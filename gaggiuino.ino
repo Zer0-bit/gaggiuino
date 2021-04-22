@@ -15,6 +15,7 @@ float E_ADDR1 = 0;
 float E_ADDR2 = 0;
 uint32_t presetTemp;
 uint32_t offsetTemp;
+uint32_t brewTimeOffsetTemp;
 
 //Define the buffer used for the buttons sent to Nextion
 //char buffer[10] = {0};
@@ -27,6 +28,7 @@ uint32_t lastSetOffsetTemp;
 uint32_t savedOffsetTemp;
 uint32_t savedBoilerTemp;
 uint32_t waterTemp;
+uint32_t savedBrewTimeTemp;
 
 
 //Init the thermocouple with the appropriate pins
@@ -35,6 +37,7 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // Define the Nextion objects types
 NexNumber boilerTemp = NexNumber(1, 4, "n0");
 NexNumber offTemp = NexNumber(1, 6, "n1");
+NexNumber brewTimeTemp = NexNumber(1, 13, "n2");
 NexButton bPlus = NexButton(1, 3, "b2");
 NexButton bMinus = NexButton(1, 2, "b1");
 NexButton boffsetPlus = NexButton(1, 7, "b4");
@@ -85,11 +88,14 @@ void bSavePushCallback(void *ptr)
 {
   //Get current set desired temp values and save them to EEPROM
   boilerTemp.getValue(&savedBoilerTemp);
-  offTemp.getValue(&savedOffsetTemp);
+  offTimeTemp.getValue(&savedOffsetTemp);
+  brewTimeTemp.getValue(&savedBrewTimeTemp);
   E_ADDR1 = savedBoilerTemp;
   E_ADDR2 = savedOffsetTemp;
+  E_ADDR3 = savedBrewTimeTemp;
   EEPROM.update(COUNT_ADDR1, E_ADDR1);
   EEPROM.update(COUNT_ADDR2, E_ADDR2);
+  EEPROM.update(COUNT_ADDR3, E_ADDR3);
   
 }
 void setup() {
@@ -106,6 +112,7 @@ void setup() {
   bSave.attachPush(bSavePushCallback, &bSave);
   boilerTemp.setValue(EEPROM.read(COUNT_ADDR1));
   offTemp.setValue(EEPROM.read(COUNT_ADDR2));  
+  brewTimeTemp.setValue(EEPROM.read(COUNT_ADDR3));
 }
 
 void loop() {
@@ -114,6 +121,7 @@ void loop() {
 // Readig the preset and offset temperature values set on the Nextion Menu page
   boilerTemp.getValue(&presetTemp);
   offTemp.getValue(&offsetTemp);
+  brewTimeTemp.getValue(&brewTimeOffsetTemp);
   
 // some logic to keep the boiler as close to the desired set temp as possible 
   waterTemp=presetTemp-float(offsetTemp);
@@ -121,8 +129,10 @@ void loop() {
     digitalWrite(relayPin, HIGH);
   }
   else if (thermocouple.readCelsius() >= float(presetTemp-10) && thermocouple.readCelsius() < float(presetTemp)) {
+    // Smth that resembles PWM control aka software pseudo-pwm
+    // Change the <brewTimeOffsetTemp> to keep your machine temps closer to the desired range i ended up with 1200ms on a 2014 Gaggia
     digitalWrite(relayPin, HIGH);
-    delay(700);
+    delay(brewTimeOffsetTemp);
     digitalWrite(relayPin, LOW);
   }
   else {
