@@ -12,3 +12,4 @@ Hardware requirements:
 3. MAX7765 thermocouple
 4. 40DA SSR Relay
 5. Thermo-resistant cables AWG 15 and AWG 30
+6. Spade connectors M/F 6.3mm
