@@ -15,5 +15,4 @@ Hardware requirements:
 6. Spade connectors M/F 6.3mm - https://www.aliexpress.com/item/1005001947648827.html?spm=a2g0s.9042311.0.0.27424c4dj1CorW
 
 
-
-<img src="https://db3pap006files.storage.live.com/y4mCSzjEiiK-HLV1tX4LI2xZerhsGGBqIQ67R42bYVYqDx8_FI5tbA-tNekXh0ELBpwujqPLHbdHb7Ai7wmzKEBBZecGg2Hlu86WB1Aa6d-Oqax0zL87HUrdSOJeB9Wlsp_uhXWIabUaNWDwE679FjDAedH3b111SG1JylR7lPJlIOaPPanpJXtU5_pIkWyR1BO?width=496&height=660&cropmode=none" width="496" height="660" />
+<img src="https://db3pap006files.storage.live.com/y4mCSzjEiiK-HLV1tX4LI2xZerhsGGBqIQ67R42bYVYqDx8_FI5tbA-tNekXh0ELBpwujqPLHbdHb7Ai7wmzKEBBZecGg2Hlu86WB1Aa6d-Oqax0zL87HUrdSOJeB9Wlsp_uhXWIabUaNWDwE679FjDAedH3b111SG1JylR7lPJlIOaPPanpJXtU5_pIkWyR1BO?width=769&height=1024&cropmode=none" width="769" height="1024" />
