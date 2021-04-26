@@ -12,9 +12,9 @@ int relayPin = 8;
 int EEP_ADDR1 = 1;
 int EEP_ADDR2 = 20;
 int EEP_ADDR3 = 40;
-long EEP_VALUE1;
-long EEP_VALUE2;
-long EEP_VALUE3;
+unsigned long EEP_VALUE1;
+unsigned long EEP_VALUE2;
+unsigned long EEP_VALUE3;
 uint32_t presetTemp;
 uint32_t offsetTemp;
 uint32_t brewTimeDelayTemp;
@@ -111,10 +111,10 @@ void bSavePushCallback(void *ptr)
     writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
     writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
   }
-  else {
-  }
-  
+  else {}
 }
+
+// The precise temp control logic
 void doCoffee() {
   boilerTemp.getValue(&presetTemp);
   offTimeTemp.getValue(&offsetTemp);
@@ -150,7 +150,7 @@ void update_t1_boiler() {
   boilerTextBox1.setText(realTempPrint);
 }
 void setup() {
-  Serial.begin(9600); 
+  Serial.begin(9600);  
   nexInit();
   startPage.show();
   bPlus.attachPush(bPlusPushCallback, &bPlus);
@@ -158,13 +158,13 @@ void setup() {
   boffsetPlus.attachPush(boffsetPlusPushCallback, &boffsetPlus);
   boffsetMinus.attachPush(boffsetMinusPushCallback, &boffsetMinus);
   bSave.attachPush(bSavePushCallback, &bSave);
+
   // port setup
   pinMode(relayPin, OUTPUT);  
-  // port init
+  // port init with - starts with the relay decoupled just in case
   digitalWrite(relayPin, LOW);
 
-  // wait for EEPROM and other chip to stabilize
-  delay(2000);  
+  // wait for EEPROM and other chip to stabilize  
   uint32_t tmp1 = readIntFromEEPROM(EEP_ADDR1);
   uint32_t tmp2 = readIntFromEEPROM(EEP_ADDR2);
   uint32_t tmp3 = readIntFromEEPROM(EEP_ADDR3);
@@ -172,14 +172,13 @@ void setup() {
     boilerTemp.setValue(tmp1);
     offTimeTemp.setValue(tmp2);
     brewTimeDelay.setValue(tmp3);
-    mainPage.show();
   }
 }
 
 void loop() {
-  nexLoop(nex_listen_list);
   doCoffee();
   update_t0_water();
   update_t1_boiler();
   delay(250);
+  nexLoop(nex_listen_list);
 }
