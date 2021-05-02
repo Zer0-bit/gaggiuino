@@ -134,19 +134,15 @@ void doCoffee() {
     digitalWrite(relayPin, LOW);
   }
 }
-void update_t0_water() {
+void update_t0_t1() {
   float tmp = thermocouple.readCelsius();
   String displayTemp;
-  displayTemp = tmp - float(offsetTemp);
-  //waterTempPrint = "t0.txt=\""+String(displayTemp,1)+"\"";
-  char const* waterTempPrint = displayTemp.c_str();
-  waterTextBox0.setText(waterTempPrint);
-}
-void update_t1_boiler() {
   String realTemp;
-  float tmp = thermocouple.readCelsius();
+  displayTemp = tmp - float(offsetTemp);
   realTemp = tmp;
+  char const* waterTempPrint = displayTemp.c_str();
   char const* realTempPrint = realTemp.c_str();
+  waterTextBox0.setText(waterTempPrint);
   boilerTextBox1.setText(realTempPrint);
 }
 void setup() {
@@ -174,11 +170,9 @@ void setup() {
     brewTimeDelay.setValue(tmp3);
   }
 }
-
 void loop() {
   doCoffee();
-  update_t0_water();
-  update_t1_boiler();
-  delay(250);
+  update_t0_t1();
   nexLoop(nex_listen_list);
+  delay(250);
 }
