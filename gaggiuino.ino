@@ -173,6 +173,6 @@ void setup() {
 void loop() {
   doCoffee();
   update_t0_t1();
-  nexLoop(nex_listen_list);
   delay(250);
+  nexLoop(nex_listen_list);
 }
