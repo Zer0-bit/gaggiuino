@@ -35,7 +35,7 @@ Optional:
 First you need to understand what goes where, the schematics isn't really rocket science but for someone who's never disasembled or has no experience working with electrical circuits it might get very confusing real fast so i will try to describe it as simple as possible, sometimes adding some photos as well.
 First you need to check your setup works as expected outside the machine so you don't ahve it all installed and realise just afterwards it's not reading any temperature because of a faulty thermocouple or any other element, or your relay doesn't go between the ON/OFF modes.
 
-1. The first step will be connecting the MAX7765 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file ( pins 4,5,6 )
+1. The first step will be connecting the max6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file ( pins 4,5,6 )
 2. Connect the relay
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board.
 5. Connect the nextion LCD ( Nextion TX goes to Arduino RX, and RX to TX )
