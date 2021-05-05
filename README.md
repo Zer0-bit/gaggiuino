@@ -14,7 +14,8 @@ Software needed:
 2. Nextion Editor
 
 Hardware requirements:
-1. Arduino Nano - https://bit.ly/3eXSfXZ - be sure to 
+1. Arduino Nano - https://bit.ly/3eXSfXZ
+   Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
 2. Nextion touch screen (i used a 2.4 inch one) - https://bit.ly/33dO8RV
 3. MAX7765 thermocouple - https://bit.ly/3ejTUIj
 4. C-M4 screw K-Type thermocouple sensor - https://bit.ly/3nP1WMm
