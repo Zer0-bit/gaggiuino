@@ -119,15 +119,27 @@ void doCoffee() {
   boilerTemp.getValue(&presetTemp);
   offTimeTemp.getValue(&offsetTemp);
   brewTimeDelay.getValue(&brewTimeDelayTemp);
+  int init_brewTimeDelayTemp = readIntFromEEPROM(EEP_ADDR3);
 
  // some logic to keep the boiler as close to the desired set temp as possible 
   waterTemp=presetTemp-float(offsetTemp);
+  // full steam ahead when the boiler is warming up
   if (thermocouple.readCelsius() < float(presetTemp-10)) {
     digitalWrite(relayPin, HIGH);
-  }
-  else if (thermocouple.readCelsius() >= float(presetTemp-10) && thermocouple.readCelsius() < float(presetTemp)) {
+  } // when temps are read in the 10 degrees range from the setpoint and the state of the relay is ON introduce a 500ms heating element oscilation
+  else if (thermocouple.readCelsius() >= float(presetTemp-10) && thermocouple.readCelsius() < float(presetTemp) && relayPin == HIGH ) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp);
+    digitalWrite(relayPin, LOW);
+  } // when temps are in the 10 degrees range from the setpoint and the state of the relay is OFF introduce double the the heat for the first pulse
+  else if (thermocouple.readCelsius() >= float(presetTemp-10) && thermocouple.readCelsius() < float(presetTemp) && relayPin == LOW ) {
+    digitalWrite(relayPin, HIGH);
+    delay(brewTimeDelayTemp*2);
+    digitalWrite(relayPin, LOW);
+  } // when the relay is in OFF state and the currrent reading temperature is in a .5 range above the setpoint have quick half the setpoint pulse for the heating element
+  else if (relayPin == LOW && thermocouple.readCelsius() > float(presetTemp) && thermocouple.readCelsius() <= float(presetTemp+0.5)) {
+    digitalWrite(relayPin, HIGH);
+    delay(brewTimeDelayTemp/2);
     digitalWrite(relayPin, LOW);
   }
   else {
