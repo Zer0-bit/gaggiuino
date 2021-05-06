@@ -31,6 +31,10 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // Define the Nextion objects types
 NexText waterTextBox0 = NexText(0, 2, "t0");
 NexText boilerTextBox1 = NexText(0, 4, "t1");
+NexVariable va0 = NexVariable(0, 7, "va0");
+NexVariable va1 = NexVariable(0, 8, "va1");
+NexVariable va2 = NexVariable(0, 9, "va2");
+NexVariable va3 = NexVariable(0, 10, "va3");
 NexNumber boilerTemp = NexNumber(1, 4, "n0");
 NexNumber offTimeTemp = NexNumber(1, 6, "n1");
 NexNumber brewTimeDelay = NexNumber(1, 11, "n2");
@@ -116,10 +120,12 @@ void bSavePushCallback(void *ptr)
 
 // The precise temp control logic
 void doCoffee() {
-  boilerTemp.getValue(&presetTemp);
-  offTimeTemp.getValue(&offsetTemp);
-  brewTimeDelay.getValue(&brewTimeDelayTemp);
-
+  // Getting the right values from the nextion lib, the whole Nextion thing is quite unstable might need to rewrite it later
+  while (presetTemp == 0 || offsetTemp == 0 || brewTimeDelayTemp == 0 ) {
+    va0.getValue(&presetTemp);
+    va1.getValue(&offsetTemp);
+    va2.getValue(&brewTimeDelayTemp);
+  }
  // some logic to keep the boiler as close to the desired set temp as possible 
   waterTemp=presetTemp-float(offsetTemp);
   if (thermocouple.readCelsius() < float(presetTemp-10)) {
@@ -132,12 +138,12 @@ void doCoffee() {
   }
   else if (thermocouple.readCelsius() > float(presetTemp) && thermocouple.readCelsius() <= float(presetTemp+0.5)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/1.5);
+    delay(brewTimeDelayTemp/2);
     digitalWrite(relayPin, LOW);
   }
-  else if (thermocouple.readCelsius() > float(presetTemp+0.5) && thermocouple.readCelsius() <= float(presetTemp+1.5)) {
+  else if (thermocouple.readCelsius() > float(presetTemp+0.5) && thermocouple.readCelsius() <= float(presetTemp+1)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/2.5);
+    delay(brewTimeDelayTemp/3);
     digitalWrite(relayPin, LOW);
   }
   else {
@@ -187,10 +193,7 @@ void setup() {
     offTimeTemp.setValue(tmp2);
     brewTimeDelay.setValue(tmp3);
   }
-  startPage.show();
-  boilerTemp.getValue(&presetTemp);
-  offTimeTemp.getValue(&offsetTemp);
-  brewTimeDelay.getValue(&brewTimeDelayTemp);
+  //startPage.show();
 }
 void loop() {
   doCoffee();
