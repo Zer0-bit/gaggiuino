@@ -19,10 +19,16 @@ uint32_t presetTemp;
 uint32_t offsetTemp;
 uint32_t brewTimeDelayTemp;
 
+// Heating Operational Vars
+uint32_t brewTimeDelayDivider;
+float brewSwitchOnDetect;
+
 //Define the temp reading vars
-uint32_t lastSetBoilerTemp;
-uint32_t lastSetOffsetTemp;
+uint32_t realTempRead;
 uint32_t waterTemp;
+
+// Graph
+bool graph=false;
 
 
 //Init the thermocouple with the appropriate pins
@@ -43,8 +49,9 @@ NexButton bMinus = NexButton(1, 2, "b1");
 NexButton boffsetPlus = NexButton(1, 7, "b4");
 NexButton boffsetMinus = NexButton(1, 5, "b3");
 NexButton bSave = NexButton(1, 10, "b5");
-NexPage startPage = NexPage(1, 0, "page1");
+NexPage graphPage = NexPage(5, 0, "graph");
 NexPage mainPage = NexPage(0, 0, "page0");
+NexWaveform graphPlotting = NexWaveform(5, 1, "s0");
 
 //Register object n0, b0, b1, to the touch event list.
 NexTouch *nex_listen_list[] =
@@ -54,6 +61,7 @@ NexTouch *nex_listen_list[] =
   &boffsetPlus,
   &boffsetMinus,
   &bSave,
+  &waterTextBox0,
   NULL  
 };
 
@@ -70,6 +78,11 @@ int readIntFromEEPROM(int address)
 }
 
 //Nextion stuff
+void waterTextBox0PushCallback(void *ptr)
+{
+  graphPage.show();
+  graph=true;
+}
 void bPlusPushCallback(void *ptr)
 {
   uint32_t presetTemp;
@@ -118,6 +131,13 @@ void bSavePushCallback(void *ptr)
   else {}
 }
 
+void drawGraph() {
+  while ( graph == true ) {
+    graphPlotting.addValue(0, waterTemp);
+    graphPlotting.addValue(1, (thermocouple.readCelsius()-10));
+  }
+}
+
 // The precise temp control logic
 void doCoffee() {
   // Getting the right values from the nextion lib, the whole Nextion thing is quite unstable might need to rewrite it later
@@ -125,30 +145,37 @@ void doCoffee() {
     va0.getValue(&presetTemp);
     va1.getValue(&offsetTemp);
     va2.getValue(&brewTimeDelayTemp);
+    va3.getValue(&brewTimeDelayDivider);
   }
+
  // some logic to keep the boiler as close to the desired set temp as possible 
   waterTemp=presetTemp-float(offsetTemp);
   if (thermocouple.readCelsius() < float(presetTemp-10)) {
     digitalWrite(relayPin, HIGH);
   }
-  else if (thermocouple.readCelsius() >= float(presetTemp-10) && thermocouple.readCelsius() < float(presetTemp-0.5)) {
+  else if (thermocouple.readCelsius() >= float(presetTemp-10) && thermocouple.readCelsius() < float(presetTemp-1)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp);
     digitalWrite(relayPin, LOW);
   }
-  else if (thermocouple.readCelsius() > float(presetTemp) && thermocouple.readCelsius() <= float(presetTemp+0.5)) {
+  else if (thermocouple.readCelsius() >= float(presetTemp-1) && thermocouple.readCelsius() < float(presetTemp)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/2);
+    delay(brewTimeDelayTemp/brewTimeDelayDivider);
     digitalWrite(relayPin, LOW);
+    delay(brewTimeDelayTemp);
   }
-  else if (thermocouple.readCelsius() > float(presetTemp+0.5) && thermocouple.readCelsius() <= float(presetTemp+1)) {
-    digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/3);
-    digitalWrite(relayPin, LOW);
-  }
+  // else if (thermocouple.readCelsius() > float(presetTemp) && thermocouple.readCelsius() <= float(presetTemp+0.2)) {
+  //   digitalWrite(relayPin, HIGH);
+  //   delay(brewTimeDelayTemp/brewTimeDelayDivider);
+  //   digitalWrite(relayPin, LOW);
+  // }
   else {
     digitalWrite(relayPin, LOW);
   }
+
+  // Brew detection mode tryout
+  // brewSwitchOnDetect += thermocouple.readCelsius() / thermocouple.readCelsius();
+
 }
 void update_t0_t1() {
   float tmp = thermocouple.readCelsius();
@@ -178,6 +205,7 @@ void setup() {
   boffsetPlus.attachPush(boffsetPlusPushCallback, &boffsetPlus);
   boffsetMinus.attachPush(boffsetMinusPushCallback, &boffsetMinus);
   bSave.attachPush(bSavePushCallback, &bSave);
+  waterTextBox0.attachPush(waterTextBox0PushCallback, &waterTextBox0);
 
   // port setup
   pinMode(relayPin, OUTPUT);  
@@ -193,11 +221,11 @@ void setup() {
     offTimeTemp.setValue(tmp2);
     brewTimeDelay.setValue(tmp3);
   }
-  //startPage.show();
 }
 void loop() {
   doCoffee();
   update_t0_t1();
+  drawGraph();
   delay(250);
   nexLoop(nex_listen_list);
 }
