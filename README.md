@@ -13,6 +13,7 @@ I will assume you have  the necessary components and installed the related softw
 Software needed:
 1. Arduino IDE
 2. Nextion Editor
+3. [CH340 USB Driver](https://electropeak.com/learn/how-to-install-ch340-driver/)
 
 Hardware requirements:
 1. Arduino Nano - https://bit.ly/3eXSfXZ
