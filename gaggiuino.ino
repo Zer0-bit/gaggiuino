@@ -140,6 +140,9 @@ void drawGraph() {
 
 // The precise temp control logic
 void doCoffee() {
+  double brewTimeStartValue, brewTimeStopValue, previousBrewTimeDetectValue;
+  float CurrentTempReadValue, PreviousTempReadValue;
+  CurrentTempReadValue = thermocouple.readCelsius();
   // Getting the right values from the nextion lib, the whole Nextion thing is quite unstable might need to rewrite it later
   while (presetTemp == 0 || offsetTemp == 0 || brewTimeDelayTemp == 0 ) {
     va0.getValue(&presetTemp);
@@ -148,34 +151,51 @@ void doCoffee() {
     va3.getValue(&brewTimeDelayDivider);
   }
 
- // some logic to keep the boiler as close to the desired set temp as possible 
+  // some logic to keep the boiler as close to the desired set temp as possible 
+  previousBrewTimeDetectValue = brewTimeStopValue - brewTimeStartValue;
+  brewTimeStartValue = millis();
   waterTemp=presetTemp-float(offsetTemp);
-  if (thermocouple.readCelsius() < float(presetTemp-10)) {
+  if (CurrentTempReadValue - PreviousTempReadValue > 0 && CurrentTempReadValue < float(presetTemp-10)) {
     digitalWrite(relayPin, HIGH);
   }
-  else if (thermocouple.readCelsius() >= float(presetTemp-10) && thermocouple.readCelsius() < float(presetTemp-1)) {
+  else if (CurrentTempReadValue - PreviousTempReadValue > 0 && CurrentTempReadValue >= float(presetTemp-10) && CurrentTempReadValue < float(presetTemp-1)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp);
     digitalWrite(relayPin, LOW);
   }
-  else if (thermocouple.readCelsius() >= float(presetTemp-1) && thermocouple.readCelsius() < float(presetTemp)) {
+  else if (CurrentTempReadValue - PreviousTempReadValue < 0 && CurrentTempReadValue >= float(presetTemp-10) && CurrentTempReadValue < float(presetTemp-1)) {
+    digitalWrite(relayPin, HIGH);
+    delay(brewTimeDelayTemp);
+    digitalWrite(relayPin, LOW);
+  }
+  else if (CurrentTempReadValue - PreviousTempReadValue > 0 && CurrentTempReadValue >= float(presetTemp-0.5) && CurrentTempReadValue < float(presetTemp)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/brewTimeDelayDivider);
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  // else if (thermocouple.readCelsius() > float(presetTemp) && thermocouple.readCelsius() <= float(presetTemp+0.2)) {
+  else if (CurrentTempReadValue - PreviousTempReadValue < 0 && CurrentTempReadValue - PreviousTempReadValue > -0.5 && CurrentTempReadValue >= float(presetTemp-0.5) && CurrentTempReadValue < float(presetTemp)) {
+    digitalWrite(relayPin, HIGH);
+    delay(brewTimeDelayTemp/brewTimeDelayDivider);
+    digitalWrite(relayPin, LOW);
+    delay(brewTimeDelayTemp);
+  }
+  else if (CurrentTempReadValue - PreviousTempReadValue < -1 && CurrentTempReadValue >= float(presetTemp-0.5) && CurrentTempReadValue < float(presetTemp+0.5)) {
+    digitalWrite(relayPin, HIGH);
+    delay(brewTimeDelayTemp/(brewTimeDelayDivider/2));
+    digitalWrite(relayPin, LOW);
+    delay(brewTimeDelayTemp);
+  }
+  // else if (PreviousTempReadValue - CurrentTempReadValue > 1 && CurrentTempReadValue >= presetTemp-0.2 && CurrentTempReadValue <= presetTemp+0.2 && millis() - brewTimeStartValue < float(brewTimeDelayTemp)/float(brewTimeDelayDivider)) {
   //   digitalWrite(relayPin, HIGH);
-  //   delay(brewTimeDelayTemp/brewTimeDelayDivider);
+  //   delay(brewTimeDelayTemp);
   //   digitalWrite(relayPin, LOW);
   // }
   else {
     digitalWrite(relayPin, LOW);
   }
-
-  // Brew detection mode tryout
-  // brewSwitchOnDetect += thermocouple.readCelsius() / thermocouple.readCelsius();
-
+  brewTimeStopValue = millis();
+  PreviousTempReadValue = CurrentTempReadValue;
 }
 void update_t0_t1() {
   float tmp = thermocouple.readCelsius();
