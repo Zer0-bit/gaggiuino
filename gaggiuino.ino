@@ -1,5 +1,6 @@
 #include <EEPROM.h>
-#include <Nextion.h>
+#include <trigger.h>
+#include <EasyNextionLibrary.h>
 #include <max6675.h>
 
 // Define our pins
@@ -13,59 +14,13 @@ int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
 unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
 uint32_t presetTemp, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
-// uint32_t offsetTemp;
-// uint32_t brewTimeDelayTemp;
-
-// Heating Operational Vars
-// uint32_t brewTimeDelayDivider;
 float brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr;
 
-//Define the temp reading vars
-// uint32_t realTempRead;
-// uint32_t waterTemp;
-
-// Graph
-// bool graph=false;
 
 
 //Init the thermocouple with the appropriate pins
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
-
-// Define the Nextion objects types
-NexText waterTextBox0 = NexText(0, 2, "t0");
-NexText boilerTextBox1 = NexText(0, 4, "t1");
-NexText msgTextBox = NexText(2, 1, "t0");
-NexVariable va0 = NexVariable(0, 7, "va0");
-NexVariable va1 = NexVariable(0, 8, "va1");
-NexVariable va2 = NexVariable(0, 9, "va2");
-NexVariable va3 = NexVariable(0, 10, "va3");
-NexVariable va_eeprom_0 = NexVariable(0, 12, "va4");
-NexVariable va_eeprom_1 = NexVariable(0, 13, "va5");
-NexVariable va_eeprom_2 = NexVariable(0, 14, "va6");
-NexVariable va_eeprom_3 = NexVariable(0, 15, "va7");
-NexNumber boilerTemp = NexNumber(1, 4, "n0");
-NexNumber offTimeTemp = NexNumber(1, 6, "n1");
-NexNumber brewTimeDelay = NexNumber(3, 6, "n0");
-NexNumber brewTimeDivider = NexNumber(3, 10, "n1");
-NexButton bPlus = NexButton(1, 3, "b2");
-NexButton bMinus = NexButton(1, 2, "b1");
-NexButton boffsetPlus = NexButton(1, 7, "b4");
-NexButton boffsetMinus = NexButton(1, 5, "b3");
-NexButton bSave = NexButton(1, 10, "b5");
-NexPage msgPage = NexPage(2, 0, "popupMSG");
-NexPage mainPage = NexPage(0, 0, "page0");
-// NexWaveform graphPlotting = NexWaveform(5, 1, "s0");
-
-//Register object n0, b0, b1, to the touch event list.
-NexTouch *nex_listen_list[] =
-{
-  &bPlus,
-  &bMinus,
-  &boffsetPlus,
-  &boffsetMinus,
-  &bSave,
-  NULL  
-};
+EasyNex myNex(Serial);
 
 // EEPROM WRITE
 void writeIntIntoEEPROM(int address, int number)
@@ -79,90 +34,96 @@ int readIntFromEEPROM(int address)
   return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
 }
 
-//Nextion stuff
-// void waterTextBox0PushCallback(void *ptr)
-// {
-//   graphPage.show();
-// }
-void bPlusPushCallback(void *ptr)
+
+void trigger1()
 {
   uint32_t presetTemp;
-  boilerTemp.getValue(&presetTemp); 
-  presetTemp++;
-  boilerTemp.setValue(presetTemp);
-}
-void bMinusPushCallback(void *ptr)
-{
-  uint32_t presetTemp;
-  boilerTemp.getValue(&presetTemp);
+  presetTemp = myNex.readNumber("page1.n0.val");
   presetTemp--;
-  boilerTemp.setValue(presetTemp);
+  myNex.writeNum("page1.n0.val",presetTemp);
 }
-void boffsetPlusPushCallback(void *ptr)
+void trigger2()
+{
+  uint32_t presetTemp;
+  presetTemp = myNex.readNumber("page1.n0.val");
+  presetTemp++;
+  myNex.writeNum("page1.n0.val",presetTemp);
+}
+void trigger3()
 {
   uint32_t offsetTemp;
-  offTimeTemp.getValue(&offsetTemp); 
-  offsetTemp++;
-  offTimeTemp.setValue(offsetTemp);
-}
-void boffsetMinusPushCallback(void *ptr)
-{
-  uint32_t offsetTemp;
-  offTimeTemp.getValue(&offsetTemp);
+  offsetTemp = myNex.readNumber("page1.n1.val");
   offsetTemp--;
-  offTimeTemp.setValue(offsetTemp);
+  myNex.writeNum("page1.n1.val",offsetTemp);
 }
-void bSavePushCallback(void *ptr)
+void trigger4()
+{
+  uint32_t offsetTemp;
+  offsetTemp = myNex.readNumber("page1.n1.val");
+  offsetTemp++;
+  myNex.writeNum("page1.n1.val",offsetTemp);
+}
+void trigger5()
 {
   // set desired temp values and save them to EEPROM
   int savedOffsetTemp;
   int savedBoilerTemp;
   int savedBrewTimeDelay;
   int savedbrewTimeDivider;
-  boilerTemp.getValue(&EEP_VALUE1);
-  offTimeTemp.getValue(&EEP_VALUE2);
-  brewTimeDelay.getValue(&EEP_VALUE3);
-  brewTimeDivider.getValue(&EEP_VALUE4);
+  EEP_VALUE1 = myNex.readNumber("page1.n0.val");
+  EEP_VALUE2 = myNex.readNumber("page1.n1.val");
+  EEP_VALUE3 = myNex.readNumber("page2.n0.val");
+  EEP_VALUE4 = myNex.readNumber("page2.n1.val");
   savedBoilerTemp = EEP_VALUE1 / 4;
   savedOffsetTemp = EEP_VALUE2 / 4;
   savedBrewTimeDelay = EEP_VALUE3 / 4;
   savedbrewTimeDivider = EEP_VALUE4 / 4;
-  if (savedBoilerTemp != 0) {
+  if (savedBoilerTemp > 0) {
     writeIntIntoEEPROM(EEP_ADDR1, savedBoilerTemp);
+    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+    myNex.writeStr("page popupMSG");
   }
   else {
-    msgTextBox.setText("ERROR!");
-    msgPage.show();
+    myNex.writeStr("popupMSG.t0.txt", "ERROR!");
+    myNex.writeStr("page popupMSG");
   }
-  if (savedOffsetTemp != 0) {
+  if (savedOffsetTemp > 0) {
     writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
+    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+    myNex.writeStr("page popupMSG");
   }
   else {
-    msgTextBox.setText("ERROR!");
-    msgPage.show();
+    myNex.writeStr("popupMSG.t0.txt", "ERROR!");
+    myNex.writeStr("page popupMSG");
   }
-  if (savedBrewTimeDelay != 0) {
+  if (savedBrewTimeDelay > 0) {
     writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
+    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+    myNex.writeStr("page popupMSG");
   }
   else {
-    msgTextBox.setText("ERROR!");
-    msgPage.show();
+    myNex.writeStr("popupMSG.t0.txt", "ERROR!");
+    myNex.writeStr("page popupMSG");
   }
-  if (savedbrewTimeDivider != 0) {
+  if (savedbrewTimeDivider > 0) {
     writeIntIntoEEPROM(EEP_ADDR4, savedbrewTimeDivider);
+    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+    myNex.writeStr("page popupMSG");
   }
   else {
-    msgTextBox.setText("ERROR!");
-    msgPage.show();
+    myNex.writeStr("popupMSG.t0.txt", "ERROR!");
+    myNex.writeStr("page popupMSG");
   }
 }
 
-// void drawGraph() {
-//   while ( graph == true ) {
-//     graphPlotting.addValue(0, waterTemp);
-//     graphPlotting.addValue(1, (thermocouple.readCelsius()-10));
-//   }
-// }
+void trigger6()
+{
+  for (int i=0; i<=30; i++)
+  {
+    delay(1000);
+    myNex.writeNum("page0.sec_number.val", i);
+  }
+}
 
 // The precise temp control logic
 void doCoffee() {
@@ -171,13 +132,11 @@ void doCoffee() {
   float CurrentTempReadValue, PreviousTempReadValue;
 
   CurrentTempReadValue = thermocouple.readCelsius();
-  // Getting the right values from the nextion lib, the whole Nextion thing is quite unstable might need to rewrite it later
-  while (presetTemp == 0 || offsetTemp == 0 || brewTimeDelayTemp == 0 || brewTimeDelayDivider == 0 ) {
-    va0.getValue(&presetTemp);
-    va1.getValue(&offsetTemp);
-    va2.getValue(&brewTimeDelayTemp);
-    va3.getValue(&brewTimeDelayDivider);
-  }
+  
+  presetTemp = myNex.readNumber("page1.n0.val");
+  offsetTemp = myNex.readNumber("page1.n1.val");
+  brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
+  brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
 
   // Calculating the overshoot value
   if (CurrentTempReadValue > presetTemp+1 && CurrentTempReadValue < presetTemp+3 && CurrentTempReadValue > maxReachedTemp) {
@@ -225,11 +184,6 @@ void doCoffee() {
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  // else if (PreviousTempReadValue - CurrentTempReadValue > 1 && CurrentTempReadValue >= presetTemp-0.2 && CurrentTempReadValue <= presetTemp+0.2 && millis() - brewTimeStartValue < float(brewTimeDelayTemp)/float(brewTimeDelayDivider)) {
-  //   digitalWrite(relayPin, HIGH);
-  //   delay(brewTimeDelayTemp);
-  //   digitalWrite(relayPin, LOW);
-  // }
   else {
     digitalWrite(relayPin, LOW);
   }
@@ -245,13 +199,14 @@ void update_t0_t1() {
   realTemp = errCalc;
   char const* waterTempPrint = displayTemp.c_str();
   char const* realTempPrint = realTemp.c_str();
-  waterTextBox0.setText(waterTempPrint);
-  boilerTextBox1.setText(realTempPrint);
+  myNex.writeStr("t0.txt", waterTempPrint);
+  myNex.writeStr("t1.txt", realTempPrint);
 }
 void setup() {
-  Serial.begin(9600);  
-  nexInit();
-  delay(500);
+  
+  myNex.begin(9600);  
+  // nexInit();
+  // delay(500);
   //Registering a higher baud for hopefully more responsive touch controls
   Serial.print("baud=115200");
   Serial.write(0xff);
@@ -260,11 +215,7 @@ void setup() {
   Serial.end();
   Serial.begin(115200);
 
-  bPlus.attachPush(bPlusPushCallback, &bPlus);
-  bMinus.attachPush(bMinusPushCallback, &bMinus);
-  boffsetPlus.attachPush(boffsetPlusPushCallback, &boffsetPlus);
-  boffsetMinus.attachPush(boffsetMinusPushCallback, &boffsetMinus);
-  bSave.attachPush(bSavePushCallback, &bSave);
+
 
   // port setup
   pinMode(relayPin, OUTPUT);  
@@ -277,14 +228,14 @@ void setup() {
   uint32_t tmp3 = readIntFromEEPROM(EEP_ADDR3);
   uint32_t tmp4 = readIntFromEEPROM(EEP_ADDR4);
   if ((tmp1 != 0) && (tmp2 != 0) && (tmp3 != 0) && (tmp4 != 0)) {
-    va_eeprom_0.setValue(tmp1);
-    va_eeprom_1.setValue(tmp2);
-    va_eeprom_2.setValue(tmp3);
-    va_eeprom_3.setValue(tmp4);
+    myNex.writeNum("page1.n0.val",tmp1);
+    myNex.writeNum("page1.n1.val",tmp2);
+    myNex.writeNum("page2.n0.val",tmp3);
+    myNex.writeNum("page2.n1.val",tmp4);
   }
 }
 void loop() {
-  nexLoop(nex_listen_list);
+  myNex.NextionListen();
   doCoffee();
   update_t0_t1();
   delay(250);
