@@ -9,26 +9,23 @@ int thermoCLK = 6;
 int relayPin = 8;
 
 // EEPROM  stuff
-int EEP_ADDR1 = 1;
-int EEP_ADDR2 = 20;
-int EEP_ADDR3 = 40;
-unsigned long EEP_VALUE1;
-unsigned long EEP_VALUE2;
-unsigned long EEP_VALUE3;
-uint32_t presetTemp;
-uint32_t offsetTemp;
-uint32_t brewTimeDelayTemp;
+int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
+unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
+
+uint32_t presetTemp, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
+// uint32_t offsetTemp;
+// uint32_t brewTimeDelayTemp;
 
 // Heating Operational Vars
-uint32_t brewTimeDelayDivider;
-float brewSwitchOnDetect;
+// uint32_t brewTimeDelayDivider;
+float brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr;
 
 //Define the temp reading vars
-uint32_t realTempRead;
-uint32_t waterTemp;
+// uint32_t realTempRead;
+// uint32_t waterTemp;
 
 // Graph
-bool graph=false;
+// bool graph=false;
 
 
 //Init the thermocouple with the appropriate pins
@@ -37,21 +34,27 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // Define the Nextion objects types
 NexText waterTextBox0 = NexText(0, 2, "t0");
 NexText boilerTextBox1 = NexText(0, 4, "t1");
+NexText msgTextBox = NexText(2, 1, "t0");
 NexVariable va0 = NexVariable(0, 7, "va0");
 NexVariable va1 = NexVariable(0, 8, "va1");
 NexVariable va2 = NexVariable(0, 9, "va2");
 NexVariable va3 = NexVariable(0, 10, "va3");
+NexVariable va_eeprom_0 = NexVariable(0, 12, "va4");
+NexVariable va_eeprom_1 = NexVariable(0, 13, "va5");
+NexVariable va_eeprom_2 = NexVariable(0, 14, "va6");
+NexVariable va_eeprom_3 = NexVariable(0, 15, "va7");
 NexNumber boilerTemp = NexNumber(1, 4, "n0");
 NexNumber offTimeTemp = NexNumber(1, 6, "n1");
-NexNumber brewTimeDelay = NexNumber(1, 11, "n2");
+NexNumber brewTimeDelay = NexNumber(3, 6, "n0");
+NexNumber brewTimeDivider = NexNumber(3, 10, "n1");
 NexButton bPlus = NexButton(1, 3, "b2");
 NexButton bMinus = NexButton(1, 2, "b1");
 NexButton boffsetPlus = NexButton(1, 7, "b4");
 NexButton boffsetMinus = NexButton(1, 5, "b3");
 NexButton bSave = NexButton(1, 10, "b5");
-NexPage graphPage = NexPage(5, 0, "graph");
+NexPage msgPage = NexPage(2, 0, "popupMSG");
 NexPage mainPage = NexPage(0, 0, "page0");
-NexWaveform graphPlotting = NexWaveform(5, 1, "s0");
+// NexWaveform graphPlotting = NexWaveform(5, 1, "s0");
 
 //Register object n0, b0, b1, to the touch event list.
 NexTouch *nex_listen_list[] =
@@ -61,7 +64,6 @@ NexTouch *nex_listen_list[] =
   &boffsetPlus,
   &boffsetMinus,
   &bSave,
-  &waterTextBox0,
   NULL  
 };
 
@@ -78,11 +80,10 @@ int readIntFromEEPROM(int address)
 }
 
 //Nextion stuff
-void waterTextBox0PushCallback(void *ptr)
-{
-  graphPage.show();
-  graph=true;
-}
+// void waterTextBox0PushCallback(void *ptr)
+// {
+//   graphPage.show();
+// }
 void bPlusPushCallback(void *ptr)
 {
   uint32_t presetTemp;
@@ -117,70 +118,108 @@ void bSavePushCallback(void *ptr)
   int savedOffsetTemp;
   int savedBoilerTemp;
   int savedBrewTimeDelay;
+  int savedbrewTimeDivider;
   boilerTemp.getValue(&EEP_VALUE1);
   offTimeTemp.getValue(&EEP_VALUE2);
   brewTimeDelay.getValue(&EEP_VALUE3);
+  brewTimeDivider.getValue(&EEP_VALUE4);
   savedBoilerTemp = EEP_VALUE1 / 4;
   savedOffsetTemp = EEP_VALUE2 / 4;
   savedBrewTimeDelay = EEP_VALUE3 / 4;
-  if ((savedBoilerTemp != 0) && (savedOffsetTemp != 0) && (savedBrewTimeDelay != 0)) {
+  savedbrewTimeDivider = EEP_VALUE4 / 4;
+  if (savedBoilerTemp != 0) {
     writeIntIntoEEPROM(EEP_ADDR1, savedBoilerTemp);
+  }
+  else {
+    msgTextBox.setText("ERROR!");
+    msgPage.show();
+  }
+  if (savedOffsetTemp != 0) {
     writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
+  }
+  else {
+    msgTextBox.setText("ERROR!");
+    msgPage.show();
+  }
+  if (savedBrewTimeDelay != 0) {
     writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
   }
-  else {}
-}
-
-void drawGraph() {
-  while ( graph == true ) {
-    graphPlotting.addValue(0, waterTemp);
-    graphPlotting.addValue(1, (thermocouple.readCelsius()-10));
+  else {
+    msgTextBox.setText("ERROR!");
+    msgPage.show();
+  }
+  if (savedbrewTimeDivider != 0) {
+    writeIntIntoEEPROM(EEP_ADDR4, savedbrewTimeDivider);
+  }
+  else {
+    msgTextBox.setText("ERROR!");
+    msgPage.show();
   }
 }
+
+// void drawGraph() {
+//   while ( graph == true ) {
+//     graphPlotting.addValue(0, waterTemp);
+//     graphPlotting.addValue(1, (thermocouple.readCelsius()-10));
+//   }
+// }
 
 // The precise temp control logic
 void doCoffee() {
+  int i=1;
   double brewTimeStartValue, brewTimeStopValue, previousBrewTimeDetectValue;
   float CurrentTempReadValue, PreviousTempReadValue;
+
   CurrentTempReadValue = thermocouple.readCelsius();
   // Getting the right values from the nextion lib, the whole Nextion thing is quite unstable might need to rewrite it later
-  while (presetTemp == 0 || offsetTemp == 0 || brewTimeDelayTemp == 0 ) {
+  while (presetTemp == 0 || offsetTemp == 0 || brewTimeDelayTemp == 0 || brewTimeDelayDivider == 0 ) {
     va0.getValue(&presetTemp);
     va1.getValue(&offsetTemp);
     va2.getValue(&brewTimeDelayTemp);
     va3.getValue(&brewTimeDelayDivider);
   }
 
+  // Calculating the overshoot value
+  if (CurrentTempReadValue > presetTemp+1 && CurrentTempReadValue < presetTemp+3 && CurrentTempReadValue > maxReachedTemp) {
+    maxReachedTemp = CurrentTempReadValue;
+    i++;
+    sumOfAllMaxes = maxReachedTemp + lastMaxReachedTemp; //193
+    lastMaxReachedTemp = maxReachedTemp; //96
+    overshootVariable = maxReachedTemp - presetTemp;//97-94=3 
+    overshootErr = sumOfAllMaxes/presetTemp/i;//193/94=2.05
+    errCalc = overshootVariable-overshootErr;//3-2.05=0.9
+  }
+
   // some logic to keep the boiler as close to the desired set temp as possible 
   previousBrewTimeDetectValue = brewTimeStopValue - brewTimeStartValue;
   brewTimeStartValue = millis();
   waterTemp=presetTemp-float(offsetTemp);
-  if (CurrentTempReadValue - PreviousTempReadValue > 0 && CurrentTempReadValue < float(presetTemp-10)) {
+  if ((relayPin != HIGH) && (CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue < float(presetTemp-10))) {
     digitalWrite(relayPin, HIGH);
   }
-  else if (CurrentTempReadValue - PreviousTempReadValue > 0 && CurrentTempReadValue >= float(presetTemp-10) && CurrentTempReadValue < float(presetTemp-1)) {
-    digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp);
-    digitalWrite(relayPin, LOW);
-  }
-  else if (CurrentTempReadValue - PreviousTempReadValue < 0 && CurrentTempReadValue >= float(presetTemp-10) && CurrentTempReadValue < float(presetTemp-1)) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp-10)) && (CurrentTempReadValue < float(presetTemp)-overshootVariable)) { //errCalc
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp);
     digitalWrite(relayPin, LOW);
   }
-  else if (CurrentTempReadValue - PreviousTempReadValue > 0 && CurrentTempReadValue >= float(presetTemp-0.5) && CurrentTempReadValue < float(presetTemp)) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue >= float(presetTemp-10)) && (CurrentTempReadValue <= float(presetTemp)-overshootVariable)) { //2
+    digitalWrite(relayPin, HIGH);
+    delay(brewTimeDelayTemp);
+    digitalWrite(relayPin, LOW);
+  }
+  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp))) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/brewTimeDelayDivider);
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  else if (CurrentTempReadValue - PreviousTempReadValue < 0 && CurrentTempReadValue - PreviousTempReadValue > -0.5 && CurrentTempReadValue >= float(presetTemp-0.5) && CurrentTempReadValue < float(presetTemp)) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -0.5) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp))) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/brewTimeDelayDivider);
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  else if (CurrentTempReadValue - PreviousTempReadValue < -1 && CurrentTempReadValue >= float(presetTemp-0.5) && CurrentTempReadValue < float(presetTemp+0.5)) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue < -1) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp+0.2))) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/(brewTimeDelayDivider/2));
     digitalWrite(relayPin, LOW);
@@ -202,7 +241,8 @@ void update_t0_t1() {
   String displayTemp;
   String realTemp;
   displayTemp = tmp - float(offsetTemp);
-  realTemp = tmp;
+  // realTemp = tmp;
+  realTemp = errCalc;
   char const* waterTempPrint = displayTemp.c_str();
   char const* realTempPrint = realTemp.c_str();
   waterTextBox0.setText(waterTempPrint);
@@ -225,7 +265,6 @@ void setup() {
   boffsetPlus.attachPush(boffsetPlusPushCallback, &boffsetPlus);
   boffsetMinus.attachPush(boffsetMinusPushCallback, &boffsetMinus);
   bSave.attachPush(bSavePushCallback, &bSave);
-  waterTextBox0.attachPush(waterTextBox0PushCallback, &waterTextBox0);
 
   // port setup
   pinMode(relayPin, OUTPUT);  
@@ -236,16 +275,17 @@ void setup() {
   uint32_t tmp1 = readIntFromEEPROM(EEP_ADDR1);
   uint32_t tmp2 = readIntFromEEPROM(EEP_ADDR2);
   uint32_t tmp3 = readIntFromEEPROM(EEP_ADDR3);
-  if ((tmp1 != 0) && (tmp2 != 0) && (tmp3 != 0)) {
-    boilerTemp.setValue(tmp1);
-    offTimeTemp.setValue(tmp2);
-    brewTimeDelay.setValue(tmp3);
+  uint32_t tmp4 = readIntFromEEPROM(EEP_ADDR4);
+  if ((tmp1 != 0) && (tmp2 != 0) && (tmp3 != 0) && (tmp4 != 0)) {
+    va_eeprom_0.setValue(tmp1);
+    va_eeprom_1.setValue(tmp2);
+    va_eeprom_2.setValue(tmp3);
+    va_eeprom_3.setValue(tmp4);
   }
 }
 void loop() {
+  nexLoop(nex_listen_list);
   doCoffee();
   update_t0_t1();
-  drawGraph();
   delay(250);
-  nexLoop(nex_listen_list);
 }
