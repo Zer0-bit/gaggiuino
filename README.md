@@ -1,6 +1,6 @@
 # gaggiuino
 
-### WIP ####
+## WIP ##
 
 ### Better documenting coming soon, just delayed a bit by some job/life things i need to sort out now ###
 
