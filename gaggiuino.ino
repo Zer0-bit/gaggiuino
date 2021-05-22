@@ -176,13 +176,13 @@ void doCoffee() {
     delay(brewTimeDelayTemp);
     digitalWrite(relayPin, LOW);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-overshootDivider) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-overshootErr) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -0.5) && (CurrentTempReadValue >= float(presetTemp)-overshootDivider) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -0.5) && (CurrentTempReadValue >= float(presetTemp)-overshootErr) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
     digitalWrite(relayPin, LOW);
