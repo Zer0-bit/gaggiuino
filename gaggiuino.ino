@@ -2,6 +2,8 @@
 #include <trigger.h>
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
+// #include <iostream>
+// #include <string>
 
 // Define our pins
 int thermoDO = 4;
@@ -14,7 +16,7 @@ int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
 unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
 uint32_t presetTemp, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
-float brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr;
+float brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr, overshootDivider;
 
 
 
@@ -120,8 +122,15 @@ void trigger6()
 {
   for (int i=0; i<=30; i++)
   {
-    delay(1000);
-    myNex.writeNum("page0.sec_number.val", i);
+    if (millis() == 1000 && i < 25) {
+      myNex.writeNum("page0.sec_number.pco", 65535);
+      myNex.writeNum("page0.sec_number.val", i);
+    }
+    else if (millis() == 1000 && i > 25)
+    {
+      myNex.writeNum("page0.sec_number.pco", 63488);
+      myNex.writeNum("page0.sec_number.val", i);
+    }
   }
 }
 
@@ -146,6 +155,7 @@ void doCoffee() {
     lastMaxReachedTemp = maxReachedTemp; //96
     overshootVariable = maxReachedTemp - presetTemp;//97-94=3 
     overshootErr = sumOfAllMaxes/presetTemp/i;//193/94=2.05
+    overshootDivider = overshootVariable / overshootErr; // 3/2.05=1.46
     errCalc = overshootVariable-overshootErr;//3-2.05=0.9
   }
 
@@ -153,34 +163,34 @@ void doCoffee() {
   previousBrewTimeDetectValue = brewTimeStopValue - brewTimeStartValue;
   brewTimeStartValue = millis();
   waterTemp=presetTemp-float(offsetTemp);
-  if ((relayPin != HIGH) && (CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue < float(presetTemp-10))) {
+  if ((relayPin != HIGH) && (CurrentTempReadValue < float(presetTemp)-10)) {
     digitalWrite(relayPin, HIGH);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp-10)) && (CurrentTempReadValue < float(presetTemp)-overshootVariable)) { //errCalc
+  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-10) && (CurrentTempReadValue < float(presetTemp)-overshootVariable)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp);
     digitalWrite(relayPin, LOW);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue >= float(presetTemp-10)) && (CurrentTempReadValue <= float(presetTemp)-overshootVariable)) { //2
+  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -1) && (CurrentTempReadValue >= float(presetTemp)-10) && (CurrentTempReadValue <= float(presetTemp)-overshootVariable)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp);
     digitalWrite(relayPin, LOW);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp))) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-overshootDivider) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/brewTimeDelayDivider);
+    delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -0.5) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp))) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -0.5) && (CurrentTempReadValue >= float(presetTemp)-overshootDivider) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/brewTimeDelayDivider);
+    delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue < -1) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp+0.2))) {
+  else if (((CurrentTempReadValue - PreviousTempReadValue < -1) || (CurrentTempReadValue - PreviousTempReadValue > 1)) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/(brewTimeDelayDivider/2));
+    delay(brewTimeDelayTemp/(brewTimeDelayDivider));
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
@@ -192,15 +202,26 @@ void doCoffee() {
 }
 void update_t0_t1() {
   float tmp = thermocouple.readCelsius();
-  String displayTemp;
+  String displayTemp, overshootVariablePrint, overshootErrPrint, overshootDividerPrint, errCalcPrint;
   String realTemp;
   displayTemp = tmp - float(offsetTemp);
+  overshootVariablePrint = overshootVariable;
+  overshootErrPrint = overshootErr;
+  overshootDividerPrint = overshootDivider;
+  errCalcPrint = errCalc;
   // realTemp = tmp;
-  realTemp = errCalc;
+  // realTemp = errCalc;
   char const* waterTempPrint = displayTemp.c_str();
-  char const* realTempPrint = realTemp.c_str();
-  myNex.writeStr("t0.txt", waterTempPrint);
-  myNex.writeStr("t1.txt", realTempPrint);
+  // char const* overshootVariableChar = overshootVariablePrint.c_str();
+  // char const* overshootErrChar = overshootErrPrint.c_str();
+  // char const* overshootDividerChar = overshootDividerPrint.c_str();
+  // char const* errCalcChar = errCalcPrint.c_str();
+
+  myNex.writeStr("page0.t0.txt", waterTempPrint);
+  myNex.writeStr("page0.t1.txt", overshootVariablePrint);
+  myNex.writeStr("page0.t2.txt", overshootErrPrint);
+  myNex.writeStr("page0.t3.txt", overshootDividerPrint);
+  myNex.writeStr("page0.t4.txt", errCalcPrint);
 }
 void setup() {
   
