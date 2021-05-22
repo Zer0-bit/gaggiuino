@@ -68,69 +68,33 @@ void trigger4()
 void trigger5()
 {
   // set desired temp values and save them to EEPROM
-  int savedOffsetTemp;
-  int savedBoilerTemp;
-  int savedBrewTimeDelay;
-  int savedbrewTimeDivider;
-  EEP_VALUE1 = myNex.readNumber("page1.n0.val");
-  EEP_VALUE2 = myNex.readNumber("page1.n1.val");
-  EEP_VALUE3 = myNex.readNumber("page2.n0.val");
-  EEP_VALUE4 = myNex.readNumber("page2.n1.val");
-  savedBoilerTemp = EEP_VALUE1 / 4;
-  savedOffsetTemp = EEP_VALUE2 / 4;
-  savedBrewTimeDelay = EEP_VALUE3 / 4;
-  savedbrewTimeDivider = EEP_VALUE4 / 4;
-  if (savedBoilerTemp > 0) {
-    writeIntIntoEEPROM(EEP_ADDR1, savedBoilerTemp);
-    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("page popupMSG");
-  }
-  else {
-    myNex.writeStr("popupMSG.t0.txt", "ERROR!");
-    myNex.writeStr("page popupMSG");
-  }
-  if (savedOffsetTemp > 0) {
-    writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
-    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("page popupMSG");
-  }
-  else {
-    myNex.writeStr("popupMSG.t0.txt", "ERROR!");
-    myNex.writeStr("page popupMSG");
-  }
-  if (savedBrewTimeDelay > 0) {
-    writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
-    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("page popupMSG");
-  }
-  else {
-    myNex.writeStr("popupMSG.t0.txt", "ERROR!");
-    myNex.writeStr("page popupMSG");
-  }
-  if (savedbrewTimeDivider > 0) {
-    writeIntIntoEEPROM(EEP_ADDR4, savedbrewTimeDivider);
-    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("page popupMSG");
-  }
-  else {
-    myNex.writeStr("popupMSG.t0.txt", "ERROR!");
-    myNex.writeStr("page popupMSG");
-  }
+  int savedBoilerTemp = myNex.readNumber("page1.n0.val");
+  int savedOffsetTemp = myNex.readNumber("page1.n1.val");
+  int savedBrewTimeDelay = myNex.readNumber("page2.n0.val");
+  int savedbrewTimeDivider = myNex.readNumber("page2.n1.val");
+
+  writeIntIntoEEPROM(EEP_ADDR1, savedBoilerTemp);
+  writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
+  writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
+  writeIntIntoEEPROM(EEP_ADDR4, savedbrewTimeDivider);
+  myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+  myNex.writeStr("page popupMSG");
 }
 
 void trigger6()
 {
   for (int i=0; i<=30; i++)
   {
-    if (millis() == 1000 && i < 25) {
+    if (i < 25) {
       myNex.writeNum("page0.sec_number.pco", 65535);
       myNex.writeNum("page0.sec_number.val", i);
     }
-    else if (millis() == 1000 && i > 25)
+    else if (i > 25)
     {
       myNex.writeNum("page0.sec_number.pco", 63488);
       myNex.writeNum("page0.sec_number.val", i);
     }
+    delay(1000);
   }
 }
 
@@ -155,12 +119,12 @@ void doCoffee() {
     lastMaxReachedTemp = maxReachedTemp; //96
     overshootVariable = maxReachedTemp - presetTemp;//97-94=3 
     overshootErr = sumOfAllMaxes/presetTemp/i;//193/94=2.05
-    overshootDivider = overshootVariable / overshootErr; // 3/2.05=1.46
+    overshootDivider = overshootVariable / errCalc; // 3/2.05=1.46
     errCalc = overshootVariable-overshootErr;//3-2.05=0.9
   }
 
   // some logic to keep the boiler as close to the desired set temp as possible 
-  previousBrewTimeDetectValue = brewTimeStopValue - brewTimeStartValue;
+  //previousBrewTimeDetectValue = brewTimeStopValue - brewTimeStartValue;
   brewTimeStartValue = millis();
   waterTemp=presetTemp-float(offsetTemp);
   if ((relayPin != HIGH) && (CurrentTempReadValue < float(presetTemp)-10)) {
@@ -176,19 +140,19 @@ void doCoffee() {
     delay(brewTimeDelayTemp);
     digitalWrite(relayPin, LOW);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-overshootErr) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-overshootDivider) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -0.5) && (CurrentTempReadValue >= float(presetTemp)-overshootErr) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -0.5) && (CurrentTempReadValue >= float(presetTemp)-overshootDivider) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
     digitalWrite(relayPin, LOW);
     delay(brewTimeDelayTemp);
   }
-  else if (((CurrentTempReadValue - PreviousTempReadValue < -1) || (CurrentTempReadValue - PreviousTempReadValue > 1)) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+  else if (((CurrentTempReadValue - PreviousTempReadValue < -1) || (CurrentTempReadValue - PreviousTempReadValue > 0.5)) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
     digitalWrite(relayPin, HIGH);
     delay(brewTimeDelayTemp/(brewTimeDelayDivider));
     digitalWrite(relayPin, LOW);
@@ -202,16 +166,16 @@ void doCoffee() {
 }
 void update_t0_t1() {
   float tmp = thermocouple.readCelsius();
-  String displayTemp, overshootVariablePrint, overshootErrPrint, overshootDividerPrint, errCalcPrint;
-  String realTemp;
-  displayTemp = tmp - float(offsetTemp);
+  String waterTempPrint, displayTemp, overshootVariablePrint, overshootErrPrint, overshootDividerPrint, errCalcPrint;
+
+  waterTempPrint = tmp - float(offsetTemp);
   overshootVariablePrint = overshootVariable;
   overshootErrPrint = overshootErr;
   overshootDividerPrint = overshootDivider;
   errCalcPrint = errCalc;
   // realTemp = tmp;
   // realTemp = errCalc;
-  char const* waterTempPrint = displayTemp.c_str();
+  //char const* waterTempPrint = displayTemp.c_str();
   // char const* overshootVariableChar = overshootVariablePrint.c_str();
   // char const* overshootErrChar = overshootErrPrint.c_str();
   // char const* overshootDividerChar = overshootDividerPrint.c_str();
@@ -236,12 +200,12 @@ void setup() {
   Serial.end();
   Serial.begin(115200);
 
-
-
   // port setup
   pinMode(relayPin, OUTPUT);  
   // port init with - starts with the relay decoupled just in case
   digitalWrite(relayPin, LOW);
+
+  delay(1000);
 
   // wait for EEPROM and other chip to stabilize  
   uint32_t tmp1 = readIntFromEEPROM(EEP_ADDR1);
