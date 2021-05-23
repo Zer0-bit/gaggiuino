@@ -2,8 +2,7 @@
 #include <trigger.h>
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
-// #include <iostream>
-// #include <string>
+#include <arduino-timer.h>
 
 // Define our pins
 int thermoDO = 4;
@@ -19,6 +18,10 @@ EasyNex myNex(Serial);
 int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
 unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
+// timer
+auto timer = timer_create_default();
+
+int i = 0, t = 0;
 uint32_t presetTemp, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
 float CurrentTempReadValue, PreviousTempReadValue, brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr, overshootDivider, powerOutput;
 float const MAX_TEMP = 120;
@@ -84,18 +87,27 @@ void trigger5()
 
 void trigger6()
 {
-  for (int i=0; i<=30; i++)
+  if (i < 25) {
+    myNex.writeNum("page0.sec_number.pco", 65535);
+    myNex.writeNum("page0.sec_number.val", i);
+    timer.every(1000, i++);
+  }
+  else if (i > 25 && i <= 29)
   {
-    if (i < 25) {
-      myNex.writeNum("page0.sec_number.pco", 65535);
-      myNex.writeNum("page0.sec_number.val", i);
-    }
-    else if (i > 25)
-    {
-      myNex.writeNum("page0.sec_number.pco", 63488);
-      myNex.writeNum("page0.sec_number.val", i);
-    }
-    delay(500);
+    myNex.writeNum("page0.sec_number.pco", 63488);
+    myNex.writeNum("page0.sec_number.val", i);
+    timer.every(1000, i++);
+  }
+  else if ( i == 30 && t <= 10)
+  { 
+    myNex.writeNum("page0.sec_number.pco", 64776);
+    timer.every(1000, t);
+    myNex.writeNum("page0.sec_number.pco", 63488);
+    timer.every(1000, t++);
+  }
+  else
+  {
+    myNex.writeStr("vis page0.sec_number,0");
   }
 }
 
@@ -260,6 +272,7 @@ void setup() {
 }
 void loop() {
   myNex.NextionListen();
+  timer.tick();
   doCoffee();
   updateLCD();
   delay(250);
