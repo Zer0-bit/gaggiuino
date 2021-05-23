@@ -11,18 +11,19 @@ int thermoCS = 5;
 int thermoCLK = 6;
 int relayPin = 8;
 
+//Init the thermocouple with the appropriate pins
+MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
+EasyNex myNex(Serial);
+
 // EEPROM  stuff
 int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
 unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
 uint32_t presetTemp, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
-float brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr, overshootDivider;
+float CurrentTempReadValue, PreviousTempReadValue, brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr, overshootDivider, powerOutput;
+float const MAX_TEMP = 120;
 const int MAX = 100;
 
-
-//Init the thermocouple with the appropriate pins
-MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
-EasyNex myNex(Serial);
 
 // EEPROM WRITE
 void writeIntIntoEEPROM(int address, int number)
@@ -94,38 +95,36 @@ void trigger6()
       myNex.writeNum("page0.sec_number.pco", 63488);
       myNex.writeNum("page0.sec_number.val", i);
     }
-    delay(1000);
+    delay(500);
   }
 }
 
-void powerRatedBrew() {
-  float CurrentTempReadValue = thermocouple.readCelsius(), powerOutput;
-  int arr[100], i;
-  for (i = 0; i < 100; i++) arr[i] = i + 1;
-  int  var[MAX] = {arr[i]};
+// void powerRatedBrew() {
+//   CurrentTempReadValue = thermocouple.readCelsius();
+//   int arr[100], i;
+//   for (i = 0; i < 100; i++) arr[i] = i + 1;
+//   int  var[MAX] = {arr[i]};
 
-  powerOutput = (presetTemp - presetTemp * CurrentTempReadValue / 100) * 10;
+//   powerOutput = (presetTemp - presetTemp * CurrentTempReadValue / 100) * 10;
   
-  if (CurrentTempReadValue < presetTemp/1.2) {
-    digitalWrite(relayPin, HIGH);
-  }
-  else if (CurrentTempReadValue > presetTemp/1.2 && CurrentTempReadValue < presetTemp) {
-    digitalWrite(relayPin, HIGH);
-    delay(powerOutput);
-    digitalWrite(relayPin, LOW);
-    delay(powerOutput);
-  }
-  else {
-    digitalWrite(relayPin, LOW);
-  }
+//   if (CurrentTempReadValue < presetTemp/1.2) {
+//     digitalWrite(relayPin, HIGH);
+//   }
+//   else if (CurrentTempReadValue > presetTemp/1.2 && CurrentTempReadValue < presetTemp) {
+//     digitalWrite(relayPin, HIGH);
+//     delay(powerOutput);
+//     digitalWrite(relayPin, LOW);
+//     delay(powerOutput);
+//   }
+//   else {
+//     digitalWrite(relayPin, LOW);
+//   }
   
-}
+// }
 
 // The *precise* temp control logic
 void doCoffee() {
   int i=1;
-  double brewTimeStartValue, brewTimeStopValue, previousBrewTimeDetectValue;
-  float CurrentTempReadValue, PreviousTempReadValue;
 
   CurrentTempReadValue = thermocouple.readCelsius();
   
@@ -146,12 +145,9 @@ void doCoffee() {
     errCalc = overshootVariable-overshootErr;//3-2.05=0.9
   }
 
-  // some logic to keep the boiler as close to the desired set temp as possible 
-  //previousBrewTimeDetectValue = brewTimeStopValue - brewTimeStartValue;
-  // brewTimeStartValue = millis();
-  // waterTemp=presetTemp-float(offsetTemp);
-  if (CurrentTempReadValue > 0 && CurrentTempReadValue < presetTemp + 3) {
-    if ((relayPin != HIGH) && (CurrentTempReadValue < float(presetTemp)-10)) {
+
+  if (CurrentTempReadValue < float(presetTemp) + 3) {
+    if (relayPin != HIGH && CurrentTempReadValue < float(presetTemp)-10) {
       digitalWrite(relayPin, HIGH);
     }
     else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-10) && (CurrentTempReadValue < float(presetTemp)-overshootVariable)) {
@@ -213,24 +209,16 @@ void doCoffee() {
   else {
     digitalWrite(relayPin, LOW);
   }
-  // brewTimeStopValue = millis();
 }
-void update_t0_t1() {
-  float tmp = thermocouple.readCelsius();
+void updateLCD() {
+  // float tmp = thermocouple.readCelsius();
   String waterTempPrint, displayTemp, overshootVariablePrint, overshootErrPrint, overshootDividerPrint, errCalcPrint;
 
-  waterTempPrint = tmp - float(offsetTemp);
+  waterTempPrint = CurrentTempReadValue - float(offsetTemp);
   overshootVariablePrint = overshootVariable;
   overshootErrPrint = overshootErr;
   overshootDividerPrint = overshootDivider;
   errCalcPrint = errCalc;
-  // realTemp = tmp;
-  // realTemp = errCalc;
-  //char const* waterTempPrint = displayTemp.c_str();
-  // char const* overshootVariableChar = overshootVariablePrint.c_str();
-  // char const* overshootErrChar = overshootErrPrint.c_str();
-  // char const* overshootDividerChar = overshootDividerPrint.c_str();
-  // char const* errCalcChar = errCalcPrint.c_str();
 
   myNex.writeStr("page0.t0.txt", waterTempPrint);
   myNex.writeStr("page0.t1.txt", overshootVariablePrint);
@@ -253,10 +241,10 @@ void setup() {
 
   // port setup
   pinMode(relayPin, OUTPUT);  
-  // port init with - starts with the relay decoupled just in case
+  // port init - starts with the relay decoupled just in case
   digitalWrite(relayPin, LOW);
 
-  delay(1000);
+  delay(500);
 
   // wait for EEPROM and other chip to stabilize  
   uint32_t tmp1 = readIntFromEEPROM(EEP_ADDR1);
@@ -273,6 +261,6 @@ void setup() {
 void loop() {
   myNex.NextionListen();
   doCoffee();
-  update_t0_t1();
+  updateLCD();
   delay(250);
 }
