@@ -17,7 +17,7 @@ unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
 uint32_t presetTemp, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
 float brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr, overshootDivider;
-
+const int MAX = 100;
 
 
 //Init the thermocouple with the appropriate pins
@@ -98,7 +98,30 @@ void trigger6()
   }
 }
 
-// The precise temp control logic
+void powerRatedBrew() {
+  float CurrentTempReadValue = thermocouple.readCelsius(), powerOutput;
+  int arr[100], i;
+  for (i = 0; i < 100; i++) arr[i] = i + 1;
+  int  var[MAX] = {arr[i]};
+
+  powerOutput = (presetTemp - presetTemp * CurrentTempReadValue / 100) * 10;
+  
+  if (CurrentTempReadValue < presetTemp/1.2) {
+    digitalWrite(relayPin, HIGH);
+  }
+  else if (CurrentTempReadValue > presetTemp/1.2 && CurrentTempReadValue < presetTemp) {
+    digitalWrite(relayPin, HIGH);
+    delay(powerOutput);
+    digitalWrite(relayPin, LOW);
+    delay(powerOutput);
+  }
+  else {
+    digitalWrite(relayPin, LOW);
+  }
+  
+}
+
+// The *precise* temp control logic
 void doCoffee() {
   int i=1;
   double brewTimeStartValue, brewTimeStopValue, previousBrewTimeDetectValue;
@@ -112,7 +135,7 @@ void doCoffee() {
   brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
 
   // Calculating the overshoot value
-  if (CurrentTempReadValue > presetTemp+1 && CurrentTempReadValue < presetTemp+3 && CurrentTempReadValue > maxReachedTemp) {
+  if (CurrentTempReadValue > presetTemp && CurrentTempReadValue < presetTemp+3 && CurrentTempReadValue > maxReachedTemp) {
     maxReachedTemp = CurrentTempReadValue;
     i++;
     sumOfAllMaxes = maxReachedTemp + lastMaxReachedTemp; //193
@@ -125,44 +148,72 @@ void doCoffee() {
 
   // some logic to keep the boiler as close to the desired set temp as possible 
   //previousBrewTimeDetectValue = brewTimeStopValue - brewTimeStartValue;
-  brewTimeStartValue = millis();
-  waterTemp=presetTemp-float(offsetTemp);
-  if ((relayPin != HIGH) && (CurrentTempReadValue < float(presetTemp)-10)) {
-    digitalWrite(relayPin, HIGH);
-  }
-  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-10) && (CurrentTempReadValue < float(presetTemp)-overshootVariable)) {
-    digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp);
-    digitalWrite(relayPin, LOW);
-  }
-  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -1) && (CurrentTempReadValue >= float(presetTemp)-10) && (CurrentTempReadValue <= float(presetTemp)-overshootVariable)) {
-    digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp);
-    digitalWrite(relayPin, LOW);
-  }
-  else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-overshootDivider) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
-    digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
-    digitalWrite(relayPin, LOW);
-    delay(brewTimeDelayTemp);
-  }
-  else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -0.5) && (CurrentTempReadValue >= float(presetTemp)-overshootDivider) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
-    digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
-    digitalWrite(relayPin, LOW);
-    delay(brewTimeDelayTemp);
-  }
-  else if (((CurrentTempReadValue - PreviousTempReadValue < -1) || (CurrentTempReadValue - PreviousTempReadValue > 0.5)) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
-    digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/(brewTimeDelayDivider));
-    digitalWrite(relayPin, LOW);
-    delay(brewTimeDelayTemp);
+  // brewTimeStartValue = millis();
+  // waterTemp=presetTemp-float(offsetTemp);
+  if (CurrentTempReadValue > 0 && CurrentTempReadValue < presetTemp + 3) {
+    if ((relayPin != HIGH) && (CurrentTempReadValue < float(presetTemp)-10)) {
+      digitalWrite(relayPin, HIGH);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-10) && (CurrentTempReadValue < float(presetTemp)-overshootVariable)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp);
+      digitalWrite(relayPin, LOW);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -1) && (CurrentTempReadValue >= float(presetTemp)-10) && (CurrentTempReadValue <= float(presetTemp)-overshootVariable)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp);
+      digitalWrite(relayPin, LOW);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue < -1) && (CurrentTempReadValue >= float(presetTemp)-10) && (CurrentTempReadValue <= float(presetTemp)-overshootVariable)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp);
+      digitalWrite(relayPin, LOW);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue - PreviousTempReadValue < 1) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
+      digitalWrite(relayPin, LOW);
+      delay(brewTimeDelayTemp);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue >= float(presetTemp)-overshootVariable) && (CurrentTempReadValue < float(presetTemp)-errCalc)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp/brewTimeDelayDivider);
+      digitalWrite(relayPin, LOW);
+      delay(brewTimeDelayTemp);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue > 0) && (CurrentTempReadValue >= float(presetTemp)-overshootVariable) && (CurrentTempReadValue < float(presetTemp)-errCalc)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
+      digitalWrite(relayPin, LOW);
+      delay(brewTimeDelayTemp);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue < 0) && (CurrentTempReadValue - PreviousTempReadValue > -1) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
+      digitalWrite(relayPin, LOW);
+      delay(brewTimeDelayTemp);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue < -1) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp/brewTimeDelayDivider);
+      digitalWrite(relayPin, LOW);
+      delay(brewTimeDelayTemp);
+    }
+    else if ((CurrentTempReadValue - PreviousTempReadValue > 1) && (CurrentTempReadValue >= float(presetTemp)-errCalc) && (CurrentTempReadValue < float(presetTemp)-0.2)) {
+      digitalWrite(relayPin, HIGH);
+      delay(brewTimeDelayTemp/(brewTimeDelayDivider));
+      digitalWrite(relayPin, LOW);
+      delay(brewTimeDelayTemp);
+    }
+    else {
+      digitalWrite(relayPin, LOW);
+    }
+  PreviousTempReadValue = CurrentTempReadValue;
   }
   else {
     digitalWrite(relayPin, LOW);
   }
-  brewTimeStopValue = millis();
-  PreviousTempReadValue = CurrentTempReadValue;
+  // brewTimeStopValue = millis();
 }
 void update_t0_t1() {
   float tmp = thermocouple.readCelsius();
