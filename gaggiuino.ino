@@ -22,7 +22,7 @@ unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 SandTimer timer;
 
 int i = 0, t = 0;
-uint32_t presetTemp, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
+uint32_t setPoint, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
 float CurrentTempReadValue, PreviousTempReadValue, brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr, overshootDivider;
 float const MAX_TEMP = 120;
 const int MAX = 100;
@@ -43,17 +43,17 @@ int readIntFromEEPROM(int address)
 
 void trigger1()
 {
-  uint32_t presetTemp;
-  presetTemp = myNex.readNumber("page1.n0.val");
-  presetTemp--;
-  myNex.writeNum("page1.n0.val",presetTemp);
+  uint32_t setPoint;
+  setPoint = myNex.readNumber("page1.n0.val");
+  setPoint--;
+  myNex.writeNum("page1.n0.val",setPoint);
 }
 void trigger2()
 {
-  uint32_t presetTemp;
-  presetTemp = myNex.readNumber("page1.n0.val");
-  presetTemp++;
-  myNex.writeNum("page1.n0.val",presetTemp);
+  uint32_t setPoint;
+  setPoint = myNex.readNumber("page1.n0.val");
+  setPoint++;
+  myNex.writeNum("page1.n0.val",setPoint);
 }
 void trigger3()
 {
@@ -89,41 +89,20 @@ void trigger6()
 {
   myNex.writeNum("page0.sec_number",0);
   myNex.writeStr("vis page0.sec_number,1");
+  i++;
+  if (i > 1) myNex.writeStr("vis page0.sec_number,0");
+
 }
-
-// void powerRatedBrew() {
-//   CurrentTempReadValue = thermocouple.readCelsius();
-//   presetTemp = myNex.readNumber("page1.n0.val");
-
-//   // int arr[100], i;
-//   // for (i = 0; i < 100; i++) arr[i] = i + 1;
-//   // int  var[MAX] = {arr[i]};
-
-//   float powerOutput = (presetTemp - presetTemp * CurrentTempReadValue / 100) * 10;
-  
-//   if (CurrentTempReadValue < presetTemp/1.2) {
-//     digitalWrite(relayPin, HIGH);
-//   }
-//   else if (CurrentTempReadValue > presetTemp/1.2 && CurrentTempReadValue < presetTemp) {
-//     digitalWrite(relayPin, HIGH);
-//     delay(powerOutput);
-//     digitalWrite(relayPin, LOW);
-//     delay(powerOutput);
-//   }
-//   else {
-//     digitalWrite(relayPin, LOW);
-//   }
-// }
 
 // The *precise* temp control logic
 void doCoffee() {
   CurrentTempReadValue = thermocouple.readCelsius();
-  presetTemp = myNex.readNumber("page1.n0.val");
+  setPoint = myNex.readNumber("page1.n0.val");
   offsetTemp = myNex.readNumber("page1.n1.val");
   brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
   brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-  // float powerOutput = (presetTemp - presetTemp * thermocouple.readCelsius() / 100) * 10;
-  int powerOutput = map(CurrentTempReadValue, presetTemp-10, presetTemp, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
+  // float powerOutput = (setPoint - setPoint * thermocouple.readCelsius() / 100) * 10;
+  int powerOutput = map(CurrentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
   if (powerOutput > brewTimeDelayTemp){
     powerOutput = brewTimeDelayTemp;
   }
@@ -131,37 +110,25 @@ void doCoffee() {
     powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
   }
 
-  // Calculating the overshoot value
-  // if (CurrentTempReadValue > presetTemp && CurrentTempReadValue < presetTemp+3 && CurrentTempReadValue > maxReachedTemp) {
-    // maxReachedTemp = CurrentTempReadValue;
-    // i++;
-    // sumOfAllMaxes = maxReachedTemp + lastMaxReachedTemp; //193
-    // lastMaxReachedTemp = maxReachedTemp; //96
-    // overshootVariable = maxReachedTemp - presetTemp;//97-94=3 
-    // overshootErr = sumOfAllMaxes/presetTemp/i;//193/94=2.05
-    // overshootDivider = overshootVariable / errCalc; // 3/2.05=1.46
-    // errCalc = overshootVariable-overshootErr;//3-2.05=0.9
-  // }
-
-  if (thermocouple.readCelsius() < float(presetTemp-10)) {
+  if (thermocouple.readCelsius() < float(setPoint-10)) {
     digitalWrite(relayPin, HIGH);
   }
-  else if (thermocouple.readCelsius() >= float(presetTemp-10) && thermocouple.readCelsius() < float(presetTemp-3)) {
+  else if (thermocouple.readCelsius() >= float(setPoint-10) && thermocouple.readCelsius() < float(setPoint-3)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp);
+    delay(powerOutput);
     digitalWrite(relayPin, LOW);
   }
-  else if (thermocouple.readCelsius() >= float(presetTemp-3) && thermocouple.readCelsius() <= float(presetTemp-1)) {
+  else if (thermocouple.readCelsius() >= float(setPoint-3) && thermocouple.readCelsius() <= float(setPoint-1)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/brewTimeDelayDivider);
+    delay(powerOutput);
     digitalWrite(relayPin, LOW);
-    delay(brewTimeDelayTemp/brewTimeDelayDivider);
+    delay(powerOutput);
   }
-  else if (thermocouple.readCelsius() >= float(presetTemp-1) && thermocouple.readCelsius() < float(presetTemp-0.2)) {
+  else if (thermocouple.readCelsius() >= float(setPoint-1) && thermocouple.readCelsius() < float(setPoint-0.2)) {
     digitalWrite(relayPin, HIGH);
-    delay(brewTimeDelayTemp/brewTimeDelayDivider/2);
+    delay(powerOutput);
     digitalWrite(relayPin, LOW);
-    delay(brewTimeDelayTemp/brewTimeDelayDivider);
+    delay(powerOutput);
   }
   else {
     digitalWrite(relayPin, LOW);
@@ -170,15 +137,15 @@ void doCoffee() {
 }
 
 void updateLCD() {
-  String waterTempPrint, displayTemp, overshootVariablePrint, overshootErrPrint, overshootDividerPrint, errCalcPrint;
+  String waterTempPrint, hPwrPrint;
   CurrentTempReadValue = thermocouple.readCelsius();
-  presetTemp = myNex.readNumber("page1.n0.val");
+  setPoint = myNex.readNumber("page1.n0.val");
   offsetTemp = myNex.readNumber("page1.n1.val");
   brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
   brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
 
-  // float powerOutput = (presetTemp - (presetTemp * thermocouple.readCelsius() / 100)) * 10;
-  int powerOutput = map(CurrentTempReadValue, presetTemp-10, presetTemp, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
+  // float powerOutput = (setPoint - (setPoint * thermocouple.readCelsius() / 100)) * 10;
+  int powerOutput = map(CurrentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
   if (powerOutput > brewTimeDelayTemp){
     powerOutput = brewTimeDelayTemp;
   }
@@ -187,43 +154,35 @@ void updateLCD() {
   }
 
   waterTempPrint = thermocouple.readCelsius() - float(offsetTemp);
-  overshootVariablePrint = overshootVariable;
-  overshootErrPrint = overshootErr;
-  overshootDividerPrint = overshootDivider;
-  errCalcPrint = powerOutput;
+  hPwrPrint = powerOutput;
 
   myNex.writeStr("page0.t0.txt", waterTempPrint);
-  myNex.writeStr("page0.t1.txt", overshootVariablePrint);
-  myNex.writeStr("page0.t2.txt", overshootErrPrint);
-  myNex.writeStr("page0.t3.txt", overshootDividerPrint);
-  myNex.writeStr("page0.t4.txt", errCalcPrint);
+  myNex.writeStr("page0.t1.txt", hPwrPrint);
 
-
-  // if (i < 25) {
-  //   timer.start(1000);
-  //   if (timer.finished()) myNex.writeNum("page0.sec_number.val", i);
-  //   myNex.writeNum("page0.sec_number.pco", 65535);
-  //   i++;
-  // }
-  // else if (i > 25 && i <= 29)
-  // {
-  //   timer.start(1000);
-  //   if (timer.finished()) myNex.writeNum("page0.sec_number.val", i);
-  //   myNex.writeNum("page0.sec_number.pco", 63488);
-  //   i++;
-  // }
-  // else if ( i == 30 && t <= 10)
-  // { 
-  //   timer.start(1000);
-  //   if (timer.finished()) myNex.writeNum("page0.sec_number.pco", 64776);
-  //   timer.start(1000);
-  //   if (timer.finished())  myNex.writeNum("page0.sec_number.pco", 63488);
-  //   t++;
-  // }
-  // else
-  // {
-  //   myNex.writeStr("vis page0.sec_number,0");
-  // }
+long t_timer=0, s_timer = millis();
+  if (t_timer < 25) {
+    t_timer += millis()-s_timer;
+    myNex.writeNum("page0.sec_number.val", t_timer);
+    myNex.writeNum("page0.sec_number.pco", 65535);
+  }
+  else if (t_timer > 25 && i <= 30)
+  {
+    t_timer += millis()-s_timer;
+    myNex.writeNum("page0.sec_number.val", t_timer);
+    myNex.writeNum("page0.sec_number.pco", 63488);
+  }
+  else if ( t_timer == 30 && t < 10)
+  { 
+    timer.start(1000);
+    if (timer.finished()) myNex.writeNum("page0.sec_number.pco", 64776);
+    timer.start(1000);
+    if (timer.finished())  myNex.writeNum("page0.sec_number.pco", 63488);
+    t++;
+  }
+  else
+  {
+    myNex.writeStr("vis page0.sec_number,0");
+  }
 }
 void setup() {
   
