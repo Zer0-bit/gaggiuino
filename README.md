@@ -41,12 +41,12 @@ First you need to check your setup works as expected outside the machine so you 
 
 1. The first step will be connecting the max6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file ( pins 4,5,6 )
 2. Connect the relay, for now only connect the circuit controlling ports to check whether the relay LED indicates the power states.
-  >*Relay 3 to Arduino GND, Relay 4 to Arduino D8, the ports 1 and 2 on the relay are the high voltage ones, we ca
+>*Relay 3 to Arduino GND, Relay 4 to Arduino D8, the ports 1 and 2 on the relay are the high voltage ones, we ca
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
-  >*Note: uploading won't work with the LCD connected*
+>*Note: uploading won't work with the LCD connected*
 5. Upload the .HMI file on a microSD card
-   >*Note: card needs to be FAT32 formatted*
+>*Note: card needs to be FAT32 formatted*
 6. Insert the card in the LCD card reader slot and connect the LCD to the arduino board.
-   >*Nextion TX goes to Arduino RX, and RX to TX, VCC goes to Arduino 5V and GND to GND*
+>*Nextion TX goes to Arduino RX, and RX to TX, VCC goes to Arduino 5V and GND to GND*
 7. After upload finished get the card out and power cycle the LCD.
 8. You should see temp readings on your screen if everything went according to the plan.
