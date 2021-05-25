@@ -33,7 +33,7 @@ Optional:
 - [Nextion LCD case](https://bit.ly/3b2nxf7)
 - [Magnet sheet](https://bit.ly/3xKTMJn)
 
-![GaggiaPID1](https://github.com/Zer0-bit/gaggiuino/blob/main/images/PXL_20210426_180310406.jpg)
+![GaggiaPID1](https://github.com/Zer0-bit/gaggiuino/blob/main/images/PXL_20210525_144343463.jpg)
 
 First you need to understand what goes where, the schematics isn't really rocket science but for someone who's never disasembled or has no experience working with electrical circuits it might get very confusing real fast so i will try to describe it as simple as possible, sometimes adding some photos as well.
 First you need to check your setup works as expected outside the machine so you don't ahve it all installed and realise just afterwards it's not reading any temperature because of a faulty thermocouple or any other element, or your relay doesn't go between the ON/OFF modes.
