@@ -41,7 +41,7 @@ First you need to check your setup works as expected outside the machine so you 
 
 1. The first step will be connecting the max6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file ( pins 4,5,6 )
 2. Connect the relay, for now only connect the circuit controlling ports to check whether the relay LED indicates the power states.
->*Relay 3 to Arduino GND, Relay 4 to Arduino D8, the ports 1 and 2 on the relay are the high voltage ones, we ca
+>*Relay 3 to Arduino GND, Relay 4 to Arduino D8, the ports 1 and 2 on the relay are the high voltage circuit breaker*
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
 >*Note: uploading won't work with the LCD connected*
 5. Upload the .HMI file on a microSD card
