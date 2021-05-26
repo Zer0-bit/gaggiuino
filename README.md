@@ -53,6 +53,6 @@ First you need to check your setup works as expected outside the machine so you 
 >*Nextion TX goes to Arduino RX, and RX to TX, VCC goes to Arduino 5V and GND to GND*
 7. After upload finished get the card out and power cycle the LCD.
 8. You should see temp readings on your screen if everything went according to the plan.
-    >*Don't forget to test the thermocouple/relay combo operation, apply some heat to the thermocouple end and see whether the relay led operates in HIGH/LOW modes*
+>*Don't forget to test the thermocouple/relay combo operation, apply some heat to the thermocouple end and see whether the relay led operates in HIGH/LOW modes*
 
 ### At this point if all the above works as expected you're ready to install it all inside the machine, for this we'll need to prepare some splitters that we'll use to connect to the Gaggia internals without introducing any permanent modifications so in the event of a desire to revert to stock it's a few disconnects away! ###
