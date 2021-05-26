@@ -14,8 +14,11 @@ I will assume you have  the necessary components and installed the related softw
 
 Software needed:
 1. [Arduino IDE](https://www.arduino.cc/en/software)
+    >*Needed to upload the code ".ino" to the arduino ROM*
 2. [Nextion Editor](https://nextion.tech/nextion-editor/)
+    >*Only necessary if planning on editing the ".HMI" file to ammend the LCD functionality*
 3. [CH340 USB Driver](https://electropeak.com/learn/how-to-install-ch340-driver/)
+    >*USB driver so your system recognizes the Arduino clone board*
 
 Hardware requirements:
 1. [Arduino Nano](https://bit.ly/3eXSfXZ) - Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
