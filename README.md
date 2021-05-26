@@ -28,6 +28,8 @@ Hardware requirements:
 5. [40DA SSR Relay](https://bit.ly/33g1Pjr)
 6. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI)
 7. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
+8. 5v power supply - for powering the arduino board once it's inside the machine.
+>* I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board.*
 
 Optional:
 - [Heat shrink](https://bit.ly/2PQdnqt)
