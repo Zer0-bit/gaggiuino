@@ -2,7 +2,6 @@
 #include <trigger.h>
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
-#include <SandTimer.h>
 
 // Define our pins
 int thermoDO = 4;
@@ -18,12 +17,9 @@ EasyNex myNex(Serial);
 int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
 unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
-// timer
-SandTimer timer;
-
-int i = 0, t = 0;
+int i = 0;
 uint32_t setPoint, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
-float CurrentTempReadValue, PreviousTempReadValue, brewSwitchOnDetect, errCalc, overshootVariable, maxReachedTemp, lastMaxReachedTemp, sumOfAllMaxes, overshootErr, overshootDivider;
+float CurrentTempReadValue;
 float const MAX_TEMP = 120;
 const int MAX = 100;
 
@@ -40,7 +36,7 @@ int readIntFromEEPROM(int address)
   return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
 }
 
-
+// Button minus
 void trigger1()
 {
   uint32_t setPoint;
@@ -48,6 +44,7 @@ void trigger1()
   setPoint--;
   myNex.writeNum("page1.n0.val",setPoint);
 }
+// Button plus
 void trigger2()
 {
   uint32_t setPoint;
@@ -55,6 +52,7 @@ void trigger2()
   setPoint++;
   myNex.writeNum("page1.n0.val",setPoint);
 }
+// Button minus
 void trigger3()
 {
   uint32_t offsetTemp;
@@ -62,6 +60,7 @@ void trigger3()
   offsetTemp--;
   myNex.writeNum("page1.n1.val",offsetTemp);
 }
+// Button plus
 void trigger4()
 {
   uint32_t offsetTemp;
@@ -69,9 +68,9 @@ void trigger4()
   offsetTemp++;
   myNex.writeNum("page1.n1.val",offsetTemp);
 }
+// Save the desired temp values to EEPROM
 void trigger5()
 {
-  // set desired temp values and save them to EEPROM
   int savedBoilerTemp = myNex.readNumber("page1.n0.val");
   int savedOffsetTemp = myNex.readNumber("page1.n1.val");
   int savedBrewTimeDelay = myNex.readNumber("page2.n0.val");
@@ -85,23 +84,16 @@ void trigger5()
   myNex.writeStr("page popupMSG");
 }
 
-void trigger6()
-{
-  myNex.writeNum("page0.sec_number",0);
-  myNex.writeStr("vis page0.sec_number,1");
-  i++;
-  if (i > 1) myNex.writeStr("vis page0.sec_number,0");
-
-}
-
 // The *precise* temp control logic
 void doCoffee() {
+  // Getting the operational readings
   CurrentTempReadValue = thermocouple.readCelsius();
   setPoint = myNex.readNumber("page1.n0.val");
   offsetTemp = myNex.readNumber("page1.n1.val");
   brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
   brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-  // float powerOutput = (setPoint - setPoint * thermocouple.readCelsius() / 100) * 10;
+
+  // Calculating the boiler heating power
   int powerOutput = map(CurrentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
   if (powerOutput > brewTimeDelayTemp){
     powerOutput = brewTimeDelayTemp;
@@ -110,6 +102,7 @@ void doCoffee() {
     powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
   }
 
+  // Applying the powerOutput variable as part of the relay logic
   if (thermocouple.readCelsius() < float(setPoint-10)) {
     digitalWrite(relayPin, HIGH);
   }
@@ -133,18 +126,20 @@ void doCoffee() {
   else {
     digitalWrite(relayPin, LOW);
   }
-  PreviousTempReadValue = CurrentTempReadValue;
 }
 
 void updateLCD() {
+  // Declaring the local vars to keep the temperature and boiler_power values
   String waterTempPrint, hPwrPrint;
+
+  // Getting the latest readings from the needed endpoints
   CurrentTempReadValue = thermocouple.readCelsius();
   setPoint = myNex.readNumber("page1.n0.val");
   offsetTemp = myNex.readNumber("page1.n1.val");
   brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
   brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-
-  // float powerOutput = (setPoint - (setPoint * thermocouple.readCelsius() / 100)) * 10;
+  
+  // Calculating the boiler heating power to apply
   int powerOutput = map(CurrentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
   if (powerOutput > brewTimeDelayTemp){
     powerOutput = brewTimeDelayTemp;
@@ -153,36 +148,12 @@ void updateLCD() {
     powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
   }
 
-  waterTempPrint = thermocouple.readCelsius() - float(offsetTemp);
+  //Printing the current values to the display
+  waterTempPrint = CurrentTempReadValue - float(offsetTemp);
   hPwrPrint = powerOutput;
 
   myNex.writeStr("page0.t0.txt", waterTempPrint);
   myNex.writeStr("page0.t1.txt", hPwrPrint);
-
-long t_timer=0, s_timer = millis();
-  if (t_timer < 25) {
-    t_timer += millis()-s_timer;
-    myNex.writeNum("page0.sec_number.val", t_timer);
-    myNex.writeNum("page0.sec_number.pco", 65535);
-  }
-  else if (t_timer > 25 && i <= 30)
-  {
-    t_timer += millis()-s_timer;
-    myNex.writeNum("page0.sec_number.val", t_timer);
-    myNex.writeNum("page0.sec_number.pco", 63488);
-  }
-  else if ( t_timer == 30 && t < 10)
-  { 
-    timer.start(1000);
-    if (timer.finished()) myNex.writeNum("page0.sec_number.pco", 64776);
-    timer.start(1000);
-    if (timer.finished())  myNex.writeNum("page0.sec_number.pco", 63488);
-    t++;
-  }
-  else
-  {
-    myNex.writeStr("vis page0.sec_number,0");
-  }
 }
 void setup() {
   
@@ -202,9 +173,10 @@ void setup() {
   // port init - starts with the relay decoupled just in case
   digitalWrite(relayPin, LOW);
 
+  // Small delay so the LCD has a chance to fully initialize before passing the EEPROM values
   delay(900);
 
-  // wait for EEPROM and other chip to stabilize  
+  // Applying the EEPROM saved values  
   uint32_t tmp1 = readIntFromEEPROM(EEP_ADDR1);
   uint32_t tmp2 = readIntFromEEPROM(EEP_ADDR2);
   uint32_t tmp3 = readIntFromEEPROM(EEP_ADDR3);
@@ -218,6 +190,7 @@ void setup() {
 }
 
 void loop() {
+  //Main loop where all the above logic is continuously run
   myNex.NextionListen();
   doCoffee();
   updateLCD();
