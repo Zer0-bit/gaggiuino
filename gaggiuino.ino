@@ -19,7 +19,6 @@ unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
 int i = 0;
 uint32_t setPoint, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
-float CurrentTempReadValue;
 float const MAX_TEMP = 120;
 const int MAX = 100;
 
@@ -87,14 +86,14 @@ void trigger5()
 // The *precise* temp control logic
 void doCoffee() {
   // Getting the operational readings
-  CurrentTempReadValue = thermocouple.readCelsius();
+  float currentTempReadValue = thermocouple.readCelsius();
   setPoint = myNex.readNumber("page1.n0.val");
   offsetTemp = myNex.readNumber("page1.n1.val");
   brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
   brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
 
   // Calculating the boiler heating power
-  int powerOutput = map(CurrentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
+  int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
   if (powerOutput > brewTimeDelayTemp){
     powerOutput = brewTimeDelayTemp;
   }
@@ -133,27 +132,35 @@ void updateLCD() {
   String waterTempPrint, hPwrPrint;
 
   // Getting the latest readings from the needed endpoints
-  CurrentTempReadValue = thermocouple.readCelsius();
+  float currentTempReadValue = thermocouple.readCelsius();
   setPoint = myNex.readNumber("page1.n0.val");
   offsetTemp = myNex.readNumber("page1.n1.val");
   brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
   brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
   
-  // Calculating the boiler heating power to apply
-  int powerOutput = map(CurrentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
-  if (powerOutput > brewTimeDelayTemp){
-    powerOutput = brewTimeDelayTemp;
+  if (currentTempReadValue < float(setPoint+5)) {
+    // Calculating the boiler heating power to apply
+    int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
+    if (powerOutput > brewTimeDelayTemp) {
+      hPwrPrint = brewTimeDelayTemp;
+      myNex.writeStr("page0.t1.txt", hPwrPrint);
+    }
+    else if (powerOutput < brewTimeDelayTemp/brewTimeDelayDivider) {
+      hPwrPrint = brewTimeDelayTemp/brewTimeDelayDivider;
+      myNex.writeStr("page0.t1.txt", hPwrPrint);
+    }
+    else {
+      hPwrPrint = powerOutput;
+      myNex.writeStr("page0.t1.txt", hPwrPrint);
+    }
   }
-  else if (powerOutput < brewTimeDelayTemp/brewTimeDelayDivider) {
-    powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
+  else {
+    waterTempPrint = currentTempReadValue - float(offsetTemp);
+    myNex.writeStr("page0.t1.txt", "STEAM");
   }
-
   //Printing the current values to the display
-  waterTempPrint = CurrentTempReadValue - float(offsetTemp);
-  hPwrPrint = powerOutput;
-
+  waterTempPrint = currentTempReadValue - float(offsetTemp);
   myNex.writeStr("page0.t0.txt", waterTempPrint);
-  myNex.writeStr("page0.t1.txt", hPwrPrint);
 }
 void setup() {
   
