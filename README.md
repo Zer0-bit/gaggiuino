@@ -1,7 +1,8 @@
 # gaggiuino
 
 ## WIP ##
-
+ >UPDATE: I have taken photos and started editing them preparing the whole step by step guide, soon ( i'm thinking next week ) it should be all ready and published here.
+ 
 ### Better documenting coming soon, just delayed a bit by some job/life things i need to sort out now ###
 
 Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.
