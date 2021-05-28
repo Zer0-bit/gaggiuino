@@ -19,7 +19,7 @@ Software needed:
 2. [Nextion Editor](https://nextion.tech/nextion-editor/)
     >*Only necessary if planning on editing the ".HMI" file to ammend the LCD functionality*
 3. [CH340 USB Driver](https://electropeak.com/learn/how-to-install-ch340-driver/)
-    >*USB driver so your system recognizes the Arduino clone board*
+    >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
 Hardware requirements:
 1. [Arduino Nano](https://bit.ly/3eXSfXZ) - Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
