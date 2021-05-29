@@ -23,6 +23,52 @@ float const MAX_TEMP = 120;
 const int MAX = 100;
 
 
+
+void setup() {
+  
+  myNex.begin(9600);  
+  // nexInit();
+  delay(100);
+  //Registering a higher baud for hopefully more responsive touch controls
+  Serial.print("baud=115200");
+  Serial.write(0xff);
+  Serial.write(0xff);
+  Serial.write(0xff);
+  Serial.end();
+  Serial.begin(115200);
+
+  // port setup
+  pinMode(relayPin, OUTPUT);  
+  // port init - starts with the relay decoupled just in case
+  digitalWrite(relayPin, LOW);
+
+  // Small delay so the LCD has a chance to fully initialize before passing the EEPROM values
+  delay(500);
+
+  // Applying the EEPROM saved values  
+  uint32_t tmp1 = readIntFromEEPROM(EEP_ADDR1);
+  uint32_t tmp2 = readIntFromEEPROM(EEP_ADDR2);
+  uint32_t tmp3 = readIntFromEEPROM(EEP_ADDR3);
+  uint32_t tmp4 = readIntFromEEPROM(EEP_ADDR4);
+  if ((tmp1 != 0) && (tmp2 != 0) && (tmp3 != 0) && (tmp4 != 0)) {
+    myNex.writeNum("page1.n0.val",tmp1);
+    myNex.writeNum("page1.n1.val",tmp2);
+    myNex.writeNum("page2.n0.val",tmp3);
+    myNex.writeNum("page2.n1.val",tmp4);
+  }
+}
+
+void loop() {
+  //Main loop where all the above logic is continuously run
+  myNex.NextionListen();
+  doCoffee();
+  updateLCD();
+  delay(400);
+}
+
+
+//  ALL used functions declared bellow
+
 // EEPROM WRITE
 void writeIntIntoEEPROM(int address, int number)
 { 
@@ -35,38 +81,6 @@ int readIntFromEEPROM(int address)
   return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
 }
 
-// Button minus
-void trigger1()
-{
-  uint32_t setPoint;
-  setPoint = myNex.readNumber("page1.n0.val");
-  setPoint--;
-  myNex.writeNum("page1.n0.val",setPoint);
-}
-// Button plus
-void trigger2()
-{
-  uint32_t setPoint;
-  setPoint = myNex.readNumber("page1.n0.val");
-  setPoint++;
-  myNex.writeNum("page1.n0.val",setPoint);
-}
-// Button minus
-void trigger3()
-{
-  uint32_t offsetTemp;
-  offsetTemp = myNex.readNumber("page1.n1.val");
-  offsetTemp--;
-  myNex.writeNum("page1.n1.val",offsetTemp);
-}
-// Button plus
-void trigger4()
-{
-  uint32_t offsetTemp;
-  offsetTemp = myNex.readNumber("page1.n1.val");
-  offsetTemp++;
-  myNex.writeNum("page1.n1.val",offsetTemp);
-}
 // Save the desired temp values to EEPROM
 void trigger5()
 {
@@ -161,45 +175,4 @@ void updateLCD() {
   //Printing the current values to the display
   waterTempPrint = currentTempReadValue - float(offsetTemp);
   myNex.writeStr("page0.t0.txt", waterTempPrint);
-}
-void setup() {
-  
-  myNex.begin(9600);  
-  // nexInit();
-  delay(100);
-  //Registering a higher baud for hopefully more responsive touch controls
-  Serial.print("baud=115200");
-  Serial.write(0xff);
-  Serial.write(0xff);
-  Serial.write(0xff);
-  Serial.end();
-  Serial.begin(115200);
-
-  // port setup
-  pinMode(relayPin, OUTPUT);  
-  // port init - starts with the relay decoupled just in case
-  digitalWrite(relayPin, LOW);
-
-  // Small delay so the LCD has a chance to fully initialize before passing the EEPROM values
-  delay(900);
-
-  // Applying the EEPROM saved values  
-  uint32_t tmp1 = readIntFromEEPROM(EEP_ADDR1);
-  uint32_t tmp2 = readIntFromEEPROM(EEP_ADDR2);
-  uint32_t tmp3 = readIntFromEEPROM(EEP_ADDR3);
-  uint32_t tmp4 = readIntFromEEPROM(EEP_ADDR4);
-  if ((tmp1 != 0) && (tmp2 != 0) && (tmp3 != 0) && (tmp4 != 0)) {
-    myNex.writeNum("page1.n0.val",tmp1);
-    myNex.writeNum("page1.n1.val",tmp2);
-    myNex.writeNum("page2.n0.val",tmp3);
-    myNex.writeNum("page2.n1.val",tmp4);
-  }
-}
-
-void loop() {
-  //Main loop where all the above logic is continuously run
-  myNex.NextionListen();
-  doCoffee();
-  updateLCD();
-  delay(300);
 }
