@@ -53,9 +53,9 @@ void setup() {
   } 
   else if(tmp1 == 777777){
     tmp1 = readIntFromEEPROM(EEP_ADDR1);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     myNex.writeNum("page1.n0.val",tmp1);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
   }
   tmp2 = readIntFromEEPROM(EEP_ADDR2);
   if(tmp2 != 777777){       // 777777is the return value if the code fails to read the new value
@@ -63,9 +63,9 @@ void setup() {
   } 
   else if(tmp2 == 777777){
     tmp2 = readIntFromEEPROM(EEP_ADDR2);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     myNex.writeNum("page1.n1.val",tmp2);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
   }
   tmp3 = readIntFromEEPROM(EEP_ADDR3);
   if(tmp3 != 777777){       // 777777is the return value if the code fails to read the new value
@@ -73,9 +73,9 @@ void setup() {
   } 
   else if(tmp3 == 777777){
     tmp3 = readIntFromEEPROM(EEP_ADDR3);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     myNex.writeNum("page2.n0.val",tmp3);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
   }
   tmp4 = readIntFromEEPROM(EEP_ADDR4);
   if(tmp4 != 777777){       // 777777is the return value if the code fails to read the new value
@@ -83,18 +83,19 @@ void setup() {
   } 
   else if(tmp4 == 777777){
     tmp4 = readIntFromEEPROM(EEP_ADDR4);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     myNex.writeNum("page2.n1.val",tmp4);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
   }
 }
 
+
+//Main loop where all the bellow logic is continuously run
 void loop() {
-  //Main loop where all the above logic is continuously run
   myNex.NextionListen();
   doCoffee();
   updateLCD();
-  delay(250);
+  delay(250);  //delay so max6675 has a chance to read the values
 }
 
 
@@ -128,9 +129,9 @@ void trigger1()
   } 
   else if(savedBoilerTemp == 777777){
     savedBoilerTemp = myNex.readNumber("page1.n0.val");
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     writeIntIntoEEPROM(EEP_ADDR1, savedBoilerTemp);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
     myNex.writeStr("page popupMSG");
   }
@@ -144,9 +145,9 @@ void trigger1()
   } 
   else if(savedOffsetTemp == 777777){
     savedOffsetTemp = myNex.readNumber("page1.n1.val");
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
     myNex.writeStr("page popupMSG");
   }
@@ -160,9 +161,9 @@ void trigger1()
   } 
   else if(savedBrewTimeDelay == 777777){
     savedBrewTimeDelay = myNex.readNumber("page2.n0.val");
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
     myNex.writeStr("page popupMSG");
   }
@@ -176,10 +177,11 @@ void trigger1()
   } 
   else if(savedbrewTimeDivider == 777777){
     savedbrewTimeDivider = myNex.readNumber("page2.n1.val");
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     writeIntIntoEEPROM(EEP_ADDR4, savedbrewTimeDivider);
-    delay(5); //Small delay to hopefully get full serial communication
+    delay(5); //Small delay to get full serial
     myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+    myNex.writeStr("popupMSG.t0.pco=BLACK");
     myNex.writeStr("page popupMSG");
   }
 }
@@ -269,7 +271,8 @@ void doCoffee() {
 
 void updateLCD() {
   // Declaring the local vars to keep the temperature and boiler_power values
-  String waterTempPrint, hPwrPrint;
+  String waterTempPrint;
+  int hPwrPrint = 0;
   float currentTempReadValue = 0;
   int setPoint = 0;
   int offsetTemp = 0;
@@ -317,32 +320,36 @@ void updateLCD() {
     brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
   }
   
-  if (currentTempReadValue < float(setPoint+5)) {
+  if (currentTempReadValue < setPoint+5) {
+    myNex.writeStr("vis page0.t1,0");
     // Calculating the boiler heating power to apply
     int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
     if (powerOutput > brewTimeDelayTemp) {
-      hPwrPrint = brewTimeDelayTemp;
-      myNex.writeStr("page0.t1.txt", hPwrPrint);
-      delay(10); //Small delay to hopefully get full serial communication
+      powerOutput = brewTimeDelayTemp;
+      myNex.writeNum("page0.n0.val", powerOutput);
+      delay(10); //Small delay to get full serial
     }
     else if (powerOutput < brewTimeDelayTemp/brewTimeDelayDivider) {
-      hPwrPrint = brewTimeDelayTemp/brewTimeDelayDivider;
-      myNex.writeStr("page0.t1.txt", hPwrPrint);
-      delay(10); //Small delay to hopefully get full serial communication
+      powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
+      myNex.writeNum("page0.n0.val", powerOutput);
+      delay(10); //Small delay to get full serial
     }
-    else {
-      hPwrPrint = powerOutput;
-      myNex.writeStr("page0.t1.txt", hPwrPrint);
-      delay(10); //Small delay to hopefully get full serial communication
+    else {;
+      myNex.writeNum("page0.n0.val", powerOutput);
+      delay(10); //Small delay to get full serial
     }
   }
   else {
-    waterTempPrint = currentTempReadValue - float(offsetTemp);
-    myNex.writeStr("page0.t1.txt", "STEAM");
-    delay(10); //Small delay to hopefully get full serial communication
+    for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){
+    myNex.writeStr("popupMSG.t0.txt", "STEAMING!");
+    myNex.writeStr("popupMSG.t0.pco=RED");
+    myNex.writeStr("page popupMSG");
+    }
+    for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){ 
+    }
   }
   //Printing the current values to the display
-  waterTempPrint = currentTempReadValue - float(offsetTemp);
+  waterTempPrint = String(currentTempReadValue-offsetTemp, 2);
   myNex.writeStr("page0.t0.txt", waterTempPrint);
-  delay(10); //Small delay to hopefully get full serial communication
+  delay(10); //Small delay to get full serial
 }
