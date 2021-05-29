@@ -15,10 +15,11 @@ EasyNex myNex(Serial);
 
 // EEPROM  stuff
 const int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
-// unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
-long asyncDelay = 0;
-float const MAX_TEMP = 165;
+float currentTempReadValue = 0;
+long timer = 0;
+const unsigned long interval = 250;
+const int MAX_TEMP = 165;
 const int STEAM_START = 100;
 
 
@@ -92,15 +93,169 @@ void setup() {
 
 //Main loop where all the bellow logic is continuously run
 void loop() {
+  // Reading the temperature just once ever 250ms between the loops while making sure we're getting a value
+  if (millis() - timer >= interval) {
+    timer += interval;
+    currentTempReadValue = thermocouple.readCelsius();
+    if (currentTempReadValue == NAN || currentTempReadValue < 0) currentTempReadValue = thermocouple.readCelsius();
+  }
   myNex.NextionListen();
   doCoffee();
   updateLCD();
-  delay(250);  //delay so max6675 has a chance to read the values
+  // delay(250);  //delay so max6675 has a chance to read the values
 }
 
 
 //  ALL used functions declared bellow
+// The *precise* temp control logic
+void doCoffee() {
+  int setPoint = 0;
+  int offsetTemp = 0;
+  int brewTimeDelayTemp = 0;
+  int brewTimeDelayDivider = 0;
 
+  // Making sure the serial communication finishes sending all the values
+  setPoint = myNex.readNumber("page1.n0.val");
+  if (setPoint != 777777) {
+    delay(1);
+  }
+  else if (setPoint == 777777) {
+    setPoint = myNex.readNumber("page1.n0.val");
+  }
+
+  offsetTemp = myNex.readNumber("page1.n1.val");
+  if (offsetTemp != 777777) {
+    delay(1);
+  }
+  else if (offsetTemp == 777777) {
+    offsetTemp = myNex.readNumber("page1.n1.val");
+  }
+
+  brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
+  if (brewTimeDelayTemp != 777777) {
+    delay(1);
+  }
+  else if (brewTimeDelayTemp == 777777) {
+    brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
+  }
+
+  brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
+  if (brewTimeDelayDivider != 777777) {
+    delay(1);
+  }
+  else if (brewTimeDelayDivider == 777777) {
+    brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
+  }
+  // Calculating the boiler heating power
+  int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
+  if (powerOutput > brewTimeDelayTemp){
+    powerOutput = brewTimeDelayTemp;
+  }
+  else if (powerOutput < brewTimeDelayTemp/brewTimeDelayDivider) {
+    powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
+  }
+
+  // Applying the powerOutput variable as part of the relay logic
+  if (currentTempReadValue < float(setPoint-10)) {
+    digitalWrite(relayPin, HIGH);
+  }
+  else if (currentTempReadValue >= float(setPoint-10) && currentTempReadValue < float(setPoint-3)) {
+    digitalWrite(relayPin, HIGH);
+    delay(powerOutput);
+    digitalWrite(relayPin, LOW);
+  }
+  else if (currentTempReadValue >= float(setPoint-3) && currentTempReadValue <= float(setPoint-1)) {
+    digitalWrite(relayPin, HIGH);
+    delay(powerOutput);
+    digitalWrite(relayPin, LOW);
+    delay(powerOutput);
+  }
+  else if (currentTempReadValue >= float(setPoint-1) && currentTempReadValue < float(setPoint-0.2)) {
+    digitalWrite(relayPin, HIGH);
+    delay(powerOutput);
+    digitalWrite(relayPin, LOW);
+    delay(powerOutput);
+  }
+  else {
+    digitalWrite(relayPin, LOW);
+  }
+}
+
+void updateLCD() {
+  // Declaring the local vars to keep the temperature and boiler_power values
+  String waterTempPrint;
+  int hPwrPrint = 0;
+  int setPoint = 0;
+  int offsetTemp = 0;
+  int brewTimeDelayTemp = 0;
+  int brewTimeDelayDivider = 0;
+
+  // Making sure the serial communication finishes sending all the values
+  setPoint = myNex.readNumber("page1.n0.val");
+  if (setPoint != 777777) {
+    delay(1);
+  }
+  else if (setPoint == 777777) {
+    setPoint = myNex.readNumber("page1.n0.val");
+  }
+
+  offsetTemp = myNex.readNumber("page1.n1.val");
+  if (offsetTemp != 777777) {
+    delay(1);
+  }
+  else if (offsetTemp == 777777) {
+    offsetTemp = myNex.readNumber("page1.n1.val");
+  }
+
+  brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
+  if (brewTimeDelayTemp != 777777) {
+    delay(1);
+  }
+  else if (brewTimeDelayTemp == 777777) {
+    brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
+  }
+
+  brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
+  if (brewTimeDelayDivider != 777777) {
+    delay(1);
+  }
+  else if (brewTimeDelayDivider == 777777) {
+    brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
+  }
+  
+  if (currentTempReadValue < STEAM_START) {
+    myNex.writeStr("vis page0.t1,0");
+    // Calculating the boiler heating power to apply
+    int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
+    if (powerOutput > brewTimeDelayTemp) {
+      powerOutput = brewTimeDelayTemp;
+      myNex.writeNum("page0.n0.val", powerOutput);
+      delay(10); //Small delay to get full serial
+    }
+    else if (powerOutput < brewTimeDelayTemp/brewTimeDelayDivider) {
+      powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
+      myNex.writeNum("page0.n0.val", powerOutput);
+      delay(10); //Small delay to get full serial
+    }
+    else {
+      myNex.writeNum("page0.n0.val", powerOutput);
+      delay(10); //Small delay to get full serial
+    }
+  }
+  else {
+    for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){
+    myNex.writeStr("popupMSG.t0.txt", "STEAMING!");
+    myNex.writeStr("popupMSG.t0.pco=RED");
+    myNex.writeStr("page popupMSG");
+    }
+    for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){ 
+    }
+  }
+  //Printing the current values to the display
+  waterTempPrint = String(currentTempReadValue-offsetTemp, 2);
+  myNex.writeStr("page0.t0.txt", waterTempPrint);
+  delay(10); //Small delay to get full serial
+}
 // EEPROM WRITE
 void writeIntIntoEEPROM(int address, int number)
 { 
@@ -184,172 +339,4 @@ void trigger1()
     myNex.writeStr("popupMSG.t0.pco=BLACK");
     myNex.writeStr("page popupMSG");
   }
-}
-
-// The *precise* temp control logic
-void doCoffee() {
-  float currentTempReadValue = 0;
-  int setPoint = 0;
-  int offsetTemp = 0;
-  int brewTimeDelayTemp = 0;
-  int brewTimeDelayDivider = 0;
-
-  // Making sure the serial communication finishes sending all the values
-  currentTempReadValue = thermocouple.readCelsius();
-  if (currentTempReadValue != NAN) {
-    delay(1);
-  }
-  else if (currentTempReadValue == NAN) {
-    currentTempReadValue = thermocouple.readCelsius();
-  }
-
-  setPoint = myNex.readNumber("page1.n0.val");
-  if (setPoint != 777777) {
-    delay(1);
-  }
-  else if (setPoint == 777777) {
-    setPoint = myNex.readNumber("page1.n0.val");
-  }
-
-  offsetTemp = myNex.readNumber("page1.n1.val");
-  if (offsetTemp != 777777) {
-    delay(1);
-  }
-  else if (offsetTemp == 777777) {
-    offsetTemp = myNex.readNumber("page1.n1.val");
-  }
-
-  brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
-  if (brewTimeDelayTemp != 777777) {
-    delay(1);
-  }
-  else if (brewTimeDelayTemp == 777777) {
-    brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
-  }
-
-  brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-  if (brewTimeDelayDivider != 777777) {
-    delay(1);
-  }
-  else if (brewTimeDelayDivider == 777777) {
-    brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-  }
-  // Calculating the boiler heating power
-  int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
-  if (powerOutput > brewTimeDelayTemp){
-    powerOutput = brewTimeDelayTemp;
-  }
-  else if (powerOutput < brewTimeDelayTemp/brewTimeDelayDivider) {
-    powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
-  }
-
-  // Applying the powerOutput variable as part of the relay logic
-  if (currentTempReadValue < float(setPoint-10)) {
-    digitalWrite(relayPin, HIGH);
-  }
-  else if (currentTempReadValue >= float(setPoint-10) && currentTempReadValue < float(setPoint-3)) {
-    digitalWrite(relayPin, HIGH);
-    delay(powerOutput);
-    digitalWrite(relayPin, LOW);
-  }
-  else if (currentTempReadValue >= float(setPoint-3) && currentTempReadValue <= float(setPoint-1)) {
-    digitalWrite(relayPin, HIGH);
-    delay(powerOutput);
-    digitalWrite(relayPin, LOW);
-    delay(powerOutput);
-  }
-  else if (currentTempReadValue >= float(setPoint-1) && currentTempReadValue < float(setPoint-0.2)) {
-    digitalWrite(relayPin, HIGH);
-    delay(powerOutput);
-    digitalWrite(relayPin, LOW);
-    delay(powerOutput);
-  }
-  else {
-    digitalWrite(relayPin, LOW);
-  }
-}
-
-void updateLCD() {
-  // Declaring the local vars to keep the temperature and boiler_power values
-  String waterTempPrint;
-  int hPwrPrint = 0;
-  float currentTempReadValue = 0;
-  int setPoint = 0;
-  int offsetTemp = 0;
-  int brewTimeDelayTemp = 0;
-  int brewTimeDelayDivider = 0;
-
-  // Making sure the serial communication finishes sending all the values
-  currentTempReadValue = thermocouple.readCelsius();
-  if (currentTempReadValue != NAN) {
-    delay(1);
-  }
-  else if (currentTempReadValue == NAN) {
-    currentTempReadValue = thermocouple.readCelsius();
-  }
-
-  setPoint = myNex.readNumber("page1.n0.val");
-  if (setPoint != 777777) {
-    delay(1);
-  }
-  else if (setPoint == 777777) {
-    setPoint = myNex.readNumber("page1.n0.val");
-  }
-
-  offsetTemp = myNex.readNumber("page1.n1.val");
-  if (offsetTemp != 777777) {
-    delay(1);
-  }
-  else if (offsetTemp == 777777) {
-    offsetTemp = myNex.readNumber("page1.n1.val");
-  }
-
-  brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
-  if (brewTimeDelayTemp != 777777) {
-    delay(1);
-  }
-  else if (brewTimeDelayTemp == 777777) {
-    brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
-  }
-
-  brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-  if (brewTimeDelayDivider != 777777) {
-    delay(1);
-  }
-  else if (brewTimeDelayDivider == 777777) {
-    brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-  }
-  
-  if (currentTempReadValue < setPoint+5) {
-    myNex.writeStr("vis page0.t1,0");
-    // Calculating the boiler heating power to apply
-    int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
-    if (powerOutput > brewTimeDelayTemp) {
-      powerOutput = brewTimeDelayTemp;
-      myNex.writeNum("page0.n0.val", powerOutput);
-      delay(10); //Small delay to get full serial
-    }
-    else if (powerOutput < brewTimeDelayTemp/brewTimeDelayDivider) {
-      powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
-      myNex.writeNum("page0.n0.val", powerOutput);
-      delay(10); //Small delay to get full serial
-    }
-    else {;
-      myNex.writeNum("page0.n0.val", powerOutput);
-      delay(10); //Small delay to get full serial
-    }
-  }
-  else {
-    for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){
-    myNex.writeStr("popupMSG.t0.txt", "STEAMING!");
-    myNex.writeStr("popupMSG.t0.pco=RED");
-    myNex.writeStr("page popupMSG");
-    }
-    for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){ 
-    }
-  }
-  //Printing the current values to the display
-  waterTempPrint = String(currentTempReadValue-offsetTemp, 2);
-  myNex.writeStr("page0.t0.txt", waterTempPrint);
-  delay(10); //Small delay to get full serial
 }
