@@ -14,18 +14,16 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 EasyNex myNex(Serial);
 
 // EEPROM  stuff
-int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
-unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
+const int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
+// unsigned long EEP_VALUE1, EEP_VALUE2, EEP_VALUE3, EEP_VALUE4;
 
-int i = 0;
-uint32_t setPoint, offsetTemp, brewTimeDelayTemp, brewTimeDelayDivider, realTempRead, waterTemp;
-float const MAX_TEMP = 120;
-const int MAX = 100;
+long asyncDelay = 0;
+float const MAX_TEMP = 165;
+const int STEAM_START = 100;
 
 
 
 void setup() {
-  
   myNex.begin(9600);  
   // nexInit();
   delay(100);
@@ -43,7 +41,7 @@ void setup() {
   digitalWrite(relayPin, LOW);
 
   // Small delay so the LCD has a chance to fully initialize before passing the EEPROM values
-  delay(500);
+  delay(1000);
 
   // Applying the EEPROM saved values  
   uint32_t tmp1 = readIntFromEEPROM(EEP_ADDR1);
@@ -63,7 +61,7 @@ void loop() {
   myNex.NextionListen();
   doCoffee();
   updateLCD();
-  delay(400);
+  delay(250);
 }
 
 
@@ -101,10 +99,10 @@ void trigger5()
 void doCoffee() {
   // Getting the operational readings
   float currentTempReadValue = thermocouple.readCelsius();
-  setPoint = myNex.readNumber("page1.n0.val");
-  offsetTemp = myNex.readNumber("page1.n1.val");
-  brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
-  brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
+  uint32_t setPoint = myNex.readNumber("page1.n0.val");
+  uint32_t offsetTemp = myNex.readNumber("page1.n1.val");
+  uint32_t brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
+  uint32_t brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
 
   // Calculating the boiler heating power
   int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
@@ -147,10 +145,10 @@ void updateLCD() {
 
   // Getting the latest readings from the needed endpoints
   float currentTempReadValue = thermocouple.readCelsius();
-  setPoint = myNex.readNumber("page1.n0.val");
-  offsetTemp = myNex.readNumber("page1.n1.val");
-  brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
-  brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
+  uint32_t setPoint = myNex.readNumber("page1.n0.val");
+  uint32_t offsetTemp = myNex.readNumber("page1.n1.val");
+  uint32_t brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
+  uint32_t brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
   
   if (currentTempReadValue < float(setPoint+5)) {
     // Calculating the boiler heating power to apply
@@ -175,4 +173,11 @@ void updateLCD() {
   //Printing the current values to the display
   waterTempPrint = currentTempReadValue - float(offsetTemp);
   myNex.writeStr("page0.t0.txt", waterTempPrint);
+}
+
+long asyncDelayFunc(int asyncDelayMax) {
+  if (millis() > asyncDelay+asyncDelayMax) {
+    asyncDelay = millis();
+  }
+  return asyncDelay;
 }
