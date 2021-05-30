@@ -3,6 +3,8 @@
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
 
+#define MAX_TEMP 165
+
 // Define our pins
 int thermoDO = 4;
 int thermoCS = 5;
@@ -15,12 +17,11 @@ EasyNex myNex(Serial);
 
 // EEPROM  stuff
 const int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
-
 float currentTempReadValue = 0;
 long timer = 0;
 const unsigned long interval = 250;
-const int MAX_TEMP = 165;
-const int STEAM_START = 100;
+const float STEAM_START = 105;
+
 
 
 
@@ -156,7 +157,7 @@ void doCoffee() {
   }
 
   // Applying the powerOutput variable as part of the relay logic
-  if (currentTempReadValue < float(setPoint-10)) {
+  if (currentTempReadValue < float(setPoint-10) && !(currentTempReadValue < 0) && currentTempReadValue != NAN) {
     digitalWrite(relayPin, HIGH);
   }
   else if (currentTempReadValue >= float(setPoint-10) && currentTempReadValue < float(setPoint-3)) {
@@ -223,33 +224,38 @@ void updateLCD() {
     brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
   }
   
+  // Calculating the boiler heating power to apply
+  int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
   if (currentTempReadValue < STEAM_START) {
-    myNex.writeStr("vis page0.t1,0");
-    // Calculating the boiler heating power to apply
-    int powerOutput = map(currentTempReadValue, setPoint-10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp/brewTimeDelayDivider);
     if (powerOutput > brewTimeDelayTemp) {
       powerOutput = brewTimeDelayTemp;
-      myNex.writeNum("page0.n0.val", powerOutput);
-      delay(10); //Small delay to get full serial
     }
     else if (powerOutput < brewTimeDelayTemp/brewTimeDelayDivider) {
       powerOutput = brewTimeDelayTemp/brewTimeDelayDivider;
-      myNex.writeNum("page0.n0.val", powerOutput);
-      delay(10); //Small delay to get full serial
     }
     else {
       myNex.writeNum("page0.n0.val", powerOutput);
       delay(10); //Small delay to get full serial
     }
+    
+    myNex.writeNum("page0.n0.val", powerOutput);
+    delay(10); //Small delay to get full serial
+  }
+  else if (currentTempReadValue > float(setPoint+10)) {
+    // for( uint32_t tStart = millis();  (millis()-tStart) < 100;  ){
+    if (millis() - timer >= interval) {
+      timer += interval;
+      myNex.writeStr("popupMSG.t0.txt", "STEAMING!");
+      myNex.writeStr("popupMSG.t0.pco=RED");
+      myNex.writeStr("page popupMSG");
+    }
+    // for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){ 
+    // }
   }
   else {
-    for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){
-    myNex.writeStr("popupMSG.t0.txt", "STEAMING!");
-    myNex.writeStr("popupMSG.t0.pco=RED");
-    myNex.writeStr("page popupMSG");
-    }
-    for( uint32_t tStart = millis();  (millis()-tStart) < 1000;  ){ 
-    }
+      powerOutput = NAN;
+      myNex.writeNum("page0.n0.val", powerOutput);
+      delay(10); //Small delay to get full serial
   }
   //Printing the current values to the display
   waterTempPrint = String(currentTempReadValue-offsetTemp, 2);
