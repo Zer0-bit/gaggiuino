@@ -42,8 +42,7 @@ void setup() {
   digitalWrite(relayPin, LOW);
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
-  while ( Serial.available() == 0) {
-  }
+  delay(800);
   // Applying the EEPROM saved values  
   uint32_t tmp1 = 0;
   uint32_t tmp2 = 0;
@@ -88,11 +87,11 @@ void setup() {
 
 //Main loop where all the bellow logic is continuously run
 void loop() {
-  // Reading the temperature just once ever 250ms between the loops while making sure we're getting a value
+  // Reading the temperature just once ever 250ms between the loops
   if (millis() - timer >= interval) {
     timer += interval;
     currentTempReadValue = thermocouple.readCelsius();
-    if (currentTempReadValue == NAN || currentTempReadValue < 0) currentTempReadValue = thermocouple.readCelsius();
+    if (currentTempReadValue == NAN || currentTempReadValue < 0) currentTempReadValue = thermocouple.readCelsius(); // Making sure we're getting a expected value
   }
   myNex.NextionListen();
   doCoffee();
@@ -194,10 +193,18 @@ void doCoffee() {
         myNex.writeStr("popupMSG.t0.txt", "STEAMING!");
         myNex.writeStr("popupMSG.t0.pco=RED");
         myNex.writeStr("page popupMSG");
+        powerOutput = NAN;
+        myNex.writeNum("page0.n0.val", powerOutput);
+        String waterTempPrint = String(currentTempReadValue-offsetTemp, 2);
+        myNex.writeStr("page0.t0.txt", waterTempPrint);
         blink = true;
       }
       else {
         blink = false;
+        powerOutput = NAN;
+        myNex.writeNum("page0.n0.val", powerOutput);
+        String waterTempPrint = String(currentTempReadValue-offsetTemp, 2);
+        myNex.writeStr("page0.t0.txt", waterTempPrint);
       }
     }
   }
