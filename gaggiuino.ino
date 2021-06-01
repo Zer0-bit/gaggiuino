@@ -21,8 +21,8 @@ const int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
 float currentTempReadValue = 0;
 unsigned long timer = 0;
 const unsigned long interval = 250;
-const float STEAM_START = 105;
-bool blink = false;
+const float STEAM_START = 115.00;
+
 
 
 
@@ -185,26 +185,31 @@ void doCoffee() {
     }   
     myNex.writeNum("page0.n0.val", powerOutput);
   }
-  else if (currentTempReadValue > float(setPoint+10) && !(currentTempReadValue < 0) && currentTempReadValue != NAN) {
+  else if (currentTempReadValue > STEAM_START && !(currentTempReadValue < 0) && currentTempReadValue != NAN) {
+    static bool blink = false;
+    static unsigned long timer_s1 = 0, timer_s2 = 0;
     unsigned long currentMillis = millis();
-    if (currentMillis - timer >= 1000UL) {
-      timer = currentMillis;
-      if (blink != true) {
+    if (blink != true) {
+      if (currentMillis - timer_s1 >= 1000UL) {
+        timer_s1 = currentMillis;
         myNex.writeStr("popupMSG.t0.txt", "STEAMING!");
         myNex.writeStr("popupMSG.t0.pco=RED");
         myNex.writeStr("page popupMSG");
-        powerOutput = NAN;
-        myNex.writeNum("page0.n0.val", powerOutput);
+        myNex.writeNum("page0.n0.val", NAN);
         String waterTempPrint = String(currentTempReadValue-offsetTemp, 2);
         myNex.writeStr("page0.t0.txt", waterTempPrint);
         blink = true;
+        timer_s2 = 0;
       }
-      else {
-        blink = false;
-        powerOutput = NAN;
-        myNex.writeNum("page0.n0.val", powerOutput);
+    }
+    else {
+      if (currentMillis - timer_s2 >= 1000UL) {
+        timer_s2 = currentMillis;
+        myNex.writeNum("page0.n0.val", NAN);
         String waterTempPrint = String(currentTempReadValue-offsetTemp, 2);
         myNex.writeStr("page0.t0.txt", waterTempPrint);
+        timer_s1 = 0;
+        blink = false;
       }
     }
   }
