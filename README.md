@@ -39,8 +39,6 @@ Optional:
 - [Nextion LCD case](https://bit.ly/3b2nxf7)
 - [Magnet sheet](https://bit.ly/3xKTMJn)
 
-![GaggiaPID1](https://github.com/Zer0-bit/gaggiuino/blob/main/images/PXL_20210526_071342331.jpg)
-
 First you need to understand what goes where, the schematics isn't really rocket science but for someone who's never disasembled or has no experience working with electrical circuits it might get very confusing real fast so i will try to describe it as simple as possible, sometimes adding some photos as well.
 First you need to check your setup works as expected outside the machine so you don't ahve it all installed and realise just afterwards it's not reading any temperature because of a faulty thermocouple or any other element, or your relay doesn't go between the ON/OFF modes.
 
@@ -85,7 +83,7 @@ First you need to check your setup works as expected outside the machine so you 
 <img src="https://db3pap006files.storage.live.com/y4mTxf55lGmZZXwW9c5ZtPSKiib-e1-GUz55rqAWBa6jWDovmKHDfve5ldN1OU4__vWXlqpDieD3WAFSyndaGA0KV76zeo49UjVOuWKTUTmeVBseXmgPze6pTjTBHTCQmzJ3gAs_Wxl8DmdQkU5rSZFLCZkuGiaQc4hZjnOBMoyoEATlMpWKGmCeiF98_3udqTh?width=3496&height=4656&cropmode=none" width="769" height="1024" />
 
 6. Prepare 2 cables you'll use to connect the cables disconnected form the thermostat to the port 1 adn 2 of the SSR relay, use the red cable for that they shouldn't be too long, about 10cm will suffice, one end should be crimpled wiht a male spade connector and the loose end screwed to the relay.
-<img src="https://db3pap006files.storage.live.com/y4m3ZmhHEobr2VPen1wScEO8AMLiaOVfWjsnW8Aw4645PaRXerrLpV8iZmZjzU88KDPmKEfPXbUBqYhn6ejVOfXIB7hgucmljyOLL54tqWKUahFoqnYEf2rBh0TRXjFEtzAvptdT3W8nSTzc96sfvD8hcK-pQEeEaYaLaq4gpNaKyXdWQtETpPtrzpMd1mLzuyb?width=2584&height=2140&cropmode=none" width="769" height="1024" /> 
+<img src="https://db3pap006files.storage.live.com/y4m3ZmhHEobr2VPen1wScEO8AMLiaOVfWjsnW8Aw4645PaRXerrLpV8iZmZjzU88KDPmKEfPXbUBqYhn6ejVOfXIB7hgucmljyOLL54tqWKUahFoqnYEf2rBh0TRXjFEtzAvptdT3W8nSTzc96sfvD8hcK-pQEeEaYaLaq4gpNaKyXdWQtETpPtrzpMd1mLzuyb?width=2584&height=2140&cropmode=none" width="769" height="769" /> 
 
 So you end up having the m connected like this:
-<img src="https://db3pap006files.storage.live.com/y4m5HfjPvkFSOtSm8gkTJJ4saqEw8dcB1no2eoaHcDZjYD9OV95tBnrG8tqtRuOcor7aFZrIRw7167k4QGMUneOPATitBFctkgdklxWOohMyBir3zLdm9fkAnTQW8TquTZouRh9rzKSC0t5bkerK1g8AzlFYTfuZoDPQ3juFiOJ19JKiL6VpODn40Z1q8JwVpGy?width=2625&height=2831&cropmode=none" width="769" height="1024" />
+<img src="https://db3pap006files.storage.live.com/y4m5HfjPvkFSOtSm8gkTJJ4saqEw8dcB1no2eoaHcDZjYD9OV95tBnrG8tqtRuOcor7aFZrIRw7167k4QGMUneOPATitBFctkgdklxWOohMyBir3zLdm9fkAnTQW8TquTZouRh9rzKSC0t5bkerK1g8AzlFYTfuZoDPQ3juFiOJ19JKiL6VpODn40Z1q8JwVpGy?width=2625&height=2831&cropmode=none" width="769" height="769" />
