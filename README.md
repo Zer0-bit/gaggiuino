@@ -58,4 +58,16 @@ First you need to check your setup works as expected outside the machine so you 
 8. You should see temp readings on your screen if everything went according to the plan.
 >*Don't forget to test the thermocouple/relay combo operation, apply some heat to the thermocouple end and see whether the relay led operates in HIGH/LOW modes*
 
+>Note: don't do any perament connections while testing, if you can i recommend buying a small breadboard which will allow to share ertain ports between the relay, thermocouple and the lcd display, like for ex the 5v and and the GND pins will be shared between all these devices.
+
+
 ### At this point if all the above works as expected you're ready to install it all inside the machine, for this we'll need to prepare some splitters that we'll use to connect to the Gaggia internals without introducing any permanent modifications so in the event of a desire to revert to stock it's a few disconnects away! ###
+
+>*Okay so first things first, tripple check your machine is disconnected from any power sources, even better just pull the power cable out of it !*
+
+###Now i won't be explaining every single detail as to how to disasemble the machine or how to use a pair of pliers, i'm expecting the people doing such sort of modifications will have some basic knowledge.###
+
+##So here goes:##
+1. Take off the top cover by unscrewing the 2 top screws, you should be able to see smth similar to the bellow image minus the SSR relay:
+<img src="https://db3pap006files.storage.live.com/y4m4pob4r1pDtjBPqIyA-dqHOH_eZDJaf6W2dYdHlIh8G8OWusXig9WUKOA-iBCk2QRN-lL3ajrWDDUBASx_frpWqz_2z1dxeAnksAKKysKqL-eXE9PVRYeA2SdmS_DSkAA3TJ5ZVe3ybpkLYV0-PDKLjEhxNZluA_UX8ektw8kGW4PXKQeQU-UUJtjuaDSYKsG?width=3496&height=4656&cropmode=none" width="3496" height="4656" />
+
