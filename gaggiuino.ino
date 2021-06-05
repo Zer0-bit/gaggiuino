@@ -9,8 +9,8 @@
 int thermoDO = 4;
 int thermoCS = 5;
 int thermoCLK = 6;
-int vibrPin = 7;
-int relayPin = 8;
+int vibrPin = 7; // PD7
+int relayPin = 8; // PB0
 
 
 //Init the thermocouple with the appropriate pins defined above with the prefix "thermo"
@@ -43,7 +43,12 @@ void setup() {
   // relay port init and set initial operating mode
   pinMode(vibrPin, INPUT);
   pinMode(relayPin, OUTPUT);
-  digitalWrite(relayPin, LOW);
+
+  // Chip side  HIGH/LOW  specification
+  // PORTB |= _BV(PB0);
+  //  PORTB &= ~_BV(PB0); slow
+  // PORTB |= _BV(PB0); //relayPin HIGH
+  PORTB &= ~_BV(PB0);// relayPin LOW
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   delay(1000);
@@ -109,7 +114,7 @@ void doCoffee() {
   int offsetTemp = 0;
   int brewTimeDelayTemp = 0;
   int brewTimeDelayDivider = 0;
-  char waterTempPrint[8];
+  char waterTempPrint[8];  
 
   // Making sure the serial communication finishes sending all the values
   setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
@@ -149,23 +154,23 @@ void doCoffee() {
 
   // Applying the powerOutput variable as part of the relay logic
   if (currentTempReadValue < float(setPoint - 10) && !(currentTempReadValue < 0) && currentTempReadValue != NAN) {
-    digitalWrite(relayPin, HIGH);
+    PORTB |= _BV(PB0); // relayPIN -> HIGH
   } else if (currentTempReadValue >= float(setPoint - 10) && currentTempReadValue < float(setPoint - 3)) {
-    digitalWrite(relayPin, HIGH);
+    PORTB |= _BV(PB0); // relayPIN -> HIGH
     delay(powerOutput);
-    digitalWrite(relayPin, LOW);
+     PORTB &= ~_BV(PB0); // relayPIN -> LOW
   } else if (currentTempReadValue >= float(setPoint - 3) && currentTempReadValue <= float(setPoint - 1)) {
-    digitalWrite(relayPin, HIGH);
+    PORTB |= _BV(PB0); // relayPIN -> HIGH
     delay(powerOutput);
-    digitalWrite(relayPin, LOW);
+     PORTB &= ~_BV(PB0); // relayPIN -> LOW
     delay(powerOutput);
   } else if (currentTempReadValue >= float(setPoint - 1) && currentTempReadValue < float(setPoint - 0.2)) {
-    digitalWrite(relayPin, HIGH);
+    PORTB |= _BV(PB0); // relayPIN -> HIGH
     delay(powerOutput);
-    digitalWrite(relayPin, LOW);
+     PORTB &= ~_BV(PB0); // relayPIN -> LOW
     delay(powerOutput);
   } else {
-    digitalWrite(relayPin, LOW);
+     PORTB &= ~_BV(PB0); // relayPIN -> LOW
   }
 
   // Updating the LCD
