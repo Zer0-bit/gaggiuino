@@ -33,12 +33,12 @@ const float STEAM_START = 115.00;
 void setup() {
   myNex.begin(9600);
   //Registering a higher baud rate for quicker serial communication
-  Serial.print("baud=57600");
+  Serial.print("baud=115200");
   Serial.write(0xff);
   Serial.write(0xff);
   Serial.write(0xff);
   Serial.end();
-  Serial.begin(57600);
+  Serial.begin(115200);
 
   // relay port init and set initial operating mode
   pinMode(vibrPin, INPUT);
@@ -46,7 +46,7 @@ void setup() {
   digitalWrite(relayPin, LOW);
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
-  delay(800);
+  delay(1000);
   // Applying the EEPROM saved values
   uint32_t tmp1 = 0;
   uint32_t tmp2 = 0;
@@ -55,33 +55,37 @@ void setup() {
 
   // Making sure we're getting the right values and sending them to the display
   tmp1 = readIntFromEEPROM(EEP_ADDR1);
-  if (tmp1 != 777777) {  // 777777 is the return value if the incoming value is malformed
+  if (tmp1 != 777777 && tmp1>0) {  // 777777 is the return value if the incoming value is malformed
     myNex.writeNum("page1.n0.val", tmp1);
-  } else if (tmp1 == 777777) {
-    tmp1 = readIntFromEEPROM(EEP_ADDR1);
-    myNex.writeNum("page1.n0.val", tmp1);
-  }
+  } 
+  // else {
+  //   tmp1 = readIntFromEEPROM(EEP_ADDR1);
+  //   myNex.writeNum("page1.n0.val", tmp1);
+  // }
   tmp2 = readIntFromEEPROM(EEP_ADDR2);
-  if (tmp2 != 777777) {  // 777777 is the return value if the incoming value is malformed
+  if (tmp2 != 777777 && tmp2>0) {  // 777777 is the return value if the incoming value is malformed
     myNex.writeNum("page1.n1.val", tmp2);
-  } else if (tmp2 == 777777) {
-    tmp2 = readIntFromEEPROM(EEP_ADDR2);
-    myNex.writeNum("page1.n1.val", tmp2);
-  }
+  } 
+  // else {
+  //   tmp2 = readIntFromEEPROM(EEP_ADDR2);
+  //   myNex.writeNum("page1.n1.val", tmp2);
+  // }
   tmp3 = readIntFromEEPROM(EEP_ADDR3);
-  if (tmp3 != 777777) {  // 777777 is the return value if the incoming value is malformed
+  if (tmp3 != 777777 && tmp3>0) {  // 777777 is the return value if the incoming value is malformed
     myNex.writeNum("page2.n0.val", tmp3);
-  } else if (tmp3 == 777777) {
-    tmp3 = readIntFromEEPROM(EEP_ADDR3);
-    myNex.writeNum("page2.n0.val", tmp3);
-  }
+  } 
+  // else {
+  //   tmp3 = readIntFromEEPROM(EEP_ADDR3);
+  //   myNex.writeNum("page2.n0.val", tmp3);
+  // }
   tmp4 = readIntFromEEPROM(EEP_ADDR4);
-  if (tmp4 != 777777) {  // 777777 is the return value if the incoming value is malformed
+  if (tmp4 != 777777 && tmp4>0) {  // 777777 is the return value if the incoming value is malformed
     myNex.writeNum("page2.n1.val", tmp4);
-  } else if (tmp4 == 777777) {
-    tmp4 = readIntFromEEPROM(EEP_ADDR4);
-    myNex.writeNum("page2.n1.val", tmp4);
-  }
+  } 
+  // else {
+  //   tmp4 = readIntFromEEPROM(EEP_ADDR4);
+  //   myNex.writeNum("page2.n1.val", tmp4);
+  // }
 }
 
 
@@ -105,33 +109,34 @@ void doCoffee() {
   int offsetTemp = 0;
   int brewTimeDelayTemp = 0;
   int brewTimeDelayDivider = 0;
+  char waterTempPrint[8];
 
   // Making sure the serial communication finishes sending all the values
   setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
-  if (setPoint != 777777) {
+  if (setPoint != 777777 && setPoint>0) {
     delay(0);
-  } else if (setPoint == 777777) {
+  } else if (setPoint == 777777 || setPoint<0) {
     setPoint = myNex.readNumber("page1.n0.val");
   }
 
   offsetTemp = myNex.readNumber("page1.n1.val");  // reading the offset value from the lcd
-  if (offsetTemp != 777777) {
+  if (offsetTemp != 777777 && offsetTemp>0) {
     delay(0);
-  } else if (offsetTemp == 777777) {
+  } else if (offsetTemp == 777777 || offsetTemp<0) {
     offsetTemp = myNex.readNumber("page1.n1.val");
   }
 
   brewTimeDelayTemp = myNex.readNumber("page2.n0.val");  // reading the brew time delay used to apply heating in waves
-  if (brewTimeDelayTemp != 777777) {
+  if (brewTimeDelayTemp != 777777 && brewTimeDelayTemp > 0) {
     delay(0);
-  } else if (brewTimeDelayTemp == 777777) {
+  } else if (brewTimeDelayTemp == 777777 || brewTimeDelayTemp < 0) {
     brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
   }
 
   brewTimeDelayDivider = myNex.readNumber("page2.n1.val");  // reading the delay divider
-  if (brewTimeDelayDivider != 777777) {
+  if (brewTimeDelayDivider != 777777 && brewTimeDelayDivider > 0) {
     delay(0);
-  } else if (brewTimeDelayDivider == 777777) {
+  } else if (brewTimeDelayDivider == 777777 || brewTimeDelayDivider < 0) {
     brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
   }
   // Calculating the boiler heating power
@@ -184,20 +189,20 @@ void doCoffee() {
       }
       myNex.writeStr("vis t1,1");
       myNex.writeNum("page0.n0.val", NAN);
-      String waterTempPrint = String(currentTempReadValue - offsetTemp, 2);
+      dtostrf(currentTempReadValue - offsetTemp, 6, 2, waterTempPrint);
       myNex.writeStr("page0.t0.txt", waterTempPrint);
     } else {
         timer_s2 = currentMillis;
         myNex.writeStr("vis t1,0");
         myNex.writeNum("page0.n0.val", NAN);
-        String waterTempPrint = String(currentTempReadValue - offsetTemp, 2);
+        dtostrf(currentTempReadValue - offsetTemp, 6, 2, waterTempPrint);
         myNex.writeStr("page0.t0.txt", waterTempPrint);
         if (currentMillis - timer_s1  >= 1000UL) blink = true;
     }
   } else {
     myNex.writeNum("page0.n0.val", NAN);
   }
-  String waterTempPrint = String(currentTempReadValue - offsetTemp, 2);
+  dtostrf(currentTempReadValue - offsetTemp, 6, 2, waterTempPrint);
   myNex.writeStr("page0.t0.txt", waterTempPrint); // Printing the current water temp values to the display
 }
 
@@ -220,56 +225,61 @@ void trigger1() {
 
   // Reading our values from the LCD and checking whether we got proper serial communication
   savedBoilerTemp = myNex.readNumber("page1.n0.val");
-  if (savedBoilerTemp != 777777) {  // 777777 is the return value if the incoming value is malformed
+  if (savedBoilerTemp != 777777 && savedBoilerTemp > 0) {  // 777777 is the return value if the incoming value is malformed
     writeIntIntoEEPROM(EEP_ADDR1, savedBoilerTemp);
     myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
     myNex.writeStr("page popupMSG");
-  } else if (savedBoilerTemp == 777777) {
-    savedBoilerTemp = myNex.readNumber("page1.n0.val");
-    writeIntIntoEEPROM(EEP_ADDR1, savedBoilerTemp);
-    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("page popupMSG");
-  }
+  } 
+  // else if (savedBoilerTemp == 777777 || savedBoilerTemp < 0) {
+  //   savedBoilerTemp = myNex.readNumber("page1.n0.val");
+  //   writeIntIntoEEPROM(EEP_ADDR1, savedBoilerTemp);
+  //   myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+  //   myNex.writeStr("page popupMSG");
+  // }
 
 
   savedOffsetTemp = myNex.readNumber("page1.n1.val");
-  if (savedOffsetTemp != 777777) {  // 777777 is the return value if the incoming value is malformed
+  if (savedOffsetTemp != 777777 && savedOffsetTemp > 0) {  // 777777 is the return value if the incoming value is malformed
     writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
     myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
     myNex.writeStr("page popupMSG");
-  } else if (savedOffsetTemp == 777777) {
-    savedOffsetTemp = myNex.readNumber("page1.n1.val");
-    writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
-    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("page popupMSG");
-  }
+  } 
+  // else if (savedOffsetTemp == 777777 || savedOffsetTemp < 0) {
+  //   savedOffsetTemp = myNex.readNumber("page1.n1.val");
+  //   writeIntIntoEEPROM(EEP_ADDR2, savedOffsetTemp);
+  //   myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+  //   myNex.writeStr("page popupMSG");
+  // }
 
 
   savedBrewTimeDelay = myNex.readNumber("page2.n0.val");
-  if (savedBrewTimeDelay != 777777) {  // 777777 is the return value if the incoming value is malformed
-    writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
-    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("page popupMSG");
-  } else if (savedBrewTimeDelay == 777777) {
-    savedBrewTimeDelay = myNex.readNumber("page2.n0.val");
+  if (savedBrewTimeDelay != 777777 && savedBrewTimeDelay > 0) {  // 777777 is the return value if the incoming value is malformed
     writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
     myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
     myNex.writeStr("page popupMSG");
   }
+  //  else if (savedBrewTimeDelay == 777777 || savedBrewTimeDelay < 0) {
+  //   savedBrewTimeDelay = myNex.readNumber("page2.n0.val");
+  //   writeIntIntoEEPROM(EEP_ADDR3, savedBrewTimeDelay);
+  //   myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+  //   myNex.writeStr("page popupMSG");
+  // }
 
 
   savedbrewTimeDivider = myNex.readNumber("page2.n1.val");
-  if (savedbrewTimeDivider != 777777) {  // 777777 is the return value if the incoming value is malformed
+  if (savedbrewTimeDivider != 777777 && savedbrewTimeDivider > 0) {  // 777777 is the return value if the incoming value is malformed
     writeIntIntoEEPROM(EEP_ADDR4, savedbrewTimeDivider);
     myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("page popupMSG");
-  } else if (savedbrewTimeDivider == 777777) {
-    savedbrewTimeDivider = myNex.readNumber("page2.n1.val");
-    writeIntIntoEEPROM(EEP_ADDR4, savedbrewTimeDivider);
-    myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
-    myNex.writeStr("popupMSG.t0.pco=BLACK");
     myNex.writeStr("page popupMSG");
   }
+  
+  //  else if (savedbrewTimeDivider == 777777 || savedbrewTimeDivider < 0) {
+  //   savedbrewTimeDivider = myNex.readNumber("page2.n1.val");
+  //   writeIntIntoEEPROM(EEP_ADDR4, savedbrewTimeDivider);
+  //   myNex.writeStr("popupMSG.t0.txt", "SUCCESS!");
+  //   myNex.writeStr("popupMSG.t0.pco=BLACK");
+  //   myNex.writeStr("page popupMSG");
+  // }
 }
 
 // Vibrtion sensor
