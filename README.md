@@ -73,6 +73,7 @@ First you need to check your setup works as expected outside the machine so you 
 
 2. Prepare 2 splitters like in the bellow image using the AWG15 cable, be sure one splitter to be black(negative) and one red(positive)
 <img src="https://db3pap006files.storage.live.com/y4mGdTrz4hXNuu3rvDk5qro2WGn5xqy8ZVGwhJSXFSDqmJErI8dYufS1H-l_PnIIa0HffKXPuPkvbRjNHt_2OogxaW8UohuFKatz3BfjjK8NEGmynX2unmeZ6opV3_gd-u0f3cCAlgh9nF5spGDt12McFxpxzsatrSK2YuRgrFTfFnxMvMmiXss0XSLrZGx5xIa?width=769&height=1024&cropmode=none" width="769" height="1024" />
+
 >Hope it goes without mentioning this every single time but please use heatshrink tubing/thermal insulation tape  for all your expsed connections
 
 3. Be sure to mark your top left power connector so you don't mix them up ( even though it's not that hard to understand which one is which)
