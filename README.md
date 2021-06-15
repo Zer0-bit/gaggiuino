@@ -1,7 +1,9 @@
 # gaggiuino
 
-## WIP but some documenting done see bellow ##
- >UPDATE: I have taken photos and started editing them preparing the whole step by step guide, soon ( i'm thinking next week ) it should be all ready and published here.
+## WIP - some documenting done see bellow ##
+
+## Currently working on adding a dimmer and a sensor for detecting different mahcine states, ex: start/stop brewing ##
+ >UPDATE: The code in it's current state is in full working order, the additional features i'm working on are mainly for additional behaviour like pre-infusion or descaling.
  
 ### Better documenting coming soon, just delayed a bit by some job/life things i need to sort out now ###
 
