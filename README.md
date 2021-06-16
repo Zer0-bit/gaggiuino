@@ -78,13 +78,14 @@ First you need to check your setup works as expected outside the machine so you 
 
 >Hope it goes without mentioning this every single time but please use heatshrink tubing/thermal insulation tape  for all your expsed connections
 
-3. Be sure to mark your top left power connector so you don't mix them up ( even though it's not that hard to understand which one is which)
+3. Be sure to mark your top left power connector so you don't mix them up - these are all for the power ON/OFF switch.
 <img src="https://db3pap006files.storage.live.com/y4mM3HVfjbCIdcPtx16eN0pEgGC4Z0ih04agqfBwI-NLtpUWvmlBFI23fT2LPVagGHXYsgRiIVq8oSjJckuZscCcdTKqq7GNxCK5GxRqsp2pCZinopGHCdqJtnZqMCFBlSq-yOT-vNtsATxE734AN05DO47i1as2NSW4E-87r78gV7kpP_sy9tHiBqey26s9xP0?width=769&height=1024&cropmode=none" width="769" height="1024" />
 
 4. Disconnect all 3 of them as you'll use the midlle and bottom ones for power sharing.
 <img src="https://db3pap006files.storage.live.com/y4m9fZvq6wrObA7QFSkvQpfFyOinQbfs-u_E8DLZqp784cPLcUIlZKoZeqbLWn3JPAElseiwa0G1KuN-yXJfOx_4N-3k-IU0YprmK-YHBYEG-33CaUXTEWVPNVwjy6y7kMyaDvbEzH445Su6hSKNqZqAPXmwJQlIH8lAQmXaTduAk3WIsUrZSw2J0lPhRRVEqzX?width=769&height=1024&cropmode=none" width="769" height="1024" />
 
 5. The hardest part will be now in my opinnion as you'll have to unscrew the bottom boiler stock thermostat and screw back in the new thermocoule, be sure to apply some thermal paste on the thermocouple threads ( just a teeny tiny bit ):
+>There are 2 mechanical thermostats, one on the top of the boiler and one on the side( opposite from where the steam knob is located ), make sure to carefully disconnect the angled connectors and carefully unscrew the thermostat itself, it's quite easy to break it and have it stuck inside or at least that's what i've heard .
 <img src="https://db3pap006files.storage.live.com/y4mTxf55lGmZZXwW9c5ZtPSKiib-e1-GUz55rqAWBa6jWDovmKHDfve5ldN1OU4__vWXlqpDieD3WAFSyndaGA0KV76zeo49UjVOuWKTUTmeVBseXmgPze6pTjTBHTCQmzJ3gAs_Wxl8DmdQkU5rSZFLCZkuGiaQc4hZjnOBMoyoEATlMpWKGmCeiF98_3udqTh?width=769&height=1024&cropmode=none" width="769" height="1024" />
 
 6. Prepare 2 cables you'll use to connect the cables disconnected form the thermostat to the port 1 adn 2 of the SSR relay, use the red( yes i know mine are blue but that's what i received so just used them) cable for that they shouldn't be too long, about 10cm will suffice, one end should be crimpled with a male spade connector and the loose end screwed to the relay and attach the relay to the machine case itself, ihave no clue what screw size i used as i have just matched one by trial and error lol, but be sure to apply some thermal paste to the SSR backplate that will make contact with the metal case of the machine.
