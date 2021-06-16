@@ -67,7 +67,7 @@ First you need to check your setup works as expected outside the machine so you 
 
 >*Okay so first things first, tripple check your machine is disconnected from any power sources, even better just pull the power cable out of it !*
 
-###Now i won't be explaining every single detail as to how to disasemble the machine or how to use a pair of pliers, i'm expecting the people doing such sort of modifications will have some basic knowledge.###
+### Now i won't be explaining every single detail as to how to disasemble the machine or how to use a pair of pliers, i'm expecting the people doing such sort of modifications will have some basic knowledge. ###
 
 ##So here goes:##
 1. Take off the top cover by unscrewing the 2 top screws, you should be able to see smth similar to the bellow image minus the SSR relay:
