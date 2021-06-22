@@ -47,13 +47,18 @@ int EEP_ADDR1 = 1, EEP_ADDR2 = 20, EEP_ADDR3 = 40, EEP_ADDR4 = 60;
 void setup() {
   myNex.begin(115200); //this has been set as an init baud parameter on the Nextion LCD
   Serial.begin(115200); // switching our board to the new serial speed
-  dimmer.begin(TOGGLE_MODE, OFF); //dimmer initialisation: name.begin(MODE, STATE)
 
-  dimmer.toggleSettings(0, 100); //Name.toggleSettings(MIN, MAX);
-  dimmer.setState(ON); // state: dimmer1.setState(ON/OFF);
+  // To debug correct work later
+  // dimmer.begin(TOGGLE_MODE, OFF); //dimmer initialisation: name.begin(MODE, STATE)
+  // dimmer.toggleSettings(0, 100); //Name.toggleSettings(MIN, MAX);
+  // dimmer.setState(ON); // state: dimmer1.setState(ON/OFF);
+
+  // start dimmer in normal mode
+  dimmer.begin(NORMAL_MODE, ON);
+  dimmer.setPower(96); //max output
 
   // relay port init and set initial operating mode
-  pinMode(vibrPin, INPUT_PULLUP);
+  // pinMode(vibrPin, INPUT_PULLUP);
   pinMode(relayPin, OUTPUT);
 
   // Chip side  HIGH/LOW  specification
