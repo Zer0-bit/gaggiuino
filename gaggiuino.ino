@@ -30,8 +30,9 @@ dimmerLamp dimmer(dimmerPin); //initialase port for dimmer for MEGA, Leonardo, U
 
 
 
-// Global var  - just defined globally to avoid reading the temp sensor in every function i'm using it for
+// Global var  - just defined globally to avoid reading the temp sensor in every function
 float currentTempReadValue = 0.00;
+bool descaleEnabled = 0;
 byte setPoint = 0;
 byte offsetTemp = 0;
 uint16_t brewTimeDelayTemp = 0;
@@ -81,23 +82,23 @@ void setup() {
     myNex.writeNum("page1.n0.val", tmp1);
   }
   tmp2 = readIntFromEEPROM(EEP_ADDR2);
-  if ( !(tmp2<0)  && tmp2 != NAN) {  // some checks to make sur ewe're getting an acceptable value
+  if ( !(tmp2<0)  && tmp2 != NAN) {  // some checks to make sure we're getting an acceptable value
     myNex.writeNum("page1.n1.val", tmp2);
   }
   tmp3 = readIntFromEEPROM(EEP_ADDR3);
-  if ( !(tmp3<0)  && tmp3 != NAN) {  // some checks to make sur ewe're getting an acceptable value
+  if ( !(tmp3<0)  && tmp3 != NAN) {  // some checks to make sure we're getting an acceptable value
     myNex.writeNum("page2.n0.val", tmp3);
   }
   tmp4 = readIntFromEEPROM(EEP_ADDR4);
   if ( !(tmp4<0)  && tmp4 != NAN) {  // some checks to make sur ewe're getting an acceptable value
     myNex.writeNum("page2.n1.val", tmp4);
   }
-  myNex.writeNum("page0.n1.val", getFreeSram());
 }
 
 
 //Main loop where all the bellow logic is continuously run
 void loop() {
+  static bool powerBackOnDescaleFinish = false;
   myNex.NextionListen();
   // Reading the temperature every 250ms between the loops
   if ((millis() - timer) > 350UL){
@@ -106,6 +107,15 @@ void loop() {
     timer += 350UL;
   }
   doCoffee();
+  if (descaleEnabled == true) {
+    deScale(descaleEnabled);
+    powerBackOnDescaleFinish = true;
+  }else {
+    if (powerBackOnDescaleFinish == true) {
+      dimmer.setPower(96);
+      powerBackOnDescaleFinish = false;
+    }
+  }
 }
 
 
@@ -142,7 +152,11 @@ void doCoffee() {
     } else {
       brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
     }
-    lcdValuesUpdated == true; // setting this to TRUE so the condition is skipped on subsequent iterations
+
+    // reding the descale value which should be 0 or 1
+    descaleEnabled = myNex.readNumber("page2.c1.val");
+    // setting this to TRUE so the condition is skipped on subsequent iterations
+    lcdValuesUpdated == true; 
   } else if ( myNex.currentPageId == 0 && lcdValuesUpdated == false) {
     // Making sure the serial communication finishes sending all the values
     setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
@@ -172,6 +186,8 @@ void doCoffee() {
     } else {
       brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
     }
+    // reding the descale value which should be 0 or 1
+    descaleEnabled = myNex.readNumber("page2.c1.val");
     lcdValuesUpdated = true; // setting this to TRUE so the condition is skipped on subsequent iterations
   }
   // Getting the boiler heating power range
@@ -303,6 +319,10 @@ void trigger1() {
   lcdValuesUpdated = false;
 }
 
+void trigger2() {
+  lcdValuesUpdated = false;
+}
+
 
 // Vibrtion sensor
 // bool vibrSense() {
@@ -329,10 +349,6 @@ void pressureProfile() {
   //do smth in the future
 }
 
-void descale() {
-  //do smth
-}
-
 bool preinfusionState(byte c) {
   static bool pageRead = false;
   if (myNex.currentPageId == 0 && pageRead == false) {
@@ -341,6 +357,31 @@ bool preinfusionState(byte c) {
   }
 }
 
+void deScale(bool c) {
+  static bool blink = true;
+  static unsigned long timer_s1 = millis(), timer_s2 = millis();
+  unsigned long currentMillis = millis();
+  if (c == true) {
+    if (blink == true) {
+      if (currentMillis >= timer_s1 + 1000UL) {
+        timer_s1 += 1000UL;
+        blink = false;
+      }
+      dimmer.setPower(96);
+    } else {
+      dimmer.
+      dimmer.setPower(0);
+      if (currentMillis >= timer_s2 + 3000UL) {
+        timer_s2 += 1000UL;
+        blink = true;
+      }
+    }
+  }else {
+    if (myNex.currentPageId == 0) {
+      dimmer.setPower(96);
+    }
+  }
+}
 uint16_t getFreeSram() {
   uint8_t newVariable;
   // heap is empty, use bss as start memory address
