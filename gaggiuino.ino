@@ -9,7 +9,7 @@
 #define thermoDO 4
 #define thermoCS 5
 #define thermoCLK 6
-#define vibrPin 7 // PD7
+#define currentSense A7
 #define relayPin 8  // PB0
 #define dimmerPin 9
 
@@ -24,7 +24,7 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // EasyNextion object init
 EasyNex myNex(Serial);
 
-// RobotDYN Dimmer object init
+// Dimmer object init
 dimmerLamp dimmer(dimmerPin); //initialase port for dimmer for MEGA, Leonardo, UNO, Arduino M0, Arduino Zero
 
 
@@ -32,13 +32,12 @@ dimmerLamp dimmer(dimmerPin); //initialase port for dimmer for MEGA, Leonardo, U
 
 // Global var  - just defined globally to avoid reading the temp sensor in every function
 float currentTempReadValue = 0.00;
-bool descaleEnabled = 0;
+bool descaleEnabled = 0, preinfusionEnabled = 0, preinfusionEnabledLastState = 0;
 byte setPoint = 0;
 byte offsetTemp = 0;
 uint16_t brewTimeDelayTemp = 0;
 byte brewTimeDelayDivider = 0;
 char waterTempPrint[6];
-unsigned long timer = millis(), timer_lcd = millis();
 bool lcdValuesUpdated = false;
 
 // EEPROM  stuff - alo global cause used in multiple functions
@@ -56,10 +55,10 @@ void setup() {
 
   // start dimmer in normal mode
   dimmer.begin(NORMAL_MODE, ON);
-  dimmer.setPower(96); //max output
+  // dimmerLamp(dimmerPin);
+  dimmer.setPower(97); //max output
 
   // relay port init and set initial operating mode
-  // pinMode(vibrPin, INPUT_PULLUP);
   pinMode(relayPin, OUTPUT);
 
   // Chip side  HIGH/LOW  specification
@@ -98,6 +97,7 @@ void setup() {
 
 //Main loop where all the bellow logic is continuously run
 void loop() {
+  static unsigned long timer = millis(), timer1 = millis();
   static bool powerBackOnDescaleFinish = false;
   myNex.NextionListen();
   // Reading the temperature every 250ms between the loops
@@ -107,12 +107,23 @@ void loop() {
     timer += 350UL;
   }
   doCoffee();
+  //Preinfusion function
+  if (brewStartSense(analogRead(A7)) == true) {
+    preInfusion();
+  }
+  // else {
+  //   if ((millis() - timer1) > 60000UL){
+  //     timer1 += 60000UL;
+  //     preinfusionEnabledLastState = true;
+  //   }
+  // }
+  // Descale function
   if (descaleEnabled == true) {
     deScale(descaleEnabled);
     powerBackOnDescaleFinish = true;
   }else {
     if (powerBackOnDescaleFinish == true) {
-      dimmer.setPower(96);
+      dimmer.setState(ON);
       powerBackOnDescaleFinish = false;
     }
   }
@@ -122,6 +133,7 @@ void loop() {
 //  ALL used functions declared bellow
 // The *precise* temp control logic
 void doCoffee() {
+  static unsigned long timer = millis(), timer_lcd = millis();
   // Getting the latest LCD side set temp settings 
   if (myNex.currentPageId != 0 && lcdValuesUpdated == false) {
     // Making sure the serial communication finishes sending all the values
@@ -153,8 +165,11 @@ void doCoffee() {
       brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
     }
 
-    // reding the descale value which should be 0 or 1
+    // reding the descale state radio button
     descaleEnabled = myNex.readNumber("page2.c1.val");
+    // reading the preinfusion state radio button
+    preinfusionEnabled = myNex.readNumber("page2.c0.val");
+    preinfusionEnabledLastState = preinfusionEnabled;
     // setting this to TRUE so the condition is skipped on subsequent iterations
     lcdValuesUpdated == true; 
   } else if ( myNex.currentPageId == 0 && lcdValuesUpdated == false) {
@@ -188,7 +203,11 @@ void doCoffee() {
     }
     // reding the descale value which should be 0 or 1
     descaleEnabled = myNex.readNumber("page2.c1.val");
-    lcdValuesUpdated = true; // setting this to TRUE so the condition is skipped on subsequent iterations
+    // reading the preinfusion state radio button
+    preinfusionEnabled = myNex.readNumber("page2.c0.val");
+    preinfusionEnabledLastState = preinfusionEnabled;
+    // setting this to TRUE so the condition is skipped on subsequent iterations
+    lcdValuesUpdated = true; 
   }
   // Getting the boiler heating power range
   uint16_t powerOutput = map(currentTempReadValue, setPoint - 10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp / brewTimeDelayDivider);
@@ -271,8 +290,8 @@ void doCoffee() {
 
 // EEPROM WRITE
 void writeIntIntoEEPROM(int address, int number) {
-  EEPROM.write(address + 1, number & 0xFF);
-  EEPROM.write(address, number >> 8);
+  EEPROM.update(address + 1, number & 0xFF);
+  EEPROM.update(address, number >> 8);
 }
 //EEPROM READ
 int readIntFromEEPROM(int address) {
@@ -321,40 +340,61 @@ void trigger1() {
 
 void trigger2() {
   lcdValuesUpdated = false;
+  myNex.writeStr("popupMSG.t0.txt", F("SUCCESS!"));
+  myNex.writeStr("page popupMSG");
 }
 
 
 // Vibrtion sensor
-// bool vibrSense() {
-//   bool vibration_detect = false;
-//   unsigned long vibration = pulseIn(vibrPin, HIGH);
-//   if (vibration > 2000) vibration_detect = true;
-//   return vibration_detect;
-// }
+bool brewStartSense(int i) {
+  if (i > 10000) {
+    return true;
+  }else {
+    return false;
+  } 
+}
 
 // Pump dimming during for preinfusion
-void preinfusion() {
+void preInfusion() {
+  static bool preinfusionStage1 = true, preinfusionStage2 = false;
   //dealing with preinfusion here, might take more time to get it right
- if (vibrPin != 0 && preinfusionState(myNex.readNumber("page2.c0.val")) == true) {
-   for (unsigned long i=millis();i > millis()+5000UL;) {
-     dimmer.setPower(50);
-     doCoffee();
-   }
-   dimmer.setPower(100);
-  //  preinfusionState(false);
- }
+  static bool blink = true;
+  static unsigned long timer_s1 = millis(), timer_s2 = millis(), stage1_timer = millis(), stage2_timer = millis();
+  unsigned long currentMillis = millis(), stageMillis = millis();
+  if (preinfusionStage1 == true) { //Stage 1 - preinfusion stage
+    // Switching on the pump in particular pattern using the dimmer
+    if (blink == true) {
+      if (currentMillis >= timer_s1 + 500UL) {
+        timer_s1 += 500UL;
+        blink = false;
+      }
+      dimmer.setState(ON);
+    } else {
+      if (currentMillis >= timer_s2 + 500UL) {
+        timer_s2 += 500UL;
+        blink = true;
+      }
+      dimmer.setState(OFF);
+    }
+  // Switch to second phase after preinfusionTime has passed
+    if (stageMillis >= stage1_timer + 6000UL) {
+      stage1_timer += 6000UL;
+      preinfusionStage2 = true;
+      preinfusionStage1 = false;
+    }
+  } else if (preinfusionStage2 == true) { // Stage 2 - soaking phase
+    if (stageMillis >= stage2_timer + 5000UL) {
+      stage2_timer += 5000UL;
+      preinfusionStage2 = false;
+      preinfusionEnabledLastState = false;
+      dimmer.setState(ON);
+    }
+    dimmer.setState(OFF);
+  }
 }
 
 void pressureProfile() {
   //do smth in the future
-}
-
-bool preinfusionState(byte c) {
-  static bool pageRead = false;
-  if (myNex.currentPageId == 0 && pageRead == false) {
-    if (c == 0) return false;
-    if (c == 1) return true;
-  }
 }
 
 void deScale(bool c) {
@@ -367,18 +407,17 @@ void deScale(bool c) {
         timer_s1 += 1000UL;
         blink = false;
       }
-      dimmer.setPower(96);
+      dimmer.setState(ON);
     } else {
-      dimmer.
-      dimmer.setPower(0);
       if (currentMillis >= timer_s2 + 3000UL) {
-        timer_s2 += 1000UL;
+        timer_s2 += 3000UL;
         blink = true;
       }
+      dimmer.setState(OFF);
     }
   }else {
     if (myNex.currentPageId == 0) {
-      dimmer.setPower(96);
+      dimmer.setState(ON);
     }
   }
 }
