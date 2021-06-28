@@ -1,7 +1,6 @@
 # gaggiuino
 
-## WIP ##
- >UPDATE: I have taken photos and started editing them preparing the whole step by step guide, soon ( i'm thinking next week ) it should be all ready and published here.
+## This branch is used for all the experimental stuff, i did add a dimmer to the equation so i can control the pump generated pressure, implemented a basic descaling function and working on the preinfusion as well as saving custom profiles ##
  
 ### Better documenting coming soon, just delayed a bit by some job/life things i need to sort out now ###
 
