@@ -18,7 +18,8 @@ I will assume you have  the necessary components and installed the related softw
 Software needed:
 1. [Arduino IDE](https://www.arduino.cc/en/software)
     >*Needed to upload the code ".ino" to the arduino ROM*
-    >*Included libraries and[how to add them](https://www.arduino.cc/en/Guide/Libraries?setlang=en):*
+    >
+    >*Included libraries and [how to add them](https://www.arduino.cc/en/Guide/Libraries?setlang=en):*
     >- EasyNextionLibrary
     >- Max6675
 2. [Nextion Editor](https://nextion.tech/nextion-editor/)
