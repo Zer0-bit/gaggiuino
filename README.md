@@ -45,7 +45,7 @@ Optional:
 - [Nextion LCD case](https://bit.ly/3b2nxf7)
 - [Magnet sheet](https://bit.ly/3xKTMJn)
 
-Aditionally here is a link to the files for a [3D printed case](https://www.thingiverse.com/thing:3347514), not my design just found it on thingiverse so all credits go to the original creator.
+Aditionally here is a link to the files for a [3D printed case](https://www.thingiverse.com/thing:3611737), not my design just found it on thingiverse so all credits go to the original creator.
 
 First you need to understand what goes where, the schematics isn't really rocket science but for someone who's never disasembled or has no experience working with electrical circuits it might get very confusing real fast so i will try to describe it as simple as possible, sometimes adding some photos as well.
 First you need to check your setup works as expected outside the machine so you don't ahve it all installed and realise just afterwards it's not reading any temperature because of a faulty thermocouple or any other element, or your relay doesn't go between the ON/OFF modes.
