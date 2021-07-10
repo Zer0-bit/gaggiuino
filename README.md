@@ -18,14 +18,17 @@ I will assume you have  the necessary components and installed the related softw
 Software needed:
 1. [Arduino IDE](https://www.arduino.cc/en/software)
     >*Needed to upload the code ".ino" to the arduino ROM*
+    >*Included libraries and[how to add them](https://www.arduino.cc/en/Guide/Libraries?setlang=en):*
+    >- EasyNextionLibrary
+    >- Max6675
 2. [Nextion Editor](https://nextion.tech/nextion-editor/)
-    >*Only necessary if planning on editing the ".HMI" file to ammend the LCD functionality*
+    >*Necessary to load the ".HMI" file and export it to a FAT32 fromatted microSD card*
 3. [CH340 USB Driver](https://electropeak.com/learn/how-to-install-ch340-driver/)
-    >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
+    >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller compared to "genuino"*
 
 Hardware requirements:
 1. [Arduino Nano](https://bit.ly/3eXSfXZ) - Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
-2. [Nextion touch screen (i used a 2.4 inch one)](https://bit.ly/33dO8RV)
+2. [Nextion touch screen](https://bit.ly/33dO8RV)
 3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)
 4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
 5. [40DA SSR Relay](https://bit.ly/33g1Pjr)
@@ -47,12 +50,12 @@ First you need to understand what goes where, the schematics isn't really rocket
 First you need to check your setup works as expected outside the machine so you don't ahve it all installed and realise just afterwards it's not reading any temperature because of a faulty thermocouple or any other element, or your relay doesn't go between the ON/OFF modes.
 
 
-1. The first step will be connecting the max6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file ( pins 4,5,6 )
+1. The first step will be connecting the max6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file ( pins 4,5,6 ) as well as VCC on the board goes to 5V pin and GND to obviously the GND pin on arduino.
 2. Connect the relay, for now only connect the circuit controlling ports to check whether the relay LED indicates the power states.
 >*Relay 3 to Arduino GND, Relay 4 to Arduino D8, the ports 1 and 2 on the relay are the high voltage circuit breaker*
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
 >*Note: uploading won't work with the LCD connected*
-5. Upload the .HMI file on a microSD card
+5. Open the .HMI file in the Nextion editor and export it on a microSD card by  going to "File" in the main menu and select "TFT file output", there should be a .tft file generted on the card after this step is done.
 >*Note: card needs to be FAT32 formatted*
 6. Insert the card in the LCD card reader slot and connect the LCD to the arduino board.
 >*Nextion TX goes to Arduino RX, and RX to TX, VCC goes to Arduino 5V and GND to GND*
