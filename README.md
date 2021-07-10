@@ -30,7 +30,7 @@ Software needed:
 Hardware requirements:
 1. [Arduino Nano](https://bit.ly/3eXSfXZ) - Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
 2. [Nextion touch screen](https://bit.ly/33dO8RV)
-3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)
+3. [MAX6675 thermocouple](https://bit.ly/3ejTUIj)
 4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
 5. [40DA SSR Relay](https://bit.ly/33g1Pjr)
 6. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI)
