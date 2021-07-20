@@ -1,8 +1,7 @@
 # gaggiuino
 
-## This branch is used for all the experimental stuff, i did add a dimmer to the equation so i can control the pump generated pressure, implemented a basic descaling function and working on the preinfusion as well as saving custom profiles ##
+### This branch is used for all the experimental stuff, i did add a dimmer to the equation so i can control the pump generated pressure, implemented a basic descaling function and working on the preinfusion as well as saving custom profiles ###
  
-### Better documenting coming soon, just delayed a bit by some job/life things i need to sort out now ###
 
 Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.
 
