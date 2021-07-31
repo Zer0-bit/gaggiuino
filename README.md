@@ -25,9 +25,10 @@ Hardware requirements:
 3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)
 4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
 5. [40DA SSR Relay](https://bit.ly/33g1Pjr)
-6. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI)
-7. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-8. 5v power supply - for powering the arduino board once it's inside the machine.
+6. [RobotDYN dimmer module - Embedded 16A-600V ](https://bit.ly/3xhTwQy)
+7. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI)
+8. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
+9. 5v power supply - for powering the arduino board once it's inside the machine.
 >*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board.*
 
 Optional:
