@@ -5,13 +5,20 @@
 #include <max6675.h>
 
 
+
 // Define our pins
 #define thermoDO 4
 #define thermoCS 5
 #define thermoCLK 6
-#define currentSense A7
+#define brewSwitchPin 7 // PD7
 #define relayPin 8  // PB0
 #define dimmerPin 9
+
+// Define some const values
+#define dimmerMinValue 0
+#define dimmerMaxValue 97
+#define dimmerDescaleMinValue 20
+#define dimmerDescaleMaxValue 50
 
 //RAM debug
 extern unsigned int __bss_end;
@@ -24,7 +31,7 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // EasyNextion object init
 EasyNex myNex(Serial);
 
-// Dimmer object init
+// RobotDYN Dimmer object init
 dimmerLamp dimmer(dimmerPin); //initialase port for dimmer for MEGA, Leonardo, UNO, Arduino M0, Arduino Zero
 
 
@@ -32,12 +39,13 @@ dimmerLamp dimmer(dimmerPin); //initialase port for dimmer for MEGA, Leonardo, U
 
 // Global var  - just defined globally to avoid reading the temp sensor in every function
 float currentTempReadValue = 0.00;
-bool descaleEnabled = 0, preinfusionEnabled = 0, preinfusionEnabledLastState = 0;
+bool descaleEnabled = 0, powerBackOnDescaleFinish = 0, preinfusionCheckBox = 0;
 byte setPoint = 0;
 byte offsetTemp = 0;
 uint16_t brewTimeDelayTemp = 0;
 byte brewTimeDelayDivider = 0;
 char waterTempPrint[6];
+unsigned long timer = millis(), timer_lcd = millis();
 bool lcdValuesUpdated = false;
 
 // EEPROM  stuff - alo global cause used in multiple functions
@@ -48,17 +56,17 @@ void setup() {
   myNex.begin(115200); //this has been set as an init baud parameter on the Nextion LCD
   Serial.begin(115200); // switching our board to the new serial speed
 
-  // To debug correct work later
-  // dimmer.begin(TOGGLE_MODE, OFF); //dimmer initialisation: name.begin(MODE, STATE)
-  // dimmer.toggleSettings(0, 100); //Name.toggleSettings(MIN, MAX);
-  // dimmer.setState(ON); // state: dimmer1.setState(ON/OFF);
+  // To debug correct work of the bellow feature later
+  dimmer.begin(TOGGLE_MODE, OFF); //dimmer initialisation: name.begin(MODE, STATE)
+  dimmer.toggleSettings(dimmerMinValue, dimmerMaxValue); //Name.toggleSettings(MIN, MAX);
+  dimmer.setState(ON); // state: dimmer1.setState(ON/OFF);
 
   // start dimmer in normal mode
-  dimmer.begin(NORMAL_MODE, ON);
-  // dimmerLamp(dimmerPin);
-  dimmer.setPower(97); //max output
+  // dimmer.begin(NORMAL_MODE, ON);
+  // dimmer.setPower(dimmerMaxValue); //max output
 
   // relay port init and set initial operating mode
+  // pinMode(vibrPin, INPUT_PULLUP);
   pinMode(relayPin, OUTPUT);
 
   // Chip side  HIGH/LOW  specification
@@ -77,53 +85,35 @@ void setup() {
 
   // Making sure we're getting the right values and sending them to the display
   tmp1 = readIntFromEEPROM(EEP_ADDR1);
-  if ( !(tmp1<0)  && tmp1 != NAN) {  // some checks to make sur ewe're getting an acceptable value
-    myNex.writeNum("page1.n0.val", tmp1);
-  }
+  if ( !(tmp1<0)  && tmp1 != NAN) myNex.writeNum("page1.n0.val", tmp1);
+
   tmp2 = readIntFromEEPROM(EEP_ADDR2);
-  if ( !(tmp2<0)  && tmp2 != NAN) {  // some checks to make sure we're getting an acceptable value
-    myNex.writeNum("page1.n1.val", tmp2);
-  }
+  if ( !(tmp2<0)  && tmp2 != NAN) myNex.writeNum("page1.n1.val", tmp2);
+
   tmp3 = readIntFromEEPROM(EEP_ADDR3);
-  if ( !(tmp3<0)  && tmp3 != NAN) {  // some checks to make sure we're getting an acceptable value
-    myNex.writeNum("page2.n0.val", tmp3);
-  }
+  if ( !(tmp3<0)  && tmp3 != NAN) myNex.writeNum("page2.n0.val", tmp3);
+
   tmp4 = readIntFromEEPROM(EEP_ADDR4);
-  if ( !(tmp4<0)  && tmp4 != NAN) {  // some checks to make sur ewe're getting an acceptable value
-    myNex.writeNum("page2.n1.val", tmp4);
-  }
+  if ( !(tmp4<0)  && tmp4 != NAN) myNex.writeNum("page2.n1.val", tmp4);
 }
 
 
 //Main loop where all the bellow logic is continuously run
 void loop() {
-  static unsigned long timer = millis(), timer1 = millis();
-  static bool powerBackOnDescaleFinish = false;
   myNex.NextionListen();
-  // Reading the temperature every 250ms between the loops
+  // Reading the temperature every 350ms between the loops
   if ((millis() - timer) > 350UL){
     currentTempReadValue = thermocouple.readCelsius();
-    if (currentTempReadValue == NAN || currentTempReadValue < 0) currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a desired value
+    if (currentTempReadValue == NAN || currentTempReadValue < 0) currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
     timer += 350UL;
   }
   doCoffee();
-  //Preinfusion function
-  if (brewStartSense(analogRead(A7)) == true) {
-    preInfusion();
-  }
-  // else {
-  //   if ((millis() - timer1) > 60000UL){
-  //     timer1 += 60000UL;
-  //     preinfusionEnabledLastState = true;
-  //   }
-  // }
   // Descale function
   if (descaleEnabled == true) {
     deScale(descaleEnabled);
-    powerBackOnDescaleFinish = true;
   }else {
     if (powerBackOnDescaleFinish == true) {
-      dimmer.setState(ON);
+      dimmer.setPower(dimmerMaxValue);
       powerBackOnDescaleFinish = false;
     }
   }
@@ -133,82 +123,38 @@ void loop() {
 //  ALL used functions declared bellow
 // The *precise* temp control logic
 void doCoffee() {
-  static unsigned long timer = millis(), timer_lcd = millis();
   // Getting the latest LCD side set temp settings 
-  if (myNex.currentPageId != 0 && lcdValuesUpdated == false) {
+  if ( lcdValuesUpdated == false ) {
     // Making sure the serial communication finishes sending all the values
     setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
-    if (!(setPoint<0) && setPoint != NAN && setPoint > 85) {
-      delay(0);
-    } else {
-      setPoint = myNex.readNumber("page1.n0.val");
-    }
+    if (!(setPoint<0) && setPoint != NAN && setPoint > 85);
+    else setPoint = myNex.readNumber("page1.n0.val");
 
     offsetTemp = myNex.readNumber("page1.n1.val");  // reading the offset value from the lcd
-    if ( !(offsetTemp<0) && offsetTemp != NAN ) {
-      delay(0);
-    } else {
-      offsetTemp = myNex.readNumber("page1.n1.val");
-    }
+    if ( !(offsetTemp<0) && offsetTemp != NAN );
+    else offsetTemp = myNex.readNumber("page1.n1.val");
 
     brewTimeDelayTemp = myNex.readNumber("page2.n0.val");  // reading the brew time delay used to apply heating in waves
-    if ( !(brewTimeDelayTemp<0) && brewTimeDelayTemp != NAN ) {
-      delay(0);
-    } else {
-      brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
-    }
+    if ( !(brewTimeDelayTemp<0) && brewTimeDelayTemp != NAN );
+    else brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
 
     brewTimeDelayDivider = myNex.readNumber("page2.n1.val");  // reading the delay divider
-    if ( !(brewTimeDelayDivider<0) && brewTimeDelayDivider != NAN ) {
-      delay(0);
-    } else {
-      brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-    }
+    if ( !(brewTimeDelayDivider<0) && brewTimeDelayDivider != NAN );
+    else brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
 
-    // reding the descale state radio button
-    descaleEnabled = myNex.readNumber("page2.c1.val");
-    // reading the preinfusion state radio button
-    preinfusionEnabled = myNex.readNumber("page2.c0.val");
-    preinfusionEnabledLastState = preinfusionEnabled;
-    // setting this to TRUE so the condition is skipped on subsequent iterations
-    lcdValuesUpdated == true; 
-  } else if ( myNex.currentPageId == 0 && lcdValuesUpdated == false) {
-    // Making sure the serial communication finishes sending all the values
-    setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
-    if (!(setPoint<0) && setPoint != NAN && setPoint > 85) {
-      delay(0);
-    } else {
-      setPoint = myNex.readNumber("page1.n0.val");
-    }
-
-    offsetTemp = myNex.readNumber("page1.n1.val");  // reading the offset value from the lcd
-    if ( !(offsetTemp<0) && offsetTemp != NAN ) {
-      delay(0);
-    } else {
-      offsetTemp = myNex.readNumber("page1.n1.val");
-    }
-
-    brewTimeDelayTemp = myNex.readNumber("page2.n0.val");  // reading the brew time delay used to apply heating in waves
-    if ( !(brewTimeDelayTemp<0) && brewTimeDelayTemp != NAN ) {
-      delay(0);
-    } else {
-      brewTimeDelayTemp = myNex.readNumber("page2.n0.val");
-    }
-
-    brewTimeDelayDivider = myNex.readNumber("page2.n1.val");  // reading the delay divider
-    if ( !(brewTimeDelayDivider<0) && brewTimeDelayDivider != NAN ) {
-      delay(0);
-    } else {
-      brewTimeDelayDivider = myNex.readNumber("page2.n1.val");
-    }
     // reding the descale value which should be 0 or 1
     descaleEnabled = myNex.readNumber("page2.c1.val");
-    // reading the preinfusion state radio button
-    preinfusionEnabled = myNex.readNumber("page2.c0.val");
-    preinfusionEnabledLastState = preinfusionEnabled;
-    // setting this to TRUE so the condition is skipped on subsequent iterations
-    lcdValuesUpdated = true; 
+    if (descaleEnabled < 0 || descaleEnabled > 1 || descaleEnabled == NAN) descaleEnabled = myNex.readNumber("page2.c1.val");
+
+    // reding the preinfusion value which should be 0 or 1
+    preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+    if (preinfusionCheckBox < 0 || preinfusionCheckBox > 1 || preinfusionCheckBox == NAN) preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+
+    // some boolean logic controling values setting
+    powerBackOnDescaleFinish = true; // setting this to true so we make sure the pump has power after we turn off the descale mode
+    lcdValuesUpdated == true; // setting this to TRUE so the condition is skipped on subsequent iterations
   }
+
   // Getting the boiler heating power range
   uint16_t powerOutput = map(currentTempReadValue, setPoint - 10, setPoint, brewTimeDelayTemp, brewTimeDelayTemp / brewTimeDelayDivider);
   float tmp1;
@@ -241,8 +187,13 @@ void doCoffee() {
 
   // Updating the LCD every 500ms
   if (myNex.currentPageId == 0) {
+    //Declaring some local variables we'll use to control various features displayed on the LCD 
+    static bool blink = true, steam_reset = false;
+    static unsigned long timer_s1 = millis(), timer_s2 = millis();
+    unsigned long currentMillis = millis();
     if ((millis() - timer_lcd) > 500UL){
       if (currentTempReadValue < 115.00 ) {
+        if (steam_reset == true) myNex.writeStr("vis t1,0"); //Resetting the "STEAMING!" message
         if (powerOutput > brewTimeDelayTemp) {
           powerOutput = brewTimeDelayTemp;
         } else if (powerOutput < brewTimeDelayTemp / brewTimeDelayDivider) {
@@ -252,13 +203,11 @@ void doCoffee() {
         }
         myNex.writeNum("page0.n0.val", powerOutput);
       } else if (currentTempReadValue > 115.00 && !(currentTempReadValue < 0) && currentTempReadValue != NAN ) {
-        static bool blink = true;
-        static unsigned long timer_s1 = millis(), timer_s2 = millis();
-        unsigned long currentMillis = millis();
         if (blink == true) {
           if (currentMillis >= timer_s1 + 1000UL) {
             timer_s1 += 1000UL;
             blink = false;
+            steam_reset = true;
           }
           myNex.writeStr("vis t1,1");
           myNex.writeNum("page0.n0.val", NAN);
@@ -290,8 +239,8 @@ void doCoffee() {
 
 // EEPROM WRITE
 void writeIntIntoEEPROM(int address, int number) {
-  EEPROM.update(address + 1, number & 0xFF);
-  EEPROM.update(address, number >> 8);
+  EEPROM.write(address + 1, number & 0xFF);
+  EEPROM.write(address, number >> 8);
 }
 //EEPROM READ
 int readIntFromEEPROM(int address) {
@@ -340,86 +289,81 @@ void trigger1() {
 
 void trigger2() {
   lcdValuesUpdated = false;
-  myNex.writeStr("popupMSG.t0.txt", F("SUCCESS!"));
-  myNex.writeStr("page popupMSG");
 }
 
-
-// Vibrtion sensor
-bool brewStartSense(int i) {
-  if (i > 10000) {
-    return true;
-  }else {
-    return false;
-  } 
-}
+// void pressureProfile(bool c, int a) {
+//   static bool phase_1 = 1, phase_2 = 0, phase_3 = 0;
+//   static unsigned long timer = millis();
+//   unsigned long currentMillis = millis();
+//   uint16_t tmpDimmerVal;
+//   if (c == true) {
+//     if (phase_1 == true) {
+//       if (currentMillis >= timer + 15000UL) {
+//         phase_1 = 0;
+//         phase_2 = 1;
+//       }
+//       dimmer.setPower(dimmerMaxValue);
+//     } else if (phase_2 == true) {
+//       if (currentMillis >= timer + 1000UL) {
+//         timer_s2 += 1000UL;
+//         tmpDimmerVal = (uint16_t)dimmerMaxValue - a;
+//       }
+//       dimmer.setPower(tmpDimmerVal);
+//     }
+//   }
+// }
 
 // Pump dimming during for preinfusion
-void preInfusion() {
-  static bool preinfusionStage1 = true, preinfusionStage2 = false;
-  //dealing with preinfusion here, might take more time to get it right
-  static bool blink = true;
-  static unsigned long timer_s1 = millis(), timer_s2 = millis(), stage1_timer = millis(), stage2_timer = millis();
-  unsigned long currentMillis = millis(), stageMillis = millis();
-  if (preinfusionStage1 == true) { //Stage 1 - preinfusion stage
-    // Switching on the pump in particular pattern using the dimmer
-    if (blink == true) {
-      if (currentMillis >= timer_s1 + 500UL) {
-        timer_s1 += 500UL;
-        blink = false;
-      }
-      dimmer.setState(ON);
-    } else {
-      if (currentMillis >= timer_s2 + 500UL) {
-        timer_s2 += 500UL;
-        blink = true;
-      }
-      dimmer.setState(OFF);
-    }
-  // Switch to second phase after preinfusionTime has passed
-    if (stageMillis >= stage1_timer + 6000UL) {
-      stage1_timer += 6000UL;
-      preinfusionStage2 = true;
-      preinfusionStage1 = false;
-    }
-  } else if (preinfusionStage2 == true) { // Stage 2 - soaking phase
-    if (stageMillis >= stage2_timer + 5000UL) {
-      stage2_timer += 5000UL;
-      preinfusionStage2 = false;
-      preinfusionEnabledLastState = false;
-      dimmer.setState(ON);
-    }
-    dimmer.setState(OFF);
-  }
-}
+// void preinfusion() {
+//   //dealing with preinfusion here, might take more time to get it right
+//  if (brewSwitchPin == HIGH && preinfusionState(preinfusionCheckBox) == true) {
+//    for (unsigned long i=millis();i > millis()+5000UL;) {
+//      dimmer.setPower(dimmerMaxValue/2);
+//    }
+//    dimmer.setPower(dimmerMaxValue);
+//   //  preinfusionState(false);
+//  }
+// }
 
-void pressureProfile() {
-  //do smth in the future
-}
+// bool preinfusionState(byte c) {
+//   static bool pageRead = false;
+//   if (myNex.currentPageId == 0 && pageRead == false) {
+//     if (c == 0) return false;
+//     if (c == 1) return true;
+//   }
+// }
 
 void deScale(bool c) {
-  static bool blink = true;
-  static unsigned long timer_s1 = millis(), timer_s2 = millis();
+  static bool blink = true, value_set = false;
+  static unsigned long timer = millis();
   unsigned long currentMillis = millis();
   if (c == true) {
     if (blink == true) {
-      if (currentMillis >= timer_s1 + 1000UL) {
-        timer_s1 += 1000UL;
+      if (value_set == false) { // making sure we're not constantly setting the dimmer value over serial
+        dimmer.setPower(dimmerDescaleMaxValue);
+        value_set = true;
+      }
+      if (currentMillis >= timer + 5000UL) {
+        timer += 5000UL;
         blink = false;
+        value_set = false;
       }
-      dimmer.setState(ON);
     } else {
-      if (currentMillis >= timer_s2 + 3000UL) {
-        timer_s2 += 3000UL;
-        blink = true;
+      if (value_set == false) { // making sure we're not constantly setting the dimmer value over serial
+        dimmer.setPower(dimmerDescaleMinValue);
+        value_set = true;
       }
-      dimmer.setState(OFF);
-    }
-  }else {
-    if (myNex.currentPageId == 0) {
-      dimmer.setState(ON);
+      if (currentMillis >= timer + 10000UL) {
+        timer += 10000UL;
+        blink = true;
+        value_set = false;
+      }
     }
   }
+  // else {
+  //   dimmer.setPower(dimmerMaxValue);
+  //   powerBackOnDescaleFinish = true;
+  // }
 }
 uint16_t getFreeSram() {
   uint8_t newVariable;
