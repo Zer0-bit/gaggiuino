@@ -11,6 +11,16 @@ I will assume you have  the necessary components and installed the related softw
 Software needed:
 1. [Arduino IDE](https://www.arduino.cc/en/software)
     >*Needed to upload the code ".ino" to the arduino ROM*
+   **Libraries to add:**
+   Library manager:
+   - Easy Nextion Library
+   - MAX6675 by Adafruit
+
+   External libraries:
+   - [ACS712](https://github.com/rkoptev/ACS712-arduino)
+   - [RBDDimmer](https://github.com/RobotDynOfficial/RBDDimmer)
+
+
 2. [Nextion Editor](https://nextion.tech/nextion-editor/)
     >*Only necessary if planning on editing the ".HMI" file to ammend the LCD functionality*
 3. [CH340 USB Driver](https://electropeak.com/learn/how-to-install-ch340-driver/)
