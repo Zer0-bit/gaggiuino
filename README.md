@@ -15,13 +15,13 @@ Software needed:
 
    **Libraries to add:**
    
-       Library manager:
-           - Easy Nextion Library
-           - MAX6675 by Adafruit
+      Library manager:
+          - Easy Nextion Library
+          - MAX6675 by Adafruit
 
-       External libraries:
-           - [ACS712](https://github.com/rkoptev/ACS712-arduino)
-           - [RBDDimmer](https://github.com/RobotDynOfficial/RBDDimmer)
+      External libraries:
+          - [ACS712](https://github.com/rkoptev/ACS712-arduino)
+          - [RBDDimmer](https://github.com/RobotDynOfficial/RBDDimmer)
 
 
 2. [Nextion Editor](https://nextion.tech/nextion-editor/)
