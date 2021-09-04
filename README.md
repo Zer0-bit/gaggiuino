@@ -16,8 +16,8 @@ Software needed:
    **Libraries to add:**
    
          Library manager:
-            - Easy Nextion Library
-            - MAX6675 by Adafruit
+          - Easy Nextion Library
+          - MAX6675 by Adafruit
 
          External libraries:
           - ACS712 > https://github.com/rkoptev/ACS712-arduino
@@ -44,10 +44,14 @@ Software needed:
 
 **Optional:**
 - [Heat shrink](https://bit.ly/2PQdnqt)
-- [U-shaped Parallel Terminal](https://bit.ly/3h8phaF)  - These are in case you're coosing not to solder
+- [U-shaped Parallel Terminal](https://bit.ly/3h8phaF)  - These are in case you're choosing not to solder
 - [Soldering iron](https://bit.ly/3tijlOI) - the one i bought for my soldering needs,  seems to do a great job
 - [Nextion LCD case](https://bit.ly/3b2nxf7)
 - [Magnet sheet](https://bit.ly/3xKTMJn)
+
+## The housing for all of the above hardware has been designed and provided kindly by LikeableBump and can be found on thingiverse by following the link bellow ##
+[Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
+
 
 First we need to understand what goes where, the schematics aren't really rocket science but for someone who's never disasembled or has no experience working with electrical circuits it might get confusing real fast so i will try to describe it as simple as possible yet limited by my vocabulary.
 First let's check the setup works as expected while outside the machine so you don't have it all installed and realise just afterwards it's not reading any temperature because of a faulty component or the relay doesn't switch between the ON/OFF modes.
