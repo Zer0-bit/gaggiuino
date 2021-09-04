@@ -65,6 +65,7 @@ MAX6675 CS -> Arduino CS*<
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
 >*Note: uploading won't work with the LCD connected*
 5. Method 1 > Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
+
 Method2 > Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
 >*Note: card needs to be FAT32 formatted*
 6. Insert the card in the LCD card reader slot and connect the LCD to the arduino board.
