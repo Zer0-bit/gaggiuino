@@ -1,8 +1,5 @@
 # gaggiuino
 
-### This branch is used for all the experimental stuff, i did add a dimmer to the equation so i can control the pump generated pressure, implemented a basic descaling function and working on the preinfusion as well as saving custom profiles ###
- 
-
 Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.
 
 >*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it, only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the bellow guide i cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
@@ -25,10 +22,11 @@ Hardware requirements:
 3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)
 4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
 5. [40DA SSR Relay](https://bit.ly/33g1Pjr)
-6. [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
-7. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI)
-8. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-9. 5v power supply - for powering the arduino board once it's inside the machine.
+6. *NEW Functionality* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
+7. *NEW Functionality* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv)
+8. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI)
+9. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
+10. 5v power supply - for powering the arduino board once it's inside the machine.
 >*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board.*
 
 Optional:
@@ -43,10 +41,10 @@ First you need to check your setup works as expected while outside the machine s
 
 
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file ( pins 4,5,6 )
->*MAX6675 VCC -> Arduino 5v
-MAX6675 GND -> Arduino GND
-MAX6675 SCK -> Arduino CLK
-MAX6675 SO -> Arduino DO 
+>*MAX6675 VCC -> Arduino 5v |
+MAX6675 GND -> Arduino GND |
+MAX6675 SCK -> Arduino CLK |
+MAX6675 SO -> Arduino DO |
 MAX6675 CS -> Arduino CS*<
 
 2. Connect the relay, for now only connect the circuit controlling ports to check whether the relay LED indicates the power states.
