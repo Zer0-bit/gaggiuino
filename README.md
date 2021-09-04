@@ -69,7 +69,7 @@ First you need to check your setup works as expected while outside the machine s
         --------|-----------
           3     |   GND
           4     |   D8
- **Relay ports [1] and [2] are the high voltage circuit breaker
+ **Relay ports [1] and [2] are the high voltage circuit breaker**
 
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
 >*Note: uploading won't work with the LCD connected*
