@@ -15,13 +15,13 @@ Software needed:
 
    **Libraries to add:**
    
-   Library manager:
-   - Easy Nextion Library
-   - MAX6675 by Adafruit
+         Library manager:
+            - Easy Nextion Library
+            - MAX6675 by Adafruit
 
-   External libraries:
-   - [ACS712](https://github.com/rkoptev/ACS712-arduino)
-   - [RBDDimmer](https://github.com/RobotDynOfficial/RBDDimmer)
+         External libraries:
+          - ACS712 > https://github.com/rkoptev/ACS712-arduino
+          - RBDDimmer > https://github.com/RobotDynOfficial/RBDDimmer
 
 
 2. [Nextion Editor](https://nextion.tech/nextion-editor/)
@@ -54,17 +54,27 @@ First you need to check your setup works as expected while outside the machine s
 
 
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file ( pins 4,5,6 )
->*MAX6675 VCC -> Arduino 5v |
-MAX6675 GND -> Arduino GND |
-MAX6675 SCK -> Arduino CLK |
-MAX6675 SO -> Arduino DO |
-MAX6675 CS -> Arduino CS*<
+
+        MAX6675  |  Arduino
+        ---------|-----------
+         VCC     |   5v
+         GND     |   GND
+         SCK     |   CLK
+         SO      |   DO
+         CS      |   CS
 
 2. Connect the relay, for now only connect the circuit controlling ports to check whether the relay LED indicates the power states.
->*Relay 3 to Arduino GND, Relay 4 to Arduino D8, the ports 1 and 2 on the relay are the high voltage circuit breaker*
+
+        Relay   |  Arduino
+        --------|-----------
+          3     |   GND
+          4     |   D8
+      **Relay ports [1] and [2] are the high voltage circuit breaker**
+
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
 >*Note: uploading won't work with the LCD connected*
 5. Method 1 > Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
+
 Method2 > Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
 >*Note: card needs to be FAT32 formatted*
 6. Insert the card in the LCD card reader slot and connect the LCD to the arduino board.
