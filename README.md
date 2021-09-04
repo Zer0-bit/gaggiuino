@@ -14,6 +14,7 @@ Software needed:
 
 
    **Libraries to add:**
+   
    Library manager:
    - Easy Nextion Library
    - MAX6675 by Adafruit
