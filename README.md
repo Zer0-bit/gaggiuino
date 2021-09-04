@@ -11,6 +11,8 @@ I will assume you have  the necessary components and installed the related softw
 Software needed:
 1. [Arduino IDE](https://www.arduino.cc/en/software)
     >*Needed to upload the code ".ino" to the arduino ROM*
+
+
    **Libraries to add:**
    Library manager:
    - Easy Nextion Library
