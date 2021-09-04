@@ -1,12 +1,12 @@
-# gaggiuino
-
+# GAGGIUINO #
+<!-- <img src = "/images/PXL_20210525_144343463.jpg" width = 500 height =700> -->
 Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.
 
 >*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it, only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the bellow guide i cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
 
 I will assume you have  the necessary components and installed the related software, for the sake of not getting stuck at some point just double check again the list bellow.
 
-**PROJECT REQUIREMENTS**
+# **PROJECT REQUIREMENTS** #
 
 Software needed:
 1. [Arduino IDE](https://www.arduino.cc/en/software)
@@ -49,14 +49,18 @@ Software needed:
 - [Nextion LCD case](https://bit.ly/3b2nxf7)
 - [Magnet sheet](https://bit.ly/3xKTMJn)
 
-## The housing for all of the above hardware has been designed and provided kindly by LikeableBump and can be found on thingiverse by following the link bellow ##
-[Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
+
+ **The housing for all of the above hardware has been designed and provided kindly by LikeableBump and can be found on thingiverse by following the link bellow:**
+ 
+   [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
 
 
+# Assembling #
 First we need to understand what goes where, the schematics aren't really rocket science but for someone who's never disasembled or has no experience working with electrical circuits it might get confusing real fast so i will try to describe it as simple as possible yet limited by my vocabulary.
 First let's check the setup works as expected while outside the machine so you don't have it all installed and realise just afterwards it's not reading any temperature because of a faulty component or the relay doesn't switch between the ON/OFF modes.
 
->**Note - no perament connections are needed during testing so no soldering needed for now.**
+>**Note 1 - no perament connections are needed during testing so no soldering needed for now.**
+>
 >**Note 2 - the 5v/GND Arduino board pins will be shared between all the connected devices.**
 
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file.
