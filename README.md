@@ -6,6 +6,18 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 
 I will assume you have  the necessary components and installed the related software, for the sake of not getting stuck at some point just double check again the list bellow.
 
+#### Features / Completeness 
+- [x] Temp control
+- [x] Realtime temp values update
+- [x] Saving set values
+- [x] Descale program
+- [x] Steaming alert
+- [x] Brew start sense
+- [ ] Pre-infusion **COMING SOON**
+- [ ] Auto pressure profiling **COMING SOON**
+- [ ] Manual pressure control **COMING SOON**
+
+
 # **PROJECT REQUIREMENTS** #
 
 Software needed:
