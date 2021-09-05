@@ -138,10 +138,12 @@ First let's check the setup works as expected while outside the machine so you d
       
 2. Adding the dimmer
 
-    Relay   |  Arduino
+    Dimmer   |  Arduino
     --------|-----------
-      3     |   GND
-      4     |   D8
+      VCC   |   5v
+      GND   |   GND
+      Z-C   |   D2
+      PSM   |   D9
       
    **Dimmer high voltage circuit control ports will act as a passthrough for the pump positive circuit wire**
 
