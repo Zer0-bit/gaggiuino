@@ -112,12 +112,15 @@ First let's check the setup works as expected while outside the machine so you d
       GND    |   GND
       
 6. Uploading the LCD ROM code
-**Method 1**
-    >Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
 
-**Method2**
-    >Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
-    >*Note: card needs to be FAT32 formatted*
+**Method 1** 
+
+    Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
+
+**Method2** 
+
+    Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
+ >*Note: card needs to be FAT32 formatted*
 
 7. After upload finished get the card out and power cycle the LCD.
 8. You should see temp readings on your screen if everything went according to the plan.
