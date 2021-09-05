@@ -81,32 +81,34 @@ First let's check the setup works as expected while outside the machine so you d
 **BASE FUNCTIONALITY**
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file.
 
-        MAX6675  |  Arduino
-        ---------|-----------
-         VCC     |   5v
-         GND     |   GND
-         SCK     |   CLK
-         SO      |   DO
-         CS      |   CS
+    MAX6675  |  Arduino
+    ---------|-----------
+     VCC     |   5v
+     GND     |   GND
+     SCK     |   CLK
+     SO      |   DO
+     CS      |   CS
 
 2. Connect the relay, for now only connect the circuit controlling ports to check whether the relay LED indicates the power states.
 
-        Relay   |  Arduino
-        --------|-----------
-          3     |   GND
-          4     |   D8
-      **Relay ports [1] and [2] are the high voltage circuit breaker**
+    Relay   |  Arduino
+    --------|-----------
+      3     |   GND
+      4     |   D8
+      
+   **Relay ports [1] and [2] are the high voltage circuit breaker**
 
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
 >*Note: uploading won't work with the LCD connected*
 5. Nextion LCD wiring
 
-        Nextion  |  Arduino
-        ---------|-----------
-          TX     |   RX
-          RX     |   TX
-          VCC    |   5v
-          GND    |   GND
+    Nextion  |  Arduino
+    ---------|-----------
+      TX     |   RX
+      RX     |   TX
+      VCC    |   5v
+      GND    |   GND
+      
 6. Uploading the LCD ROM code
 **Method 1**
     >Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
@@ -126,22 +128,22 @@ First let's check the setup works as expected while outside the machine so you d
 
 1. Adding the ACS712 hall current sensor is quite straight forward
 
-         ACS712  |  Arduino
-        ---------|-----------
-           VCC   |   5v
-           GND   |   GND
-           OUT   |   A0
-           
-     **The high voltage circuit control ports will act as a passthrough for the front panel brew button positive wire**
+    ACS712  |  Arduino
+   ---------|-----------
+      VCC   |   5v
+      GND   |   GND
+      OUT   |   A0
+
+   **The high voltage circuit control ports will act as a passthrough for the front panel brew button positive wire**
       
 2. Adding the dimmer
 
-        Relay   |  Arduino
-        --------|-----------
-          3     |   GND
-          4     |   D8
+    Relay   |  Arduino
+    --------|-----------
+      3     |   GND
+      4     |   D8
       
-      **Dimmer high voltage circuit control ports will act as a passthrough for the pump positive circuit wire**
+   **Dimmer high voltage circuit control ports will act as a passthrough for the pump positive circuit wire**
 
 
 ### Now i won't be explaining every single detail, as always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding. ###
