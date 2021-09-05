@@ -30,17 +30,20 @@ Software needed:
     >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
 **Hardware requirements:**
-1. [Arduino Nano](https://bit.ly/3eXSfXZ) - Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
-2. [Nextion touch screen (i used a 2.4 inch one)](https://bit.ly/33dO8RV)
-3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)
-4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
-5. [40DA SSR Relay](https://bit.ly/33g1Pjr)
-6. *NEW Functionality* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
-7. *NEW Functionality* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv)
-8. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI)
+>*The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality companent type*
+
+1. [Arduino Nano](https://bit.ly/3eXSfXZ)  **[BASE]**
+>*Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
+2. [Nextion touch screen](https://bit.ly/33dO8RV)  **[BASE]**
+3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
+4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
+5. [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
+6. *NEW Functionality* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
+7. *NEW Functionality* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
+8. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 9. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-10. 5v power supply - for powering the arduino board once it's inside the machine.
->*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board.*
+10. [5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
+>*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
 
 **Optional:**
 - [Heat shrink](https://bit.ly/2PQdnqt)
@@ -63,6 +66,7 @@ First let's check the setup works as expected while outside the machine so you d
 >
 >**Note 2 - the 5v/GND Arduino board pins will be shared between all the connected devices.**
 
+**BASE FUNCTIONALITY**
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file.
 
         MAX6675  |  Arduino
@@ -83,15 +87,7 @@ First let's check the setup works as expected while outside the machine so you d
 
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
 >*Note: uploading won't work with the LCD connected*
-5. 
-  **Method 1**
-  >Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
-
-**Method2**
->Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
->*Note: card needs to be FAT32 formatted*
-
-6. Insert the card in the LCD card reader slot and connect the LCD to the arduino board.
+5. Nextion LCD wiring
 
         Nextion  |  Arduino
         ---------|-----------
@@ -99,13 +95,41 @@ First let's check the setup works as expected while outside the machine so you d
           RX     |   TX
           VCC    |   5v
           GND    |   GND
+6. Uploading the LCD ROM code
+**Method 1**
+    >Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
+
+**Method2**
+    >Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
+    >*Note: card needs to be FAT32 formatted*
 
 7. After upload finished get the card out and power cycle the LCD.
 8. You should see temp readings on your screen if everything went according to the plan.
 >*Don't forget to test the thermocouple/relay combo operation, apply some heat to the thermocouple end and see whether the relay led operates in HIGH/LOW modes*
 
-
 **At this point if all the above works as expected you're ready to install it all inside the machine, for this we'll need to prepare some splitters that we'll use to connect to the Gaggia internals without introducing any permanent modifications so in the event of a desire to revert to stock it's a few disconnects away!**
+
+
+**EXTENDED FUNCTIONALITY**
+
+1. Adding the ACS712 hall current sensor is quite straight forward
+
+         ACS712  |  Arduino
+        ---------|-----------
+           VCC   |   5v
+           GND   |   GND
+           OUT   |   A0
+           
+     **The high voltage circuit control ports will act as a passthrough for the front panel brew button positive wire**
+      
+2. Adding the dimmer
+
+        Relay   |  Arduino
+        --------|-----------
+          3     |   GND
+          4     |   D8
+      
+      **Dimmer high voltage circuit control ports will act as a passthrough for the pump positive circuit wire**
 
 
 ### Now i won't be explaining every single detail, as always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding. ###
