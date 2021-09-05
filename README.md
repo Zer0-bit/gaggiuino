@@ -30,17 +30,20 @@ Software needed:
     >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
 **Hardware requirements:**
-1. [Arduino Nano](https://bit.ly/3eXSfXZ) - Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
-2. [Nextion touch screen (i used a 2.4 inch one)](https://bit.ly/33dO8RV)
-3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)
-4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
-5. [40DA SSR Relay](https://bit.ly/33g1Pjr)
-6. *NEW Functionality* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
-7. *NEW Functionality* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv)
-8. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI)
+>*The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality companent type*
+
+1. [Arduino Nano](https://bit.ly/3eXSfXZ)  **[BASE]**
+>*Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
+2. [Nextion touch screen](https://bit.ly/33dO8RV)  **[BASE]**
+3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
+4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
+5. [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
+6. *NEW Functionality* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
+7. *NEW Functionality* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
+8. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 9. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-10. 5v power supply - for powering the arduino board once it's inside the machine.
->*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board.*
+10.[5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
+>*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
 
 **Optional:**
 - [Heat shrink](https://bit.ly/2PQdnqt)
