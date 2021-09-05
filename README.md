@@ -42,7 +42,7 @@ Software needed:
 7. *NEW Functionality* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
 8. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 9. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-10.[5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
+10. [5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
 >*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
 
 **Optional:**
