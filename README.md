@@ -18,11 +18,12 @@ I will assume you have  the necessary components and installed the related softw
 - [ ] Pre-infusion - **COMING SOON**
 - [ ] Auto pressure profiling - **COMING SOON**
 - [ ] Manual pressure control - **COMING SOON**
+##### << Ideas deas are welcome in the Issues tab >>
 
 
-# **PROJECT REQUIREMENTS** #
+# **PROJECT REQUIREMENTS**
 
-Software needed:
+### **Software requirements:**
 1. [Arduino IDE](https://www.arduino.cc/en/software)
     >*Needed to upload the code ".ino" to the arduino ROM*
 
@@ -43,11 +44,11 @@ Software needed:
 3. [CH340 USB Driver](https://electropeak.com/learn/how-to-install-ch340-driver/)
     >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
-**Hardware requirements:**
->*The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality companent type*
+### **Hardware requirements:**
+###### The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality companent type
 
 1. [Arduino Nano](https://bit.ly/3eXSfXZ)  **[BASE]**
->*Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
+    >*Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
 2. [Nextion touch screen](https://bit.ly/33dO8RV)  **[BASE]**
 3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
 4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
@@ -57,14 +58,14 @@ Software needed:
 8. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 9. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
 10. [5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
->*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
+    >*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
 
 **Optional:**
-- [Heat shrink](https://bit.ly/2PQdnqt)
-- [U-shaped Parallel Terminal](https://bit.ly/3h8phaF)  - These are in case you're choosing not to solder
-- [Soldering iron](https://bit.ly/3tijlOI) - the one i bought for my soldering needs,  seems to do a great job
-- [Nextion LCD case](https://bit.ly/3b2nxf7)
-- [Magnet sheet](https://bit.ly/3xKTMJn)
+ * [Heat shrink](https://bit.ly/2PQdnqt)
+ * [U-shaped Parallel Terminal](https://bit.ly/3h8phaF)  - These are in case you're choosing not to solder
+ * [Soldering iron](https://bit.ly/3tijlOI) - the one i bought for my soldering needs,  seems to do a great job
+ * [Nextion LCD case](https://bit.ly/3b2nxf7)
+ * [Magnet sheet](https://bit.ly/3xKTMJn)
 
 
  ## The housing for all of the above hardware has been designed and provided kindly by @LikeableBump and can be found on thingiverse by following the link bellow:
@@ -101,7 +102,7 @@ First let's check the setup works as expected while outside the machine so you d
    **Relay ports [1] and [2] are the high voltage circuit breaker**
 
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
->*Note: uploading won't work with the LCD connected*
+    >*Note: uploading won't work with the LCD connected*
 5. Nextion LCD wiring
 
     Nextion  |  Arduino
@@ -113,18 +114,18 @@ First let's check the setup works as expected while outside the machine so you d
       
 6. Uploading the LCD ROM code
 
-**Method 1** 
+    **Method 1** 
 
-    Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
+        Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
 
-**Method2** 
+    **Method2** 
 
-    Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
- >*Note: card needs to be FAT32 formatted*
+        Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
+     >*Note: card needs to be FAT32 formatted*
 
 7. After upload finished get the card out and power cycle the LCD.
 8. You should see temp readings on your screen if everything went according to the plan.
->*Don't forget to test the thermocouple/relay combo operation, apply some heat to the thermocouple end and see whether the relay led operates in HIGH/LOW modes*
+    >*Don't forget to test the thermocouple/relay combo operation, apply some heat to the thermocouple end and see whether the relay led operates in HIGH/LOW modes*
 
 **At this point if all the above works as expected you're ready to install it all inside the machine, for this we'll need to prepare some splitters that we'll use to connect to the Gaggia internals without introducing any permanent modifications so in the event of a desire to revert to stock it's a few disconnects away!**
 
