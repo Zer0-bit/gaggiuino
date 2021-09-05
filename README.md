@@ -66,6 +66,7 @@ First let's check the setup works as expected while outside the machine so you d
 >
 >**Note 2 - the 5v/GND Arduino board pins will be shared between all the connected devices.**
 
+**BASE FUNCTIONALITY**
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code, you can find them defined at the top of the .ino file.
 
         MAX6675  |  Arduino
@@ -86,15 +87,7 @@ First let's check the setup works as expected while outside the machine so you d
 
 4. Plug the arduino board using the mini usb cable that came with it and upload the code to the arduino board. 
 >*Note: uploading won't work with the LCD connected*
-5. 
-  **Method 1**
-  >Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
-
-**Method2**
->Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
->*Note: card needs to be FAT32 formatted*
-
-6. Insert the card in the LCD card reader slot and connect the LCD to the arduino board.
+5. Nextion LCD wiring
 
         Nextion  |  Arduino
         ---------|-----------
@@ -102,13 +95,41 @@ First let's check the setup works as expected while outside the machine so you d
           RX     |   TX
           VCC    |   5v
           GND    |   GND
+6. Uploading the LCD ROM code
+**Method 1**
+    >Just copy the *.tft file on a FAT32 formatted microSD card and upload onthe LCD panel using the onboard card reader
+
+**Method2**
+    >Open the .HMI file using Nextion Editor and using the File menu upload it on a microSD card
+    >*Note: card needs to be FAT32 formatted*
 
 7. After upload finished get the card out and power cycle the LCD.
 8. You should see temp readings on your screen if everything went according to the plan.
 >*Don't forget to test the thermocouple/relay combo operation, apply some heat to the thermocouple end and see whether the relay led operates in HIGH/LOW modes*
 
-
 **At this point if all the above works as expected you're ready to install it all inside the machine, for this we'll need to prepare some splitters that we'll use to connect to the Gaggia internals without introducing any permanent modifications so in the event of a desire to revert to stock it's a few disconnects away!**
+
+
+**EXTENDED FUNCTIONALITY**
+
+1. Adding the ACS712 hall current sensor is quite straight forward
+
+         ACS712  |  Arduino
+        ---------|-----------
+           VCC   |   5v
+           GND   |   GND
+           OUT   |   A0
+           
+     **The high voltage circuit control ports will act as a passthrough for the front panel brew button positive wire**
+      
+2. Adding the dimmer
+
+        Relay   |  Arduino
+        --------|-----------
+          3     |   GND
+          4     |   D8
+      
+      **Dimmer high voltage circuit control ports will act as a passthrough for the pump positive circuit wire**
 
 
 ### Now i won't be explaining every single detail, as always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding. ###
