@@ -18,7 +18,7 @@ I will assume you have  the necessary components and installed the related softw
 - [ ] Pre-infusion - **COMING SOON**
 - [ ] Auto pressure profiling - **COMING SOON**
 - [ ] Manual pressure control - **COMING SOON**
-##### << Ideas deas are welcome in the Issues tab >>
+##### << Ideas are welcome in the Issues tab >>
 
 
 # **PROJECT REQUIREMENTS**
