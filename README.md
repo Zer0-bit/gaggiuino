@@ -158,7 +158,8 @@ First let's check the setup works as expected while outside the machine so you d
 
 >*AGAIN!!! Tripple check your machine is disconnected from any power sources, even better just pull the power cable out of it !*
 
-**So here goes:**
+#### BASE FUNCTIONALITY
+
 1. Take off the top cover by unscrewing the 2 top screws, you should be able to see smth similar to the bellow image minus the SSR relay:
 <img src="https://db3pap006files.storage.live.com/y4m4pob4r1pDtjBPqIyA-dqHOH_eZDJaf6W2dYdHlIh8G8OWusXig9WUKOA-iBCk2QRN-lL3ajrWDDUBASx_frpWqz_2z1dxeAnksAKKysKqL-eXE9PVRYeA2SdmS_DSkAA3TJ5ZVe3ybpkLYV0-PDKLjEhxNZluA_UX8ektw8kGW4PXKQeQU-UUJtjuaDSYKsG?width=3496&height=4656&cropmode=none" width="769" height="1024" />
 
@@ -190,3 +191,13 @@ So you end up having them connected like this:
 <img src="https://db3pap006files.storage.live.com/y4myMKUSADo1HIGEXQ42p9tP1UKzL2aUqI6gCv3st6cBqR921Y-xWkhHB9QYaUlubJC-wCs5swyMaXX-p9LJu0qDgOgMKwkMyW-KUdUkkQWZ7-VdJNZiWv2duaBEcFtGo34uX1_-mqF66PpgseniGFKGhJmO-o5n8Pb2TP2it0vyQBcLAgX00jzVl-H6L5NeVzE?width=769&height=1024&cropmode=none" width="769" height="1024" />
 
 10. Now you're ready to connect everything to the arduino like you did it when testing everything, one advice would be to solder all the arduino connected cables a during the machine operation there is quite a bit of vibration and that can introduce all sorts of noise/frequent disconnects to certain pins which will lead to unexplained behaviours.
+
+
+#### EXTENDED FUNCTIONALITY
+
+1. Installing the ACS712 Hall current sensor, please note in the photo bellow the way the sensor faces the camera and how the cable passthrough is done with the original ( positive) cable connected to the front panel brew button (1) connected to the top port of the ACS712 board (1) and then the exit connection on the ACS712 board (2) feeds a cable to the front panel brew button position where the original was connected.
+>**!It is important to conect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value**
+<img src="https://db3pap006files.storage.live.com/y4mW3P8Rf5uhe-FJXBpXVLkn1SePg7W0jZQ4cagG6rldxZT3h-uZvYLW_7A6oEsaWF0-sY038W6prq1qLtbKiIepLeWFnPL1Ck59tFLd-Hfj-2flGiqPRduNt9ctvi4cS_YC9PzsJr3TjhE-Mqbora0UNkPgeAZkVZdDXeX2F1VJqRxP9zn5diDO3MNbvDDsZ4y?width=2328&height=1748&cropmode=none" width="769" height="769" />
+
+2. Installing the RobotDYN dimmer module.
+<img src="https://db3pap006files.storage.live.com/y4mC6f3vykKE40Z3FnrvrwriXgztoGaPAV_PoeIreyugKLhfK58o9KyQo1mANet1k-s0EZ2Shp6a1P6dEv13bQBIGwZKyxHMuIoPMJTO4GjAzESpHOXRNeBMtV5rZ8qGRWoPKVo13ahvh0V9hAYXGdPs5Zp7KpXnCSwjA2xiSqODEEy0y9d5zVJRxJAL1ovjVgB?width=1920&height=1080&cropmode=none" width="810" height="520" />
