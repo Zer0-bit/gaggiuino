@@ -2,9 +2,13 @@
 <!-- <img src = "/images/PXL_20210525_144343463.jpg" width = 500 height =700> -->
 Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.
 
->*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it, only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the bellow guide i cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
+#### SUCCESSFUL INSTALLS:
 
-I will assume you have  the necessary components and installed the related software, for the sake of not getting stuck at some point just double check again the list bellow.
+   Machine            | PHOTOS
+   -------------------|---------------------------------
+   Gaggia Classic     | TBD
+   Gaggia Classic Pro | https://imgur.com/gallery/SF3zP0b
+   
 
 #### Features / Completeness 
 
@@ -19,7 +23,6 @@ I will assume you have  the necessary components and installed the related softw
 - [ ] Auto pressure profiling - **COMING SOON**
 - [ ] Manual pressure control - **COMING SOON**
 ##### << Ideas are welcome in the Issues tab >>
-
 
 # **PROJECT REQUIREMENTS**
 
@@ -72,6 +75,8 @@ I will assume you have  the necessary components and installed the related softw
  
    [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
 
+***!! WARNING !!***
+>*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it, only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the bellow guide i cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
 
 # Assembling #
 First we need to understand what goes where, the schematics aren't really rocket science but for someone who's never disasembled or has no experience working with electrical circuits it might get confusing real fast so i will try to describe it as simple as possible yet limited by my vocabulary.
