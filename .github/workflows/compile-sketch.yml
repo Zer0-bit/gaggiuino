@@ -19,7 +19,7 @@ jobs:
 
       - uses: arduino/compile-sketches@v1
         with:
-          fqbn: 'arduino:avr:nano'
+          fqbn: 'arduino:avr:nano:cpu=atmega328'
           libraries: |
             - name: MAX6675 library
             - name: Easy Nextion Library
