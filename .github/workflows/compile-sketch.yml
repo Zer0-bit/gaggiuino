@@ -1,0 +1,27 @@
+name: Compile Sketch
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  # Manual trigger
+  workflow_dispatch:
+
+jobs:
+  compile-sketch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2
+
+      - uses: arduino/compile-sketches@v1
+        with:
+          fqbn: 'arduino:avr:nano'
+          libraries: |
+            - name: MAX6675 library
+            - name: Easy Nextion Library
+            - source-url: https://github.com/rkoptev/ACS712-arduino/archive/refs/heads/master.zip
+            - source-url: https://github.com/RobotDynOfficial/RBDDimmer/archive/refs/heads/master.zip
