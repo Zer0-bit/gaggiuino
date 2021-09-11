@@ -17,7 +17,9 @@
 #define dimmerPin 9
 
 // Define some const values
-#define GET_KTYPE_READ_EVERY 350
+#define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250
+#define REFRESH_SCREEN_EVERY 350 // Screen refresh interval
+#define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define dimmerMinValue 90
 #define dimmerMaxValue 97
 #define dimmerDescaleMinValue 1
@@ -44,17 +46,19 @@ dimmerLamp dimmer(dimmerPin); //initialase port for dimmer for MEGA, Leonardo, U
 // Global var  - just defined globally to avoid reading the temp sensor in every function
 float currentTempReadValue = 0.0;
 float lastReadTempValue = 0.0;
+bool POWER_ON;
 bool  descaleCheckBox = 0;
 bool  preinfusionCheckBox = 0;
 bool  pressureProfileCheckBox = 0;
 bool  valuesRefreshOnPageChange = 0;
 bool  pProfileRefresh;
-uint16_t  HPWR = 0;
-uint16_t  setPoint = 0;
-uint16_t  offsetTemp = 0;
-uint16_t  MainCycleDivider = 0;
-uint16_t  BrewCycleDivider = 0;
-uint16_t  preinfusionCounter = 0;
+uint16_t  HPWR;
+uint16_t  HPWR_OUT;
+uint16_t  setPoint;
+uint16_t  offsetTemp;
+uint16_t  MainCycleDivider;
+uint16_t  BrewCycleDivider;
+uint16_t  preinfusionCounter;
 unsigned long thermoTimer = millis();
 
 // Declaring local vars
@@ -92,8 +96,9 @@ void setup() {
 
 
   //If it's the first boot we'll need to set some defaults
-  if (EEPROM.read(0) != 253 || EEPROM.read(EEP_SETPOINT) == NULL || EEPROM.read(EEP_SETPOINT) == 65535) {
-    EEPROM.put(0, 253);
+  if (EEPROM.read(0) != 252 || EEPROM.read(EEP_SETPOINT) == NULL || EEPROM.read(EEP_SETPOINT) == 65535) {
+    Serial.println("SECU_CHECK FAILED! Applying defaults!");
+    EEPROM.put(0, 252);
     EEPROM.put(EEP_SETPOINT, 101);
     EEPROM.put(EEP_OFFSET, 8);
     EEPROM.put(EEP_HPWR, 550);
@@ -138,17 +143,18 @@ void setup() {
  myNex.writeStr("page 0");
  delay(10);
  myNex.lastCurrentPageId = 1;
+ delay(5);
+ POWER_ON = true;
 }
 
 
 //Main loop where all the bellow logic is continuously run
 void loop() {
-  pageValuesRefresh();
+  Power_ON_Values_Refresh();
   myNex.NextionListen();
   kThermoRead();
-  screenRefresh();
   doCoffee();
-
+  screenRefresh();
   // if (preinfusionCheckBox == 1 && descaleCheckBox == 0) { //Preinfusion
   //   preInfusion();
   // } else if (pressureProfileCheckBox == 1 && preinfusionCheckBox == 1 && descaleCheckBox == 0) { //Pressure profile
@@ -164,71 +170,11 @@ void loop() {
   // }
 }
 
+//##############################################################################################################################
+//############################################________________MAIN______________################################################
+//##############################################################################################################################
 
-//  ALL used functions declared bellow
-// The temperature, preinfusion, dimming, LCD update, etc control logic is all in the bellow functions
-void doCoffee() {
-  // Calculating the boiler heating power range based on the bellow input values
-  uint16_t HPWR_OUT = constrain(HPWR_OUT, HPWR/MainCycleDivider, HPWR);  // limits range of sensor values to between 10 and 150
-  HPWR_OUT = map(currentTempReadValue, setPoint - 10, setPoint, HPWR, HPWR / MainCycleDivider);
-
-
-  if (brewState() == true && descaleCheckBox == 0) {
-    if (preinfusionCheckBox == 0 && pressureProfileCheckBox == 0) dimmer.setPower(dimmerMaxValue);
-    brewTimer(1);
-
-  // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (currentTempReadValue < setPoint+0.5) {
-      PORTB |= _BV(PB0);   // relayPIN -> HIGH
-      delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-      delay(HPWR_OUT); 
-    }
-  } else if (brewState() == true && descaleCheckBox == 1) {
-    if (currentTempReadValue < (float)setPoint - 10.00 && !(currentTempReadValue < 0.00) && currentTempReadValue != NAN) {
-      PORTB |= _BV(PB0);  // relayPIN -> HIGH
-    } else if (currentTempReadValue >= (float)setPoint - 10.00 && currentTempReadValue < (float)setPoint - 3.00) {
-      PORTB |= _BV(PB0);   // relayPIN -> HIGH
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-    } else if (currentTempReadValue >= (float)setPoint - 3.00 && currentTempReadValue <= float(setPoint - 1.00)) {
-      PORTB |= _BV(PB0);   // relayPIN -> HIGH
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else if (currentTempReadValue >= (float)setPoint - 1.00 && currentTempReadValue < (float)setPoint - 0.50) {
-      PORTB |= _BV(PB0);   // relayPIN -> HIGH
-      delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else {
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-    }
-  } else {
-    brewTimer(0);
-    if (currentTempReadValue < (float)setPoint - 10.00 && !(currentTempReadValue < 0.00) && currentTempReadValue != NAN) {
-      PORTB |= _BV(PB0);  // relayPIN -> HIGH
-    } else if (currentTempReadValue >= (float)setPoint - 10.00 && currentTempReadValue < (float)setPoint - 3.00) {
-      PORTB |= _BV(PB0);   // relayPIN -> HIGH
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-    } else if (currentTempReadValue >= (float)setPoint - 3.00 && currentTempReadValue <= float(setPoint - 1.00)) {
-      PORTB |= _BV(PB0);   // relayPIN -> HIGH
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else if (currentTempReadValue >= (float)setPoint - 1.00 && currentTempReadValue < (float)setPoint - 0.50) {
-      PORTB |= _BV(PB0);   // relayPIN -> HIGH
-      delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else {
-      PORTB &= ~_BV(PB0);  // relayPIN -> LOW
-    }
-  } 
-}
-
-void kThermoRead() {
+void kThermoRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
     currentTempReadValue = thermocouple.readCelsius();
@@ -236,6 +182,149 @@ void kThermoRead() {
     thermoTimer = millis();
   }
 }
+
+
+//##############################################################################################################################
+//############################################______POWER_ON_VALUES_REFRESH_____################################################
+//##############################################################################################################################
+
+void Power_ON_Values_Refresh() {  // Refreshing our values on first start and subsequent page changes
+
+  if (POWER_ON == true) {
+    // Making sure the serial communication finishes sending all the values
+    setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
+    if ( setPoint == NULL || setPoint <= 0 || setPoint > MAX_SETPOINT_VALUE ) setPoint = myNex.readNumber("page1.n0.val");
+
+    offsetTemp = myNex.readNumber("page1.n1.val");  // reading the offset value from the lcd
+    if (offsetTemp ==  NULL || offsetTemp < 0 ) offsetTemp = myNex.readNumber("page1.n1.val");
+
+    HPWR = myNex.readNumber("page1.n2.val");  // reading the brew time delay used to apply heating in waves
+    if ( HPWR == NULL || HPWR < 0 ) HPWR = myNex.readNumber("page1.n2.val");
+
+    MainCycleDivider = myNex.readNumber("page1.n4.val");  // reading the delay divider
+    if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) MainCycleDivider = myNex.readNumber("page1.n4.val");
+
+    BrewCycleDivider = myNex.readNumber("page1.n3.val");  // reading the delay divider
+    if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) BrewCycleDivider = myNex.readNumber("page1.n3.val");
+
+    // reding the descale value which should be 0 or 1
+    descaleCheckBox = myNex.readNumber("page2.c1.val");
+    if ( descaleCheckBox < 0 || descaleCheckBox > 1 || descaleCheckBox == NULL ) descaleCheckBox = myNex.readNumber("page2.c1.val");
+
+    // reding the preinfusion value which should be 0 or 1
+    preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+    if ( preinfusionCheckBox < 0 || preinfusionCheckBox > 1 ) preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+
+    pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
+    if ( pressureProfileCheckBox < 0 || pressureProfileCheckBox > 1 ) pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
+
+      // some boolean logic controling values setting
+      // powerBackOnDescaleFinish = true; // setting this to true so we make sure the pump has power after we turn off the descale mode
+    // }
+    // valuesRefreshOnPageChange == true; // setting this to TRUE so the condition is skipped on subsequent iterations
+    myNex.lastCurrentPageId = myNex.currentPageId;
+    POWER_ON = false;
+  }
+}
+
+void pageValuesRefresh() {  // Refreshing our values on page changes
+
+  // myNex.currentPageId = myNex.readNumber("dp"); //reading the value of the currently loaded page
+
+  if (myNex.currentPageId != myNex.lastCurrentPageId) {
+      // Making sure the serial communication finishes sending all the values
+    setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
+    if ( setPoint == NULL || setPoint < 0 || setPoint > MAX_SETPOINT_VALUE ) setPoint = myNex.readNumber("page1.n0.val");
+
+    offsetTemp = myNex.readNumber("page1.n1.val");  // reading the offset value from the lcd
+    if (offsetTemp ==  NULL || offsetTemp < 0 ) offsetTemp = myNex.readNumber("page1.n1.val");
+
+    HPWR = myNex.readNumber("page1.n2.val");  // reading the brew time delay used to apply heating in waves
+    if ( HPWR == NULL || HPWR < 0 ) HPWR = myNex.readNumber("page1.n2.val");
+
+    MainCycleDivider = myNex.readNumber("page1.n4.val");  // reading the delay divider
+    if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) MainCycleDivider = myNex.readNumber("page1.n4.val");
+
+    BrewCycleDivider = myNex.readNumber("page1.n3.val");  // reading the delay divider
+    if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) BrewCycleDivider = myNex.readNumber("page1.n3.val");
+
+    // reding the descale value which should be 0 or 1
+    descaleCheckBox = myNex.readNumber("page2.c1.val");
+    if ( descaleCheckBox < 0 || descaleCheckBox > 1 || descaleCheckBox == NULL ) descaleCheckBox = myNex.readNumber("page2.c1.val");
+
+    // reding the preinfusion value which should be 0 or 1
+    preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+    if ( preinfusionCheckBox < 0 || preinfusionCheckBox > 1 ) preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+
+    pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
+    if ( pressureProfileCheckBox < 0 || pressureProfileCheckBox > 1 ) pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
+
+    myNex.lastCurrentPageId = myNex.currentPageId;
+  }
+}
+
+
+// The temperature, preinfusion, dimming, LCD update, etc control logic is all in the bellow functions
+void doCoffee() {
+  uint8_t HPWR_LOW= HPWR/MainCycleDivider;
+  // Calculating the boiler heating power range based on the bellow input values
+  HPWR_OUT = map(currentTempReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW);
+  HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to between 110 and 550
+
+  if (brewState() == true && descaleCheckBox == 0) {
+    if (preinfusionCheckBox == 0 && pressureProfileCheckBox == 0) dimmer.setPower(dimmerMaxValue);
+    brewTimer(1);
+  // Applying the HPWR_OUT variable as part of the relay switching logic
+    if (currentTempReadValue < setPoint+0.5) {
+      digitalWrite(relayPin, HIGH);   // relayPin -> HIGH
+      delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
+      digitalWrite(relayPin, LOW);  // relayPin -> LOW
+      delay(HPWR_OUT); 
+    }
+  } else if (brewState() == true && descaleCheckBox == 1) {
+    if (currentTempReadValue < (float)setPoint - 10.00 && !(currentTempReadValue < 0.00) && currentTempReadValue != NAN) {
+      PORTB |= _BV(PB0);  // relayPin -> HIGH
+    } else if (currentTempReadValue >= (float)setPoint - 10.00 && currentTempReadValue < (float)setPoint - 3.00) {
+      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    } else if (currentTempReadValue >= (float)setPoint - 3.00 && currentTempReadValue <= float(setPoint - 1.00)) {
+      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+    } else if (currentTempReadValue >= (float)setPoint - 1.00 && currentTempReadValue < (float)setPoint - 0.50) {
+      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+    } else {
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }
+  } else {
+    brewTimer(0);
+    if (currentTempReadValue < ((float)setPoint - 10.00)) {
+      digitalWrite(relayPin, HIGH);  // relayPin -> HIGH
+    } else if (currentTempReadValue >= ((float)setPoint - 10.00) && currentTempReadValue < ((float)setPoint - 3.00)) {
+      digitalWrite(relayPin, HIGH);   // relayPin -> HIGH
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      digitalWrite(relayPin, LOW);  // relayPin -> LOW
+    } else if (currentTempReadValue >= (float)setPoint - 3.00 && currentTempReadValue <= float(setPoint - 1.00)) {
+      digitalWrite(relayPin, HIGH);   // relayPin -> HIGH
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      digitalWrite(relayPin, LOW);  // relayPin -> LOW
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+    } else if (currentTempReadValue >= (float)setPoint - 1.00 && currentTempReadValue < (float)setPoint - 0.50) {
+      digitalWrite(relayPin, HIGH);   // relayPin -> HIGH
+      delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      digitalWrite(relayPin, LOW);  // relayPin -> LOW
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+    } else {
+      digitalWrite(relayPin, LOW);  // relayPin -> LOW
+    }
+  } 
+}
+
 void screenRefresh() {
   // myNex.currentPageId = myNex.readNumber("dp");
   // Updating the LCD every 300ms
@@ -243,13 +332,12 @@ void screenRefresh() {
     static unsigned long pageRefreshTimer = millis();
     static bool steam_reset = 0;
     
-  if (millis() - pageRefreshTimer > 350) {
+  if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     if (currentTempReadValue < 115.00 ) { //LCD update behaviour  when temps under 115C
       if (steam_reset == 1) {
         myNex.writeNum("page0.var_steam.val", 0); //Resetting the "STEAMING!" message
         steam_reset = 0;
       }
-      uint16_t HPWR_OUT = constrain(HPWR_OUT, HPWR/MainCycleDivider, HPWR);
       myNex.writeNum("page0.n0.val", HPWR_OUT);      
     } else if (currentTempReadValue > 115.00 && currentTempReadValue < 170.00) { //Updating the LCD during steaming
       if (steam_reset == 0) {
@@ -260,54 +348,14 @@ void screenRefresh() {
     // float tmp1 = currentTempReadValue - (float)offsetTemp;
     dtostrf(currentTempReadValue - (float)offsetTemp, 6, 2, waterTempPrint); // converting values with floating point to string
     myNex.writeStr("page0.t0.txt", waterTempPrint);  // Printing the current water temp values to the display
-    myNex.writeNum("page0.n1.val", getFreeSram());
-    pageRefreshTimer = millis();
+    myNex.writeNum("page0.n1.val", offsetTemp);
+    // float P = 230 * sensor.getCurrentAC()*10;
+    myNex.writeNum("page0.n2.val", currentTempReadValue);
     lastReadTempValue = currentTempReadValue;
+    pageRefreshTimer = millis();
   }
 }
 
-void pageValuesRefresh() {
-
-  myNex.currentPageId = myNex.readNumber("dp");
-
-  if (myNex.currentPageId != myNex.lastCurrentPageId) {
-    valuesRefreshOnPageChange == false; //Making this false to update the values if a new page was loaded
-    // Getting the latest LCD side set temp settings 
-    if ( valuesRefreshOnPageChange == false ) {
-      // Making sure the serial communication finishes sending all the values
-      setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
-      if ( setPoint == NULL || setPoint < 0 ) setPoint = myNex.readNumber("page1.n0.val");
-
-      offsetTemp = myNex.readNumber("page1.n1.val");  // reading the offset value from the lcd
-      if (offsetTemp ==  NULL || offsetTemp < 0 ) offsetTemp = myNex.readNumber("page1.n1.val");
-
-      HPWR = myNex.readNumber("page1.n2.val");  // reading the brew time delay used to apply heating in waves
-      if ( HPWR == NULL || HPWR < 0 ) HPWR = myNex.readNumber("page1.n2.val");
-
-      MainCycleDivider = myNex.readNumber("page1.n4.val");  // reading the delay divider
-      if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) MainCycleDivider = myNex.readNumber("page1.n4.val");
-
-      BrewCycleDivider = myNex.readNumber("page1.n3.val");  // reading the delay divider
-      if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) BrewCycleDivider = myNex.readNumber("page1.n3.val");
-
-      // reding the descale value which should be 0 or 1
-      descaleCheckBox = myNex.readNumber("page2.c1.val");
-      if ( descaleCheckBox < 0 || descaleCheckBox > 1 || descaleCheckBox == NULL ) descaleCheckBox = myNex.readNumber("page2.c1.val");
-
-      // reding the preinfusion value which should be 0 or 1
-      preinfusionCheckBox = myNex.readNumber("page2.c0.val");
-      if ( preinfusionCheckBox < 0 || preinfusionCheckBox > 1 ) preinfusionCheckBox = myNex.readNumber("page2.c0.val");
-
-      pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
-      if ( pressureProfileCheckBox < 0 || pressureProfileCheckBox > 1 ) pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
-
-      // some boolean logic controling values setting
-      // powerBackOnDescaleFinish = true; // setting this to true so we make sure the pump has power after we turn off the descale mode
-    }
-    valuesRefreshOnPageChange == true; // setting this to TRUE so the condition is skipped on subsequent iterations
-    myNex.lastCurrentPageId = myNex.currentPageId;
-  }
-}
 
 // Save the desired temp values to EEPROM
 void trigger1() {
@@ -415,7 +463,31 @@ void trigger1() {
 }
 
 void trigger2() {
-  pProfileRefresh = false;
+    setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
+    if ( setPoint == NULL || setPoint < 0 || setPoint > MAX_SETPOINT_VALUE ) setPoint = myNex.readNumber("page1.n0.val");
+
+    offsetTemp = myNex.readNumber("page1.n1.val");  // reading the offset value from the lcd
+    if (offsetTemp ==  NULL || offsetTemp < 0 ) offsetTemp = myNex.readNumber("page1.n1.val");
+
+    HPWR = myNex.readNumber("page1.n2.val");  // reading the brew time delay used to apply heating in waves
+    if ( HPWR == NULL || HPWR < 0 ) HPWR = myNex.readNumber("page1.n2.val");
+
+    MainCycleDivider = myNex.readNumber("page1.n4.val");  // reading the delay divider
+    if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) MainCycleDivider = myNex.readNumber("page1.n4.val");
+
+    BrewCycleDivider = myNex.readNumber("page1.n3.val");  // reading the delay divider
+    if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) BrewCycleDivider = myNex.readNumber("page1.n3.val");
+
+    // reding the descale value which should be 0 or 1
+    descaleCheckBox = myNex.readNumber("page2.c1.val");
+    if ( descaleCheckBox < 0 || descaleCheckBox > 1 || descaleCheckBox == NULL ) descaleCheckBox = myNex.readNumber("page2.c1.val");
+
+    // reding the preinfusion value which should be 0 or 1
+    preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+    if ( preinfusionCheckBox < 0 || preinfusionCheckBox > 1 ) preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+
+    pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
+    if ( pressureProfileCheckBox < 0 || pressureProfileCheckBox > 1 ) pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
 }
 
 
@@ -429,6 +501,9 @@ bool brewState() {
   else return false;
 }
 
+//#############################################################################################
+//###############################____DESCALE__CONTROL____######################################
+//#############################################################################################
 
 void deScale(bool c) {
   static bool blink = true, value_set = false, dimmerModeSet = false;
@@ -492,13 +567,10 @@ void pressureProfile() {
   pProfileActive = myNex.readNumber("page2.c2.val");
 
   if ( pProfileActive == true) {
-    // if ( pProfileRefresh == false ) { //updating the values once to avoid serial spamming
       auto_p =  myNex.readNumber("page2.c3.val");
       man_p =  myNex.readNumber("page2.c4.val");
       start_p = myNex.readNumber("page2.n0.val");
       finish_p = myNex.readNumber("page2.n1.val");
-      // pProfileRefresh = true;
-    // }
     
     // bool tmp = myNex.readNumber("page2.c2.val");
     //DEBUG READ VALUES
