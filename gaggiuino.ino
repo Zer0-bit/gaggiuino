@@ -24,6 +24,7 @@
 #define dimmerMaxPowerValue 97
 #define dimmerDescaleMinValue 10
 #define dimmerDescaleMaxValue 40
+#define dimmerPreinfusionValue 50
 
 //RAM debug
 extern unsigned int __bss_end;
@@ -43,7 +44,7 @@ dimmerLamp dimmer(dimmerPin); //initialase port for dimmer for MEGA, Leonardo, U
 
 
 
-// Global var  - just defined globally to avoid reading the temp sensor in every function
+// Some vars are better global
 float currentTempReadValue = 0.0;
 float lastReadTempValue = 0.0;
 bool POWER_ON;
@@ -51,19 +52,14 @@ bool  descaleCheckBox = 0;
 bool  preinfusionCheckBox = 0;
 bool  pressureProfileCheckBox = 0;
 bool  valuesRefreshOnPageChange = 0;
-bool  pProfileRefresh;
-bool  preinfusionInProgress;
 uint16_t  HPWR;
 uint16_t  HPWR_OUT;
 uint16_t  setPoint;
 uint16_t  offsetTemp;
 uint16_t  MainCycleDivider;
 uint16_t  BrewCycleDivider;
-uint16_t  preinfusionCounter;
 uint16_t  brewStateCounter;
 uint16_t  preinfuseTime;
-uint16_t  preinfusion_start_val;
-uint16_t  preinfusion_finish_val;
 uint8_t selectedOperationalMode;
 unsigned long thermoTimer = millis();
 
@@ -219,8 +215,6 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start and su
     if (selectedOperationalMode < 0 || selectedOperationalMode > 7) selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
 
     preinfuseTime = myNex.readNumber("page2.n3.val");
-    preinfusion_start_val = myNex.readNumber("page2.n0.val");
-    preinfusion_finish_val = myNex.readNumber("page2.n1.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
     POWER_ON = false;
@@ -263,19 +257,19 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
 
     preinfuseTime = myNex.readNumber("page2.n3.val");
-    preinfusion_start_val = myNex.readNumber("page2.n0.val");
-    preinfusion_finish_val = myNex.readNumber("page2.n1.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
   }
 }
 
-
+//#############################################################################################
+//############################____OPERATIONAL_MODE_CONTROL____#################################
+//#############################################################################################
 void modeSelect() {
 
   switch (selectedOperationalMode) {
     case 0:
-      preInfusion();
+      preInfusion(preinfusionCheckBox);
       break;
     case 1:
       pressureProfile();
@@ -289,16 +283,15 @@ void modeSelect() {
     case 4:
       autoPressureProfileWithPreinfusion();
       break;
-    case 5:
-      manualPressureProfileWithPreinfusion();
-      break;
     default:
       justDoCoffee();
       break;
   }
 }
 
-
+//#############################################################################################
+//#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
+//#############################################################################################
 // The temperature, preinfusion, dimming, LCD update, etc control logic is all in the bellow functions
 void justDoCoffee() {
   uint8_t HPWR_LOW= HPWR/MainCycleDivider;
@@ -340,6 +333,9 @@ void justDoCoffee() {
   } 
 }
 
+//#############################################################################################
+//################################____HEAT_POWER_CONTROL____###################################
+//#############################################################################################
 void heatCtrl() {
   uint8_t HPWR_LOW= HPWR/MainCycleDivider;
   // Calculating the boiler heating power range based on the bellow input values
@@ -355,9 +351,33 @@ void heatCtrl() {
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT); 
     }
+  } else {
+    brewTimer(0);
+    if (currentTempReadValue < ((float)setPoint - 10.00)) {
+      PORTB |= _BV(PB0);  // relayPin -> HIGH
+    } else if (currentTempReadValue >= ((float)setPoint - 10.00) && currentTempReadValue < ((float)setPoint - 3.00)) {
+      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    } else if (currentTempReadValue >= (float)setPoint - 3.00 && currentTempReadValue <= float(setPoint - 1.00)) {
+      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+    } else if (currentTempReadValue >= (float)setPoint - 1.00 && currentTempReadValue < (float)setPoint - 0.50) {
+      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
+    } else {
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }
   }
-}
-
+} 
+  
+//#############################################################################################
+//################################____LCD_REFRESH_CONTROL___###################################
+//#############################################################################################
 void screenRefresh() {
   // myNex.currentPageId = myNex.readNumber("dp");
   // Updating the LCD every 300ms
@@ -389,7 +409,9 @@ void screenRefresh() {
   }
 }
 
-
+//#############################################################################################
+//###################################____SAVE_BUTTON____#######################################
+//#############################################################################################
 // Save the desired temp values to EEPROM
 void trigger1() {
   
@@ -495,14 +517,17 @@ void trigger1() {
   }
 }
 
+//#############################################################################################
+//###############################____PRESSURE CONTROL____######################################
+//#############################################################################################
 
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 bool brewState() {
   //Monitors the current flowing through the ACS712 circuit
-  float P = 230 * sensor.getCurrentAC()*10;
+  float P = 230 * sensor.getCurrentAC();
   //When it exceeds the set limit 
-  if ( P >= 400.00 ) return true;
+  if ( P > 16 ) return true;
   else return false;
 }
 
@@ -512,8 +537,6 @@ void brewCycleTracker() {
     brewStateCounter++;
   }
   else if (brewState() == false && brewStateCounter%2 != 0) {
-    
-    if (preinfusionCheckBox == true) preinfusionCounter++;
     brewStateCounter++;
   }
 }
@@ -523,42 +546,28 @@ void brewCycleTracker() {
 //#############################################################################################
 
 void deScale(bool c) {
-  static bool blink = true, value_set = false;
+  static bool blink = true;
   static unsigned long timer = millis();
   static int i = 0;
   if (c == true) {
     if (i < 6) { // descale in cycles for 5 times then wait according to the bellow condition
-      // Logic that switches between modes depending on the $blink value
-      if (blink == true) {
-        if (value_set == false) { // making sure we're not constantly setting the dimmer value over serial
-          dimmer.setPower(dimmerDescaleMaxValue);
-          value_set = true;
-        }
+      if (blink == true) { // Logic that switches between modes depending on the $blink value
+        dimmer.setPower(dimmerDescaleMaxValue);
         if (millis() - timer > 10000) { //set dimmer power to max descale value for 10 sec
           blink = false;
-          value_set = false;
           timer = millis();
         }
       }else {
-        if (value_set == false) { // making sure we're not constantly setting the dimmer value over serial
-          dimmer.setPower(dimmerDescaleMinValue);
-          value_set = true;
-        }
+        dimmer.setPower(dimmerDescaleMinValue);
         if (millis() - timer > 20000) { //set dimmer power to min descale value for 20 sec
           blink = true;
-          value_set = false;
-          i+=1;
+          i++;
           timer = millis();
         }
       }
     }else {
-      if (value_set == false) { // making sure we're not constantly setting the dimmer value over serial
-        dimmer.setPower(0);
-        value_set = true;
-      }
-      if (millis() - timer > 300000) { //do nothing for 5 minutes
-        dimmer.setPower(0);
-        value_set = false;
+      dimmer.setPower(0);
+      if ((millis() - timer) > 300000) { //nothing for 5 minutes
         i=0;
         timer = millis();
       } 
@@ -569,7 +578,7 @@ void deScale(bool c) {
 
 
 //#############################################################################################
-//###############################____PRESSURE CONTROL____######################################
+//###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
 
 
@@ -630,45 +639,46 @@ void pressureProfile() {
   heatCtrl(); // Keep that water at temp
 }
 
+//#############################################################################################
+//###############################____PREINFUSION_CONTROL____###################################
+//#############################################################################################
 
 // Pump dimming during brew for preinfusion
-void preInfusion() {
+void preInfusion(bool c) {
+  static bool blink = true;
+  static bool exitPreinfusion;
+  static unsigned long timer = millis();
 
-  static unsigned long  timer = millis();
-  static bool preinfusionFinished;
-  static bool timer_reset;
-
-  myNex.writeNum("page0.n1.val", preinfuseTime); //DEBUG
-
-  if ((brewState() == true) && (preinfusionCounter%2 == 0)) { //runs this only when brew button activated and preinfussionCounter modulo = 0
-    preinfusionInProgress = 1;
-    if (timer_reset == 1) {
-      timer = millis();
-      timer_reset = 0;
-    }
-    if (preinfusionFinished == 0 && preinfusionInProgress == 1) { //enters phase 1
-      if ((millis() - timer) > (preinfuseTime*1000)) { // keeping track of the elapsing time
-        preinfusionFinished = 1;
-        timer = millis();
-        myNex.writeNum("page0.n2.val", 50); //DEBUG
+  if (brewState() == true && c == true) {
+    if (exitPreinfusion == false) {
+      if (blink == true) { // Logic that switches between modes depending on the $blink value
+        brewTimer(1);
+        dimmer.setPower(dimmerPreinfusionValue);
+        if ((millis() - timer) > (preinfuseTime*1000)) {
+          blink = false;
+          timer = millis();
+        }
+      }else {
+        dimmer.setPower(30);
+        if (millis() - timer > 3000) { 
+          brewTimer(20);
+          exitPreinfusion = true;
+          blink = true;
+          timer = millis();
+        }
       }
+    }else {
       brewTimer(1);
-      dimmer.setPower(60);
-      // myNex.writeNum("page0.n2.val", 50); //DEBUG
-    } else if (preinfusionFinished == 1 && preinfusionInProgress == 1){ // Soaking phase - will stop the pump for 3 seconds
-      if ((millis() - timer) > 3000) { // keeping track of the elapsing time
-        preinfusionCounter++;
-        preinfusionInProgress = 0;
-        preinfusionFinished = 0;
-        timer_reset = 1;
-        myNex.writeNum("page0.n2.val", 1); //DEBUG
-      }
-      dimmer.setPower(1);
-      delay(3000);
-      brewTimer(0);
-    }
+      dimmer.setPower(dimmerMaxPowerValue);
+    } 
+  }else if(brewState() == false && c == true) {
+    brewTimer(0);
+    exitPreinfusion = false;
+    timer = millis();
   }
-  heatCtrl(); //more warmth into the masses
+  uint16_t P = 230*sensor.getCurrentAC();
+  myNex.writeNum("page0.n1.val",P);
+  heatCtrl(); //keeping it at temp
 }
 
 bool brewTimer(bool c) {
@@ -683,10 +693,6 @@ bool brewTimer(bool c) {
 
 void autoPressureProfileWithPreinfusion() {
   ///some code here
-}
-
-void manualPressureProfileWithPreinfusion() {
-  // some code here
 }
 
 uint16_t getFreeSram() {
