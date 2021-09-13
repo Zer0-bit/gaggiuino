@@ -19,9 +19,9 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
-- [ ] Pre-infusion - **COMING SOON**
-- [ ] Auto pressure profiling - **COMING SOON**
-- [ ] Manual pressure control - **COMING SOON**
+- [x] Pre-infusion - **IN TESTING**
+- [ ] Auto pressure profiling - **IN TESTING**
+- [x] Manual pressure control - **IN TESTING**
 ##### << Ideas are welcome in the Issues tab >>
 
 # **PROJECT REQUIREMENTS**
