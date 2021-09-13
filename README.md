@@ -18,7 +18,7 @@ I will assume you have  the necessary components and installed the related softw
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
-- [ ] Pre-infusion - **COMING SOON**
+- [x] Pre-infusion
 - [ ] Auto pressure profiling - **COMING SOON**
 - [ ] Manual pressure control - **COMING SOON**
 ##### << Ideas are welcome in the Issues tab >>
