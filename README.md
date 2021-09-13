@@ -23,6 +23,8 @@ I will assume you have  the necessary components and installed the related softw
 - [ ] Manual pressure control - **COMING SOON**
 ##### << Ideas are welcome in the Issues tab >>
 
+##### Code updates are almost always done to the .ino and .tft files so make sure to upload both files to their appropriate devices
+
 
 # **PROJECT REQUIREMENTS**
 
