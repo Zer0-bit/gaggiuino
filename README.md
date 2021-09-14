@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-# GAGGIUINO
-
-=======
 # GAGGIUINO #
->>>>>>> dev
 [![Compile Sketch](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg)](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml)
 
 <!-- <img src = "/images/PXL_20210525_144343463.jpg" width = 500 height =700> -->
