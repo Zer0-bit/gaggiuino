@@ -202,12 +202,11 @@ So you end up having them connected like this:
 
 #### EXTENDED FUNCTIONALITY
 
-1. Installing the ACS712 Hall current sensor, please note in the photo bellow the way the sensor faces the camera and how the cable passthrough is done with the original ( positive) cable connected to the front panel brew button (1) connected to the top port of the ACS712 board (1) and then the exit connection on the ACS712 board (2) feeds a cable to the front panel brew button position where the original was connected.
->**!It is important to conect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value**
->**!!! IMPORTANT !!!  The cable marked with 2 connects to the middle slot of the machine front panel, i have mistakenly used a photo from the testing phase without realising it.
->It goes without saying that the right connector to use at point 1 is the one from the middle slot which our cable replaces.**
+1. Installing the ACS712 Hall current sensor, please note in the photo bellow the way the sensor faces the camera and how the cable passthrough is done with the original cable connected to the front panel brew button (1) located in the middle on the brew button and connects to the steam button, we leave it connected to the steam button as is but the end which was connected to the middle slot of the brew button connects now to top port of the ACS712 board (1) and then the exit(bottom) port of the ACS712 board (2) feeds a cable to the original front panel brew button position.
 
-<img src="https://db3pap006files.storage.live.com/y4mW3P8Rf5uhe-FJXBpXVLkn1SePg7W0jZQ4cagG6rldxZT3h-uZvYLW_7A6oEsaWF0-sY038W6prq1qLtbKiIepLeWFnPL1Ck59tFLd-Hfj-2flGiqPRduNt9ctvi4cS_YC9PzsJr3TjhE-Mqbora0UNkPgeAZkVZdDXeX2F1VJqRxP9zn5diDO3MNbvDDsZ4y?width=2328&height=1748&cropmode=none" width="769" height="769" />
+>**!It is important to conect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value**
+
+<img src="https://db3pap006files.storage.live.com/y4mDAGJwdsJP2Vv-Z4FCeTheZSWYlCj09fbWdURcj2t_qeDla_UaWY3qT23MZKsIiQtbH-d7TOS4nRDypYBrDUeFm7eEsL2LidREYBNIylJlCSIntsNItisdsSFSfqbPvGYsZDJ-dJ7_uKYD1gjYabCTC99pB-EVuW7BvWW2v7ut7aK4NLarH9iTjjNRDBpAc88?width=768&height=1024&cropmode=none" width="768" height="1024" />
 
 2. Installing the RobotDYN dimmer module.
 <img src="https://db3pap006files.storage.live.com/y4mC6f3vykKE40Z3FnrvrwriXgztoGaPAV_PoeIreyugKLhfK58o9KyQo1mANet1k-s0EZ2Shp6a1P6dEv13bQBIGwZKyxHMuIoPMJTO4GjAzESpHOXRNeBMtV5rZ8qGRWoPKVo13ahvh0V9hAYXGdPs5Zp7KpXnCSwjA2xiSqODEEy0y9d5zVJRxJAL1ovjVgB?width=1920&height=1080&cropmode=none" width="810" height="520" />
