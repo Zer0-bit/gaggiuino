@@ -1,13 +1,21 @@
+<<<<<<< HEAD
 # GAGGIUINO
 
+=======
+# GAGGIUINO #
+>>>>>>> dev
 [![Compile Sketch](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg)](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml)
 
 <!-- <img src = "/images/PXL_20210525_144343463.jpg" width = 500 height =700> -->
 Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.
 
->*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it, only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the bellow guide i cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
+#### SUCCESSFUL INSTALLS:
 
-I will assume you have  the necessary components and installed the related software, for the sake of not getting stuck at some point just double check again the list bellow.
+   Machine            | PHOTOS
+   -------------------|---------------------------------
+   Gaggia Classic     | TBD
+   Gaggia Classic Pro | https://imgur.com/gallery/SF3zP0b
+   
 
 #### Features / Completeness 
 
@@ -18,11 +26,10 @@ I will assume you have  the necessary components and installed the related softw
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
-- [ ] Pre-infusion - **COMING SOON**
-- [ ] Auto pressure profiling - **COMING SOON**
-- [ ] Manual pressure control - **COMING SOON**
+- [x] Pre-infusion
+- [x] Auto pressure profiling - **IN TESTING**
+- [x] Manual pressure control
 ##### << Ideas are welcome in the Issues tab >>
-
 
 # **PROJECT REQUIREMENTS**
 
@@ -75,6 +82,8 @@ I will assume you have  the necessary components and installed the related softw
  
    [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
 
+***!! WARNING !!***
+>*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it, only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the bellow guide i cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
 
 # Assembling #
 First we need to understand what goes where, the schematics aren't really rocket science but for someone who's never disasembled or has no experience working with electrical circuits it might get confusing real fast so i will try to describe it as simple as possible yet limited by my vocabulary.
@@ -161,7 +170,8 @@ First let's check the setup works as expected while outside the machine so you d
 
 >*AGAIN!!! Tripple check your machine is disconnected from any power sources, even better just pull the power cable out of it !*
 
-**So here goes:**
+#### BASE FUNCTIONALITY
+
 1. Take off the top cover by unscrewing the 2 top screws, you should be able to see smth similar to the bellow image minus the SSR relay:
 <img src="https://db3pap006files.storage.live.com/y4m4pob4r1pDtjBPqIyA-dqHOH_eZDJaf6W2dYdHlIh8G8OWusXig9WUKOA-iBCk2QRN-lL3ajrWDDUBASx_frpWqz_2z1dxeAnksAKKysKqL-eXE9PVRYeA2SdmS_DSkAA3TJ5ZVe3ybpkLYV0-PDKLjEhxNZluA_UX8ektw8kGW4PXKQeQU-UUJtjuaDSYKsG?width=3496&height=4656&cropmode=none" width="769" height="1024" />
 
@@ -193,3 +203,15 @@ So you end up having them connected like this:
 <img src="https://db3pap006files.storage.live.com/y4myMKUSADo1HIGEXQ42p9tP1UKzL2aUqI6gCv3st6cBqR921Y-xWkhHB9QYaUlubJC-wCs5swyMaXX-p9LJu0qDgOgMKwkMyW-KUdUkkQWZ7-VdJNZiWv2duaBEcFtGo34uX1_-mqF66PpgseniGFKGhJmO-o5n8Pb2TP2it0vyQBcLAgX00jzVl-H6L5NeVzE?width=769&height=1024&cropmode=none" width="769" height="1024" />
 
 10. Now you're ready to connect everything to the arduino like you did it when testing everything, one advice would be to solder all the arduino connected cables a during the machine operation there is quite a bit of vibration and that can introduce all sorts of noise/frequent disconnects to certain pins which will lead to unexplained behaviours.
+
+
+#### EXTENDED FUNCTIONALITY
+
+1. Installing the ACS712 Hall current sensor, please note in the photo bellow the way the sensor faces the camera and how the cable passthrough is done with the original cable connected to the front panel brew button (1) located in the middle on the brew button and connects to the steam button, we leave it connected to the steam button as is but the end which was connected to the middle slot of the brew button connects now to top port of the ACS712 board (1) and then the exit(bottom) port of the ACS712 board (2) feeds a cable to the original front panel brew button position.
+
+>**!It is important to conect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value**
+
+<img src="https://db3pap006files.storage.live.com/y4mDAGJwdsJP2Vv-Z4FCeTheZSWYlCj09fbWdURcj2t_qeDla_UaWY3qT23MZKsIiQtbH-d7TOS4nRDypYBrDUeFm7eEsL2LidREYBNIylJlCSIntsNItisdsSFSfqbPvGYsZDJ-dJ7_uKYD1gjYabCTC99pB-EVuW7BvWW2v7ut7aK4NLarH9iTjjNRDBpAc88?width=768&height=1024&cropmode=none" width="768" height="1024" />
+
+2. Installing the RobotDYN dimmer module.
+<img src="https://db3pap006files.storage.live.com/y4mC6f3vykKE40Z3FnrvrwriXgztoGaPAV_PoeIreyugKLhfK58o9KyQo1mANet1k-s0EZ2Shp6a1P6dEv13bQBIGwZKyxHMuIoPMJTO4GjAzESpHOXRNeBMtV5rZ8qGRWoPKVo13ahvh0V9hAYXGdPs5Zp7KpXnCSwjA2xiSqODEEy0y9d5zVJRxJAL1ovjVgB?width=1920&height=1080&cropmode=none" width="810" height="520" />

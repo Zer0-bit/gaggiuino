@@ -2,9 +2,15 @@ name: Compile Sketch
 
 on:
   push:
+<<<<<<< HEAD
     branches: [ main ]
   pull_request:
     branches: [ main ]
+=======
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+>>>>>>> dev
   # Manual trigger
   workflow_dispatch:
 
