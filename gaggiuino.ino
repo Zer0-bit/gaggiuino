@@ -22,8 +22,8 @@
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define dimmerMinPowerValue 30
 #define dimmerMaxPowerValue 97
-#define dimmerDescaleMinValue 10
-#define dimmerDescaleMaxValue 40
+#define dimmerDescaleMinValue 40
+#define dimmerDescaleMaxValue 50
 #define dimmerPreinfusionValue 50
 
 //RAM debug
@@ -62,6 +62,8 @@ uint16_t  BrewCycleDivider;
 uint16_t  brewStateCounter;
 uint16_t  preinfuseTime;
 uint8_t selectedOperationalMode;
+uint8_t pProfileStartVal;
+uint8_t pProfileFinishVal;
 unsigned long thermoTimer = millis();
 
 // Declaring local vars
@@ -267,6 +269,14 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
 
     preinfuseTime = myNex.readNumber("page2.n3.val");
+    if (preinfuseTime < 0 || preinfuseTime > 10) preinfuseTime = myNex.readNumber("page2.n3.val");
+
+
+    pProfileStartVal = myNex.readNumber("page2.n0.val");
+    if (pProfileStartVal < 30 || pProfileStartVal > 97) pProfileStartVal = myNex.readNumber("page2.n0.val");
+
+    pProfileFinishVal = myNex.readNumber("page2.n1.val");
+    if (pProfileFinishVal < 30 || pProfileFinishVal > 97) pProfileFinishVal = myNex.readNumber("page2.n0.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
   }
@@ -541,7 +551,7 @@ bool brewState() {
   //Monitors the current flowing through the ACS712 circuit
   float P = 230 * sensor.getCurrentAC();
   //When it exceeds the set limit 
-  if ( P > 20 ) return true;
+  if ( P > 25 ) return true;
   else return false;
 }
 
@@ -590,7 +600,7 @@ void deScale(bool c) {
         }
       }
     }else {
-      dimmer.setPower(0);
+      dimmer.setPower(30);
       if ((millis() - timer) > 300000) { //nothing for 5 minutes
         i=0;
         timer = millis();
@@ -612,45 +622,45 @@ void deScale(bool c) {
 void autoPressureProfile() {
   static bool setPerformed = 0, phase_1 = 1, phase_2 = 0;
   static unsigned long timer = millis();
-  static uint8_t dimmerInput, start_p ,finish_p;
-  uint8_t dimmerNewPowerVal;
-
-  start_p = myNex.readNumber("page2.n0.val");
-  finish_p = myNex.readNumber("page2.n1.val");
+  static uint8_t dimmerOutput;
+  static uint8_t dimmerNewPowerVal;
   
   // bool tmp = myNex.readNumber("page2.c2.val");
   //DEBUG READ VALUES
-  myNex.writeNum("page0.n2.val", start_p);
+  // myNex.writeNum("page0.n2.val", pProfileStartVal);
   //END DEBUG 
 
-  if (brewState() == true ) { //runs this only when brew button activated and pressure profile selected 
-    brewTimer(1); 
+  if (brewState() == true ) { //runs this only when brew button activated and pressure profile selected  
+    brewTimer(1);
     if (phase_1 == true) { //enters phase 1
       if (millis() - timer >  14000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
         timer = millis();
       }
-      dimmer.setPower(start_p);
+      dimmer.setPower(pProfileStartVal);
+      myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
     } else if (phase_2 == true) { //enters pahse 2
       if (millis() - timer > 1000) { // runs the bellow block every second
-        if (start_p > finish_p) {
-          dimmerInput=16*(16/(start_p/finish_p));
-          dimmerNewPowerVal = map(dimmerInput, 0, 100, start_p, finish_p); //calculates a new dimmer power value every second given the max and min
-          dimmerNewPowerVal = constrain(dimmerNewPowerVal, start_p, finish_p);  // limits range of sensor values to between start_p and finish_p
+        if (pProfileStartVal > pProfileFinishVal) {
+          dimmerOutput+=pProfileStartVal/pProfileFinishVal*2;
+          dimmerNewPowerVal -= dimmerOutput; //calculates a new dimmer power value every second given the max and min
+          dimmerNewPowerVal = constrain(dimmerNewPowerVal, pProfileStartVal, pProfileFinishVal);  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
           dimmer.setPower(dimmerNewPowerVal);
-        }else if (start_p < finish_p) {
-          dimmerInput=16*(16/(finish_p/start_p));
-          dimmerNewPowerVal = map(dimmerInput, 0, 100, finish_p, start_p); //calculates a new dimmer power value every second given the max and min
-          dimmerNewPowerVal = constrain(dimmerNewPowerVal, start_p, finish_p);  // limits range of sensor values to between start_p and finish_p
+          myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
+        }else if (pProfileStartVal < pProfileFinishVal) {
+          dimmerOutput+=pProfileFinishVal/pProfileStartVal*2;
+          dimmerNewPowerVal = map(dimmerOutput, 0, 100, pProfileStartVal, pProfileFinishVal); //calculates a new dimmer power value every second given the max and min
+          dimmerNewPowerVal = constrain(dimmerNewPowerVal, pProfileStartVal, pProfileFinishVal);  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
           dimmer.setPower(dimmerNewPowerVal);
+          myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
         }
         timer = millis();
       } 
     }
   }else { //Manual preinfusion control
     brewTimer(0);
-    dimmer.setPower(start_p);
+    dimmer.setPower(pProfileStartVal);
     timer = millis();
   }
   heatCtrl(); // Keep that water at temp
@@ -705,8 +715,6 @@ void preInfusion(bool c) {
     timer = millis();
     preinfusionFinished = false;
   }
-  uint16_t P = 230*sensor.getCurrentAC();
-  myNex.writeNum("page0.n1.val",P);
   heatCtrl(); //keeping it at temp
 }
 
