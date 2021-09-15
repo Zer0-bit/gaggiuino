@@ -24,6 +24,8 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Pre-infusion
 - [x] Auto pressure profiling - **IN TESTING**
 - [x] Manual pressure control
+- [x] Auto shot timer
+- [ ] Saving all the values in selected state - **PARTIALY DONE**
 ##### << Ideas are welcome in the Issues tab >>
 
 # **PROJECT REQUIREMENTS**
