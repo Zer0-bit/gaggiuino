@@ -24,7 +24,6 @@
 #define dimmerMaxPowerValue 97
 #define dimmerDescaleMinValue 40
 #define dimmerDescaleMaxValue 50
-#define dimmerPreinfusionValue 50
 
 //RAM debug
 extern unsigned int __bss_end;
@@ -108,12 +107,12 @@ void setup() {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
     EEPROM.put(0, 252);
     EEPROM.put(EEP_SETPOINT, 101);
-    EEPROM.put(EEP_OFFSET, 8);
+    EEPROM.put(EEP_OFFSET, 7);
     EEPROM.put(EEP_HPWR, 550);
     EEPROM.put(EEP_M_DIVIDER, 5);
     EEPROM.put(EEP_B_DIVIDER, 2);
-    EEPROM.put(EEP_P_START, 97);
-    EEPROM.put(EEP_P_FINISH, 30);
+    EEPROM.put(EEP_P_START, 9);
+    EEPROM.put(EEP_P_FINISH, 5);
     EEPROM.put(EEP_P_AUTO, 0);
     EEPROM.put(EEP_P_MANUAL, 0);
   }
@@ -673,13 +672,14 @@ void autoPressureProfile() {
 }
 
 void manualPressureProfile() {
-  uint8_t power_reading = myNex.readNumber("page0.p_var.val");
+  volatile uint8_t power_reading = myNex.readNumber("page0.p_var.val");
   if (brewState()==true) {
     brewTimer(1);
     dimmer.setPower(power_reading);
   }else {
     brewTimer(0);
   }
+  heatCtrl();
 }
 //#############################################################################################
 //###############################____PREINFUSION_CONTROL____###################################
