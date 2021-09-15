@@ -17,7 +17,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Housing - **credits @LikeableBump**
 - [x] Temp control
 - [x] Realtime temp values update
-- [x] Saving set values
+- [x] Saving set values - **PARTIALY DONE**
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
@@ -25,7 +25,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Auto pressure profiling - **IN TESTING**
 - [x] Manual pressure control
 - [x] Auto shot timer
-- [ ] Saving all the values in selected state - **PARTIALY DONE**
+
 ##### << Ideas are welcome in the Issues tab >>
 
 #### As part of considerably upgrading the project i've taken it upon me to bring a new UI as well, hopefully nicer than the old one:
