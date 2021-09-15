@@ -202,7 +202,7 @@ So you end up having them connected like this:
 
 #### EXTENDED FUNCTIONALITY
 
-1. Installing the ACS712 Hall current sensor, please note in the photo bellow the way the sensor faces the camera and how the cable passthrough is done with the original cable connected to the front panel brew button (1) located in the middle on the brew button and connects to the steam button, we leave it connected to the steam button as is but the end which was connected to the middle slot of the brew button connects now to top port of the ACS712 board (1) and then the exit(bottom) port of the ACS712 board (2) feeds a cable to the original front panel brew button position.
+1. While installing the ACS712 Hall current sensor please note in the photo bellow the way the sensor faces the camera and how the cable passthrough is done with the cable originall connected to the middle slot front panel brew button (1), it's a short cable connecting the brew button with the steam button, we leave it connected to the steam button but the end which was connected to the middle slot of the brew button connects now to the top port of the ACS712 board (1) and then the exit(2) port of the ACS712 board  feeds a cable to the original front panel brew button position.
 
 >**!It is important to conect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value**
 

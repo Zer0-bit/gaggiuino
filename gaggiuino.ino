@@ -24,7 +24,6 @@
 #define dimmerMaxPowerValue 97
 #define dimmerDescaleMinValue 40
 #define dimmerDescaleMaxValue 50
-#define dimmerPreinfusionValue 50
 
 //RAM debug
 extern unsigned int __bss_end;
@@ -57,13 +56,13 @@ uint16_t  HPWR;
 uint16_t  HPWR_OUT;
 uint16_t  setPoint;
 uint16_t  offsetTemp;
-uint16_t  MainCycleDivider;
-uint16_t  BrewCycleDivider;
-uint16_t  brewStateCounter;
-uint16_t  preinfuseTime;
+uint8_t  MainCycleDivider;
+uint8_t  BrewCycleDivider;
+uint8_t  preinfuseTime;
+uint8_t preinfuseBar;
+uint8_t ppressureProfileStartBar;
+uint8_t ppressureProfileFinishBar;
 uint8_t selectedOperationalMode;
-uint8_t pProfileStartVal;
-uint8_t pProfileFinishVal;
 unsigned long thermoTimer = millis();
 
 // Declaring local vars
@@ -89,10 +88,6 @@ void setup() {
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
   dimmer.setPower(dimmerMaxPowerValue);
 
-  // dimmer.begin(TOGGLE_MODE, OFF); //dimmer initialisation: name.begin(MODE, STATE) 
-  // dimmer.toggleSettings(30, 97); //Name.toggleSettings(MIN, MAX);
-  // dimmer.setState(ON); // state: dimmer1.setState(ON/OFF);
-
   // Calibrating the hall current sensor
   sensor.calibrate();
 
@@ -112,12 +107,12 @@ void setup() {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
     EEPROM.put(0, 252);
     EEPROM.put(EEP_SETPOINT, 101);
-    EEPROM.put(EEP_OFFSET, 8);
+    EEPROM.put(EEP_OFFSET, 7);
     EEPROM.put(EEP_HPWR, 550);
     EEPROM.put(EEP_M_DIVIDER, 5);
     EEPROM.put(EEP_B_DIVIDER, 2);
-    EEPROM.put(EEP_P_START, 97);
-    EEPROM.put(EEP_P_FINISH, 30);
+    EEPROM.put(EEP_P_START, 9);
+    EEPROM.put(EEP_P_FINISH, 5);
     EEPROM.put(EEP_P_AUTO, 0);
     EEPROM.put(EEP_P_MANUAL, 0);
   }
@@ -227,6 +222,15 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start and su
     if (selectedOperationalMode < 0 || selectedOperationalMode > 7) selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
 
     preinfuseTime = myNex.readNumber("page2.n3.val");
+    if (preinfuseTime < 0 || preinfuseTime > 10) preinfuseTime = myNex.readNumber("page2.n3.val");
+
+    preinfuseBar = myNex.readNumber("page2.preinf_pwr.val");
+    if (preinfuseBar < 0 || preinfuseBar > 97) preinfuseBar = myNex.readNumber("page2.preinf_pwr.val");
+    
+    ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
+    if (ppressureProfileStartBar < 0 || ppressureProfileStartBar > 97) ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
+    ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
+    if (ppressureProfileFinishBar < 0 || ppressureProfileFinishBar > 97) ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
     POWER_ON = false;
@@ -271,12 +275,17 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     preinfuseTime = myNex.readNumber("page2.n3.val");
     if (preinfuseTime < 0 || preinfuseTime > 10) preinfuseTime = myNex.readNumber("page2.n3.val");
 
+    preinfuseTime = myNex.readNumber("page2.n3.val");
+    if (preinfuseTime < 0 || preinfuseTime > 10) preinfuseTime = myNex.readNumber("page2.n3.val");
 
-    pProfileStartVal = myNex.readNumber("page2.n0.val");
-    if (pProfileStartVal < 30 || pProfileStartVal > 97) pProfileStartVal = myNex.readNumber("page2.n0.val");
+    preinfuseBar = myNex.readNumber("page2.preinf_pwr.val");
+    if (preinfuseBar < 0 || preinfuseBar > 97) preinfuseBar = myNex.readNumber("page2.preinf_pwr.val");
+    
+    ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
+    if (ppressureProfileStartBar < 0 || ppressureProfileStartBar > 97) ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
+    ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
+    if (ppressureProfileFinishBar < 0 || ppressureProfileFinishBar > 97) ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
 
-    pProfileFinishVal = myNex.readNumber("page2.n1.val");
-    if (pProfileFinishVal < 30 || pProfileFinishVal > 97) pProfileFinishVal = myNex.readNumber("page2.n0.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
   }
@@ -555,15 +564,6 @@ bool brewState() {
   else return false;
 }
 
-void brewCycleTracker() {
-  if (brewState() == true && brewStateCounter%2 == 0) {
-
-    brewStateCounter++;
-  }
-  else if (brewState() == false && brewStateCounter%2 != 0) {
-    brewStateCounter++;
-  }
-}
 
 bool brewTimer(bool c) {
   if (myNex.currentPageId == 0 && c == 1) {  
@@ -627,31 +627,32 @@ void autoPressureProfile() {
   
   // bool tmp = myNex.readNumber("page2.c2.val");
   //DEBUG READ VALUES
-  // myNex.writeNum("page0.n2.val", pProfileStartVal);
+  // myNex.writeNum("page0.n2.val", ppressureProfileStartBar);
   //END DEBUG 
 
   if (brewState() == true ) { //runs this only when brew button activated and pressure profile selected  
     brewTimer(1);
     if (phase_1 == true) { //enters phase 1
-      if (millis() - timer >  14000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
+      if ((millis() - timer)>8000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
         timer = millis();
       }
-      dimmer.setPower(pProfileStartVal);
-      myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
+      dimmer.setPower(ppressureProfileStartBar);
+      myNex.writeNum("page0.n2.val",ppressureProfileStartBar);
     } else if (phase_2 == true) { //enters pahse 2
-      if (millis() - timer > 1000) { // runs the bellow block every second
-        if (pProfileStartVal > pProfileFinishVal) {
-          dimmerOutput+=pProfileStartVal/pProfileFinishVal*2;
-          dimmerNewPowerVal -= dimmerOutput; //calculates a new dimmer power value every second given the max and min
-          dimmerNewPowerVal = constrain(dimmerNewPowerVal, pProfileStartVal, pProfileFinishVal);  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
+      if (millis() - timer > 500) { // runs the bellow block every second
+        if (ppressureProfileStartBar > ppressureProfileFinishBar) {
+          dimmerOutput+=ppressureProfileStartBar/ppressureProfileFinishBar*2;
+          dimmerNewPowerVal=ppressureProfileStartBar-dimmerOutput; //calculates a new dimmer power value every second given the max and min
+          if (dimmerNewPowerVal<ppressureProfileFinishBar) dimmerNewPowerVal=ppressureProfileFinishBar;  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
           dimmer.setPower(dimmerNewPowerVal);
           myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
-        }else if (pProfileStartVal < pProfileFinishVal) {
-          dimmerOutput+=pProfileFinishVal/pProfileStartVal*2;
-          dimmerNewPowerVal = map(dimmerOutput, 0, 100, pProfileStartVal, pProfileFinishVal); //calculates a new dimmer power value every second given the max and min
-          dimmerNewPowerVal = constrain(dimmerNewPowerVal, pProfileStartVal, pProfileFinishVal);  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
+        }else if (ppressureProfileStartBar < ppressureProfileFinishBar) {
+          dimmerOutput+=ppressureProfileFinishBar/ppressureProfileStartBar*2;
+          dimmerNewPowerVal = map(dimmerOutput, 0, 100, ppressureProfileStartBar, ppressureProfileFinishBar); //calculates a new dimmer power value every second given the max and min
+          if (dimmerNewPowerVal>ppressureProfileFinishBar) dimmerNewPowerVal=ppressureProfileFinishBar;  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
+          // dimmerNewPowerVal = constrain(dimmerNewPowerVal, ppressureProfileStartBar, ppressureProfileFinishBar);  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
           dimmer.setPower(dimmerNewPowerVal);
           myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
         }
@@ -660,20 +661,25 @@ void autoPressureProfile() {
     }
   }else { //Manual preinfusion control
     brewTimer(0);
-    dimmer.setPower(pProfileStartVal);
+    dimmer.setPower(ppressureProfileStartBar);
     timer = millis();
+    phase_2 = false;
+    phase_1=true;
+    dimmerOutput=0;
+    dimmerNewPowerVal=0;
   }
   heatCtrl(); // Keep that water at temp
 }
 
 void manualPressureProfile() {
-  uint8_t power_reading = myNex.readNumber("page0.p_var.val");
+  volatile uint8_t power_reading = myNex.readNumber("page0.p_var.val");
   if (brewState()==true) {
     brewTimer(1);
     dimmer.setPower(power_reading);
   }else {
     brewTimer(0);
   }
+  heatCtrl();
 }
 //#############################################################################################
 //###############################____PREINFUSION_CONTROL____###################################
@@ -689,7 +695,7 @@ void preInfusion(bool c) {
     if (exitPreinfusion == false) {
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         brewTimer(1);
-        dimmer.setPower(dimmerPreinfusionValue);
+        dimmer.setPower(preinfuseBar);
         if ((millis() - timer) > (preinfuseTime*1000)) {
           blink = false;
           timer = millis();
