@@ -89,10 +89,6 @@ void setup() {
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
   dimmer.setPower(dimmerMaxPowerValue);
 
-  // dimmer.begin(TOGGLE_MODE, OFF); //dimmer initialisation: name.begin(MODE, STATE) 
-  // dimmer.toggleSettings(30, 97); //Name.toggleSettings(MIN, MAX);
-  // dimmer.setState(ON); // state: dimmer1.setState(ON/OFF);
-
   // Calibrating the hall current sensor
   sensor.calibrate();
 
@@ -633,25 +629,26 @@ void autoPressureProfile() {
   if (brewState() == true ) { //runs this only when brew button activated and pressure profile selected  
     brewTimer(1);
     if (phase_1 == true) { //enters phase 1
-      if (millis() - timer >  14000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
+      if ((millis() - timer)>8000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
         timer = millis();
       }
       dimmer.setPower(pProfileStartVal);
-      myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
+      myNex.writeNum("page0.n2.val",pProfileStartVal);
     } else if (phase_2 == true) { //enters pahse 2
-      if (millis() - timer > 1000) { // runs the bellow block every second
+      if (millis() - timer > 500) { // runs the bellow block every second
         if (pProfileStartVal > pProfileFinishVal) {
           dimmerOutput+=pProfileStartVal/pProfileFinishVal*2;
-          dimmerNewPowerVal -= dimmerOutput; //calculates a new dimmer power value every second given the max and min
-          dimmerNewPowerVal = constrain(dimmerNewPowerVal, pProfileStartVal, pProfileFinishVal);  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
+          dimmerNewPowerVal=pProfileStartVal-dimmerOutput; //calculates a new dimmer power value every second given the max and min
+          if (dimmerNewPowerVal<pProfileFinishVal) dimmerNewPowerVal=pProfileFinishVal;  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
           dimmer.setPower(dimmerNewPowerVal);
           myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
         }else if (pProfileStartVal < pProfileFinishVal) {
           dimmerOutput+=pProfileFinishVal/pProfileStartVal*2;
           dimmerNewPowerVal = map(dimmerOutput, 0, 100, pProfileStartVal, pProfileFinishVal); //calculates a new dimmer power value every second given the max and min
-          dimmerNewPowerVal = constrain(dimmerNewPowerVal, pProfileStartVal, pProfileFinishVal);  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
+          if (dimmerNewPowerVal>pProfileFinishVal) dimmerNewPowerVal=pProfileFinishVal;  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
+          // dimmerNewPowerVal = constrain(dimmerNewPowerVal, pProfileStartVal, pProfileFinishVal);  // limits range of sensor values to between pProfileStartVal and pProfileFinishVal
           dimmer.setPower(dimmerNewPowerVal);
           myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
         }
@@ -662,6 +659,10 @@ void autoPressureProfile() {
     brewTimer(0);
     dimmer.setPower(pProfileStartVal);
     timer = millis();
+    phase_2 = false;
+    phase_1=true;
+    dimmerOutput=0;
+    dimmerNewPowerVal=0;
   }
   heatCtrl(); // Keep that water at temp
 }
