@@ -39,7 +39,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
     >*Needed to upload the code ".ino" to the arduino ROM*
 
 
-   **Libraries to add:**
+   **Libraries to [add](https://www.arduino.cc/en/Guide/Libraries?setlang=en):**
    
          Library manager:
           - Easy Nextion Library
