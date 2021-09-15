@@ -17,14 +17,20 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Housing - **credits @LikeableBump**
 - [x] Temp control
 - [x] Realtime temp values update
-- [x] Saving set values
+- [x] Saving set values - **PARTIALY DONE**
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
 - [x] Pre-infusion
 - [x] Auto pressure profiling - **IN TESTING**
 - [x] Manual pressure control
+- [x] Auto shot timer
+
 ##### << Ideas are welcome in the Issues tab >>
+
+#### As part of considerably upgrading the project i've taken it upon me to bring a new UI as well, hopefully nicer than the old one:
+<img src="https://db3pap006files.storage.live.com/y4mVSHlwib9lZho2UFEGaXuhEy_-udrWos8DhK9nqyGQbwSvrOUYjv0LZC3yKIGTdN1iR0A8a5hdYz6-Xq12ut8ZEBgyX5ga4AsGR9KCVaGB8NN4OetwCOO4OxejVb2VB2eXID9eFXlfLk30IR4-x88ahRgCHiXFpZhCvF7N6RTa_V8Uh0mz0ByTsM76aumAk7s?width=401&height=302&cropmode=none" width="401" height="302" />  <img src="https://db3pap006files.storage.live.com/y4mWHmyHeLZ_L2xH19oGMsCGnuIv1RTazI_KQWbprL7pSqFU8Hkb0r0GE6DU_kXJyRB9CkVyu0Uv8ZRK7mrzjWs1xqoLwWV2aUYg_Dt-iz-a5Osed4kXEoBT9FxsEVseMKzKibCoxANqcue7C7dT6lJzMe5TsiJ7M_WIWUiXtkoA_OKYHJZGg_0x2S8tA08sNni?width=401&height=305&cropmode=none" width="401" height="305" />  <img src="https://db3pap006files.storage.live.com/y4mL4BllGyh_Zqmajbi48A0v5Zwq5kEkGuf3bEk9v4wNJTjE865qde3oRMdm6bkKzcLFfRc5jlNGNKY0gOIFiQOqJxk-EmjlBqpJKqsN8JbwDtH3rEQJd85wrrb9nsEbG3JkxYRRcEPvgpkHg8EKZcLH7vfzxPzhIL5Q1BG8GtKr6TiMD9PMcyh8-j7xkyNOJ7Z?width=403&height=302&cropmode=none" width="403" height="302" />  <img src="https://db3pap006files.storage.live.com/y4mcMSHHBr1BWmGxc_6W-2UpFuMFAnS2qKIDRM_qVqnGfqbO6dEQzzVYEK9mweS209LblIZYIfRJQ53zNb35vcmkHp6ptnzkVEc_Q07CKfqluRRFNFSwJgjOB1ahEyNbMdulsc7pyxBUmZeEzQrrF2DjHRMNWyvMqGkX-CcffIWk_qDQlQJGxxtjhn1L1a-2uF-?width=402&height=302&cropmode=none" width="402" height="302" />  <img src="https://db3pap006files.storage.live.com/y4mWqoKtmta3flPxER2MCJEdT1bMzWQ9oUce4_vr1rBbFThnBdSGI5qrsblWxVnfNoIkkb-FRfdP0ZxzX_WwS5rd7RuUD2sOhz3Wnj7U1y7QVEIzlj5T3C_khz-vyR9iCoruiC4CDr6AEYJL5FKZUT-F2_LQz4uWZJXvR4Ze8ylmlNx5NXFXP4RPUmFgVKbe1lb?width=402&height=305&cropmode=none" width="402" height="305" />
+
 
 # **PROJECT REQUIREMENTS**
 
