@@ -38,6 +38,12 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
  * HPWR        - sets the relay start pulse length
  * M.C.DIV     - sets the main cycle divider(aka non brew heating beahaviour), used in conjunction with HPWR
  * B.C.DIV     - sets the brew cycle divider
+ * PREINFUSION - sets the preinfusion length and pressure
+ * P-PROFILING - enables either AUTO or MAN ressure profiling mode
+
+       AUTO     - sets the profiling trend incremental or decremental (can be combined with preinfusion )
+       MAN      - allows for manual pressure control at brew time
+ * DESCALE     - enables the descaling program, at this point there's only one default behaviour (10s x 5 times at 2bar, 20s x5 at 1 bar, 5min at 0 bar)
 
 
 # **PROJECT REQUIREMENTS**
