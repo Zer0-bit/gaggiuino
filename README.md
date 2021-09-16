@@ -26,6 +26,8 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Manual pressure control
 - [x] Auto shot timer
 
+>Note: Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy for the time being.
+
 ##### << Ideas are welcome in the Issues tab >>
 
 #### As part of considerably upgrading the project i've taken it upon me to bring a new UI as well, hopefully nicer than the old one:
@@ -43,7 +45,13 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 
        AUTO     - sets the profiling trend incremental or decremental (can be combined with preinfusion )
        MAN      - allows for manual pressure control at brew time
- * DESCALE     - enables the descaling program, at this point there's only one default behaviour (10s x 5 times at 2bar, 20s x5 at 1 bar, 5min at 0 bar)
+ * DESCALE     - enables the descaling program, at this point there's only one default behaviour:
+
+         flush - 10s x 5 at 2bar
+         flush - 20s x5 at 1 bar
+         idle  - 5min at 0 bar
+
+
 
 
 # **PROJECT REQUIREMENTS**
