@@ -167,7 +167,6 @@ void loop() {
   modeSelect();
   screenRefresh();
   pageValuesRefresh();
-  // brewCycleTracker();
 }
 
 //##############################################################################################################################
@@ -624,11 +623,6 @@ void autoPressureProfile() {
   static unsigned long timer = millis();
   static uint8_t dimmerOutput;
   static uint8_t dimmerNewPowerVal;
-  
-  // bool tmp = myNex.readNumber("page2.c2.val");
-  //DEBUG READ VALUES
-  // myNex.writeNum("page0.n2.val", ppressureProfileStartBar);
-  //END DEBUG 
 
   if (brewState() == true ) { //runs this only when brew button activated and pressure profile selected  
     brewTimer(1);
@@ -692,7 +686,7 @@ void preInfusion(bool c) {
   static unsigned long timer = millis();
 
   if (brewState() == true && c == true) {
-    if (exitPreinfusion == false) {
+    if (exitPreinfusion == false) { //main preinfusion body
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         brewTimer(1);
         dimmer.setPower(preinfuseBar);
@@ -709,13 +703,14 @@ void preInfusion(bool c) {
           timer = millis();
         }
       }
-    }else if(exitPreinfusion == true && pressureProfileCheckBox == false){
+    }else if(exitPreinfusion == true && pressureProfileCheckBox == false){ // just preinfusion
       brewTimer(1);
       dimmer.setPower(dimmerMaxPowerValue);
-    }else {
+    }else if(exitPreinfusion == true && pressureProfileCheckBox == true){ // preinfusion with pressure profiling on
       preinfusionFinished = true;
-    } 
-  }else if(brewState() == false && c == true) {
+      dimmer.setPower(ppressureProfileStartBar);
+    }
+  }else if(brewState() == false && c == true) { //resetting all the values
     brewTimer(0);
     exitPreinfusion = false;
     timer = millis();
