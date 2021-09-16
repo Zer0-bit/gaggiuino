@@ -39,7 +39,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
  * M.C.DIV     - sets the main cycle divider(aka non brew heating beahaviour), used in conjunction with HPWR
  * B.C.DIV     - sets the brew cycle divider
  * PREINFUSION - sets the preinfusion length and pressure
- * P-PROFILING - enables either AUTO or MAN ressure profiling mode
+ * P-PROFILING - enables either AUTO or MAN pressure profiling mode
 
        AUTO     - sets the profiling trend incremental or decremental (can be combined with preinfusion )
        MAN      - allows for manual pressure control at brew time
@@ -70,7 +70,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
     >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
 ### **Hardware requirements:**
-###### The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality companent type
+###### The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality component type
 
 1. [Arduino Nano](https://bit.ly/3eXSfXZ)  **[BASE]**
     >*Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
