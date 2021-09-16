@@ -25,11 +25,6 @@
 #define dimmerDescaleMinValue 40
 #define dimmerDescaleMaxValue 50
 
-//RAM debug
-extern unsigned int __bss_end;
-extern unsigned int __heap_start;
-extern void *__brkval;
-
 
 //Init the thermocouple with the appropriate pins defined above with the prefix "thermo"
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
@@ -38,7 +33,7 @@ EasyNex myNex(Serial);
 //Init the ACS712 hall sensor
 ACS712 sensor(ACS712_20A, brewSwitchPin);
 // RobotDYN Dimmer object init
-dimmerLamp dimmer(dimmerPin); //initialase port for dimmer for MEGA, Leonardo, UNO, Arduino M0, Arduino Zero
+dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 
 
 
@@ -74,8 +69,8 @@ uint16_t  EEP_M_DIVIDER = 60;
 uint16_t  EEP_B_DIVIDER = 80;
 uint16_t  EEP_P_START = 100;
 uint16_t  EEP_P_FINISH = 120;
-uint16_t  EEP_P_AUTO = 140;
-uint16_t  EEP_P_MANUAL = 160;
+uint16_t  EEP_PREINFUSION = 140;
+uint16_t  EEP_P_PROFILE = 160;
 
 
 void setup() {
@@ -111,14 +106,14 @@ void setup() {
     EEPROM.put(EEP_HPWR, 550);
     EEPROM.put(EEP_M_DIVIDER, 5);
     EEPROM.put(EEP_B_DIVIDER, 2);
+    EEPROM.put(EEP_PREINFUSION, 0);
     EEPROM.put(EEP_P_START, 9);
     EEPROM.put(EEP_P_FINISH, 5);
-    EEPROM.put(EEP_P_AUTO, 0);
-    EEPROM.put(EEP_P_MANUAL, 0);
+    EEPROM.put(EEP_P_PROFILE, 0);
   }
   // Applying our saved EEPROM saved values
   uint16_t init_val;
-  // Making sure we're getting the right values and sending them to the LCD module
+  // Loading the saved values fro EEPROM and sending them to the LCD
 
   EEPROM.get(EEP_SETPOINT, init_val);
   if ( init_val > 0 && init_val != NULL ) myNex.writeNum("page1.n0.val", init_val);
@@ -141,11 +136,11 @@ void setup() {
   EEPROM.get(EEP_P_FINISH, init_val);
   if (  init_val > 1 && init_val != NULL ) myNex.writeNum("page2.n1.val", init_val);
 
-  EEPROM.get(EEP_P_AUTO, init_val);
-  if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) myNex.writeNum("page2.c3.val", init_val);
+  EEPROM.get(EEP_PREINFUSION, init_val);
+  if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) myNex.writeNum("page2.c0.val", init_val);
 
-  EEPROM.get(EEP_P_MANUAL, init_val);
-  if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) myNex.writeNum("page2.c4.val", init_val);
+  EEPROM.get(EEP_P_PROFILE, init_val);
+  if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) myNex.writeNum("page2.c2.val", init_val);
 
  myNex.writeStr("page 0");
  delay(10);
@@ -215,10 +210,10 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start and su
     if ( preinfusionCheckBox < 0 || preinfusionCheckBox > 1 ) preinfusionCheckBox = myNex.readNumber("page2.c0.val");
 
     pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
-    if ( pressureProfileCheckBox < 0 || pressureProfileCheckBox > 1 ) pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
-
-    selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
-    if (selectedOperationalMode < 0 || selectedOperationalMode > 7) selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
+    if ( pressureProfileCheckBox < 0 || pressureProfileCheckBox > 1 ) {
+      pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
+      if ( pressureProfileCheckBox > 0) myNex.writeNum("page2.c3.val",1); //enabling auto pressure profiling as a default when pressure profile checkbox selected
+    }
 
     preinfuseTime = myNex.readNumber("page2.n3.val");
     if (preinfuseTime < 0 || preinfuseTime > 10) preinfuseTime = myNex.readNumber("page2.n3.val");
@@ -230,6 +225,10 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start and su
     if (ppressureProfileStartBar < 0 || ppressureProfileStartBar > 97) ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
     ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
     if (ppressureProfileFinishBar < 0 || ppressureProfileFinishBar > 97) ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
+
+
+    selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
+    if (selectedOperationalMode < 0 || selectedOperationalMode > 7) selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
     POWER_ON = false;
@@ -454,8 +453,8 @@ void trigger1() {
   uint8_t savedBrewCycleDivider = myNex.readNumber("page1.n3.val");
   uint8_t savedPPStart = myNex.readNumber("page2.n0.val");
   uint8_t savedPPFinish = myNex.readNumber("page2.n1.val");
-  uint8_t savedAutoPP = myNex.readNumber("page2.c3.val");
-  uint8_t savedManPP = myNex.readNumber("page2.c4.val");
+  uint8_t savedPreinfusion = myNex.readNumber("page2.c0.val");
+  uint8_t savedPProfile = myNex.readNumber("page2.c2.val");
   uint8_t allValuesUpdated = 0;
 
   if (EEP_SETPOINT >= 19 ) EEP_SETPOINT = 1;
@@ -465,8 +464,8 @@ void trigger1() {
   if (EEP_B_DIVIDER >= 99 ) EEP_B_DIVIDER = 80;
   if (EEP_P_START >= 119) EEP_P_START = 100;
   if (EEP_P_FINISH >= 139) EEP_P_FINISH = 120;
-  if (EEP_P_AUTO >= 159) EEP_P_AUTO = 140;
-  if (EEP_P_MANUAL >= 179) EEP_P_MANUAL = 160;
+  if (EEP_PREINFUSION >= 159) EEP_PREINFUSION = 140;
+  if (EEP_P_PROFILE >= 179) EEP_P_PROFILE = 160;
 
   // Reading the LCD side set values
   if (savedBoilerTemp != NULL && savedBoilerTemp > 0) { 
@@ -525,19 +524,19 @@ void trigger1() {
     myNex.writeStr("page popupMSG");
     delay(5);
   }
-  if (!(savedAutoPP < 0) || savedAutoPP != NULL ) {
-    EEPROM.put(EEP_P_AUTO, savedAutoPP);
+  if (!(savedPreinfusion < 0) || savedPreinfusion != NULL ) {
+    EEPROM.put(EEP_PREINFUSION, savedPreinfusion);
     allValuesUpdated++;
   }else {
-    myNex.writeStr("popupMSG.t0.txt", ("AUTO PP ERROR!"));
+    myNex.writeStr("popupMSG.t0.txt", ("PREINFUSION ERROR!"));
     myNex.writeStr("page popupMSG");
     delay(5);
   }
-  if ( !(savedManPP < 0) || savedManPP != NULL ) {
-    EEPROM.put(EEP_P_MANUAL, savedManPP);
+  if (!(savedPProfile < 0) || savedPProfile != NULL ) {
+    EEPROM.put(EEP_P_PROFILE, savedPProfile);
     allValuesUpdated++;
   }else {
-    myNex.writeStr("popupMSG.t0.txt", ("MANUAL PP ERROR!"));
+    myNex.writeStr("popupMSG.t0.txt", ("P-PROFILE ERROR!"));
     myNex.writeStr("page popupMSG");
     delay(5);
   }
@@ -635,15 +634,15 @@ void autoPressureProfile() {
       dimmer.setPower(ppressureProfileStartBar);
       myNex.writeNum("page0.n2.val",ppressureProfileStartBar);
     } else if (phase_2 == true) { //enters pahse 2
-      if (millis() - timer > 500) { // runs the below block every second
+      if (millis() - timer > 500) { // runs the below block every half second
         if (ppressureProfileStartBar > ppressureProfileFinishBar) {
-          dimmerOutput+=ppressureProfileStartBar/ppressureProfileFinishBar*2;
+          dimmerOutput+=round(ppressureProfileStartBar/ppressureProfileFinishBar)*2;
           dimmerNewPowerVal=ppressureProfileStartBar-dimmerOutput; //calculates a new dimmer power value every second given the max and min
           if (dimmerNewPowerVal<ppressureProfileFinishBar) dimmerNewPowerVal=ppressureProfileFinishBar;  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
           dimmer.setPower(dimmerNewPowerVal);
           myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
         }else if (ppressureProfileStartBar < ppressureProfileFinishBar) {
-          dimmerOutput+=ppressureProfileFinishBar/ppressureProfileStartBar*2;
+          dimmerOutput+=round(ppressureProfileFinishBar/ppressureProfileStartBar)*2;
           dimmerNewPowerVal = map(dimmerOutput, 0, 100, ppressureProfileStartBar, ppressureProfileFinishBar); //calculates a new dimmer power value every second given the max and min
           if (dimmerNewPowerVal>ppressureProfileFinishBar) dimmerNewPowerVal=ppressureProfileFinishBar;  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
           // dimmerNewPowerVal = constrain(dimmerNewPowerVal, ppressureProfileStartBar, ppressureProfileFinishBar);  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
@@ -724,15 +723,4 @@ void preInfusion(bool c) {
     timer = millis();
   }
   heatCtrl(); //keeping it at temp
-}
-
-
-uint16_t getFreeSram() {
-  uint8_t newVariable;
-  // heap is empty, use bss as start memory address
-  if ((uint16_t)__brkval == 0)
-    return (((uint16_t)&newVariable) - ((uint16_t)&__bss_end));
-  // use heap end as the start of the memory address
-  else
-    return (((uint16_t)&newVariable) - ((uint16_t)__brkval));
 }
