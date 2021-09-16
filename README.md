@@ -45,7 +45,13 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 
        AUTO     - sets the profiling trend incremental or decremental (can be combined with preinfusion )
        MAN      - allows for manual pressure control at brew time
- * DESCALE     - enables the descaling program, at this point there's only one default behaviour (10s x 5 times at 2bar, 20s x5 at 1 bar, 5min at 0 bar)
+ * DESCALE     - enables the descaling program, at this point there's only one default behaviour:
+
+         flush - 10s x 5 at 2bar
+         flush - 20s x5 at 1 bar
+         idle  - 5min at 0 bar
+
+
 
 
 # **PROJECT REQUIREMENTS**
