@@ -22,7 +22,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Steaming alert
 - [x] Brew start sense
 - [x] Pre-infusion
-- [x] Auto pressure profiling - **IN TESTING**
+- [x] Auto pressure profiling
 - [x] Manual pressure control
 - [x] Auto shot timer
 
