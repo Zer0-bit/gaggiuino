@@ -624,7 +624,7 @@ void autoPressureProfile() {
   static uint8_t dimmerOutput;
   static uint8_t dimmerNewPowerVal;
 
-  if (brewState() == true ) { //runs this only when brew button activated and pressure profile selected  
+  if (brewState() == true) { //runs this only when brew button activated and pressure profile selected  
     brewTimer(1);
     if (phase_1 == true) { //enters phase 1
       if ((millis() - timer)>8000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
@@ -653,9 +653,17 @@ void autoPressureProfile() {
         timer = millis();
       } 
     }
-  }else { //Manual preinfusion control
+  }else if (brewState() == false && selectedOperationalMode == 1) { //Manual preinfusion control
     brewTimer(0);
     dimmer.setPower(ppressureProfileStartBar);
+    timer = millis();
+    phase_2 = false;
+    phase_1=true;
+    dimmerOutput=0;
+    dimmerNewPowerVal=0;
+  }else if (brewState() == false && selectedOperationalMode == 4) { //Manual preinfusion control
+    brewTimer(0);
+    preinfusionFinished = false;
     timer = millis();
     phase_2 = false;
     phase_1=true;
@@ -685,7 +693,7 @@ void preInfusion(bool c) {
   static bool exitPreinfusion;
   static unsigned long timer = millis();
 
-  if (brewState() == true && c == true) {
+  if (brewState() == true) {
     if (exitPreinfusion == false) { //main preinfusion body
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         brewTimer(1);
@@ -710,11 +718,10 @@ void preInfusion(bool c) {
       preinfusionFinished = true;
       dimmer.setPower(ppressureProfileStartBar);
     }
-  }else if(brewState() == false && c == true) { //resetting all the values
+  }else { //resetting all the values
     brewTimer(0);
     exitPreinfusion = false;
     timer = millis();
-    preinfusionFinished = false;
   }
   heatCtrl(); //keeping it at temp
 }
