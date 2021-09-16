@@ -82,7 +82,7 @@ void setup() {
   
   Serial.begin(115200); // switching our board to the new serial speed
 
-  // To debug correct work of the bellow feature later
+  // To debug correct work of the below feature later
   // attachInterrupt(digitalPinToInterrupt(dimmerPin), dimmerInterrupt, CHANGE);
 
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
@@ -159,7 +159,7 @@ void setup() {
 //##############################################################################################################################
 
 
-//Main loop where all the bellow logic is continuously run
+//Main loop where all the below logic is continuously run
 void loop() {
   Power_ON_Values_Refresh();
   myNex.NextionListen();
@@ -324,10 +324,10 @@ void modeSelect() {
 //#############################################################################################
 //#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
 //#############################################################################################
-// The temperature, preinfusion, dimming, LCD update, etc control logic is all in the bellow functions
+// The temperature, preinfusion, dimming, LCD update, etc control logic is all in the below functions
 void justDoCoffee() {
   uint8_t HPWR_LOW= HPWR/MainCycleDivider;
-  // Calculating the boiler heating power range based on the bellow input values
+  // Calculating the boiler heating power range based on the below input values
   HPWR_OUT = map(currentTempReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to between 110 and 550
 
@@ -370,7 +370,7 @@ void justDoCoffee() {
 //#############################################################################################
 void heatCtrl() {
   uint8_t HPWR_LOW= HPWR/MainCycleDivider;
-  // Calculating the boiler heating power range based on the bellow input values
+  // Calculating the boiler heating power range based on the below input values
   HPWR_OUT = map(currentTempReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to between 110 and 550
 
@@ -583,7 +583,7 @@ void deScale(bool c) {
   static unsigned long timer = millis();
   static int i = 0;
   if (c == true) {
-    if (i < 6) { // descale in cycles for 5 times then wait according to the bellow condition
+    if (i < 6) { // descale in cycles for 5 times then wait according to the below condition
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         dimmer.setPower(dimmerDescaleMaxValue);
         if (millis() - timer > 10000) { //set dimmer power to max descale value for 10 sec
@@ -635,7 +635,7 @@ void autoPressureProfile() {
       dimmer.setPower(ppressureProfileStartBar);
       myNex.writeNum("page0.n2.val",ppressureProfileStartBar);
     } else if (phase_2 == true) { //enters pahse 2
-      if (millis() - timer > 500) { // runs the bellow block every second
+      if (millis() - timer > 500) { // runs the below block every second
         if (ppressureProfileStartBar > ppressureProfileFinishBar) {
           dimmerOutput+=ppressureProfileStartBar/ppressureProfileFinishBar*2;
           dimmerNewPowerVal=ppressureProfileStartBar-dimmerOutput; //calculates a new dimmer power value every second given the max and min
