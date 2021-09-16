@@ -6,10 +6,10 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 
 #### SUCCESSFUL INSTALLS:
 
-   Machine            | PHOTOS
-   -------------------|---------------------------------
-   Gaggia Classic     | TBD
-   Gaggia Classic Pro | https://imgur.com/gallery/SF3zP0b
+   MODEL              |    YEAR   |  VOLTAGE   |PHOTOS
+   -------------------|-----------|------------|--------
+   Gaggia Classic | 2012 | 240v     | https://bit.ly/2Xv1fiv
+   Gaggia Classic Pro | 2019 | 115V | https://imgur.com/gallery/SF3zP0b
    
 
 #### Features / Completeness 
