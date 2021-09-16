@@ -26,6 +26,8 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Manual pressure control
 - [x] Auto shot timer
 
+>Note: Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy for the time being.
+
 ##### << Ideas are welcome in the Issues tab >>
 
 #### As part of considerably upgrading the project i've taken it upon me to bring a new UI as well, hopefully nicer than the old one:
