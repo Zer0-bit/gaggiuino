@@ -26,7 +26,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Manual pressure control
 - [x] Auto shot timer
 
->Note: Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy for the time being.
+>Note: Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy, for the time being pressure was calculated according to water flow.
 
 ##### [<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)
 
