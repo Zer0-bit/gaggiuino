@@ -72,7 +72,7 @@ uint16_t  EEP_P_FINISH = 120;
 uint16_t  EEP_PREINFUSION = 140;
 uint16_t  EEP_P_PROFILE = 160;
 uint8_t   EEP_PREINFUSION_SEC = 180;
-uint8_t   EEP_PREINFUSION_BAR = 182;
+uint8_t   EEP_PREINFUSION_BAR = 190;
 
 
 void setup() {
@@ -144,7 +144,10 @@ void setup() {
   if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) myNex.writeNum("page2.c0.val", init_val);
 
   EEPROM.get(EEP_P_PROFILE, init_val);
-  if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) myNex.writeNum("page2.c2.val", init_val);
+  if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) {
+    myNex.writeNum("page2.c2.val", init_val);
+    if (init_val == 1) myNex.writeNum("page2.c3.val",1);
+  }
 
   EEPROM.get(EEP_PREINFUSION_SEC, init_val);
   if (  !(init_val < 0) && init_val < 11 && init_val != NULL ) myNex.writeNum("page2.h1.val", init_val);
@@ -152,17 +155,16 @@ void setup() {
   EEPROM.get(EEP_PREINFUSION_BAR, init_val);
   if (  !(init_val < 0) && init_val < 98 && init_val != NULL ) myNex.writeNum("page2.preinf_pwr.val", init_val);
 
-  if (myNex.readNumber("page2.c0.val")==true && myNex.readNumber("page2.c2.val")==false && myNex.readNumber("page2.c1.val")==false) myNex.writeNum("page2.mode_select.val",0);
-  else if (myNex.readNumber("page2.c0.val")==false && myNex.readNumber("page2.c2.val")==true && myNex.readNumber("page2.c1.val")==false) myNex.writeNum("page2.mode_select.val",1);
-  else if (myNex.readNumber("page2.c0.val")==true && myNex.readNumber("page2.c2.val")==true && myNex.readNumber("page2.c1.val")==false) myNex.writeNum("page2.mode_select.val",4);
-  else if (myNex.readNumber("page2.c1.val")==true) myNex.writeNum("page2.mode_select.val",3);
-  else myNex.writeNum("page2.mode_select.val",10);
+  if (myNex.readNumber("page2.c0.val")==1 && myNex.readNumber("page2.c2.val")==0 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",0);
+  if (myNex.readNumber("page2.c0.val")==0 && myNex.readNumber("page2.c2.val")==1 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",1);
+  if (myNex.readNumber("page2.c0.val")==1 && myNex.readNumber("page2.c2.val")==1 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",4);
+  if (myNex.readNumber("page2.c1.val")==1) myNex.writeNum("page0.mode_select.val",3);
+  if (myNex.readNumber("page2.c0.val")==0 && myNex.readNumber("page2.c2.val")==0 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",10);
 
- myNex.writeStr("page 0");
- delay(10);
- myNex.lastCurrentPageId = 1;
- delay(5);
- POWER_ON = true;
+  myNex.writeStr("page 0");
+  myNex.lastCurrentPageId = 1;
+  delay(5);
+  POWER_ON = true;
 }
 
 //##############################################################################################################################
@@ -243,8 +245,8 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start and su
     if (ppressureProfileFinishBar < 0 || ppressureProfileFinishBar > 97) ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
 
     // MODE_SELECT should always be last
-    selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
-    if (selectedOperationalMode < 0 || selectedOperationalMode > 7) selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
+    selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
+    if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
     POWER_ON = false;
@@ -295,8 +297,8 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     if (ppressureProfileFinishBar < 0 || ppressureProfileFinishBar > 97) ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
 
     // MODE_SELECT should always be last
-    selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
-    if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("page2.mode_select.val");
+    selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
+    if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
   }
