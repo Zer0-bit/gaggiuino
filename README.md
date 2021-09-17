@@ -26,7 +26,9 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Manual pressure control
 - [x] Auto shot timer
 
->Note: Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy, for the time being pressure was calculated according to water flow.
+>Note on pressure:
+>1. It is expected your OPV has been tuned to 9bar by default.
+>2. Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy, for the time being pressure was calculated according to water flow.
 
 ##### [<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)
 
@@ -94,8 +96,8 @@ No| BREW MODE   | DESCRIPTION
 3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
 4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
 5. [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
-6. *NEW Functionality* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
-7. *NEW Functionality* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
+6. [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
+7. [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
 8. [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 9. [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
 10. [5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
