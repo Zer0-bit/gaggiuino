@@ -100,9 +100,9 @@ void setup() {
 
 
   //If it's the first boot we'll need to set some defaults
-  if (EEPROM.read(0) != 252 || EEPROM.read(EEP_SETPOINT) == NULL || EEPROM.read(EEP_SETPOINT) == 65535) {
+  if (EEPROM.read(0) != 253 || EEPROM.read(EEP_SETPOINT) == NULL || EEPROM.read(EEP_SETPOINT) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
-    EEPROM.put(0, 252);
+    EEPROM.put(0, 253);
     EEPROM.put(EEP_SETPOINT, 101);
     EEPROM.put(EEP_OFFSET, 7);
     EEPROM.put(EEP_HPWR, 550);
@@ -112,49 +112,50 @@ void setup() {
     EEPROM.put(EEP_P_START, 9);
     EEPROM.put(EEP_P_FINISH, 5);
     EEPROM.put(EEP_P_PROFILE, 0);
-    EEPROM.put(EEP_PREINFUSION_SEC, 5);
+    EEPROM.put(EEP_PREINFUSION_SEC, 8);
     EEPROM.put(EEP_PREINFUSION_BAR, 2);
   }
   // Applying our saved EEPROM saved values
   uint16_t init_val;
   // Loading the saved values fro EEPROM and sending them to the LCD
 
-  EEPROM.get(EEP_SETPOINT, init_val);
+  EEPROM.get(EEP_SETPOINT, init_val);// reading setpoint value from eeprom
   if ( init_val > 0 && init_val != NULL ) myNex.writeNum("page1.n0.val", init_val);
 
-  EEPROM.get(EEP_OFFSET, init_val);
+  EEPROM.get(EEP_OFFSET, init_val); // reading offset value from eeprom
   if ( init_val > 0 && init_val != NULL ) myNex.writeNum("page1.n1.val", init_val);
 
-  EEPROM.get(EEP_HPWR, init_val);
+  EEPROM.get(EEP_HPWR, init_val);//reading HPWR value from eeprom
   if (  init_val > 0 && init_val != NULL ) myNex.writeNum("page1.n2.val", init_val);
 
-  EEPROM.get(EEP_M_DIVIDER, init_val);
+  EEPROM.get(EEP_M_DIVIDER, init_val);//reading main cycle div from eeprom
   if ( init_val > 1 && init_val != NULL ) myNex.writeNum("page1.n4.val", init_val);
 
-  EEPROM.get(EEP_B_DIVIDER, init_val);
+  EEPROM.get(EEP_B_DIVIDER, init_val);//reading brew cycle div from eeprom
   if (  init_val > 1 && init_val != NULL ) myNex.writeNum("page1.n3.val", init_val);
 
-  EEPROM.get(EEP_P_START, init_val);
+  EEPROM.get(EEP_P_START, init_val);//reading pressure profile start value from eeprom
   if (  init_val > 1 && init_val != NULL ) myNex.writeNum("page2.n0.val", init_val);
 
-  EEPROM.get(EEP_P_FINISH, init_val);
+  EEPROM.get(EEP_P_FINISH, init_val);// reading pressure profile finish value from eeprom
   if (  init_val > 1 && init_val != NULL ) myNex.writeNum("page2.n1.val", init_val);
 
-  EEPROM.get(EEP_PREINFUSION, init_val);
+  EEPROM.get(EEP_PREINFUSION, init_val);//reading preinfusion checkbox value from eeprom
   if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) myNex.writeNum("page2.c0.val", init_val);
 
-  EEPROM.get(EEP_P_PROFILE, init_val);
+  EEPROM.get(EEP_P_PROFILE, init_val);//reading pressure profile checkbox value from eeprom
   if (  !(init_val < 0) && init_val < 2 && init_val != NULL ) {
     myNex.writeNum("page2.c2.val", init_val);
     if (init_val == 1) myNex.writeNum("page2.c3.val",1);
   }
 
-  EEPROM.get(EEP_PREINFUSION_SEC, init_val);
+  EEPROM.get(EEP_PREINFUSION_SEC, init_val);//reading preinfusion time value from eeprom
   if (  !(init_val < 0) && init_val < 11 && init_val != NULL ) myNex.writeNum("page2.h1.val", init_val);
 
-  EEPROM.get(EEP_PREINFUSION_BAR, init_val);
+  EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
   if (  !(init_val < 0) && init_val < 98 && init_val != NULL ) myNex.writeNum("page2.preinf_pwr.val", init_val);
 
+//loading the correct operating mode according to the previoisly loaded values
   if (myNex.readNumber("page2.c0.val")==1 && myNex.readNumber("page2.c2.val")==0 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",0);
   if (myNex.readNumber("page2.c0.val")==0 && myNex.readNumber("page2.c2.val")==1 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",1);
   if (myNex.readNumber("page2.c0.val")==1 && myNex.readNumber("page2.c2.val")==1 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",4);
