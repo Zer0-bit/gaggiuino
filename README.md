@@ -17,7 +17,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 - [x] Housing - **credits @LikeableBump**
 - [x] Temp control
 - [x] Realtime temp values update
-- [x] Saving set values - **80% COMPLETE**
+- [x] Saving set values - **95% COMPLETE**
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
