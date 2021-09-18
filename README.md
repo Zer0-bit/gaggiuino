@@ -103,17 +103,16 @@ No| BREW MODE   | DESCRIPTION
 10. [5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
     >*I used an old mobile charger i had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
 
+### Housing :
+ * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
+     >Designed by the redditor [/u/LikeableBump1](https://www.reddit.com/r/gaggiaclassic/comments/phzyis/gaggia_with_arduino_pid_in_3d_printed_case/)
+
+
 **Optional:**
  * [Heat shrink](https://bit.ly/2PQdnqt)
- * [U-shaped Parallel Terminal](https://bit.ly/3h8phaF)  - These are in case you're choosing not to solder
- * [Soldering iron](https://bit.ly/3tijlOI) - the one i bought for my soldering needs,  seems to do a great job
- * [Nextion LCD case](https://bit.ly/3b2nxf7)
- * [Magnet sheet](https://bit.ly/3xKTMJn)
+ * [Soldering iron](https://bit.ly/3tijlOI) 
+    >I bought it for my soldering needs, seems to do a great job, it's important to not leave it ON while not in use as the heating element will get damaged.
 
-
- ## The housing for all of the above hardware has been designed and provided kindly by @LikeableBump and can be found on thingiverse by following the link below:
- 
-   [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
 
 ***!! WARNING !!***
 >*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it, only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the below guide i cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
