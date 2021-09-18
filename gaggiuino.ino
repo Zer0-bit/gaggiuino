@@ -37,6 +37,10 @@ dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 
 
 
+//Change these values if your tests show the dimmer should be tuned
+// BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
+// DIM -30-|45-|50-|57-|65-|72-|78-|83-|90-|97
+int BAR_TO_DIMMER_OUTPUT[10]={30,45,50,57,65,72,78,83,90,97};
 
 // Some vars are better global
 float currentTempReadValue = 0.0;
@@ -146,10 +150,16 @@ void setup() {
   if (  init_val > 1 ) myNex.writeNum("page1.n3.val", init_val);
 
   EEPROM.get(EEP_P_START, init_val);//reading pressure profile start value from eeprom
-  if (  init_val > 1 ) myNex.writeNum("page2.n0.val", init_val);
+  if (  init_val > 1 ) {
+    myNex.writeNum("page2.n0.val", init_val);
+    myNex.writeNum("page2.pps_var.val", BAR_TO_DIMMER_OUTPUT[init_val]);
+  }
 
   EEPROM.get(EEP_P_FINISH, init_val);// reading pressure profile finish value from eeprom
-  if (  init_val > 1 ) myNex.writeNum("page2.n1.val", init_val);
+  if (  init_val > 1 ) {
+    myNex.writeNum("page2.n1.val", init_val);
+    myNex.writeNum("page2.ppf_var.val", BAR_TO_DIMMER_OUTPUT[init_val]);
+  }
 
   EEPROM.get(EEP_DESCALE, init_val);//reading preinfusion checkbox value from eeprom
   if (  !(init_val < 0) && init_val < 2 ) myNex.writeNum("page2.c1.val", init_val);
