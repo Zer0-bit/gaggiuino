@@ -1,9 +1,9 @@
-# GAGGIUINO #
+# GAGGIUINO
 [![Compile Sketch](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg)](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml)
-
+***
 <!-- <img src = "/images/PXL_20210525_144343463.jpg" width = 500 height =700> -->
 Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.
-
+***
 #### SUCCESSFUL INSTALLS:
 
    MODEL              |    YEAR   |  VOLTAGE   |PHOTOS
@@ -11,7 +11,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
    Gaggia Classic | 2012 | 240v     | https://bit.ly/2Xv1fiv
    Gaggia Classic Pro | 2019 | 115V | https://imgur.com/gallery/SF3zP0b
    
-
+***
 #### Features / Completeness 
 
 - [x] Housing - **credits @LikeableBump**
@@ -251,3 +251,5 @@ So you end up having them connected like this:
 
 2. Installing the RobotDYN dimmer module.
 <img src="https://db3pap006files.storage.live.com/y4mC6f3vykKE40Z3FnrvrwriXgztoGaPAV_PoeIreyugKLhfK58o9KyQo1mANet1k-s0EZ2Shp6a1P6dEv13bQBIGwZKyxHMuIoPMJTO4GjAzESpHOXRNeBMtV5rZ8qGRWoPKVo13ahvh0V9hAYXGdPs5Zp7KpXnCSwjA2xiSqODEEy0y9d5zVJRxJAL1ovjVgB?width=1920&height=1080&cropmode=none" width="810" height="520" />
+
+>Once installed tests can be done to verify the dimmer output is the expected one, this will require having either a [portafilter gauge](https://www.amazon.co.uk/Portafilter-Pressure-Espresso-Machines-ESPRESS/dp/B00ONTGKNA) or a [internally mounted gauge](https://www.ebay.com/itm/401980168959?hash=item5d97e29aff:g:fugAAOSwzkRd4~Jl).
