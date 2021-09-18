@@ -58,6 +58,8 @@ uint8_t preinfuseBar;
 uint8_t ppressureProfileStartBar;
 uint8_t ppressureProfileFinishBar;
 uint8_t selectedOperationalMode;
+uint8_t regionVolts;
+uint8_t regionHz;
 unsigned long thermoTimer = millis();
 
 // Declaring local vars
@@ -73,6 +75,8 @@ uint16_t  EEP_PREINFUSION = 140;
 uint16_t  EEP_P_PROFILE = 160;
 uint8_t   EEP_PREINFUSION_SEC = 180;
 uint8_t   EEP_PREINFUSION_BAR = 190;
+uint8_t   EEP_REGPWR_V = 195;
+uint8_t   EEP_REGPWR_HZ = 195;
 
 
 void setup() {
@@ -114,6 +118,8 @@ void setup() {
     EEPROM.put(EEP_P_PROFILE, 0);
     EEPROM.put(EEP_PREINFUSION_SEC, 8);
     EEPROM.put(EEP_PREINFUSION_BAR, 2);
+    EEPROM.put(EEP_REGPWR_V, 230);
+    EEPROM.put(EEP_REGPWR_HZ, 50);
   }
   // Applying our saved EEPROM saved values
   uint16_t init_val;
@@ -154,6 +160,12 @@ void setup() {
 
   EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
   if (  !(init_val < 0) && init_val < 98 && init_val != NULL ) myNex.writeNum("page2.preinf_pwr.val", init_val);
+
+// Region POWER values
+  EEPROM.get(EEP_REGPWR_V, init_val);//reading preinfusion pressure value from eeprom
+  if (  !(init_val < 0) && init_val < 250 && init_val != NULL ) myNex.writeNum("page3.n0.val", init_val);
+  EEPROM.get(EEP_REGPWR_HZ, init_val);//reading preinfusion pressure value from eeprom
+  if (  !(init_val < 0) && init_val < 61 && init_val != NULL ) myNex.writeNum("page3.n1.val", init_val);
 
 //loading the correct operating mode according to the previoisly loaded values
   if (myNex.readNumber("page2.c0.val")==1 && myNex.readNumber("page2.c2.val")==0 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",0);
@@ -204,29 +216,30 @@ void kThermoRead() { // Reading the thermocouple temperature
 void Power_ON_Values_Refresh() {  // Refreshing our values on first start and subsequent page changes
 
   if (POWER_ON == true) {
+    POWER_ON_START:
     // Making sure the serial communication finishes sending all the values
     setPoint = myNex.readNumber("page1.n0.val");  // reading the setPoint value from the lcd
-    if ( setPoint == NULL || setPoint <= 0 || setPoint > MAX_SETPOINT_VALUE ) setPoint = myNex.readNumber("page1.n0.val");
+    if ( setPoint == NULL || setPoint <= 0 || setPoint > MAX_SETPOINT_VALUE ) goto POWER_ON_START;//setPoint = myNex.readNumber("page1.n0.val");
 
     offsetTemp = myNex.readNumber("page1.n1.val");  // reading the offset value from the lcd
-    if (offsetTemp ==  NULL || offsetTemp < 0 ) offsetTemp = myNex.readNumber("page1.n1.val");
+    if (offsetTemp ==  NULL || offsetTemp < 0 ) goto POWER_ON_START;//offsetTemp = myNex.readNumber("page1.n1.val");
 
     HPWR = myNex.readNumber("page1.n2.val");  // reading the brew time delay used to apply heating in waves
-    if ( HPWR == NULL || HPWR < 0 ) HPWR = myNex.readNumber("page1.n2.val");
+    if ( HPWR == NULL || HPWR < 0 ) goto POWER_ON_START;//HPWR = myNex.readNumber("page1.n2.val");
 
     MainCycleDivider = myNex.readNumber("page1.n4.val");  // reading the delay divider
-    if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) MainCycleDivider = myNex.readNumber("page1.n4.val");
+    if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) goto POWER_ON_START;//MainCycleDivider = myNex.readNumber("page1.n4.val");
 
     BrewCycleDivider = myNex.readNumber("page1.n3.val");  // reading the delay divider
-    if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) BrewCycleDivider = myNex.readNumber("page1.n3.val");
+    if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) goto POWER_ON_START;//BrewCycleDivider = myNex.readNumber("page1.n3.val");
 
     // reding the descale value which should be 0 or 1
     descaleCheckBox = myNex.readNumber("page2.c1.val");
-    if ( descaleCheckBox < 0 || descaleCheckBox > 1 || descaleCheckBox == NULL ) descaleCheckBox = myNex.readNumber("page2.c1.val");
+    if ( descaleCheckBox < 0 || descaleCheckBox > 1 || descaleCheckBox == NULL ) goto POWER_ON_START;//descaleCheckBox = myNex.readNumber("page2.c1.val");
 
     // reding the preinfusion value which should be 0 or 1
     preinfusionCheckBox = myNex.readNumber("page2.c0.val");
-    if ( preinfusionCheckBox < 0 || preinfusionCheckBox > 1 ) preinfusionCheckBox = myNex.readNumber("page2.c0.val");
+    if ( preinfusionCheckBox < 0 || preinfusionCheckBox > 1 ) goto POWER_ON_START;//preinfusionCheckBox = myNex.readNumber("page2.c0.val");
 
     pressureProfileCheckBox = myNex.readNumber("page2.c2.val");
     if ( pressureProfileCheckBox < 0 || pressureProfileCheckBox > 1 ) {
@@ -235,19 +248,24 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start and su
     }
 
     preinfuseTime = myNex.readNumber("page2.h1.val");
-    if (preinfuseTime < 0 || preinfuseTime > 10) preinfuseTime = myNex.readNumber("page2.h1.val");
+    if (preinfuseTime < 0 || preinfuseTime > 10) goto POWER_ON_START;//preinfuseTime = myNex.readNumber("page2.h1.val");
 
     preinfuseBar = myNex.readNumber("page2.preinf_pwr.val");
-    if (preinfuseBar < 0 || preinfuseBar > 97) preinfuseBar = myNex.readNumber("page2.preinf_pwr.val");
+    if (preinfuseBar < 0 || preinfuseBar > 97) goto POWER_ON_START;//preinfuseBar = myNex.readNumber("page2.preinf_pwr.val");
     
     ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
-    if (ppressureProfileStartBar < 0 || ppressureProfileStartBar > 97) ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
+    if (ppressureProfileStartBar < 0 || ppressureProfileStartBar > 97) goto POWER_ON_START;//ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
     ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
-    if (ppressureProfileFinishBar < 0 || ppressureProfileFinishBar > 97) ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
+    if (ppressureProfileFinishBar < 0 || ppressureProfileFinishBar > 97) goto POWER_ON_START;//ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
+
+    regionVolts = myNex.readNumber("page3.n0.val");
+    if (regionVolts < 0 || regionVolts > 250) goto POWER_ON_START;//regionVolts = myNex.readNumber("page3.n0.val");
+    regionHz = myNex.readNumber("page3.n1.val");
+    if (regionHz < 0 || regionHz > 60) goto POWER_ON_START;
 
     // MODE_SELECT should always be last
     selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
-    if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
+    if (selectedOperationalMode < 0 || selectedOperationalMode > 10) goto POWER_ON_START;//selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
     POWER_ON = false;
@@ -255,8 +273,6 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start and su
 }
 
 void pageValuesRefresh() {  // Refreshing our values on page changes
-
-  // myNex.currentPageId = myNex.readNumber("dp"); //reading the value of the currently loaded page
 
   if (myNex.currentPageId != myNex.lastCurrentPageId) {
       // Making sure the serial communication finishes sending all the values
@@ -590,7 +606,7 @@ void trigger1() {
 //returns true or false based on the read P(power) value
 bool brewState() {
   //Monitors the current flowing through the ACS712 circuit
-  float P = 230 * sensor.getCurrentAC();
+  float P = regionVolts * sensor.getCurrentAC(regionHz);
   //When it exceeds the set limit 
   if ( P > 25 ) return true;
   else return false;
