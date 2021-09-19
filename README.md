@@ -137,9 +137,9 @@ First let's check the setup works as expected while outside the machine so you d
     ---------|-----------
      VCC     |   5v
      GND     |   GND
-     SCK     |   CLK
-     SO      |   DO
-     CS      |   CS
+     SCK     |   D6
+     SO      |   D4
+     CS      |   D5
 
 2. Connect the relay, for now only connect the circuit controlling ports to check whether the relay LED indicates the power states.
 
