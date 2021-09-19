@@ -231,7 +231,7 @@ void kThermoRead() { // Reading the thermocouple temperature
 //############################################______POWER_ON_VALUES_REFRESH_____################################################
 //##############################################################################################################################
 
-void Power_ON_Values_Refresh() {  // Refreshing our values on first start and subsequent page changes
+void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 
   if (POWER_ON == true) {
     
@@ -436,7 +436,7 @@ void justDoCoffee() {
 
   if (brewState() == true) {
     dimmer.setPower(dimmerMaxPowerValue);
-    brewTimer(true);
+    brewTimer(1);
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (currentTempReadValue < setPoint+0.5) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
@@ -445,7 +445,7 @@ void justDoCoffee() {
       delay(HPWR_OUT); 
     }
   } else {
-    brewTimer(false);
+    brewTimer(0);
     if (currentTempReadValue < ((float)setPoint - 10.00)) {
       PORTB |= _BV(PB0);  // relayPin -> HIGH
     } else if (currentTempReadValue >= ((float)setPoint - 10.00) && currentTempReadValue < ((float)setPoint - 3.00)) {
@@ -478,7 +478,7 @@ void heatCtrl() {
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to between HPWR_LOW and HPWR
 
   if (brewState() == true) {
-    brewTimer(true);
+    brewTimer(1);
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (currentTempReadValue < setPoint+0.5) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
@@ -487,7 +487,7 @@ void heatCtrl() {
       delay(HPWR_OUT); 
     }
   } else {
-    brewTimer(false);
+    brewTimer(0);
     if (currentTempReadValue < ((float)setPoint - 10.00)) {
       PORTB |= _BV(PB0);  // relayPin -> HIGH
     } else if (currentTempReadValue >= ((float)setPoint - 10.00) && currentTempReadValue < ((float)setPoint - 3.00)) {
@@ -565,15 +565,6 @@ void trigger1() {
   uint8_t savedRegHz = myNex.readNumber("page3.n1.val");
   uint8_t allValuesUpdated = 0;
 
-  // if (EEP_SETPOINT >= 19 ) EEP_SETPOINT = 1;
-  // if (EEP_OFFSET >= 39 ) EEP_OFFSET = 20;
-  // if (EEP_HPWR >= 59 ) EEP_HPWR = 40;
-  // if (EEP_M_DIVIDER >= 79 ) EEP_M_DIVIDER = 60;
-  // if (EEP_B_DIVIDER >= 99 ) EEP_B_DIVIDER = 80;
-  // if (EEP_P_START >= 119) EEP_P_START = 100;
-  // if (EEP_P_FINISH >= 139) EEP_P_FINISH = 120;
-  // if (EEP_PREINFUSION >= 159) EEP_PREINFUSION = 140;
-  // if (EEP_P_PROFILE >= 179) EEP_P_PROFILE = 160;
 
   // Reading the LCD side set values
   if (savedBoilerTemp != NULL && savedBoilerTemp > 0) { 
@@ -758,15 +749,14 @@ void autoPressureProfile() {
   static uint8_t dimmerNewPowerVal;
 
   if (brewState() == true) { //runs this only when brew button activated and pressure profile selected  
-    brewTimer(true);
     if (phase_1 == true) { //enters phase 1
       if ((millis() - timer)>8000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
         timer = millis();
       }
+      brewTimer(1);
       dimmer.setPower(ppressureProfileStartBar);
-      myNex.writeNum("page0.n2.val",ppressureProfileStartBar);
     } else if (phase_2 == true) { //enters pahse 2
       if (millis() - timer > 500) { // runs the below block every half second
         if (ppressureProfileStartBar > ppressureProfileFinishBar) {
@@ -774,20 +764,17 @@ void autoPressureProfile() {
           dimmerNewPowerVal=ppressureProfileStartBar-dimmerOutput; //calculates a new dimmer power value every second given the max and min
           if (dimmerNewPowerVal<ppressureProfileFinishBar) dimmerNewPowerVal=ppressureProfileFinishBar;  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
           dimmer.setPower(dimmerNewPowerVal);
-          myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
         }else if (ppressureProfileStartBar < ppressureProfileFinishBar) {
           dimmerOutput+=round(ppressureProfileFinishBar/ppressureProfileStartBar)*2;
           dimmerNewPowerVal = map(dimmerOutput, 0, 100, ppressureProfileStartBar, ppressureProfileFinishBar); //calculates a new dimmer power value every second given the max and min
           if (dimmerNewPowerVal>ppressureProfileFinishBar) dimmerNewPowerVal=ppressureProfileFinishBar;  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
-          // dimmerNewPowerVal = constrain(dimmerNewPowerVal, ppressureProfileStartBar, ppressureProfileFinishBar);  // limits range of sensor values to between ppressureProfileStartBar and ppressureProfileFinishBar
           dimmer.setPower(dimmerNewPowerVal);
-          myNex.writeNum("page0.n2.val",dimmerNewPowerVal);
         }
         timer = millis();
       } 
     }
   }else if (brewState() == false && selectedOperationalMode == 1) { //Manual preinfusion control
-    brewTimer(false);
+    brewTimer(0);
     dimmer.setPower(ppressureProfileStartBar);
     timer = millis();
     phase_2 = false;
@@ -795,7 +782,7 @@ void autoPressureProfile() {
     dimmerOutput=0;
     dimmerNewPowerVal=0;
   }else if (brewState() == false && selectedOperationalMode == 4) { //Manual preinfusion control
-    brewTimer(false);
+    brewTimer(0);
     preinfusionFinished = false;
     timer = millis();
     phase_2 = false;
@@ -809,10 +796,10 @@ void autoPressureProfile() {
 void manualPressureProfile() {
   volatile uint8_t power_reading = myNex.readNumber("page0.p_var.val");
   if (brewState()==true) {
-    brewTimer(true);
+    brewTimer(1);
     dimmer.setPower(power_reading);
   }else {
-    brewTimer(false);
+    brewTimer(0);
   }
   heatCtrl();
 }
@@ -829,31 +816,31 @@ void preInfusion(bool c) {
   if (brewState() == true) {
     if (exitPreinfusion == false) { //main preinfusion body
       if (blink == true) { // Logic that switches between modes depending on the $blink value
-        brewTimer(true);
+        brewTimer(1);
         dimmer.setPower(preinfuseBar);
         if ((millis() - timer) > (preinfuseTime*1000)) {
           blink = false;
           timer = millis();
         }
       }else {
-        brewTimer(false);
         dimmer.setPower(dimmerMinPowerValue);
+        brewTimer(0);
         if (millis() - timer > 3000) { 
           exitPreinfusion = true;
           blink = true;
           timer = millis();
         }
       }
-    }else if(exitPreinfusion == true && pressureProfileCheckBox == false){ // just preinfusion
-      brewTimer(true);
+    }else if(exitPreinfusion == true && selectedOperationalMode == 1){ // just preinfusion
+      brewTimer(1);
       dimmer.setPower(dimmerMaxPowerValue);
-    }else if(exitPreinfusion == true && pressureProfileCheckBox == true){ // preinfusion with pressure profiling on
-      brewTimer(false);
+    }else if(exitPreinfusion == true && selectedOperationalMode == 4){ // preinfusion with pressure profiling on
+      brewTimer(0);
       preinfusionFinished = true;
       dimmer.setPower(ppressureProfileStartBar);
     }
   }else { //resetting all the values
-    brewTimer(false);
+    brewTimer(0);
     exitPreinfusion = false;
     timer = millis();
   }
