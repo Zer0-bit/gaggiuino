@@ -40,19 +40,20 @@ dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 //Change these values if your tests show the dimmer should be tuned
 // BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
 // DIM -30-|45-|50-|57-|65-|72-|78-|83-|90-|97
-int BAR_TO_DIMMER_OUTPUT[10]={30,45,50,57,65,72,78,83,90,97};
+uint8_t BAR_TO_DIMMER_OUTPUT[10]={30,45,50,57,65,72,78,83,90,97};
 
 // Some vars are better global
-float currentTempReadValue = 0.0;
-float lastReadTempValue = 0.0;
+volatile float currentTempReadValue = 0.0;
+volatile float lastReadTempValue = 0.0;
+unsigned long thermoTimer = millis();
 bool POWER_ON;
 bool  descaleCheckBox = 0;
 bool  preinfusionCheckBox = 0;
 bool  pressureProfileCheckBox = 0;
 bool  valuesRefreshOnPageChange = 0;
 bool preinfusionFinished;
-uint16_t  HPWR;
-uint16_t  HPWR_OUT;
+volatile uint16_t  HPWR;
+volatile uint16_t  HPWR_OUT;
 uint16_t  setPoint;
 uint16_t  offsetTemp;
 uint8_t  MainCycleDivider;
@@ -64,7 +65,6 @@ uint8_t ppressureProfileFinishBar;
 uint8_t selectedOperationalMode;
 uint8_t regionVolts;
 uint8_t regionHz;
-unsigned long thermoTimer = millis();
 
 // Declaring local vars
 // EEPROM  stuff
