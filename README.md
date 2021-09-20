@@ -33,7 +33,17 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 >     * Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy, for the time being pressure was calculated according to water flow.
 >* Regional power:
 >     * Defaults to 230V/50Hz and should be changed to the regional values for the correct work of the ACS712 sensor.
+
 ***
+#### Possible future features:
+* Pressure transducer
+   * Used for a feedback loop to make real-time pressure adjustments based on puck resistance
+   * Possibly auto-calibration of non 9bar
+* Load cells
+   * Exploring the options of integrating some small load cells with the water tray for real time weight feedback.
+* Flow sensor
+   * Exploring the idea of introducing some water flow sensing so predefined ammounts of water can be output, this might prove to be less useful and kind of redundant with the load cells, unless it adds some benefit i don't see yet.
+
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
 
