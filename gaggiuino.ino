@@ -17,9 +17,11 @@
 #define dimmerPin 9
 
 // Define some const values
-#define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250
-#define REFRESH_SCREEN_EVERY 350 // Screen refresh interval
+#define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+#define REFRESH_SCREEN_EVERY 350 // Screen refresh interval (ms)
+#define DIMMER_UPDATE_EVERY 500 // Defines how often the dimmer gets calculated a new value during a brew cycle (ms)
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
+#define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
 #define dimmerMinPowerValue 30
 #define dimmerMaxPowerValue 97
 #define dimmerDescaleMinValue 40
@@ -185,7 +187,7 @@ void setup() {
   EEPROM.get(EEP_REGPWR_HZ, init_val);//reading preinfusion pressure value from eeprom
   if (  !(init_val < 0) && init_val < 61 ) myNex.writeNum("page3.n1.val", init_val);
 
-//loading the correct operating mode according to the previoisly loaded values
+//loading the correct operating mode according to the previously saved values
   if (myNex.readNumber("page2.c0.val")==1 && myNex.readNumber("page2.c2.val")==0 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",0);
   if (myNex.readNumber("page2.c0.val")==0 && myNex.readNumber("page2.c2.val")==1 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",1);
   if (myNex.readNumber("page2.c0.val")==1 && myNex.readNumber("page2.c2.val")==1 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",4);
@@ -343,6 +345,10 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     POWER_ON = false;
   }
 }
+
+//##############################################################################################################################
+//############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
+//##############################################################################################################################
 
 void pageValuesRefresh() {  // Refreshing our values on page changes
 
@@ -758,7 +764,7 @@ void autoPressureProfile() {
       brewTimer(1);
       dimmer.setPower(ppressureProfileStartBar);
     } else if (phase_2 == true) { //enters pahse 2
-      if (millis() - timer > 500) { // runs the below block every half second
+      if (millis() - timer > DIMMER_UPDATE_EVERY) { // runs the below block every half second
         if (ppressureProfileStartBar > ppressureProfileFinishBar) {
           dimmerOutput+=round(ppressureProfileStartBar/ppressureProfileFinishBar)*2;
           dimmerNewPowerVal=ppressureProfileStartBar-dimmerOutput; //calculates a new dimmer power value every second given the max and min
@@ -819,28 +825,29 @@ void preInfusion(bool c) {
         brewTimer(1);
         dimmer.setPower(preinfuseBar);
         if ((millis() - timer) > (preinfuseTime*1000)) {
+          brewTimer(0);
           blink = false;
           timer = millis();
         }
       }else {
         dimmer.setPower(dimmerMinPowerValue);
-        brewTimer(0);
-        if (millis() - timer > 3000) { 
+        if (millis() - timer > PI_SOAK_FOR) { 
           exitPreinfusion = true;
           blink = true;
           timer = millis();
         }
       }
-    }else if(exitPreinfusion == true && selectedOperationalMode == 1){ // just preinfusion
+    }else if(exitPreinfusion == true && selectedOperationalMode == 1){ // just pre-infusion
       brewTimer(1);
       dimmer.setPower(dimmerMaxPowerValue);
-    }else if(exitPreinfusion == true && selectedOperationalMode == 4){ // preinfusion with pressure profiling on
+    }else if(exitPreinfusion == true && selectedOperationalMode == 4){ // pre-infusion with pressure profiling on
       brewTimer(0);
       preinfusionFinished = true;
       dimmer.setPower(ppressureProfileStartBar);
     }
   }else { //resetting all the values
     brewTimer(0);
+    
     exitPreinfusion = false;
     timer = millis();
   }
