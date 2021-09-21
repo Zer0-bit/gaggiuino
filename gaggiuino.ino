@@ -41,8 +41,8 @@ dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 
 //Change these values if your tests show the dimmer should be tuned
 // BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
-// DIM -30-|45-|50-|57-|65-|72-|78-|83-|90-|97
-uint8_t BAR_TO_DIMMER_OUTPUT[10]={30,45,50,57,65,72,78,83,90,97};
+// DIM -40-|47-|48-|50-|52-|53-|54-|57-|59-|60
+uint8_t BAR_TO_DIMMER_OUTPUT[10]={40,47,48,50,52,53,54,57,59,60};
 
 // Some vars are better global
 volatile float currentTempReadValue = 0.0;
@@ -800,7 +800,7 @@ void autoPressureProfile() {
 }
 
 void manualPressureProfile() {
-  volatile uint8_t power_reading = myNex.readNumber("page0.p_var.val");
+  volatile uint8_t power_reading = myNex.readNumber("page0.h0.val");
   if (brewState()==true) {
     brewTimer(1);
     dimmer.setPower(power_reading);
@@ -826,6 +826,7 @@ void preInfusion(bool c) {
         dimmer.setPower(preinfuseBar);
         if ((millis() - timer) > (preinfuseTime*1000)) {
           brewTimer(0);
+          // delay(50);
           blink = false;
           timer = millis();
         }
