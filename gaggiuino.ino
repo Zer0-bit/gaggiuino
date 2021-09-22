@@ -19,12 +19,12 @@
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define REFRESH_SCREEN_EVERY 350 // Screen refresh interval (ms)
-#define DIMMER_UPDATE_EVERY 500 // Defines how often the dimmer gets calculated a new value during a brew cycle (ms)
+#define DIMMER_UPDATE_EVERY 1000 // Defines how often the dimmer gets calculated a new value during a brew cycle (ms)
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
 #define dimmerMinPowerValue 30
-#define dimmerMaxPowerValue 97
-#define dimmerDescaleMinValue 40
+#define dimmerMaxPowerValue 80
+#define dimmerDescaleMinValue 45
 #define dimmerDescaleMaxValue 50
 
 
@@ -42,7 +42,7 @@ dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 //Change these values if your tests show the dimmer should be tuned
 // BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
 // DIM -40-|47-|48-|50-|52-|53-|54-|57-|59-|60
-uint8_t BAR_TO_DIMMER_OUTPUT[10]={40,47,48,50,52,53,54,57,59,60};
+uint8_t BAR_TO_DIMMER_OUTPUT[10]={40,48,50,52,55,60,67,72,80,97};
 
 // Some vars are better global
 volatile float currentTempReadValue = 0.0;
