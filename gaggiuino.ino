@@ -829,6 +829,7 @@ void preInfusion(bool c) {
           timer = millis();
         }
       }else {
+        brewTimer(0);
         dimmer.setPower(dimmerMinPowerValue);
         if (millis() - timer > PI_SOAK_FOR) { 
           exitPreinfusion = true;

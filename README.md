@@ -30,7 +30,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 >Notes:
 >* Pressure:
 >     * It is expected your OPV has been tuned to 9bar by default.
->     * Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy, for the time being pressure was calculated according to water flow.
+>     * Initial pressure tunning has been performed acording to a portafilter pressure gauge, while this is better than nothing and gives nice results it's not real PP per se as the pressure at the puck can't be directly controlled. I have started looking for a suitable(food safe) pressure transducer which will allow for a feedback loop and real time dimmer control for a real PP experience.
 >* Regional power:
 >     * Defaults to 230V/50Hz and should be changed to the regional values for the correct work of the ACS712 sensor.
 
