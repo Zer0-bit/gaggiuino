@@ -108,7 +108,7 @@ No| BREW MODE   | DESCRIPTION
 1. [Arduino Nano](https://bit.ly/3eXSfXZ)  **[BASE]**
     >*Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
 2. [Nextion touch screen](https://bit.ly/33dO8RV)  **[BASE]**
-3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
+3. [MAX6675 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
 4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
 5. [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
 6. [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
