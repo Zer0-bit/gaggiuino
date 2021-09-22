@@ -22,9 +22,9 @@
 #define DIMMER_UPDATE_EVERY 1000 // Defines how often the dimmer gets calculated a new value during a brew cycle (ms)
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
-#define dimmerMinPowerValue 30
-#define dimmerMaxPowerValue 80
-#define dimmerDescaleMinValue 45
+#define dimmerMinPowerValue 40
+#define dimmerMaxPowerValue 97
+#define dimmerDescaleMinValue 47
 #define dimmerDescaleMaxValue 50
 
 
@@ -749,12 +749,16 @@ void deScale(bool c) {
 // as time passes, starts dimming at about 15 seconds mark 
 // goes from 9bar to the lower threshold set in settings(default 4bar)
 void autoPressureProfile() {
-  static bool setPerformed = 0, phase_1 = 1, phase_2 = 0;
+  static bool setPerformed = 0, phase_1 = 1, phase_2 = 0, updateTimer = 1;
   static unsigned long timer = millis();
   static uint8_t dimmerOutput;
   static uint8_t dimmerNewPowerVal;
 
   if (brewState() == true) { //runs this only when brew button activated and pressure profile selected  
+    if (updateTimer == 1) {
+      timer = millis();
+      updateTimer = 0;
+    }
     if (phase_1 == true) { //enters phase 1
       if ((millis() - timer)>8000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
         phase_1 = 0;
@@ -779,22 +783,16 @@ void autoPressureProfile() {
         timer = millis();
       } 
     }
-  }else if (brewState() == false && selectedOperationalMode == 1) { //Manual preinfusion control
+  }else { 
     brewTimer(0);
-    dimmer.setPower(ppressureProfileStartBar);
+    if (selectedOperationalMode == 1 ) dimmer.setPower(ppressureProfileStartBar);
+    if (selectedOperationalMode == 4 ) preinfusionFinished = false;
     timer = millis();
     phase_2 = false;
     phase_1=true;
     dimmerOutput=0;
     dimmerNewPowerVal=0;
-  }else if (brewState() == false && selectedOperationalMode == 4) { //Manual preinfusion control
-    brewTimer(0);
-    preinfusionFinished = false;
-    timer = millis();
-    phase_2 = false;
-    phase_1=true;
-    dimmerOutput=0;
-    dimmerNewPowerVal=0;
+    updateTimer = 1;
   }
   heatCtrl(); // Keep that water at temp
 }
@@ -848,7 +846,7 @@ void preInfusion(bool c) {
     }
   }else { //resetting all the values
     brewTimer(0);
-    
+    dimmer.setPower(preinfuseBar);
     exitPreinfusion = false;
     timer = millis();
   }
