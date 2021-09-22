@@ -30,7 +30,7 @@ Gaggiuino started as an idea to improve an already cappable coffee machine while
 >Notes:
 >* Pressure:
 >     * It is expected your OPV has been tuned to 9bar by default.
->     * Pressure isn't tuned yet due to the absence of a gauge, it's been ordered and we're at the delivery services' mercy, for the time being pressure was calculated according to water flow.
+>     * Initial pressure tunning has been performed acording to a portafilter pressure gauge, while this is better than nothing and gives nice results it's not real PP per se as the pressure at the puck can't be directly controlled. I have started looking for a suitable(food safe) pressure transducer which will allow for a feedback loop and real time dimmer control for a real PP experience.
 >* Regional power:
 >     * Defaults to 230V/50Hz and should be changed to the regional values for the correct work of the ACS712 sensor.
 
@@ -108,7 +108,7 @@ No| BREW MODE   | DESCRIPTION
 1. [Arduino Nano](https://bit.ly/3eXSfXZ)  **[BASE]**
     >*Be sure to buy the AT328 version, also if you're buying the mini usb version buy the cable from them, you'll save yourself a lot of problems.
 2. [Nextion touch screen](https://bit.ly/33dO8RV)  **[BASE]**
-3. [MAX7765 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
+3. [MAX6675 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
 4. [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
 5. [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
 6. [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
