@@ -2,8 +2,11 @@
 <p align="center">
   <img src="images/100-1001555_coffee-cup-graphic-coffee-black-and-white.svg">
 </p>
-<h1 align="center"><a href="https://github.com/Zer0-bit/gaggiuino">Gaggiuino</a></h1> <p align="center">
-  <a href="https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml"><img alt="Toolkit unit tests status" src="https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg"></a>
+<h1 align="center"><a href="https://github.com/Zer0-bit/gaggiuino">Gaggiuino</a></h1> 
+<p align="center">
+  <a href="https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml"><img alt="compile sketch" src="https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg"></a> <a href="https://discord.gg/etwxMgMe"><img alt="Discord" src="https://img.shields.io/discord/890339612441063494"></a> <a href="https://www.reddit.com/user/VSparxx"><img alt="Reddit" src="https://img.shields.io/reddit/user-karma/combined/VSparxx?style=social"></a></p>
+  
+  
   
 ***
 **Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.**
