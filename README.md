@@ -1,8 +1,15 @@
-# GAGGIUINO
-[![Compile Sketch](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg)](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml)
+<br/>
+<h1 align="center"><a href="https://github.com/Zer0-bit/gaggiuino">Gaggiuino</a></h1>
+<br/>
+<p align="center">
+  <img src="images/100-1001555_coffee-cup-graphic-coffee-black-and-white.svg">
+</p>
+<p align="center">
+  <a href="https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml"><img alt="Toolkit unit tests status" src="https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg"></a>
+</p>
+
 ***
-<!-- <img src = "/images/PXL_20210525_144343463.jpg" width = 500 height =700> -->
-Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.
+**Gaggiuino started as an idea to improve an already cappable coffee machine while keeping the machine looks and buttons functionality as close as possible to the original, an important part is that no internal cables/connectors were modified, all the connections were made by creating splitters using the purchased spade connectors.**
 ***
 #### SUCCESSFUL INSTALLS:
 
