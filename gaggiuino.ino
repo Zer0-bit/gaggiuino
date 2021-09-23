@@ -697,10 +697,10 @@ bool brewState() {
 bool brewTimer(bool c) {
   if (myNex.currentPageId == 0 && c == 1) {  
     if (brewState() == true) {
-      myNex.writeNum("page0.tim_v.val", 1);
+      myNex.writeNum("page0.timer.en", 1);
     }
   }else if(myNex.currentPageId == 0 && c == 0) { 
-    myNex.writeNum("page0.tim_v.val", 0);
+    myNex.writeNum("page0.timer.en", 0);
   }
 }
 
