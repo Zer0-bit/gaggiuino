@@ -484,7 +484,6 @@ void heatCtrl() {
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to between HPWR_LOW and HPWR
 
   if (brewState() == true) {
-    brewTimer(1);
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (currentTempReadValue < setPoint+0.5) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
