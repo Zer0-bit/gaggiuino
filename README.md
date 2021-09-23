@@ -1,4 +1,9 @@
-# GAGGIUINO
+<br/>
+<h1 align="center"><a href="https://github.com/Zer0-bit/gaggiuino">Gaggiuino</a></h1>
+<br/>
+<p align="center">
+  <img src="images/R (3).jfif">
+</p>
 <p align="center">
   <a href="https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml"><img alt="Toolkit unit tests status" src="https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg"></a>
 </p>
