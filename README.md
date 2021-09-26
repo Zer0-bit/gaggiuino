@@ -21,7 +21,7 @@
 ***
 #### Features / Completeness 
 
-- [x] Housing - **credits @LikeableBump**
+- [x] [Housing](https://www.thingiverse.com/thing:4949471) - **credits @LikeableBump**
 - [x] Temp control
 - [x] Realtime temp values update
 - [x] Saving set values
