@@ -162,8 +162,8 @@ First let's check the setup works as expected while outside the machine so you d
 
     Relay   |  Arduino
     --------|-----------
-      3     |   GND
-      4     |   D8
+      4     |   GND
+      3     |   D8
       
    **Relay ports [1] and [2] are the high voltage circuit breaker**
 
