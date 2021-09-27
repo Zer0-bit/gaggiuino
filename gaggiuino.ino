@@ -24,7 +24,7 @@
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
 #define dimmerMinPowerValue 40
 #define dimmerMaxPowerValue 97
-#define dimmerDescaleMinValue 40
+#define dimmerDescaleMinValue 0
 #define dimmerDescaleMaxValue 47
 
 
@@ -719,6 +719,7 @@ void deScale(bool c) {
         if (blink == true) { // Logic that switches between modes depending on the $blink value
           dimmer.setPower(dimmerDescaleMaxValue);
           if (millis() - timer > 5000) { //set dimmer power to max descale value for 10 sec
+            if (currentCycleRead >=100) descaleFinished = true;
             blink = false;
             currentCycleRead = myNex.readNumber("j0.val");
             timer = millis();
