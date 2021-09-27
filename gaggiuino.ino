@@ -24,8 +24,8 @@
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
 #define dimmerMinPowerValue 40
 #define dimmerMaxPowerValue 97
-#define dimmerDescaleMinValue 47
-#define dimmerDescaleMaxValue 50
+#define dimmerDescaleMinValue 40
+#define dimmerDescaleMaxValue 47
 
 
 //Init the thermocouple with the appropriate pins defined above with the prefix "thermo"
@@ -41,7 +41,7 @@ dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 
 //Change these values if your tests show the dimmer should be tuned
 // BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
-// DIM -40-|47-|48-|50-|52-|53-|54-|57-|59-|60
+// DIM -40-|48-|50-|52-|55-|60-|67-|72-|80-|97
 uint8_t BAR_TO_DIMMER_OUTPUT[10]={40,48,50,52,55,60,67,72,80,97};
 
 // Some vars are better global
@@ -458,12 +458,12 @@ void justDoCoffee() {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    } else if (currentTempReadValue >= (float)setPoint - 3.00 && currentTempReadValue <= float(setPoint - 1.00)) {
+    } else if ((currentTempReadValue >= ((float)setPoint - 3.00)) && (currentTempReadValue <= ((float)setPoint - 1.00))) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else if (currentTempReadValue >= (float)setPoint - 1.00 && currentTempReadValue < (float)setPoint - 0.50) {
+    } else if ((currentTempReadValue >= ((float)setPoint - 0.50)) && currentTempReadValue < (float)setPoint) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
@@ -485,7 +485,7 @@ void heatCtrl() {
 
   if (brewState() == true) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (currentTempReadValue < setPoint+0.5) {
+    if (currentTempReadValue < setPoint+0.50) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
@@ -499,12 +499,12 @@ void heatCtrl() {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    } else if (currentTempReadValue >= (float)setPoint - 3.00 && currentTempReadValue <= float(setPoint - 1.00)) {
+    } else if ((currentTempReadValue >= ((float)setPoint - 3.00)) && (currentTempReadValue <= ((float)setPoint - 1.00))) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else if (currentTempReadValue >= (float)setPoint - 1.00 && currentTempReadValue < (float)setPoint - 0.50) {
+    } else if ((currentTempReadValue >= ((float)setPoint - 0.50)) && currentTempReadValue < (float)setPoint) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
@@ -710,30 +710,50 @@ bool brewTimer(bool c) {
 void deScale(bool c) {
   static bool blink = true;
   static unsigned long timer = millis();
-  static int i = 0;
-  if (c == true) {
-    if (i < 6) { // descale in cycles for 5 times then wait according to the below condition
-      if (blink == true) { // Logic that switches between modes depending on the $blink value
-        dimmer.setPower(dimmerDescaleMaxValue);
-        if (millis() - timer > 10000) { //set dimmer power to max descale value for 10 sec
-          blink = false;
-          timer = millis();
+  static uint8_t currentCycleRead = myNex.readNumber("j0.val");
+  static uint8_t lastCycleRead = 10;
+  static bool descaleFinished = false;
+  if (brewState() == true) {
+    if (c == true && descaleFinished == false) {
+      if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
+        if (blink == true) { // Logic that switches between modes depending on the $blink value
+          dimmer.setPower(dimmerDescaleMaxValue);
+          if (millis() - timer > 5000) { //set dimmer power to max descale value for 10 sec
+            blink = false;
+            currentCycleRead = myNex.readNumber("j0.val");
+            timer = millis();
+          }
+        }else {
+          dimmer.setPower(dimmerDescaleMinValue);
+          if (millis() - timer > 20000) { //set dimmer power to min descale value for 20 sec
+            blink = true;
+            currentCycleRead++;
+            myNex.writeNum("j0.val", currentCycleRead);
+            timer = millis();
+          }
         }
       }else {
-        dimmer.setPower(dimmerDescaleMinValue);
-        if (millis() - timer > 20000) { //set dimmer power to min descale value for 20 sec
-          blink = true;
-          i++;
+        dimmer.setPower(30);
+        if ((millis() - timer) > 300000) { //nothing for 5 minutes
+          myNex.writeNum("j0.val", currentCycleRead*3);
+          if (currentCycleRead >=100) descaleFinished = true;
+          lastCycleRead = myNex.readNumber("j0.val");
           timer = millis();
-        }
+        } 
       }
-    }else {
-      dimmer.setPower(30);
-      if ((millis() - timer) > 300000) { //nothing for 5 minutes
-        i=0;
-        timer = millis();
-      } 
+    }else if(c == true && descaleFinished == true) {
+      dimmer.setPower(0);
+      if ((millis() - timer) > 1000) {
+        myNex.writeStr("popupMSG.t0.txt","DESCALE FINISHED!");
+        myNex.writeStr("page popupMSG");
+        timer=millis();
+      }
     }
+  }else{
+    currentCycleRead = 0;
+    lastCycleRead = 10;
+    descaleFinished = false;
+    timer = millis();
   }
   heatCtrl(); //keeping it at temp
 }
