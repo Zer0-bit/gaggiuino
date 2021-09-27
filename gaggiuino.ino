@@ -20,11 +20,14 @@
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define REFRESH_SCREEN_EVERY 350 // Screen refresh interval (ms)
 #define DIMMER_UPDATE_EVERY 1000 // Defines how often the dimmer gets calculated a new value during a brew cycle (ms)
+#define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
+#define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
+#define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
 #define dimmerMinPowerValue 40
 #define dimmerMaxPowerValue 97
-#define dimmerDescaleMinValue 0
+#define dimmerDescaleMinValue 30
 #define dimmerDescaleMaxValue 47
 
 
@@ -703,6 +706,17 @@ bool brewTimer(bool c) {
   }
 }
 
+
+float livePressureRead() {
+  int sensorVal=analogRead(A1);
+
+  float voltage = (sensorVal*5.0)/1024.0;
+
+  float pressure_pascal = (3.0*((float)voltage-0.47))*1000000.0;
+  float pressure_bar = pressure_pascal/10e5;
+  float pressure_psi=pressure_bar*14.5038;
+}
+
 //#############################################################################################
 //###############################____DESCALE__CONTROL____######################################
 //#############################################################################################
@@ -713,42 +727,42 @@ void deScale(bool c) {
   static uint8_t currentCycleRead = myNex.readNumber("j0.val");
   static uint8_t lastCycleRead = 10;
   static bool descaleFinished = false;
-  if (brewState() == true) {
-    if (c == true && descaleFinished == false) {
-      if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
-        if (blink == true) { // Logic that switches between modes depending on the $blink value
-          dimmer.setPower(dimmerDescaleMaxValue);
-          if (millis() - timer > 5000) { //set dimmer power to max descale value for 10 sec
-            if (currentCycleRead >=100) descaleFinished = true;
-            blink = false;
-            currentCycleRead = myNex.readNumber("j0.val");
-            timer = millis();
-          }
-        }else {
-          dimmer.setPower(dimmerDescaleMinValue);
-          if (millis() - timer > 20000) { //set dimmer power to min descale value for 20 sec
-            blink = true;
-            currentCycleRead++;
-            myNex.writeNum("j0.val", currentCycleRead);
-            timer = millis();
-          }
+  if (brewState() == true && descaleFinished == false) {
+    if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
+      if (blink == true) { // Logic that switches between modes depending on the $blink value
+        dimmer.setPower(dimmerDescaleMaxValue);
+        if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to max descale value for 10 sec
+          if (currentCycleRead >=100) descaleFinished = true;
+          blink = false;
+          currentCycleRead = myNex.readNumber("j0.val");
+          timer = millis();
         }
       }else {
-        dimmer.setPower(30);
-        if ((millis() - timer) > 300000) { //nothing for 5 minutes
-          myNex.writeNum("j0.val", currentCycleRead*3);
-          if (currentCycleRead >=100) descaleFinished = true;
-          lastCycleRead = myNex.readNumber("j0.val");
+        dimmer.setPower(dimmerDescaleMinValue);
+        if (millis() - timer > DESCALE_PHASE2_EVERY) { //set dimmer power to min descale value for 20 sec
+          blink = true;
+          currentCycleRead++;
+          if (currentCycleRead<100) myNex.writeNum("j0.val", currentCycleRead);
           timer = millis();
-        } 
+        }
       }
-    }else if(c == true && descaleFinished == true) {
-      dimmer.setPower(0);
-      if ((millis() - timer) > 1000) {
-        myNex.writeStr("popupMSG.t0.txt","DESCALE FINISHED!");
-        myNex.writeStr("page popupMSG");
-        timer=millis();
-      }
+    }else {
+      dimmer.setPower(dimmerDescaleMinValue);
+      if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
+        if (currentCycleRead*3 < 100) myNex.writeNum("j0.val", currentCycleRead*3);
+        else {
+          myNex.writeNum("j0.val", 100);
+          descaleFinished = true;
+        }
+        lastCycleRead = currentCycleRead*3;
+        timer = millis();
+      } 
+    }
+  }else if (brewState() == true && descaleFinished == true){
+    dimmer.setPower(dimmerDescaleMinValue);
+    if ((millis() - timer) > 1000) {
+      myNex.writeStr("t14.txt", "FINISHED!");
+      timer=millis();
     }
   }else{
     currentCycleRead = 0;
