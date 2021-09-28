@@ -7,7 +7,7 @@
 [![Compile Sketch](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg)](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml)
 [![Join Discord](https://img.shields.io/discord/890339612441063494)](https://discord.gg/etwxMgMe "Join Discord Help Chat")
 [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/VSparxx?style=social)](https://www.reddit.com/user/VSparxx "I'm on Reddit")
-[![License](https://img.shields.io/badge/License-MIT-blue)](/LICENSE "Go to license section")
+[![License](https://img.shields.io/badge/License-GNU-blue)](/LICENSE "Go to license section")
 </div>
 
 ## Intro
