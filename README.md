@@ -130,6 +130,7 @@ No| BREW MODE   | DESCRIPTION
 ### Housing:
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
      >Designed by the redditor [/u/LikeableBump1](https://www.reddit.com/r/gaggiaclassic/comments/phzyis/gaggia_with_arduino_pid_in_3d_printed_case/)
+
 **Additional parts required to fully assemble housing:**
 * [5v power supply](https://bit.ly/3ovAmpZ)
     >*This replaced the mobile charger that is recommended above. I still used a mobile charger with the casing removed to make it fit, but these should simplify things, and are cheap. Make sure you purchase the 5v 1500mA version.*
