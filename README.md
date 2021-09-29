@@ -132,9 +132,9 @@ No| BREW MODE   | DESCRIPTION
      >Designed by the redditor [/u/LikeableBump1](https://www.reddit.com/r/gaggiaclassic/comments/phzyis/gaggia_with_arduino_pid_in_3d_printed_case/)
 
 **Additional parts required to fully assemble housing:**
-* [5v power supply](https://bit.ly/3ovAmpZ)
+* [5v power supply](https://www.aliexpress.com/item/4000391310693.html?spm=a2g0o.productlist.0.0.146a4c65THgQHo&algo_pvid=439edb09-c288-4d5f-bcb1-370d7695c3c6&algo_exp_id=439edb09-c288-4d5f-bcb1-370d7695c3c6-59&pdp_ext_f=%7B%22sku_id%22%3A%2210000001599752639%22%7D)
     >*This replaced the mobile charger that is recommended above. I still used a mobile charger with the casing removed to make it fit, but these should simplify things, and are cheap. Make sure you purchase the 5v 1500mA version.*
-* [DB15 D-SUB connectors, male and female](https://bit.ly/39M5F77)
+* [DB15 D-SUB connectors, male and female](https://www.aliexpress.com/item/1005002650762015.html?spm=a2g0o.productlist.0.0.6f0a1b50CsSmjP&algo_pvid=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b&aem_p4p_detail=202109282059464734316742000220004860154&algo_exp_id=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b-14&pdp_ext_f=%7B%22sku_id%22%3A%2212000021558768022%22%7D)
     >*These are used as a disconnectable pass-through to get the data and power cables through the back of the machine case. The 3d files include custom housings for these connectors. There will need to be 2 or 3 of the vertical "slats" cut out of the cooling vents on the machine case back to make these fit. Make sure you purchase both male and female DB15 connectors.*
 
 ### Additional notes for 3d printed housing:
