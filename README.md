@@ -125,7 +125,8 @@ No| BREW MODE   | DESCRIPTION
 * [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
 * [5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
-     >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
+     >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.
+     >If you're printing the housing as well skip this for the one in the housing section.*
 
 ### Housing:
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
@@ -138,7 +139,7 @@ No| BREW MODE   | DESCRIPTION
     >*These are used as a disconnectable pass-through to get the data and power cables through the back of the machine case. The 3d files include custom housings for these connectors. There will need to be 2 or 3 of the vertical "slats" cut out of the cooling vents on the machine case back to make these fit. Make sure you purchase both male and female DB15 connectors.*
 
 ### Additional notes for 3d printed housing:
-    >*If you use the standard .tft file attached above, the UI will be upside down, due to the way the screen has to be installed in the 3d printed housing. There is an additional .tft file for those using this housing, or you can open the .hmi file in the Nextion Editor yourself and flip it.
+   >*If you use the standard .tft file attached above, the UI will be upside down, due to the way the screen has to be installed in the 3d printed housing. There is an additional .tft file for those using this housing, or you can open the .hmi file in the Nextion Editor yourself and flip it.
 
 **Optional:**
  * [Heat shrink](https://bit.ly/2PQdnqt)
