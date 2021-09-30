@@ -138,8 +138,8 @@ No| BREW MODE   | DESCRIPTION
 * [DB15 D-SUB connectors, male and female](https://www.aliexpress.com/item/1005002650762015.html?spm=a2g0o.productlist.0.0.6f0a1b50CsSmjP&algo_pvid=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b&aem_p4p_detail=202109282059464734316742000220004860154&algo_exp_id=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b-14&pdp_ext_f=%7B%22sku_id%22%3A%2212000021558768022%22%7D)
     >*These are used as a disconnectable pass-through to get the data and power cables through the back of the machine case. The 3d files include custom housings for these connectors. There will need to be 2 or 3 of the vertical "slats" cut out of the cooling vents on the machine case back to make these fit. Make sure you purchase both male and female DB15 connectors.*
 
-### Additional notes for 3d printed housing:
-   >*If you use the standard .tft file attached above, the UI will be upside down, due to the way the screen has to be installed in the 3d printed housing. There is an additional .tft file for those using this housing, or you can open the .hmi file in the Nextion Editor yourself and flip it.
+**Additional notes for 3d printed housing:**
+   >*If you use the standard .tft file attached above, the UI will be upside down, due to the way the screen has to be installed in the 3d printed housing. There is an additional .tft file for those using this housing, or you can open the .hmi file in the Nextion Editor yourself and flip it.*
 
 **Optional:**
  * [Heat shrink](https://bit.ly/2PQdnqt)
