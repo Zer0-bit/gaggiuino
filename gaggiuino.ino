@@ -544,7 +544,7 @@ void screenRefresh() {
     // float tmp1 = currentTempReadValue - (float)offsetTemp;
     dtostrf(currentTempReadValue - (float)offsetTemp, 6, 2, waterTempPrint); // converting values with floating point to string
     myNex.writeStr("page0.t0.txt", waterTempPrint);  // Printing the current water temp values to the display
-    myNex.writeNum("page0.n1.val", offsetTemp);
+    // myNex.writeNum("page0.n1.val", offsetTemp);
     if (regionVolts > 200) {
       float P = regionVolts * sensor.getCurrentAC();
       myNex.writeNum("page0.n2.val", P);
@@ -696,7 +696,7 @@ bool brewState() {
   if (regionVolts > 200) P = regionVolts * sensor.getCurrentAC();
   if (regionVolts < 200) P = regionVolts * sensor.getCurrentAC(regionHz);
   //When it exceeds the set limit 
-  if ( P > 15 ) return true;
+  if ( P > 25 ) return true;
   else return false;
 }
 
