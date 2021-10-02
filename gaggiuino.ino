@@ -488,7 +488,7 @@ void heatCtrl() {
 
   if (brewState() == true) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (currentTempReadValue < setPoint+0.50) {
+    if (currentTempReadValue < setPoint+0.25) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
@@ -507,7 +507,7 @@ void heatCtrl() {
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else if ((currentTempReadValue >= ((float)setPoint - 0.50)) && currentTempReadValue < (float)setPoint) {
+    } else if ((currentTempReadValue <= ((float)setPoint - 0.25)) && currentTempReadValue < (float)setPoint) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
@@ -545,8 +545,13 @@ void screenRefresh() {
     dtostrf(currentTempReadValue - (float)offsetTemp, 6, 2, waterTempPrint); // converting values with floating point to string
     myNex.writeStr("page0.t0.txt", waterTempPrint);  // Printing the current water temp values to the display
     // myNex.writeNum("page0.n1.val", offsetTemp);
-    // float P = 230 * sensor.getCurrentAC()*10;
-    // myNex.writeNum("page0.n2.val", currentTempReadValue);
+    if (regionVolts > 200) {
+      float P = regionVolts * sensor.getCurrentAC();
+      myNex.writeNum("page0.n2.val", P);
+    }else if (regionVolts < 200) {
+      float P = regionVolts * sensor.getCurrentAC(regionHz);
+      myNex.writeNum("page0.n2.val", P);
+    }
     lastReadTempValue = currentTempReadValue;
     pageRefreshTimer = millis();
   }
