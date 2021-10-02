@@ -1,6 +1,6 @@
 <div align="center">
 
-[![Gaggiuino](/images/project_logo.png)](https://github.com/Zer0-bit/gaggiuino)
+[![Gaggiuino](/images/GAGGIUINO_LOGO_transp.png)](https://github.com/Zer0-bit/gaggiuino)
   
 [![Compile Sketch](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg)](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml)
 [![Join Discord](https://img.shields.io/discord/890339612441063494)](https://discord.gg/etwxMgMe "Join Discord Help Chat")
