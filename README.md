@@ -42,14 +42,13 @@
 >     * Defaults to 230V/50Hz and should be changed to the regional values for the correct work of the ACS712 sensor.
 
 ***
-#### Possible future features:
+#### Planned future additions:
 * Pressure transducer
    * Used for a feedback loop to make real-time pressure adjustments based on puck resistance
-   * Possibly auto-calibration of non 9bar
-* Load cells
-   * Exploring the options of integrating some small load cells with the water tray for real time weight feedback.
 * Flow sensor
-   * Exploring the idea of introducing some water flow sensing so predefined ammounts of water can be output, this might prove to be less useful and kind of redundant with the load cells, unless it adds some benefit I don't see yet.
+   * Used to monitor the water flow for true flow profiling
+* Water trayscales integration
+   * Custom 3d printd water tray with space for a pocket scale
 
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
