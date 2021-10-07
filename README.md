@@ -52,6 +52,20 @@
 
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
+### Mod in operation:
+**MENU options:**
+
+https://user-images.githubusercontent.com/42692077/136399542-be8fd033-6627-4900-82f5-605498f92c77.mp4
+
+**Brew mode:**
+
+https://user-images.githubusercontent.com/42692077/136399404-f9959012-2306-4764-b4a5-84c8df69b336.mp4
+
+**Steaming mode:**
+
+https://user-images.githubusercontent.com/42692077/136397476-15f436ad-1bf2-4962-85ef-d9db43ebc1a2.mp4
+
+
 
 ### User Interface:
 <img src="https://db3pap006files.storage.live.com/y4mVSHlwib9lZho2UFEGaXuhEy_-udrWos8DhK9nqyGQbwSvrOUYjv0LZC3yKIGTdN1iR0A8a5hdYz6-Xq12ut8ZEBgyX5ga4AsGR9KCVaGB8NN4OetwCOO4OxejVb2VB2eXID9eFXlfLk30IR4-x88ahRgCHiXFpZhCvF7N6RTa_V8Uh0mz0ByTsM76aumAk7s?width=401&height=302&cropmode=none" width="401" height="302" />  <img src="https://db3pap006files.storage.live.com/y4mQDD43TPZqb-3HGVqKNvm6hYuTcwN2u-kUB62B4pJgADFn9Y_M7Fdrf5s61LfzjCv2itomT5BntyLnkoFRQkKZWg3rsYc8eBob61R8R7xUJP7moKiSYlrqudgPCOVwM6lzLaVlu09vcz1-wgVdIBqCDmKS2oYS881Bu01A-wFQ8ecRJnoSF-LwRyOza7BPWGx?width=403&height=302&cropmode=none" width="403" height="302" />  <img src="https://db3pap006files.storage.live.com/y4mtvUFNT1vL0e5cL9aGd0MCMDnMXPcPBRtYXag_RtX0mPUtuMLR2ArVwg3SZHXTHNghGdc6u8jzyyCu9Ql4mJYL7LEFa4jubG6gSLzipwrN4TjnrKlO2DEAqW-SOn6EYM3-4_hX8RJ3lyK-OliGj0AEOg94DFDg4vAsotzoS1iTuTvGwyO5R38U5GveQnYN_M1?width=401&height=298&cropmode=none" width="401" height="298" />  <img src="https://db3pap006files.storage.live.com/y4mFYIKZKyaOliinPbi5sHYjowb8vTw3fTGwGIFNf5IrW35ssovgP26TFManWM6LChMDbTxD-MD348tVj8_AcmWuyJelJcx7CyNQPo_zVgXxZRVeBMNPAw5Hbzkd6aOQTEBp6qvT8m3ASvUCvaXKc7-bp-a4xxNywAvjTx5NN_ERN2GVKecbGTcVTuX7DuiTomn?width=402&height=302&cropmode=none" width="402" height="302" />  <img src="https://db3pap006files.storage.live.com/y4mzQv7QY7l1QtR_5T3qBmUA7vRBi9-gmMS-lqjcrdtMb0mMA1q9YYxOWNLSjPfBRbmHcxABEqCHef-srKAO-TPVFEhV5OCa2XxkJXNnuO7M-BtX82H_FkXLk1hLL9A11MR0aNlkRnnwlrtaGIeH6GUtEjz4toD-hIt11wTv103uz68Xbo7fVNmjOQ5lqTSCTgv?width=400&height=302&cropmode=none" width="400" height="302" />  <img src="https://db3pap006files.storage.live.com/y4mDkszRvittz8CcKfFbD31bCH8LkxecErKo2vlMoP10GMPZhDUNUlU3CwAB6ceE3mFYXPok2P46IRHdhs7Rnzz444gfbKlkmHGav7ORudRZElDyE1JVw5AMtsGdK388wilomZfOqo0o93htyFS_t1RnNe7W9VJ5GFUxXfbRXqG8tY3MN_OMMKmd2QrbUjfFbGC?width=401&height=305&cropmode=none" width="401" height="305" />
