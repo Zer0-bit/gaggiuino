@@ -47,8 +47,12 @@
    * Used for a feedback loop to make real-time pressure adjustments based on puck resistance
 * Flow sensor
    * Used to monitor the water flow for true flow profiling
-* Water trayscales integration
-   * Custom 3d printd water tray with space for a pocket scale
+* Steam control
+* ESP32 support:
+   * Web interface
+   * Graph outputs
+   * OTA firmware updates
+   * TBC
 
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
@@ -58,11 +62,13 @@
 
 https://user-images.githubusercontent.com/42692077/136586344-41fdeaa6-646c-4248-861a-547c8deddf93.mp4
 </div>
+
 **Brew mode:**
 <div align="center">
  
 https://user-images.githubusercontent.com/42692077/136586154-c0c78e05-d78d-401b-9dd3-049758d2d995.mp4
 </div>
+
 **Steaming mode:**
 <div align="center">
   
