@@ -26,4 +26,4 @@ jobs:
             - source-url: https://github.com/rkoptev/ACS712-arduino/archive/refs/heads/master.zip
             - source-url: https://github.com/RobotDynOfficial/RBDDimmer/archive/refs/heads/master.zip
           sketch-paths: |
-            .
+            - 'gaggiuino.ino'
