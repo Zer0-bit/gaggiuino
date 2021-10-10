@@ -138,7 +138,7 @@ No| BREW MODE   | DESCRIPTION
 * [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
 * [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
 * [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
-* [Thermo-resistant cables AWG 15 ( 1m black/red ) and AWG 30 ( 1m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
+* [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
 * [5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
      >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.
