@@ -163,6 +163,7 @@ No| BREW MODE   | DESCRIPTION
     >I bought it for my soldering needs, seems to do a great job. It's important to not leave it ON while not in use as the heating element will get damaged.
 
 ### Schematics :
+* [GAGGIA Classic](schematics/gc-schematics.png)
 * [GAGGIA Classic Pro](schematics/gcp-schematics.png)
 
 ***!! WARNING !!***
