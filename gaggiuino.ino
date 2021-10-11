@@ -699,12 +699,12 @@ bool brewState() {
   //Monitors the current flowing through the ACS712 circuit
   if (regionVolts > 200) {
     P = regionVolts * sensor.getCurrentAC();
-    if ( P > 35 ) return true;
+    if ( P >= 45 ) return true;
     else return false;
   }
   if (regionVolts < 200) {
     P = regionVolts * sensor.getCurrentAC(regionHz);
-    if ( P > 35 ) return true;
+    if ( P >= 45 ) return true;
     else return false;
   } 
 }
