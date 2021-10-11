@@ -547,7 +547,7 @@ void screenRefresh() {
 
     //#####################________DEBUG_START_______########################
     //#######################################################################
-    // myNex.writeNum("page0.n1.val", regionHz); //debug
+    //myNex.writeNum("page0.n1.val", regionHz); //debug
     // if (regionVolts > 200) {
     //   float P = regionVolts * sensor.getCurrentAC();
     //   myNex.writeNum("page0.n2.val", P);
@@ -704,7 +704,7 @@ bool brewState() {
   }
   if (regionVolts < 200) {
     P = regionVolts * sensor.getCurrentAC(regionHz);
-    if ( P > 25 ) return true;
+    if ( P > 35 ) return true;
     else return false;
   } 
 }

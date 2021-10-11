@@ -704,7 +704,7 @@ bool brewState() {
   }
   if (regionVolts < 200) {
     P = regionVolts * sensor.getCurrentAC(regionHz);
-    if ( P > 25 ) return true;
+    if ( P > 35 ) return true;
     else return false;
   } 
 }
