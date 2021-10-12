@@ -544,14 +544,18 @@ void screenRefresh() {
     // float tmp1 = currentTempReadValue - (float)offsetTemp;
     dtostrf(currentTempReadValue - (float)offsetTemp, 6, 2, waterTempPrint); // converting values with floating point to string
     myNex.writeStr("page0.t0.txt", waterTempPrint);  // Printing the current water temp values to the display
-    // myNex.writeNum("page0.n1.val", offsetTemp);
-    if (regionVolts > 200) {
-      float P = regionVolts * sensor.getCurrentAC();
-      myNex.writeNum("page0.n2.val", P);
-    }else if (regionVolts < 200) {
-      float P = regionVolts * sensor.getCurrentAC(regionHz);
-      myNex.writeNum("page0.n2.val", P);
-    }
+
+    //#####################________DEBUG_START_______########################
+    //#######################################################################
+    //myNex.writeNum("page0.n1.val", regionHz); //debug
+    // if (regionVolts > 200) {
+    //   float P = regionVolts * sensor.getCurrentAC();
+    //   myNex.writeNum("page0.n2.val", P);
+    // }else if (regionVolts < 200) {
+    //   float P = regionVolts * sensor.getCurrentAC(regionHz);
+    //   myNex.writeNum("page0.n2.val", P);
+    // }
+    //#########################______END_________############################
     lastReadTempValue = currentTempReadValue;
     pageRefreshTimer = millis();
   }
@@ -685,7 +689,7 @@ void trigger1() {
 }
 
 //#############################################################################################
-//###############################_____HELPER_FEATURES____######################################
+//###############################_____HELPER_FUCTIONS____######################################
 //#############################################################################################
 
 //Function to get the state of the brew switch button
@@ -693,11 +697,16 @@ void trigger1() {
 bool brewState() {
   float P;
   //Monitors the current flowing through the ACS712 circuit
-  if (regionVolts > 200) P = regionVolts * sensor.getCurrentAC();
-  if (regionVolts < 200) P = regionVolts * sensor.getCurrentAC(regionHz);
-  //When it exceeds the set limit 
-  if ( P > 25 ) return true;
-  else return false;
+  if (regionVolts > 200) {
+    P = regionVolts * sensor.getCurrentAC();
+    if ( P >= 45 ) return true;
+    else return false;
+  }
+  if (regionVolts < 200) {
+    P = regionVolts * sensor.getCurrentAC(regionHz);
+    if ( P >= 45 ) return true;
+    else return false;
+  } 
 }
 
 
@@ -712,15 +721,15 @@ bool brewTimer(bool c) {
 }
 
 
-float livePressureRead() {
-  int sensorVal=analogRead(A1);
+// float livePressureRead() {
+//   int sensorVal=analogRead(A1);
 
-  float voltage = (sensorVal*5.0)/1024.0;
+//   float voltage = (sensorVal*5.0)/1024.0;
 
-  float pressure_pascal = (3.0*((float)voltage-0.47))*1000000.0;
-  float pressure_bar = pressure_pascal/10e5;
-  float pressure_psi=pressure_bar*14.5038;
-}
+//   float pressure_pascal = (3.0*((float)voltage-0.47))*1000000.0;
+//   float pressure_bar = pressure_pascal/10e5;
+//   float pressure_psi=pressure_bar*14.5038;
+// }
 
 //#############################################################################################
 //###############################____DESCALE__CONTROL____######################################
