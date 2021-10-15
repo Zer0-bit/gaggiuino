@@ -19,4 +19,4 @@
 
 ## Design Concepts [Draft]
 
-<img src="https://github.com/toanster/gaggiuino-UX-Remix/blob/release-0.1.0/images/Gaggiuino_ux.jpg" width="703" height="1976" />
+<img src="https://github.com/toanster/gaggiuino-UX-Remix/blob/release-0.1.0/images/Gaggiuino_ux.jpg"/>
