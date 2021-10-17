@@ -52,10 +52,11 @@ volatile float currentTempReadValue = 0.0;
 volatile float lastReadTempValue = 0.0;
 unsigned long thermoTimer = millis();
 bool POWER_ON;
-bool  descaleCheckBox = 0;
-bool  preinfusionCheckBox = 0;
-bool  pressureProfileCheckBox = 0;
-bool  valuesRefreshOnPageChange = 0;
+bool  descaleCheckBox;
+bool  preinfusionCheckBox;
+bool  pressureProfileCheckBox;
+bool  warmupCheckBox;
+bool  valuesRefreshOnPageChange;
 bool preinfusionFinished;
 volatile uint16_t  HPWR;
 volatile uint16_t  HPWR_OUT;
@@ -82,11 +83,12 @@ uint16_t  EEP_P_START = 100;
 uint16_t  EEP_P_FINISH = 120;
 uint16_t  EEP_PREINFUSION = 140;
 uint16_t  EEP_P_PROFILE = 160;
-uint16_t   EEP_PREINFUSION_SEC = 180;
-uint16_t   EEP_PREINFUSION_BAR = 190;
-uint16_t   EEP_REGPWR_V = 195;
-uint16_t   EEP_REGPWR_HZ = 200;
-uint16_t   EEP_DESCALE = 205;
+uint16_t  EEP_PREINFUSION_SEC = 180;
+uint16_t  EEP_PREINFUSION_BAR = 190;
+uint16_t  EEP_REGPWR_V = 195;
+uint16_t  EEP_REGPWR_HZ = 200;
+uint16_t  EEP_DESCALE = 205;
+uint16_t  EEP_WARMUP = 210;
 
 
 void setup() {
@@ -134,6 +136,7 @@ void setup() {
     EEPROM.put(EEP_PREINFUSION_BAR, 2);
     EEPROM.put(EEP_REGPWR_V, 230);
     EEPROM.put(EEP_REGPWR_HZ, 50);
+    EEPROM.put(EEP_WARMUP, 1);
   }
   // Applying our saved EEPROM saved values
   uint16_t init_val;
@@ -189,6 +192,9 @@ void setup() {
   if (  !(init_val < 0) && init_val < 250 ) myNex.writeNum("page3.n0.val", init_val);
   EEPROM.get(EEP_REGPWR_HZ, init_val);//reading preinfusion pressure value from eeprom
   if (  !(init_val < 0) && init_val < 61 ) myNex.writeNum("page3.n1.val", init_val);
+// Warmup checkbox value
+  EEPROM.get(EEP_WARMUP, init_val);//reading preinfusion pressure value from eeprom
+  if (  !(init_val >= 0) && init_val <= 1 ) myNex.writeNum("page3.c11.val", init_val);
 
 //loading the correct operating mode according to the previously saved values
   if (myNex.readNumber("page2.c0.val")==1 && myNex.readNumber("page2.c2.val")==0 && myNex.readNumber("page2.c1.val")==0) myNex.writeNum("page0.mode_select.val",0);
@@ -339,6 +345,13 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
       goto ReadAagain_12;
     }
     delay(20);
+    ReadAagain_13:
+    warmupCheckBox = myNex.readNumber("page3.c11.val");
+    if (warmupCheckBox < 0 || warmupCheckBox > 1) {
+      myNex.writeNum("page0.c11.val",13); 
+      goto ReadAagain_13;
+    }
+    delay(5);
     
     // MODE_SELECT should always be last
     selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
@@ -393,6 +406,9 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     if (ppressureProfileStartBar < 0 || ppressureProfileStartBar > 97) ppressureProfileStartBar = myNex.readNumber("page2.pps_var.val");
     ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
     if (ppressureProfileFinishBar < 0 || ppressureProfileFinishBar > 97) ppressureProfileFinishBar = myNex.readNumber("page2.ppf_var.val");
+
+    // warmupCheckBox = myNex.readNumber("page3.c11.val");
+    // if (warmupCheckBox < 0 || warmupCheckBox > 1) myNex.readNumber("page3.c11.val");
 
     // MODE_SELECT should always be last
     selectedOperationalMode = myNex.readNumber("page0.mode_select.val");
@@ -701,12 +717,11 @@ bool brewState() {
     P = regionVolts * sensor.getCurrentAC();
     if ( P >= 45 ) return true;
     else return false;
-  }
-  if (regionVolts < 200) {
+  }else if (regionVolts < 200) {
     P = regionVolts * sensor.getCurrentAC(regionHz);
     if ( P >= 45 ) return true;
     else return false;
-  } 
+  }
 }
 
 
@@ -719,17 +734,6 @@ bool brewTimer(bool c) {
     myNex.writeNum("page0.timer.en", 0);
   }
 }
-
-
-// float livePressureRead() {
-//   int sensorVal=analogRead(A1);
-
-//   float voltage = (sensorVal*5.0)/1024.0;
-
-//   float pressure_pascal = (3.0*((float)voltage-0.47))*1000000.0;
-//   float pressure_bar = pressure_pascal/10e5;
-//   float pressure_psi=pressure_bar*14.5038;
-// }
 
 //#############################################################################################
 //###############################____DESCALE__CONTROL____######################################
