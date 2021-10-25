@@ -177,6 +177,12 @@ First let's check that the setup works as expected while outside the machine so 
 >
 >**Note 2 - the 5v/GND Arduino board pins will be shared between all the connected devices.**
 
+>***!! IMPORTANT !!***
+>
+>**All the boards should be powered by the arduino 5v/GND pins, taking power from other sources like an AC adapter will lead to the system working incorrectly.**
+>
+>**The AC adapter should be used only to provide power to the Arduino board itself by connecting to the VIN/GND ports.**
+
 **BASE FUNCTIONALITY**
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code. You can find them defined at the top of the .ino file.
 
