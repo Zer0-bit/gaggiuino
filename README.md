@@ -140,17 +140,17 @@ No| BREW MODE   | DESCRIPTION
 * [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
 * [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-* [5v Power Adaptor](https://bit.ly/2WPHGkg) **[BASE]**
+* [5v AC Adaptor](https://bit.ly/2WPHGkg) or [12v Power Supply](https://www.aliexpress.com/item/33012749903.html?spm=a2g0s.9042311.0.0.370a4c4dSNhQoq)**[BASE]**
      >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.
-     >If you're printing the housing as well skip this for the one in the housing section.*
+     >It's recommended to power the arduino board using the  12V 1000mA power supply.*
 
 ### Housing:
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
      >Designed by the redditor [/u/LikeableBump1](https://www.reddit.com/r/gaggiaclassic/comments/phzyis/gaggia_with_arduino_pid_in_3d_printed_case/)
 
 **Additional parts required to fully assemble housing:**
-* [5v power supply](https://www.aliexpress.com/item/4000391310693.html?spm=a2g0o.productlist.0.0.146a4c65THgQHo&algo_pvid=439edb09-c288-4d5f-bcb1-370d7695c3c6&algo_exp_id=439edb09-c288-4d5f-bcb1-370d7695c3c6-59&pdp_ext_f=%7B%22sku_id%22%3A%2210000001599752639%22%7D)
-    >*This replaced the mobile charger that is recommended above. I still used a mobile charger with the casing removed to make it fit, but these should simplify things, and are cheap. Make sure you purchase the 5v 1500mA version.*
+* [12v power supply](https://www.aliexpress.com/item/33012749903.html?spm=a2g0s.9042311.0.0.370a4c4dSNhQoq)
+    >*This replaced the mobile charger that is recommended above. I still used a mobile charger with the casing removed to make it fit, but these should simplify things, and are cheap. Make sure you purchase the 12v 1000mA version.*
 * [DB15 D-SUB connectors, male and female](https://www.aliexpress.com/item/1005002650762015.html?spm=a2g0o.productlist.0.0.6f0a1b50CsSmjP&algo_pvid=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b&aem_p4p_detail=202109282059464734316742000220004860154&algo_exp_id=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b-14&pdp_ext_f=%7B%22sku_id%22%3A%2212000021558768022%22%7D)
     >*These are used as a disconnectable pass-through to get the data and power cables through the back of the machine case. The 3d files include custom housings for these connectors. There will need to be 2 or 3 of the vertical "slats" cut out of the cooling vents on the machine case back to make these fit. Make sure you purchase both male and female DB15 connectors.*
 
@@ -230,6 +230,22 @@ First let's check that the setup works as expected while outside the machine so 
     >*Don't forget to test the thermocouple/relay combo operation, apply some heat to the thermocouple end and see whether the relay led operates in HIGH/LOW modes*
 
 **At this point if all the above works as expected you're ready to install it all inside the machine. For this we'll need to prepare some splitters that we'll use to connect to the Gaggia internals without introducing any permanent modifications so in the event of a desire to revert to stock it's a few disconnects away!**
+
+**POWER DELIVERY RECOMMENDATION**
+
+*Method 1:*
+>*If choosing to power the system using the AC adapter then the arduino board and all the connected componnents will receive power by the means of the regulated 5v the AC adapter delivers through the USB port.*
+
+*Method 2:*
+>*If powering using the 12v power supply module follow the bellow scheme:*
+
+   PS  |  Arduino
+  -----|-----------
+  12v  |   VIN
+  GND  |   GND
+ 
+ All the other boards will get their power from the arduino 5v / GND pins and it's extrmely important they are powered using those outputs.
+
 
 
 **EXTENDED FUNCTIONALITY**
