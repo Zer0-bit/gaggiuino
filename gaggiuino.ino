@@ -676,7 +676,7 @@ void trigger1() {
         EEPROM.put(EEP_REGPWR_V, valueToSave);
         allValuesUpdated++;
       }else {
-        myNex.writeStr("popupMSG.t0.txt", "REG PWR ERROR!");
+        myNex.writeStr("popupMSG.t0.txt", "REG VOLT ERROR!");
         myNex.writeStr("page popupMSG");
         delay(5);
       }
@@ -685,13 +685,13 @@ void trigger1() {
         EEPROM.put(EEP_REGPWR_HZ, valueToSave);
         allValuesUpdated++;
       }else {
-        myNex.writeStr("popupMSG.t0.txt", "REG PWR ERROR!");
+        myNex.writeStr("popupMSG.t0.txt", "REG HZ ERROR!");
         myNex.writeStr("page popupMSG");
         delay(5);
       }
       // Saving warmup state
       valueToSave = myNex.readNumber("warmupState");
-      if (!(valueToSave < 0) || valueToSave != NULL ) {
+      if (!(valueToSave < 0) || valueToSave < 2 ) {
         EEPROM.put(EEP_WARMUP, valueToSave);
         allValuesUpdated++;
       }else {
