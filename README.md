@@ -60,22 +60,23 @@
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
 ### Mod in operation:
-**MENU options:**
-<div align="center">
-
-https://user-images.githubusercontent.com/42692077/136586344-41fdeaa6-646c-4248-861a-547c8deddf93.mp4
-</div>
-
 **Brew mode:**
 <div align="center">
  
-https://user-images.githubusercontent.com/42692077/136586154-c0c78e05-d78d-401b-9dd3-049758d2d995.mp4
+https://user-images.githubusercontent.com/42692077/139340155-a3739359-33e1-423f-9ecf-10836f9446de.mp4
 </div>
 
 **Steaming mode:**
 <div align="center">
   
-https://user-images.githubusercontent.com/42692077/136586795-d87a1f00-f392-41fc-94bb-da777a1bf1a7.mp4
+https://user-images.githubusercontent.com/42692077/139340240-0602f792-8052-4ba4-96f8-e54d31add210.mp4
+</div>
+
+
+**Flush:**
+<div align="center">
+
+https://user-images.githubusercontent.com/42692077/139340295-698b1392-94cd-418b-8a63-222a4390aed5.mp4
 </div>
 
 ***USAGE:***
