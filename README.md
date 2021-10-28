@@ -43,11 +43,14 @@
 
 ***
 #### Planned future additions:
+* Tray integrated load cells
+   * Used for all things weight related
 * Pressure transducer
    * Used for a feedback loop to make real-time pressure adjustments based on puck resistance
 * Flow sensor
    * Used to monitor the water flow for true flow profiling
 * Steam control
+* STM32F411CE(blackpill) support
 * ESP32 support:
    * Web interface
    * Graph outputs
