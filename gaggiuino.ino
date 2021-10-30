@@ -445,7 +445,7 @@ void justDoCoffee() {
   HPWR_OUT = map(currentTempReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
 
-  if (brewState() == true) {
+  if (brewState() == 1) {
     dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
     brewTimer(1);
   // Applying the HPWR_OUT variable as part of the relay switching logic
@@ -488,7 +488,7 @@ void heatCtrl() {
   HPWR_OUT = map(currentTempReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to between HPWR_LOW and HPWR
 
-  if (brewState() == true) {
+  if (brewState() == 1) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (currentTempReadValue < setPoint+0.25) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
@@ -733,7 +733,7 @@ bool brewState() {
 
 bool brewTimer(bool c) {
   if ( c == 1) {  
-    if (brewState() == true) {
+    if (brewState() == 1) {
       myNex.writeNum("timerState", 1);
     }
   }else if( c == 0) { 
@@ -752,7 +752,7 @@ void deScale(bool c) {
     static uint8_t currentCycleRead = myNex.readNumber("j0.val");
     static uint8_t lastCycleRead = 10;
     static bool descaleFinished = false;
-    if (brewState() == true && descaleFinished == false) {
+    if (brewState() == 1 && descaleFinished == false) {
       if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
         if (blink == true) { // Logic that switches between modes depending on the $blink value
           dimmer.setPower(BAR_TO_DIMMER_OUTPUT[2]);
@@ -783,7 +783,7 @@ void deScale(bool c) {
           timer = millis();
         } 
       }
-    }else if (brewState() == true && descaleFinished == true){
+    }else if (brewState() == 1 && descaleFinished == true){
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[0]);
       if ((millis() - timer) > 1000) {
         myNex.writeStr("t14.txt", "FINISHED!");
@@ -814,7 +814,7 @@ void autoPressureProfile() {
   static uint8_t dimmerOutput;
   static uint8_t dimmerNewPowerVal;
 
-  if (brewState() == true) { //runs this only when brew button activated and pressure profile selected  
+  if (brewState() == 1) { //runs this only when brew button activated and pressure profile selected  
     if (updateTimer == 1) {
       timer = millis();
       updateTimer = 0;
@@ -831,13 +831,13 @@ void autoPressureProfile() {
     } else if (phase_2 == true) { //enters pahse 2
       if (millis() - timer > DIMMER_UPDATE_EVERY) { // runs the below block every half second
         if (BAR_TO_DIMMER_OUTPUT[ppStartBar] > BAR_TO_DIMMER_OUTPUT[ppFinishBar]) {
-          dimmerOutput+=round(BAR_TO_DIMMER_OUTPUT[ppStartBar]/BAR_TO_DIMMER_OUTPUT[ppFinishBar])*3;
+          dimmerOutput+=round(BAR_TO_DIMMER_OUTPUT[ppStartBar]/BAR_TO_DIMMER_OUTPUT[ppFinishBar])*2;
           dimmerNewPowerVal=BAR_TO_DIMMER_OUTPUT[ppStartBar]-dimmerOutput; //calculates a new dimmer power value every second given the max and min
           if (dimmerNewPowerVal<BAR_TO_DIMMER_OUTPUT[ppFinishBar]) dimmerNewPowerVal=BAR_TO_DIMMER_OUTPUT[ppFinishBar];  // limits range of sensor values between BAR_TO_DIMMER_OUTPUT[ppStartBar] and BAR_TO_DIMMER_OUTPUT[ppFinishBar]
           dimmer.setPower(dimmerNewPowerVal);
           myNex.writeNum("currentPressure",dimmerNewPowerVal);
         }else if (BAR_TO_DIMMER_OUTPUT[ppStartBar] < BAR_TO_DIMMER_OUTPUT[ppFinishBar]) {
-          dimmerOutput+=round(BAR_TO_DIMMER_OUTPUT[ppFinishBar]/BAR_TO_DIMMER_OUTPUT[ppStartBar])*3;
+          dimmerOutput+=round(BAR_TO_DIMMER_OUTPUT[ppFinishBar]/BAR_TO_DIMMER_OUTPUT[ppStartBar])*2;
           dimmerNewPowerVal = map(dimmerOutput, 0, 100, BAR_TO_DIMMER_OUTPUT[ppStartBar], BAR_TO_DIMMER_OUTPUT[ppFinishBar]); //calculates a new dimmer power value every second given the max and min
           if (dimmerNewPowerVal>BAR_TO_DIMMER_OUTPUT[ppFinishBar]) dimmerNewPowerVal=BAR_TO_DIMMER_OUTPUT[ppFinishBar];  // limits range of sensor values between BAR_TO_DIMMER_OUTPUT[ppStartBar] and BAR_TO_DIMMER_OUTPUT[ppFinishBar]
           dimmer.setPower(dimmerNewPowerVal);
@@ -846,7 +846,7 @@ void autoPressureProfile() {
         timer = millis();
       } 
     }
-  }else { 
+  }else if ( brewState() == 0 ) { 
     brewTimer(0);
     if (selectedOperationalMode == 1 ) {
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[ppStartBar]);
@@ -865,10 +865,10 @@ void autoPressureProfile() {
 void manualPressureProfile() {
   if(myNex.currentPageId==2) {
     volatile uint8_t power_reading = myNex.readNumber("h0.val");
-    if (brewState()==true) {
+    if (brewState() == 1) {
       brewTimer(1);
       dimmer.setPower(power_reading);
-    }else {
+    }else if (brewState() == 0) {
       brewTimer(0);
     }
   }
@@ -884,7 +884,7 @@ void preInfusion(bool c) {
   static bool exitPreinfusion;
   static unsigned long timer = millis();
 
-  if (brewState() == true) {
+  if (brewState() == 1) {
     if (exitPreinfusion == false) { //main preinfusion body
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         brewTimer(1);
@@ -914,7 +914,7 @@ void preInfusion(bool c) {
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[ppStartBar]);
       myNex.writeNum("currentPressure",BAR_TO_DIMMER_OUTPUT[ppStartBar]);
     }
-  }else { //resetting all the values
+  }else if ( brewState() == 0 ) { //resetting all the values
     brewTimer(0);
     dimmer.setPower(BAR_TO_DIMMER_OUTPUT[preinfuseBar]);
     myNex.writeNum("currentPressure",BAR_TO_DIMMER_OUTPUT[preinfuseBar]);
