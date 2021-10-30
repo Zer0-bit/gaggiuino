@@ -753,6 +753,7 @@ void deScale(bool c) {
     static uint8_t lastCycleRead = 10;
     static bool descaleFinished = false;
     if (brewState() == 1 && descaleFinished == false) {
+      brewTimer(1);
       if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
         if (blink == true) { // Logic that switches between modes depending on the $blink value
           dimmer.setPower(BAR_TO_DIMMER_OUTPUT[2]);
@@ -786,6 +787,7 @@ void deScale(bool c) {
     }else if (brewState() == 1 && descaleFinished == true){
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[0]);
       if ((millis() - timer) > 1000) {
+        brewTimer(0);
         myNex.writeStr("t14.txt", "FINISHED!");
         timer=millis();
       }
