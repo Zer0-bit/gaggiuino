@@ -42,7 +42,7 @@ dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 //Change these values if your tests show the dimmer should be tuned
 // BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
 // DIM -40-|48-|50-|52-|55-|60-|67-|72-|80-|97
-uint8_t BAR_TO_DIMMER_OUTPUT[10]={30,48,50,52,55,60,67,72,80,97};
+uint8_t BAR_TO_DIMMER_OUTPUT[10]={40,48,50,52,55,60,67,72,80,97};
 
 // Some vars are better global
 volatile float currentTempReadValue = 0.0;
