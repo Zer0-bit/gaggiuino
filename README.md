@@ -16,7 +16,8 @@
    MODEL              |    YEAR   |  VOLTAGE   |PHOTOS
    -------------------|-----------|------------|--------
    Gaggia Classic | 2012 | 240v     | https://bit.ly/2Xv1fiv
-   Gaggia Classic Pro | 2019 | 115V | https://imgur.com/gallery/SF3zP0b
+   Gaggia Classic Pro | 2021 | 115V | https://imgur.com/gallery/SF3zP0b
+   Gaggia CLassic Pro | 2020 | 240v | https://bit.ly/3jQESw3
    
 ***
 #### Features / Completeness 
@@ -34,6 +35,11 @@
 - [x] Manual pressure control
 - [x] Auto shot timer
 - [x] Regional power options
+- [ ] Tray integrated load cells
+- [ ] Realtime pressure feedback
+- [ ] Steam control
+- [ ] Water flow feedback
+- [ ] Graphing shot stats
 
 >Notes:
 >* Pressure:
