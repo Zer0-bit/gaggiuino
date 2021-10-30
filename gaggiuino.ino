@@ -42,7 +42,7 @@ dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 //Change these values if your tests show the dimmer should be tuned
 // BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
 // DIM -40-|48-|50-|52-|55-|60-|67-|72-|80-|97
-uint8_t BAR_TO_DIMMER_OUTPUT[10]={40,48,50,52,55,60,67,72,80,97};
+uint8_t BAR_TO_DIMMER_OUTPUT[10]={30,48,50,52,55,60,67,72,80,97};
 
 // Some vars are better global
 volatile float currentTempReadValue = 0.0;
@@ -490,7 +490,7 @@ void heatCtrl() {
 
   if (brewState() == 1) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (currentTempReadValue < setPoint+0.25) {
+    if (currentTempReadValue < setPoint+0.5) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
