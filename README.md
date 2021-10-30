@@ -22,6 +22,7 @@
 #### Features / Completeness 
 
 - [x] [Housing](https://www.thingiverse.com/thing:4949471) - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/LikeableBump1?style=social)](https://www.reddit.com/user/VSparxx "I'm on Reddit")
+- [x] Proper UI/UX - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/tt2166?style=social)](https://www.reddit.com/user/tt2166 "I'm on Reddit")
 - [x] Temp control
 - [x] Realtime temp values update
 - [x] Saving set values
