@@ -234,7 +234,7 @@ void kThermoRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
     currentTempReadValue = thermocouple.readCelsius();
-    if (currentTempReadValue < 0 || currentTempReadValue == NAN) currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
+    while (currentTempReadValue < 0 || currentTempReadValue == NAN) currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
     thermoTimer = millis();
   }
 }
@@ -251,113 +251,113 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     ReadAagain_1:
     // Making sure the serial communication finishes sending all the values
     setPoint = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
-    if ( setPoint == NULL || setPoint < 0 || setPoint > MAX_SETPOINT_VALUE ) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_1");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_1;
-    }
-    delay(5);
+    // if ( setPoint == NULL || setPoint < 0 || setPoint > MAX_SETPOINT_VALUE ) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_1");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_1;
+    // }
+    // delay(5);
 
     ReadAagain_2:
     offsetTemp = myNex.readNumber("offSet");  // reading the offset value from the lcd
-    if (offsetTemp ==  NULL || offsetTemp < 0 ) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_2");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_2;
-    }
-    delay(5);
+    // if (offsetTemp ==  NULL || offsetTemp < 0 ) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_2");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_2;
+    // }
+    // delay(5);
 
     ReadAagain_3:
     HPWR = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
-    if ( HPWR == NULL || HPWR < 0 ) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_3");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_3;
-    }
-    delay(5);
+    // if ( HPWR == NULL || HPWR < 0 ) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_3");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_3;
+    // }
+    // delay(5);
 
     ReadAagain_4:
     MainCycleDivider = myNex.readNumber("mDiv");  // reading the delay divider
-    if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_4");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_4;
-    }
-    delay(5);
+    // if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_4");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_4;
+    // }
+    // delay(5);
     ReadAagain_5:
     BrewCycleDivider = myNex.readNumber("bDiv");  // reading the delay divider
-    if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_5");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_5;
-    }
-    delay(5);
+    // if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_5");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_5;
+    // }
+    // delay(5);
 
     ReadAagain_6:
     // reding the preinfusion value which should be 0 or 1
     preinfusionState = myNex.readNumber("piState");
-    if ( preinfusionState < 0 || preinfusionState > 1 ){
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_6");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_6;
-    }
-    delay(5);
+    // if ( preinfusionState < 0 || preinfusionState > 1 ){
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_6");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_6;
+    // }
+    // delay(5);
 
     ReadAagain_7:
     pressureProfileState = myNex.readNumber("ppState");
-    if ( pressureProfileState < 0 || pressureProfileState > 1 ) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_7");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_7;
-    }
+    // if ( pressureProfileState < 0 || pressureProfileState > 1 ) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_7");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_7;
+    // }
     
-    delay(5);
+    // delay(5);
 
     ReadAagain_8:
     preinfuseTime = myNex.readNumber("piSec");
-    if (preinfuseTime < 0 || preinfuseTime > 30) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_8");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_8;
-    }
-    delay(5);
+    // if (preinfuseTime < 0 || preinfuseTime > 30) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_8");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_8;
+    // }
+    // delay(5);
 
     ReadAagain_9:
     preinfuseBar = myNex.readNumber("piBar");
-    if (preinfuseBar < 0 || preinfuseBar > 9) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_9");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_9;
-    }
-    delay(5);
+    // if (preinfuseBar < 0 || preinfuseBar > 9) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_9");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_9;
+    // }
+    // delay(5);
 
     ReadAagain_10:    
     ppStartBar = myNex.readNumber("ppStart");
     ppFinishBar = myNex.readNumber("ppFin");
-    if (ppStartBar < 0 || ppStartBar > 9 || ppFinishBar < 0 || ppFinishBar > 9) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_10");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_10;
-    }
-    delay(5);
+    // if (ppStartBar < 0 || ppStartBar > 9 || ppFinishBar < 0 || ppFinishBar > 9) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_10");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_10;
+    // }
+    // delay(5);
 
     ReadAagain_11:
     regionVolts = myNex.readNumber("regVolt");
     regionHz = myNex.readNumber("regHz");
-    if (regionVolts < 0 || regionVolts > 250 || regionHz < 0 || regionHz > 60) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_11");
-      myNex.writeStr("page popupMSG"); 
-      goto ReadAagain_11;
-    }
-    delay(5);
+    // if (regionVolts < 0 || regionVolts > 250 || regionHz < 0 || regionHz > 60) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_11");
+    //   myNex.writeStr("page popupMSG"); 
+    //   goto ReadAagain_11;
+    // }
+    // delay(5);
     ReadAagain_12:
     warmupEnabled = myNex.readNumber("warmupState");
-    if (warmupEnabled < 0 || warmupEnabled > 1) {
-      myNex.writeStr("popupMSG.t0.txt","ReadAagain_12");
-      myNex.writeStr("page popupMSG");
-      goto ReadAagain_12;
-    }
-    delay(5);
+    // if (warmupEnabled < 0 || warmupEnabled > 1) {
+    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_12");
+    //   myNex.writeStr("page popupMSG");
+    //   goto ReadAagain_12;
+    // }
+    // delay(5);
     
     // MODE_SELECT should always be last
     selectedOperationalMode = myNex.readNumber("modeSelect");
@@ -417,11 +417,8 @@ void modeSelect() {
       manualPressureProfile();
       break;
     case 4:
-      if(preinfusionFinished==false){
-        preInfusion(preinfusionState);
-      }else {
-        autoPressureProfile();
-      }
+      if(preinfusionFinished == false) preInfusion(preinfusionState);
+      else if(preinfusionFinished == true) autoPressureProfile();
       break;
     case 5:
       justDoCoffee();
@@ -429,9 +426,9 @@ void modeSelect() {
     case 6:
       deScale(descaleCheckBox);
       break;
-    default:
-      justDoCoffee();
-      break;
+    // default:
+    //   justDoCoffee();
+    //   break;
   }
 }
 
@@ -455,7 +452,7 @@ void justDoCoffee() {
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT); 
     }
-  } else {
+  } else if (brewState() == 0) {
     brewTimer(0);
     if (currentTempReadValue < ((float)setPoint - 10.00)) {
       PORTB |= _BV(PB0);  // relayPin -> HIGH
@@ -496,7 +493,7 @@ void heatCtrl() {
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT); 
     }
-  } else {
+  } else if (brewState() == 0) {
     brewTimer(0);
     if (currentTempReadValue < ((float)setPoint - 10.00)) {
       PORTB |= _BV(PB0);  // relayPin -> HIGH
@@ -791,7 +788,7 @@ void deScale(bool c) {
         myNex.writeStr("t14.txt", "FINISHED!");
         timer=millis();
       }
-    }else{
+    }else if (brewState() == 0) {
       currentCycleRead = 0;
       lastCycleRead = 10;
       descaleFinished = false;
@@ -822,7 +819,7 @@ void autoPressureProfile() {
       updateTimer = 0;
     }
     if (phase_1 == true) { //enters phase 1
-      if ((millis() - timer)>4000) { // the actions of this if block are run after 15 seconds have passed since starting brewing
+      if ((millis() - timer)>4000) { // the actions of this if block are run after 4 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
         timer = millis();
@@ -907,7 +904,7 @@ void preInfusion(bool c) {
         }
       }
     }else if(exitPreinfusion == true && selectedOperationalMode == 1){ // just pre-infusion
-      brewTimer(1);
+      // brewTimer(1);
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
       myNex.writeNum("currentPressure",BAR_TO_DIMMER_OUTPUT[9]);
     }else if(exitPreinfusion == true && selectedOperationalMode == 4){ // pre-infusion with pressure profiling on
