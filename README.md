@@ -135,7 +135,7 @@ No| BREW MODE   | DESCRIPTION
 
 2. [Nextion Editor](https://nextion.tech/nextion-editor/)
     >*Only necessary if planning on editing the ".HMI" file to ammend the LCD functionality*
-3. [CH340 USB Driver](https://electropeak.com/learn/how-to-install-ch340-driver/)
+3. [CH340 USB Driver](http://www.wch-ic.com/downloads/CH341SER_ZIP.html)
     >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
 ### **Hardware requirements:**
