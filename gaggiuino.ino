@@ -248,7 +248,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 
   if (POWER_ON == true) {
     
-    ReadAagain_1:
+//     ReadAagain_1:
     // Making sure the serial communication finishes sending all the values
     setPoint = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
     // if ( setPoint == NULL || setPoint < 0 || setPoint > MAX_SETPOINT_VALUE ) {
@@ -258,7 +258,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-    ReadAagain_2:
+//     ReadAagain_2:
     offsetTemp = myNex.readNumber("offSet");  // reading the offset value from the lcd
     // if (offsetTemp ==  NULL || offsetTemp < 0 ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_2");
@@ -267,7 +267,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-    ReadAagain_3:
+//     ReadAagain_3:
     HPWR = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
     // if ( HPWR == NULL || HPWR < 0 ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_3");
@@ -276,7 +276,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-    ReadAagain_4:
+//     ReadAagain_4:
     MainCycleDivider = myNex.readNumber("mDiv");  // reading the delay divider
     // if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_4");
@@ -284,7 +284,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     //   goto ReadAagain_4;
     // }
     // delay(5);
-    ReadAagain_5:
+//     ReadAagain_5:
     BrewCycleDivider = myNex.readNumber("bDiv");  // reading the delay divider
     // if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_5");
@@ -293,7 +293,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-    ReadAagain_6:
+//     ReadAagain_6:
     // reding the preinfusion value which should be 0 or 1
     preinfusionState = myNex.readNumber("piState");
     // if ( preinfusionState < 0 || preinfusionState > 1 ){
@@ -303,7 +303,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-    ReadAagain_7:
+//     ReadAagain_7:
     pressureProfileState = myNex.readNumber("ppState");
     // if ( pressureProfileState < 0 || pressureProfileState > 1 ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_7");
@@ -313,7 +313,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     
     // delay(5);
 
-    ReadAagain_8:
+//     ReadAagain_8:
     preinfuseTime = myNex.readNumber("piSec");
     // if (preinfuseTime < 0 || preinfuseTime > 30) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_8");
@@ -331,7 +331,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-    ReadAagain_10:    
+//     ReadAagain_10:    
     ppStartBar = myNex.readNumber("ppStart");
     ppFinishBar = myNex.readNumber("ppFin");
     // if (ppStartBar < 0 || ppStartBar > 9 || ppFinishBar < 0 || ppFinishBar > 9) {
@@ -341,7 +341,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-    ReadAagain_11:
+//     ReadAagain_11:
     regionVolts = myNex.readNumber("regVolt");
     regionHz = myNex.readNumber("regHz");
     // if (regionVolts < 0 || regionVolts > 250 || regionHz < 0 || regionHz > 60) {
@@ -350,7 +350,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     //   goto ReadAagain_11;
     // }
     // delay(5);
-    ReadAagain_12:
+//     ReadAagain_12:
     warmupEnabled = myNex.readNumber("warmupState");
     // if (warmupEnabled < 0 || warmupEnabled > 1) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_12");
@@ -426,9 +426,9 @@ void modeSelect() {
     case 6:
       deScale(descaleCheckBox);
       break;
-    // default:
-    //   justDoCoffee();
-    //   break;
+    default:
+      justDoCoffee();
+      break;
   }
 }
 
