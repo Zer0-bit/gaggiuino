@@ -143,7 +143,7 @@ No| BREW MODE   | DESCRIPTION
 
 * [Arduino Nano AT328](https://bit.ly/3eXSfXZ)  **[BASE]**
   * [Arduino Nano expansion board](https://www.aliexpress.com/item/32831772475.html?spm=a2g0o.store_pc_allProduct.8148356.21.7ed173b9bTMew3)
-* [2.4" Nextion LCD](.0.652955c90uhUWQ&algo_pvid=1fdc2046-cf41-468f-bec2-44084cfa3677&algo_exp_id=1fdc2046-cf41-468f-bec2-44084cfa3677-1&pdp_ext_f=%7B"sku)  **[BASE]**
+* [2.4" Nextion LCD](https://bit.ly/3CAUzPj)  **[BASE]**
 * [MAX6675 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
 * [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
 * [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
