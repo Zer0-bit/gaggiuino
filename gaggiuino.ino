@@ -45,11 +45,11 @@ dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 uint8_t BAR_TO_DIMMER_OUTPUT[10]={40,48,50,52,55,60,67,72,80,97};
 
 // Some vars are better global
-volatile float currentTempReadValue = 0.0;
-unsigned long thermoTimer = millis();
+volatile float currentTempReadValue;
+unsigned long thermoTimer;
 bool POWER_ON;
 bool  descaleCheckBox;
-bool  preinfusionState;
+// bool  preinfusionState;
 bool  pressureProfileState;
 bool  warmupEnabled;
 bool  flushEnabled;
@@ -209,6 +209,7 @@ void setup() {
   myNex.lastCurrentPageId = 1;
   delay(5);
   POWER_ON = true;
+  thermoTimer = millis();
 }
 
 //##############################################################################################################################
@@ -248,7 +249,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 
   if (POWER_ON == true) {
     
-//     ReadAagain_1:
+    // ReadAagain_1:
     // Making sure the serial communication finishes sending all the values
     setPoint = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
     // if ( setPoint == NULL || setPoint < 0 || setPoint > MAX_SETPOINT_VALUE ) {
@@ -258,7 +259,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-//     ReadAagain_2:
+    // ReadAagain_2:
     offsetTemp = myNex.readNumber("offSet");  // reading the offset value from the lcd
     // if (offsetTemp ==  NULL || offsetTemp < 0 ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_2");
@@ -267,7 +268,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-//     ReadAagain_3:
+    // ReadAagain_3:
     HPWR = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
     // if ( HPWR == NULL || HPWR < 0 ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_3");
@@ -276,7 +277,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-//     ReadAagain_4:
+    // ReadAagain_4:
     MainCycleDivider = myNex.readNumber("mDiv");  // reading the delay divider
     // if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_4");
@@ -284,7 +285,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     //   goto ReadAagain_4;
     // }
     // delay(5);
-//     ReadAagain_5:
+    // ReadAagain_5:
     BrewCycleDivider = myNex.readNumber("bDiv");  // reading the delay divider
     // if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_5");
@@ -293,9 +294,9 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-//     ReadAagain_6:
+    // ReadAagain_6:
     // reding the preinfusion value which should be 0 or 1
-    preinfusionState = myNex.readNumber("piState");
+    // preinfusionState = myNex.readNumber("piState");
     // if ( preinfusionState < 0 || preinfusionState > 1 ){
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_6");
     //   myNex.writeStr("page popupMSG");
@@ -303,7 +304,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-//     ReadAagain_7:
+    // ReadAagain_7:
     pressureProfileState = myNex.readNumber("ppState");
     // if ( pressureProfileState < 0 || pressureProfileState > 1 ) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_7");
@@ -313,7 +314,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     
     // delay(5);
 
-//     ReadAagain_8:
+    // ReadAagain_8:
     preinfuseTime = myNex.readNumber("piSec");
     // if (preinfuseTime < 0 || preinfuseTime > 30) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_8");
@@ -322,7 +323,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-    ReadAagain_9:
+    // ReadAagain_9:
     preinfuseBar = myNex.readNumber("piBar");
     // if (preinfuseBar < 0 || preinfuseBar > 9) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_9");
@@ -331,7 +332,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-//     ReadAagain_10:    
+    // ReadAagain_10:    
     ppStartBar = myNex.readNumber("ppStart");
     ppFinishBar = myNex.readNumber("ppFin");
     // if (ppStartBar < 0 || ppStartBar > 9 || ppFinishBar < 0 || ppFinishBar > 9) {
@@ -341,7 +342,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     // }
     // delay(5);
 
-//     ReadAagain_11:
+    // ReadAagain_11:
     regionVolts = myNex.readNumber("regVolt");
     regionHz = myNex.readNumber("regHz");
     // if (regionVolts < 0 || regionVolts > 250 || regionHz < 0 || regionHz > 60) {
@@ -350,7 +351,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     //   goto ReadAagain_11;
     // }
     // delay(5);
-//     ReadAagain_12:
+    // ReadAagain_12:
     warmupEnabled = myNex.readNumber("warmupState");
     // if (warmupEnabled < 0 || warmupEnabled > 1) {
     //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_12");
@@ -375,9 +376,9 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 void pageValuesRefresh() {  // Refreshing our values on page changes
 
   if (myNex.currentPageId != myNex.lastCurrentPageId) {
-    preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
+    // preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
     pressureProfileState = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
-    preinfuseTime = myNex.readNumber("piSec"); 
+    preinfuseTime = myNex.readNumber("piSec");
     preinfuseBar = myNex.readNumber("piBar"); 
     ppStartBar = myNex.readNumber("ppStart");
     ppFinishBar = myNex.readNumber("ppFin");
@@ -408,7 +409,7 @@ void modeSelect() {
       justDoCoffee();
       break;
     case 1:
-      preInfusion(preinfusionState);
+      preInfusion();
       break;
     case 2:
       autoPressureProfile();
@@ -417,7 +418,7 @@ void modeSelect() {
       manualPressureProfile();
       break;
     case 4:
-      if(preinfusionFinished == false) preInfusion(preinfusionState);
+      if(preinfusionFinished == false) preInfusion();
       else if(preinfusionFinished == true) autoPressureProfile();
       break;
     case 5:
@@ -426,16 +427,15 @@ void modeSelect() {
     case 6:
       deScale(descaleCheckBox);
       break;
-    default:
-      justDoCoffee();
-      break;
+    // default:
+    //   justDoCoffee();
+    //   break;
   }
 }
 
 //#############################################################################################
 //#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
 //#############################################################################################
-// The temperature, preinfusion, dimming, LCD update, etc control logic is all in the below functions
 void justDoCoffee() {
   uint8_t HPWR_LOW = HPWR/MainCycleDivider;
   // Calculating the boiler heating power range based on the below input values
@@ -527,7 +527,7 @@ void lcdRefresh() {
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     myNex.writeNum("currentHPWR", HPWR_OUT);      
     if(fineTempEnabled==1) {
-      myNex.writeNum("currentTemp",int((currentTempReadValue-offsetTemp)*10));
+      myNex.writeNum("currentTemp",int((currentTempReadValue-offsetTemp)*100));
     }else {
       myNex.writeNum("currentTemp",int(currentTempReadValue-offsetTemp));
     }
@@ -713,26 +713,20 @@ void trigger1() {
 
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
-bool brewState() {
+bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
   float P;
-  //Monitors the current flowing through the ACS712 circuit
-  if (regionVolts > 200) {
-    P = regionVolts * sensor.getCurrentAC();
-    if ( P >= 45 ) return 1;
-    else return 0;
-  }else if (regionVolts < 200) {
-    P = regionVolts * sensor.getCurrentAC(regionHz);
-    if ( P >= 45 ) return 1;
-    else return 0;
-  }
+  // Checking which region we're running in so the right formula can be applied
+  if (regionVolts > 200) P = regionVolts * sensor.getCurrentAC();
+  else if (regionVolts < 200) P = regionVolts * sensor.getCurrentAC(regionHz);
+  // Returnig "true" or "false" as the function response
+  if ( P >= 45 ) return 1;
+  else return 0;
 }
 
 
-bool brewTimer(bool c) {
+bool brewTimer(bool c) { // small function for easier timer start/stop
   if ( c == 1) {  
-    if (brewState() == 1) {
-      myNex.writeNum("timerState", 1);
-    }
+    myNex.writeNum("timerState", 1);
   }else if( c == 0) { 
     myNex.writeNum("timerState", 0);
   }
@@ -862,7 +856,7 @@ void autoPressureProfile() {
 }
 
 void manualPressureProfile() {
-  if(myNex.currentPageId==2) {
+  if( myNex.currentPageId == 2 ) {
     volatile uint8_t power_reading = myNex.readNumber("h0.val");
     if (brewState() == 1) {
       brewTimer(1);
@@ -878,12 +872,12 @@ void manualPressureProfile() {
 //#############################################################################################
 
 // Pump dimming during brew for preinfusion
-void preInfusion(bool c) {
+void preInfusion() {
   static bool blink = true;
   static bool exitPreinfusion;
   static unsigned long timer = millis();
 
-  if (brewState() == 1) {
+  if ( brewState() == 1 ) {
     if (exitPreinfusion == false) { //main preinfusion body
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         brewTimer(1);
