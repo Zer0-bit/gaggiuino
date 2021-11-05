@@ -19,13 +19,12 @@
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define REFRESH_SCREEN_EVERY 350 // Screen refresh interval (ms)
-#define DIMMER_UPDATE_EVERY 500 // Defines how often the dimmer gets calculated a new value during a brew cycle (ms)
+#define DIMMER_UPDATE_EVERY 1000 // Defines how often the dimmer gets calculated a new value during a brew cycle (ms)
 #define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
-
 
 
 //Init the thermocouple with the appropriate pins defined above with the prefix "thermo"
@@ -427,9 +426,9 @@ void modeSelect() {
     case 6:
       deScale(descaleCheckBox);
       break;
-    // default:
-    //   justDoCoffee();
-    //   break;
+    default:
+      justDoCoffee();
+      break;
   }
 }
 
@@ -688,7 +687,7 @@ void trigger1() {
       }
       // Saving warmup state
       valueToSave = myNex.readNumber("warmupState");
-      if (!(valueToSave < 0) || valueToSave < 2 ) {
+      if (valueToSave >= 0 && valueToSave < 2 ) {
         EEPROM.put(EEP_WARMUP, valueToSave);
         allValuesUpdated++;
       }else {
