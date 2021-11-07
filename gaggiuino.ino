@@ -234,13 +234,13 @@ void kThermoRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
     currentTempReadValue = thermocouple.readCelsius();
+    thermoTimer = millis();
     while (currentTempReadValue < 0 || currentTempReadValue == NAN) {
       if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
         currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis();
       }
     }
-    thermoTimer = millis();
   }
 }
 
