@@ -255,11 +255,11 @@ First let's check that the setup works as expected while outside the machine so 
 >*If choosing to power the system using the AC adapter then the arduino board and all the connected componnents will receive power by the means of the regulated 5v the AC adapter delivers through the USB port.*
 
 *Method 2:*
->*If powering using the 12v power supply module follow the bellow scheme:*
+>*If powering using the [ 12v ] power supply module + [ 9v ] stepdown convertor follow the bellow scheme:*
 
    PS  |  Arduino
   -----|-----------
-  12v  |   VIN
+   9v  |   VIN
   GND  |   GND
  
  All the other boards will get their power from the arduino 5v / GND pins and it's extrmely important they are powered using those outputs.
