@@ -343,4 +343,6 @@ So you end up having them connected like this:
 2. Installing the RobotDYN dimmer module.
 <img src="https://db3pap006files.storage.live.com/y4mC6f3vykKE40Z3FnrvrwriXgztoGaPAV_PoeIreyugKLhfK58o9KyQo1mANet1k-s0EZ2Shp6a1P6dEv13bQBIGwZKyxHMuIoPMJTO4GjAzESpHOXRNeBMtV5rZ8qGRWoPKVo13ahvh0V9hAYXGdPs5Zp7KpXnCSwjA2xiSqODEEy0y9d5zVJRxJAL1ovjVgB?width=1920&height=1080&cropmode=none" width="810" height="520" />
 
->Once installed tests can be done to verify the dimmer output is the expected one, this will require having either a [portafilter gauge](https://www.amazon.co.uk/Portafilter-Pressure-Espresso-Machines-ESPRESS/dp/B00ONTGKNA) or an [internally mounted gauge](https://www.ebay.com/itm/401980168959?hash=item5d97e29aff:g:fugAAOSwzkRd4~Jl).
+>**The image above is provided as a reference to understand how the connection through the dimmer is made, please check whether your dimmer high voltage ports placement differs from the above image, in the above the placement is IN|N|OUT and people have reported idfferent placement on their boards like OUT|IN|N , this is very important to check for.**
+
+*Once installed tests can be done to verify the dimmer output is the expected one, this will require having either a* [portafilter gauge](https://www.amazon.co.uk/Portafilter-Pressure-Espresso-Machines-ESPRESS/dp/B00ONTGKNA) *or a* [internally mounted gauge](https://www.ebay.com/itm/401980168959?hash=item5d97e29aff:g:fugAAOSwzkRd4~Jl).
