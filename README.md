@@ -341,8 +341,8 @@ So you end up having them connected like this:
 <img src="https://db3pap006files.storage.live.com/y4mDAGJwdsJP2Vv-Z4FCeTheZSWYlCj09fbWdURcj2t_qeDla_UaWY3qT23MZKsIiQtbH-d7TOS4nRDypYBrDUeFm7eEsL2LidREYBNIylJlCSIntsNItisdsSFSfqbPvGYsZDJ-dJ7_uKYD1gjYabCTC99pB-EVuW7BvWW2v7ut7aK4NLarH9iTjjNRDBpAc88?width=768&height=1024&cropmode=none" width="768" height="1024" />
 
 2. Installing the RobotDYN dimmer module.
-<img src="https://db3pap006files.storage.live.com/y4mC6f3vykKE40Z3FnrvrwriXgztoGaPAV_PoeIreyugKLhfK58o9KyQo1mANet1k-s0EZ2Shp6a1P6dEv13bQBIGwZKyxHMuIoPMJTO4GjAzESpHOXRNeBMtV5rZ8qGRWoPKVo13ahvh0V9hAYXGdPs5Zp7KpXnCSwjA2xiSqODEEy0y9d5zVJRxJAL1ovjVgB?width=1920&height=1080&cropmode=none" width="810" height="520" />
+<img src="https://db3pap006files.storage.live.com/y4m7v0t_oSlOM7p3t0-j_NrK2xgdlAACQ0K4lkJoCO7i_iFm8Fk8ol9NXNH2ugS1ue8APobUEcJYPn4cft63YNXLyamKjPUmOnOvjBzYX3BPlTkCwThpmP3AsJAhcat9PtdqoSslyuF_kLvklM1NZObw_DIRW1zGlqqKDK3-CScQMAbCrn51sScgYOfjBXrFX9Q?width=1024&height=576&cropmode=none" width="1024" height="576" />
 
->**The image above is provided as a reference to understand how the connection through the dimmer is made, please check whether your dimmer high voltage ports placement differs from the above image, in the above the placement is IN|N|OUT and people have reported idfferent placement on their boards like OUT|IN|N , this is very important to check for.**
+>**The image above is provided as a reference to understand how the connection through the dimmer is made, please check whether your dimmer high voltage ports placement differs from the above image before connecting the dimmer, it's very important to feed the IN wires properly.**
 
 *Once installed tests can be done to verify the dimmer output is the expected one, this will require having either a* [portafilter gauge](https://www.amazon.co.uk/Portafilter-Pressure-Espresso-Machines-ESPRESS/dp/B00ONTGKNA) *or a* [internally mounted gauge](https://www.ebay.com/itm/401980168959?hash=item5d97e29aff:g:fugAAOSwzkRd4~Jl).
