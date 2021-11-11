@@ -288,7 +288,7 @@ First let's check that the setup works as expected while outside the machine so 
       GND   |   GND
       Z-C   |   D2
       PSM   |   D9
-      
+  
    **Dimmer high voltage circuit control ports will act as a passthrough for the pump positive circuit wire**
 
 
@@ -299,34 +299,52 @@ First let's check that the setup works as expected while outside the machine so 
 #### BASE FUNCTIONALITY
 
 1. Take off the top cover by unscrewing the 2 top screws. You should be able to see something similar to the below image minus the SSR relay:
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4m4pob4r1pDtjBPqIyA-dqHOH_eZDJaf6W2dYdHlIh8G8OWusXig9WUKOA-iBCk2QRN-lL3ajrWDDUBASx_frpWqz_2z1dxeAnksAKKysKqL-eXE9PVRYeA2SdmS_DSkAA3TJ5ZVe3ybpkLYV0-PDKLjEhxNZluA_UX8ektw8kGW4PXKQeQU-UUJtjuaDSYKsG?width=3496&height=4656&cropmode=none" width="769" height="1024" />
+</div>
 
 2. Prepare 2 splitters like in the below image using the AWG15 cable, be sure one splitter to be black(negative) and one red(positive)
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4mGdTrz4hXNuu3rvDk5qro2WGn5xqy8ZVGwhJSXFSDqmJErI8dYufS1H-l_PnIIa0HffKXPuPkvbRjNHt_2OogxaW8UohuFKatz3BfjjK8NEGmynX2unmeZ6opV3_gd-u0f3cCAlgh9nF5spGDt12McFxpxzsatrSK2YuRgrFTfFnxMvMmiXss0XSLrZGx5xIa?width=769&height=1024&cropmode=none" width="769" height="1024" />
+</div>
 
 3. Be sure to mark your top left power connector so you don't mix them up ( even though it's not that hard to understand which one is which)
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4mM3HVfjbCIdcPtx16eN0pEgGC4Z0ih04agqfBwI-NLtpUWvmlBFI23fT2LPVagGHXYsgRiIVq8oSjJckuZscCcdTKqq7GNxCK5GxRqsp2pCZinopGHCdqJtnZqMCFBlSq-yOT-vNtsATxE734AN05DO47i1as2NSW4E-87r78gV7kpP_sy9tHiBqey26s9xP0?width=769&height=1024&cropmode=none" width="769" height="1024" />
+</div>
 
 4. Disconnect all 3 of them as you'll use the midlle and bottom ones for power sharing.
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4m9fZvq6wrObA7QFSkvQpfFyOinQbfs-u_E8DLZqp784cPLcUIlZKoZeqbLWn3JPAElseiwa0G1KuN-yXJfOx_4N-3k-IU0YprmK-YHBYEG-33CaUXTEWVPNVwjy6y7kMyaDvbEzH445Su6hSKNqZqAPXmwJQlIH8lAQmXaTduAk3WIsUrZSw2J0lPhRRVEqzX?width=769&height=1024&cropmode=none" width="769" height="1024" />
+</div>
 
 5. The hardest part will be now in my opinion as you'll have to unscrew the bottom boiler stock thermostat and screw back in the new thermocoule. Be sure to apply some thermal paste on the thermocouple threads. (Just a teeny tiny bit.)
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4m9lHvLCobQ3DlmTfqYPJvV1M-z2T0_GMxgeE21-hqP3nfu5UwB1PTyPF6rIT5A6ebeyv9TXwEfCbB1SBwkyVy0r8AIbrLGogaWcebzjSpaskThwbn-S45n5E-IAkeKPJgYAjLMPYeQPjALL--D1CC60ZFaOGsaHtAOSNvcb1Y4X2IEWV7n4bUP4v40sKawusJ?width=496&height=660&cropmode=none" width="768" height="1024" />
+</div>
 
 6. Prepare 2 cables you'll use to connect the cables disconnected from the thermostat to the port 1 and 2 of the SSR relay. Use the red cable for that. They shouldn't be too long, about 10cm will suffice, one end should be crimpled with a male spade connector and the loose end screwed to the relay and attach the relay to the machine case itself, I have no clue what screw size I used as i have just matched one by trial and error lol, but be sure to apply some thermal paste to the SSR backplate that will make contact with the metal case of the machine.
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4m3ZmhHEobr2VPen1wScEO8AMLiaOVfWjsnW8Aw4645PaRXerrLpV8iZmZjzU88KDPmKEfPXbUBqYhn6ejVOfXIB7hgucmljyOLL54tqWKUahFoqnYEf2rBh0TRXjFEtzAvptdT3W8nSTzc96sfvD8hcK-pQEeEaYaLaq4gpNaKyXdWQtETpPtrzpMd1mLzuyb?width=2584&height=2140&cropmode=none" width="769" height="769" /> 
+</div>
 
 So you end up having them connected like this:
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4m5HfjPvkFSOtSm8gkTJJ4saqEw8dcB1no2eoaHcDZjYD9OV95tBnrG8tqtRuOcor7aFZrIRw7167k4QGMUneOPATitBFctkgdklxWOohMyBir3zLdm9fkAnTQW8TquTZouRh9rzKSC0t5bkerK1g8AzlFYTfuZoDPQ3juFiOJ19JKiL6VpODn40Z1q8JwVpGy?width=2625&height=2831&cropmode=none" width="769" height="769" />
+</div>
 
 7. Prepare 2 more 10cm cables( also colour coded accordingly) which should be crimpled with M/F spade connectors at each end, the female end will go in Gaggia's front panel and the male end will go to the female end of the previously prepared (2) splitters, as in the below image:
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4m2LoENSwBicOmRtvdMKM9srnf4tfNECBkaNXWkkGxxEAMbc_BuQhQnYgVH7h0FZ52NIDiIudlx2NhDkm1747Y9wT60F7uoHMJu-lx_MF-mPXBbzOyeZNVuEdrISfsi56v7VYKNZIgby3qUD922gMJCI177q0IttLhWXn_VM9OamG0FvyKQ3T26uqOye6H50eV?width=769&height=1024&cropmode=none" width="769" height="1024" />
 <img src="https://db3pap006files.storage.live.com/y4myMKUSADo1HIGEXQ42p9tP1UKzL2aUqI6gCv3st6cBqR921Y-xWkhHB9QYaUlubJC-wCs5swyMaXX-p9LJu0qDgOgMKwkMyW-KUdUkkQWZ7-VdJNZiWv2duaBEcFtGo34uX1_-mqF66PpgseniGFKGhJmO-o5n8Pb2TP2it0vyQBcLAgX00jzVl-H6L5NeVzE?width=769&height=1024&cropmode=none" width="769" height="1024" />
+</div>
 
 8. Connect the front panel cables to any of the free male ends of the splitters as well, black one for the negative cable and red for the positive one (on my machine the positive is having 2 cables crimped together).
 
 9. To power the Arduino system I have used an old 5v mobile charger which I'm sure all of us have laying around. Just solder 2 cables to the 2 ends of the charger and for the other ends use 2 F spade connectors, after which plug them to the remaining 2 splitter (2) ends.
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4myMKUSADo1HIGEXQ42p9tP1UKzL2aUqI6gCv3st6cBqR921Y-xWkhHB9QYaUlubJC-wCs5swyMaXX-p9LJu0qDgOgMKwkMyW-KUdUkkQWZ7-VdJNZiWv2duaBEcFtGo34uX1_-mqF66PpgseniGFKGhJmO-o5n8Pb2TP2it0vyQBcLAgX00jzVl-H6L5NeVzE?width=769&height=1024&cropmode=none" width="769" height="1024" />
+</div>
 
 10. Now you're ready to connect everything to the arduino like you did it when testing everything, one piece of advice would be to solder all the Arduino connected cables as during the machine operation there is quite a bit of vibration and that can introduce all sorts of noise/frequent disconnects to certain pins which will lead to unexplained behaviours.
 
@@ -337,11 +355,14 @@ So you end up having them connected like this:
 
 >**It is important to connect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value!
 >Another VERY important aspect is to have the board connected just as shown in the picture (location and position) as well as only the necessary cables connected to the sensor board itself, no additional wires(high or low voltage) should be positioned anywhere around the hall effect sensor as this will most likely create unexpected reads that will confuse the program. A easy way to understand whether your program has false readings is if the shot timer keeps starting randomly when the machine is in idle state.**
-
+<div align="center">
 <img src="https://db3pap006files.storage.live.com/y4mDAGJwdsJP2Vv-Z4FCeTheZSWYlCj09fbWdURcj2t_qeDla_UaWY3qT23MZKsIiQtbH-d7TOS4nRDypYBrDUeFm7eEsL2LidREYBNIylJlCSIntsNItisdsSFSfqbPvGYsZDJ-dJ7_uKYD1gjYabCTC99pB-EVuW7BvWW2v7ut7aK4NLarH9iTjjNRDBpAc88?width=768&height=1024&cropmode=none" width="768" height="1024" />
+</div>
 
 2. Installing the RobotDYN dimmer module.
-<img src="https://db3pap006files.storage.live.com/y4m7v0t_oSlOM7p3t0-j_NrK2xgdlAACQ0K4lkJoCO7i_iFm8Fk8ol9NXNH2ugS1ue8APobUEcJYPn4cft63YNXLyamKjPUmOnOvjBzYX3BPlTkCwThpmP3AsJAhcat9PtdqoSslyuF_kLvklM1NZObw_DIRW1zGlqqKDK3-CScQMAbCrn51sScgYOfjBXrFX9Q?width=1024&height=576&cropmode=none" width="1024" height="576" />
+<div align="center">
+<img src="https://db3pap006files.storage.live.com/y4mRPlqJsFn_WyU0usCWAaXngJjq0xgRh7Do7O1i9RMUJc3hBhCpGQlfFn0FKqaw3rZkg5ZuofwPelqGe55PjFbhH_6YvEpswQIOlatLVNXsAVf7UwpwF5i5WhouXE1Hwqu6yioPBhlmgKscw-0sdwyvzX9puihL1ASPeWi1cAXNQAx-NKVf6U5e2O486GoY49K?width=660&height=367&cropmode=none" width="660" height="367" />
+</div>
 
 >**The image above is provided as a reference to understand how the connection through the dimmer is made, please check whether your dimmer high voltage ports placement differs from the above image before connecting the dimmer, it's very important to feed the IN wires properly.**
 
