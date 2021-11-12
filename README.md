@@ -159,7 +159,7 @@ No| BREW MODE   | DESCRIPTION
   * [12v Power Supply](https://www.aliexpress.com/item/33012749903.html) should work only together with any of the bellow 2 options:
     * [12v to 5v stepdown USB output](https://www.aliexpress.com/item/32525175131.html)
     * [12v to 9v stepdown](https://www.aliexpress.com/item/1005001534605959.html)
- >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.
+ >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
  >*It's recommended though to power the arduino board using  12V 1000mA power supply and a stepdown convertor of your choice from the provided list.*
 
 ### Housing:
