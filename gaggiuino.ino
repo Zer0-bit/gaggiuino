@@ -3,8 +3,7 @@
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
 #include <ACS712.h>
-
-
+// #include "pressureRead.h"
 
 
 
@@ -15,6 +14,7 @@
 #define brewSwitchPin A0 // PD7
 #define relayPin 8  // PB0
 #define dimmerPin 9
+#define pressurePin A1 
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
@@ -35,7 +35,10 @@ EasyNex myNex(Serial);
 ACS712 sensor(ACS712_20A, brewSwitchPin);
 // RobotDYN Dimmer object init
 dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
+//Transducer stuff
+// transducer Sensor(pressurePin);
 
+// Sensor.set_values(921.6,105.0,12);
 
 
 //Change these values if your tests show the dimmer should be tuned
@@ -48,7 +51,7 @@ volatile float currentTempReadValue;
 unsigned long thermoTimer;
 bool POWER_ON;
 bool  descaleCheckBox;
-// bool  preinfusionState;
+bool  preinfusionState;
 bool  pressureProfileState;
 bool  warmupEnabled;
 bool  flushEnabled;
@@ -67,7 +70,6 @@ uint8_t preinfuseBar;
 uint8_t ppStartBar;
 uint8_t ppFinishBar;
 uint8_t selectedOperationalMode;
-uint8_t regionVolts;
 uint8_t regionHz;
 
 // EEPROM  stuff
@@ -82,9 +84,8 @@ uint16_t  EEP_PREINFUSION = 140;
 uint16_t  EEP_P_PROFILE = 160;
 uint16_t  EEP_PREINFUSION_SEC = 180;
 uint16_t  EEP_PREINFUSION_BAR = 190;
-uint16_t  EEP_REGPWR_V = 195;
-uint16_t  EEP_REGPWR_HZ = 200;
-uint16_t  EEP_WARMUP = 210;
+uint16_t  EEP_REGPWR_HZ = 195;
+uint16_t  EEP_WARMUP = 200;
 
 
 void setup() {
@@ -109,25 +110,26 @@ void setup() {
 
 
   //If it's the first boot we'll need to set some defaults
-  if (EEPROM.read(0) != 252 || EEPROM.read(EEP_SETPOINT) == NULL || EEPROM.read(EEP_SETPOINT) == 65535) {
+  if (EEPROM.read(0) != 251 || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
-    EEPROM.put(0, 252);
+    EEPROM.put(0, 251);
     //The values can be modified to accomodate whatever system it tagets
     //So on first boot it writes and reads the desired system values
-    EEPROM.put(EEP_SETPOINT, 101);
+    EEPROM.put(EEP_SETPOINT, 100);
     EEPROM.put(EEP_OFFSET, 7);
     EEPROM.put(EEP_HPWR, 550);
     EEPROM.put(EEP_M_DIVIDER, 5);
     EEPROM.put(EEP_B_DIVIDER, 2);
+    delay(5);
     EEPROM.put(EEP_PREINFUSION, 0);
     EEPROM.put(EEP_P_START, 9);
     EEPROM.put(EEP_P_FINISH, 6);
     EEPROM.put(EEP_P_PROFILE, 0);
     EEPROM.put(EEP_PREINFUSION_SEC, 8);
     EEPROM.put(EEP_PREINFUSION_BAR, 2);
-    EEPROM.put(EEP_REGPWR_V, 230);
-    EEPROM.put(EEP_REGPWR_HZ, 50);
-    EEPROM.put(EEP_WARMUP, 1);
+    delay(5);
+    EEPROM.put(EEP_REGPWR_HZ, 60);
+    EEPROM.put(EEP_WARMUP, 0);
   }
   // Applying our saved EEPROM saved values
   uint16_t init_val;
@@ -193,19 +195,21 @@ void setup() {
     myNex.writeNum("piBar", init_val);
     myNex.writeNum("brewAuto.n1.val", init_val);
   }
-  // EEPROM.get(EEP_DESCALE, init_val);//reading preinfusion checkbox value from eeprom
-  // if (  !(init_val < 0) && init_val < 2 ) myNex.writeNum("descaleState", init_val);
 
-// Region POWER values
-  EEPROM.get(EEP_REGPWR_V, init_val);//reading region voltage value from eeprom
-  if (  !(init_val < 0) && init_val < 250 ) myNex.writeNum("regVolt", init_val);
+// Region POWER value
   EEPROM.get(EEP_REGPWR_HZ, init_val);//reading region frequency value from eeprom
-  if (  !(init_val < 0) && init_val < 61 ) myNex.writeNum("regHZ", init_val);
+  if (  init_val == 50 || init_val == 60 ) {
+    myNex.writeNum("regHz", init_val);
+  }
+
 // Warmup checkbox value
   EEPROM.get(EEP_WARMUP, init_val);//reading preinfusion pressure value from eeprom
-  if (  !(init_val >= 0) && init_val <= 1 ) myNex.writeNum("warmupState", init_val);
+  if (  init_val == 0 || init_val == 1 ) {
+    myNex.writeNum("warmupState", init_val);
+    myNex.writeNum("morePower.bt0.val", init_val);
+  }
 
-  myNex.lastCurrentPageId = 1;
+  myNex.lastCurrentPageId = myNex.currentPageId;
   delay(5);
   POWER_ON = true;
   thermoTimer = millis();
@@ -233,14 +237,14 @@ void loop() {
 void kThermoRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
-    currentTempReadValue = thermocouple.readCelsius();
-    thermoTimer = millis();
-    while (currentTempReadValue < 0 || currentTempReadValue == NAN) {
+    currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
+    while (currentTempReadValue <= 0 || currentTempReadValue == NAN) {
       if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
         currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis();
       }
     }
+    thermoTimer = millis();
   }
 }
 
@@ -253,116 +257,26 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 
   if (POWER_ON == true) {
     
-    // ReadAagain_1:
-    // Making sure the serial communication finishes sending all the values
     setPoint = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
-    // if ( setPoint == NULL || setPoint < 0 || setPoint > MAX_SETPOINT_VALUE ) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_1");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_1;
-    // }
-    // delay(5);
-
-    // ReadAagain_2:
     offsetTemp = myNex.readNumber("offSet");  // reading the offset value from the lcd
-    // if (offsetTemp ==  NULL || offsetTemp < 0 ) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_2");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_2;
-    // }
-    // delay(5);
-
-    // ReadAagain_3:
     HPWR = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
-    // if ( HPWR == NULL || HPWR < 0 ) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_3");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_3;
-    // }
-    // delay(5);
-
-    // ReadAagain_4:
     MainCycleDivider = myNex.readNumber("mDiv");  // reading the delay divider
-    // if ( MainCycleDivider == NULL || MainCycleDivider < 1 ) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_4");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_4;
-    // }
-    // delay(5);
-    // ReadAagain_5:
     BrewCycleDivider = myNex.readNumber("bDiv");  // reading the delay divider
-    // if ( BrewCycleDivider == NULL || BrewCycleDivider < 1  ) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_5");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_5;
-    // }
-    // delay(5);
+    delay(5);
 
-    // ReadAagain_6:
-    // reding the preinfusion value which should be 0 or 1
-    // preinfusionState = myNex.readNumber("piState");
-    // if ( preinfusionState < 0 || preinfusionState > 1 ){
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_6");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_6;
-    // }
-    // delay(5);
+    preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
+    preinfuseTime = myNex.readNumber("piSec"); // pre-infusion duration
+    preinfuseBar = myNex.readNumber("piBar"); //pre-infusion pressure value
+    delay(5);
+  
+    pressureProfileState = myNex.readNumber("ppState"); // pressure profile state value which should be 0 or 1
+    ppStartBar = myNex.readNumber("ppStart"); // pressure profile start pressure value
+    ppFinishBar = myNex.readNumber("ppFin"); // pressure profile finish pressure value
+    delay(5);
 
-    // ReadAagain_7:
-    pressureProfileState = myNex.readNumber("ppState");
-    // if ( pressureProfileState < 0 || pressureProfileState > 1 ) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_7");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_7;
-    // }
-    
-    // delay(5);
-
-    // ReadAagain_8:
-    preinfuseTime = myNex.readNumber("piSec");
-    // if (preinfuseTime < 0 || preinfuseTime > 30) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_8");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_8;
-    // }
-    // delay(5);
-
-    // ReadAagain_9:
-    preinfuseBar = myNex.readNumber("piBar");
-    // if (preinfuseBar < 0 || preinfuseBar > 9) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_9");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_9;
-    // }
-    // delay(5);
-
-    // ReadAagain_10:    
-    ppStartBar = myNex.readNumber("ppStart");
-    ppFinishBar = myNex.readNumber("ppFin");
-    // if (ppStartBar < 0 || ppStartBar > 9 || ppFinishBar < 0 || ppFinishBar > 9) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_10");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_10;
-    // }
-    // delay(5);
-
-    // ReadAagain_11:
-    regionVolts = myNex.readNumber("regVolt");
-    regionHz = myNex.readNumber("regHz");
-    // if (regionVolts < 0 || regionVolts > 250 || regionHz < 0 || regionHz > 60) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_11");
-    //   myNex.writeStr("page popupMSG"); 
-    //   goto ReadAagain_11;
-    // }
-    // delay(5);
-    // ReadAagain_12:
+    regionHz = myNex.readNumber("regHz"); // regionVolts = myNex.readNumber("regVolt");
     warmupEnabled = myNex.readNumber("warmupState");
-    // if (warmupEnabled < 0 || warmupEnabled > 1) {
-    //   myNex.writeStr("popupMSG.t0.txt","ReadAagain_12");
-    //   myNex.writeStr("page popupMSG");
-    //   goto ReadAagain_12;
-    // }
-    // delay(5);
+    delay(5);
     
     // MODE_SELECT should always be last
     selectedOperationalMode = myNex.readNumber("modeSelect");
@@ -380,7 +294,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 void pageValuesRefresh() {  // Refreshing our values on page changes
 
   if (myNex.currentPageId != myNex.lastCurrentPageId) {
-    // preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
+    preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
     pressureProfileState = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
     preinfuseTime = myNex.readNumber("piSec");
     preinfuseBar = myNex.readNumber("piBar"); 
@@ -393,8 +307,8 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     HPWR = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
     MainCycleDivider = myNex.readNumber("mDiv");  // reading the delay divider
     BrewCycleDivider = myNex.readNumber("bDiv");  // reading the delay divider
-    regionVolts = myNex.readNumber("regVolt");
     regionHz = myNex.readNumber("regHz");
+    warmupEnabled = myNex.readNumber("warmupState");
 
     // MODE_SELECT should always be last
     selectedOperationalMode = myNex.readNumber("modeSelect");
@@ -449,6 +363,7 @@ void justDoCoffee() {
   if (brewState() == 1) {
     dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
     brewTimer(1);
+    myNex.writeNum("warmupState", 0);
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (currentTempReadValue < setPoint+0.5) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
@@ -497,6 +412,7 @@ void heatCtrl() {
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT); 
     }
+    myNex.writeNum("warmupState", 0);
   } else if (brewState() == 0) {
     brewTimer(0);
     if (currentTempReadValue < ((float)setPoint - 10.00)) {
@@ -524,21 +440,17 @@ void heatCtrl() {
 //#############################################################################################
 //################################____LCD_REFRESH_CONTROL___###################################
 //#############################################################################################
+
 void lcdRefresh() {
   // Updating the LCD every 300ms
   static unsigned long pageRefreshTimer = millis();
     
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     myNex.writeNum("currentHPWR", HPWR_OUT);      
-    if(fineTempEnabled==1) {
-      myNex.writeNum("currentTemp",int((currentTempReadValue-offsetTemp)*100));
-    }else {
-      myNex.writeNum("currentTemp",int(currentTempReadValue-offsetTemp));
-    }
+    myNex.writeNum("currentTemp",int(currentTempReadValue-offsetTemp));
     pageRefreshTimer = millis();
   }
 }
-
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
@@ -548,163 +460,109 @@ void trigger1() {
   uint8_t allValuesUpdated;
 
   switch (myNex.currentPageId){
-    case 6: 
-      // Reading the LCD side set values
-      valueToSave = myNex.readNumber("setPoint");
-      if (valueToSave != NULL && valueToSave > 0) { 
-        EEPROM.put(EEP_SETPOINT, valueToSave);
-        allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt","BOILER TEMP ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
-      // Saving offset
-      valueToSave = myNex.readNumber("offSet");
-      if (valueToSave != NULL && valueToSave > 0) {
-        EEPROM.put(EEP_OFFSET, valueToSave);
-        allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "OFFSET ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
-      // Saving HPWR
-      valueToSave = myNex.readNumber("hpwr");
-      if (valueToSave != NULL && valueToSave > 0) {
-        EEPROM.put(EEP_HPWR, valueToSave);
-        allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "HPWR ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
-      // Saving mDiv
-      valueToSave = myNex.readNumber("mDiv");
-      if (valueToSave != NULL && valueToSave >= 1) {
-        EEPROM.put(EEP_M_DIVIDER, valueToSave);
-        allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "M_DIV ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
-      //Saving bDiv
-      valueToSave = myNex.readNumber("bDiv");
-      if (valueToSave != NULL && valueToSave >= 1) {
-        EEPROM.put(EEP_B_DIVIDER, valueToSave);
-        allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "B_DIV ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
-      if (allValuesUpdated == 5) {
-        allValuesUpdated=0;
-        myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
-        myNex.writeStr("page popupMSG");
-      }
+    case 1:
+      break;
+    case 2:
       break;
     case 3:
       // Saving ppStart and ppFin
       valueToSave = myNex.readNumber("ppStart");
-      if (valueToSave != NULL && valueToSave >= 1) {
+      if (valueToSave != 0 && valueToSave >= 1) {
         EEPROM.put(EEP_P_START, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "PP Start ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
+      }else {}
       valueToSave = myNex.readNumber("ppFin");
-      if (valueToSave != NULL && valueToSave >= 1) {
+      if (valueToSave != 0 && valueToSave >= 1) {
         EEPROM.put(EEP_P_FINISH, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "PP Finish ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
+      }else {}
       // Saving PI and PP
       valueToSave = myNex.readNumber("piState");
-      if (!(valueToSave < 0) || valueToSave != NULL ) {
+      if (valueToSave == 0 || valueToSave == 1 ) {
         EEPROM.put(EEP_PREINFUSION, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "PREINFUSION ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
+      }else {}
       valueToSave = myNex.readNumber("ppState");
-      if (!(valueToSave < 0) || valueToSave != NULL ) {
+      if (valueToSave == 0 || valueToSave == 1 ) {
         EEPROM.put(EEP_P_PROFILE, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "P-PROFILE ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
+      }else {}
       //Saved piSec
       valueToSave = myNex.readNumber("piSec");
-      if (!(valueToSave < 0) || valueToSave != NULL ) {
+      if ( valueToSave >= 0 ) {
         EEPROM.put(EEP_PREINFUSION_SEC, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "PREINFUSION SEC ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
+      }else {}
       //Saved piBar
       valueToSave = myNex.readNumber("piBar");
-      if (!(valueToSave < 0) || valueToSave != NULL ) {
+      if ( valueToSave >= 0 ) {
         EEPROM.put(EEP_PREINFUSION_BAR, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "PREINFUSION BAR ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
+      }else {}
       if (allValuesUpdated == 6) {
         allValuesUpdated=0;
         myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
-        myNex.writeStr("page popupMSG");
-      }
+      }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
+      myNex.writeStr("page popupMSG");
       break;
-    case 7:
-      //Saved regVolt and regHz
-      valueToSave = myNex.readNumber("regVolt");
-      if (valueToSave > 0 ) {
-        EEPROM.put(EEP_REGPWR_V, valueToSave);
+    case 4:
+      break;
+    case 5:
+      break;
+    case 6: 
+      // Reading the LCD side set values
+      valueToSave = myNex.readNumber("setPoint");
+      if ( valueToSave > 0) { 
+        EEPROM.put(EEP_SETPOINT, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "REG VOLT ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
-      valueToSave = myNex.readNumber("regHz");
-      if (valueToSave > 0 ) {
-        EEPROM.put(EEP_REGPWR_HZ, valueToSave);
+      }else {}
+      // Saving offset
+      valueToSave = myNex.readNumber("offSet");
+      if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_OFFSET, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "REG HZ ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
-      // Saving warmup state
-      valueToSave = myNex.readNumber("warmupState");
-      if (valueToSave >= 0 && valueToSave < 2 ) {
-        EEPROM.put(EEP_WARMUP, valueToSave);
+      }else {}
+      // Saving HPWR
+      valueToSave = myNex.readNumber("hpwr");
+      if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_HPWR, valueToSave);
         allValuesUpdated++;
-      }else {
-        myNex.writeStr("popupMSG.t0.txt", "WARMUP ERROR!");
-        myNex.writeStr("page popupMSG");
-        delay(5);
-      }
-      if (allValuesUpdated == 3) {
+      }else {}
+      // Saving mDiv
+      valueToSave = myNex.readNumber("mDiv");
+      if ( valueToSave >= 1) {
+        EEPROM.put(EEP_M_DIVIDER, valueToSave);
+        allValuesUpdated++;
+      }else {}
+      //Saving bDiv
+      valueToSave = myNex.readNumber("bDiv");
+      if ( valueToSave >= 1) {
+        EEPROM.put(EEP_B_DIVIDER, valueToSave);
+        allValuesUpdated++;
+      }else {}
+      if (allValuesUpdated == 5) {
         allValuesUpdated=0;
         myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
-        myNex.writeStr("page popupMSG");
-      }      
+      }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
+      myNex.writeStr("page popupMSG");
+      break;
+    case 7:
+      valueToSave = myNex.readNumber("regHz");
+      if ( valueToSave == 50 || valueToSave == 60 ) {
+        EEPROM.put(EEP_REGPWR_HZ, valueToSave);
+        allValuesUpdated++;
+      }else {}
+      // Saving warmup state
+      valueToSave = myNex.readNumber("warmupState");
+      if (valueToSave == 0 || valueToSave == 1 ) {
+        EEPROM.put(EEP_WARMUP, valueToSave);
+        allValuesUpdated++;
+      }else {}
+      if (allValuesUpdated == 2) {
+        allValuesUpdated=0;
+        myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
+      }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
+      myNex.writeStr("page popupMSG");
       break;
     default:
       break;
@@ -718,10 +576,10 @@ void trigger1() {
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
-  float P;
+  uint16_t P;
   // Checking which region we're running in so the right formula can be applied
-  if (regionVolts > 200) P = regionVolts * sensor.getCurrentAC();
-  else if (regionVolts < 200) P = regionVolts * sensor.getCurrentAC(regionHz);
+  if (regionHz < 55 ) P = 240 * sensor.getCurrentAC();
+  else if (regionHz > 55 ) P = 120 * sensor.getCurrentAC(regionHz);
   // Returnig "true" or "false" as the function response
   if ( P >= 45 ) return 1;
   else return 0;
@@ -803,8 +661,8 @@ void deScale(bool c) {
 
 
 // Pressure profiling function, uses dimmer to dim the pump 
-// as time passes, starts dimming at about 15 seconds mark 
-// goes from 9bar to the lower threshold set in settings(default 4bar)
+// as time passes, starts dimming at about X seconds mark 
+// goes from 9bar to the lower threshold set in settings(default 6bar)
 void autoPressureProfile() {
   static bool setPerformed = 0, phase_1 = 1, phase_2 = 0, updateTimer = 1;
   static unsigned long timer = millis();
@@ -817,7 +675,7 @@ void autoPressureProfile() {
       updateTimer = 0;
     }
     if (phase_1 == true) { //enters phase 1
-      if ((millis() - timer)>4000) { // the actions of this if block are run after 4 seconds have passed since starting brewing
+      if ((millis() - timer)>5000) { // the actions of this if block are run after 4 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
         timer = millis();
@@ -826,7 +684,7 @@ void autoPressureProfile() {
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[ppStartBar]);
       myNex.writeNum("currentPressure",BAR_TO_DIMMER_OUTPUT[ppStartBar]);
     } else if (phase_2 == true) { //enters pahse 2
-      if (millis() - timer > DIMMER_UPDATE_EVERY) { // runs the below block every half second
+      if (millis() - timer > DIMMER_UPDATE_EVERY) { // runs the below block every second
         if (BAR_TO_DIMMER_OUTPUT[ppStartBar] > BAR_TO_DIMMER_OUTPUT[ppFinishBar]) {
           dimmerOutput+=round(BAR_TO_DIMMER_OUTPUT[ppStartBar]/BAR_TO_DIMMER_OUTPUT[ppFinishBar])*2;
           dimmerNewPowerVal=BAR_TO_DIMMER_OUTPUT[ppStartBar]-dimmerOutput; //calculates a new dimmer power value every second given the max and min
