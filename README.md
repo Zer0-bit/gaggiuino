@@ -47,29 +47,27 @@
 >Notes:
 >* Pressure:
 >     * It is expected your OPV has been tuned to 9bar by default.
->     * Initial pressure tuning has been performed according to a portafilter pressure gauge. While this is better than nothing and gives nice results, it's not real PP per se as the pressure at the puck can't be directly controlled. I have started looking for a suitable (food safe) pressure transducer which will allow for a feedback loop and real time dimmer control for a real PP experience.
+>     * Initial pressure tuning has been performed against a blind measurement using a portafilter gauge.
+>     * True pressure profiling can be added by adding a pressure feedback sensor(details bellow).
 >* Regional power:
 >     * Defaults to 230V/50Hz and should be changed to the regional values for the correct work of the ACS712 sensor.
+>     * Operating with the incorrect power settings result in incorrect dimmer/timer work as well.
 
 ***
-#### Planned future additions:
-* Tray integrated load cells
-   * Used for all things weight related
-* Pressure transducer
-   * Used for a feedback loop to make real-time pressure adjustments based on puck resistance
-* Flow sensor
-   * Used to monitor the water flow for true flow profiling
-* Steam control
-* STM32F411CE(blackpill) support
-* ESP32 support:
-   * Web interface
-   * Graph outputs
-   * OTA firmware updates
-   * TBC
 
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
 ### Mod in operation:
+
+**WARMUP:**
+<div align="center">
+
+https://user-images.githubusercontent.com/42692077/143676550-4e1284ea-8d00-4317-bc0e-6a00d9153400.mp4
+
+https://user-images.githubusercontent.com/42692077/143675667-df061080-e474-4967-9907-e938d678861e.mp4
+
+</div>
+
 **Brew mode:**
 <div align="center">
  
@@ -142,19 +140,19 @@ No| BREW MODE   | DESCRIPTION
     >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
 ### **Hardware requirements:**
-###### The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality component type
+***The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, it's all appropriately split under "BASE" or "EXTENDED" functionality (see bellow).***
 
-* [Arduino Nano AT328](https://bit.ly/3eXSfXZ)  **[BASE]**
+#### **BASE FUNCTIONALITY** 
+***
+* [Arduino Nano AT328](https://bit.ly/3eXSfXZ)
   * [Arduino Nano expansion board](https://www.aliexpress.com/item/32831772475.html?spm=a2g0o.store_pc_allProduct.8148356.21.7ed173b9bTMew3)
-* [2.4" Nextion LCD](https://bit.ly/3CAUzPj)  **[BASE]**
-* [MAX6675 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
-* [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
-* [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
-* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
-* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
-* [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
+* [2.4" Nextion LCD](https://bit.ly/3CAUzPj)
+* [MAX6675 thermocouple](https://bit.ly/3ejTUIj) 
+* [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
+* [40DA SSR Relay](https://bit.ly/33g1Pjr)
+* [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow/blue )](https://bit.ly/3tjSQbI)
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-* Power Supply (multiple options provided choose what fits your needs): **[BASE]**
+* Power Supply (multiple options provided choose what fits your needs):
   * [5v AC Adaptor](https://bit.ly/3jWSrKa) 
   * [12v Power Supply](https://www.aliexpress.com/item/33012749903.html) should work only together with any of the bellow 2 options:
     * [12v to 5v stepdown USB output](https://www.aliexpress.com/item/32525175131.html)
@@ -162,7 +160,17 @@ No| BREW MODE   | DESCRIPTION
  >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
  >*It's recommended though to power the arduino board using  12V 1000mA power supply and a stepdown convertor of your choice from the provided list.*
 
-### Housing:
+#### **EXTENDED FUNCTIONALITY**
+***
+* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
+* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv)
+* [Pressure sensor - 0-1.2Mpa](https://www.aliexpress.com/item/4000756631924.html)
+  * [Fitting - 6-02/PCF ](https://www.aliexpress.com/item/4001338642124.html)
+  * [Fitting - 6mm/PE](https://www.aliexpress.com/item/4001338085412.html)
+  * [Hose - 6x4-1 meter](https://www.aliexpress.com/item/4000383354010.html)
+
+#### **Housing:**
+***
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
      >Designed by the redditor [/u/LikeableBump1](https://www.reddit.com/r/gaggiaclassic/comments/phzyis/gaggia_with_arduino_pid_in_3d_printed_case/)
 
@@ -175,12 +183,14 @@ No| BREW MODE   | DESCRIPTION
 **Additional notes for 3d printed housing:**
    >*If you use the standard .tft file attached above, the UI will be upside down, due to the way the screen has to be installed in the 3d printed housing. There is an additional .tft file for those using this housing, or you can open the .hmi file in the Nextion Editor yourself and flip it.*
 
-**Optional:**
+#### **Optional:**
+***
  * [Heat shrink](https://bit.ly/2PQdnqt)
  * [Soldering iron](https://bit.ly/3tijlOI) 
     >I bought it for my soldering needs, seems to do a great job. It's important to not leave it ON while not in use as the heating element will get damaged.
 
-### Schematics :
+#### **Schematics:**
+***
 * [GAGGIA Classic](schematics/gc-schematics.png)
 * [GAGGIA Classic Pro](schematics/gcp-schematics.png)
 
