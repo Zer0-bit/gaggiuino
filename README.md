@@ -38,7 +38,7 @@
 - [x] Brew start sense
 - [x] Auto shot timer
 - [x] Regional power options
-- [ ] Auto pressure normalise
+- [ ] Realtime pressure normalising
 - [ ] Tray integrated load cells
 - [ ] Steam control
 - [ ] Saving/Loading profiles
