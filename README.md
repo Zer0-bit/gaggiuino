@@ -27,20 +27,20 @@
 - [x] [Housing](https://www.thingiverse.com/thing:4949471) - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/LikeableBump1?style=social)](https://www.reddit.com/user/LikeableBump1 "I'm on Reddit")
 - [x] UI/UX - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/different-wishbone81?style=social)](https://www.reddit.com/user/different-wishbone81 "I'm on Reddit")
 - [x] Temp control
+- [x] Realtime pressure feedback
+- [x] Preinfusion
+- [x] Auto pressure profiling
+- [x] Manual pressure control
 - [x] Realtime temp values update
 - [x] Saving set values
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
-- [x] Pre-infusion
-- [x] Auto pressure profiling
-- [x] Manual pressure control
 - [x] Auto shot timer
 - [x] Regional power options
+- [ ] Realtime pressure normalising
 - [ ] Tray integrated load cells
-- [ ] Realtime pressure feedback
 - [ ] Steam control
-- [ ] Water flow feedback
 - [ ] Saving/Loading profiles
 - [ ] Graphing shot stats
 
