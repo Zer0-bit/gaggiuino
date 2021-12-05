@@ -29,7 +29,7 @@
 - [x] Temp control
 - [x] Realtime pressure feedback
 - [x] Preinfusion
-- [x] Auto pressure profiling
+- [x] Passive auto pressure profiling
 - [x] Manual pressure control
 - [x] Realtime temp values update
 - [x] Saving set values
@@ -38,7 +38,7 @@
 - [x] Brew start sense
 - [x] Auto shot timer
 - [x] Regional power options
-- [ ] Realtime pressure normalising
+- [ ] Active auto pressure control
 - [ ] Tray integrated load cells
 - [ ] Steam control
 - [ ] Saving/Loading profiles
