@@ -29,7 +29,7 @@
 - [x] Temp control
 - [x] Realtime pressure feedback
 - [x] Preinfusion
-- [x] Passive auto pressure profiling
+- [x] Passive auto pressure control
 - [x] Manual pressure control
 - [x] Realtime temp values update
 - [x] Saving set values
