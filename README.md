@@ -194,6 +194,10 @@ No| BREW MODE   | DESCRIPTION
 * [GAGGIA Classic](schematics/gc-schematics.png)
 * [GAGGIA Classic Pro](schematics/gcp-schematics.png)
 
+#### **Connections diagram:**
+***
+* [GAGGIA Classic Pro](schematics/GCP-CONNECTIONS-DIAGRAM.png)
+
 ***!! WARNING !!***
 >*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it. Only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the below guide I cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
 
@@ -204,12 +208,6 @@ First let's check that the setup works as expected while outside the machine so 
 >**Note 1 - no permanent connections are needed during testing so no soldering needed for now.**
 >
 >**Note 2 - the 5v/GND Arduino board pins will be shared between all the connected devices.**
-
->***!! IMPORTANT !!***
->
->**All the boards should be powered by the arduino 5v/GND pins, taking power from other sources like an AC adapter will lead to the system working incorrectly.**
->
->**The PSU should only be used to provide power to the Arduino board itself by connecting to the VIN/GND ports.**
 
 **BASE FUNCTIONALITY**
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code. You can find them defined at the top of the .ino file.
