@@ -5,15 +5,14 @@
 #include <ACS712.h>
 // #include "pressureRead.h"
 
-
-
 // Define our pins
-#define thermoDO 4
-#define thermoCS 5
-#define thermoCLK 6
+#define thermoDO 12
+#define thermoCS 15
+#define thermoCLK 14
 #define brewSwitchPin A0 // PD7
-#define relayPin 8  // PB0
-#define dimmerPin 9
+#define relayPin 4  // PB0
+#define dimmerPin 16
+#define dimmerZC 5
 #define pressurePin A1 
 
 // Define some const values
@@ -26,7 +25,6 @@
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
 
-
 //Init the thermocouple with the appropriate pins defined above with the prefix "thermo"
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // EasyNextion object init
@@ -34,12 +32,12 @@ EasyNex myNex(Serial);
 //Init the ACS712 hall sensor
 ACS712 sensor(ACS712_20A, brewSwitchPin);
 // RobotDYN Dimmer object init
-dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
+dimmerLamp dimmer(dimmerPin,dimmerZC); //initialase port for dimmer for MEGA, Leonardo, UNO, Arduino M0, Arduino Zero
+
 //Transducer stuff
 // transducer Sensor(pressurePin);
 
 // Sensor.set_values(921.6,105.0,12);
-
 
 //Change these values if your tests show the dimmer should be tuned
 // BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
@@ -87,7 +85,6 @@ uint16_t  EEP_PREINFUSION_BAR = 190;
 uint16_t  EEP_REGPWR_HZ = 195;
 uint16_t  EEP_WARMUP = 200;
 
-
 void setup() {
   
   Serial.begin(115200); // switching our board to the new serial speed
@@ -103,7 +100,7 @@ void setup() {
   pinMode(brewSwitchPin, INPUT);
 
   // Chip side  HIGH/LOW  specification
-  PORTB &= ~_BV(PB0);  // relayPin LOW
+  digitalWrite(relayPin, LOW); // relayPin LOW
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   delay(500);
@@ -219,7 +216,6 @@ void setup() {
 //############################################________________MAIN______________################################################
 //##############################################################################################################################
 
-
 //Main loop where all the below logic is continuously run
 void loop() {
   Power_ON_Values_Refresh();
@@ -238,16 +234,18 @@ void kThermoRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
     currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
-    while (currentTempReadValue <= 0 || currentTempReadValue == NAN) {
-      if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
-        currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
-        thermoTimer = millis();
+    if(currentTempReadValue){
+      while (currentTempReadValue <= 0 || currentTempReadValue == NAN) {
+        if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
+          currentTempReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
+          thermoTimer = millis();
+        }
       }
     }
+
     thermoTimer = millis();
   }
 }
-
 
 //##############################################################################################################################
 //############################################______POWER_ON_VALUES_REFRESH_____################################################
@@ -366,31 +364,31 @@ void justDoCoffee() {
     myNex.writeNum("warmupState", 0);
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (currentTempReadValue < setPoint+0.5) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
       delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
       delay(HPWR_OUT); 
     }
   } else if (brewState() == 0) {
     brewTimer(0);
     if (currentTempReadValue < ((float)setPoint - 10.00)) {
-      PORTB |= _BV(PB0);  // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
     } else if (currentTempReadValue >= ((float)setPoint - 10.00) && currentTempReadValue < ((float)setPoint - 3.00)) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
     } else if ((currentTempReadValue >= ((float)setPoint - 3.00)) && (currentTempReadValue <= ((float)setPoint - 1.00))) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
     } else if ((currentTempReadValue >= ((float)setPoint - 0.50)) && currentTempReadValue < (float)setPoint) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
       delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
       delay(HPWR_OUT*2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
     } else {
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
     }
   } 
 }
@@ -407,32 +405,32 @@ void heatCtrl() {
   if (brewState() == 1) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (currentTempReadValue < setPoint+0.5) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
       delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
       delay(HPWR_OUT); 
     }
     myNex.writeNum("warmupState", 0);
   } else if (brewState() == 0) {
     brewTimer(0);
     if (currentTempReadValue < ((float)setPoint - 10.00)) {
-      PORTB |= _BV(PB0);  // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
     } else if (currentTempReadValue >= ((float)setPoint - 10.00) && currentTempReadValue < ((float)setPoint - 3.00)) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
     } else if ((currentTempReadValue >= ((float)setPoint - 3.00)) && (currentTempReadValue <= ((float)setPoint - 1.00))) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
     } else if ((currentTempReadValue <= ((float)setPoint - 0.25)) && currentTempReadValue < (float)setPoint) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
+      digitalWrite(relayPin, HIGH);   // relayPIN -> HIGH
       delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
       delay(HPWR_OUT*2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
     } else {
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      digitalWrite(relayPin, LOW);  // relayPIN -> LOW
     }
   }
 } 
@@ -451,6 +449,7 @@ void lcdRefresh() {
     pageRefreshTimer = millis();
   }
 }
+
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
@@ -589,8 +588,10 @@ bool brewState() {  //Monitors the current flowing through the ACS712 circuit an
 bool brewTimer(bool c) { // small function for easier timer start/stop
   if ( c == 1) {  
     myNex.writeNum("timerState", 1);
+    return 1;
   }else if( c == 0) { 
     myNex.writeNum("timerState", 0);
+    return 0;
   }
 }
 
@@ -654,11 +655,9 @@ void deScale(bool c) {
   }
 }
 
-
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
-
 
 // Pressure profiling function, uses dimmer to dim the pump 
 // as time passes, starts dimming at about X seconds mark 
@@ -729,6 +728,7 @@ void manualPressureProfile() {
   }
   heatCtrl();
 }
+
 //#############################################################################################
 //###############################____PREINFUSION_CONTROL____###################################
 //#############################################################################################
