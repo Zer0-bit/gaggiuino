@@ -254,6 +254,15 @@ First let's check that the setup works as expected while outside the machine so 
       PSM   |   D9
   
    **Dimmer high voltage circuit control ports will act as a passthrough for the pump LIVE and NEUTRAL wires**
+   
+3. Adding the pressure transducer
+
+    Transducer|  Arduino
+    ----------|-----------
+     RED      |   5v
+     BLACK    |   GND
+     YELLOW   |   A1
+      
 
 ***
 **!!!WARNING!!! 
@@ -336,5 +345,9 @@ So you end up having them connected like this:
 3. Installing the pressure transducer.
   The pressure sensor will be tapping into the hose connecting the **pump outlet** and the **boiler inlet**
   
+  ![New Project (11) (1)](https://user-images.githubusercontent.com/42692077/146647799-f4887edb-95ec-4a33-8561-4e4afda6256e.png)
   
+  ![New Project (12)](https://user-images.githubusercontent.com/42692077/146647809-970c0ccd-47c6-430c-9c71-9b651bab4bf4.png)
+
+
 
