@@ -13,26 +13,18 @@
 **Gaggiuino started as an idea to improve an already capable coffee machine while keeping the machine appearance and button functionality as close as possible to the original. An important part is that no internal cables/connectors were modified; all the connections were made by creating splitters using the purchased spade connectors.**
 ***
 *For project related help or learning more on future plans make sure to join the [discord server](https://discord.gg/eJTDJA3xfh) here or clicking the **"chat"** badge under the logo.*
-#### SUCCESSFUL INSTALLS:
 
-   MODEL              |    YEAR   |  VOLTAGE   |PHOTOS
-   -------------------|-----------|------------|--------
-   Gaggia Classic | 2012 | 240v     | https://bit.ly/2Xv1fiv
-   Gaggia Classic Pro | 2021 | 115V | https://imgur.com/gallery/SF3zP0b
-   Gaggia Classic Pro | 2020 | 240v | https://bit.ly/3jQESw3
-   
-***
 #### Features / Completeness 
 
 - [x] [Housing](https://www.thingiverse.com/thing:4949471) - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/LikeableBump1?style=social)](https://www.reddit.com/user/LikeableBump1 "I'm on Reddit")
 - [x] UI/UX - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/different-wishbone81?style=social)](https://www.reddit.com/user/different-wishbone81 "I'm on Reddit")
 - [x] Temp control
-- [x] Realtime pressure feedback
 - [x] Preinfusion
-- [x] Pressure profiling (live feedback loop)
+- [x] Realtime pressure feedback
+- [x] Pressure profiling (realtime feedback loop)
 - [x] Manual pressure control
-- [x] Realtime temp values update
-- [x] Saving set values
+- [x] Realtime values update
+- [x] Saving selected values
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
@@ -46,27 +38,13 @@
 >Notes:
 >* Pressure:
 >     * It is expected your OPV has been tuned to 9bar by default.
->     * Initial pressure tuning has been performed against a blind measurement using a portafilter gauge.
->     * True pressure profiling can be added by adding a pressure feedback sensor(details bellow).
 >* Regional power:
 >     * Defaults to 230V/50Hz and should be changed to the regional values for the correct work of the ACS712 sensor.
->     * Operating with the incorrect power settings result in incorrect dimmer/timer work as well.
 
 ***
-
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
 ### Mod in operation:
-
-**WARMUP:**
-<div align="center">
-
-https://user-images.githubusercontent.com/42692077/143676550-4e1284ea-8d00-4317-bc0e-6a00d9153400.mp4
-
-https://user-images.githubusercontent.com/42692077/143675667-df061080-e474-4967-9907-e938d678861e.mp4
-
-</div>
-
 **Brew mode:**
 <div align="center">
  
@@ -139,19 +117,19 @@ No| BREW MODE   | DESCRIPTION
     >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
 ### **Hardware requirements:**
-***The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, it's all appropriately split under "BASE" or "EXTENDED" functionality (see bellow).***
+###### The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality component type
 
-#### **BASE FUNCTIONALITY** 
-***
-* [Arduino Nano AT328](https://bit.ly/3eXSfXZ)
+* [Arduino Nano AT328](https://bit.ly/3eXSfXZ)  **[BASE]**
   * [Arduino Nano expansion board](https://www.aliexpress.com/item/32831772475.html?spm=a2g0o.store_pc_allProduct.8148356.21.7ed173b9bTMew3)
-* [2.4" Nextion LCD](https://bit.ly/3CAUzPj)
-* [MAX6675 thermocouple](https://bit.ly/3ejTUIj) 
-* [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
-* [40DA SSR Relay](https://bit.ly/33g1Pjr)
-* [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow/blue )](https://bit.ly/3tjSQbI)
+* [2.4" Nextion LCD](https://bit.ly/3CAUzPj)  **[BASE]**
+* [MAX6675 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
+* [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
+* [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
+* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
+* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
+* [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-* Power Supply (multiple options provided choose what fits your needs):
+* Power Supply (multiple options provided choose what fits your needs): **[BASE]**
   * [5v AC Adaptor](https://bit.ly/3jWSrKa) 
   * [12v Power Supply](https://www.aliexpress.com/item/33012749903.html) should work only together with any of the bellow 2 options:
     * [12v to 5v stepdown USB output](https://www.aliexpress.com/item/32525175131.html)
@@ -159,43 +137,22 @@ No| BREW MODE   | DESCRIPTION
  >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
  >*It's recommended though to power the arduino board using  12V 1000mA power supply and a stepdown convertor of your choice from the provided list.*
 
-#### **EXTENDED FUNCTIONALITY**
-***
-* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
-* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv)
-* [Pressure sensor - 0-1.2Mpa](https://www.aliexpress.com/item/4000756631924.html)
-  * [Fitting - 6-02/PCF ](https://www.aliexpress.com/item/4001338642124.html)
-  * [Fitting - 6mm/PE](https://www.aliexpress.com/item/4001338085412.html)
-  * [Hose - 6x4-1 meter](https://www.aliexpress.com/item/4000383354010.html)
-
-#### **Housing:**
-***
+### Housing:
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
      >Designed by the redditor [/u/LikeableBump1](https://www.reddit.com/r/gaggiaclassic/comments/phzyis/gaggia_with_arduino_pid_in_3d_printed_case/)
 
-**Additional parts required to fully assemble housing:**
-* [12v power supply](https://www.aliexpress.com/item/33012749903.html?spm=a2g0s.9042311.0.0.370a4c4dSNhQoq)
-    >*This replaced the mobile charger that is recommended above. I still used a mobile charger with the casing removed to make it fit, but these should simplify things, and are cheap. Make sure you purchase the 12v 1000mA version.*
+**Optional additional parts to use with the housing:**
 * [DB15 D-SUB connectors, male and female](https://www.aliexpress.com/item/1005002650762015.html?spm=a2g0o.productlist.0.0.6f0a1b50CsSmjP&algo_pvid=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b&aem_p4p_detail=202109282059464734316742000220004860154&algo_exp_id=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b-14&pdp_ext_f=%7B%22sku_id%22%3A%2212000021558768022%22%7D)
     >*These are used as a disconnectable pass-through to get the data and power cables through the back of the machine case. The 3d files include custom housings for these connectors. There will need to be 2 or 3 of the vertical "slats" cut out of the cooling vents on the machine case back to make these fit. Make sure you purchase both male and female DB15 connectors.*
 
-**Additional notes for 3d printed housing:**
-   >*If you use the standard .tft file attached above, the UI will be upside down, due to the way the screen has to be installed in the 3d printed housing. There is an additional .tft file for those using this housing, or you can open the .hmi file in the Nextion Editor yourself and flip it.*
-
-#### **Optional:**
-***
+**Optional:**
  * [Heat shrink](https://bit.ly/2PQdnqt)
  * [Soldering iron](https://bit.ly/3tijlOI) 
     >I bought it for my soldering needs, seems to do a great job. It's important to not leave it ON while not in use as the heating element will get damaged.
 
-#### **Schematics:**
-***
+### Schematics :
 * [GAGGIA Classic](schematics/gc-schematics.png)
 * [GAGGIA Classic Pro](schematics/gcp-schematics.png)
-
-#### **Connections diagram:**
-***
-* [GAGGIA Classic Pro](schematics/GCP-CONNECTIONS-DIAGRAM.png)
 
 ***!! WARNING !!***
 >*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it. Only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the below guide I cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
@@ -285,7 +242,7 @@ First let's check that the setup works as expected while outside the machine so 
       GND   |   GND
       OUT   |   A0
 
-   **The high voltage circuit control ports will act as a passthrough for the front panel brew button positive wire**
+   **The high voltage circuit control ports will act as a passthrough for the front panel brew button LIVE wire**
       
 2. Adding the dimmer
 
@@ -296,15 +253,27 @@ First let's check that the setup works as expected while outside the machine so 
       Z-C   |   D2
       PSM   |   D9
   
-   **Dimmer high voltage circuit control ports will act as a passthrough for the pump positive circuit wire**
+   **Dimmer high voltage circuit control ports will act as a passthrough for the pump LIVE and NEUTRAL wires**
+   
+3. Adding the pressure transducer
 
+    Transducer|  Arduino
+    ----------|-----------
+     RED      |   5v
+     BLACK    |   GND
+     YELLOW   |   A1
+      
 
-### Now I won't be explaining every single detail, as always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding. ###
+***
+**ATTENTION !!!**
+
+**As always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding.**
+***
 
 >*AGAIN!!! Triple check your machine is disconnected from any power sources, even better just pull the power cable out of it!*
 
 #### BASE FUNCTIONALITY
-
+***
 1. Take off the top cover by unscrewing the 2 top screws. You should be able to see something similar to the below image minus the SSR relay:
 <div align="center">
 <img src="https://db3pap006files.storage.live.com/y4m4pob4r1pDtjBPqIyA-dqHOH_eZDJaf6W2dYdHlIh8G8OWusXig9WUKOA-iBCk2QRN-lL3ajrWDDUBASx_frpWqz_2z1dxeAnksAKKysKqL-eXE9PVRYeA2SdmS_DSkAA3TJ5ZVe3ybpkLYV0-PDKLjEhxNZluA_UX8ektw8kGW4PXKQeQU-UUJtjuaDSYKsG?width=3496&height=4656&cropmode=none" width="769" height="1024" />
@@ -357,7 +326,7 @@ So you end up having them connected like this:
 
 
 #### EXTENDED FUNCTIONALITY
-
+***
 1. While installing the ACS712 Hall current sensor please note in the photo below the way the sensor faces the camera and how the cable passthrough is done with the cable originally connected to the middle slot front panel brew button (1). It's a short cable connecting the brew button with the steam button, we leave it connected to the steam button but the end which was connected to the middle slot of the brew button connects now to the top port of the ACS712 board (1) and then the exit (2) port of the ACS712 board  feeds a cable to the original front panel brew button position.
 
 >**It is important to connect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value!
@@ -366,6 +335,8 @@ So you end up having them connected like this:
 <img src="https://db3pap006files.storage.live.com/y4mDAGJwdsJP2Vv-Z4FCeTheZSWYlCj09fbWdURcj2t_qeDla_UaWY3qT23MZKsIiQtbH-d7TOS4nRDypYBrDUeFm7eEsL2LidREYBNIylJlCSIntsNItisdsSFSfqbPvGYsZDJ-dJ7_uKYD1gjYabCTC99pB-EVuW7BvWW2v7ut7aK4NLarH9iTjjNRDBpAc88?width=768&height=1024&cropmode=none" width="768" height="1024" />
 </div>
 
+**PLEASE DON'T FORGET TO INSULATE THE ACS SENSOR WHEN STICKING IT TO THE GAGGIA BODY, STAINLESS STEEL IS A GREAT ELECTRICAL CONDUCTOR!**
+
 2. Installing the RobotDYN dimmer module.
 <div align="center">
 <img src="https://db3pap006files.storage.live.com/y4mRPlqJsFn_WyU0usCWAaXngJjq0xgRh7Do7O1i9RMUJc3hBhCpGQlfFn0FKqaw3rZkg5ZuofwPelqGe55PjFbhH_6YvEpswQIOlatLVNXsAVf7UwpwF5i5WhouXE1Hwqu6yioPBhlmgKscw-0sdwyvzX9puihL1ASPeWi1cAXNQAx-NKVf6U5e2O486GoY49K?width=660&height=367&cropmode=none" width="660" height="367" />
@@ -373,4 +344,12 @@ So you end up having them connected like this:
 
 >**The image above is provided as a reference to understand how the connection through the dimmer is made, please check whether your dimmer high voltage ports placement differs from the above image before connecting the dimmer, it's very important to feed the IN wires properly.**
 
-*Once installed tests can be done to verify the dimmer output is the expected one, this will require having either a* [portafilter gauge](https://www.amazon.co.uk/Portafilter-Pressure-Espresso-Machines-ESPRESS/dp/B00ONTGKNA) *or a* [internally mounted gauge](https://www.ebay.com/itm/401980168959?hash=item5d97e29aff:g:fugAAOSwzkRd4~Jl).
+3. Installing the pressure transducer.
+  The pressure sensor will be tapping into the hose connecting the **pump outlet** and the **boiler inlet**
+  
+  ![New Project (11) (1)](https://user-images.githubusercontent.com/42692077/146647799-f4887edb-95ec-4a33-8561-4e4afda6256e.png)
+  
+  ![New Project (12)](https://user-images.githubusercontent.com/42692077/146647809-970c0ccd-47c6-430c-9c71-9b651bab4bf4.png)
+
+
+
