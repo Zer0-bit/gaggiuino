@@ -265,9 +265,9 @@ First let's check that the setup works as expected while outside the machine so 
       
 
 ***
-**!!!WARNING!!! 
-As always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding.
-!!!WARNING!!!**
+**ATTENTION !!!**
+
+**As always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding.**
 ***
 
 >*AGAIN!!! Triple check your machine is disconnected from any power sources, even better just pull the power cable out of it!*
@@ -334,6 +334,8 @@ So you end up having them connected like this:
 <div align="center">
 <img src="https://db3pap006files.storage.live.com/y4mDAGJwdsJP2Vv-Z4FCeTheZSWYlCj09fbWdURcj2t_qeDla_UaWY3qT23MZKsIiQtbH-d7TOS4nRDypYBrDUeFm7eEsL2LidREYBNIylJlCSIntsNItisdsSFSfqbPvGYsZDJ-dJ7_uKYD1gjYabCTC99pB-EVuW7BvWW2v7ut7aK4NLarH9iTjjNRDBpAc88?width=768&height=1024&cropmode=none" width="768" height="1024" />
 </div>
+
+**PLEASE DON'T FORGET TO INSULATE THE ACS SENSOR WHEN STICKING IT TO THE GAGGIA BODY, STAINLESS STEEL IS A GREAT ELECTRICAL CONDUCTOR!**
 
 2. Installing the RobotDYN dimmer module.
 <div align="center">
