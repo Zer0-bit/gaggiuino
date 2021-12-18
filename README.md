@@ -150,10 +150,14 @@ No| BREW MODE   | DESCRIPTION
  * [Soldering iron](https://bit.ly/3tijlOI) 
     >I bought it for my soldering needs, seems to do a great job. It's important to not leave it ON while not in use as the heating element will get damaged.
 
-### Schematics :
+### Schematics & diagrams:
+**Schematics:**
 * [GAGGIA Classic](schematics/gc-schematics.png)
 * [GAGGIA Classic Pro](schematics/gcp-schematics.png)
 
+**Diagrams:**
+* [GAGGIA Classic Pro](schematics/GCP-CONNECTIONS-DIAGRAM.png)
+***
 ***!! WARNING !!***
 >*First and foremost please do not underestimate the danger of electricity or overestimate your ability to work around it. Only start working on your machine while it's  completely disconnected from the mains power socket, also by agreeing to follow the below guide I cannot be deemed responsible for any of the damage you induce to your house appliances, yourself, your cat, friend or gold fish and it will be entirely your fault!*
 
