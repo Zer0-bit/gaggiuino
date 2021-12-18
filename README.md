@@ -13,60 +13,35 @@
 **Gaggiuino started as an idea to improve an already capable coffee machine while keeping the machine appearance and button functionality as close as possible to the original. An important part is that no internal cables/connectors were modified; all the connections were made by creating splitters using the purchased spade connectors.**
 ***
 *For project related help or learning more on future plans make sure to join the [discord server](https://discord.gg/eJTDJA3xfh) here or clicking the **"chat"** badge under the logo.*
-#### SUCCESSFUL INSTALLS:
 
-   MODEL              |    YEAR   |  VOLTAGE   |PHOTOS
-   -------------------|-----------|------------|--------
-   Gaggia Classic | 2012 | 240v     | https://bit.ly/2Xv1fiv
-   Gaggia Classic Pro | 2021 | 115V | https://imgur.com/gallery/SF3zP0b
-   Gaggia Classic Pro | 2020 | 240v | https://bit.ly/3jQESw3
-   
-***
 #### Features / Completeness 
 
 - [x] [Housing](https://www.thingiverse.com/thing:4949471) - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/LikeableBump1?style=social)](https://www.reddit.com/user/LikeableBump1 "I'm on Reddit")
 - [x] UI/UX - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/different-wishbone81?style=social)](https://www.reddit.com/user/different-wishbone81 "I'm on Reddit")
 - [x] Temp control
-- [x] Realtime temp values update
-- [x] Saving set values
+- [x] Preinfusion
+- [x] Realtime pressure feedback
+- [x] Pressure profiling (realtime feedback loop)
+- [x] Manual pressure control
+- [x] Realtime values update
+- [x] Saving selected values
 - [x] Descale program
 - [x] Steaming alert
 - [x] Brew start sense
-- [x] Pre-infusion
-- [x] Auto pressure profiling
-- [x] Manual pressure control
 - [x] Auto shot timer
 - [x] Regional power options
 - [ ] Tray integrated load cells
-- [ ] Realtime pressure feedback
 - [ ] Steam control
-- [ ] Water flow feedback
 - [ ] Saving/Loading profiles
 - [ ] Graphing shot stats
 
 >Notes:
 >* Pressure:
 >     * It is expected your OPV has been tuned to 9bar by default.
->     * Initial pressure tuning has been performed according to a portafilter pressure gauge. While this is better than nothing and gives nice results, it's not real PP per se as the pressure at the puck can't be directly controlled. I have started looking for a suitable (food safe) pressure transducer which will allow for a feedback loop and real time dimmer control for a real PP experience.
 >* Regional power:
 >     * Defaults to 230V/50Hz and should be changed to the regional values for the correct work of the ACS712 sensor.
 
 ***
-#### Planned future additions:
-* Tray integrated load cells
-   * Used for all things weight related
-* Pressure transducer
-   * Used for a feedback loop to make real-time pressure adjustments based on puck resistance
-* Flow sensor
-   * Used to monitor the water flow for true flow profiling
-* Steam control
-* STM32F411CE(blackpill) support
-* ESP32 support:
-   * Web interface
-   * Graph outputs
-   * OTA firmware updates
-   * TBC
-
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
 ### Mod in operation:
@@ -166,14 +141,9 @@ No| BREW MODE   | DESCRIPTION
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
      >Designed by the redditor [/u/LikeableBump1](https://www.reddit.com/r/gaggiaclassic/comments/phzyis/gaggia_with_arduino_pid_in_3d_printed_case/)
 
-**Additional parts required to fully assemble housing:**
-* [12v power supply](https://www.aliexpress.com/item/33012749903.html?spm=a2g0s.9042311.0.0.370a4c4dSNhQoq)
-    >*This replaced the mobile charger that is recommended above. I still used a mobile charger with the casing removed to make it fit, but these should simplify things, and are cheap. Make sure you purchase the 12v 1000mA version.*
+**Optional additional parts to use with the housing:**
 * [DB15 D-SUB connectors, male and female](https://www.aliexpress.com/item/1005002650762015.html?spm=a2g0o.productlist.0.0.6f0a1b50CsSmjP&algo_pvid=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b&aem_p4p_detail=202109282059464734316742000220004860154&algo_exp_id=8cc51e0e-429a-4d9b-a99b-d6d059ebf29b-14&pdp_ext_f=%7B%22sku_id%22%3A%2212000021558768022%22%7D)
     >*These are used as a disconnectable pass-through to get the data and power cables through the back of the machine case. The 3d files include custom housings for these connectors. There will need to be 2 or 3 of the vertical "slats" cut out of the cooling vents on the machine case back to make these fit. Make sure you purchase both male and female DB15 connectors.*
-
-**Additional notes for 3d printed housing:**
-   >*If you use the standard .tft file attached above, the UI will be upside down, due to the way the screen has to be installed in the 3d printed housing. There is an additional .tft file for those using this housing, or you can open the .hmi file in the Nextion Editor yourself and flip it.*
 
 **Optional:**
  * [Heat shrink](https://bit.ly/2PQdnqt)
@@ -194,12 +164,6 @@ First let's check that the setup works as expected while outside the machine so 
 >**Note 1 - no permanent connections are needed during testing so no soldering needed for now.**
 >
 >**Note 2 - the 5v/GND Arduino board pins will be shared between all the connected devices.**
-
->***!! IMPORTANT !!***
->
->**All the boards should be powered by the arduino 5v/GND pins, taking power from other sources like an AC adapter will lead to the system working incorrectly.**
->
->**The PSU should only be used to provide power to the Arduino board itself by connecting to the VIN/GND ports.**
 
 **BASE FUNCTIONALITY**
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code. You can find them defined at the top of the .ino file.
@@ -278,7 +242,7 @@ First let's check that the setup works as expected while outside the machine so 
       GND   |   GND
       OUT   |   A0
 
-   **The high voltage circuit control ports will act as a passthrough for the front panel brew button positive wire**
+   **The high voltage circuit control ports will act as a passthrough for the front panel brew button LIVE wire**
       
 2. Adding the dimmer
 
@@ -289,15 +253,18 @@ First let's check that the setup works as expected while outside the machine so 
       Z-C   |   D2
       PSM   |   D9
   
-   **Dimmer high voltage circuit control ports will act as a passthrough for the pump positive circuit wire**
+   **Dimmer high voltage circuit control ports will act as a passthrough for the pump LIVE and NEUTRAL wires**
 
-
-### Now I won't be explaining every single detail, as always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding. ###
+***
+**!!!WARNING!!! 
+As always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding.
+!!!WARNING!!!**
+***
 
 >*AGAIN!!! Triple check your machine is disconnected from any power sources, even better just pull the power cable out of it!*
 
 #### BASE FUNCTIONALITY
-
+***
 1. Take off the top cover by unscrewing the 2 top screws. You should be able to see something similar to the below image minus the SSR relay:
 <div align="center">
 <img src="https://db3pap006files.storage.live.com/y4m4pob4r1pDtjBPqIyA-dqHOH_eZDJaf6W2dYdHlIh8G8OWusXig9WUKOA-iBCk2QRN-lL3ajrWDDUBASx_frpWqz_2z1dxeAnksAKKysKqL-eXE9PVRYeA2SdmS_DSkAA3TJ5ZVe3ybpkLYV0-PDKLjEhxNZluA_UX8ektw8kGW4PXKQeQU-UUJtjuaDSYKsG?width=3496&height=4656&cropmode=none" width="769" height="1024" />
@@ -350,7 +317,7 @@ So you end up having them connected like this:
 
 
 #### EXTENDED FUNCTIONALITY
-
+***
 1. While installing the ACS712 Hall current sensor please note in the photo below the way the sensor faces the camera and how the cable passthrough is done with the cable originally connected to the middle slot front panel brew button (1). It's a short cable connecting the brew button with the steam button, we leave it connected to the steam button but the end which was connected to the middle slot of the brew button connects now to the top port of the ACS712 board (1) and then the exit (2) port of the ACS712 board  feeds a cable to the original front panel brew button position.
 
 >**It is important to connect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value!
@@ -366,4 +333,8 @@ So you end up having them connected like this:
 
 >**The image above is provided as a reference to understand how the connection through the dimmer is made, please check whether your dimmer high voltage ports placement differs from the above image before connecting the dimmer, it's very important to feed the IN wires properly.**
 
-*Once installed tests can be done to verify the dimmer output is the expected one, this will require having either a* [portafilter gauge](https://www.amazon.co.uk/Portafilter-Pressure-Espresso-Machines-ESPRESS/dp/B00ONTGKNA) *or a* [internally mounted gauge](https://www.ebay.com/itm/401980168959?hash=item5d97e29aff:g:fugAAOSwzkRd4~Jl).
+3. Installing the pressure transducer.
+  The pressure sensor will be tapping into the hose connecting the **pump outlet** and the **boiler inlet**
+  
+  
+
