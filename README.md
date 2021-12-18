@@ -45,6 +45,15 @@
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
 ### Mod in operation:
+**WARMUP:**
+<div align="center">
+
+https://user-images.githubusercontent.com/42692077/143676550-4e1284ea-8d00-4317-bc0e-6a00d9153400.mp4
+
+https://user-images.githubusercontent.com/42692077/143675667-df061080-e474-4967-9907-e938d678861e.mp4
+
+</div>
+
 **Brew mode:**
 <div align="center">
  
