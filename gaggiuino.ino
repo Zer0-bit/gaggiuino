@@ -212,7 +212,7 @@ void setup() {
   }
 
   EEPROM.get(EEP_PREINFUSION_SEC, init_val);//reading preinfusion time value from eeprom
-  if (  !(init_val < 0) && init_val < 11  ) {
+  if (!(init_val < 0)) {
     myNex.writeNum("piSec", init_val);
     myNex.writeNum("brewAuto.n0.val", init_val);
   }
@@ -223,7 +223,7 @@ void setup() {
     myNex.writeNum("brewAuto.n1.val", init_val);
   }
   EEPROM.get(EEP_PREINFUSION_SOAK, init_val);//reading preinfusion soak times value from eeprom
-  if (  !(init_val < 0) && init_val < 9 ) {
+  if (!(init_val < 0)) {
     myNex.writeNum("piSoak", init_val);
     myNex.writeNum("brewAuto.n4.val", init_val);
   }
