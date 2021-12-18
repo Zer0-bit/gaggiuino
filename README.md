@@ -126,25 +126,34 @@ No| BREW MODE   | DESCRIPTION
     >*USB driver so your system recognizes the Arduino clone board, let's say i have found this the hard way as apparetly the majority of cloned arduinos use a cheaper USB controller comparing to "genuino"*
 
 ### **Hardware requirements:**
-###### The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, next to the hardware component there will be anotated whether its a [BASE] or [EXT] functionality component type
+***The code has been designed to be plugable, meaning there is a minimal hardware configuration one can start with if certain features are not something of interest, it's all appropriately split under "BASE" or "EXTENDED" functionality (see bellow).***
 
-* [Arduino Nano AT328](https://bit.ly/3eXSfXZ)  **[BASE]**
+#### **BASE FUNCTIONALITY** 
+***
+* [Arduino Nano AT328](https://bit.ly/3eXSfXZ)
   * [Arduino Nano expansion board](https://www.aliexpress.com/item/32831772475.html?spm=a2g0o.store_pc_allProduct.8148356.21.7ed173b9bTMew3)
-* [2.4" Nextion LCD](https://bit.ly/3CAUzPj)  **[BASE]**
-* [MAX6675 thermocouple](https://bit.ly/3ejTUIj)  **[BASE]**
-* [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)  **[BASE]**
-* [40DA SSR Relay](https://bit.ly/33g1Pjr)  **[BASE]**
-* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy) **[EXT]**
-* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv) **[EXT]**
-* [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow )](https://bit.ly/3tjSQbI) **[BASE]**
+* [2.4" Nextion LCD](https://bit.ly/3CAUzPj)
+* [MAX6675 thermocouple](https://bit.ly/3ejTUIj) 
+* [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
+* [40DA SSR Relay](https://bit.ly/33g1Pjr)
+* [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow/blue )](https://bit.ly/3tjSQbI)
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
-* Power Supply (multiple options provided choose what fits your needs): **[BASE]**
+* Power Supply (multiple options provided choose what fits your needs):
   * [5v AC Adaptor](https://bit.ly/3jWSrKa) 
   * [12v Power Supply](https://www.aliexpress.com/item/33012749903.html) should work only together with any of the bellow 2 options:
     * [12v to 5v stepdown USB output](https://www.aliexpress.com/item/32525175131.html)
     * [12v to 9v stepdown](https://www.aliexpress.com/item/1005001534605959.html)
  >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
  >*It's recommended though to power the arduino board using  12V 1000mA power supply and a stepdown convertor of your choice from the provided list.*
+
+#### **EXTENDED FUNCTIONALITY**
+***
+* [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
+* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv)
+* [Pressure sensor - 0-1.2Mpa](https://www.aliexpress.com/item/4000756631924.html)
+  * [Fitting - 6-02/PCF ](https://www.aliexpress.com/item/4001338642124.html)
+  * [Fitting - 6mm/PE](https://www.aliexpress.com/item/4001338085412.html)
+  * [Hose - 6x4-1 meter](https://www.aliexpress.com/item/4000383354010.html)
 
 ### Housing:
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
