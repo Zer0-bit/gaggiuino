@@ -85,7 +85,7 @@ https://user-images.githubusercontent.com/42692077/139340295-698b1392-94cd-418b-
      * Time       - sets the length of the PI phase
      * Bar        - sets the max reacheable pressure for the PI phase
      * Soak       - sets the length of the soaking(blooming) phase
-   * P-PROFILING - enables either AUTO or MANUAL pressure profiling mode
+   * P-PROFILING - enables AUTO pressure profiling mode
      * Start      - sets the desired starting point  of the PP phase, can be High->Low or Low->High.
      * Finish     - sets the desired finish point of the PP pahse, same as above can be from High->Low or Low->High.
      * Hold       - sets the length of the PP hold period, if it's desired to maintain the "Start" pressure for a period of time before the pressure drop/raise is applied this is where it's done.
