@@ -97,17 +97,6 @@ https://user-images.githubusercontent.com/42692077/139340295-698b1392-94cd-418b-
          flush - 20s x5 at 1 bar
          idle  - 5min at 0 bar
 
-***Pre-infusion[PI] and pressure profile[PP] usage examples:***
-
-No| BREW MODE   | DESCRIPTION
----|--------------|--------------
-1.| [PP] 9bar >> 6bar | the brew starts at 9 bars and stays at 9bar for 8 seconds then starts slowly dropping towards 6 bars,all this aims the official 30 seconds shot times, if the shot goes above 30s seconds the pressure will just remain at 6 bar untill the end of the shot.
-2.| [PP] 6bar >> 9bar | same as above but viceversa.
-3.| [PP] 6bar >> 6bar | the pressure stays locked at 6 bar.
-4.| [PI] 8sec >> 2bar [PP] 9bar >> 5bar | preinfusion for 8 seconds at 2 bar >> pause 3 seconds (aka soaking) >> behaviour from point 1.
-
-
-
 ## **PROJECT REQUIREMENTS**
 
 ### **Software requirements:**
