@@ -178,23 +178,23 @@ void setup() {
     myNex.writeNum("moreTemp.n5.val", init_val);
   }
   EEPROM.get(EEP_P_START, init_val);//reading pressure profile start value from eeprom
-  if (  init_val > 1 ) {
+  if (  init_val >= 0 ) {
     myNex.writeNum("ppStart", init_val);
     myNex.writeNum("brewAuto.n2.val", init_val);
   }
 
   EEPROM.get(EEP_P_FINISH, init_val);// reading pressure profile finish value from eeprom
-  if (  init_val > 1 ) {
+  if (  init_val >= 0 ) {
     myNex.writeNum("ppFin", init_val);
     myNex.writeNum("brewAuto.n3.val", init_val);
   }
   EEPROM.get(EEP_P_HOLD, init_val);// reading pressure profile hold value from eeprom
-  if (  init_val > 1 ) {
+  if (  init_val >= 0 ) {
     myNex.writeNum("ppHold", init_val);
     myNex.writeNum("brewAuto.n5.val", init_val);
   }
   EEPROM.get(EEP_P_LENGTH, init_val);// reading pressure profile length value from eeprom
-  if (  init_val > 1 ) {
+  if (  init_val >= 0 ) {
     myNex.writeNum("ppLength", init_val);
     myNex.writeNum("brewAuto.n6.val", init_val);
   }
@@ -218,7 +218,7 @@ void setup() {
   }
 
   EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
-  if (  !(init_val < 0) && init_val < 9 ) {
+  if (  !(init_val < 0) && init_val <= 9 ) {
     myNex.writeNum("piBar", init_val);
     myNex.writeNum("brewAuto.n1.val", init_val);
   }
@@ -567,22 +567,22 @@ void trigger1() {
     case 3:
       // Saving ppStart,ppFin,ppHold and ppLength
       valueToSave = myNex.readNumber("ppStart");
-      if (valueToSave != 0 && valueToSave >= 1) {
+      if (valueToSave >= 0 && valueToSave <= 9) {
         EEPROM.put(EEP_P_START, valueToSave);
         allValuesUpdated++;
       }else {}
       valueToSave = myNex.readNumber("ppFin");
-      if (valueToSave != 0 && valueToSave >= 1) {
+      if (valueToSave >= 0 && valueToSave <= 9) {
         EEPROM.put(EEP_P_FINISH, valueToSave);
         allValuesUpdated++;
       }else {}
       valueToSave = myNex.readNumber("ppHold");
-      if (valueToSave != 0 && valueToSave >= 1) {
+      if (valueToSave >= 0) {
         EEPROM.put(EEP_P_HOLD, valueToSave);
         allValuesUpdated++;
       }else {}
       valueToSave = myNex.readNumber("ppLength");
-      if (valueToSave != 0 && valueToSave >= 1) {
+      if (valueToSave >= 0) {
         EEPROM.put(EEP_P_LENGTH, valueToSave);
         allValuesUpdated++;
       }else {}
