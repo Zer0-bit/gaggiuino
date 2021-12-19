@@ -75,17 +75,23 @@ https://user-images.githubusercontent.com/42692077/139340295-698b1392-94cd-418b-
 
 ***USAGE:***
 
- * BOILER      - sets the desired temperature at the boiler level
- * OFFSET      - sets the offset value used to calculate the real water temperature
- * HPWR        - sets the relay start pulse length
- * M.C.DIV     - sets the main cycle divider(aka non brew heating beahaviour), used in conjunction with HPWR
- * B.C.DIV     - sets the brew cycle divider
- * PREINFUSION - sets the preinfusion length and pressure
- * P-PROFILING - enables either AUTO or MAN pressure profiling mode
-
-       AUTO     - sets the profiling trend incremental or decremental (can be combined with preinfusion), some examples bellow:
-       MAN      - allows for manual pressure control at brew time
- * DESCALE     - enables the descaling program, at this point there's only one default behaviour:
+ * **BOILER**      - sets the desired temperature at the boiler level
+ * **OFFSET**      - sets the offset value used to calculate the real water temperature
+ * **HPWR**        - sets the relay start pulse length
+ * **M.C.DIV**     - sets the main cycle divider(aka non brew heating beahaviour), used in conjunction with HPWR
+ * **B.C.DIV**     - sets the brew cycle divider
+ * **Brew(Auto)**  - all pressure settings are following the bellow:
+   * PREINFUSION - enables preinfusion
+     * Time       - sets the length of the PI phase
+     * Bar        - sets the max reacheable pressure for the PI phase
+     * Soak       - sets the length of the soaking(blooming) phase
+   * P-PROFILING - enables either AUTO or MANUAL pressure profiling mode
+     * Start      - sets the desired starting point  of the PP phase, can be High->Low or Low->High.
+     * Finish     - sets the desired finish point of the PP pahse, same as above can be from High->Low or Low->High.
+     * Hold       - sets the length of the PP hold period, if it's desired to maintain the "Start" pressure for a period of time before the pressure drop/raise is applied this is where it's done.
+     * Length     - sets the length(aka speed) of the PP drop/raise behaviour, so one can change the pressure slow or fast if desired.
+ * **Brew(Manual)** - allows for manual pressure control at brew time.
+ * **DESCALE**     - enables the descaling program, at this point there's only one default behaviour:
 
          flush - 10s x5 at 2bar
          flush - 20s x5 at 1 bar
@@ -367,7 +373,9 @@ So you end up having them connected like this:
 >**The image above is provided as a reference to understand how the connection through the dimmer is made, please check whether your dimmer high voltage ports placement differs from the above image before connecting the dimmer, it's very important to feed the IN wires properly.**
 
 3. Installing the pressure transducer.
-  The pressure sensor will be tapping into the hose connecting the **pump outlet** and the **boiler inlet**
+  The pressure sensor will be tapping into the hose connecting the **pump outlet** and the **boiler inlet**, the way people connect it is up to individuals, i would generally advise to take out the original hose and use the one ordered together with the pressure sensor, cut a similarly sized one out of the bought one and use the rest of the left length as additional transducer buffer.
+
+***It's advisable after making the connections and just before connecting the transducer itself turn on the machine and while cold engage the pump to fill the transducer hose with water as well, leaving a lot of air in the system might play funny with the readings.***
   
   ![New Project (11) (1)](https://user-images.githubusercontent.com/42692077/146647799-f4887edb-95ec-4a33-8561-4e4afda6256e.png)
   
