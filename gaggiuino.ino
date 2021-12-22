@@ -5,8 +5,6 @@
 #include <ACS712.h>
 
 
-
-
 // Define our pins
 #define thermoDO 4 // MAX6675 DO
 #define thermoCS 5 // MAX6675 CS
@@ -26,7 +24,7 @@
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
-#define POWER_DRAW_ZERO 36 // sets the zero bar acs power value
+#define POWER_DRAW_ZERO 40 // sets the zero bar acs power value
 
 
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
@@ -50,7 +48,8 @@ float pressureValue; //variable to store the value coming from the pressure tran
 //Change these values if your tests show the dimmer should be tuned
 // BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
 // DIM -42-|48-|50-|52-|55-|60-|67-|72-|80-|97
-uint8_t BAR_TO_DIMMER_OUTPUT[10]={42,48,50,52,55,60,67,72,80,95};
+//uint8_t BAR_TO_DIMMER_OUTPUT[10]={42,48,50,52,55,60,67,72,80,95};
+uint8_t BAR_TO_DIMMER_OUTPUT[10]; //={45,50,53,56,59,63,67,71,75,80};
 
 // Some vars are better global
 volatile float kProbeReadValue;
@@ -105,11 +104,7 @@ uint16_t  EEP_GRAPH_BREW = 205;
 void setup() {
   
   Serial.begin(115200); // switching our board to the new serial speed
-  // Dimmer initialisation
-  dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
-  dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
-  // Calibrating the hall current sensor
-  sensor.calibrate();
+  
   // relay port init and set initial operating mode
   pinMode(relayPin, OUTPUT);
   pinMode(brewSwitchPin, INPUT);
@@ -231,6 +226,45 @@ void setup() {
   EEPROM.get(EEP_REGPWR_HZ, init_val);//reading region frequency value from eeprom
   if (  init_val == 50 || init_val == 60 ) {
     myNex.writeNum("regHz", init_val);
+    // Setting the pump performance based on loaded region  settings
+    switch (init_val) {
+      case 50: // 240v / 50Hz
+        BAR_TO_DIMMER_OUTPUT[0]=42;
+        BAR_TO_DIMMER_OUTPUT[1]=45;
+        BAR_TO_DIMMER_OUTPUT[2]=50;
+        BAR_TO_DIMMER_OUTPUT[3]=53;
+        BAR_TO_DIMMER_OUTPUT[4]=56;
+        BAR_TO_DIMMER_OUTPUT[5]=60;
+        BAR_TO_DIMMER_OUTPUT[6]=64;
+        BAR_TO_DIMMER_OUTPUT[7]=68;
+        BAR_TO_DIMMER_OUTPUT[8]=70;
+        BAR_TO_DIMMER_OUTPUT[9]=73;
+        break;
+      case 60: // 120v / 60 Hz
+        BAR_TO_DIMMER_OUTPUT[0]=45;
+        BAR_TO_DIMMER_OUTPUT[1]=51;
+        BAR_TO_DIMMER_OUTPUT[2]=53;
+        BAR_TO_DIMMER_OUTPUT[3]=56;
+        BAR_TO_DIMMER_OUTPUT[4]=58;
+        BAR_TO_DIMMER_OUTPUT[5]=60;
+        BAR_TO_DIMMER_OUTPUT[6]=63;
+        BAR_TO_DIMMER_OUTPUT[7]=65;
+        BAR_TO_DIMMER_OUTPUT[8]=70;
+        BAR_TO_DIMMER_OUTPUT[9]=73;
+        break;
+      default: // smth went wrong the pump is set to 0 bar in all modes.
+        BAR_TO_DIMMER_OUTPUT[0]=40;
+        BAR_TO_DIMMER_OUTPUT[1]=40;
+        BAR_TO_DIMMER_OUTPUT[2]=40;
+        BAR_TO_DIMMER_OUTPUT[3]=40;
+        BAR_TO_DIMMER_OUTPUT[4]=40;
+        BAR_TO_DIMMER_OUTPUT[5]=40;
+        BAR_TO_DIMMER_OUTPUT[6]=40;
+        BAR_TO_DIMMER_OUTPUT[7]=40;
+        BAR_TO_DIMMER_OUTPUT[8]=40;
+        BAR_TO_DIMMER_OUTPUT[9]=40;
+        break;
+    }
   }
 
   // Brew page settings
@@ -246,7 +280,14 @@ void setup() {
     myNex.writeNum("warmupState", init_val);
     myNex.writeNum("morePower.bt0.val", init_val);
   }
-
+  
+  // Dimmer initialisation
+  dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
+  dimmer.setPower(setPressure(9.0,9,2));
+  
+  // Calibrating the hall current sensor
+  sensor.calibrate();
+  
   myNex.lastCurrentPageId = myNex.currentPageId;
   delay(5);
   POWER_ON = true;
@@ -260,7 +301,6 @@ void setup() {
 
 //Main loop where all the below logic is continuously run
 void loop() {
-  Power_ON_Values_Refresh();
   myNex.NextionListen();
   kThermoRead();
   modeSelect();
@@ -344,53 +384,12 @@ uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) { // func
 }
 
 //##############################################################################################################################
-//############################################______POWER_ON_VALUES_REFRESH_____################################################
-//##############################################################################################################################
-
-void Power_ON_Values_Refresh() {  // Refreshing our values on first start
-
-  if (POWER_ON == true) {
-    
-    setPoint = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
-    offsetTemp = myNex.readNumber("offSet");  // reading the offset value from the lcd
-    HPWR = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
-    MainCycleDivider = myNex.readNumber("mDiv");  // reading the delay divider
-    BrewCycleDivider = myNex.readNumber("bDiv");  // reading the delay divider
-    delay(5);
-
-    preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
-    preinfuseTime = myNex.readNumber("piSec"); // pre-infusion duration
-    preinfuseBar = myNex.readNumber("piBar"); //pre-infusion pressure value
-    preinfuseSoak = myNex.readNumber("piSoak"); // pre-infusion soak value
-    delay(5);
-  
-    pressureProfileState = myNex.readNumber("ppState"); // pressure profile state value which should be 0 or 1
-    ppStartBar = myNex.readNumber("ppStart"); // pressure profile start pressure value
-    ppFinishBar = myNex.readNumber("ppFin"); // pressure profile finish pressure value
-    ppHold = myNex.readNumber("ppHold"); // pp start pressure hold
-    ppLength = myNex.readNumber("ppLength"); // pp shot length
-    delay(5);
-
-    regionHz = myNex.readNumber("regHz"); // regionVolts = myNex.readNumber("regVolt");
-    warmupEnabled = myNex.readNumber("warmupState");
-    delay(5);
-    
-    // MODE_SELECT should always be last
-    selectedOperationalMode = myNex.readNumber("modeSelect");
-    if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("modeSelect");
-
-    myNex.lastCurrentPageId = myNex.currentPageId;
-    POWER_ON = false;
-  }
-}
-
-//##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 
 void pageValuesRefresh() {  // Refreshing our values on page changes
 
-  if (myNex.currentPageId != myNex.lastCurrentPageId) {
+  if ( myNex.currentPageId != myNex.lastCurrentPageId || POWER_ON == true ) {
     preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
     pressureProfileState = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
     preinfuseTime = myNex.readNumber("piSec");
@@ -415,6 +414,7 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("modeSelect");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
+    POWER_ON = false;
   }
 }
 
