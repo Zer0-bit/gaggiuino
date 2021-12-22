@@ -355,8 +355,13 @@ So you end up having them connected like this:
 **PLEASE DON'T FORGET TO INSULATE THE ACS SENSOR WHEN STICKING IT TO THE GAGGIA BODY, STAINLESS STEEL IS A GREAT ELECTRICAL CONDUCTOR!**
 
 2. Installing the RobotDYN dimmer module.
+
 <div align="center">
 <img src="https://db3pap006files.storage.live.com/y4mRPlqJsFn_WyU0usCWAaXngJjq0xgRh7Do7O1i9RMUJc3hBhCpGQlfFn0FKqaw3rZkg5ZuofwPelqGe55PjFbhH_6YvEpswQIOlatLVNXsAVf7UwpwF5i5WhouXE1Hwqu6yioPBhlmgKscw-0sdwyvzX9puihL1ASPeWi1cAXNQAx-NKVf6U5e2O486GoY49K?width=660&height=367&cropmode=none" width="660" height="367" />
+</div>
+<div align="center">
+  
+![dimmer-install-info](https://user-images.githubusercontent.com/42692077/147135452-fb3931c5-ac48-4a61-91ff-1b4275aaccb2.png)
 </div>
 
 >**The image above is provided as a reference to understand how the connection through the dimmer is made, please check whether your dimmer high voltage ports placement differs from the above image before connecting the dimmer, it's very important to feed the IN wires properly.**
