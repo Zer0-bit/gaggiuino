@@ -283,7 +283,7 @@ void setup() {
   
   // Dimmer initialisation
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
-  dimmer.setPower(setPressure(9.0,9,2));
+  dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
   
   // Calibrating the hall current sensor
   sensor.calibrate();
