@@ -146,9 +146,14 @@ https://user-images.githubusercontent.com/42692077/139340295-698b1392-94cd-418b-
 * [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
 * [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv)
 * [Pressure sensor - 0-1.2Mpa](https://www.aliexpress.com/item/4000756631924.html)
-  * [Fitting - 6-02/PCF ](https://www.aliexpress.com/item/4001338642124.html)
-  * [Fitting - 6mm/PE](https://www.aliexpress.com/item/4001338085412.html)
-  * [Hose - 6x4-1 meter](https://www.aliexpress.com/item/4000383354010.html)
+  * **Gaggia Classic (pre 2015 versions):**
+    * [Fitting - 6-02/PCF ](https://www.aliexpress.com/item/4001338642124.html)
+    * [Fitting - 6mm/PE](https://www.aliexpress.com/item/4001338085412.html)
+    * [Hose - 6x4 - 1 meter](https://www.aliexpress.com/item/4000383354010.html)
+  * **Gaggia Classic Pro (2018+ versions):**
+    * [Fitting - 12-02/PCF](https://www.aliexpress.com/item/4001338642124.html)
+    * [Fitting - 6mm](https://a.aliexpress.com/_vcLoZM) OR alternatively [Fitting - 12mm/PE](https://www.aliexpress.com/item/4001338085412.html)
+    * [Hose -   ID 6 x OD 12mm](https://a.aliexpress.com/_vKvDby) 
 
 ### Housing:
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
