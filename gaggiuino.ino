@@ -141,7 +141,7 @@ void setup() {
     EEPROM.put(EEP_HOME_ON_SHOT_FINISH, 1);
     EEPROM.put(EEP_PREINFUSION_SOAK, 5);
     EEPROM.put(EEP_P_HOLD, 7);
-    EEPROM.put(EEP_P_LENGTH, 30);
+    EEPROM.put(EEP_P_LENGTH, 10);
   }
   // Applying our saved EEPROM saved values
   uint16_t init_val;
@@ -816,6 +816,7 @@ void autoPressureProfile() {
       if ((millis() - timer) > (ppHold*1000)) { // the actions of this if block are run after 4 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
+        timer = millis();
       }
       brewTimer(1);
       dimmer.setPower(setPressure(ppStartBar,ppStartBar,ppStartBar)); 
