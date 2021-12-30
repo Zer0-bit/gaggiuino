@@ -545,9 +545,9 @@ void lcdRefresh() {
   static unsigned long pageRefreshTimer = millis();
     
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
-    myNex.writeNum("currentHPWR", HPWR_OUT);      
-    myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
-    if (brewState() == 1) myNex.writeStr("t11.txt", String(getPressure(),1));    
+    myNex.writeNum("currentHPWR", HPWR_OUT); 
+    myNex.writeStr("pressureVal.txt", String(getPressure(),1));
+    myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));    
     pageRefreshTimer = millis();
   }
 }
