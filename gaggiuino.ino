@@ -117,7 +117,7 @@ void setup() {
     delay(500);
   }
   //If it's the first boot we'll need to set some defaults
-  if (EEPROM.read(0) != 251 || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535) {
+  if (EEPROM.read(0) != 251 || EEPROM.read(EEP_SETPOINT) == 65535 || EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
     EEPROM.put(0, 251);
     //The values can be modified to accomodate whatever system it tagets
