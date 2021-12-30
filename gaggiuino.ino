@@ -117,7 +117,7 @@ void setup() {
     delay(500);
   }
   //If it's the first boot we'll need to set some defaults
-  if (EEPROM.read(0) != 251 || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535) {
+  if (EEPROM.read(0) != 251 || EEPROM.read(EEP_SETPOINT) == 65535 || EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
     EEPROM.put(0, 251);
     //The values can be modified to accomodate whatever system it tagets
@@ -545,9 +545,9 @@ void lcdRefresh() {
   static unsigned long pageRefreshTimer = millis();
     
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
-    myNex.writeNum("currentHPWR", HPWR_OUT);      
-    myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
-    if (brewState() == 1) myNex.writeStr("t11.txt", String(getPressure(),1));    
+    myNex.writeNum("currentHPWR", HPWR_OUT); 
+    myNex.writeStr("pressureVal.txt", String(getPressure(),1));
+    myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));    
     pageRefreshTimer = millis();
   }
 }
