@@ -24,7 +24,7 @@
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
-#define POWER_DRAW_ZERO 36 // sets the zero bar acs power value
+#define POWER_DRAW_ZERO 42 // sets the zero bar acs power value
 
 
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
