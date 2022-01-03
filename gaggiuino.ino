@@ -13,6 +13,7 @@
 #define relayPin 8  // SSR VCC pin
 #define dimmerPin 9 // dimmer psm pin
 #define pressurePin A1 // pressure transducer data pin
+#define steamPin A7 // steam ctrl pin
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
@@ -253,16 +254,6 @@ void setup() {
         BAR_TO_DIMMER_OUTPUT[9]=73;
         break;
       default: // smth went wrong the pump is set to 0 bar in all modes.
-        BAR_TO_DIMMER_OUTPUT[0]=40;
-        BAR_TO_DIMMER_OUTPUT[1]=40;
-        BAR_TO_DIMMER_OUTPUT[2]=40;
-        BAR_TO_DIMMER_OUTPUT[3]=40;
-        BAR_TO_DIMMER_OUTPUT[4]=40;
-        BAR_TO_DIMMER_OUTPUT[5]=40;
-        BAR_TO_DIMMER_OUTPUT[6]=40;
-        BAR_TO_DIMMER_OUTPUT[7]=40;
-        BAR_TO_DIMMER_OUTPUT[8]=40;
-        BAR_TO_DIMMER_OUTPUT[9]=40;
         break;
     }
   }
@@ -422,31 +413,52 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
 void modeSelect() {
+  static uint8_t previousMode;
+  
+  if (previousMode != selectedOperationalMode) {
+    selectedOperationalMode = myNex.readNumber("modeSelect");
+    previousMode = selectedOperationalMode;
+  }
   switch (selectedOperationalMode) {
     case 0:
-      justDoCoffee();
+      if (analogRead(steamPin) > 10) justDoCoffee();
+      else steamCtrl();
       break;
     case 1:
-      preInfusion();
+      if (analogRead(steamPin) > 10) preInfusion();
+      else steamCtrl();
       break;
     case 2:
-      autoPressureProfile();
+      if (analogRead(steamPin) > 10) autoPressureProfile();
+      else steamCtrl();
       break;
     case 3:
       manualPressureProfile();
       break;
     case 4:
-      if(preinfusionFinished == false) preInfusion();
-      else if(preinfusionFinished == true) autoPressureProfile();
+      if (analogRead(steamPin) > 10) {
+        if(preinfusionFinished == false) preInfusion();
+        else if(preinfusionFinished == true) autoPressureProfile();
+      } else steamCtrl();
       break;
     case 5:
-      justDoCoffee();
+      if (analogRead(steamPin) > 10) justDoCoffee();
+      else steamCtrl();
       break;
     case 6:
       deScale(descaleCheckBox);
       break;
+    case 7:
+      break;
+    case 8:
+      break;
+    case 9:
+      if (analogRead(steamPin) > 10) justDoCoffee();
+      else steamCtrl();
+      break;
     default:
-      justDoCoffee();
+      if (analogRead(steamPin) > 10) justDoCoffee();
+      else steamCtrl();
       break;
   }
 }
@@ -536,7 +548,25 @@ void heatCtrl() {
     }
   }
 } 
-  
+
+//#############################################################################################
+//################################____STEAM_POWER_CONTROL____##################################
+//#############################################################################################
+
+void steamCtrl() {
+  float boilerPressure = getPressure();
+
+  if (brewState() == 0 && boilerPressure >=0.1 && boilerPressure <= 9.0) {
+    if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) {
+      PORTB |= _BV(PB0);  // relayPin -> HIGH
+    } else {
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }
+  } else {
+    PORTB &= ~_BV(PB0);  // relayPin -> LOW
+  }
+} 
+
 //#############################################################################################
 //################################____LCD_REFRESH_CONTROL___###################################
 //#############################################################################################
