@@ -292,11 +292,11 @@ void setup() {
 
 //Main loop where all the below logic is continuously run
 void loop() {
+  pageValuesRefresh();
   myNex.NextionListen();
   kThermoRead();
   modeSelect();
   lcdRefresh();
-  pageValuesRefresh();
 }
 
 //##############################################################################################################################
