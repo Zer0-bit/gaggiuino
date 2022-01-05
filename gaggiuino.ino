@@ -415,10 +415,6 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
 void modeSelect() {
   static uint8_t previousMode;
   
-  if (previousMode != selectedOperationalMode) {
-    selectedOperationalMode = myNex.readNumber("modeSelect");
-    previousMode = selectedOperationalMode;
-  }
   switch (selectedOperationalMode) {
     case 0:
       if (analogRead(steamPin) > 10) justDoCoffee();
