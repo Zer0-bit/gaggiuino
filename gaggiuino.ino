@@ -558,8 +558,6 @@ void steamCtrl() {
     } else {
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
     }
-  } else {
-    PORTB &= ~_BV(PB0);  // relayPin -> LOW
   }
 } 
 
