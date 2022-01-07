@@ -552,14 +552,16 @@ void heatCtrl() {
 void steamCtrl() {
   float boilerPressure = getPressure();
 
-  if (brewState() == 0 && boilerPressure >=0.1 && boilerPressure <= 9.0) {
-    if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) {
-      PORTB |= _BV(PB0);  // relayPin -> HIGH
-    } else {
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+  if (brewState() == 0 && analogRead(steamPin) == 0 ) {
+    if (boilerPressure >=0.3 && boilerPressure <= 9.0) {
+      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) {
+        PORTB |= _BV(PB0);  // relayPin -> HIGH
+      } else {
+        PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      }
     }
   }
-} 
+}
 
 //#############################################################################################
 //################################____LCD_REFRESH_CONTROL___###################################
