@@ -572,7 +572,7 @@ void lcdRefresh() {
     
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     myNex.writeNum("currentHPWR", HPWR_OUT); 
-    myNex.writeStr("pressureVal.txt", String(getPressure(),1));
+    myNex.writeNum("pressure.val", int(getPressure()*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));    
     pageRefreshTimer = millis();
   }
