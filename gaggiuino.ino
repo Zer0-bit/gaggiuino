@@ -143,6 +143,7 @@ void setup() {
     EEPROM.put(EEP_PREINFUSION_SOAK, 5);
     EEPROM.put(EEP_P_HOLD, 7);
     EEPROM.put(EEP_P_LENGTH, 10);
+    EEPROM.put(EEP_GRAPH_BREW, 0);
   }
   // Applying our saved EEPROM saved values
   uint16_t init_val;
@@ -264,7 +265,12 @@ void setup() {
     myNex.writeNum("homeOnBrewFinish", init_val);
     myNex.writeNum("brewSettings.btGoHome.val", init_val);
   }
-
+  
+  EEPROM.get(EEP_GRAPH_BREW, init_val);//reading preinfusion pressure value from eeprom
+  if (  init_val == 0 || init_val == 1) {
+    myNex.writeNum("graphEnabled", init_val);
+    myNex.writeNum("brewSettings.btGraph.val", init_val);
+  }
   // Warmup checkbox value
   EEPROM.get(EEP_WARMUP, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1 ) {
@@ -654,7 +660,12 @@ void trigger1() {
         EEPROM.put(EEP_HOME_ON_SHOT_FINISH, valueToSave);
         allValuesUpdated++;
       }else {}
-      if (allValuesUpdated == 1) {
+      valueToSave = myNex.readNumber("graphEnabled");
+      if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_GRAPH_BREW, valueToSave);
+        allValuesUpdated++;
+      }else {}
+      if (allValuesUpdated == 2) {
         allValuesUpdated=0;
         myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
       }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
