@@ -230,19 +230,19 @@ void setup() {
     // Setting the pump performance based on loaded region  settings
     switch (init_val) {
       case 50: // 240v / 50Hz
-        BAR_TO_DIMMER_OUTPUT[0]=42;
+        BAR_TO_DIMMER_OUTPUT[0]=40;
         BAR_TO_DIMMER_OUTPUT[1]=45;
         BAR_TO_DIMMER_OUTPUT[2]=50;
         BAR_TO_DIMMER_OUTPUT[3]=53;
         BAR_TO_DIMMER_OUTPUT[4]=56;
         BAR_TO_DIMMER_OUTPUT[5]=60;
-        BAR_TO_DIMMER_OUTPUT[6]=64;
-        BAR_TO_DIMMER_OUTPUT[7]=68;
-        BAR_TO_DIMMER_OUTPUT[8]=70;
-        BAR_TO_DIMMER_OUTPUT[9]=73;
+        BAR_TO_DIMMER_OUTPUT[6]=62;
+        BAR_TO_DIMMER_OUTPUT[7]=65;
+        BAR_TO_DIMMER_OUTPUT[8]=68;
+        BAR_TO_DIMMER_OUTPUT[9]=70;
         break;
       case 60: // 120v / 60 Hz
-        BAR_TO_DIMMER_OUTPUT[0]=45;
+        BAR_TO_DIMMER_OUTPUT[0]=44;
         BAR_TO_DIMMER_OUTPUT[1]=51;
         BAR_TO_DIMMER_OUTPUT[2]=53;
         BAR_TO_DIMMER_OUTPUT[3]=56;
@@ -250,8 +250,8 @@ void setup() {
         BAR_TO_DIMMER_OUTPUT[5]=60;
         BAR_TO_DIMMER_OUTPUT[6]=63;
         BAR_TO_DIMMER_OUTPUT[7]=65;
-        BAR_TO_DIMMER_OUTPUT[8]=70;
-        BAR_TO_DIMMER_OUTPUT[9]=73;
+        BAR_TO_DIMMER_OUTPUT[8]=68;
+        BAR_TO_DIMMER_OUTPUT[9]=71;
         break;
       default: // smth went wrong the pump is set to 0 bar in all modes.
         break;
@@ -308,7 +308,8 @@ void kThermoRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
-    while (kProbeReadValue <= 0 || kProbeReadValue == NAN) {
+    while (kProbeReadValue <= 0 || kProbeReadValue == NAN || kProbeReadValue > 170.0) {
+      PORTB &= ~_BV(PB0);  // relayPin -> LOW
       if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
         kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis();
