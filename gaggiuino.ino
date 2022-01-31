@@ -4,53 +4,50 @@
 #include <max6675.h>
 #include <ACS712.h>
 
-
 // Define our pins
-#define thermoDO 4 // MAX6675 DO
-#define thermoCS 5 // MAX6675 CS
-#define thermoCLK 6 // MAX6675 CLK
-#define brewSwitchPin A0 // ACS sensor data pin
-#define relayPin 8  // SSR VCC pin
-#define dimmerPin 9 // dimmer psm pin
-#define pressurePin A1 // pressure transducer data pin
-#define steamPin A7 // steam ctrl pin
+#define thermoDO 4
+#define thermoCS 5
+#define thermoCLK 6
+#define brewSwitchPin A0 // PD7
+#define relayPin 8  // PB0
+#define dimmerPin 9
+#define pressurePin A1 
+#define steamPin A7
+
+#define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
+#define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
+#define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
+#define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
+
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
-// #define GET_RTD_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define REFRESH_SCREEN_EVERY 350 // Screen refresh interval (ms)
-#define DIMMER_UPDATE_EVERY 850 // Defines how often the dimmer gets calculated a new value during a brew cycle (ms)
 #define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
-#define PI_SOAK_FOR 3000 // sets the ammount of time the preinfusion soaking phase is going to last for (ms)
 #define POWER_DRAW_ZERO 42 // sets the zero bar acs power value
 
 
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 
-// Use software SPI: CS, DI, DO, CLK
-// Adafruit_MAX31865 rtd = Adafruit_MAX31865(max31865_CS, max31865_SDI, max31865_SDO, max31865_CLK);
-
 // EasyNextion object init
 EasyNex myNex(Serial);
-// Init the ACS712 hall sensor
+//Init the ACS712 hall sensor
 ACS712 sensor(ACS712_20A, brewSwitchPin);
 // RobotDYN Dimmer object init
 dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
-
 
 //##################__Transducer_stuff__##################################
 const float voltageZero = 0.49; // the voltage output by the transducer at 0bar - aka our offset
 float pressureValue; //variable to store the value coming from the pressure transducer
 
-//Change these values if your tests show the dimmer should be tuned
-// BAR --0-|-1-|-2-|-3-|-4-|-5-|-6-|-7-|-8-|-9
-// DIM -42-|48-|50-|52-|55-|60-|67-|72-|80-|97
-//uint8_t BAR_TO_DIMMER_OUTPUT[10]={42,48,50,52,55,60,67,72,80,95};
-uint8_t BAR_TO_DIMMER_OUTPUT[10]; //={45,50,53,56,59,63,67,71,75,80};
+// setting the pump performance based on region
+// uint8_t BAR_TO_DIMMER_OUTPUT[10] = {42,45,50,53,56,60,64,68,70,75}; // the dimmer setpoints for the 220v pumps
+uint8_t BAR_TO_DIMMER_OUTPUT[10]; //={45,51,53,56,58,60,63,65,69,73}; // the dimmer setpoints for the 110v pumps
+
 
 // Some vars are better global
 volatile float kProbeReadValue;
@@ -62,8 +59,6 @@ bool  pressureProfileState;
 bool  warmupEnabled;
 bool  flushEnabled;
 bool  descaleEnabled;
-bool  fineTempEnabled;
-bool  valuesRefreshOnPageChange;
 bool preinfusionFinished;
 volatile uint16_t  HPWR;
 volatile uint16_t  HPWR_OUT;
@@ -105,20 +100,22 @@ uint16_t  EEP_GRAPH_BREW = 205;
 void setup() {
   
   Serial.begin(115200); // switching our board to the new serial speed
-  
+
   // relay port init and set initial operating mode
   pinMode(relayPin, OUTPUT);
   pinMode(brewSwitchPin, INPUT);
+  pinMode(steamPin, INPUT_PULLUP);
   // Chip side  HIGH/LOW  specification
   PORTB &= ~_BV(PB0);  // relayPin LOW
-  
+
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
     delay(500);
   }
+
   //If it's the first boot we'll need to set some defaults
-  if (EEPROM.read(0) != 251 || EEPROM.read(EEP_SETPOINT) == 65535 || EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
+  if (EEPROM.read(0) != 251 || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
     EEPROM.put(0, 251);
     //The values can be modified to accomodate whatever system it tagets
@@ -142,7 +139,7 @@ void setup() {
     EEPROM.put(EEP_HOME_ON_SHOT_FINISH, 1);
     EEPROM.put(EEP_PREINFUSION_SOAK, 5);
     EEPROM.put(EEP_P_HOLD, 7);
-    EEPROM.put(EEP_P_LENGTH, 10);
+    EEPROM.put(EEP_P_LENGTH, 30);
     EEPROM.put(EEP_GRAPH_BREW, 0);
   }
   // Applying our saved EEPROM saved values
@@ -209,18 +206,18 @@ void setup() {
   }
 
   EEPROM.get(EEP_PREINFUSION_SEC, init_val);//reading preinfusion time value from eeprom
-  if (!(init_val < 0)) {
+  if (init_val >= 0) {
     myNex.writeNum("piSec", init_val);
     myNex.writeNum("brewAuto.n0.val", init_val);
   }
 
   EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
-  if (  !(init_val < 0) && init_val <= 9 ) {
+  if (  init_val >= 0 && init_val < 9 ) {
     myNex.writeNum("piBar", init_val);
     myNex.writeNum("brewAuto.n1.val", init_val);
   }
   EEPROM.get(EEP_PREINFUSION_SOAK, init_val);//reading preinfusion soak times value from eeprom
-  if (!(init_val < 0)) {
+  if (  init_val >= 0 ) {
     myNex.writeNum("piSoak", init_val);
     myNex.writeNum("brewAuto.n4.val", init_val);
   }
@@ -228,7 +225,7 @@ void setup() {
   EEPROM.get(EEP_REGPWR_HZ, init_val);//reading region frequency value from eeprom
   if (  init_val == 50 || init_val == 60 ) {
     myNex.writeNum("regHz", init_val);
-    // Setting the pump performance based on loaded region  settings
+    // Setting the pump performance based on region 
     switch (init_val) {
       case 50: // 240v / 50Hz
         BAR_TO_DIMMER_OUTPUT[0]=40;
@@ -243,7 +240,7 @@ void setup() {
         BAR_TO_DIMMER_OUTPUT[9]=70;
         break;
       case 60: // 120v / 60 Hz
-        BAR_TO_DIMMER_OUTPUT[0]=44;
+        BAR_TO_DIMMER_OUTPUT[0]=45;
         BAR_TO_DIMMER_OUTPUT[1]=51;
         BAR_TO_DIMMER_OUTPUT[2]=53;
         BAR_TO_DIMMER_OUTPUT[3]=56;
@@ -251,13 +248,14 @@ void setup() {
         BAR_TO_DIMMER_OUTPUT[5]=60;
         BAR_TO_DIMMER_OUTPUT[6]=63;
         BAR_TO_DIMMER_OUTPUT[7]=65;
-        BAR_TO_DIMMER_OUTPUT[8]=68;
-        BAR_TO_DIMMER_OUTPUT[9]=71;
+        BAR_TO_DIMMER_OUTPUT[8]=70;
+        BAR_TO_DIMMER_OUTPUT[9]=73;
         break;
       default: // smth went wrong the pump is set to 0 bar in all modes.
         break;
     }
   }
+
 
   // Brew page settings
   EEPROM.get(EEP_HOME_ON_SHOT_FINISH, init_val);//reading preinfusion pressure value from eeprom
@@ -265,26 +263,27 @@ void setup() {
     myNex.writeNum("homeOnBrewFinish", init_val);
     myNex.writeNum("brewSettings.btGoHome.val", init_val);
   }
-  
+
   EEPROM.get(EEP_GRAPH_BREW, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1) {
     myNex.writeNum("graphEnabled", init_val);
     myNex.writeNum("brewSettings.btGraph.val", init_val);
   }
+
   // Warmup checkbox value
   EEPROM.get(EEP_WARMUP, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1 ) {
     myNex.writeNum("warmupState", init_val);
     myNex.writeNum("morePower.bt0.val", init_val);
   }
-  
-  // Dimmer initialisation
+
+    // Dimmer initialisation
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
   dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
-  
+
   // Calibrating the hall current sensor
   sensor.calibrate();
-  
+
   myNex.lastCurrentPageId = myNex.currentPageId;
   delay(5);
   POWER_ON = true;
@@ -314,7 +313,7 @@ void kThermoRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
-    while (kProbeReadValue <= 0 || kProbeReadValue == NAN || kProbeReadValue > 170.0) {
+    while (kProbeReadValue <= 0.0 || kProbeReadValue == NAN || kProbeReadValue > 160.0) {
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
         kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
@@ -329,55 +328,41 @@ void kThermoRead() { // Reading the thermocouple temperature
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
 float getPressure() {  //returns sensor pressure data
-  float sumPressure, finalPressure;
-
-  for (int i=0;i<20;i++) {
     float voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
     float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
-    sumPressure += pressure_bar; // sums every 20 pressure reads
-  }
-  finalPressure = sumPressure/20.0; // averages 20 readings
-  return finalPressure; // outputs the value here as the function return value
+    return pressure_bar;
 }
 
+uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) {
+  static double refreshTimer;
+  static float outputValue, prevOutputValue;
+  float livePressure = getPressure();
 
-uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) { // function to set pressure but be bound to the set min and max values
-  static float outputValue;
-  float livePressure = getPressure(); 
   if (brewState() == 1 ) {
-    if (livePressure > wantedValue && (livePressure - wantedValue >= 1.0)) {
-      if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[minVal] && BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
-        outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] - 3;
-        return uint8_t(outputValue);
-      }else {
-        outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-        return uint8_t(outputValue);
-      }
-    }else if (livePressure > wantedValue && (livePressure - wantedValue < 1.0)) {
-      if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[minVal] && BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
-        outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]--;
-        return uint8_t(outputValue);
-      }else {
-        outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-        return uint8_t(outputValue);
-      }
-    }else if (livePressure < wantedValue && (wantedValue - livePressure >= 1.0)) {
-      if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[minVal] && BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
-        outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]+2;
-        return uint8_t(outputValue);
-      }else {
-        outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-        return uint8_t(outputValue);
-      }
-    }else if (livePressure < wantedValue && (wantedValue - livePressure < 1)) {
-      if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[minVal] && BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
-        outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]++;
-        return uint8_t(outputValue);
-      }else {
-        outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-        return uint8_t(outputValue);
-      }
-    }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+    if (millis() - refreshTimer > 600) {
+      if (livePressure > wantedValue) {
+        if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[minVal]) {
+          outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]--;
+          if (outputValue > BAR_TO_DIMMER_OUTPUT[1]) {
+            prevOutputValue = outputValue;
+            return uint8_t(outputValue);
+          }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+        }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+      }else if (livePressure < wantedValue) {
+        if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
+          outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]++;
+          if (outputValue > BAR_TO_DIMMER_OUTPUT[0]) {
+            prevOutputValue = outputValue;
+            return uint8_t(outputValue);
+          }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+        }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+      }else if ((uint8_t)livePressure == (uint8_t)wantedValue) {
+        if ((uint8_t(wantedValue) - maxVal) < 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return uint8_t(outputValue);
+        else if ((uint8_t(wantedValue) - maxVal) > 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return BAR_TO_DIMMER_OUTPUT[0];
+        else return uint8_t(prevOutputValue);
+      }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+      refreshTimer = millis();
+    }else return (outputValue >= BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(outputValue) : uint8_t(prevOutputValue); 
   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
 }
 
@@ -420,32 +405,30 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
 void modeSelect() {
-  static uint8_t previousMode;
-  
   switch (selectedOperationalMode) {
     case 0:
-      if (analogRead(steamPin) > 10) justDoCoffee();
+      if (steamState() == 1) justDoCoffee();
       else steamCtrl();
       break;
     case 1:
-      if (analogRead(steamPin) > 10) preInfusion();
+      if (steamState() == 1) preInfusion();
       else steamCtrl();
       break;
     case 2:
-      if (analogRead(steamPin) > 10) autoPressureProfile();
+      if (steamState() == 1) autoPressureProfile();
       else steamCtrl();
       break;
     case 3:
       manualPressureProfile();
       break;
     case 4:
-      if (analogRead(steamPin) > 10) {
+      if (steamState() == 1) {
         if(preinfusionFinished == false) preInfusion();
         else if(preinfusionFinished == true) autoPressureProfile();
       } else steamCtrl();
       break;
     case 5:
-      if (analogRead(steamPin) > 10) justDoCoffee();
+      if (steamState() == 1) justDoCoffee();
       else steamCtrl();
       break;
     case 6:
@@ -456,11 +439,11 @@ void modeSelect() {
     case 8:
       break;
     case 9:
-      if (analogRead(steamPin) > 10) justDoCoffee();
+      if (steamState() == 1) justDoCoffee();
       else steamCtrl();
       break;
     default:
-      if (analogRead(steamPin) > 10) justDoCoffee();
+      if (steamState() == 1) justDoCoffee();
       else steamCtrl();
       break;
   }
@@ -476,8 +459,10 @@ void justDoCoffee() {
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
 
   if (brewState() == 1) {
-    dimmer.setPower(setPressure(9.0,9,9));
-    brewTimer(1);
+    if (selectedOperationalMode == 5 || selectedOperationalMode == 9) {
+      dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
+      brewTimer(1);
+    }
     myNex.writeNum("warmupState", 0);
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (kProbeReadValue < setPoint+0.5) {
@@ -499,7 +484,7 @@ void justDoCoffee() {
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else if ((kProbeReadValue >= ((float)setPoint - 0.50)) && kProbeReadValue < (float)setPoint) {
+    } else if ((kProbeReadValue >= ((float)setPoint - 0.5)) && kProbeReadValue < (float)setPoint) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
@@ -511,62 +496,17 @@ void justDoCoffee() {
 }
 
 //#############################################################################################
-//################################____HEAT_POWER_CONTROL____###################################
-//#############################################################################################
-void heatCtrl() {
-  uint8_t HPWR_LOW= HPWR/MainCycleDivider;
-  // Calculating the boiler heating power range based on the below input values
-  HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW,0);
-  HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to between HPWR_LOW and HPWR
-
-  if (brewState() == 1) {
-  // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (kProbeReadValue < setPoint+0.5) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
-      delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
-      delay(HPWR_OUT); 
-    }
-    myNex.writeNum("warmupState", 0);
-  } else if (brewState() == 0) {
-    brewTimer(0);
-    if (kProbeReadValue < ((float)setPoint - 10.00)) {
-      PORTB |= _BV(PB0);  // relayPin -> HIGH
-    } else if (kProbeReadValue >= ((float)setPoint - 10.00) && kProbeReadValue < ((float)setPoint - 3.00)) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    } else if ((kProbeReadValue >= ((float)setPoint - 3.00)) && (kProbeReadValue <= ((float)setPoint - 1.00))) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
-      delay(HPWR_OUT);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else if ((kProbeReadValue <= ((float)setPoint - 0.25)) && kProbeReadValue < (float)setPoint) {
-      PORTB |= _BV(PB0);   // relayPin -> HIGH
-      delay(HPWR_OUT/2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
-      delay(HPWR_OUT*2);  // delaying the relayPin state for <HPWR_OUT> ammount of time
-    } else {
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    }
-  }
-} 
-
-//#############################################################################################
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
 void steamCtrl() {
   float boilerPressure = getPressure();
 
-  if (brewState() == 0 && analogRead(steamPin) == 0 ) {
-    if (boilerPressure >=0.3 && boilerPressure <= 9.0) {
-      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) {
-        PORTB |= _BV(PB0);  // relayPin -> HIGH
-      } else {
-        PORTB &= ~_BV(PB0);  // relayPin -> LOW
-      }
-    }
+  if (brewState() == 0 && analogRead(steamPin) < 50 ) {
+    if (boilerPressure >=0.1 && boilerPressure <= 9.0) {
+      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
+      else PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }else if(boilerPressure >=8.6) PORTB &= ~_BV(PB0);  // relayPin -> LOW
   }
 }
 
@@ -575,12 +515,15 @@ void steamCtrl() {
 //#############################################################################################
 
 void lcdRefresh() {
-  static unsigned long pageRefreshTimer = millis();
-    
+  // Updating the LCD every 300ms
+  static unsigned long pageRefreshTimer, scalesRefreshTimer, refreshTimer;
+  float fWgt;
+  static bool tareDone;
+  
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
-    myNex.writeNum("currentHPWR", HPWR_OUT); 
+    // myNex.writeNum("currentHPWR", HPWR_OUT);
     myNex.writeNum("pressure.val", int(getPressure()*10));
-    myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));    
+    myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     pageRefreshTimer = millis();
   }
 }
@@ -600,12 +543,12 @@ void trigger1() {
     case 3:
       // Saving ppStart,ppFin,ppHold and ppLength
       valueToSave = myNex.readNumber("ppStart");
-      if (valueToSave >= 0 && valueToSave <= 9) {
+      if (valueToSave != 0 && valueToSave >= 1) {
         EEPROM.put(EEP_P_START, valueToSave);
         allValuesUpdated++;
       }else {}
       valueToSave = myNex.readNumber("ppFin");
-      if (valueToSave >= 0 && valueToSave <= 9) {
+      if (valueToSave != 0 && valueToSave >= 1) {
         EEPROM.put(EEP_P_FINISH, valueToSave);
         allValuesUpdated++;
       }else {}
@@ -638,7 +581,7 @@ void trigger1() {
       }else {}
       //Saved piBar
       valueToSave = myNex.readNumber("piBar");
-      if ( valueToSave >= 0 ) {
+      if ( valueToSave >= 0 && valueToSave <= 9) {
         EEPROM.put(EEP_PREINFUSION_BAR, valueToSave);
         allValuesUpdated++;
       }else {}
@@ -734,6 +677,7 @@ void trigger1() {
   }
 }
 
+
 //#############################################################################################
 //###############################_____HELPER_FUCTIONS____######################################
 //#############################################################################################
@@ -746,8 +690,12 @@ bool brewState() {  //Monitors the current flowing through the ACS712 circuit an
   if (regionHz < 55 ) P = 240 * sensor.getCurrentAC();
   else if (regionHz > 55 ) P = 120 * sensor.getCurrentAC(regionHz);
   // Returnig "true" or "false" as the function response
-  if ( P >= POWER_DRAW_ZERO ) return 1;
-  else return 0;
+  return ( P >= POWER_DRAW_ZERO ) ? 1 : 0;
+}
+
+// Returns HIGH when switch is OFF and LOW when ON
+bool steamState() {
+  return (analogRead(steamPin) > 50) ? true : false; // pin will be high when switch is off.
 }
 
 
@@ -760,7 +708,7 @@ bool brewTimer(bool c) { // small function for easier timer start/stop
 }
 
 
-static double mapRange(double sourceNumber, double fromA, double fromB, double toA, double toB, int decimalPrecision ) {
+double mapRange(double sourceNumber, double fromA, double fromB, double toA, double toB, int decimalPrecision ) {
   double deltaA = fromB - fromA;
   double deltaB = toB - toA;
   double scale  = deltaB / deltaA;
@@ -828,7 +776,8 @@ void deScale(bool c) {
       descaleFinished = false;
       timer = millis();
     }
-    heatCtrl(); //keeping it at temp
+   //keeping it at temp
+    justDoCoffee();
   }
 }
 
@@ -841,7 +790,7 @@ void deScale(bool c) {
 // Pressure profiling function, uses dimmer to dim the pump 
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
-  static bool setPerformed = 0, phase_1 = 1, phase_2 = 0, updateTimer = 1;
+  static bool phase_1 = 1, phase_2 = 0, updateTimer = 1;
   static unsigned long timer;
   static double newBarValue;
 
@@ -857,18 +806,19 @@ void autoPressureProfile() {
         timer = millis();
       }
       brewTimer(1);
-      dimmer.setPower(setPressure(ppStartBar,ppStartBar,ppStartBar)); 
-    }else if (phase_2 == true) { //enters pahse 2
+      // dimmer.setPower(BAR_TO_DIMMER_OUTPUT[ppStartBar]);
+      dimmer.setPower(setPressure(ppStartBar,ppStartBar,ppStartBar));
+    } else if (phase_2 == true) { //enters pahse 2
       if (ppStartBar < ppFinishBar) { // Incremental profiling curve
-        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure raise after the hold period is over for a [Length] ammount of time
+        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue < (double)ppStartBar) newBarValue = (double)ppStartBar;
         else if (newBarValue > (double)ppFinishBar) newBarValue = (double)ppFinishBar;
       }else if (ppStartBar > ppFinishBar) { // Decremental profiling curve
-        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop after the hold period is over for a [Length] ammount of time
+        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue > (double)ppStartBar) newBarValue = (double)ppStartBar;
         else if (newBarValue < ppFinishBar) newBarValue = (double)ppFinishBar;      
       }else { // Flat line profiling
-        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //handles the shot if it's a flat line
+        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue < (double)ppStartBar) newBarValue = (double)ppStartBar;
         else if (newBarValue > (double)ppFinishBar) newBarValue = (double)ppFinishBar;
       }
@@ -884,7 +834,8 @@ void autoPressureProfile() {
     updateTimer = 1;
     newBarValue = 0.0;
   }
-  heatCtrl(); // Keep that water at temp
+ // Keep that water at temp
+  justDoCoffee();
 }
 
 void manualPressureProfile() {
@@ -897,7 +848,8 @@ void manualPressureProfile() {
       brewTimer(0);
     }
   }
-  heatCtrl();
+
+  justDoCoffee();
 }
 //#############################################################################################
 //###############################____PREINFUSION_CONTROL____###################################
@@ -942,5 +894,6 @@ void preInfusion() {
     exitPreinfusion = false;
     timer = millis();
   }
-  heatCtrl(); //keeping it at temp
+ //keeping it at temp
+  justDoCoffee();
 }
