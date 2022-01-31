@@ -24,13 +24,13 @@
 - [x] Realtime pressure feedback
 - [x] Pressure profiling (realtime feedback loop)
 - [x] Manual pressure control
+- [x] Graphing shot stats
 - [x] Realtime values update
 - [x] Saving selected values
 - [x] Descale program
 - [x] Brew start sense
 - [x] Auto shot timer
 - [ ] Tray integrated load cells - WIP ~55%
-- [ ] Graphing shot stats - WIP ~10%
 - [ ] Saving/Loading profiles
 
 >Notes:
