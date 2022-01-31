@@ -94,7 +94,7 @@ uint16_t  EEP_PREINFUSION_SOAK = 170;
 uint16_t  EEP_REGPWR_HZ = 195;
 uint16_t  EEP_WARMUP = 200;
 uint16_t  EEP_HOME_ON_SHOT_FINISH = 205;
-uint16_t  EEP_GRAPH_BREW = 205;
+uint16_t  EEP_GRAPH_BREW = 210;
 
 
 void setup() {
