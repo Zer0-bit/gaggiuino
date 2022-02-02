@@ -101,22 +101,21 @@ uint16_t  EEP_GRAPH_BREW = 210;
 void setup() {
   
   Serial.begin(115200); // switching our board to the new serial speed
-
+  
   // relay port init and set initial operating mode
   pinMode(relayPin, OUTPUT);
   pinMode(brewSwitchPin, INPUT);
   pinMode(steamPin, INPUT_PULLUP);
   // Chip side  HIGH/LOW  specification
   PORTB &= ~_BV(PB0);  // relayPin LOW
-
+  
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
     delay(500);
   }
-
   //If it's the first boot we'll need to set some defaults
-  if (EEPROM.read(0) != EEPROM_RESET || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535 || EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
+  if (EEPROM.read(0) != EEPROM_RESET || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535|| EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
     EEPROM.put(0, EEPROM_RESET);
     //The values can be modified to accomodate whatever system it tagets
@@ -140,7 +139,7 @@ void setup() {
     EEPROM.put(EEP_HOME_ON_SHOT_FINISH, 1);
     EEPROM.put(EEP_PREINFUSION_SOAK, 5);
     EEPROM.put(EEP_P_HOLD, 7);
-    EEPROM.put(EEP_P_LENGTH, 30);
+    EEPROM.put(EEP_P_LENGTH, 10);
     EEPROM.put(EEP_GRAPH_BREW, 0);
   }
   // Applying our saved EEPROM saved values
@@ -207,18 +206,18 @@ void setup() {
   }
 
   EEPROM.get(EEP_PREINFUSION_SEC, init_val);//reading preinfusion time value from eeprom
-  if (init_val >= 0) {
+  if (!(init_val < 0)) {
     myNex.writeNum("piSec", init_val);
     myNex.writeNum("brewAuto.n0.val", init_val);
   }
 
   EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
-  if (  init_val >= 0 && init_val < 9 ) {
+  if (  !(init_val < 0) && init_val <= 9 ) {
     myNex.writeNum("piBar", init_val);
     myNex.writeNum("brewAuto.n1.val", init_val);
   }
   EEPROM.get(EEP_PREINFUSION_SOAK, init_val);//reading preinfusion soak times value from eeprom
-  if (  init_val >= 0 ) {
+  if (!(init_val < 0)) {
     myNex.writeNum("piSoak", init_val);
     myNex.writeNum("brewAuto.n4.val", init_val);
   }
@@ -226,7 +225,7 @@ void setup() {
   EEPROM.get(EEP_REGPWR_HZ, init_val);//reading region frequency value from eeprom
   if (  init_val == 50 || init_val == 60 ) {
     myNex.writeNum("regHz", init_val);
-    // Setting the pump performance based on region 
+    // Setting the pump performance based on loaded region  settings
     switch (init_val) {
       case 50: // 240v / 50Hz
         BAR_TO_DIMMER_OUTPUT[0]=40;
@@ -257,34 +256,32 @@ void setup() {
     }
   }
 
-
   // Brew page settings
   EEPROM.get(EEP_HOME_ON_SHOT_FINISH, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1 ) {
     myNex.writeNum("homeOnBrewFinish", init_val);
     myNex.writeNum("brewSettings.btGoHome.val", init_val);
   }
-
+  
   EEPROM.get(EEP_GRAPH_BREW, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1) {
     myNex.writeNum("graphEnabled", init_val);
     myNex.writeNum("brewSettings.btGraph.val", init_val);
   }
-
   // Warmup checkbox value
   EEPROM.get(EEP_WARMUP, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1 ) {
     myNex.writeNum("warmupState", init_val);
     myNex.writeNum("morePower.bt0.val", init_val);
   }
-
-    // Dimmer initialisation
+  
+  // Dimmer initialisation
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
   dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
-
+  
   // Calibrating the hall current sensor
   sensor.calibrate();
-
+  
   myNex.lastCurrentPageId = myNex.currentPageId;
   delay(5);
   POWER_ON = true;
