@@ -28,6 +28,7 @@
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define POWER_DRAW_ZERO 42 // sets the zero bar acs power value
+#define EEPROM_RESET 251 //change this value if want to reset to defaults
 
 
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
@@ -115,9 +116,9 @@ void setup() {
   }
 
   //If it's the first boot we'll need to set some defaults
-  if (EEPROM.read(0) != 251 || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535) {
+  if (EEPROM.read(0) != EEPROM_RESET || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535 || EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
-    EEPROM.put(0, 251);
+    EEPROM.put(0, EEPROM_RESET);
     //The values can be modified to accomodate whatever system it tagets
     //So on first boot it writes and reads the desired system values
     EEPROM.put(EEP_SETPOINT, 100);
@@ -506,7 +507,7 @@ void steamCtrl() {
     if (boilerPressure >=0.1 && boilerPressure <= 9.0) {
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
       else PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    }else if(boilerPressure >=8.6) PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }else if(boilerPressure < 0 || boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
   }
 }
 
@@ -516,9 +517,7 @@ void steamCtrl() {
 
 void lcdRefresh() {
   // Updating the LCD every 300ms
-  static unsigned long pageRefreshTimer, scalesRefreshTimer, refreshTimer;
-  float fWgt;
-  static bool tareDone;
+  static unsigned long pageRefreshTimer;
   
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     // myNex.writeNum("currentHPWR", HPWR_OUT);
