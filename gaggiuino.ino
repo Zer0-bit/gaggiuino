@@ -14,12 +14,6 @@
 #define pressurePin A1 
 #define steamPin A7
 
-#define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
-#define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
-#define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
-#define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
-
-
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define REFRESH_SCREEN_EVERY 350 // Screen refresh interval (ms)
