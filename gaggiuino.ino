@@ -143,7 +143,6 @@ void setup() {
     EEPROM.put(EEP_GRAPH_BREW, 0);
   }
   
-  delay(500);
   // Applying our saved EEPROM saved values
   uint16_t init_val;
   // Loading the saved values fro EEPROM and sending them to the LCD
@@ -285,7 +284,6 @@ void setup() {
   sensor.calibrate();
   
   myNex.lastCurrentPageId = myNex.currentPageId;
-  delay(5);
   POWER_ON = true;
   thermoTimer = millis();
 }
