@@ -19,21 +19,19 @@
 - [x] [Housing](https://www.thingiverse.com/thing:4949471) - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/LikeableBump1?style=social)](https://www.reddit.com/user/LikeableBump1 "I'm on Reddit")
 - [x] UI/UX - **credits** [![I'm on Reddit](https://img.shields.io/reddit/user-karma/combined/different-wishbone81?style=social)](https://www.reddit.com/user/different-wishbone81 "I'm on Reddit")
 - [x] Temp control
+- [x] Steam control and alerting
 - [x] Preinfusion
 - [x] Realtime pressure feedback
 - [x] Pressure profiling (realtime feedback loop)
 - [x] Manual pressure control
+- [x] Graphing shot stats
 - [x] Realtime values update
 - [x] Saving selected values
 - [x] Descale program
-- [x] Steaming alert
 - [x] Brew start sense
 - [x] Auto shot timer
-- [x] Regional power options
-- [ ] Tray integrated load cells
-- [ ] Steam control
+- [ ] Tray integrated load cells - WIP ~55%
 - [ ] Saving/Loading profiles
-- [ ] Graphing shot stats
 
 >Notes:
 >* Pressure:
@@ -131,7 +129,7 @@ https://user-images.githubusercontent.com/42692077/139340295-698b1392-94cd-418b-
 * [MAX6675 thermocouple](https://bit.ly/3ejTUIj) 
 * [C-M4 screw K-Type thermocouple sensor](https://bit.ly/3nP1WMm)
 * [40DA SSR Relay](https://bit.ly/33g1Pjr)
-* [Thermo-resistant cables AWG 15 and 18 ( 1m black/red ) and AWG 30 ( 5m black/red/yellow/blue )](https://bit.ly/3tjSQbI)
+* [Thermo-resistant cables AWG15 and AWG20 ( 1m black/red ) and AWG26 ( 5m black/red/yellow/blue )](https://bit.ly/3tjSQbI)
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
 * Power Supply (multiple options provided choose what fits your needs):
   * [5v AC Adaptor](https://bit.ly/3jWSrKa) 
@@ -252,7 +250,37 @@ First let's check that the setup works as expected while outside the machine so 
  
  All the other boards will get their power from the arduino 5v / GND pins and it's extrmely important they are powered using those outputs.
 
+**STEAM HANDLING**
 
+  ***Gaggia Classic:***
+  
+  1. Disconnect all the steam switch high voltage wires
+  2. Bridge the wires connected to the steam switch poles 1 and 2.
+  3. Bridge the steam thermostat wires.
+  4. Connect steam switch poles 3 and 4 to the arduino nano like in the table bellow using some AWG26 wires.
+  5. Make sure you secure all the left disconnected wires so they don't make any accidental contact.
+
+![GC - steam handling](https://user-images.githubusercontent.com/42692077/147904917-feeb3230-3ea0-460c-82de-4ad16034a48e.png)
+
+GC SWITCH| Arduino
+---------|-----------
+   3     |   A7
+   4     |   GND
+***
+***Gaggia Classic Pro:***
+
+  1. Move steam switch wire 4 to steam switch pole 1.
+  2. Unplug and secure steam switch wire 5.
+  3. Replace the SSR brew thermostat connected wires with the steam thermostat wires.
+  4. Bridge the brew thermostat wires(the wires we just disconnected from te SSR in favour of the steam thermostat ones)
+  5. Connect steam switch poles 4 and 5 to the arduino nano like in the table bellow using some AWG26 wires.
+
+![image](https://user-images.githubusercontent.com/42692077/152634151-6f53722c-ecda-4492-bcff-c9400f90911d.png)
+
+ GCP SWITCH| Arduino
+---------|-----------
+   4     |   A7
+   5     |   GND
 
 **EXTENDED FUNCTIONALITY**
 
