@@ -3,6 +3,8 @@
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
 #include <ACS712.h>
+#include <HX711.h>
+
 
 // Define our pins
 #define thermoDO 4
@@ -13,6 +15,12 @@
 #define dimmerPin 9
 #define pressurePin A1 
 #define steamPin A7
+
+#define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
+#define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
+#define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
+#define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
+
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
@@ -35,6 +43,11 @@ ACS712 sensor(ACS712_20A, brewSwitchPin);
 // RobotDYN Dimmer object init
 dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 
+
+//#######################__HX711_stuff__##################################
+HX711 LoadCell_1; //HX711 1
+HX711 LoadCell_2; //HX711 2
+
 //##################__Transducer_stuff__##################################
 const float voltageZero = 0.49; // the voltage output by the transducer at 0bar - aka our offset
 float pressureValue; //variable to store the value coming from the pressure transducer
@@ -46,6 +59,8 @@ uint8_t BAR_TO_DIMMER_OUTPUT[10]; //={45,51,53,56,58,60,63,65,69,73}; // the dim
 
 // Some vars are better global
 volatile float kProbeReadValue;
+float currentWeight;
+float previousWeight;
 unsigned long thermoTimer;
 bool POWER_ON;
 bool  descaleCheckBox;
@@ -95,19 +110,30 @@ uint16_t  EEP_GRAPH_BREW = 210;
 void setup() {
   
   Serial.begin(115200); // switching our board to the new serial speed
-  
+
   // relay port init and set initial operating mode
   pinMode(relayPin, OUTPUT);
   pinMode(brewSwitchPin, INPUT);
   pinMode(steamPin, INPUT_PULLUP);
   // Chip side  HIGH/LOW  specification
   PORTB &= ~_BV(PB0);  // relayPin LOW
+
+  LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
+  LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
   
+  SCALE_CALIBRATION:
+  if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
+    //good values - 1: 1708 2: -2162 | 
+    LoadCell_1.set_scale(1952.66f); // orig: 1704.f
+    LoadCell_2.set_scale(-1910.33f); // orig: -2159.f
+  }else goto SCALE_CALIBRATION;
+
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
     delay(500);
   }
+
   //If it's the first boot we'll need to set some defaults
   if (EEPROM.read(0) != EEPROM_RESET || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535|| EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
@@ -133,10 +159,9 @@ void setup() {
     EEPROM.put(EEP_HOME_ON_SHOT_FINISH, 1);
     EEPROM.put(EEP_PREINFUSION_SOAK, 5);
     EEPROM.put(EEP_P_HOLD, 7);
-    EEPROM.put(EEP_P_LENGTH, 10);
+    EEPROM.put(EEP_P_LENGTH, 30);
     EEPROM.put(EEP_GRAPH_BREW, 0);
   }
-  
   // Applying our saved EEPROM saved values
   uint16_t init_val;
   // Loading the saved values fro EEPROM and sending them to the LCD
@@ -201,18 +226,18 @@ void setup() {
   }
 
   EEPROM.get(EEP_PREINFUSION_SEC, init_val);//reading preinfusion time value from eeprom
-  if (!(init_val < 0)) {
+  if (init_val >= 0) {
     myNex.writeNum("piSec", init_val);
     myNex.writeNum("brewAuto.n0.val", init_val);
   }
 
   EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
-  if (  !(init_val < 0) && init_val <= 9 ) {
+  if (  init_val >= 0 && init_val < 9 ) {
     myNex.writeNum("piBar", init_val);
     myNex.writeNum("brewAuto.n1.val", init_val);
   }
   EEPROM.get(EEP_PREINFUSION_SOAK, init_val);//reading preinfusion soak times value from eeprom
-  if (!(init_val < 0)) {
+  if (  init_val >= 0 ) {
     myNex.writeNum("piSoak", init_val);
     myNex.writeNum("brewAuto.n4.val", init_val);
   }
@@ -220,7 +245,7 @@ void setup() {
   EEPROM.get(EEP_REGPWR_HZ, init_val);//reading region frequency value from eeprom
   if (  init_val == 50 || init_val == 60 ) {
     myNex.writeNum("regHz", init_val);
-    // Setting the pump performance based on loaded region  settings
+    // Setting the pump performance based on region 
     switch (init_val) {
       case 50: // 240v / 50Hz
         BAR_TO_DIMMER_OUTPUT[0]=40;
@@ -251,33 +276,36 @@ void setup() {
     }
   }
 
+
   // Brew page settings
   EEPROM.get(EEP_HOME_ON_SHOT_FINISH, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1 ) {
     myNex.writeNum("homeOnBrewFinish", init_val);
     myNex.writeNum("brewSettings.btGoHome.val", init_val);
   }
-  
+
   EEPROM.get(EEP_GRAPH_BREW, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1) {
     myNex.writeNum("graphEnabled", init_val);
     myNex.writeNum("brewSettings.btGraph.val", init_val);
   }
+
   // Warmup checkbox value
   EEPROM.get(EEP_WARMUP, init_val);//reading preinfusion pressure value from eeprom
   if (  init_val == 0 || init_val == 1 ) {
     myNex.writeNum("warmupState", init_val);
     myNex.writeNum("morePower.bt0.val", init_val);
   }
-  
-  // Dimmer initialisation
+
+    // Dimmer initialisation
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
   dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
-  
+
   // Calibrating the hall current sensor
   sensor.calibrate();
-  
+
   myNex.lastCurrentPageId = myNex.currentPageId;
+  delay(5);
   POWER_ON = true;
   thermoTimer = millis();
 }
@@ -320,6 +348,15 @@ void kThermoRead() { // Reading the thermocouple temperature
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
 float getPressure() {  //returns sensor pressure data
+  // float sumPressure, finalPressure;
+
+  // for (int i=0;i<5;i++) {
+  //   float voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
+  //   float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
+  //   sumPressure += pressure_bar;
+  // }
+  // finalPressure = sumPressure/5.0; // averages 5 readings
+  // return finalPressure; // outputs the value here as the function return value
     float voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
     float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
     return pressure_bar;
@@ -498,7 +535,7 @@ void steamCtrl() {
     if (boilerPressure >=0.1 && boilerPressure <= 9.0) {
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
       else PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    }else if(boilerPressure < 0 || boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }else if(boilerPressure >=8.6) PORTB &= ~_BV(PB0);  // relayPin -> LOW
   }
 }
 
@@ -508,13 +545,48 @@ void steamCtrl() {
 
 void lcdRefresh() {
   // Updating the LCD every 300ms
-  static unsigned long pageRefreshTimer;
+  static unsigned long pageRefreshTimer, scalesRefreshTimer, refreshTimer;
+  float fWgt;
+  static bool tareDone;
   
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     // myNex.writeNum("currentHPWR", HPWR_OUT);
     myNex.writeNum("pressure.val", int(getPressure()*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     pageRefreshTimer = millis();
+  }
+  if (myNex.currentPageId == 8 ||myNex.currentPageId == 1 ||myNex.currentPageId == 2) {
+    TARE_AGAIN:
+    if(tareDone != 1) {
+      if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
+        LoadCell_1.tare();
+        LoadCell_2.tare();
+      }
+      tareDone=1;
+    }
+    if (millis() - scalesRefreshTimer > 200) {
+      currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
+      if (currentWeight <= -0.5 || currentWeight >= 100.0) {
+        tareDone=0;
+        goto TARE_AGAIN;
+      }
+      scalesRefreshTimer = millis();
+    }
+    myNex.writeStr("weight.txt",String(currentWeight,1));
+    // FLow calc
+    if ((brewState() == 1) && (currentWeight - previousWeight >= 0.5)) {
+      if (millis() - refreshTimer >= 1000) {
+        fWgt = (currentWeight - previousWeight)*10;
+        myNex.writeNum("flow.val", int(fWgt));
+        refreshTimer = millis();
+        previousWeight = currentWeight;
+      }
+    }else if (brewState() == 0) {
+      if (myNex.currentPageId != 8 ||myNex.currentPageId != 1 ||myNex.currentPageId != 2) {
+        previousWeight=0.0;
+        tareDone=0;
+      }
+    }
   }
 }
 //#############################################################################################
@@ -667,6 +739,16 @@ void trigger1() {
   }
 }
 
+//#############################################################################################
+//###################################_____SCALES_TARE____######################################
+//#############################################################################################
+
+void trigger2() {
+  if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
+    LoadCell_1.tare();
+    LoadCell_2.tare();
+  }
+}
 
 //#############################################################################################
 //###############################_____HELPER_FUCTIONS____######################################
@@ -690,11 +772,8 @@ bool steamState() {
 
 
 bool brewTimer(bool c) { // small function for easier timer start/stop
-  if ( c == 1) {  
-    myNex.writeNum("timerState", 1);
-  }else if( c == 0) { 
-    myNex.writeNum("timerState", 0);
-  }
+  if ( c == 1) myNex.writeNum("timerState", 1);
+  else myNex.writeNum("timerState", 0);
 }
 
 
