@@ -270,9 +270,10 @@ GC SWITCH| Arduino
 ***Gaggia Classic Pro:***
 
   1. Move steam switch wire 4 to steam switch pole 1.
-  2. Replace the SSR brew thermostat connected wires with the steam thermostat wires.
-  3. Bridge the brew thermostat wires(the wires we just disconnected from te SSR in favour of the steam thermostat ones)
-  4. Connect steam switch poles 4 and 5 to the arduino nano like in the table bellow using some AWG26 wires.
+  2. Unplug and secure steam switch wire 5.
+  3. Replace the SSR brew thermostat connected wires with the steam thermostat wires.
+  4. Bridge the brew thermostat wires(the wires we just disconnected from te SSR in favour of the steam thermostat ones)
+  5. Connect steam switch poles 4 and 5 to the arduino nano like in the table bellow using some AWG26 wires.
 
 ![image](https://user-images.githubusercontent.com/42692077/152634151-6f53722c-ecda-4492-bcff-c9400f90911d.png)
 
