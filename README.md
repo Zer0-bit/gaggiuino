@@ -256,8 +256,9 @@ First let's check that the setup works as expected while outside the machine so 
   
   1. Disconnect all the steam switch high voltage wires
   2. Bridge the wires connected to the steam switch poles 1 and 2.
-  3. Connect steam switch poles 3 and 4 to the arduino nano like in the table bellow using some AWG26 wires.
-  4. Make sure you secure all the left disconnected wires so they don't make any accidental contact.
+  3. Bridge the steam thermostat wires.
+  4. Connect steam switch poles 3 and 4 to the arduino nano like in the table bellow using some AWG26 wires.
+  5. Make sure you secure all the left disconnected wires so they don't make any accidental contact.
 
 ![GC - steam handling](https://user-images.githubusercontent.com/42692077/147904917-feeb3230-3ea0-460c-82de-4ad16034a48e.png)
 
@@ -268,12 +269,17 @@ GC SWITCH| Arduino
 ***
 ***Gaggia Classic Pro:***
 
-![gcp - steam handling](https://user-images.githubusercontent.com/42692077/147905461-1648b3c7-e7df-46e7-9776-c992ffe95799.png)
+  1. Move steam switch wire 4 to steam switch pole 1.
+  2. Replace the SSR brew thermostat connected wires with the steam thermostat wires.
+  3. Bridge the brew thermostat wires(the wires we just disconnected from te SSR in favour of the steam thermostat ones)
+  4. Connect steam switch poles 4 and 5 to the arduino nano like in the table bellow using some AWG26 wires.
+
+![image](https://user-images.githubusercontent.com/42692077/152634151-6f53722c-ecda-4492-bcff-c9400f90911d.png)
 
  GCP SWITCH| Arduino
 ---------|-----------
-   TBD     |   A7
-   TBD     |   GND
+   4     |   A7
+   5     |   GND
 
 **EXTENDED FUNCTIONALITY**
 
