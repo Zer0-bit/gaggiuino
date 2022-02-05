@@ -16,7 +16,7 @@ const int LOADCELL_DOUT_PIN_13 = 13;
 const int LOADCELL_SCK_PIN_11 = 11;
 
 long reading_1, reading_2;
-bool calibration;
+bool calibration=1;
 
 //Nextion object init
 EasyNex myNex(Serial);
@@ -31,13 +31,13 @@ void setup() {
   }
 
   //Initialize library
-  loadcell_1.begin(LOADCELL_DOUT_PIN_12, LOADCELL_SCK_PIN_10);
-  loadcell_1.begin(LOADCELL_DOUT_PIN_13, LOADCELL_SCK_PIN_11);
+    loadcell_1.begin(LOADCELL_DOUT_PIN_12, LOADCELL_SCK_PIN_10);
+    loadcell_2.begin(LOADCELL_DOUT_PIN_13, LOADCELL_SCK_PIN_11);
 }
 
 void loop() {
   myNex.NextionListen();
-  if (calibration == 1) {
+  if (myNex.currentPageId == 0 && calibration == 1) {
     CALIBRATE:
     if (loadcell_1.wait_ready_timeout(100) && loadcell_2.wait_ready_timeout(100)) {
       loadcell_1.set_scale();
@@ -66,6 +66,6 @@ void trigger0() {
 }
 
 void trigger1() {
-  calibration = 0;
+  calibration = 1;
 }
 
