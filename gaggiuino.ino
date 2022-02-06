@@ -582,7 +582,10 @@ void lcdRefresh() {
         previousWeight = currentWeight;
       }
     }else if (brewState() == 0) {
-      if (myNex.currentPageId != 8 ||myNex.currentPageId != 1 ||myNex.currentPageId != 2) {
+      if (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8) {
+        myNex.writeStr("weight.txt",String(currentWeight,1));
+        myNex.writeNum("flow.val", int(fWgt));
+      }else {
         previousWeight=0.0;
         tareDone=0;
       }
