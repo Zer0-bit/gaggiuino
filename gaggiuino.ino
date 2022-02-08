@@ -124,8 +124,8 @@ void setup() {
   SCALE_CALIBRATION:
   if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
     //good values - 1: 1708 2: -2162 | 
-    LoadCell_1.set_scale(1952.66f); // orig: 1704.f
-    LoadCell_2.set_scale(-1910.33f); // orig: -2159.f
+    LoadCell_1.set_scale(1955.571428f); // full calibrated val: 1,955.571428571429
+    LoadCell_2.set_scale(-2091.571428f); // full calibrated val: -2,091.571428571429
   }else goto SCALE_CALIBRATION;
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
@@ -395,6 +395,60 @@ uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) {
   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
 }
 
+//   if (brewState() == 1 ) {
+//     // if (millis() - refreshTimer > 50) {
+//       if (livePressure > wantedValue) {
+//         if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[1]) {
+//           outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]--;
+//           if (outputValue > BAR_TO_DIMMER_OUTPUT[1]) {
+//             prevOutputValue = outputValue;
+//             return uint8_t(outputValue);
+//           }else return uint8_t(prevOutputValue);
+//         }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+//       }else if (livePressure < wantedValue) {
+//         outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]++;
+//         return uint8_t(outputValue);
+//       }else if ((uint8_t)livePressure == (uint8_t)wantedValue) {
+//         if ((uint8_t(wantedValue) - maxVal) < 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return uint8_t(outputValue);
+//         else if ((uint8_t(wantedValue) - maxVal) > 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return BAR_TO_DIMMER_OUTPUT[0];
+//         else return uint8_t(prevOutputValue);
+//       }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+//       refreshTimer = millis();
+//     // }else return (outputValue >= BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(outputValue) : uint8_t(prevOutputValue); 
+//   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+// }
+
+//   if (brewState() == 1 ) {
+//     if (millis() - refreshTimer > 50) {
+//       if (livePressure > wantedValue) {
+//         if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[1]) {
+//           outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]--;
+//           if (outputValue > BAR_TO_DIMMER_OUTPUT[1]) {
+//             prevOutputValue = outputValue;
+//             return uint8_t(outputValue);
+//           }else return uint8_t(prevOutputValue);
+//         }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+//       }else if (livePressure < wantedValue && (wantedValue-livePressure) < 2.0) {
+//         if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
+//           outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]++;
+//           if (outputValue < BAR_TO_DIMMER_OUTPUT[9]) {
+//             prevOutputValue = outputValue;
+//             return uint8_t(outputValue);
+//           }else return uint8_t(prevOutputValue);
+//         }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+//       }else if (livePressure < wantedValue && (wantedValue-livePressure) > 2.0) {
+//         outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+//         return uint8_t(outputValue);
+//       }else if ((uint8_t)livePressure == (uint8_t)wantedValue) {
+//         if ((uint8_t(wantedValue) - maxVal) < 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return uint8_t(outputValue);
+//         else if ((uint8_t(wantedValue) - maxVal) > 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return BAR_TO_DIMMER_OUTPUT[0];
+//         else return uint8_t(prevOutputValue);
+//       }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+//       refreshTimer = millis();
+//     }else return (outputValue >= BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(outputValue) : uint8_t(prevOutputValue); 
+//   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+// }
+
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
@@ -488,7 +542,7 @@ void justDoCoffee() {
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
 
   if (brewState() == 1) {
-    if (selectedOperationalMode == 0 || selectedOperationalMode == 9) {
+    if (selectedOperationalMode == 0 || selectedOperationalMode == 5 || selectedOperationalMode == 9) {
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
       brewTimer(1);
     }
@@ -546,8 +600,10 @@ void steamCtrl() {
 void lcdRefresh() {
   // Updating the LCD every 300ms
   static unsigned long pageRefreshTimer, scalesRefreshTimer, refreshTimer;
-  float fWgt;
   static bool tareDone;
+  static uint8_t wErr;
+  static float fWghtEntryVal;
+  float fWgt;
   
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     // myNex.writeNum("currentHPWR", HPWR_OUT);
@@ -555,42 +611,51 @@ void lcdRefresh() {
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     pageRefreshTimer = millis();
   }
-  if (myNex.currentPageId == 8 ||myNex.currentPageId == 1 ||myNex.currentPageId == 2) {
-    TARE_AGAIN:
-    if(tareDone != 1) {
-      if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
-        LoadCell_1.tare();
-        LoadCell_2.tare();
+  if (brewState() == 1) {
+    if (myNex.currentPageId == 8 ||myNex.currentPageId == 1 ||myNex.currentPageId == 2) {
+      TARE_AGAIN:
+      if(tareDone != 1) {
+        if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
+          LoadCell_1.tare();
+          LoadCell_2.tare();
+        }
+        tareDone=1;
       }
-      tareDone=1;
+      if (millis() - scalesRefreshTimer > 200) {
+        currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
+        if (currentWeight <= -0.5 || currentWeight >= 100.0) {
+          tareDone=0;
+          goto TARE_AGAIN;
+        }
+        // soft smooth quite dumb atm just wanted ot have a more stable output value
+        if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 4) {
+          currentWeight = previousWeight; 
+          wErr++;
+        }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 4) {
+          previousWeight = currentWeight;
+          wErr = 0;
+        }// smoothing end
+        scalesRefreshTimer = millis();
+      } 
+      myNex.writeStr("weight.txt",String(currentWeight,1));
+      // FLow calc
+      if ((currentWeight - fWghtEntryVal) >= 0.5) {
+        if (millis() - refreshTimer >= 1000) {
+          fWgt = (currentWeight - fWghtEntryVal)*10;
+          myNex.writeNum("flow.val", int(fWgt));
+          refreshTimer = millis();
+        }
+      }
     }
-    if (millis() - scalesRefreshTimer > 200) {
-      currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
-      if (currentWeight <= -0.5 || currentWeight >= 100.0) {
-        tareDone=0;
-        goto TARE_AGAIN;
-      }
-      scalesRefreshTimer = millis();
-    }
-    myNex.writeStr("weight.txt",String(currentWeight,1));
-    // FLow calc
-    if ((brewState() == 1) && (currentWeight - previousWeight >= 0.5)) {
-      if (millis() - refreshTimer >= 1000) {
-        fWgt = (currentWeight - previousWeight)*10;
-        myNex.writeNum("flow.val", int(fWgt));
-        refreshTimer = millis();
-        previousWeight = currentWeight;
-      }
-    }else if (brewState() == 0) {
-      if (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8) {
-        myNex.writeStr("weight.txt",String(currentWeight,1));
-        myNex.writeNum("flow.val", int(fWgt));
-      }else {
-        previousWeight=0.0;
-        tareDone=0;
-      }
-    }
+  }else if (brewState() == 0 && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) myNex.writeStr("weight.txt",String(currentWeight,1));
+  else {
+    previousWeight=0.0;
+    tareDone=0;
+    currentWeight=0;
+    previousWeight=0;
+    fWghtEntryVal=0;
   }
+  fWghtEntryVal = currentWeight;
 }
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
@@ -789,6 +854,43 @@ double mapRange(double sourceNumber, double fromA, double fromB, double toA, dou
   double finalNumber = (sourceNumber * scale) + offset;
   int calcScale = (int) pow(10, decimalPrecision);
   return (double) round(finalNumber * calcScale) / calcScale;
+}
+
+
+float smoothValue(float inputVal) {
+  // Define the number of samples to keep track of. The higher the number, the
+  // more the readings will be smoothed, but the slower the output will respond to
+  // the input. Using a constant rather than a normal variable lets us use this
+  // value to determine the size of the readings array.
+  const int numReadings = 5;
+
+  int readings[numReadings];      // the readings from the analog input
+  int readIndex = 0;              // the index of the current reading
+  int total = 0;                  // the running total
+  int average = 0;                // the average
+
+  // initialize serial communication with computer:
+  // initialize all the readings to 0:
+  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+    readings[thisReading] = 0;
+  }
+  // subtract the last reading:
+  total = total - readings[readIndex];
+  // read from the sensor:
+  readings[readIndex] = inputVal;
+  // add the reading to the total:
+  total = total + readings[readIndex];
+  // advance to the next position in the array:
+  readIndex = readIndex + 1;
+
+  // if we're at the end of the array...
+  if (readIndex >= numReadings) {
+    // ...wrap around to the beginning:
+    readIndex = 0;
+  }
+
+  // calculate the average:
+  return average = total / numReadings;
 }
 
 
