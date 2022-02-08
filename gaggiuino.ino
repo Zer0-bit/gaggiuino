@@ -648,7 +648,7 @@ void lcdRefresh() {
         }
       }
     }
-  }else if (brewState() == 0 && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) myNex.writeStr("weight.txt",String(currentWeight,1));
+  }else if (brewState() == 0 && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) myNex.writeStr("weight.txt",String(currentWeight+fWgt,1));
   else {
     previousWeight=0.0;
     tareDone=0;
