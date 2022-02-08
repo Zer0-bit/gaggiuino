@@ -649,7 +649,21 @@ void lcdRefresh() {
       }
     }
   }else if (brewState() == 0 && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) myNex.writeStr("weight.txt",String(currentWeight+fWgt,1));
-  else {
+  else if (brewState() == 0 && myNex.currentPageId == 11) {
+    if (millis() - scalesRefreshTimer > 200) {
+        currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
+        myNex.writeStr("weight.txt",String(currentWeight,1));
+        // // soft smooth quite dumb atm just wanted ot have a more stable output value
+        // if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 4) {
+        //   currentWeight = previousWeight; 
+        //   wErr++;
+        // }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 4) {
+        //   previousWeight = currentWeight;
+        //   wErr = 0;
+        // }// smoothing end
+        scalesRefreshTimer = millis();
+      }
+  }else {
     previousWeight=0.0;
     tareDone=0;
     currentWeight=0;
