@@ -643,6 +643,7 @@ void lcdRefresh() {
         if (millis() - refreshTimer >= 1000) {
           fWgt = (currentWeight - fWghtEntryVal)*10;
           myNex.writeNum("flow.val", int(fWgt));
+          fWghtEntryVal = currentWeight;
           refreshTimer = millis();
         }
       }
@@ -655,7 +656,6 @@ void lcdRefresh() {
     previousWeight=0;
     fWghtEntryVal=0;
   }
-  fWghtEntryVal = currentWeight;
 }
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
