@@ -278,6 +278,7 @@ GC SWITCH| Arduino
 **EXTENDED FUNCTIONALITY**
 
 1. Adding the ACS712 hall current sensor is quite straight forward
+   The ACS is very sensitive. To prevent problems, ensure you solder the wires to the ACS board and try to keep wires short.
 
     ACS712  |  Arduino
    ---------|-----------
