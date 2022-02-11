@@ -125,7 +125,8 @@
   * **Gaggia Classic Pro (2018+ versions):**
     * [Fitting - 10-02/PCF](https://www.aliexpress.com/item/4001338642124.html)
     * [Fitting - 6mm](https://a.aliexpress.com/_vcLoZM) OR alternatively [Fitting - 10mm/PE](https://www.aliexpress.com/item/4001338085412.html)
-    * [Hose -   ID 4 x OD 9mm](https://a.aliexpress.com/_vabJrm) 
+    * [Hose -   ID 4 x OD 9mm](https://a.aliexpress.com/_vabJrm)
+    * [Clamps - 7.8-9.5mm](https://www.aliexpress.com/item/1005003400371446.html) 
 
 ### Housing:
  * [Gaggia Classic Arduino & Touchscreen Housing](https://www.thingiverse.com/thing:4949471)
