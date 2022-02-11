@@ -44,10 +44,8 @@
 ***
 ### Mod in operation:
 
-<div align="center">
+[![Video](https://img.youtube.com/vi/hpxB1Q6AFkY/maxresdefault.jpg)](https://www.youtube.com/watch?v=hpxB1Q6AFkY)
 
-  [![Video](https://www.youtube.com/watch?v=hpxB1Q6AFkY/maxresdefault.jpg)](https://www.youtube.com/watch?v=hpxB1Q6AFkY)
-</div>
 
 ***USAGE:***
 
