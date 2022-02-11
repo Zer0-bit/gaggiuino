@@ -43,33 +43,7 @@
 **[<< Ideas are welcome in the Issues tab >>](https://github.com/Zer0-bit/gaggiuino/issues)**
 ***
 ### Mod in operation:
-**WARMUP:**
-<div align="center">
-
-https://user-images.githubusercontent.com/42692077/143676550-4e1284ea-8d00-4317-bc0e-6a00d9153400.mp4
-
-https://user-images.githubusercontent.com/42692077/143675667-df061080-e474-4967-9907-e938d678861e.mp4
-
-</div>
-
-**Brew mode:**
-<div align="center">
- 
-https://user-images.githubusercontent.com/42692077/139340155-a3739359-33e1-423f-9ecf-10836f9446de.mp4
-</div>
-
-**Steaming mode:**
-<div align="center">
-  
-https://user-images.githubusercontent.com/42692077/139340240-0602f792-8052-4ba4-96f8-e54d31add210.mp4
-</div>
-
-
-**Flush:**
-<div align="center">
-
-https://user-images.githubusercontent.com/42692077/139340295-698b1392-94cd-418b-8a63-222a4390aed5.mp4
-</div>
+[![Video](https://img.youtube.com/vi/hpxB1Q6AFkY/maxresdefault.jpg)](https://www.youtube.com/watch?v=hpxB1Q6AFkY)
 
 ***USAGE:***
 
