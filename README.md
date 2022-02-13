@@ -109,11 +109,8 @@
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
 * Power Supply (multiple options provided choose what fits your needs):
   * [5v AC Adaptor](https://bit.ly/3jWSrKa) 
-  * [12v Power Supply](https://www.aliexpress.com/item/33012749903.html) should work only together with any of the bellow 2 options:
-    * [12v to 5v stepdown USB output](https://www.aliexpress.com/item/32525175131.html)
-    * [12v to 9v stepdown](https://www.aliexpress.com/item/1005001534605959.html)
- >*I used an old mobile charger I had lying around which conveniently had a USB port for plugging the cable that came with the  board, exactly like in the link above.*
- >*It's recommended though to power the arduino board using  12V 1000mA power supply and a stepdown convertor of your choice from the provided list.*
+  * [12v Power Supply](https://www.aliexpress.com/item/33012749903.html) and [12v to 5v stepdown](https://www.aliexpress.com/item/4001184669298.html) (these two should only be used together)
+ >*It's recommended to power the arduino board using  12V 1000mA power supply and the stepdown convertor.*
 
 #### **EXTENDED FUNCTIONALITY**
 ***
@@ -125,8 +122,8 @@
     * [Fitting - 6mm/PE](https://www.aliexpress.com/item/4001338085412.html)
     * [Hose - 6x4 - 1 meter](https://www.aliexpress.com/item/4000383354010.html)
   * **Gaggia Classic Pro (2018+ versions):**
-    * [Fitting - 10-02/PCF](https://www.aliexpress.com/item/4001338642124.html)
-    * [Fitting - 6mm](https://a.aliexpress.com/_vcLoZM) OR alternatively [Fitting - 10mm/PE](https://www.aliexpress.com/item/4001338085412.html)
+    * [Fitting - PLF x 6mm x 1/8](https://www.aliexpress.com/item/1005002302555525.html)
+    * [Fitting - 6mm](https://a.aliexpress.com/_vcLoZM)
     * [Hose -   ID 4 x OD 9mm](https://a.aliexpress.com/_vabJrm)
     * [Clamps - 7.8-9.5mm](https://www.aliexpress.com/item/1005003400371446.html)
 
