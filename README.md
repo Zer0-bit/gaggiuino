@@ -107,7 +107,7 @@
 * [Spade connectors M/F 6.3mm](https://bit.ly/2Sjrkhu)
 * Power Supply (multiple options provided choose what fits your needs):
   * [5v AC Adaptor](https://bit.ly/3jWSrKa) 
-  * [12v Power Supply](https://www.aliexpress.com/item/33012749903.html) and [12v to 5v stepdown](https://www.aliexpress.com/item/4001184669298.html) (these two should only be used together)
+  * [12v Power Supply](https://www.aliexpress.com/item/33012749903.html) and [12v to 5v stepdown](https://www.aliexpress.com/item/1005001821783419.html) (these two should only be used together)
  >*It's recommended to power the arduino board using  12V 1000mA power supply and the stepdown convertor.*
 
 #### **EXTENDED FUNCTIONALITY**
