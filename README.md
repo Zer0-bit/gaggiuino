@@ -143,6 +143,7 @@
 * [GAGGIA Classic Pro](schematics/gcp-schematics.png)
 
 **Diagrams:**
+* [GAGGIA Classic](schematics/GC-CONNECTIONS-DIAGRAM.png)
 * [GAGGIA Classic Pro](schematics/GCP-CONNECTIONS-DIAGRAM.png)
 ***
 ***!! WARNING !!***
