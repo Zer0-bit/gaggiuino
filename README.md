@@ -120,7 +120,7 @@
     * [Fitting - 6mm/PE](https://www.aliexpress.com/item/4001338085412.html)
     * [Hose - 6x4 - 1 meter](https://www.aliexpress.com/item/4000383354010.html)
   * **Gaggia Classic Pro (2018+ versions):**
-    * [Fitting - PLF x 6mm x 1/8](https://www.aliexpress.com/item/1005002302555525.html)
+    * [Fitting - PLF x 6mm x 1/4](https://www.aliexpress.com/item/1005002302555525.html)
     * [Fitting - 6mm](https://a.aliexpress.com/_vcLoZM)
     * [Hose -   ID 4 x OD 9mm](https://a.aliexpress.com/_vabJrm)
     * [Clamps - 7.8-9.5mm](https://www.aliexpress.com/item/1005003400371446.html)
