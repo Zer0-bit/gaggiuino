@@ -236,7 +236,7 @@ First let's check that the setup works as expected while outside the machine so 
 
 GC SWITCH| Arduino
 ---------|-----------
-   3     |   A7
+   3     |   D7
    4     |   GND
 ***
 ***Gaggia Classic Pro:***
@@ -251,7 +251,7 @@ GC SWITCH| Arduino
 
  GCP SWITCH| Arduino
 ---------|-----------
-   4     |   A7
+   4     |   D7
    5     |   GND
 
 **EXTENDED FUNCTIONALITY**
