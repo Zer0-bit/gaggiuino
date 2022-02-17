@@ -2,7 +2,6 @@
 #include <EEPROM.h>
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
-#include <ACS712.h>
 #include <HX711.h>
 
 
@@ -10,11 +9,11 @@
 #define thermoDO 4
 #define thermoCS 5
 #define thermoCLK 6
-#define brewSwitchPin A0 // PD7
+#define brewPin A0 // PD7
 #define relayPin 8  // PB0
 #define dimmerPin 9
 #define pressurePin A1 
-#define steamPin A7
+#define steamPin 7
 
 #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
 #define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
@@ -38,8 +37,7 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 
 // EasyNextion object init
 EasyNex myNex(Serial);
-//Init the ACS712 hall sensor
-ACS712 sensor(ACS712_20A, brewSwitchPin);
+
 // RobotDYN Dimmer object init
 dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 
@@ -113,8 +111,9 @@ void setup() {
 
   // relay port init and set initial operating mode
   pinMode(relayPin, OUTPUT);
-  pinMode(brewSwitchPin, INPUT);
+  pinMode(brewPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
+  // digitalWrite(steamPin, HIGH);
   // Chip side  HIGH/LOW  specification
   PORTB &= ~_BV(PB0);  // relayPin LOW
 
@@ -301,9 +300,6 @@ void setup() {
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
   dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
 
-  // Calibrating the hall current sensor
-  sensor.calibrate();
-
   myNex.lastCurrentPageId = myNex.currentPageId;
   delay(5);
   POWER_ON = true;
@@ -348,15 +344,6 @@ void kThermoRead() { // Reading the thermocouple temperature
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
 float getPressure() {  //returns sensor pressure data
-  // float sumPressure, finalPressure;
-
-  // for (int i=0;i<5;i++) {
-  //   float voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
-  //   float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
-  //   sumPressure += pressure_bar;
-  // }
-  // finalPressure = sumPressure/5.0; // averages 5 readings
-  // return finalPressure; // outputs the value here as the function return value
     float voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
     float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
     return pressure_bar;
@@ -488,31 +475,36 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
 void modeSelect() {
+  //steamState();
   switch (selectedOperationalMode) {
     case 0:
-      if (steamState() == 1) justDoCoffee();
+      //justDoCoffee();
+      if (steamState() == 0) justDoCoffee();
       else steamCtrl();
       break;
     case 1:
-      if (steamState() == 1) preInfusion();
+      //preInfusion();
+      if (steamState() == 0) preInfusion();
       else steamCtrl();
       break;
     case 2:
-      if (steamState() == 1) autoPressureProfile();
+      // autoPressureProfile();
+      if (steamState() == 0) autoPressureProfile();
       else steamCtrl();
       break;
     case 3:
       manualPressureProfile();
       break;
     case 4:
-      if (steamState() == 1) {
+      // if(preinfusionFinished == false) preInfusion();
+      // else if(preinfusionFinished == true) autoPressureProfile();
+      if (steamState() == 0) {
         if(preinfusionFinished == false) preInfusion();
         else if(preinfusionFinished == true) autoPressureProfile();
-      } else steamCtrl();
+      } else if (steamState() == 1) steamCtrl();
       break;
     case 5:
-      if (steamState() == 1) justDoCoffee();
-      else steamCtrl();
+      justDoCoffee();
       break;
     case 6:
       deScale(descaleCheckBox);
@@ -522,12 +514,10 @@ void modeSelect() {
     case 8:
       break;
     case 9:
-      if (steamState() == 1) justDoCoffee();
-      else steamCtrl();
+      steamCtrl();
       break;
     default:
-      if (steamState() == 1) justDoCoffee();
-      else steamCtrl();
+      justDoCoffee();
       break;
   }
 }
@@ -548,13 +538,14 @@ void justDoCoffee() {
     }
     myNex.writeNum("warmupState", 0);
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (kProbeReadValue < setPoint+0.5) {
+    if (kProbeReadValue > setPoint-3.0 && kProbeReadValue < setPoint+0.5) {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
       delay(HPWR_OUT); 
-    }
-  } else if (brewState() == 0) {
+    }else if(kProbeReadValue <= setPoint-3.0) PORTB |= _BV(PB0);   // relayPin -> HIGH
+    else PORTB &= ~_BV(PB0);  // relayPin -> LOW
+  } else {
     brewTimer(0);
     if (kProbeReadValue < ((float)setPoint - 10.00)) {
       PORTB |= _BV(PB0);  // relayPin -> HIGH
@@ -585,12 +576,12 @@ void justDoCoffee() {
 void steamCtrl() {
   float boilerPressure = getPressure();
 
-  if (brewState() == 0 && analogRead(steamPin) < 50 ) {
+  if (brewState() == 0) {
     if (boilerPressure >=0.1 && boilerPressure <= 9.0) {
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
       else PORTB &= ~_BV(PB0);  // relayPin -> LOW
     }else if(boilerPressure >=8.6) PORTB &= ~_BV(PB0);  // relayPin -> LOW
-  }
+  }else PORTB &= ~_BV(PB0);  // relayPin -> LOW
 }
 
 //#############################################################################################
@@ -606,7 +597,6 @@ void lcdRefresh() {
   float fWgt;
   
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
-    // myNex.writeNum("currentHPWR", HPWR_OUT);
     myNex.writeNum("pressure.val", int(getPressure()*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     pageRefreshTimer = millis();
@@ -649,7 +639,7 @@ void lcdRefresh() {
       }
     }
   }else if (brewState() == 0 && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) myNex.writeStr("weight.txt",String(currentWeight+fWgt,1));
-  else if (brewState() == 0 && myNex.currentPageId == 11) {
+  else if (brewState() == 0 && myNex.currentPageId == 11) {//scales screen updating
     if (millis() - scalesRefreshTimer > 200) {
       if(tareDone != 1) {
         if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
@@ -660,14 +650,14 @@ void lcdRefresh() {
       }
       currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
       myNex.writeStr("weight.txt",String(currentWeight,1));
-      // // soft smooth quite dumb atm just wanted ot have a more stable output value
-      // if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 4) {
-      //   currentWeight = previousWeight; 
-      //   wErr++;
-      // }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 4) {
-      //   previousWeight = currentWeight;
-      //   wErr = 0;
-      // }// smoothing end
+      // soft smooth quite dumb atm just wanted ot have a more stable output value
+      if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 4) {
+        currentWeight = previousWeight; 
+        wErr++;
+      }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 4) {
+        previousWeight = currentWeight;
+        wErr = 0;
+      }// smoothing end
       scalesRefreshTimer = millis();
     }
   }else {
@@ -846,19 +836,14 @@ void trigger2() {
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
-  uint16_t P;
-  // Checking which region we're running in so the right formula can be applied
-  if (regionHz < 55 ) P = 240 * sensor.getCurrentAC();
-  else if (regionHz > 55 ) P = 120 * sensor.getCurrentAC(regionHz);
-  // Returnig "true" or "false" as the function response
-  return ( P >= POWER_DRAW_ZERO ) ? 1 : 0;
+ return (digitalRead(brewPin) != HIGH ) ? 0 : 1; // pin will be high when switch is off.
 }
 
 // Returns HIGH when switch is OFF and LOW when ON
+// pin will be high when switch is off.
 bool steamState() {
-  return (analogRead(steamPin) > 50) ? true : false; // pin will be high when switch is off.
+  return (digitalRead(steamPin) != LOW) ? 0 : 1;
 }
-
 
 bool brewTimer(bool c) { // small function for easier timer start/stop
   if ( c == 1) myNex.writeNum("timerState", 1);
