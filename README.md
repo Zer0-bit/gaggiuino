@@ -14,4 +14,4 @@
 ***
 *For project related help or learning more on future plans make sure to join the [discord server](https://discord.gg/eJTDJA3xfh) here or clicking the **"chat"** badge under the logo.*
 
-#### Please refer to the wiki for the guide 
+#### Please refer to the wiki for the guide (https://github.com/samirkouider/gaggiuino/wiki)
