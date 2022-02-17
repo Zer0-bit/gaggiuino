@@ -12,7 +12,7 @@
 #define relayPin 8  // PB0
 #define dimmerPin 9
 #define pressurePin A1 
-#define steamPin A7
+#define steamPin D7
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
@@ -399,29 +399,28 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
 void modeSelect() {
   switch (selectedOperationalMode) {
     case 0:
-      if (steamState() == 1) justDoCoffee();
+      if (steamState() == 0) justDoCoffee();
       else steamCtrl();
       break;
     case 1:
-      if (steamState() == 1) preInfusion();
+      if (steamState() == 0) preInfusion();
       else steamCtrl();
       break;
     case 2:
-      if (steamState() == 1) autoPressureProfile();
+      if (steamState() == 0) autoPressureProfile();
       else steamCtrl();
       break;
     case 3:
       manualPressureProfile();
       break;
     case 4:
-      if (steamState() == 1) {
+      if (steamState() == 0) {
         if(preinfusionFinished == false) preInfusion();
         else if(preinfusionFinished == true) autoPressureProfile();
-      } else steamCtrl();
+      } else if (steamState() == 1) steamCtrl();
       break;
     case 5:
-      if (steamState() == 1) justDoCoffee();
-      else steamCtrl();
+      justDoCoffee();
       break;
     case 6:
       deScale(descaleCheckBox);
@@ -431,12 +430,10 @@ void modeSelect() {
     case 8:
       break;
     case 9:
-      if (steamState() == 1) justDoCoffee();
-      else steamCtrl();
+      steamCtrl();
       break;
     default:
-      if (steamState() == 1) justDoCoffee();
-      else steamCtrl();
+      justDoCoffee();
       break;
   }
 }
@@ -494,12 +491,12 @@ void justDoCoffee() {
 void steamCtrl() {
   float boilerPressure = getPressure();
 
-  if (brewState() == 0 && analogRead(steamPin) < 50 ) {
+  if (brewState() == 0) {
     if (boilerPressure >=0.1 && boilerPressure <= 9.0) {
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
       else PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    }else if(boilerPressure < 0 || boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
-  }
+    }else if(boilerPressure >=8.6) PORTB &= ~_BV(PB0);  // relayPin -> LOW
+  }else PORTB &= ~_BV(PB0);  // relayPin -> LOW
 }
 
 //#############################################################################################
@@ -684,8 +681,9 @@ bool brewState() {  //Monitors the current flowing through the ACS712 circuit an
 }
 
 // Returns HIGH when switch is OFF and LOW when ON
+// pin will be high when switch is off.
 bool steamState() {
-  return (analogRead(steamPin) > 50) ? true : false; // pin will be high when switch is off.
+  return (digitalRead(steamPin) != LOW) ? 0 : 1;
 }
 
 
