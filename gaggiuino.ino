@@ -7,11 +7,11 @@
 #define thermoDO 4
 #define thermoCS 5
 #define thermoCLK 6
-#define brewSwitchPin A0 // PD7
+#define steamPin 7
 #define relayPin 8  // PB0
 #define dimmerPin 9
+#define brewSwitchPin A0 // PD7
 #define pressurePin A1 
-#define steamPin D7
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
