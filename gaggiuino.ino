@@ -2,7 +2,6 @@
 #include <EEPROM.h>
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
-#include <ACS712.h>
 
 // Define our pins
 #define thermoDO 4
@@ -27,11 +26,8 @@
 
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
-
 // EasyNextion object init
 EasyNex myNex(Serial);
-//Init the ACS712 hall sensor
-ACS712 sensor(ACS712_20A, brewSwitchPin);
 // RobotDYN Dimmer object init
 dimmerLamp dimmer(dimmerPin); //initialise the dimmer on the chosen port
 
@@ -98,7 +94,7 @@ void setup() {
   
   // relay port init and set initial operating mode
   pinMode(relayPin, OUTPUT);
-  pinMode(brewSwitchPin, INPUT);
+  pinMode(brewSwitchPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
   // Chip side  HIGH/LOW  specification
   PORTB &= ~_BV(PB0);  // relayPin LOW
@@ -273,9 +269,6 @@ void setup() {
   // Dimmer initialisation
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
   dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
-  
-  // Calibrating the hall current sensor
-  sensor.calibrate();
   
   myNex.lastCurrentPageId = myNex.currentPageId;
   POWER_ON = true;
@@ -672,13 +665,9 @@ void trigger1() {
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
-  uint16_t P;
-  // Checking which region we're running in so the right formula can be applied
-  if (regionHz < 55 ) P = 240 * sensor.getCurrentAC();
-  else if (regionHz > 55 ) P = 120 * sensor.getCurrentAC(regionHz);
-  // Returnig "true" or "false" as the function response
-  return ( P >= POWER_DRAW_ZERO ) ? 1 : 0;
+ return (digitalRead(brewPin) != HIGH ) ? 0 : 1; // pin will be high when switch is off.
 }
+
 
 // Returns HIGH when switch is OFF and LOW when ON
 // pin will be high when switch is off.
