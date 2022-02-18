@@ -10,7 +10,7 @@
 #define steamPin 7
 #define relayPin 8  // PB0
 #define dimmerPin 9
-#define brewSwitchPin A0 // PD7
+#define brewPin A0 // PD7
 #define pressurePin A1 
 
 // Define some const values
@@ -94,7 +94,7 @@ void setup() {
   
   // relay port init and set initial operating mode
   pinMode(relayPin, OUTPUT);
-  pinMode(brewSwitchPin, INPUT_PULLUP);
+  pinMode(brewPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
   // Chip side  HIGH/LOW  specification
   PORTB &= ~_BV(PB0);  // relayPin LOW
