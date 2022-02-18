@@ -413,7 +413,8 @@ void modeSelect() {
       } else if (steamState() == 1) steamCtrl();
       break;
     case 5:
-      justDoCoffee();
+      if (steamState() == 0) justDoCoffee();
+      else steamCtrl();
       break;
     case 6:
       deScale(descaleCheckBox);
@@ -423,10 +424,12 @@ void modeSelect() {
     case 8:
       break;
     case 9:
-      steamCtrl();
+      if (steamState() == 0) justDoCoffee();
+      else steamCtrl();
       break;
     default:
-      justDoCoffee();
+      if (steamState() == 0) justDoCoffee();
+      else steamCtrl();
       break;
   }
 }
