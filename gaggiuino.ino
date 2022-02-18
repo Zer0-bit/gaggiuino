@@ -382,60 +382,6 @@ uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) {
   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
 }
 
-//   if (brewState() == 1 ) {
-//     // if (millis() - refreshTimer > 50) {
-//       if (livePressure > wantedValue) {
-//         if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[1]) {
-//           outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]--;
-//           if (outputValue > BAR_TO_DIMMER_OUTPUT[1]) {
-//             prevOutputValue = outputValue;
-//             return uint8_t(outputValue);
-//           }else return uint8_t(prevOutputValue);
-//         }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-//       }else if (livePressure < wantedValue) {
-//         outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]++;
-//         return uint8_t(outputValue);
-//       }else if ((uint8_t)livePressure == (uint8_t)wantedValue) {
-//         if ((uint8_t(wantedValue) - maxVal) < 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return uint8_t(outputValue);
-//         else if ((uint8_t(wantedValue) - maxVal) > 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return BAR_TO_DIMMER_OUTPUT[0];
-//         else return uint8_t(prevOutputValue);
-//       }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-//       refreshTimer = millis();
-//     // }else return (outputValue >= BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(outputValue) : uint8_t(prevOutputValue); 
-//   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-// }
-
-//   if (brewState() == 1 ) {
-//     if (millis() - refreshTimer > 50) {
-//       if (livePressure > wantedValue) {
-//         if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[1]) {
-//           outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]--;
-//           if (outputValue > BAR_TO_DIMMER_OUTPUT[1]) {
-//             prevOutputValue = outputValue;
-//             return uint8_t(outputValue);
-//           }else return uint8_t(prevOutputValue);
-//         }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-//       }else if (livePressure < wantedValue && (wantedValue-livePressure) < 2.0) {
-//         if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
-//           outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]++;
-//           if (outputValue < BAR_TO_DIMMER_OUTPUT[9]) {
-//             prevOutputValue = outputValue;
-//             return uint8_t(outputValue);
-//           }else return uint8_t(prevOutputValue);
-//         }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-//       }else if (livePressure < wantedValue && (wantedValue-livePressure) > 2.0) {
-//         outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-//         return uint8_t(outputValue);
-//       }else if ((uint8_t)livePressure == (uint8_t)wantedValue) {
-//         if ((uint8_t(wantedValue) - maxVal) < 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return uint8_t(outputValue);
-//         else if ((uint8_t(wantedValue) - maxVal) > 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return BAR_TO_DIMMER_OUTPUT[0];
-//         else return uint8_t(prevOutputValue);
-//       }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-//       refreshTimer = millis();
-//     }else return (outputValue >= BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(outputValue) : uint8_t(prevOutputValue); 
-//   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-// }
-
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
@@ -475,20 +421,16 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
 void modeSelect() {
-  //steamState();
   switch (selectedOperationalMode) {
     case 0:
-      //justDoCoffee();
       if (steamState() == 0) justDoCoffee();
       else steamCtrl();
       break;
     case 1:
-      //preInfusion();
       if (steamState() == 0) preInfusion();
       else steamCtrl();
       break;
     case 2:
-      // autoPressureProfile();
       if (steamState() == 0) autoPressureProfile();
       else steamCtrl();
       break;
@@ -496,15 +438,14 @@ void modeSelect() {
       manualPressureProfile();
       break;
     case 4:
-      // if(preinfusionFinished == false) preInfusion();
-      // else if(preinfusionFinished == true) autoPressureProfile();
       if (steamState() == 0) {
         if(preinfusionFinished == false) preInfusion();
         else if(preinfusionFinished == true) autoPressureProfile();
       } else if (steamState() == 1) steamCtrl();
       break;
     case 5:
-      justDoCoffee();
+      if (steamState() == 0) justDoCoffee();
+      else steamCtrl();
       break;
     case 6:
       deScale(descaleCheckBox);
@@ -514,10 +455,12 @@ void modeSelect() {
     case 8:
       break;
     case 9:
-      steamCtrl();
+      if (steamState() == 0) justDoCoffee();
+      else steamCtrl();
       break;
     default:
-      justDoCoffee();
+      if (steamState() == 0) justDoCoffee();
+      else steamCtrl();
       break;
   }
 }
