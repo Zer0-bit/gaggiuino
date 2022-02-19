@@ -83,7 +83,6 @@
           - MAX6675 by Adafruit
 
          External libraries:
-          - ACS712 > https://github.com/rkoptev/ACS712-arduino
           - RBDDimmer > https://github.com/RobotDynOfficial/RBDDimmer
 
 
