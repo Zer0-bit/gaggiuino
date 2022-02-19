@@ -223,7 +223,7 @@ First let's check that the setup works as expected while outside the machine so 
   GND  |   GND
 
 *** 
-**STEAM HANDLING**
+**STEAM DETECTION**
 
   ***Gaggia Classic:***
   
@@ -363,10 +363,19 @@ So you end up having them connected like this:
 
 #### EXTENDED FUNCTIONALITY
 ***
-1. BREW DETECTION
-Will be handled differently on GC vs GCP due to the use of a different front switches panel, hence **if you own a GCP you're good to skip this section altogether.**
+1. **BREW DETECTION** 
 
-TBD
+**Gaggia Classic(pre 2018) ONLY**
+
+![GC - brew handling](https://user-images.githubusercontent.com/42692077/154794574-9dd2a628-889c-4dcd-bbf4-48e62a57dea2.png)
+
+  * Prepare two **"Y"** splitters **BLACK** and **RED** with the ends crimped as follows: 
+     * **RED SPLITTER:** 1 x **MALE**, 1 x **FEMALE**, 1 x **BARE**.
+     * **BLACK SPLITTER:** 2 x **MALE**, 1 x **BARE**.
+  * Wire connected to **STEAM** button pole **4** connects to BREW button pole **5**, original disconnected **BREW** pole **5** wire should be left disconnected but properly secured.
+  * Connect the RED **"Y"** splitter to **BREW** switch pole **6** and plug the original connected wire to the **MALE** spade end, the **BARE** splitter end going to the optocoupler **L** terminal. 
+  * Disconnect the wires from **STEAM** button poles **1** and **2** and connec them to the **2 MALE** spade ends of the **BLACK "Y"** splitter, the **BARE** splitter end going to the optocoupler **N** terminal.
+  >NOTE: _If you already have done the **STEAM DETECTION** changes previously then you already have the 2 steam wires bridged, in that case you just need to replace the bridge with the "Y" type bridge and have the BARE end connecting to the optocoupler N terminal. _
 
 2. Installing the RobotDYN dimmer module.
 
