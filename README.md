@@ -370,11 +370,10 @@ So you end up having them connected like this:
 
   * Prepare two **"Y"** splitters **BLACK** and **RED** with the ends crimped as follows: 
      * **RED SPLITTER:** 1 x **MALE**, 1 x **FEMALE**, 1 x **BARE**.
-     * **BLACK SPLITTER:** 2 x **MALE**, 1 x **BARE**.
+     * **BLACK SPLITTER:** 2 x **FEMALE**, 1 x **BARE**.
   * Wire connected to **STEAM** button pole **4** connects to BREW button pole **5**, original disconnected **BREW** pole **5** wire should be left disconnected but properly secured.
   * Connect the RED **"Y"** splitter to **BREW** switch pole **6** and plug the original connected wire to the **MALE** spade end, the **BARE** splitter end going to the optocoupler **L** terminal. 
-  * Disconnect the wires from **STEAM** button poles **1** and **2** and connec them to the **2 MALE** spade ends of the **BLACK "Y"** splitter, the **BARE** splitter end going to the optocoupler **N** terminal.
-  >NOTE: _If you already have done the **STEAM DETECTION** changes previously then you already have the 2 steam wires bridged, in that case you just need to replace the bridge with the "Y" type bridge and have the BARE end connecting to the optocoupler N terminal. _
+  * Tap into the **PSU** splitter used for the **N** connection using the **BLACK** splitter and connect the bare end to the optocoupler **N**
 
 2. Installing the RobotDYN dimmer module.
 
