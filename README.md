@@ -113,7 +113,9 @@
 #### **EXTENDED FUNCTIONALITY**
 ***
 * [RobotDYN dimmer module - Dimmer 4A-400V ](https://bit.ly/3xhTwQy)
-* [Hall Current Sensor Module ACS712 - 20A](https://bit.ly/38MCiRv)
+* Brew detection
+  * **Gaggia Classic -** [1-Bit AC 220V Optocoupler](https://www.aliexpress.com/item/1005003228104606.html)
+  * **Gaggia Classic Pro (2018+ versions) doesn't need additional hardware**
 * [Pressure sensor - 0-1.2Mpa](https://www.aliexpress.com/item/4000756631924.html)
   * **Gaggia Classic (pre 2015 versions):**
     * [Fitting - 6-02/PCF ](https://www.aliexpress.com/item/4001338642124.html)
@@ -157,7 +159,7 @@ First let's check that the setup works as expected while outside the machine so 
 >
 >**Note 2 - the 5v/GND Arduino board pins will be shared between all the connected devices.**
 
-**BASE FUNCTIONALITY**
+#### **ARDUINO CONNECTIONS**
 1. The first step will be connecting the MAX6675 module to the arduino board using the pins defined in the code. You can find them defined at the top of the .ino file.
 
     MAX6675  |  Arduino
@@ -213,15 +215,14 @@ First let's check that the setup works as expected while outside the machine so 
 >*If choosing to power the system using the AC adapter then the arduino board and all the connected componnents will receive power by the means of the regulated 5v the AC adapter delivers through the USB port.*
 
 *Method 2:*
->*If powering using the [ 12v ] power supply module + [ 9v ] stepdown convertor follow the bellow scheme:*
+>*If powering using the [ 12v ] power supply module + [ 5v ] stepdown convertor follow the bellow scheme:*
 
    PS  |  Arduino
   -----|-----------
-   9v  |   VIN
+   5v  |   5v
   GND  |   GND
- 
- All the other boards will get their power from the arduino 5v / GND pins and it's extrmely important they are powered using those outputs.
 
+*** 
 **STEAM HANDLING**
 
   ***Gaggia Classic:***
@@ -238,7 +239,7 @@ GC SWITCH| Arduino
 ---------|-----------
    3     |   D7
    4     |   GND
-***
+
 ***Gaggia Classic Pro:***
 
   1. Move steam switch wire 4 to steam switch pole 1.
@@ -254,45 +255,58 @@ GC SWITCH| Arduino
    4     |   D7
    5     |   GND
 
-**EXTENDED FUNCTIONALITY**
+***
+**BREW DETECTION** 
 
-1. Adding the ACS712 hall current sensor is quite straight forward
+  _Will look slightly different for people using a **GC** vs those with a **GCP**_
 
-    ACS712  |  Arduino
+  **GAGGIA CLASSIC:**
+
+   OPTOCOUPLER|  Arduino
    ---------|-----------
-      VCC   |   5v
-      GND   |   GND
-      OUT   |   A0
-
-   **The high voltage circuit control ports will act as a passthrough for the front panel brew button LIVE wire**
-      
-2. Adding the dimmer
-
-    Dimmer   |  Arduino
-    --------|-----------
-      VCC   |   5v
-      GND   |   GND
-      Z-C   |   D2
-      PSM   |   D9
-  
-   **Dimmer high voltage circuit control ports will act as a passthrough for the pump LIVE and NEUTRAL wires**
+   VCC   |   5v
+   GND   |   GND
+   OUT   |   A0
    
-3. Adding the pressure transducer
+  _The high voltage circuit control ports will splice into existing brew switch wires._
 
-    Transducer|  Arduino
-    ----------|-----------
-     RED      |   5v
-     BLACK    |   GND
-     YELLOW   |   A1
-      
+  **GAGGIA CLASSIC PRO (2018+ versions):**
+
+  ![Screenshot 2022-02-19 065826](https://user-images.githubusercontent.com/42692077/154790476-20827e83-551b-4ae7-8123-0b2886e37ea3.png)
+  
+   GCP SWITCH|Arduino
+   -------|--------
+   2   |   GND
+   1   |   A0
+  
+***
+**DIMMER**
+
+  Dimmer  |  Arduino
+  --------|-----------
+  VCC   |   5v
+  GND   |   GND
+  Z-C   |   D2
+  PSM   |   D9
+  
+_Dimmer high voltage circuit control ports will act as a passthrough for the pump LIVE and NEUTRAL wires_
+   
+***
+**PRESSURE HANDLING**
+
+  Transducer|  Arduino
+  ----------|-----------
+   RED      |   5v
+   BLACK    |   GND
+   YELLOW   |   A1
+
 
 ***
 **ATTENTION !!!**
 
 **As always with such projects common sense should be applied at all times, it's expected people doing such sort of modifications will have some basic understanding.**
-***
 
->*AGAIN!!! Triple check your machine is disconnected from any power sources, even better just pull the power cable out of it!*
+>_AGAIN!!! Triple check your machine is disconnected from any power sources, even better just pull the power cable out of it if you haven't done so yet!_
 
 #### BASE FUNCTIONALITY
 ***
@@ -349,15 +363,10 @@ So you end up having them connected like this:
 
 #### EXTENDED FUNCTIONALITY
 ***
-1. While installing the ACS712 Hall current sensor please note in the photo below the way the sensor faces the camera and how the cable passthrough is done with the cable originally connected to the middle slot front panel brew button (1). It's a short cable connecting the brew button with the steam button, we leave it connected to the steam button but the end which was connected to the middle slot of the brew button connects now to the top port of the ACS712 board (1) and then the exit (2) port of the ACS712 board  feeds a cable to the original front panel brew button position.
+1. BREW DETECTION
+Will be handled differently on GC vs GCP due to the use of a different front switches panel, hence **if you own a GCP you're good to skip this section altogether.**
 
->**It is important to connect the cables properly as the sensor has a polarity and when incorrectly connected outputs a negative value!
->Another VERY important aspect is to have the board connected just as shown in the picture (location and position) as well as only the necessary cables connected to the sensor board itself, no additional wires(high or low voltage) should be positioned anywhere around the hall effect sensor as this will most likely create unexpected reads that will confuse the program. A easy way to understand whether your program has false readings is if the shot timer keeps starting randomly when the machine is in idle state.**
-<div align="center">
-<img src="https://db3pap006files.storage.live.com/y4mDAGJwdsJP2Vv-Z4FCeTheZSWYlCj09fbWdURcj2t_qeDla_UaWY3qT23MZKsIiQtbH-d7TOS4nRDypYBrDUeFm7eEsL2LidREYBNIylJlCSIntsNItisdsSFSfqbPvGYsZDJ-dJ7_uKYD1gjYabCTC99pB-EVuW7BvWW2v7ut7aK4NLarH9iTjjNRDBpAc88?width=768&height=1024&cropmode=none" width="768" height="1024" />
-</div>
-
-**PLEASE DON'T FORGET TO INSULATE THE ACS SENSOR WHEN STICKING IT TO THE GAGGIA BODY, STAINLESS STEEL IS A GREAT ELECTRICAL CONDUCTOR!**
+TBD
 
 2. Installing the RobotDYN dimmer module.
 
