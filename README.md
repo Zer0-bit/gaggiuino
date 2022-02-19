@@ -366,7 +366,7 @@ So you end up having them connected like this:
 
 **Gaggia Classic(pre 2018) ONLY**
 
-![GC - brew handling](https://user-images.githubusercontent.com/42692077/154794574-9dd2a628-889c-4dcd-bbf4-48e62a57dea2.png)
+![GC - brew handling](https://user-images.githubusercontent.com/42692077/154805193-76068521-3ad4-4020-b2ee-8dab9394d4fe.png)
 
   * Prepare two **"Y"** splitters **BLACK** and **RED** with the ends crimped as follows: 
      * **RED SPLITTER:** 1 x **MALE**, 1 x **FEMALE**, 1 x **BARE**.
