@@ -488,10 +488,10 @@ void steamCtrl() {
   float boilerPressure = getPressure();
 
   if (brewState() == 0) {
-    if (boilerPressure >=0.1 && boilerPressure <= 9.0) {
+    if (boilerPressure <= 9.0) {
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
       else PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    }else if(boilerPressure >=8.6) PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }else if(boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
   }else PORTB &= ~_BV(PB0);  // relayPin -> LOW
 }
 
