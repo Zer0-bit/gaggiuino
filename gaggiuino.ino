@@ -779,7 +779,7 @@ void trigger2() {
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
- return (digitalRead(brewPin) != HIGH ) ? 0 : 1; // pin will be high when switch is off.
+ return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is off.
 }
 
 // Returns HIGH when switch is OFF and LOW when ON
