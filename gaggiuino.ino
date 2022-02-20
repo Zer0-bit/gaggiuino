@@ -9,11 +9,12 @@
 #define thermoDO 4
 #define thermoCS 5
 #define thermoCLK 6
-#define brewPin A0 // PD7
+#define steamPin 7
 #define relayPin 8  // PB0
 #define dimmerPin 9
+#define brewPin A0 // PD7
 #define pressurePin A1 
-#define steamPin 7
+
 
 #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
 #define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
@@ -355,30 +356,25 @@ uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) {
   float livePressure = getPressure();
 
   if (brewState() == 1 ) {
-    if (millis() - refreshTimer > 600) {
-      if (livePressure > wantedValue) {
-        if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[minVal]) {
-          outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]--;
-          if (outputValue > BAR_TO_DIMMER_OUTPUT[1]) {
-            prevOutputValue = outputValue;
-            return uint8_t(outputValue);
-          }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-        }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-      }else if (livePressure < wantedValue) {
-        if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
-          outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]++;
-          if (outputValue > BAR_TO_DIMMER_OUTPUT[0]) {
-            prevOutputValue = outputValue;
-            return uint8_t(outputValue);
-          }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-        }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-      }else if ((uint8_t)livePressure == (uint8_t)wantedValue) {
-        if ((uint8_t(wantedValue) - maxVal) < 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return uint8_t(outputValue);
-        else if ((uint8_t(wantedValue) - maxVal) > 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return BAR_TO_DIMMER_OUTPUT[0];
-        else return uint8_t(prevOutputValue);
-      }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+    if (livePressure < wantedValue) {
+      if ((livePressure/wantedValue)>=1.0 ) outputValue--;
+	  else if ((livePressure/wantedValue) > 0.5 && (livePressure/wantedValue) < 0.8 ) outputValue++;
+	  else outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+	  constrain(outputValue,BAR_TO_DIMMER_OUTPUT[0],BAR_TO_DIMMER_OUTPUT[9]);
+      prevOutputValue=outputValue;
+      return outputValue;
+    }
+    else if (livePressure > wantedValue) {
+	  if ((wantedValue/livePressure) > 0.5 && (wantedValue/livePressure) < 0.8 ) outputValue--;
+	  else if ((wantedValue/livePressure) > 0.9 )outputValue++;
+	  else outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+      constrain(outputValue,BAR_TO_DIMMER_OUTPUT[0],BAR_TO_DIMMER_OUTPUT[9]);
+      prevOutputValue=outputValue;
       refreshTimer = millis();
-    }else return (outputValue >= BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(outputValue) : uint8_t(prevOutputValue); 
+      return outputValue;
+    }
+    else if (livePressure == wantedValue) return prevOutputValue;
+    else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];;
   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
 }
 
@@ -520,10 +516,10 @@ void steamCtrl() {
   float boilerPressure = getPressure();
 
   if (brewState() == 0) {
-    if (boilerPressure >=0.1 && boilerPressure <= 9.0) {
+    if (boilerPressure <= 9.0) {
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
       else PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    }else if(boilerPressure >=8.6) PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }else if(boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
   }else PORTB &= ~_BV(PB0);  // relayPin -> LOW
 }
 
@@ -779,11 +775,11 @@ void trigger2() {
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
- return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is off.
+ return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is ON.
 }
 
 // Returns HIGH when switch is OFF and LOW when ON
-// pin will be high when switch is off.
+// pin will be high when switch is ON.
 bool steamState() {
   return (digitalRead(steamPin) != LOW) ? 0 : 1;
 }
