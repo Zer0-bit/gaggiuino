@@ -312,6 +312,13 @@ void kThermoRead() { // Reading the thermocouple temperature
 //##############################################################################################################################
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
+float getPressure() {  //returns sensor pressure data
+    float voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
+    float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
+    return pressure_bar;
+}
+
+
 uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) {
   static double refreshTimer;
   static float outputValue, prevOutputValue;
