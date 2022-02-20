@@ -180,6 +180,15 @@ First let's check that the setup works as expected while outside the machine so 
 
 4. Plug the arduino board in using the mini USB cable that came with it and upload the code to the arduino board. 
     >*Note: uploading won't work with the LCD connected*
+
+```
+For Mac:
+1 Connect adruino with a usb cable
+2 Open Adruino app
+3 Choose port in Tools -> Ports
+4 Copy the content of gagguino.ino file into the editor
+5 Press upload button on top
+```
 5. Nextion LCD wiring
 
     Nextion  |  Arduino
