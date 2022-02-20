@@ -312,42 +312,31 @@ void kThermoRead() { // Reading the thermocouple temperature
 //##############################################################################################################################
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
-float getPressure() {  //returns sensor pressure data
-    float voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
-    float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
-    return pressure_bar;
-}
-
 uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) {
   static double refreshTimer;
   static float outputValue, prevOutputValue;
   float livePressure = getPressure();
 
   if (brewState() == 1 ) {
-    if (millis() - refreshTimer > 600) {
-      if (livePressure > wantedValue) {
-        if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] > BAR_TO_DIMMER_OUTPUT[minVal]) {
-          outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]--;
-          if (outputValue > BAR_TO_DIMMER_OUTPUT[1]) {
-            prevOutputValue = outputValue;
-            return uint8_t(outputValue);
-          }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-        }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-      }else if (livePressure < wantedValue) {
-        if (BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)] < BAR_TO_DIMMER_OUTPUT[maxVal]) {
-          outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)]++;
-          if (outputValue > BAR_TO_DIMMER_OUTPUT[0]) {
-            prevOutputValue = outputValue;
-            return uint8_t(outputValue);
-          }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-        }else return (prevOutputValue > BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(prevOutputValue) : BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
-      }else if ((uint8_t)livePressure == (uint8_t)wantedValue) {
-        if ((uint8_t(wantedValue) - maxVal) < 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return uint8_t(outputValue);
-        else if ((uint8_t(wantedValue) - maxVal) > 1 && (outputValue >= BAR_TO_DIMMER_OUTPUT[0]) && (prevOutputValue > BAR_TO_DIMMER_OUTPUT[0])) return BAR_TO_DIMMER_OUTPUT[0];
-        else return uint8_t(prevOutputValue);
-      }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+    if (livePressure < wantedValue) {
+      if ((livePressure/wantedValue)>=1.0 ) outputValue--;
+	  else if ((livePressure/wantedValue) > 0.5 && (livePressure/wantedValue) < 0.8 ) outputValue++;
+	  else outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+	  constrain(outputValue,BAR_TO_DIMMER_OUTPUT[0],BAR_TO_DIMMER_OUTPUT[9]);
+      prevOutputValue=outputValue;
+      return outputValue;
+    }
+    else if (livePressure > wantedValue) {
+	  if ((wantedValue/livePressure) > 0.5 && (wantedValue/livePressure) < 0.8 ) outputValue--;
+	  else if ((wantedValue/livePressure) > 0.9 )outputValue++;
+	  else outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+      constrain(outputValue,BAR_TO_DIMMER_OUTPUT[0],BAR_TO_DIMMER_OUTPUT[9]);
+      prevOutputValue=outputValue;
       refreshTimer = millis();
-    }else return (outputValue >= BAR_TO_DIMMER_OUTPUT[1]) ? uint8_t(outputValue) : uint8_t(prevOutputValue); 
+      return outputValue;
+    }
+    else if (livePressure == wantedValue) return prevOutputValue;
+    else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];;
   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
 }
 
