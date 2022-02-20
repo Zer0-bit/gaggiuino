@@ -183,11 +183,15 @@ First let's check that the setup works as expected while outside the machine so 
 
 ```
 For Mac:
-1 Connect adruino with a usb cable
-2 Open Adruino app
-3 Choose port in Tools -> Ports
-4 Copy the content of gagguino.ino file into the editor
-5 Press upload button on top
+1 Download .zip file of https://github.com/Seithan/EasyNextionLibrary
+2 Download .zip file of https://github.com/RobotDynOfficial/RBDDimmer
+3 Download max6675 library https://www.arduino.cc/reference/en/libraries/max6675-library/
+4 Open Adruino app
+5 Add each .zip through Adruino -> Scetch -> Add Library -> upload .zip
+6 Connect adruino with a usb cable
+7 Choose port in Tools -> Ports
+8 Copy the content of gagguino.ino file into the editor
+9 Press upload button on top
 ```
 5. Nextion LCD wiring
 
