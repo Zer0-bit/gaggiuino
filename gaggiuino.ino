@@ -342,8 +342,7 @@ uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) {
       refreshTimer = millis();
       return outputValue;
     }
-    else if (livePressure == wantedValue) return prevOutputValue;
-    else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];;
+    else return prevOutputValue;
   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
 }
 
