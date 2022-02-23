@@ -439,7 +439,7 @@ void justDoCoffee() {
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
 
   if (brewState() == 1) {
-    if (selectedOperationalMode == 0 || selectedOperationalMode == 9) {
+    if (selectedOperationalMode == 0 || selectedOperationalMode == 5 || selectedOperationalMode == 9) {
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[9]);
       brewTimer(1);
     }
