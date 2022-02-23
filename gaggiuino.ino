@@ -264,16 +264,16 @@ void setup() {
         BAR_TO_DIMMER_OUTPUT[9]=70;
         break;
       case 60: // 120v / 60 Hz
-        BAR_TO_DIMMER_OUTPUT[0]=45;
-        BAR_TO_DIMMER_OUTPUT[1]=51;
-        BAR_TO_DIMMER_OUTPUT[2]=53;
-        BAR_TO_DIMMER_OUTPUT[3]=56;
-        BAR_TO_DIMMER_OUTPUT[4]=58;
-        BAR_TO_DIMMER_OUTPUT[5]=60;
-        BAR_TO_DIMMER_OUTPUT[6]=63;
-        BAR_TO_DIMMER_OUTPUT[7]=65;
-        BAR_TO_DIMMER_OUTPUT[8]=70;
-        BAR_TO_DIMMER_OUTPUT[9]=73;
+	BAR_TO_DIMMER_OUTPUT[0]=45;
+        BAR_TO_DIMMER_OUTPUT[1]=52;
+        BAR_TO_DIMMER_OUTPUT[2]=58;
+        BAR_TO_DIMMER_OUTPUT[3]=59;
+        BAR_TO_DIMMER_OUTPUT[4]=60;
+        BAR_TO_DIMMER_OUTPUT[5]=62;
+        BAR_TO_DIMMER_OUTPUT[6]=67;
+        BAR_TO_DIMMER_OUTPUT[7]=72;
+        BAR_TO_DIMMER_OUTPUT[8]=75;
+        BAR_TO_DIMMER_OUTPUT[9]=85;
         break;
       default: // smth went wrong the pump is set to 0 bar in all modes.
         break;
