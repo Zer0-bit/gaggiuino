@@ -29,7 +29,6 @@
 #define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
-#define POWER_DRAW_ZERO 42 // sets the zero bar acs power value
 #define EEPROM_RESET 251 //change this value if want to reset to defaults
 
 
@@ -51,16 +50,21 @@ HX711 LoadCell_2; //HX711 2
 const float voltageZero = 0.49; // the voltage output by the transducer at 0bar - aka our offset
 float pressureValue; //variable to store the value coming from the pressure transducer
 
-// setting the pump performance based on region
-// uint8_t BAR_TO_DIMMER_OUTPUT[10] = {42,45,50,53,56,60,64,68,70,75}; // the dimmer setpoints for the 220v pumps
-uint8_t BAR_TO_DIMMER_OUTPUT[10]; //={45,51,53,56,58,60,63,65,69,73}; // the dimmer setpoints for the 110v pumps
+// setting the pump precalibrated array of "rough" dimmer output values
+uint8_t BAR_TO_DIMMER_OUTPUT[10];
 
 
 // Some vars are better global
+
+//thermo vars
 volatile float kProbeReadValue;
+unsigned long thermoTimer;
+//scales vars
 float currentWeight;
 float previousWeight;
-unsigned long thermoTimer;
+uint8_t targetWeight;
+
+
 bool POWER_ON;
 bool  descaleCheckBox;
 bool  preinfusionState;
@@ -356,25 +360,23 @@ uint8_t setPressure(float wantedValue, uint8_t minVal, uint8_t maxVal) {
   float livePressure = getPressure();
 
   if (brewState() == 1 ) {
+	prevOutputValue=outputValue;
     if (livePressure < wantedValue) {
-      if ((livePressure/wantedValue)>=1.0 ) outputValue--;
-	  else if ((livePressure/wantedValue) > 0.5 && (livePressure/wantedValue) < 0.8 ) outputValue++;
-	  else outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+      if ((livePressure/wantedValue) < 0.5) outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+      else if ((livePressure/wantedValue)> 0.95 ) outputValue--;
+      else if ((livePressure/wantedValue) > 0.5 && (livePressure/wantedValue) < 0.8 ) outputValue++;
+      else return prevOutputValue;
 	  constrain(outputValue,BAR_TO_DIMMER_OUTPUT[0],BAR_TO_DIMMER_OUTPUT[9]);
-      prevOutputValue=outputValue;
       return outputValue;
     }
     else if (livePressure > wantedValue) {
-	  if ((wantedValue/livePressure) > 0.5 && (wantedValue/livePressure) < 0.8 ) outputValue--;
-	  else if ((wantedValue/livePressure) > 0.9 )outputValue++;
-	  else outputValue = BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
+      if ((wantedValue/livePressure) > 0.8 && (wantedValue/livePressure) < 0.95) return prevOutputValue;
+      else if ((wantedValue/livePressure) > 0.5 && (wantedValue/livePressure) < 0.8 ) outputValue--;
+      else if ((wantedValue/livePressure) > 0.95 )outputValue++;
       constrain(outputValue,BAR_TO_DIMMER_OUTPUT[0],BAR_TO_DIMMER_OUTPUT[9]);
-      prevOutputValue=outputValue;
-      refreshTimer = millis();
       return outputValue;
     }
-    else if (livePressure == wantedValue) return prevOutputValue;
-    else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];;
+    else return outputValue;
   }else return BAR_TO_DIMMER_OUTPUT[uint8_t(wantedValue)];
 }
 
@@ -516,8 +518,13 @@ void steamCtrl() {
   float boilerPressure = getPressure();
 
   if (brewState() == 0) {
-    if (boilerPressure <= 9.0) {
+    if (boilerPressure <= 9.0) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
+      else PORTB &= ~_BV(PB0);  // relayPin -> LOW
+    }else if(boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
+  }else if (brewState() == 1) { //added to cater for hot water from steam wand functionality
+	if (boilerPressure <= 9.0) {
+      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=115)) PORTB |= _BV(PB0);  // relayPin -> HIGH
       else PORTB &= ~_BV(PB0);  // relayPin -> LOW
     }else if(boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
   }else PORTB &= ~_BV(PB0);  // relayPin -> LOW
@@ -557,10 +564,10 @@ void lcdRefresh() {
           goto TARE_AGAIN;
         }
         // soft smooth quite dumb atm just wanted ot have a more stable output value
-        if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 4) {
+        if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 8) {
           currentWeight = previousWeight; 
           wErr++;
-        }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 4) {
+        }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 8) {
           previousWeight = currentWeight;
           wErr = 0;
         }// smoothing end
@@ -605,6 +612,7 @@ void lcdRefresh() {
     currentWeight=0;
     previousWeight=0;
     fWghtEntryVal=0;
+	wErr=0;
   }
 }
 //#############################################################################################
