@@ -90,6 +90,7 @@ bool  warmupEnabled;
 bool  flushEnabled;
 bool  descaleEnabled;
 bool preinfusionFinished;
+bool scalesPresent;
 volatile uint16_t  HPWR;
 volatile uint16_t  HPWR_OUT;
 uint16_t  setPoint;
@@ -144,20 +145,19 @@ void setup() {
 
   LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
   LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
-  
-  SCALE_CALIBRATION:
-  if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
-    //good values - 1: 1708 2: -2162 | 
-    LoadCell_1.set_scale(1955.571428f); // full calibrated val: 1,955.571428571429
-    LoadCell_2.set_scale(-2091.571428f); // full calibrated val: -2,091.571428571429
-  }else goto SCALE_CALIBRATION;
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
     delay(500);
   }
-
+  
+  if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
+    //good values - 1: 1708 2: -2162 | 
+    LoadCell_1.set_scale(1955.571428f); // full calibrated val: 1,955.571428571429
+    LoadCell_2.set_scale(-2091.571428f); // full calibrated val: -2,091.571428571429
+    scalesPresent = 1;
+  }
   //If it's the first boot we'll need to set some defaults
   if (EEPROM.read(0) != EEPROM_RESET || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535|| EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
     Serial.println("SECU_CHECK FAILED! Applying defaults!");
@@ -559,7 +559,7 @@ void lcdRefresh() {
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     pageRefreshTimer = millis();
   }
-  if (brewState() == 1) {
+  if (brewState() == 1 && scalesPresent == true ) {
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8) {
       TARE_AGAIN:
       if(tareDone != 1 || previousBrewState != 1) {
@@ -572,7 +572,7 @@ void lcdRefresh() {
       }
       if (millis() - scalesRefreshTimer > 200) {
         currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
-        if (currentWeight <= -0.5 || (currentWeight-previousWeight) >= 50.0) {
+        if (currentWeight <= -0.5 || (currentWeight-previousWeight) >= 20.0) {
           tareDone=0;
           previousBrewState=0;
           goto TARE_AGAIN;
@@ -598,12 +598,12 @@ void lcdRefresh() {
         }
       }
     }
-  }else if (brewState() == 0 && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) {
+  }else if (brewState() == 0 && scalesPresent == true  && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) {
     myNex.writeStr("weight.txt",String(currentWeight+flowVal,1));
     previousBrewState=0;
     tareDone=0;
   }
-  else if (brewState() == 0 && myNex.currentPageId == 11) {//scales screen updating
+  else if (brewState() == 0 && scalesPresent == true && myNex.currentPageId == 11) {//scales screen updating
     if (millis() - scalesRefreshTimer > 200) {
       if(tareDone != 1) {
         if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
