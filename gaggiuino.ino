@@ -572,7 +572,7 @@ void lcdRefresh() {
       }
       if (millis() - scalesRefreshTimer > 200) {
         currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
-        if (currentWeight <= -0.5 || (currentWeight-previousWeight) >= 20.0) {
+        if (currentWeight <= -0.5 || (currentWeight-previousWeight) >= 50.0) {
           tareDone=0;
           previousBrewState=0;
           goto TARE_AGAIN;
