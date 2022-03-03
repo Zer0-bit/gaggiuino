@@ -35,7 +35,7 @@ EasyNex myNex(Serial);
 
 //Banoz PSM for more cool shit visit https://github.com/banoz  and don't forget to star
 const unsigned int range = 127;
-PSM pump(zcPin, dimmerPin, range);
+PSM pump(zcPin, dimmerPin, range, FALLING);
 
 
 //##################__Transducer_stuff__##################################
