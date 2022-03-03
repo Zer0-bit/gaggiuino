@@ -1,6 +1,7 @@
 #include <EEPROM.h>
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
+#include <HX711.h>
 #include <PSM.h>
 
 
@@ -15,6 +16,12 @@
 #define dimmerPin 9
 #define brewPin A0 // PD7
 #define pressurePin A1 
+
+
+#define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
+#define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
+#define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
+#define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
 
 
 // Define some const values
@@ -33,10 +40,14 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // EasyNextion object init
 EasyNex myNex(Serial);
 
-//Banoz PSM for more cool shit visit https://github.com/banoz  and don't forget to star
+//Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
 const unsigned int range = 127;
 PSM pump(zcPin, dimmerPin, range, FALLING);
 
+
+//#######################__HX711_stuff__##################################
+HX711 LoadCell_1; //HX711 1
+HX711 LoadCell_2; //HX711 2
 
 //##################__Transducer_stuff__##################################
 const float voltageZero = 0.49; // the voltage output by the transducer at 0bar - aka our offset
@@ -47,7 +58,14 @@ float pressureValue; //variable to store the value coming from the pressure tran
 //thermo vars
 volatile float kProbeReadValue; //temp val
 volatile unsigned int value; //dimmer value
+float newBarValue;
 unsigned long thermoTimer; //temp timer
+//scales vars
+float currentWeight;
+float previousWeight;
+uint8_t targetWeight;
+
+
 bool POWER_ON;
 bool  descaleCheckBox;
 bool  preinfusionState;
@@ -105,6 +123,19 @@ void setup() {
   // Chip side  HIGH/LOW  specification
   PORTB &= ~_BV(PB0);  // relayPin LOW
 
+  //Pump 
+  pump.set(0);
+
+  LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
+  LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
+  
+  SCALE_CALIBRATION:
+  if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
+    //good values - 1: 1708 2: -2162 | 
+    LoadCell_1.set_scale(1955.571428f); // full calibrated val: 1,955.571428571429
+    LoadCell_2.set_scale(-2091.571428f); // full calibrated val: -2,091.571428571429
+  }else goto SCALE_CALIBRATION;
+
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
@@ -149,22 +180,22 @@ void setup() {
     myNex.writeNum("moreTemp.n1.val", init_val);
   }
   EEPROM.get(EEP_OFFSET, init_val); // reading offset value from eeprom
-  if ( init_val > 0 ) {
+  if ( init_val >= 0 ) {
     myNex.writeNum("offSet", init_val);
     myNex.writeNum("moreTemp.n2.val", init_val);
   }
   EEPROM.get(EEP_HPWR, init_val);//reading HPWR value from eeprom
-  if (  init_val > 0 ) {
+  if (  init_val >= 0 ) {
     myNex.writeNum("hpwr", init_val);
     myNex.writeNum("moreTemp.n3.val", init_val);
   }
   EEPROM.get(EEP_M_DIVIDER, init_val);//reading main cycle div from eeprom
-  if ( init_val > 1 ) {
+  if ( init_val >= 1 ) {
     myNex.writeNum("mDiv", init_val);
     myNex.writeNum("moreTemp.n4.val", init_val);
   }
   EEPROM.get(EEP_B_DIVIDER, init_val);//reading brew cycle div from eeprom
-  if (  init_val > 1 ) {
+  if (  init_val >= 1 ) {
     myNex.writeNum("bDiv", init_val);
     myNex.writeNum("moreTemp.n5.val", init_val);
   }
@@ -254,7 +285,7 @@ void setup() {
 //##############################################################################################################################
 
 
-//Main loop where all the below logic is continuously run
+//Main loop where all the logic is continuously run
 void loop() {
   pageValuesRefresh();
   myNex.NextionListen();
@@ -287,13 +318,13 @@ void kThermoRead() { // Reading the thermocouple temperature
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
 float getPressure() {  //returns sensor pressure data
-    float voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
-    float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
+	float voltage, pressure_bar;
+    voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
+    pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
     return pressure_bar;
 }
 
 void setPressure(int wantedValue) {
- static double refreshTimer;
   value=wantedValue;
  float livePressure = getPressure();
  if (brewState() == 1 ) {
@@ -330,12 +361,11 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     HPWR = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
     MainCycleDivider = myNex.readNumber("mDiv");  // reading the delay divider
     BrewCycleDivider = myNex.readNumber("bDiv");  // reading the delay divider
-    regionHz = myNex.readNumber("regHz");
+    //regionHz = myNex.readNumber("regHz");
     warmupEnabled = myNex.readNumber("warmupState");
 
     // MODE_SELECT should always be last
     selectedOperationalMode = myNex.readNumber("modeSelect");
-    if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("modeSelect");
 
     myNex.lastCurrentPageId = myNex.currentPageId;
     POWER_ON = false;
@@ -500,18 +530,95 @@ void steamCtrl() {
 //#############################################################################################
 //################################____LCD_REFRESH_CONTROL___###################################
 //#############################################################################################
+
 void lcdRefresh() {
   // Updating the LCD every 300ms
-  static unsigned long pageRefreshTimer;
+  static unsigned long pageRefreshTimer, scalesRefreshTimer, refreshTimer;
+  static bool tareDone, previousBrewState;
+  static uint8_t wErr;
+  static float fWghtEntryVal;
+  float flowVal;
   
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
-    // myNex.writeNum("currentHPWR", HPWR_OUT);
     myNex.writeNum("pressure.val", int(getPressure()*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     pageRefreshTimer = millis();
   }
+  if (brewState() == 1) {
+    if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8) {
+      TARE_AGAIN:
+      if(tareDone != 1 || previousBrewState != 1) {
+        if (LoadCell_1.wait_ready_timeout(150) && LoadCell_2.wait_ready_timeout(150)) {
+          LoadCell_1.tare();
+          LoadCell_2.tare();
+        }
+        tareDone=1;
+        previousBrewState=1;
+      }
+      if (millis() - scalesRefreshTimer > 200) {
+        currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
+        if (currentWeight <= -0.5 || (currentWeight-previousWeight) >= 20.0) {
+          tareDone=0;
+          previousBrewState=0;
+          goto TARE_AGAIN;
+        }
+        // soft smooth quite dumb atm just wanted ot have a more stable output value
+        if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 8) {
+          currentWeight = previousWeight; 
+          wErr++;
+        }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 8) {
+          previousWeight = currentWeight;
+          wErr = 0;
+        }// smoothing end
+        scalesRefreshTimer = millis();
+      } 
+      myNex.writeStr("weight.txt",String(currentWeight,1));
+      // FLow calc
+      if ((currentWeight - fWghtEntryVal) >= 0.5) {
+        if (millis() - refreshTimer >= 1000) {
+          flowVal = (currentWeight - fWghtEntryVal)*10;
+          myNex.writeNum("flow.val", int(flowVal));
+          fWghtEntryVal = currentWeight;
+          refreshTimer = millis();
+        }
+      }
+    }
+  }else if (brewState() == 0 && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) {
+    myNex.writeStr("weight.txt",String(currentWeight+flowVal,1));
+    previousBrewState=0;
+    tareDone=0;
+  }
+  else if (brewState() == 0 && myNex.currentPageId == 11) {//scales screen updating
+    if (millis() - scalesRefreshTimer > 200) {
+      if(tareDone != 1) {
+        if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
+          LoadCell_1.tare();
+          LoadCell_2.tare();
+        }
+        tareDone=1;
+      }
+      currentWeight = (LoadCell_1.get_units() + LoadCell_2.get_units()) / 2;
+      myNex.writeStr("weight.txt",String(currentWeight,1));
+      // soft smooth quite dumb atm just wanted ot have a more stable output value
+      if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 4) {
+        currentWeight = previousWeight; 
+        wErr++;
+      }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 4) {
+        previousWeight = currentWeight;
+        wErr = 0;
+      }// smoothing end
+	    previousBrewState=0;
+      scalesRefreshTimer = millis();
+    }
+  }else {
+	  previousBrewState=0;
+    tareDone=0;
+    currentWeight=0;
+    previousWeight=0;
+    fWghtEntryVal=0;
+    wErr=0;
+  }
 }
-
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
@@ -667,6 +774,10 @@ void trigger1() {
 //#############################################################################################
 
 void trigger2() {
+  if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
+    LoadCell_1.tare();
+    LoadCell_2.tare();
+  }
 }
 
 //#############################################################################################
@@ -812,7 +923,7 @@ void deScale(bool c) {
 void autoPressureProfile() {
   static bool phase_1 = 1, phase_2 = 0, updateTimer = 1;
   static unsigned long timer;
-  static float newBarValue;
+  //static float newBarValue;
 
   if (brewState() == 1) { //runs this only when brew button activated and pressure profile selected  
     if (updateTimer == 1) {
@@ -826,7 +937,8 @@ void autoPressureProfile() {
         timer = millis();
       }
       brewTimer(1);
-      setPressure(ppStartBar);
+	    newBarValue=ppStartBar;
+      setPressure(newBarValue);
     } else if (phase_2 == true) { //enters pahse 2
       if (ppStartBar < ppFinishBar) { // Incremental profiling curve
         newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
@@ -843,7 +955,7 @@ void autoPressureProfile() {
       }
       setPressure(newBarValue);
     }
-  }else if ( brewState() == 0 ) { 
+  }else { 
     brewTimer(0);
     if (selectedOperationalMode == 1 ) setPressure(ppStartBar);
     else if (selectedOperationalMode == 4 ) preinfusionFinished = false;
