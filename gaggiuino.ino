@@ -5,23 +5,39 @@
 #include <PSM.h>
 
 
-
-// Define our pins
-#define zcPin 2
-#define thermoDO 4
-#define thermoCS 5
-#define thermoCLK 6
-#define steamPin 7
-#define relayPin 8  // PB0
-#define dimmerPin 9
-#define brewPin A0 // PD7
-#define pressurePin A1 
-
-
-#define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
-#define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
-#define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
-#define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
+#if defined(ARDUINO_ARCH_AVR)
+  // ATMega32U pins definitions
+  #define zcPin 2
+  #define thermoDO 4
+  #define thermoCS 5
+  #define thermoCLK 6
+  #define steamPin 7
+  #define relayPin 8  // PB0
+  #define dimmerPin 9
+  #define brewPin A0 // PD7
+  #define pressurePin A1 
+  #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
+  #define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
+  #define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
+  #define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
+  #define COMMS_CH Serial
+#elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
+  // STM32F4 pins definitions
+  #define thermoDO PB4
+  #define thermoCS PB5
+  #define thermoCLK PB6
+  #define brewPin PA0 // PD7
+  #define relayPin PB8  // PB0
+  #define dimmerPin PB9
+  #define zcPin PB0
+  #define pressurePin PA1 
+  #define steamPin PA2
+  #define HX711_dout_1 PB14 //mcu > HX711 no 1 dout pin
+  #define HX711_dout_2 PB15 //mcu > HX711 no 2 dout pin
+  #define HX711_sck_1 PB12 //mcu > HX711 no 1 sck pin
+  #define HX711_sck_2 PB13 //mcu > HX711 no 2 sck pin
+  #define COMMS_CH Serial1
+#endif
 
 
 // Define some const values
@@ -38,7 +54,7 @@
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 
 // EasyNextion object init
-EasyNex myNex(Serial);
+EasyNex myNex(COMMS_CH);
 
 //Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
 const unsigned int range = 127;
@@ -121,7 +137,7 @@ void setup() {
   pinMode(steamPin, INPUT_PULLUP);
   // digitalWrite(steamPin, HIGH);
   // Chip side  HIGH/LOW  specification
-  PORTB &= ~_BV(PB0);  // relayPin LOW
+  setBoiler(LOW);  // relayPin LOW
 
   //Pump 
   pump.set(0);
@@ -304,7 +320,7 @@ void kThermoRead() { // Reading the thermocouple temperature
   if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
     while (kProbeReadValue <= 0.0 || kProbeReadValue == NAN || kProbeReadValue > 160.0) {
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      setBoiler(LOW);  // relayPin -> LOW
       if ((millis() - thermoTimer) > GET_KTYPE_READ_EVERY){
         kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis();
@@ -318,7 +334,7 @@ void kThermoRead() { // Reading the thermocouple temperature
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
 float getPressure() {  //returns sensor pressure data
-	float voltage, pressure_bar;
+  float voltage, pressure_bar;
     voltage = (analogRead(pressurePin)*5.0)/1024.0; // finding the voltage representation of the current analog value
     pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
     return pressure_bar;
@@ -435,7 +451,6 @@ void justDoCoffee() {
   BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.10, setPoint*0.10, 0, 0);
   BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.10);
 
-  
 
   if (brewState() == 1) {
     if (selectedOperationalMode == 0 || selectedOperationalMode == 5 || selectedOperationalMode == 9) {
@@ -446,65 +461,65 @@ void justDoCoffee() {
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (kProbeReadValue < setPoint+0.25 && preinfusionFinished == false) {
       if (millis() - heaterWave > HPWR_OUT*BrewCycleDivider && heaterState == 0) {
-		PORTB &= ~_BV(PB0);  // relayPin -> LOW
+        setBoiler(LOW);  // relayPin -> LOW
         heaterState=1;
         heaterWave=millis();
       }else if (millis() - heaterWave > HPWR*MainCycleDivider && heaterState == 1) {
-        PORTB |= _BV(PB0);  // relayPin -> HIGH
+        setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=0;
         heaterWave=millis();
       }
     } else if (kProbeReadValue < setPoint+BREW_TEMP_DELTA && preinfusionFinished == true) {
-	  if (millis() - heaterWave > HPWR*MainCycleDivider && heaterState == 0) {
-		  PORTB |= _BV(PB0);  // relayPin -> HIGH
-		  heaterState=1;
-		  heaterWave=millis();
-	  }else if (millis() - heaterWave > HPWR && heaterState == 1) {
-		  PORTB &= ~_BV(PB0);  // relayPin -> LOW
-		  heaterState=0;
-		  heaterWave=millis();
-	  }
-  } else if(kProbeReadValue <= setPoint-3.0) PORTB |= _BV(PB0);   // relayPin -> HIGH
+    if (millis() - heaterWave > HPWR*MainCycleDivider && heaterState == 0) {
+      setBoiler(HIGH);  // relayPin -> HIGH
+      heaterState=1;
+      heaterWave=millis();
+    }else if (millis() - heaterWave > HPWR && heaterState == 1) {
+      setBoiler(LOW);  // relayPin -> LOW
+      heaterState=0;
+      heaterWave=millis();
+    }
+  } else if(kProbeReadValue <= setPoint-3.0) setBoiler(HIGH);   // relayPin -> HIGH
     else {
       previousTemp = 0;
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
-	  }
+      setBoiler(LOW);  // relayPin -> LOW
+    }
   } else { //if brewState == 0
     previousTemp=0;
     brewTimer(0);
     if (kProbeReadValue < ((float)setPoint - 10.00)) {
-      PORTB |= _BV(PB0);  // relayPin -> HIGH
+      setBoiler(HIGH);  // relayPin -> HIGH
     } else if (kProbeReadValue >= ((float)setPoint - 10.00) && kProbeReadValue < ((float)setPoint - 3.00)) {
-      PORTB |= _BV(PB0);  // relayPin -> HIGH
+      setBoiler(HIGH);  // relayPin -> HIGH
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider) {
-        PORTB &= ~_BV(PB0);  // relayPin -> LOW
+        setBoiler(LOW);  // relayPin -> LOW
         heaterState=0;
         heaterWave=millis();
       }
     } else if ((kProbeReadValue >= ((float)setPoint - 3.00)) && (kProbeReadValue <= ((float)setPoint - 1.00))) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 0) {
-        PORTB |= _BV(PB0);  // relayPin -> HIGH
+        setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=1;
         heaterWave=millis();
       }else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 1) {
-        PORTB &= ~_BV(PB0);  // relayPin -> LOW
+        setBoiler(LOW);  // relayPin -> LOW
         heaterState=0;
         heaterWave=millis();
-      }	
+      } 
     } else if ((kProbeReadValue >= ((float)setPoint - 0.5)) && kProbeReadValue < (float)setPoint) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 0) {
-        PORTB |= _BV(PB0);  // relayPin -> HIGH
+        setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=1;
         heaterWave=millis();
       }else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 1) {
-        PORTB &= ~_BV(PB0);  // relayPin -> LOW
+        setBoiler(LOW);  // relayPin -> LOW
         heaterState=0;
         heaterWave=millis();
       }
     } else {
-      PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      setBoiler(LOW);  // relayPin -> LOW
     }
-  } 
+  }
 }
 
 //#############################################################################################
@@ -516,15 +531,15 @@ void steamCtrl() {
 
   if (brewState() == 0) {
     if (boilerPressure <= 9.0) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
-      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) PORTB |= _BV(PB0);  // relayPin -> HIGH
-      else PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    }else if(boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
+      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) setBoiler(HIGH);  // relayPin -> HIGH
+      else setBoiler(LOW);  // relayPin -> LOW
+    }else if(boilerPressure >=9.1) setBoiler(LOW);  // relayPin -> LOW
   }else if (brewState() == 1) { //added to cater for hot water from steam wand functionality
-	if (boilerPressure <= 9.0) {
-      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=105)) PORTB |= _BV(PB0);  // relayPin -> HIGH
-      else PORTB &= ~_BV(PB0);  // relayPin -> LOW
-    }else if(boilerPressure >=9.1) PORTB &= ~_BV(PB0);  // relayPin -> LOW
-  }else PORTB &= ~_BV(PB0);  // relayPin -> LOW
+  if (boilerPressure <= 9.0) {
+      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=105)) setBoiler(HIGH);  // relayPin -> HIGH
+      else setBoiler(LOW);  // relayPin -> LOW
+    }else if(boilerPressure >=9.1) setBoiler(LOW);  // relayPin -> LOW
+  }else setBoiler(LOW);  // relayPin -> LOW
 }
 
 //#############################################################################################
@@ -569,7 +584,7 @@ void lcdRefresh() {
         }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 8) {
           previousWeight = currentWeight;
           wErr = 0;
-        }// smoothing end
+        }else previousWeight = currentWeight;// smoothing end
         scalesRefreshTimer = millis();
       } 
       myNex.writeStr("weight.txt",String(currentWeight,1));
@@ -607,11 +622,11 @@ void lcdRefresh() {
         previousWeight = currentWeight;
         wErr = 0;
       }// smoothing end
-	    previousBrewState=0;
+      previousBrewState=0;
       scalesRefreshTimer = millis();
     }
   }else {
-	  previousBrewState=0;
+    previousBrewState=0;
     tareDone=0;
     currentWeight=0;
     previousWeight=0;
@@ -801,6 +816,22 @@ bool brewTimer(bool c) { // small function for easier timer start/stop
   else myNex.writeNum("timerState", 0);
 }
 
+// Actuating the heater element
+void setBoiler(uint8_t val) {
+  #if defined(ARDUINO_ARCH_AVR)
+    if (val == HIGH) {
+      PORTB |= _BV(PB0);  // boilerPin -> HIGH
+    } else {
+      PORTB &= ~_BV(PB0);  // boilerPin -> LOW
+    }
+  #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
+    if (val == HIGH) {
+      digitalWrite(relayPin, HIGH);  // boilerPin -> HIGH
+    } else {
+      digitalWrite(relayPin, LOW);   // boilerPin -> LOW
+    }
+  #endif
+}
 
 float mapRange(float sourceNumber, float fromA, float fromB, float toA, float toB, int decimalPrecision ) {
   float deltaA = fromB - fromA;
@@ -937,7 +968,7 @@ void autoPressureProfile() {
         timer = millis();
       }
       brewTimer(1);
-	    newBarValue=ppStartBar;
+      newBarValue=ppStartBar;
       setPressure(newBarValue);
     } else if (phase_2 == true) { //enters pahse 2
       if (ppStartBar < ppFinishBar) { // Incremental profiling curve
