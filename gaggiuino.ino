@@ -6,7 +6,7 @@
 
 
 #if defined(ARDUINO_ARCH_AVR)
-  // ATMega32U pins definitions
+  // ATMega32P pins definitions
   #define zcPin 2
   #define thermoDO 4
   #define thermoCS 5
@@ -22,11 +22,12 @@
   #define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
   #define USART_CH Serial
 #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
+  #define SS 8
   // STM32F4 pins definitions
   #define zcPin PB0
-  #define thermoDO PB4
+  //#define thermoDO PB4
   #define thermoCS PB5
-  #define thermoCLK PB6
+  //#define thermoCLK PB6
   #define brewPin PA0 // PD7
   #define relayPin PB8  // PB0
   #define dimmerPin PB9
@@ -50,26 +51,19 @@
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define EEPROM_RESET 1 //change this value if want to reset to defaults
+#define PUMP_RANGE 127
 
-//#if defined(ARDUINO_ARCH_STM32)// if arch is stm32  
-//HardwareSerial USART_CH(PA10, PA9);
-//#endif
-//Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
+//########################__MAX_6675__####################################
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
-// EasyNextion object init
+//########################__NEXTION__#####################################
 EasyNex myNex(USART_CH);
-//Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
-const unsigned int range = 127;
-PSM pump(zcPin, dimmerPin, range, FALLING);
+//#######################__Banoz_PSM__#################################### - for more cool shit visit https://github.com/banoz  and don't forget to star
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, FALLING);
 //#######################__HX711_stuff__##################################
 HX711 LoadCell_1; //HX711 1
 HX711 LoadCell_2; //HX711 2
 
-//##################__Transducer_stuff__##################################
-const float voltageZero = 0.49; // the voltage output by the transducer at 0bar - aka our offset
-float pressureValue; //variable to store the value coming from the pressure transducer
-
-// Some vars are better global
+//########################__GLOBAL_VARIABLES__DECLARATION__#####################################
 //volatile vars
 volatile float kProbeReadValue; //temp val
 volatile float livePressure;
@@ -82,7 +76,7 @@ volatile unsigned long pressureTimer;
 volatile unsigned long scalesTimer;
 volatile unsigned long pageRefreshTimer;
 
-float newBarValue;
+volatile float newBarValue;
 //scales vars
 float scalesF1;
 float scalesF2;
@@ -102,7 +96,7 @@ bool  descaleEnabled;
 bool preinfusionFinished;
 bool scalesPresent;
 volatile uint16_t  HPWR;
-volatile uint16_t  HPWR_OUT;
+volatile float  HPWR_OUT;
 uint16_t  setPoint;
 uint16_t  offsetTemp;
 uint8_t  MainCycleDivider;
@@ -138,8 +132,12 @@ const uint16_t  EEP_HOME_ON_SHOT_FINISH = 205;
 const uint16_t  EEP_GRAPH_BREW = 210;
 const uint16_t  EEP_SCALES_F1 = 215;
 const uint16_t  EEP_SCALES_F2 = 220;
+//########################__GLOBAL_VARIABLES__END__#####################################
 
 
+//##############################################################################################################################
+//############################################________________INIT______________################################################
+//##############################################################################################################################
 void setup() {
   
   USART_CH.begin(115200); // switching our board to the new serial speed
@@ -149,31 +147,20 @@ void setup() {
   pinMode(brewPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
 
-  setBoiler(LOW);  // relayPin LOW
-
+  // relayPin LOW
+  setBoiler(LOW); 
   //Pump 
   pump.set(0);
-
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
-    delay(500);
+    delay(5);
   }
   
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
-  
   // Scales handling
-  LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
-  LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
-  
-  if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
-    //good values - 1: 1708 2: -2162 | 
-    LoadCell_1.set_scale(scalesF1); // calibrated val1
-    LoadCell_2.set_scale(scalesF2); // calibrated val2
-    scalesPresent = true;
-  }
-
+  scalesInit();
 
   myNex.lastCurrentPageId = myNex.currentPageId;
   POWER_ON = true;
@@ -197,20 +184,20 @@ void loop() {
 //#############################################___________SENSORS_READ________##################################################
 //##############################################################################################################################
 
+
 void sensorsRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if (millis() > thermoTimer) {
-    kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
+    kProbeReadValue = thermocouple.readCelsius();
+
     if (kProbeReadValue <= 0.0 || kProbeReadValue == NAN || kProbeReadValue > 165.0) { // safety measures
       setBoiler(LOW);  // boilerPin -> LOW
     }
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 
-  if (millis() > pressureTimer) {
-    livePressure = getPressure();
-    pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
-  }
+  livePressure = getPressure();
+
 
 //  if (millis() > scalesTimer) {
 //    float values[2];
@@ -231,20 +218,18 @@ float getPressure() {  //returns sensor pressure data
     // pressure gauge range 0-1.2MPa - 0-12 bar
     // 1 bar = 68.27
 
-    return analogRead(pressurePin) / 68.27; // - 1.5F;
+    return analogRead(pressurePin) / 68.27 - 1.49f;
 }
 
-void setPressure(int wantedValue) {
-	value=wantedValue;
-	if (brewState() == 1 ) {
-		value = 127 - (int)livePressure * 12;
-		if (livePressure > (float)wantedValue) value = 0;
-		pump.set(value);
-	}else{
-		value = 127 - (int)wantedValue * 12;
-		if (livePressure > (float)wantedValue) value = 0;
-		pump.set(value);
-	}
+
+void setPressure(int targetValue) {  
+ if (targetValue == 0 || livePressure > targetValue) {
+   pump.set(0);
+ } else {
+	unsigned int pumpValue = 127 - livePressure * 12;
+	if (livePressure > targetValue) pumpValue = 0;
+	pump.set(pumpValue);
+ }
 }
 
 //##############################################################################################################################
@@ -286,43 +271,43 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
 //#############################################################################################
 void modeSelect() {
   switch (selectedOperationalMode) {
-    case 0:
+    case 0: //state = STRAIGHT 9 bar
       if (steamState() == 0) justDoCoffee();
       else steamCtrl();
       break;
-    case 1:
+    case 1: //state = PREINFUSION
       if (steamState() == 0) preInfusion();
       else steamCtrl();
       break;
-    case 2:
+    case 2: //state = PRESSURE PROFILING
       if (steamState() == 0) autoPressureProfile();
       else steamCtrl();
       break;
-    case 3:
+    case 3: //state = MANUAL PP
       manualPressureProfile();
       break;
-    case 4:
+    case 4: //state = PP (with or without PI)
       if (steamState() == 0) {
         if(preinfusionFinished == false) preInfusion();
         else if(preinfusionFinished == true) autoPressureProfile();
       } else if (steamState() == 1) steamCtrl();
       break;
-    case 5:
+    case 5: //state = FLUSH
       if (steamState() == 0) justDoCoffee();
       else steamCtrl();
       break;
-    case 6:
+    case 6: //state = DESCALE
       deScale(descaleCheckBox);
       break;
-    case 7:
+    case 7: //state = N/A
       break;
-    case 8:
+    case 8: //state = N/A
       break;
-    case 9:
+    case 9: //state = STEAMING
       if (steamState() == 0) justDoCoffee();
       else steamCtrl();
       break;
-    default:
+    default: //state = default state in case of logical omission
       if (steamState() == 0) justDoCoffee();
       else steamCtrl();
       break;
@@ -336,7 +321,6 @@ void justDoCoffee() {
   uint8_t HPWR_LOW = HPWR/MainCycleDivider;
   static double heaterWave;
   static uint8_t heaterState, heaterTempDirection;
-  static float previousTemp;
   float BREW_TEMP_DELTA;
   // Calculating the boiler heating power range based on the below input values
   HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
@@ -346,10 +330,10 @@ void justDoCoffee() {
 
 
   if (brewState() == 1) {
-    if (selectedOperationalMode == 0 || selectedOperationalMode == 5 || selectedOperationalMode == 9) {
+    if (selectedOperationalMode == 0) {
       setPressure(9);
       brewTimer(1);
-    }
+    }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPressure(9);
     myNex.writeNum("warmupState", 0);
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (kProbeReadValue < setPoint+0.25 && preinfusionFinished == false) {
@@ -374,11 +358,9 @@ void justDoCoffee() {
     }
   } else if(kProbeReadValue <= setPoint-3.0) setBoiler(HIGH);   // relayPin -> HIGH
     else {
-      previousTemp = 0;
       setBoiler(LOW);  // relayPin -> LOW
     }
   } else { //if brewState == 0
-    previousTemp=0;
     brewTimer(0);
     if (kProbeReadValue < ((float)setPoint - 10.00)) {
       setBoiler(HIGH);  // relayPin -> HIGH
@@ -446,9 +428,11 @@ void lcdRefresh() {
   static uint8_t wErr;
   static float fWghtEntryVal;
   float flowVal;
+  //float gPressureCurveBeautify = newBarValue*10;
   
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
-    myNex.writeNum("pressure.val", int(getPressure()*10));
+	//(preinfusionFinished == true) ? myNex.writeNum("pressure.val", int(gPressureCurveBeautify)) : myNex.writeNum("pressure.val", int(livePressure*10));
+	myNex.writeNum("pressure.val", int(livePressure*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     pageRefreshTimer = millis();
   }
@@ -953,6 +937,19 @@ void preInfusion() {
 //#############################################################################################
 //###############################____INIT_AND_ADMIN_CTRL____###################################
 //#############################################################################################
+void scalesInit() {
+  LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
+  LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
+  
+  if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
+    //good values - 1: 1708 2: -2162 | 
+    LoadCell_1.set_scale(scalesF1); // calibrated val1
+    LoadCell_2.set_scale(scalesF2); // calibrated val2
+    scalesPresent = true;
+  }
+}
+
+
 void eepromInit() {
 	//If it's the first boot we'll need to set some defaults
   if (EEPROM.read(0) != EEPROM_RESET || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535|| EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
