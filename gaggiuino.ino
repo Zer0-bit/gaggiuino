@@ -520,8 +520,8 @@ void lcdRefresh() {
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     myNex.writeNum("pressure.val", int(getPressure()*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
-    (weighingStartRequested) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt",String(currentWeight+flowVal,1));
-    if (weighingStartRequested) myNex.writeNum("flow.val", int(flowVal));
+    (weighingStartRequested) ? (currentWeight>=0) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0") : myNex.writeStr("weight.txt",String(currentWeight+flowVal,1));
+    if (weighingStartRequested) (flowVal>=0) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
     pageRefreshTimer = millis();
   }
 }
@@ -849,11 +849,11 @@ void autoPressureProfile() {
   //static float newBarValue;
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected  
-    if (updateTimer == 1) {
+    if ( updateTimer ) {
       timer = millis();
       updateTimer = 0;
     }
-    if (phase_1 == true) { //enters phase 1
+    if ( phase_1 ) { //enters phase 1
       if ((millis() - timer) > (ppHold*1000)) { // the actions of this if block are run after 4 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
@@ -861,7 +861,7 @@ void autoPressureProfile() {
       }
       newBarValue=ppStartBar;
       setPressure(newBarValue);
-    } else if (phase_2 == true) { //enters pahse 2
+    } else if ( phase_2 ) { //enters pahse 2
       if (ppStartBar < ppFinishBar) { // Incremental profiling curve
         newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue < (float)ppStartBar) newBarValue = (float)ppStartBar;
@@ -882,7 +882,7 @@ void autoPressureProfile() {
     else if (selectedOperationalMode == 4 ) preinfusionFinished = false;
     timer = millis();
     phase_2 = false;
-    phase_1=true;
+    phase_1 = true;
     updateTimer = 1;
     newBarValue = 0.0;
   }
@@ -961,6 +961,7 @@ void onBrewStart() {
     weighingStartRequested = false; // Flagging weighing stop
     tareDone = false; 
     previousBrewState = false;
+    preinfusionFinished = false;
   }
 }
 
