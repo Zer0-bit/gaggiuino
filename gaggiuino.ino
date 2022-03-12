@@ -109,7 +109,7 @@ const float scalesF2 = -2091.571428f;
 float currentWeight;
 float previousWeight;
 float flowVal;
-uint8_t targetWeight;
+uint8_t tarcalculateWeight;
 bool weighingStartRequested;
 bool scalesPresent;
 bool tareDone;
@@ -237,12 +237,19 @@ void sensorsRead() { // Reading the thermocouple temperature
   livePressure = getPressure();
 }
 
-void getWeight() {
+void calculateWeight() {
   scalesTare();
 
   // Weight output
   #if defined(SINGLE_HX711_CLOCK)
-    if (scalesPresent && (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11)) {
+    if (scalesPresent && (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4)) {
+      if (millis() > scalesTimer) {
+        float values[2];
+        LoadCells.get_units(values);
+        currentWeight = values[0] + values[1];
+        scalesTimer = millis() + GET_SCALES_READ_EVERY;
+      }
+    }else if (scalesPresent && myNex.currentPageId == 11) {
       if (millis() > scalesTimer) {
         float values[2];
         LoadCells.get_units(values);
@@ -251,30 +258,50 @@ void getWeight() {
       }
     }
   #else
-    if (scalesPresent && (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11)) {
+    if (scalesPresent && (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4)) {
+      if (millis() > scalesTimer) {
+        currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
+        scalesTimer = millis() + GET_SCALES_READ_EVERY;
+      }
+    }else if (scalesPresent && myNex.currentPageId == 11) {
       if (millis() > scalesTimer) {
         currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
         scalesTimer = millis() + GET_SCALES_READ_EVERY;
       }
     }
   #endif
+  calculateFlow();
+}
+
+void calculateFlow() {
+  static float prevFlowVal;
+  static unsigned long refreshTimer;
+
+  if (millis() >= refreshTimer) {
+    flowVal = (currentWeight - prevFlowVal)*10;
+    prevFlowVal = currentWeight;
+    refreshTimer = millis() + 1000;
+  }
 }
 
 //##############################################################################################################################
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
 float getPressure() {  //returns sensor pressure data
-    // 5V/1024 = 1/204.8
-    // voltageZero = 0.5V --> 102.4
-    // voltageMax = 4.5V --> 921.6
-    // range 921.6 - 102.4 = 819.2
-    // pressure gauge range 0-1.2MPa - 0-12 bar
-    // 1 bar = 68.27
-
+  // 5V/1024 = 1/204.8
+  // voltageZero = 0.5V --> 102.4
+  // voltageMax = 4.5V --> 921.6
+  // range 921.6 - 102.4 = 819.2
+  // pressure gauge range 0-1.2MPa - 0-12 bar
+  // 1 bar = 68.27
+  #if defined(ARDUINO_ARCH_AVR)
+    return analogRead(pressurePin) / 68.27 - 1.49f;
+  #elif defined(ARDUINO_ARCH_STM32)
     //return analogRead(pressurePin) / 437.9 - 1.5f;
     float voltage = (analogRead(pressurePin)*5.0)/65000.0; // finding the voltage representation of the current analog value
     float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
     return pressure_bar;
+  #endif
 }
 
 void setPressure(int targetValue) {  
@@ -493,7 +520,7 @@ void lcdRefresh() {
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
     myNex.writeNum("pressure.val", int(getPressure()*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
-    if (weighingStartRequested) myNex.writeStr("weight.txt",String(currentWeight,1));
+    (weighingStartRequested) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt",String(currentWeight+flowVal,1));
     if (weighingStartRequested) myNex.writeNum("flow.val", int(flowVal));
     pageRefreshTimer = millis();
   }
@@ -753,7 +780,7 @@ float smoothValue(float inputVal) {
 //#############################################################################################
 
 void deScale(bool c) {
-  if (myNex.currentPageId==5) {
+  if (selectedOperationalMode == 6) {
     static bool blink = true;
     static unsigned long timer = millis();
     static uint8_t currentCycleRead = myNex.readNumber("j0.val");
@@ -762,7 +789,7 @@ void deScale(bool c) {
     if (brewActive && !descaleFinished) {
       if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
         if (blink == true) { // Logic that switches between modes depending on the $blink value
-          setPressure(2);
+          setPressure(1);
           if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to max descale value for 10 sec
             if (currentCycleRead >=100) descaleFinished = true;
             blink = false;
@@ -790,14 +817,14 @@ void deScale(bool c) {
           timer = millis();
         } 
       }
-    }else if (brewState() == 1 && descaleFinished == true){
+    }else if (brewActive && descaleFinished == true){
       setPressure(0);
       if ((millis() - timer) > 1000) {
         brewTimer(0);
         myNex.writeStr("t14.txt", "FINISHED!");
         timer=millis();
       }
-    }else if (brewState() == 0) {
+    }else {
       currentCycleRead = 0;
       lastCycleRead = 10;
       descaleFinished = false;
@@ -916,7 +943,7 @@ void preInfusion() {
 //#############################################################################################
 
 void onBrewStart() {
-  if (brewState() == 1) {
+  if ( brewState() ) {
     /* Applying the below block only when brew detected */
     if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
       brewActive = true;
@@ -924,13 +951,16 @@ void onBrewStart() {
       brewTimer(1); // starting
       weighingStartRequested = true; // Flagging weighing start
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
-      getWeight();
+      calculateWeight();
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPressure(9); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   }else{
-    brewActive = false;
+    calculateWeight();
     brewTimer(0); // stopping timer
+    brewActive = false; // stopping 
     weighingStartRequested = false; // Flagging weighing stop
+    tareDone = false; 
+    previousBrewState = false;
   }
 }
 
@@ -939,14 +969,17 @@ void scalesInit() {
   #if defined(SINGLE_HX711_CLOCK)
     LoadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1);
     
-    delay(200);
+    delay(100);
 
-    if (LoadCells.is_ready()) LoadCells.set_scale(scalesF1, scalesF2);
+    if (LoadCells.is_ready()) {
+      LoadCells.set_scale(scalesF1, scalesF2);
+      scalesPresent = true;
+    }
   #else
     LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
     LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
 
-    delay(200);
+    delay(100);
     
     if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) { 
       LoadCell_1.set_scale(scalesF1); // calibrated val1
@@ -957,13 +990,22 @@ void scalesInit() {
 }
 
 void scalesTare() {
-  if(tareDone != 1 || previousBrewState != 1) {
-    if (LoadCell_1.wait_ready_timeout(150) && LoadCell_2.wait_ready_timeout(150)) {
-      LoadCell_1.tare();
-      LoadCell_2.tare();
+  if (brewActive || myNex.currentPageId == 11 ) {
+    if(!tareDone || !previousBrewState) {
+      if (LoadCell_1.wait_ready_timeout(150) && LoadCell_2.wait_ready_timeout(150)) {
+        LoadCell_1.tare();
+        LoadCell_2.tare();
+      }
+      tareDone=1;
+      previousBrewState=1;
     }
-    tareDone=1;
-    previousBrewState=1;
+  #if defined(SINGLE_HX711_CLOCK)
+    if( !tareDone || !previousBrewState ) {
+      if (LoadCells.is_ready()) LoadCells.tare();
+      tareDone=1;
+      previousBrewState=1;
+    }
+  #endif
   }
 }
 
