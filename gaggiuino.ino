@@ -427,22 +427,22 @@ void justDoCoffee() {
   // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (kProbeReadValue < setPoint+0.25 && preinfusionFinished == false) {
-      if (millis() - heaterWave > HPWR_OUT*BrewCycleDivider && heaterState == 0) {
+    if (kProbeReadValue < setPoint+0.25 && !preinfusionFinished ) {
+      if (millis() - heaterWave > HPWR_OUT*BrewCycleDivider && !heaterState ) {
         setBoiler(LOW);  // relayPin -> LOW
         heaterState=1;
         heaterWave=millis();
-      }else if (millis() - heaterWave > HPWR*MainCycleDivider && heaterState == 1) {
+      }else if (millis() - heaterWave > HPWR_LOW*MainCycleDivider && heaterState ) {
         setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=0;
         heaterWave=millis();
       }
-    } else if (kProbeReadValue < setPoint+BREW_TEMP_DELTA && preinfusionFinished == true) {
-    if (millis() - heaterWave > HPWR*MainCycleDivider && heaterState == 0) {
+    } else if (kProbeReadValue < setPoint+BREW_TEMP_DELTA && preinfusionFinished ) {
+    if (millis() - heaterWave > HPWR*BrewCycleDivider && !heaterState ) {
       setBoiler(HIGH);  // relayPin -> HIGH
       heaterState=1;
       heaterWave=millis();
-    }else if (millis() - heaterWave > HPWR && heaterState == 1) {
+    }else if (millis() - heaterWave > HPWR && heaterState ) {
       setBoiler(LOW);  // relayPin -> LOW
       heaterState=0;
       heaterWave=millis();
@@ -464,21 +464,21 @@ void justDoCoffee() {
         heaterWave=millis();
       }
     } else if ((kProbeReadValue >= ((float)setPoint - 3.00)) && (kProbeReadValue <= ((float)setPoint - 1.00))) {
-      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 0) {
+      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState) {
         setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=1;
         heaterWave=millis();
-      }else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 1) {
+      }else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
         setBoiler(LOW);  // relayPin -> LOW
         heaterState=0;
         heaterWave=millis();
       } 
     } else if ((kProbeReadValue >= ((float)setPoint - 0.5)) && kProbeReadValue < (float)setPoint) {
-      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 0) {
+      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState ) {
         setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=1;
         heaterWave=millis();
-      }else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 1) {
+      }else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
         setBoiler(LOW);  // relayPin -> LOW
         heaterState=0;
         heaterWave=millis();
@@ -932,7 +932,7 @@ void preInfusion() {
   }else { //resetting all the values
     setPressure(preinfuseBar);
     exitPreinfusion = false;
-    //timer = millis();
+    timer = millis();
   }
  //keeping it at temp
   justDoCoffee();
