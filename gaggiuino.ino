@@ -73,7 +73,7 @@ EasyNex myNex(USART_CH);
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, FALLING);
 //#######################__HX711_stuff__##################################
 #if defined(SINGLE_HX711_CLOCK)
-HX711_2 LoadCell_1_2;
+HX711_2 LoadCells;
 #else
 HX711 LoadCell_1; //HX711 1
 HX711 LoadCell_2; //HX711 2
