@@ -336,27 +336,27 @@ void justDoCoffee() {
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPressure(9);
     myNex.writeNum("warmupState", 0);
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (kProbeReadValue < setPoint+0.25 && preinfusionFinished == false) {
-      if (millis() - heaterWave > HPWR_OUT*BrewCycleDivider && heaterState == 0) {
+    if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+0.25 && !preinfusionFinished ) {
+      if (millis() - heaterWave > HPWR_LOW*BrewCycleDivider && !heaterState ) {
         setBoiler(LOW);  // relayPin -> LOW
         heaterState=1;
         heaterWave=millis();
-      }else if (millis() - heaterWave > HPWR*MainCycleDivider && heaterState == 1) {
+      }else if (millis() - heaterWave > HPWR && heaterState ) {
         setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=0;
         heaterWave=millis();
       }
-    } else if (kProbeReadValue < setPoint+BREW_TEMP_DELTA && preinfusionFinished == true) {
-    if (millis() - heaterWave > HPWR*MainCycleDivider && heaterState == 0) {
+    } else if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+BREW_TEMP_DELTA && preinfusionFinished ) {
+    if (millis() - heaterWave > HPWR*BrewCycleDivider && !heaterState ) {
       setBoiler(HIGH);  // relayPin -> HIGH
       heaterState=1;
       heaterWave=millis();
-    }else if (millis() - heaterWave > HPWR && heaterState == 1) {
+    }else if (millis() - heaterWave > HPWR && heaterState ) {
       setBoiler(LOW);  // relayPin -> LOW
       heaterState=0;
       heaterWave=millis();
     }
-  } else if(kProbeReadValue <= setPoint-3.0) setBoiler(HIGH);   // relayPin -> HIGH
+  } else if(kProbeReadValue <= setPoint-1.5f) setBoiler(HIGH);   // relayPin -> HIGH
     else {
       setBoiler(LOW);  // relayPin -> LOW
     }
