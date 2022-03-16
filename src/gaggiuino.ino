@@ -1,4 +1,3 @@
-<<<<<<< HEAD:src/gaggiuino.ino
 // #define SINGLE_HX711_CLOCK
 #if defined(ARDUINO_ARCH_AVR)
   #include <EEPROM.h>
@@ -2565,4 +2564,3 @@ void eepromInit() {
 //     }
 //   }
 // }
->>>>>>> fa3758ae71e272498aaf8f6d18e86a208807eca0:gaggiuino.ino
