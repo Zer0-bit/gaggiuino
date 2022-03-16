@@ -21,6 +21,22 @@
   #define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
   #define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
   #define USART_CH Serial
+
+  // configuration for TimerInterruptGeneric
+  #define TIMER_INTERRUPT_DEBUG 0
+  #define _TIMERINTERRUPT_LOGLEVEL_ 0
+
+  #define USING_16MHZ true
+  #define USING_8MHZ false
+  #define USING_250KHZ false
+
+  #define USE_TIMER_0 false
+  #define USE_TIMER_1 true
+  #define USE_TIMER_2 false
+  #define USE_TIMER_3 false
+
+  #include "TimerInterrupt_Generic.h"
+
 #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
   #define SS 8
   // STM32F4 pins definitions
@@ -147,6 +163,9 @@ void setup() {
   pinMode(brewPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
 
+  // start interrupt read for pressure transducer
+  initPressure();
+
   // relayPin LOW
   setBoiler(LOW); 
   //Pump 
@@ -210,6 +229,30 @@ void sensorsRead() { // Reading the thermocouple temperature
 //##############################################################################################################################
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
+#if defined(ARDUINO_ARCH_AVR)
+volatile unsigned int presData[2];
+volatile unsigned char presIndex = 0;
+
+void presISR()
+{
+  presData[presIndex] = ADCW;
+  presIndex ^= 1;
+}
+#endif
+
+void initPressure()
+{
+  #if defined(ARDUINO_ARCH_AVR)
+    unsigned int pin = pressurePin - 14;
+    ADMUX = (DEFAULT << 6) | (pin & 0x07);
+    ADCSRB = (1 << ACME);
+    ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+
+    ITimer1.init();
+    ITimer1.attachInterruptInterval(10, presISR);
+  #endif 
+}
+
 float getPressure() {  //returns sensor pressure data
     // 5V/1024 = 1/204.8
     // voltageZero = 0.5V --> 102.4
@@ -217,8 +260,11 @@ float getPressure() {  //returns sensor pressure data
     // range 921.6 - 102.4 = 819.2
     // pressure gauge range 0-1.2MPa - 0-12 bar
     // 1 bar = 68.27
-
-    return analogRead(pressurePin) / 68.27 - 1.49f;
+    #if defined(ARDUINO_ARCH_AVR)
+      return (presData[0] + presData[1]) / 136.54 - 1.49f;
+    #else
+      return analogRead(pressurePin) / 68.27 - 1.49f;
+    #endif
 }
 
 
