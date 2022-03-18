@@ -163,9 +163,6 @@ void setup() {
   pinMode(brewPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
 
-  // start interrupt read for pressure transducer
-  initPressure();
-
   // relayPin LOW
   setBoiler(LOW); 
   //Pump 
@@ -178,6 +175,8 @@ void setup() {
   
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
+  // start interrupt read for pressure transducer
+  initPressure(myNex.readNumber("regHz"));
   // Scales handling
   scalesInit();
 
@@ -240,7 +239,7 @@ void presISR()
 }
 #endif
 
-void initPressure()
+void initPressure(uint8_t hz)
 {
   #if defined(ARDUINO_ARCH_AVR)
     unsigned int pin = pressurePin - 14;
@@ -249,7 +248,7 @@ void initPressure()
     ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 
     ITimer1.init();
-    ITimer1.attachInterruptInterval(10, presISR);
+    ITimer1.attachInterrupt(hz * 2, presISR);
   #endif 
 }
 
@@ -688,6 +687,9 @@ void trigger1() {
       valueToSave = myNex.readNumber("regHz");
       if ( valueToSave == 50 || valueToSave == 60 ) {
         EEPROM.put(EEP_REGPWR_HZ, valueToSave);
+#if defined(ARDUINO_ARCH_AVR)
+        ITimer1.attachInterrupt(valueToSave * 2, presISR);
+#endif
         allValuesUpdated++;
       }else {}
       // Saving warmup state
