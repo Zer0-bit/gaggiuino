@@ -1,3 +1,5 @@
 .idea/
 .vscode/
 .pio/
+src/.theia/
+src/build
