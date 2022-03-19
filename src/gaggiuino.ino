@@ -571,149 +571,151 @@ void lcdRefresh() {
 //#############################################################################################
 // Save the desired temp values to EEPROM
 void trigger1() {
-  uint16_t valueToSave; 
-  uint8_t allValuesUpdated;
+  #if defined(ARCH_ARDUINO_AVR)
+    uint16_t valueToSave; 
+    uint8_t allValuesUpdated;
 
-  switch (myNex.currentPageId){
-    case 1:
-      break;
-    case 2:
-      break;
-    case 3:
-      // Saving ppStart,ppFin,ppHold and ppLength
-      valueToSave = myNex.readNumber("ppStart");
-      if (valueToSave != 0 && valueToSave >= 1) {
-//        EEPROM.put(EEP_P_START, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      valueToSave = myNex.readNumber("ppFin");
-      if (valueToSave != 0 && valueToSave >= 1) {
-//        EEPROM.put(EEP_P_FINISH, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      valueToSave = myNex.readNumber("ppHold");
-      if (valueToSave >= 0) {
-//        EEPROM.put(EEP_P_HOLD, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      valueToSave = myNex.readNumber("ppLength");
-      if (valueToSave >= 0) {
-//        EEPROM.put(EEP_P_LENGTH, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      // Saving PI and PP
-      valueToSave = myNex.readNumber("piState");
-      if (valueToSave == 0 || valueToSave == 1 ) {
-//        EEPROM.put(EEP_PREINFUSION, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      valueToSave = myNex.readNumber("ppState");
-      if (valueToSave == 0 || valueToSave == 1 ) {
-//        EEPROM.put(EEP_P_PROFILE, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      //Saved piSec
-      valueToSave = myNex.readNumber("piSec");
-      if ( valueToSave >= 0 ) {
-//        EEPROM.put(EEP_PREINFUSION_SEC, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      //Saved piBar
-      valueToSave = myNex.readNumber("piBar");
-      if ( valueToSave >= 0 && valueToSave <= 9) {
-//        EEPROM.put(EEP_PREINFUSION_BAR, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      //Saved piSoak
-      valueToSave = myNex.readNumber("piSoak");
-      if ( valueToSave >= 0 ) {
-//        EEPROM.put(EEP_PREINFUSION_SOAK, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      if (allValuesUpdated == 9) {
-        allValuesUpdated=0;
-        myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
-      }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
-      myNex.writeStr("page popupMSG");
-      break;
-    case 4:
-      //Saving brewSettings
-      valueToSave = myNex.readNumber("homeOnBrewFinish");
-      if ( valueToSave >= 0 ) {
-//        EEPROM.put(EEP_HOME_ON_SHOT_FINISH, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      valueToSave = myNex.readNumber("graphEnabled");
-      if ( valueToSave >= 0 ) {
-//        EEPROM.put(EEP_GRAPH_BREW, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      if (allValuesUpdated == 2) {
-        allValuesUpdated=0;
-        myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
-      }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
-      myNex.writeStr("page popupMSG");
-      break;
-    case 5:
-      break;
-    case 6: 
-      // Reading the LCD side set values
-      valueToSave = myNex.readNumber("setPoint");
-      if ( valueToSave > 0) { 
-//        EEPROM.put(EEP_SETPOINT, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      // Saving offset
-      valueToSave = myNex.readNumber("offSet");
-      if ( valueToSave >= 0 ) {
-//        EEPROM.put(EEP_OFFSET, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      // Saving HPWR
-      valueToSave = myNex.readNumber("hpwr");
-      if ( valueToSave >= 0 ) {
-//        EEPROM.put(EEP_HPWR, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      // Saving mDiv
-      valueToSave = myNex.readNumber("mDiv");
-      if ( valueToSave >= 1) {
-//        EEPROM.put(EEP_M_DIVIDER, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      //Saving bDiv
-      valueToSave = myNex.readNumber("bDiv");
-      if ( valueToSave >= 1) {
-//        EEPROM.put(EEP_B_DIVIDER, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      if (allValuesUpdated == 5) {
-        allValuesUpdated=0;
-        myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
-      }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
-      myNex.writeStr("page popupMSG");
-      break;
-    case 7:
-      valueToSave = myNex.readNumber("regHz");
-      if ( valueToSave == 50 || valueToSave == 60 ) {
-//        EEPROM.put(EEP_REGPWR_HZ, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      // Saving warmup state
-      valueToSave = myNex.readNumber("warmupState");
-      if (valueToSave == 0 || valueToSave == 1 ) {
-//        EEPROM.put(EEP_WARMUP, valueToSave);
-        allValuesUpdated++;
-      }else {}
-      if (allValuesUpdated == 2) {
-        allValuesUpdated=0;
-        myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
-      }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
-      myNex.writeStr("page popupMSG");
-      break;
-    default:
-      break;
-  }
+    switch (myNex.currentPageId){
+      case 1:
+        break;
+      case 2:
+        break;
+      case 3:
+        // Saving ppStart,ppFin,ppHold and ppLength
+        valueToSave = myNex.readNumber("ppStart");
+        if (valueToSave != 0 && valueToSave >= 1) {
+        EEPROM.put(EEP_P_START, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        valueToSave = myNex.readNumber("ppFin");
+        if (valueToSave != 0 && valueToSave >= 1) {
+        EEPROM.put(EEP_P_FINISH, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        valueToSave = myNex.readNumber("ppHold");
+        if (valueToSave >= 0) {
+        EEPROM.put(EEP_P_HOLD, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        valueToSave = myNex.readNumber("ppLength");
+        if (valueToSave >= 0) {
+        EEPROM.put(EEP_P_LENGTH, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        // Saving PI and PP
+        valueToSave = myNex.readNumber("piState");
+        if (valueToSave == 0 || valueToSave == 1 ) {
+        EEPROM.put(EEP_PREINFUSION, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        valueToSave = myNex.readNumber("ppState");
+        if (valueToSave == 0 || valueToSave == 1 ) {
+        EEPROM.put(EEP_P_PROFILE, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        //Saved piSec
+        valueToSave = myNex.readNumber("piSec");
+        if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_PREINFUSION_SEC, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        //Saved piBar
+        valueToSave = myNex.readNumber("piBar");
+        if ( valueToSave >= 0 && valueToSave <= 9) {
+        EEPROM.put(EEP_PREINFUSION_BAR, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        //Saved piSoak
+        valueToSave = myNex.readNumber("piSoak");
+        if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_PREINFUSION_SOAK, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        if (allValuesUpdated == 9) {
+          allValuesUpdated=0;
+          myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
+        }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
+        myNex.writeStr("page popupMSG");
+        break;
+      case 4:
+        //Saving brewSettings
+        valueToSave = myNex.readNumber("homeOnBrewFinish");
+        if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_HOME_ON_SHOT_FINISH, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        valueToSave = myNex.readNumber("graphEnabled");
+        if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_GRAPH_BREW, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        if (allValuesUpdated == 2) {
+          allValuesUpdated=0;
+          myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
+        }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
+        myNex.writeStr("page popupMSG");
+        break;
+      case 5:
+        break;
+      case 6: 
+        // Reading the LCD side set values
+        valueToSave = myNex.readNumber("setPoint");
+        if ( valueToSave > 0) { 
+        EEPROM.put(EEP_SETPOINT, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        // Saving offset
+        valueToSave = myNex.readNumber("offSet");
+        if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_OFFSET, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        // Saving HPWR
+        valueToSave = myNex.readNumber("hpwr");
+        if ( valueToSave >= 0 ) {
+        EEPROM.put(EEP_HPWR, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        // Saving mDiv
+        valueToSave = myNex.readNumber("mDiv");
+        if ( valueToSave >= 1) {
+        EEPROM.put(EEP_M_DIVIDER, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        //Saving bDiv
+        valueToSave = myNex.readNumber("bDiv");
+        if ( valueToSave >= 1) {
+        EEPROM.put(EEP_B_DIVIDER, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        if (allValuesUpdated == 5) {
+          allValuesUpdated=0;
+          myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
+        }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
+        myNex.writeStr("page popupMSG");
+        break;
+      case 7:
+        valueToSave = myNex.readNumber("regHz");
+        if ( valueToSave == 50 || valueToSave == 60 ) {
+        EEPROM.put(EEP_REGPWR_HZ, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        // Saving warmup state
+        valueToSave = myNex.readNumber("warmupState");
+        if (valueToSave == 0 || valueToSave == 1 ) {
+        EEPROM.put(EEP_WARMUP, valueToSave);
+          allValuesUpdated++;
+        }else {}
+        if (allValuesUpdated == 2) {
+          allValuesUpdated=0;
+          myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
+        }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
+        myNex.writeStr("page popupMSG");
+        break;
+      default:
+        break;
+    }
+  #endif
 }
 
 //#############################################################################################
@@ -721,6 +723,8 @@ void trigger1() {
 //#############################################################################################
 
 void trigger2() {
+  tareDone = false;
+  previousBrewState = false;
   scalesTare();
 }
 
@@ -778,42 +782,6 @@ float mapRange(float sourceNumber, float fromA, float fromB, float toA, float to
   return (float) round(finalNumber * calcScale) / calcScale;
 }
 
-
-float smoothValue(float inputVal) {
-  // Define the number of samples to keep track of. The higher the number, the
-  // more the readings will be smoothed, but the slower the output will respond to
-  // the input. Using a constant rather than a normal variable lets us use this
-  // value to determine the size of the readings array.
-  const int numReadings = 5;
-
-  int readings[numReadings];      // the readings from the analog input
-  int readIndex = 0;              // the index of the current reading
-  int total = 0;                  // the running total
-  int average = 0;                // the average
-
-  // initialize serial communication with computer:
-  // initialize all the readings to 0:
-  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
-    readings[thisReading] = 0;
-  }
-  // subtract the last reading:
-  total = total - readings[readIndex];
-  // read from the sensor:
-  readings[readIndex] = inputVal;
-  // add the reading to the total:
-  total = total + readings[readIndex];
-  // advance to the next position in the array:
-  readIndex = readIndex + 1;
-
-  // if we're at the end of the array...
-  if (readIndex >= numReadings) {
-    // ...wrap around to the beginning:
-    readIndex = 0;
-  }
-
-  // calculate the average:
-  return average = total / numReadings;
-}
 
 
 //#############################################################################################
@@ -1037,21 +1005,18 @@ void scalesInit() {
 
 void scalesTare() {
   if (brewActive || myNex.currentPageId == 11 ) {
-    if(!tareDone || !previousBrewState) {
-      if (LoadCell_1.wait_ready_timeout(150) && LoadCell_2.wait_ready_timeout(150)) {
-        LoadCell_1.tare(3);
-        LoadCell_2.tare(3);
-      }
-      tareDone=1;
-      previousBrewState=1;
-    }
-  #if defined(SINGLE_HX711_CLOCK)
     if( !tareDone || !previousBrewState ) {
-      if (LoadCells.is_ready()) LoadCells.tare(5);
+      #if defined(SINGLE_HX711_CLOCK)
+        if (LoadCells.is_ready()) LoadCells.tare(5);
+      #else
+        if (LoadCell_1.wait_ready_timeout(150) && LoadCell_2.wait_ready_timeout(150)) {
+          LoadCell_1.tare(2);
+          LoadCell_2.tare(2);
+        }
+      #endif
       tareDone=1;
       previousBrewState=1;
     }
-  #endif
   }
 }
 
