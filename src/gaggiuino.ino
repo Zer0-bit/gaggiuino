@@ -120,8 +120,8 @@ volatile unsigned long pageRefreshTimer;
 
 float newBarValue;
 //scales vars
-const float scalesF1 = 1955.571428f;
-const float scalesF2 = -2091.571428f;
+float scalesF1 = 1955.571428f;
+float scalesF2 = -2091.571428f;
 float currentWeight;
 float previousWeight;
 float flowVal;
