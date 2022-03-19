@@ -327,22 +327,6 @@ float getPressure() {  //returns sensor pressure data
       return analogRead(pressurePin) / 68.27 - 1.49f;
     #endif
 }
-// float getPressure() {  //returns sensor pressure data
-//   // 5V/1024 = 1/204.8
-//   // voltageZero = 0.5V --> 102.4
-//   // voltageMax = 4.5V --> 921.6
-//   // range 921.6 - 102.4 = 819.2
-//   // pressure gauge range 0-1.2MPa - 0-12 bar
-//   // 1 bar = 68.27
-//   #if defined(ARDUINO_ARCH_AVR)
-//     return analogRead(pressurePin) / 68.27 - 1.49f;
-//   #elif defined(ARDUINO_ARCH_STM32)
-//     //return analogRead(pressurePin) / 437.9 - 1.5f;
-//     float voltage = (analogRead(pressurePin)*5.0)/65000.0; // finding the voltage representation of the current analog value
-//     float pressure_bar = (voltage-voltageZero)*3.0; // converting to bars of pressure
-//     return pressure_bar;
-//   #endif
-// }
 
 
 void setPressure(int targetValue) {  
@@ -571,7 +555,7 @@ void lcdRefresh() {
 //#############################################################################################
 // Save the desired temp values to EEPROM
 void trigger1() {
-  #if defined(ARCH_ARDUINO_AVR)
+  #if defined(ARDUINO_ARCH_AVR)
     uint16_t valueToSave; 
     uint8_t allValuesUpdated;
 
