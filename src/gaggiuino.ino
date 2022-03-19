@@ -953,9 +953,11 @@ void brewDetect() {
     brewTimer(0); // stopping timer
     brewActive = false; // stopping 
     weighingStartRequested = false; // Flagging weighing stop
-    tareDone = false; 
-    previousBrewState = false;
-    preinfusionFinished = false;
+    preinfusionFinished = false; 
+    if (myNex.CurrentPageId != 11) {
+      tareDone = false; 
+      previousBrewState = false;
+    } 
   }
 }
 
