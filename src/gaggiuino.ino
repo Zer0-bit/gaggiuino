@@ -279,12 +279,11 @@ void calculateWeight() {
 }
 
 void calculateFlow() {
-  static float prevFlowVal;
   static unsigned long refreshTimer;
 
   if (millis() >= refreshTimer) {
-    flowVal = (currentWeight - prevFlowVal)*10;
-    prevFlowVal = currentWeight;
+    flowVal = (currentWeight - previousWeight)*10;
+    previousWeight = currentWeight;
     refreshTimer = millis() + 1000;
   }
 }
@@ -323,9 +322,9 @@ float getPressure() {  //returns sensor pressure data
     // 1 bar = 68.27
 
     #if defined(ARDUINO_ARCH_AVR)
-      return (presData[0] + presData[1]) / 136.54 - 1.49f;
+      return (presData[0] + presData[1]) / 136.54f - 1.49f;
     #else
-      return analogRead(pressurePin) / 68.27 - 1.49f;
+      return analogRead(pressurePin) / 68.27f - 1.49f;
     #endif
 }
 
@@ -447,13 +446,13 @@ void justDoCoffee() {
   // Calculating the boiler heating power range based on the below input values
   HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.10, setPoint*0.10, 0, 0);
-  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.10);
+  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.10, setPoint*0.10f, 0, 0);
+  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.10f);
 
   // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+0.25 && !preinfusionFinished ) {
+    if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+0.25f && !preinfusionFinished ) {
       if (millis() - heaterWave > HPWR_OUT*BrewCycleDivider && !heaterState ) {
         setBoiler(LOW);  // relayPin -> LOW
         heaterState=1;
@@ -480,16 +479,16 @@ void justDoCoffee() {
   } else { //if brewState == 0
     // USART_CH1.println("DO_COFFEE BREW BTN NOT ACTIVE BLOCK");
     //brewTimer(0);
-    if (kProbeReadValue < ((float)setPoint - 10.00)) {
+    if (kProbeReadValue < ((float)setPoint - 10.00f)) {
       setBoiler(HIGH);  // relayPin -> HIGH
-    } else if (kProbeReadValue >= ((float)setPoint - 10.00) && kProbeReadValue < ((float)setPoint - 3.00)) {
+    } else if (kProbeReadValue >= ((float)setPoint - 10.00f) && kProbeReadValue < ((float)setPoint - 3.00f)) {
       setBoiler(HIGH);  // relayPin -> HIGH
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider) {
         setBoiler(LOW);  // relayPin -> LOW
         heaterState=0;
         heaterWave=millis();
       }
-    } else if ((kProbeReadValue >= ((float)setPoint - 3.00)) && (kProbeReadValue <= ((float)setPoint - 1.00))) {
+    } else if ((kProbeReadValue >= ((float)setPoint - 3.00f)) && (kProbeReadValue <= ((float)setPoint - 1.00f))) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState) {
         setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=1;
@@ -499,7 +498,7 @@ void justDoCoffee() {
         heaterState=0;
         heaterWave=millis();
       } 
-    } else if ((kProbeReadValue >= ((float)setPoint - 0.5)) && kProbeReadValue < (float)setPoint) {
+    } else if ((kProbeReadValue >= ((float)setPoint - 0.5f)) && kProbeReadValue < (float)setPoint) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState ) {
         setBoiler(HIGH);  // relayPin -> HIGH
         heaterState=1;
@@ -949,15 +948,21 @@ void brewDetect() {
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPressure(9); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   }else{
-    calculateWeight();
+    calculateWeight(); // weight calculation on scales screen
     brewTimer(0); // stopping timer
     brewActive = false; // stopping 
     weighingStartRequested = false; // Flagging weighing stop
-    preinfusionFinished = false; 
-    if (myNex.CurrentPageId != 11) {
+    if (myNex.currentPageId != 11) {
       tareDone = false; 
       previousBrewState = false;
-    } 
+    }else flowVal = 0.f; //resetting the previous 
+    /* Only resetting the weight values if on any other screens than brew or scales */
+    if (selectedOperationalMode != 0 || selectedOperationalMode != 1 || selectedOperationalMode != 2 || selectedOperationalMode != 3 || selectedOperationalMode != 4) {
+      currentWeight = 0.f;
+      previousWeight = 0.f;
+      flowVal = 0.f;
+    }/* end reset */
+    preinfusionFinished = false; 
   }
 }
 
@@ -1260,6 +1265,7 @@ void valuesLoadFromEEPROM() {
     EEPROM.get(EEP_SCALES_F1, scalesF1);//reading scale factors value from eeprom
     EEPROM.get(EEP_SCALES_F2, scalesF2);//reading scale factors value from eeprom
   #else if defined(ARDUINO_ARCH_STM32)
+    /* If running on STM32 arch just loading some hardcoded defaults until the SDCARD board gets added */
     myNex.writeNum("setPoint", 100);
     myNex.writeNum("moreTemp.n1.val", 100);
 
@@ -1302,8 +1308,6 @@ void valuesLoadFromEEPROM() {
     myNex.writeNum("brewAuto.n4.val", 5);
     myNex.writeNum("regHz", 50);
 
-
-  // Brew page settings
     myNex.writeNum("homeOnBrewFinish", 1);
     myNex.writeNum("brewSettings.btGoHome.val", 1);
 
