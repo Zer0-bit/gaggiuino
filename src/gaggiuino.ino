@@ -1,4 +1,4 @@
-// #define SINGLE_HX711_CLOCK
+#define SINGLE_HX711_CLOCK
 #if defined(ARDUINO_ARCH_AVR)
   #include <EEPROM.h>
 #endif
@@ -110,7 +110,6 @@ const float voltageZero = 0.50; // sensor output at 0 bar = 409.6
 volatile float kProbeReadValue; //temp val
 volatile float livePressure;
 volatile float liveWeight;
-volatile unsigned int value; //dimmer value
 
 // timers
 volatile unsigned long thermoTimer; //temp timer
@@ -246,18 +245,25 @@ void sensorsRead() { // Reading the thermocouple temperature
   // Reading the temperature every 350ms between the loops
   if (millis() > thermoTimer) {
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
-    if (kProbeReadValue <= 0.0 || kProbeReadValue == NAN || kProbeReadValue > 165.0) { // safety measures
+    /*
+    This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
+    If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating 
+    */
+    while (kProbeReadValue <= 0.0 || kProbeReadValue == NAN || kProbeReadValue > 165.0) {
       setBoiler(LOW);  // boilerPin -> LOW
+      if (millis() > thermoTimer) {
+        kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
+        thermoTimer = millis() + GET_KTYPE_READ_EVERY;
+      }
     }
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
-
   // Read pressure and store in a global var for further controls
   livePressure = getPressure();
 }
 
 void calculateWeight() {
-  scalesTare();
+  scalesTare(); //Tare at the start of any weighing cycle
 
   // Weight output
   if (millis() > scalesTimer) {
@@ -326,7 +332,7 @@ float getPressure() {  //returns sensor pressure data
 }
 
 
-void setPressure(int targetValue) {  
+void setPressure(volatile int targetValue) {  
   if (targetValue == 0 || livePressure > targetValue) {
     pump.set(0);
   } else {
@@ -948,8 +954,10 @@ void brewDetect() {
     /* Only resetting the brew activity value if it's been previously set */
     if (brewActive) brewActive = false; 
     /* Only resetting the weight activity value if it's been previously set */
-    if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) calculateWeight(); 
-    else {/* Only resetting the tare value if on any other screens than brew or scales */
+    if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) {
+      if (!weighingStartRequested) weighingStartRequested=true;
+      calculateWeight(); 
+    }else {/* Only resetting the tare value if on any other screens than brew or scales */
       if (weighingStartRequested) weighingStartRequested = false; // Flagging weighing stop
       if (tareDone) tareDone = false;
       if (previousBrewState) previousBrewState = false;
@@ -964,7 +972,7 @@ void scalesInit() {
   #if defined(SINGLE_HX711_CLOCK)
     LoadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1);
     LoadCells.set_scale(scalesF1, scalesF2);
-    LoadCells.powerUp();
+    LoadCells.power_up();
     
     delay(300);
 
@@ -993,7 +1001,7 @@ void scalesTare() {
     #if defined(SINGLE_HX711_CLOCK)
       if (LoadCells.is_ready()) LoadCells.tare(5);
     #else
-      if (LoadCell_1.wait_ready_timeout(150) && LoadCell_2.wait_ready_timeout(150)) {
+      if (LoadCell_1.wait_ready_timeout(300) && LoadCell_2.wait_ready_timeout(300)) {
         LoadCell_1.tare(2);
         LoadCell_2.tare(2);
       }
