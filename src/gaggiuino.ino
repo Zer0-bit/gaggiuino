@@ -949,10 +949,10 @@ void brewDetect() {
     if (brewActive) brewActive = false; 
     /* Only resetting the weight activity value if it's been previously set */
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) calculateWeight(); 
-    else if (weighingStartRequested) weighingStartRequested = false; // Flagging weighing stop
     else {/* Only resetting the tare value if on any other screens than brew or scales */
-      tareDone = false;
-      previousBrewState = false;
+      if (weighingStartRequested) weighingStartRequested = false; // Flagging weighing stop
+      if (tareDone) tareDone = false;
+      if (previousBrewState) previousBrewState = false;
     }
     /* Only resetting the preinfusion value if it's been previously set */
     if (preinfusionFinished) preinfusionFinished = false;
