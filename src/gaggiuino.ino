@@ -261,25 +261,22 @@ void calculateWeight() {
 
   // Weight output
   if (millis() > scalesTimer) {
-  #if defined(SINGLE_HX711_CLOCK)
-    if (scalesPresent && (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4 || myNex.currentPageId == 11)) {
-      float values[2];
-      LoadCells.get_units(values);
-      currentWeight = values[0] + values[1];
-      scalesTimer = millis() + GET_SCALES_READ_EVERY;
+    if (scalesPresent && weighingStartRequested) {
+      #if defined(SINGLE_HX711_CLOCK)
+        float values[2];
+        LoadCells.get_units(values);
+        currentWeight = values[0] + values[1];
+      #else
+        currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
+      #endif
     }
-  #else
-    if (scalesPresent && (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4 || myNex.currentPageId == 11)) {
-      currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
-      scalesTimer = millis() + GET_SCALES_READ_EVERY;
-    }
-  #endif
+    scalesTimer = millis() + GET_SCALES_READ_EVERY;
   }
   calculateFlow();
 }
 
 void calculateFlow() {
-  static unsigned long refreshTimer;
+  static volatile unsigned long refreshTimer;
 
   if (millis() >= refreshTimer) {
     flowVal = (currentWeight - previousWeight)*10;
@@ -539,15 +536,14 @@ void steamCtrl() {
 //#############################################################################################
 
 void lcdRefresh() {
-  // Updating the LCD every 300ms
   static unsigned long pageRefreshTimer;
   
-  if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
+  if (millis() > pageRefreshTimer) {
     myNex.writeNum("pressure.val", int(getPressure()*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
-    (weighingStartRequested) ? (currentWeight>=0) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0") : myNex.writeStr("weight.txt",String(currentWeight+flowVal,1));
+    if (weighingStartRequested) (currentWeight>=0) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
     if (weighingStartRequested) (flowVal>=0) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
-    pageRefreshTimer = millis();
+    pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
 }
 //#############################################################################################
@@ -938,31 +934,28 @@ void preInfusion() {
 void brewDetect() {
   if ( brewState() ) {
     /* Applying the below block only when brew detected */
-    if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
-      brewActive = true;
-      if (selectedOperationalMode == 0) setPressure(9); // setting the pump output target to 9 bas for non PP or PI profiles
-      brewTimer(1); // starting
-      weighingStartRequested = true; // Flagging weighing start
+    if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) { 
+      brewTimer(1); // nextion timer start
+      if (!brewActive) brewActive = true;
+      if (!weighingStartRequested) weighingStartRequested = true; // Flagging weighing start
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
-      calculateWeight();
+      if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId != 11) calculateWeight();
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPressure(9); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   }else{
     calculateWeight(); // weight calculation on scales screen
     brewTimer(0); // stopping timer
-    brewActive = false; // stopping 
-    weighingStartRequested = false; // Flagging weighing stop
-    if (myNex.currentPageId != 11) {
-      tareDone = false; 
+    /* Only resetting the brew activity value if it's been previously set */
+    if (brewActive) brewActive = false; 
+    /* Only resetting the weight activity value if it's been previously set */
+    if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) calculateWeight(); 
+    else if (weighingStartRequested) weighingStartRequested = false; // Flagging weighing stop
+    else {/* Only resetting the tare value if on any other screens than brew or scales */
+      tareDone = false;
       previousBrewState = false;
-    }else flowVal = 0.f; //resetting the previous 
-    /* Only resetting the weight values if on any other screens than brew or scales */
-    if (selectedOperationalMode != 0 || selectedOperationalMode != 1 || selectedOperationalMode != 2 || selectedOperationalMode != 3 || selectedOperationalMode != 4) {
-      currentWeight = 0.f;
-      previousWeight = 0.f;
-      flowVal = 0.f;
-    }/* end reset */
-    preinfusionFinished = false; 
+    }
+    /* Only resetting the preinfusion value if it's been previously set */
+    if (preinfusionFinished) preinfusionFinished = false;
   }
 }
 
@@ -996,19 +989,17 @@ void scalesInit() {
 }
 
 void scalesTare() {
-  if (brewActive || myNex.currentPageId == 11 ) {
-    if( !tareDone || !previousBrewState ) {
-      #if defined(SINGLE_HX711_CLOCK)
-        if (LoadCells.is_ready()) LoadCells.tare(5);
-      #else
-        if (LoadCell_1.wait_ready_timeout(150) && LoadCell_2.wait_ready_timeout(150)) {
-          LoadCell_1.tare(2);
-          LoadCell_2.tare(2);
-        }
-      #endif
-      tareDone=1;
-      previousBrewState=1;
-    }
+  if( !tareDone || !previousBrewState ) {
+    #if defined(SINGLE_HX711_CLOCK)
+      if (LoadCells.is_ready()) LoadCells.tare(5);
+    #else
+      if (LoadCell_1.wait_ready_timeout(150) && LoadCell_2.wait_ready_timeout(150)) {
+        LoadCell_1.tare(2);
+        LoadCell_2.tare(2);
+      }
+    #endif
+    tareDone=1;
+    previousBrewState=1;
   }
 }
 
