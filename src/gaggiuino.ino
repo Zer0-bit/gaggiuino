@@ -825,7 +825,7 @@ void deScale(bool c) {
       descaleFinished = false;
       timer = millis();
     }
-   //keeping it at temp
+    //keeping it at temp
     justDoCoffee();
   }
 }
@@ -839,7 +839,7 @@ void deScale(bool c) {
 // Pressure profiling function, uses dimmer to dim the pump 
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
-  static bool phase_1 = 1, phase_2 = 0, updateTimer = 1;
+  static bool phase_1 = 1, phase_2 = 0, updateTimer = true;
   static unsigned long timer;
   //static float newBarValue;
 
@@ -878,7 +878,7 @@ void autoPressureProfile() {
     timer = millis();
     phase_2 = false;
     phase_1 = true;
-    updateTimer = 1;
+    updateTimer = true;
     newBarValue = 0.0;
   }
  // Keep that water at temp
@@ -906,16 +906,16 @@ void preInfusion() {
     if (!exitPreinfusion) { //main preinfusion body
       if (blink) { // Logic that switches between modes depending on the $blink value
         setPressure(preinfuseBar);
-        if ((millis() - timer) >= (preinfuseTime*1000)) {
+        if (millis() >= timer) {
           blink = false;
-          timer = millis();
+          timer = millis() + preinfuseTime*1000;
         }
       }else {
         setPressure(0);
-        if ((millis() - timer) >= (preinfuseSoak*1000)) { 
+        if (millis() >= timer) { 
           exitPreinfusion = true;
           blink = true;
-          timer = millis();
+          timer = millis() + preinfuseSoak*1000;
         }
       }
       // myNex.writeStr("t11.txt",String(getPressure(),1));
@@ -929,7 +929,7 @@ void preInfusion() {
     exitPreinfusion = false;
     timer = millis();
   }
- //keeping it at temp
+  //keeping it at temp
   justDoCoffee();
 }
 
@@ -945,7 +945,7 @@ void brewDetect() {
       if (!brewActive) brewActive = true;
       if (!weighingStartRequested) weighingStartRequested = true; // Flagging weighing start
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
-      if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId != 11) calculateWeight();
+      if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) calculateWeight();
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPressure(9); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   }else{
@@ -953,11 +953,11 @@ void brewDetect() {
     brewTimer(0); // stopping timer
     /* Only resetting the brew activity value if it's been previously set */
     if (brewActive) brewActive = false; 
-    /* Only resetting the weight activity value if it's been previously set */
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) {
+      /* Only setting the weight activity value if it's been previously unset */
       if (!weighingStartRequested) weighingStartRequested=true;
       calculateWeight(); 
-    }else {/* Only resetting the tare value if on any other screens than brew or scales */
+    }else {/* Only resetting the scales values if on any other screens than brew or scales */
       if (weighingStartRequested) weighingStartRequested = false; // Flagging weighing stop
       if (tareDone) tareDone = false;
       if (previousBrewState) previousBrewState = false;
