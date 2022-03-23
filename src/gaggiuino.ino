@@ -961,6 +961,8 @@ void brewDetect() {
       if (weighingStartRequested) weighingStartRequested = false; // Flagging weighing stop
       if (tareDone) tareDone = false;
       if (previousBrewState) previousBrewState = false;
+      if (currentWeight != 0.f) currentWeight = 0.f;
+      if (previousWeight != 0.f) previousWeight = 0.f;
     }
     /* Only resetting the preinfusion value if it's been previously set */
     if (preinfusionFinished) preinfusionFinished = false;
