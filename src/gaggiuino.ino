@@ -906,7 +906,7 @@ void preInfusion() {
     if (!exitPreinfusion) { //main preinfusion body
       if (blink) { // Logic that switches between modes depending on the $blink value
         setPressure(preinfuseBar);
-        if (millis() - timer > preinfuseTime*1000) {
+        if (millis() - timer >= preinfuseTime*1000) {
           blink = false;
           timer = millis();
         }
