@@ -840,7 +840,7 @@ void deScale(bool c) {
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
   static bool phase_1 = 1, phase_2 = 0, updateTimer = true;
-  static unsigned long timer;
+  static volatile unsigned long timer;
   //static float newBarValue;
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected  
@@ -849,7 +849,7 @@ void autoPressureProfile() {
       updateTimer = 0;
     }
     if ( phase_1 ) { //enters phase 1
-      if ((millis() - timer) > (ppHold*1000)) { // the actions of this if block are run after 4 seconds have passed since starting brewing
+      if (millis() - timer >= ppHold*1000) { // the actions of this if block are run after 4 seconds have passed since starting brewing
         phase_1 = 0;
         phase_2 = 1;
         timer = millis();
@@ -875,11 +875,11 @@ void autoPressureProfile() {
   }else { 
     if (selectedOperationalMode == 1 ) setPressure(ppStartBar);
     else if (selectedOperationalMode == 4 ) preinfusionFinished = false;
+    if (phase_2) phase_2 = false;
+    if (!phase_1) phase_1 = true;
+    if (!updateTimer) updateTimer = true;
+    if (newBarValue != 0.f) newBarValue = 0.f;
     timer = millis();
-    phase_2 = false;
-    phase_1 = true;
-    updateTimer = true;
-    newBarValue = 0.0;
   }
  // Keep that water at temp
   justDoCoffee();
@@ -900,22 +900,22 @@ void manualPressureProfile() {
 void preInfusion() {
   static bool blink = true;
   static bool exitPreinfusion;
-  static unsigned long timer = millis();
+  static volatile unsigned long timer = millis();
 
   if (brewActive) {
     if (!exitPreinfusion) { //main preinfusion body
       if (blink) { // Logic that switches between modes depending on the $blink value
         setPressure(preinfuseBar);
-        if (millis() >= timer) {
+        if (millis() - timer > preinfuseTime*1000) {
           blink = false;
-          timer = millis() + preinfuseTime*1000;
+          timer = millis();
         }
       }else {
         setPressure(0);
-        if (millis() >= timer) { 
+        if (millis() - timer >= preinfuseSoak*1000) { 
           exitPreinfusion = true;
           blink = true;
-          timer = millis() + preinfuseSoak*1000;
+          timer = millis();
         }
       }
       // myNex.writeStr("t11.txt",String(getPressure(),1));
@@ -926,7 +926,7 @@ void preInfusion() {
     }
   }else { //resetting all the values
     setPressure(preinfuseBar);
-    exitPreinfusion = false;
+    if (exitPreinfusion) exitPreinfusion = false;
     timer = millis();
   }
   //keeping it at temp
