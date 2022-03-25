@@ -847,9 +847,10 @@ void deScale(bool c) {
 // Pressure profiling function, uses dimmer to dim the pump 
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
-  static bool phase_1 = 1, phase_2 = 0, updateTimer = true;
-  static volatile unsigned long timer;
-  //static float newBarValue;
+  static bool phase_1 = true;
+  static bool phase_2;
+  static bool updateTimer = true;
+  static unsigned long timer;
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected  
     if ( updateTimer ) {
@@ -883,8 +884,8 @@ void autoPressureProfile() {
   }else { 
     if (selectedOperationalMode == 1 ) setPressure(ppStartBar);
     else if (selectedOperationalMode == 4 ) preinfusionFinished = false;
-    if (phase_2) phase_2 = false;
-    if (!phase_1) phase_1 = true;
+    phase_2 = false;
+    phase_1 = true;
     if (!updateTimer) updateTimer = true;
     if (newBarValue != 0.f) newBarValue = 0.f;
     timer = millis();
@@ -908,7 +909,7 @@ void manualPressureProfile() {
 void preInfusion() {
   static bool blink = true;
   static bool exitPreinfusion;
-  static volatile unsigned long timer = millis();
+  static unsigned long timer = millis();
 
   if (brewActive) {
     if (!exitPreinfusion) { //main preinfusion body
@@ -934,7 +935,7 @@ void preInfusion() {
     }
   }else { //resetting all the values
     setPressure(preinfuseBar);
-    if (exitPreinfusion) exitPreinfusion = false;
+    exitPreinfusion = false;
     timer = millis();
   }
   //keeping it at temp
@@ -966,9 +967,9 @@ void brewDetect() {
       if (!weighingStartRequested) weighingStartRequested=true;
       calculateWeight(); 
     }else {/* Only resetting the scales values if on any other screens than brew or scales */
-      if (weighingStartRequested) weighingStartRequested = false; // Flagging weighing stop
-      if (tareDone) tareDone = false;
-      if (previousBrewState) previousBrewState = false;
+      weighingStartRequested = false; // Flagging weighing stop
+      tareDone = false;
+      previousBrewState = false;
       if (currentWeight != 0.f) currentWeight = 0.f;
       if (previousWeight != 0.f) previousWeight = 0.f;
     }
