@@ -125,7 +125,7 @@ float scalesF2 = -2091.571428f;
 float currentWeight;
 float previousWeight;
 float flowVal;
-//uint8_t tarcalculateWeight;
+//unsigned int tarcalculateWeight;
 bool weighingStartRequested;
 bool scalesPresent;
 bool tareDone;
@@ -145,44 +145,44 @@ bool  flushEnabled;
 bool  descaleEnabled;
 bool preinfusionFinished;
 bool brewDeltaActive;
-volatile uint16_t  HPWR;
-volatile uint16_t  HPWR_OUT;
-uint16_t  setPoint;
-uint16_t  offsetTemp;
-uint8_t  MainCycleDivider;
-uint8_t  BrewCycleDivider;
-uint8_t  preinfuseTime;
-uint8_t preinfuseBar;
-uint8_t preinfuseSoak;
-uint8_t ppStartBar;
-uint8_t ppFinishBar;
-uint8_t ppHold;
-uint8_t ppLength;
-uint8_t selectedOperationalMode;
-uint8_t regionHz;
+volatile unsigned int  HPWR;
+volatile unsigned int  HPWR_OUT;
+unsigned int  setPoint;
+unsigned int  offsetTemp;
+unsigned int  MainCycleDivider;
+unsigned int  BrewCycleDivider;
+unsigned int  preinfuseTime;
+unsigned int preinfuseBar;
+unsigned int preinfuseSoak;
+unsigned int ppStartBar;
+unsigned int ppFinishBar;
+unsigned int ppHold;
+unsigned int ppLength;
+unsigned int selectedOperationalMode;
+unsigned int regionHz;
 
 // EEPROM  stuff
-const uint16_t  EEP_SETPOINT = 1;
-const uint16_t  EEP_OFFSET = 20;
-const uint16_t  EEP_HPWR = 40;
-const uint16_t  EEP_M_DIVIDER = 60;
-const uint16_t  EEP_B_DIVIDER = 80;
-const uint16_t  EEP_P_START = 100;
-const uint16_t  EEP_P_FINISH = 120;
-const uint16_t  EEP_P_HOLD = 110;
-const uint16_t  EEP_P_LENGTH = 130;
-const uint16_t  EEP_PREINFUSION = 140;
-const uint16_t  EEP_P_PROFILE = 160;
-const uint16_t  EEP_PREINFUSION_SEC = 180;
-const uint16_t  EEP_PREINFUSION_BAR = 190;
-const uint16_t  EEP_PREINFUSION_SOAK = 170; 
-const uint16_t  EEP_REGPWR_HZ = 195;
-const uint16_t  EEP_WARMUP = 200;
-const uint16_t  EEP_HOME_ON_SHOT_FINISH = 205;
-const uint16_t  EEP_GRAPH_BREW = 210;
-const uint16_t  EEP_BREW_DELTA = 212;
-const uint16_t  EEP_SCALES_F1 = 215;
-const uint16_t  EEP_SCALES_F2 = 220;
+const unsigned int  EEP_SETPOINT = 1;
+const unsigned int  EEP_OFFSET = 20;
+const unsigned int  EEP_HPWR = 40;
+const unsigned int  EEP_M_DIVIDER = 60;
+const unsigned int  EEP_B_DIVIDER = 80;
+const unsigned int  EEP_P_START = 100;
+const unsigned int  EEP_P_FINISH = 120;
+const unsigned int  EEP_P_HOLD = 110;
+const unsigned int  EEP_P_LENGTH = 130;
+const unsigned int  EEP_PREINFUSION = 140;
+const unsigned int  EEP_P_PROFILE = 160;
+const unsigned int  EEP_PREINFUSION_SEC = 180;
+const unsigned int  EEP_PREINFUSION_BAR = 190;
+const unsigned int  EEP_PREINFUSION_SOAK = 170; 
+const unsigned int  EEP_REGPWR_HZ = 195;
+const unsigned int  EEP_WARMUP = 200;
+const unsigned int  EEP_HOME_ON_SHOT_FINISH = 205;
+const unsigned int  EEP_GRAPH_BREW = 210;
+const unsigned int  EEP_BREW_DELTA = 212;
+const unsigned int  EEP_SCALES_F1 = 215;
+const unsigned int  EEP_SCALES_F2 = 220;
 
 
 void setup() {
@@ -306,7 +306,7 @@ void presISR() {
 }
 #endif
 
-void initPressure(uint8_t hz) {
+void initPressure(unsigned int hz) {
   #if defined(ARDUINO_ARCH_AVR)
     unsigned int pin = pressurePin - 14;
     ADMUX = (DEFAULT << 6) | (pin & 0x07);
@@ -445,9 +445,9 @@ void modeSelect() {
 //#############################################################################################
 void justDoCoffee() {
   // USART_CH1.println("DO_COFFEE ENTER");
-  uint8_t HPWR_LOW = HPWR/MainCycleDivider;
+  unsigned int HPWR_LOW = HPWR/MainCycleDivider;
   static double heaterWave;
-  static uint8_t heaterState;
+  static unsigned int heaterState;
   float BREW_TEMP_DELTA;
   // Calculating the boiler heating power range based on the below input values
   HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
@@ -561,8 +561,8 @@ void lcdRefresh() {
 // Save the desired temp values to EEPROM
 void trigger1() {
   #if defined(ARDUINO_ARCH_AVR)
-    uint16_t valueToSave; 
-    uint8_t allValuesUpdated;
+    unsigned int valueToSave; 
+    unsigned int allValuesUpdated;
 
     switch (myNex.currentPageId){
       case 1:
@@ -743,7 +743,7 @@ void brewTimer(bool c) { // small function for easier timer start/stop
 }
 
 // Actuating the heater element
-void setBoiler(uint8_t val) {
+void setBoiler(unsigned int val) {
 	// USART_CH1.println("SET_BOILER BEGIN");
   #if defined(ARDUINO_ARCH_AVR)
 	// USART_CH1.println("SET_BOILER AVR BLOCK BEGIN");
@@ -786,8 +786,8 @@ void deScale(bool c) {
   if (selectedOperationalMode == 6) {
     static bool blink = true;
     static unsigned long timer = millis();
-    static uint8_t currentCycleRead = myNex.readNumber("j0.val");
-    static uint8_t lastCycleRead = 10;
+    static unsigned int currentCycleRead = myNex.readNumber("j0.val");
+    static unsigned int lastCycleRead = 10;
     static bool descaleFinished = false;
     if (brewActive && !descaleFinished) {
       if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
@@ -896,7 +896,7 @@ void autoPressureProfile() {
 
 void manualPressureProfile() {
   if( selectedOperationalMode == 3 ) {
-    uint8_t power_reading = myNex.readNumber("h0.val");
+    unsigned int power_reading = myNex.readNumber("h0.val");
     setPressure(power_reading);
   }
   justDoCoffee();
@@ -1062,7 +1062,7 @@ void eepromInit() {
 
 void valuesLoadFromEEPROM() {
   #if defined(ARDUINO_ARCH_AVR)
-    uint16_t init_val;
+    unsigned int init_val;
     // Loading the saved values fro EEPROM and sending them to the LCD
 
     EEPROM.get(EEP_SETPOINT, init_val);// reading setpoint value from eeprom
