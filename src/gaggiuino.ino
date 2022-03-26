@@ -111,12 +111,6 @@ volatile float kProbeReadValue; //temp val
 volatile float livePressure;
 volatile float liveWeight;
 
-// timers
-volatile unsigned long thermoTimer; //temp timer
-volatile unsigned long pressureTimer;
-volatile unsigned long scalesTimer;
-volatile unsigned long pageRefreshTimer;
-
 float newBarValue;
 //scales vars
 /* If building for STM32 define the scales factors here */
@@ -244,6 +238,7 @@ void loop() {
 
 
 void sensorsRead() { // Reading the thermocouple temperature
+  static unsigned long thermoTimer;
   // Reading the temperature every 350ms between the loops
   if (millis() > thermoTimer) {
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
@@ -265,6 +260,8 @@ void sensorsRead() { // Reading the thermocouple temperature
 }
 
 void calculateWeight() {
+  static unsigned long scalesTimer;
+
   scalesTare(); //Tare at the start of any weighing cycle
 
   // Weight output
@@ -284,7 +281,7 @@ void calculateWeight() {
 }
 
 void calculateFlow() {
-  static volatile unsigned long refreshTimer;
+  static unsigned long refreshTimer;
 
   if (millis() >= refreshTimer) {
     flowVal = (currentWeight - previousWeight)*10;
@@ -334,7 +331,7 @@ float getPressure() {  //returns sensor pressure data
 }
 
 
-void setPressure(volatile int targetValue) {  
+void setPressure(int targetValue) {  
   if (targetValue == 0 || livePressure > targetValue) {
     pump.set(0);
   } else {
@@ -850,32 +847,32 @@ void autoPressureProfile() {
   static bool phase_1 = true;
   static bool phase_2;
   static bool updateTimer = true;
-  static unsigned long timer;
+  static unsigned long ppTimer;
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected  
     if ( updateTimer ) {
-      timer = millis();
+      ppTimer = millis();
       updateTimer = 0;
     }
     if ( phase_1 ) { //enters phase 1
-      if (millis() - timer >= ppHold*1000) { // the actions of this if block are run after 4 seconds have passed since starting brewing
-        phase_1 = 0;
-        phase_2 = 1;
-        timer = millis();
+      if ((millis() - ppTimer) >= (ppHold*1000)) { //pp start
+        phase_1 = false;
+        phase_2 = true;
+        ppTimer = millis();
       }
       newBarValue=ppStartBar;
       setPressure(newBarValue);
     } else if ( phase_2 ) { //enters pahse 2
       if (ppStartBar < ppFinishBar) { // Incremental profiling curve
-        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
+        newBarValue = mapRange(millis(),ppTimer,ppTimer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue < (float)ppStartBar) newBarValue = (float)ppStartBar;
         else if (newBarValue > (float)ppFinishBar) newBarValue = (float)ppFinishBar;
       }else if (ppStartBar > ppFinishBar) { // Decremental profiling curve
-        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
+        newBarValue = mapRange(millis(),ppTimer,ppTimer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue > (float)ppStartBar) newBarValue = (float)ppStartBar;
         else if (newBarValue < ppFinishBar) newBarValue = (float)ppFinishBar;      
       }else { // Flat line profiling
-        newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
+        newBarValue = mapRange(millis(),ppTimer,ppTimer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue < (float)ppStartBar) newBarValue = (float)ppStartBar;
         else if (newBarValue > (float)ppFinishBar) newBarValue = (float)ppFinishBar;
       }
@@ -886,9 +883,9 @@ void autoPressureProfile() {
     else if (selectedOperationalMode == 4 ) preinfusionFinished = false;
     phase_2 = false;
     phase_1 = true;
-    if (!updateTimer) updateTimer = true;
-    if (newBarValue != 0.f) newBarValue = 0.f;
-    timer = millis();
+    updateTimer = true;
+    newBarValue = 0.f;
+    ppTimer = millis();
   }
  // Keep that water at temp
   justDoCoffee();
@@ -907,24 +904,24 @@ void manualPressureProfile() {
 
 // Pump dimming during brew for preinfusion
 void preInfusion() {
-  static bool blink = true;
+  static bool preinfuse = true;
   static bool exitPreinfusion;
-  static unsigned long timer = millis();
+  static unsigned long piTimer;
 
   if (brewActive) {
     if (!exitPreinfusion) { //main preinfusion body
-      if (blink) { // Logic that switches between modes depending on the $blink value
+      if (preinfuse) { // Logic that switches between modes depending on the $blink value
         setPressure(preinfuseBar);
-        if (millis() - timer >= preinfuseTime*1000) {
-          blink = false;
-          timer = millis();
+        if (millis() - piTimer >= preinfuseTime*1000) {
+          preinfuse = false;
+          piTimer = millis();
         }
       }else {
         setPressure(0);
-        if (millis() - timer >= preinfuseSoak*1000) { 
+        if (millis() - piTimer >= preinfuseSoak*1000) { 
           exitPreinfusion = true;
-          blink = true;
-          timer = millis();
+          preinfuse = true;
+          piTimer = millis();
         }
       }
       // myNex.writeStr("t11.txt",String(getPressure(),1));
@@ -934,9 +931,9 @@ void preInfusion() {
       setPressure(ppStartBar);
     }
   }else { //resetting all the values
-    setPressure(preinfuseBar);
+    preinfusionFinished = false;
     exitPreinfusion = false;
-    timer = millis();
+    piTimer = millis();
   }
   //keeping it at temp
   justDoCoffee();
@@ -958,23 +955,20 @@ void brewDetect() {
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPressure(9); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   }else{
-    calculateWeight(); // weight calculation on scales screen
     brewTimer(0); // stopping timer
     /* Only resetting the brew activity value if it's been previously set */
-    if (brewActive) brewActive = false; 
+    brewActive = false; 
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) {
       /* Only setting the weight activity value if it's been previously unset */
-      if (!weighingStartRequested) weighingStartRequested=true;
+      weighingStartRequested=true;
       calculateWeight(); 
     }else {/* Only resetting the scales values if on any other screens than brew or scales */
       weighingStartRequested = false; // Flagging weighing stop
       tareDone = false;
       previousBrewState = false;
-      if (currentWeight != 0.f) currentWeight = 0.f;
-      if (previousWeight != 0.f) previousWeight = 0.f;
+      currentWeight = 0.f;
+      previousWeight = 0.f;
     }
-    /* Only resetting the preinfusion value if it's been previously set */
-    if (preinfusionFinished) preinfusionFinished = false;
   }
 }
 
