@@ -429,9 +429,8 @@ void modeSelect() {
       else steamCtrl();
       break;
     default:
-      // USART_CH1.println("MODE SELECT DEFAULT");
-      if (!steamState() ) justDoCoffee();
-      else steamCtrl();
+      POWER_ON == true;
+      pageValuesRefresh();
       break;
   }
   // USART_CH1.println("MODE SELECT EXIT");
@@ -522,18 +521,20 @@ void justDoCoffee() {
 //#############################################################################################
 
 void steamCtrl() {
-  float boilerPressure = getPressure();
 
   if (!brewActive) {
-    if (boilerPressure <= 9.0) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
+    if (livePressure <= 9.0) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) setBoiler(HIGH);  // relayPin -> HIGH
       else setBoiler(LOW);  // relayPin -> LOW
-    }else if(boilerPressure >=9.1) setBoiler(LOW);  // relayPin -> LOW
+    }else if(livePressure >=9.1) setBoiler(LOW);  // relayPin -> LOW
   }else if (brewActive) { //added to cater for hot water from steam wand functionality
-  if (boilerPressure <= 9.0) {
-      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=105)) setBoiler(HIGH);  // relayPin -> HIGH
-      else setBoiler(LOW);  // relayPin -> LOW
-    }else if(boilerPressure >=9.1) setBoiler(LOW);  // relayPin -> LOW
+    if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=105)) {
+      setBoiler(HIGH);  // relayPin -> HIGH
+      setPressure(9);
+    } else {
+      setBoiler(LOW);  // relayPin -> LOW
+      setPressure(9);
+    }
   }else setBoiler(LOW);  // relayPin -> LOW
 }
 
@@ -950,6 +951,7 @@ void brewDetect() {
       brewTimer(1); // nextion timer start
       if (!brewActive) brewActive = true;
       if (!weighingStartRequested) weighingStartRequested = true; // Flagging weighing start
+      if (selectedOperationalMode == 0) setPressure(9);
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
       if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) calculateWeight();
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPressure(9); // setting the pump output target to 9 bars for non PP or PI profiles
