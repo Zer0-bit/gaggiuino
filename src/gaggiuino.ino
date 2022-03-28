@@ -4,11 +4,12 @@
 #endif
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
-#if defined(SINGLE_HX711_CLOCK)
-  #include <HX711_2.h>
-#else
-  #include <HX711.h>
-#endif
+// #if defined(SINGLE_HX711_CLOCK)
+//   #include <HX711_2.h>
+// #else
+//   #include <HX711.h>
+// #endif
+#include <HX711_2.h>
 #include <PSM.h>
 
 
@@ -429,7 +430,7 @@ void modeSelect() {
       else steamCtrl();
       break;
     default:
-      POWER_ON == true;
+      POWER_ON = true;
       pageValuesRefresh();
       break;
   }
@@ -1169,7 +1170,7 @@ void valuesLoadFromEEPROM() {
     // Scales values
     EEPROM.get(EEP_SCALES_F1, scalesF1);//reading scale factors value from eeprom
     EEPROM.get(EEP_SCALES_F2, scalesF2);//reading scale factors value from eeprom
-  #else if defined(ARDUINO_ARCH_STM32)
+  #elif defined(ARDUINO_ARCH_STM32)
     /* If running on STM32 arch just loading some hardcoded defaults until the SDCARD board gets added */
     myNex.writeNum("setPoint", 100);
     myNex.writeNum("moreTemp.n1.val", 100);
