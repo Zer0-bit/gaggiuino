@@ -96,14 +96,10 @@ HX711 LoadCell_1; //HX711 1
 HX711 LoadCell_2; //HX711 2
 #endif
 
-#if defined(ARDUINO_ARCH_STM32)
-// variables to hold data (should be structs or better to organize data)
-
-#endif
 
 //##################__Transducer_stuff__##################################
 //const float voltageZero = 0.49; // the voltage output by the transducer at 0bar - aka our offset
-const float voltageZero = 0.50; // sensor output at 0 bar = 409.6
+const float voltageZero = 0.49f; // sensor output at 0 bar = 409.6
 //float pressureValue; //variable to store the value coming from the pressure transducer
 
 // Some vars are better global
@@ -549,8 +545,8 @@ void lcdRefresh() {
   if (millis() > pageRefreshTimer) {
     myNex.writeNum("pressure.val", int(getPressure()*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
-    if (weighingStartRequested) (currentWeight>=0) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
-    if (weighingStartRequested) (flowVal>=0) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
+    if (weighingStartRequested) (currentWeight) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
+    if (weighingStartRequested) (flowVal) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
 }
@@ -849,7 +845,7 @@ void autoPressureProfile() {
   static bool phase_1 = true;
   static bool phase_2;
   static bool updateTimer = true;
-  static unsigned long ppTimer;
+  static unsigned long ppTimer = millis();
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected  
     if ( updateTimer ) {
