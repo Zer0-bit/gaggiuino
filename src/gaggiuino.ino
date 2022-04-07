@@ -244,7 +244,9 @@ void sensorsRead() { // Reading the thermocouple temperature
     If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating 
     */
     while (kProbeReadValue <= 0.0 || kProbeReadValue == NAN || kProbeReadValue > 165.0) {
-      setBoiler(LOW);  // boilerPin -> LOW
+      /* In the event of the temp failing to read while the SSR is HIGH 
+      we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
+      setBoiler(LOW); 
       if (millis() > thermoTimer) {
         kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
@@ -551,12 +553,21 @@ void steamCtrl() {
 
 void lcdRefresh() {
   static unsigned long pageRefreshTimer;
+  static float shotWeight;
   
   if (millis() > pageRefreshTimer) {
+    /*LCD pressure output*/
     myNex.writeNum("pressure.val", int(getPressure()*10));
+    /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
-    if (weighingStartRequested) (currentWeight) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
+    /*LCD weight output*/
+    if (weighingStartRequested && brewActive) {
+      (currentWeight) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
+      shotWeight = currentWeight;
+    }else if (weighingStartRequested && !brewActive) myNex.writeStr("weight.txt",String(currentWeight-(currentWeight-shotWeight),1));
+    /*LCD flow output*/
     if (weighingStartRequested) (flowVal) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
+
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
 }
