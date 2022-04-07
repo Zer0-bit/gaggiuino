@@ -440,7 +440,7 @@ void justDoCoffee() {
   // USART_CH1.println("DO_COFFEE ENTER");
   unsigned int HPWR_LOW = HPWR/MainCycleDivider;
   static double heaterWave;
-  static unsigned int heaterState;
+  static bool heaterState;
   float BREW_TEMP_DELTA;
   // Calculating the boiler heating power range based on the below input values
   HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
@@ -454,21 +454,31 @@ void justDoCoffee() {
     if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+0.25f && !preinfusionFinished ) {
       if (millis() - heaterWave > HPWR_OUT*BrewCycleDivider && !heaterState ) {
         setBoiler(LOW);  // relayPin -> LOW
-        heaterState=1;
+        heaterState=true;
         heaterWave=millis();
       }else if (millis() - heaterWave > HPWR_LOW*MainCycleDivider && heaterState ) {
         setBoiler(HIGH);  // relayPin -> HIGH
-        heaterState=0;
+        heaterState=false;
         heaterWave=millis();
       }
     } else if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+(brewDeltaActive ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
     if (millis() - heaterWave > HPWR*BrewCycleDivider && !heaterState ) {
       setBoiler(HIGH);  // relayPin -> HIGH
-      heaterState=1;
+      heaterState=true;
       heaterWave=millis();
     }else if (millis() - heaterWave > HPWR && heaterState ) {
       setBoiler(LOW);  // relayPin -> LOW
-      heaterState=0;
+      heaterState=false;
+      heaterWave=millis();
+    }
+  } else if (brewDeltaActive && kProbeReadValue >= (setPoint+BREW_TEMP_DELTA) && kProbeReadValue <= (setPoint+BREW_TEMP_DELTA+2.5f)  && preinfusionFinished ) {
+    if (millis() - heaterWave > HPWR*MainCycleDivider && !heaterState ) {
+      setBoiler(HIGH);  // relayPin -> HIGH
+      heaterState=true;
+      heaterWave=millis();
+    }else if (millis() - heaterWave > HPWR && heaterState ) {
+      setBoiler(LOW);  // relayPin -> LOW
+      heaterState=false;
       heaterWave=millis();
     }
   } else if(kProbeReadValue <= setPoint-1.5f) setBoiler(HIGH);   // relayPin -> HIGH
@@ -484,27 +494,27 @@ void justDoCoffee() {
       setBoiler(HIGH);  // relayPin -> HIGH
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider) {
         setBoiler(LOW);  // relayPin -> LOW
-        heaterState=0;
+        heaterState=false;
         heaterWave=millis();
       }
     } else if ((kProbeReadValue >= ((float)setPoint - 3.00f)) && (kProbeReadValue <= ((float)setPoint - 1.00f))) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState) {
         setBoiler(HIGH);  // relayPin -> HIGH
-        heaterState=1;
+        heaterState=true;
         heaterWave=millis();
       }else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
         setBoiler(LOW);  // relayPin -> LOW
-        heaterState=0;
+        heaterState=false;
         heaterWave=millis();
       } 
     } else if ((kProbeReadValue >= ((float)setPoint - 0.5f)) && kProbeReadValue < (float)setPoint) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState ) {
         setBoiler(HIGH);  // relayPin -> HIGH
-        heaterState=1;
+        heaterState=true;
         heaterWave=millis();
       }else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
         setBoiler(LOW);  // relayPin -> LOW
-        heaterState=0;
+        heaterState=false;
         heaterWave=millis();
       }
     } else {
@@ -567,12 +577,12 @@ void trigger1() {
       case 3:
         // Saving ppStart,ppFin,ppHold and ppLength
         valueToSave = myNex.readNumber("ppStart");
-        if (valueToSave >= 0 && valueToSave >= 1) {
+        if (valueToSave >= 0 ) {
           EEPROM.put(EEP_P_START, valueToSave);
           allValuesUpdated++;
         }
         valueToSave = myNex.readNumber("ppFin");
-        if (valueToSave >= 0 && valueToSave >= 1) {
+        if (valueToSave >= 0 ) {
           EEPROM.put(EEP_P_FINISH, valueToSave);
           allValuesUpdated++;
         }
@@ -946,8 +956,8 @@ void brewDetect() {
     /* Applying the below block only when brew detected */
     if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) { 
       brewTimer(1); // nextion timer start
-      if (!brewActive) brewActive = true;
-      if (!weighingStartRequested) weighingStartRequested = true; // Flagging weighing start
+      brewActive = true;
+      weighingStartRequested = true; // Flagging weighing start
       if (selectedOperationalMode == 0) setPressure(9);
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
       if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) calculateWeight();
@@ -978,7 +988,7 @@ void scalesInit() {
     LoadCells.set_scale(scalesF1, scalesF2);
     LoadCells.power_up();
     
-    delay(300);
+    delay(500);
 
     if (LoadCells.is_ready()) {
       LoadCells.tare(5);
@@ -990,7 +1000,7 @@ void scalesInit() {
     LoadCell_1.set_scale(scalesF1); // calibrated val1
     LoadCell_2.set_scale(scalesF2); // calibrated val2
 
-    delay(300);
+    delay(500);
     
     if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
       scalesPresent = true;
@@ -1035,7 +1045,7 @@ void eepromInit() {
     EEPROM.put(EEP_P_PROFILE, 0);
     EEPROM.put(EEP_PREINFUSION_SEC, 8);
     EEPROM.put(EEP_PREINFUSION_BAR, 2);
-    EEPROM.put(EEP_REGPWR_HZ, 60);
+    EEPROM.put(EEP_REGPWR_HZ, 50);
     EEPROM.put(EEP_WARMUP, 0);
     EEPROM.put(EEP_GRAPH_BREW, 0);
     EEPROM.put(EEP_HOME_ON_SHOT_FINISH, 1);
@@ -1106,13 +1116,13 @@ void valuesLoadFromEEPROM() {
     }
 
     EEPROM.get(EEP_PREINFUSION, init_val);//reading preinfusion checkbox value from eeprom
-    if (  !(init_val < 0) && init_val < 2 ) {
+    if ( init_val >= 0 ) {
       myNex.writeNum("piState", init_val);
       myNex.writeNum("brewAuto.bt0.val", init_val);
     }
 
     EEPROM.get(EEP_P_PROFILE, init_val);//reading pressure profile checkbox value from eeprom
-    if (  !(init_val < 0) && init_val < 2 ) {
+    if ( init_val >= 0 ) {
       myNex.writeNum("ppState", init_val);
       myNex.writeNum("brewAuto.bt1.val", init_val);
     }
@@ -1124,7 +1134,7 @@ void valuesLoadFromEEPROM() {
     }
 
     EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
-    if (  init_val >= 0 && init_val < 9 ) {
+    if (  init_val >= 0 ) {
       myNex.writeNum("piBar", init_val);
       myNex.writeNum("brewAuto.n1.val", init_val);
     }
