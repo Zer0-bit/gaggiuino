@@ -564,7 +564,7 @@ void lcdRefresh() {
     if (weighingStartRequested && brewActive) {
       (currentWeight) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
       shotWeight = currentWeight;
-    }else if (weighingStartRequested && !brewActive) myNex.writeStr("weight.txt",String(currentWeight-(currentWeight-shotWeight),1));
+    }else if (weighingStartRequested && !brewActive) myNex.writeStr("weight.txt",String(shotWeight,1));
     /*LCD flow output*/
     if (weighingStartRequested) (flowVal) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
 
