@@ -330,12 +330,18 @@ float getPressure() {  //returns sensor pressure data
 }
 
 
-void setPressure(int targetValue) {  
+void setPressure(int targetValue) { 
+  unsigned int pumpValue; 
   if (targetValue == 0 || livePressure > targetValue) {
     pump.set(0);
   } else {
-    unsigned int pumpValue = 127 - livePressure * 12;
-    if (livePressure > targetValue) pumpValue = 0;
+    if (!preinfusionFinished) {
+      pumpValue = (127 - livePressure * targetValue)/4;
+      if (livePressure > targetValue) pumpValue = 0;
+    }else {
+      pumpValue = 127 - livePressure * targetValue;
+      if (livePressure > targetValue) pumpValue = 0;
+    }
     pump.set(pumpValue);
   }
 }
