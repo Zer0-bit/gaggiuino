@@ -1,6 +1,8 @@
 #define SINGLE_HX711_CLOCK
 #if defined(ARDUINO_ARCH_AVR)
   #include <EEPROM.h>
+#elif defined(ARDUINO_ARCH_STM32)
+  #include "ADS1X15.h"
 #endif
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
@@ -81,6 +83,7 @@
 #if defined(ARDUINO_ARCH_STM32)// if arch is stm32 
 //If additional USART ports want ti eb used thy should be enable first
 //HardwareSerial USART_CH(PA10, PA9);
+ADS1115 ADS(0x48);
 #endif
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
@@ -180,7 +183,9 @@ void setup() {
   // USART_CH1.begin(115200); //debug channel
   USART_CH.begin(115200); // LCD comms channel 
   // relay port init and set initial operating mode
-  
+#if defined(ARDUINO_ARCH_STM32)
+  ads1115Init();
+#endif
   // USART_CH1.println("Init step 1");
   pinMode(relayPin, OUTPUT);
   pinMode(brewPin, INPUT_PULLUP);
@@ -325,7 +330,7 @@ float getPressure() {  //returns sensor pressure data
     #if defined(ARDUINO_ARCH_AVR)
       return (presData[0] + presData[1]) / 136.54f - 1.49f;
     #else
-      return analogRead(pressurePin) / 68.27f - 1.49f;
+      return ADS.getValue() / 68.27f - 1.49f;
     #endif
 }
 
@@ -1247,4 +1252,14 @@ void valuesLoadFromEEPROM() {
     myNex.writeNum("morePower.bt0.val", 0);
   #endif
 
+}
+
+void ads1115Init() {
+#if defined(ARDUINO_ARCH_STM32)
+  ADS.begin();
+  ADS.setGain(0);      // 6.144 volt
+  ADS.setDataRate(7);  // fast
+  ADS.setMode(0);      // continuous mode
+  ADS.readADC(0);      // first read to trigger
+#endif
 }
