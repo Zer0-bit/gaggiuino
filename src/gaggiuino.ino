@@ -579,7 +579,7 @@ void lcdRefresh() {
       shotWeight = currentWeight;
     }else if (weighingStartRequested && !brewActive) (myNex.currentPageId != 11) ? myNex.writeStr("weight.txt",String(shotWeight,1)) : myNex.writeStr("weight.txt",String(currentWeight,1));
     /*LCD flow output*/
-    if (weighingStartRequested) (flowVal) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
+    if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
 
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
