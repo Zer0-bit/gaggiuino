@@ -340,7 +340,7 @@ void setPressure(int targetValue) {
   if (targetValue == 0 || livePressure > targetValue) {
     pump.set(0);
   } else {
-    if (!preinfusionFinished) {
+    if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
       pumpValue = (127 - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
     }else {
@@ -399,8 +399,10 @@ void modeSelect() {
       break;
     case 1:
       // USART_CH1.println("MODE SELECT 1");
-      if (!steamState() ) preInfusion();
-      else steamCtrl();
+      if (!steamState() ) {
+        if(!preinfusionFinished) preInfusion();
+        else justDoCoffee();
+      }else steamCtrl();
       break;
     case 2:
       // USART_CH1.println("MODE SELECT 2");
@@ -414,8 +416,8 @@ void modeSelect() {
     case 4:
       // USART_CH1.println("MODE SELECT 4");
       if (!steamState() ) {
-        if(preinfusionFinished == false) preInfusion();
-        else if(preinfusionFinished == true) autoPressureProfile();
+        if(!preinfusionFinished) preInfusion();
+        else if(preinfusionFinished) autoPressureProfile();
       } else steamCtrl();
       break;
     case 5:
@@ -981,6 +983,7 @@ void brewDetect() {
       brewActive = true;
       weighingStartRequested = true; // Flagging weighing start
       if (selectedOperationalMode == 0) setPressure(9);
+      if (selectedOperationalMode == 1 && preinfusionFinished) setPressure(9);
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
       if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) calculateWeight();
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) pump.set(127); // setting the pump output target to 9 bars for non PP or PI profiles
