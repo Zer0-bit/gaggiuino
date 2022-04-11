@@ -570,7 +570,7 @@ void lcdRefresh() {
   
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output*/
-    myNex.writeNum("pressure.val", int(getPressure()*10));
+    myNex.writeNum("pressure.val", (getPressure() > 0) ? (getPressure()*10) : 0.0);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     /*LCD weight output*/
