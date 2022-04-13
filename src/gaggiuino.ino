@@ -570,14 +570,17 @@ void lcdRefresh() {
   
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output*/
-    myNex.writeNum("pressure.val", (getPressure() > 0) ? (getPressure()*10) : 0.0);
+    myNex.writeNum("pressure.val", (getPressure() > 0) ? getPressure()*10 : 0.0);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     /*LCD weight output*/
     if (weighingStartRequested && brewActive) {
       (currentWeight) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
       shotWeight = currentWeight;
-    }else if (weighingStartRequested && !brewActive) (myNex.currentPageId != 11) ? myNex.writeStr("weight.txt",String(shotWeight,1)) : myNex.writeStr("weight.txt",String(currentWeight,1));
+    }else if (weighingStartRequested && !brewActive) {
+      if (myNex.currentPageId != 0 && myNex.readNumber("scalesState") != 1) myNex.writeStr("weight.txt",String(shotWeight,1));
+      else if(myNex.currentPageId == 0 && myNex.readNumber("scalesState") == 1) myNex.writeStr("weight.txt",String(currentWeight,1));
+    }
     /*LCD flow output*/
     if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
 
@@ -985,14 +988,14 @@ void brewDetect() {
       if (selectedOperationalMode == 0) setPressure(9);
       if (selectedOperationalMode == 1 && preinfusionFinished) setPressure(9);
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
-      if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) calculateWeight();
+      if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.readNumber("scalesState") == 1 ) calculateWeight();
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) pump.set(127); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   }else{
     brewTimer(0); // stopping timer
     /* Only resetting the brew activity value if it's been previously set */
     brewActive = false; 
-    if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.currentPageId == 11) {
+    if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || myNex.readNumber("scalesState") == 1) {
       /* Only setting the weight activity value if it's been previously unset */
       weighingStartRequested=true;
       calculateWeight(); 
