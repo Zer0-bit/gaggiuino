@@ -1043,7 +1043,7 @@ void scalesInit() {
 }
 
 void scalesTare() {
-  if( !tareDone || !previousBrewState ) {
+  if( scalesPresent && (!tareDone || !previousBrewState) ) {
     #if defined(SINGLE_HX711_CLOCK)
       if (LoadCells.is_ready()) LoadCells.tare(5);
     #else
