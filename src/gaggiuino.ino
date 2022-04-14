@@ -69,10 +69,10 @@
 
 
 // Define some const values
-#define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+#define GET_KTYPE_READ_EVERY 250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define GET_PRESSURE_READ_EVERY 50
-#define GET_SCALES_READ_EVERY 200
-#define REFRESH_SCREEN_EVERY 350 // Screen refresh interval (ms)
+#define GET_SCALES_READ_EVERY 150
+#define REFRESH_SCREEN_EVERY 150 // Screen refresh interval (ms)
 #define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
@@ -581,7 +581,7 @@ void lcdRefresh() {
       shotWeight = currentWeight;
     }else if (weighingStartRequested && !brewActive) {
       if (myNex.currentPageId != 0 && !homeScreenScalesEnabled) myNex.writeStr("weight.txt",String(shotWeight,1));
-      else if(myNex.currentPageId == 0 && myNex.readNumber("scalesState")) myNex.writeStr("weight.txt",String(currentWeight,1));
+      else if(myNex.currentPageId == 0 && homeScreenScalesEnabled) myNex.writeStr("weight.txt",String(currentWeight,1));
     }
     /*LCD flow output*/
     if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
