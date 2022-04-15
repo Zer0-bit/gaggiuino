@@ -57,7 +57,7 @@
   #define brewPin PA11 // PD7
   #define relayPin PB9  // PB0
   #define dimmerPin PB3
-  #define pressurePin PA1 
+  #define pressurePin ADS115_A0 //set here just for reference 
   #define steamPin PA12
   #define HX711_dout_1 PC15 //mcu > HX711 no 1 dout pin
   #define HX711_dout_2 PA0 //mcu > HX711 no 2 dout pin
@@ -342,16 +342,16 @@ void setPressure(int targetValue) {
     pump.set(0);
   } else if(livePressure < targetValue-1.f) {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
-      pumpValue = (127 - livePressure * targetValue)/4;
+      pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
     }else {
-      pumpValue = 127 - livePressure * targetValue;
+      pumpValue = PUMP_RANGE - livePressure * targetValue;
       if (livePressure > targetValue) pumpValue = 0;
     }
     pump.set(pumpValue);
   } else if(livePressure >= targetValue-1.f && livePressure < targetValue) {
     if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
-      pumpValue = (127 - livePressure * targetValue)/4;
+      pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
     }
     pump.set(pumpValue);
