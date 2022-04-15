@@ -340,12 +340,18 @@ void setPressure(int targetValue) {
   unsigned int pumpValue; 
   if (targetValue == 0 || livePressure > targetValue) {
     pump.set(0);
-  } else {
+  } else if(livePressure < targetValue-1.f) {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
       pumpValue = (127 - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
     }else {
       pumpValue = 127 - livePressure * targetValue;
+      if (livePressure > targetValue) pumpValue = 0;
+    }
+    pump.set(pumpValue);
+  } else if(livePressure >= targetValue-1.f && livePressure < targetValue) {
+    if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
+      pumpValue = (127 - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
     }
     pump.set(pumpValue);
