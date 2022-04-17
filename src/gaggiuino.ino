@@ -155,6 +155,7 @@ unsigned int ppHold;
 unsigned int ppLength;
 unsigned int selectedOperationalMode;
 unsigned int regionHz;
+unsigned int pumpValue;
 
 // EEPROM  stuff
 const unsigned int  EEP_SETPOINT = 1;
@@ -271,6 +272,8 @@ void calculateWeight() {
   // Weight output
   if (millis() > scalesTimer) {
     if (scalesPresent && weighingStartRequested) {
+      // Stop pump to prevent HX711 critical section from breaking timing
+      pump.set(0);
       #if defined(SINGLE_HX711_CLOCK)
         float values[2];
         LoadCells.get_units(values);
@@ -278,6 +281,8 @@ void calculateWeight() {
       #else
         currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
       #endif
+      // Resume pumping
+      pump.set(pumpValue);
     }
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
   }
@@ -337,10 +342,9 @@ float getPressure() {  //returns sensor pressure data
 
 
 #if defined(ARDUINO_ARCH_AVR)
-void setPressure(int targetValue) { 
-  unsigned int pumpValue; 
+void setPressure(int targetValue) {
   if (targetValue == 0 || livePressure > targetValue) {
-    pump.set(0);
+    pumpValue = 0;
   } else if(livePressure < targetValue-1.f) {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
@@ -349,20 +353,19 @@ void setPressure(int targetValue) {
       pumpValue = PUMP_RANGE - livePressure * targetValue;
       if (livePressure > targetValue) pumpValue = 0;
     }
-    pump.set(pumpValue);
   } else if(livePressure >= targetValue-1.f && livePressure < targetValue) {
     if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
     }
-    pump.set(pumpValue);
   }
+  pump.set(pumpValue);
 }
 #elif defined(ARDUINO_ARCH_STM32)
 void setPressure(int targetValue) { 
   unsigned int pumpValue; 
   if (targetValue == 0 || livePressure > targetValue) {
-    pump.set(0);
+    pumpValue = 0;
   } else if(livePressure < targetValue-1.f) {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
@@ -371,14 +374,13 @@ void setPressure(int targetValue) {
       pumpValue = PUMP_RANGE - livePressure * targetValue;
       if (livePressure > targetValue) pumpValue = 0;
     }
-    pump.set(pumpValue);
   } else if(livePressure >= targetValue-1.f && livePressure < targetValue) {
     if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
       if (livePressure > targetValue) pumpValue = 0;
     }
-    pump.set(pumpValue);
   }
+  pump.set(pumpValue);
 }
 #endif
 
