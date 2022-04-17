@@ -1276,12 +1276,12 @@ void valuesLoadFromEEPROM() {
     myNex.writeNum("brewAuto.bt1.val", 1);
 
     myNex.writeNum("piSec", 20);
-    myNex.writeNum("brewAuto.n0.val", 8);
+    myNex.writeNum("brewAuto.n0.val", 20);
     myNex.writeNum("piBar", 2);
     myNex.writeNum("brewAuto.n1.val", 2);
 
     myNex.writeNum("piSoak", 0);
-    myNex.writeNum("brewAuto.n4.val", 5);
+    myNex.writeNum("brewAuto.n4.val", 0);
     myNex.writeNum("regHz", 50);
 
     myNex.writeNum("homeOnBrewFinish", 1);
