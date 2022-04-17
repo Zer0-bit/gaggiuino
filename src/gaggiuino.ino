@@ -183,14 +183,13 @@ const unsigned int  EEP_SCALES_F2 = 220;
 void setup() {
   // USART_CH1.begin(115200); //debug channel
   USART_CH.begin(115200); // LCD comms channel 
-  // relay port init and set initial operating mode
-#if defined(ARDUINO_ARCH_STM32)
+  
+  // Various pins operation mode handling
+  pinInit();
+
+  // init the exteranl ADC
   ads1115Init();
-#endif
   // USART_CH1.println("Init step 1");
-  pinMode(relayPin, OUTPUT);
-  pinMode(brewPin, INPUT_PULLUP);
-  pinMode(steamPin, INPUT_PULLUP);
 
   // USART_CH1.println("Init step 2");
   setBoiler(LOW);  // relayPin LOW
@@ -1306,4 +1305,17 @@ void ads1115Init() {
   ADS.setMode(0);      // continuous mode
   ADS.readADC(0);      // first read to trigger
 #endif
+}
+
+void pinInit() {
+  pinMode(relayPin, OUTPUT);
+  pinMode(brewPin, INPUT_PULLUP);
+  pinMode(steamPin, INPUT_PULLUP);
+  
+  #if defined(ARDUINO_ARCH_STM32)
+  pinMode(HX711_sck_1, INPUT_PULLDOWN);
+  pinMode(HX711_sck_2, INPUT_PULLDOWN);
+  pinMode(HX711_dout_1, INPUT_PULLDOWN);
+  pinMode(HX711_dout_2, INPUT_PULLDOWN);
+  #endif
 }
