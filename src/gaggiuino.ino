@@ -336,7 +336,7 @@ float getPressure() {  //returns sensor pressure data
     #if defined(ARDUINO_ARCH_AVR)
       return (presData[0] + presData[1]) / 136.54f - 1.49f;
     #elif defined(ARDUINO_ARCH_STM32)
-      return ADS.getValue() / 2184.5f - 1.19f;
+      return ADS.getValue() / 1706.6f - 1.49f; //2184.5f - 1.19f;
     #endif
 }
 
