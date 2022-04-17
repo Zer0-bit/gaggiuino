@@ -51,9 +51,9 @@
 #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
   // STM32F4 pins definitions
   #define zcPin PA15
-  #define thermoDO PB4
-  #define thermoCS PB5
-  #define thermoCLK PB6
+  #define thermoDO PA5 //PB4
+  #define thermoCS PA6 //PB5
+  #define thermoCLK PA7 //PB6
   #define brewPin PA11 // PD7
   #define relayPin PB9  // PB0
   #define dimmerPin PB3
@@ -311,7 +311,8 @@ void presISR() {
 void initPressure(unsigned int hz) {
   #if defined(ARDUINO_ARCH_AVR)
     unsigned int pin = pressurePin - 14;
-    ADMUX = (DEFAULT << 6) | (pin & 0x07);
+    ADMUX = (DEFAULT << 6) | (pin & 0x07
+    );
     ADCSRB = (1 << ACME);
     ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
     
@@ -331,11 +332,12 @@ float getPressure() {  //returns sensor pressure data
     #if defined(ARDUINO_ARCH_AVR)
       return (presData[0] + presData[1]) / 136.54f - 1.49f;
     #elif defined(ARDUINO_ARCH_STM32)
-      return ADS.getValue() / 2184.5f - 1.49f;
+      return ADS.getValue() / 2184.5f - 1.19f;
     #endif
 }
 
 
+#if defined(ARDUINO_ARCH_AVR)
 void setPressure(int targetValue) { 
   unsigned int pumpValue; 
   if (targetValue == 0 || livePressure > targetValue) {
@@ -357,6 +359,29 @@ void setPressure(int targetValue) {
     pump.set(pumpValue);
   }
 }
+#elif defined(ARDUINO_ARCH_STM32)
+void setPressure(int targetValue) { 
+  unsigned int pumpValue; 
+  if (targetValue == 0 || livePressure > targetValue) {
+    pump.set(0);
+  } else if(livePressure < targetValue-1.f) {
+    if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
+      pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
+      if (livePressure > targetValue) pumpValue = 0;
+    }else {
+      pumpValue = PUMP_RANGE - livePressure * targetValue;
+      if (livePressure > targetValue) pumpValue = 0;
+    }
+    pump.set(pumpValue);
+  } else if(livePressure >= targetValue-1.f && livePressure < targetValue) {
+    if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
+      pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
+      if (livePressure > targetValue) pumpValue = 0;
+    }
+    pump.set(pumpValue);
+  }
+}
+#endif
 
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
@@ -578,16 +603,16 @@ void lcdRefresh() {
   
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output*/
-    myNex.writeNum("pressure.val", (getPressure() > 0) ? getPressure()*10 : 0.0);
+    myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10 : 0.0);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     /*LCD weight output*/
     if (weighingStartRequested && brewActive) {
-      (currentWeight) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
+      (currentWeight > 0.f) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
       shotWeight = currentWeight;
     }else if (weighingStartRequested && !brewActive) {
       if (myNex.currentPageId != 0 && !homeScreenScalesEnabled) myNex.writeStr("weight.txt",String(shotWeight,1));
-      else if(myNex.currentPageId == 0 && homeScreenScalesEnabled) myNex.writeStr("weight.txt",String(currentWeight,1));
+      else if(myNex.currentPageId == 0 && homeScreenScalesEnabled) (currentWeight > 0.f) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
     }
     /*LCD flow output*/
     if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
@@ -1231,8 +1256,8 @@ void valuesLoadFromEEPROM() {
     myNex.writeNum("bDiv", 2);
     myNex.writeNum("moreTemp.n5.val", 2);
 
-    myNex.writeNum("ppStart", 9);
-    myNex.writeNum("brewAuto.n2.val", 9);
+    myNex.writeNum("ppStart", 6);
+    myNex.writeNum("brewAuto.n2.val", 6);
 
     myNex.writeNum("ppFin", 6);
     myNex.writeNum("brewAuto.n3.val", 6);
@@ -1249,12 +1274,12 @@ void valuesLoadFromEEPROM() {
     myNex.writeNum("ppState", 1);
     myNex.writeNum("brewAuto.bt1.val", 1);
 
-    myNex.writeNum("piSec", 8);
+    myNex.writeNum("piSec", 20);
     myNex.writeNum("brewAuto.n0.val", 8);
     myNex.writeNum("piBar", 2);
     myNex.writeNum("brewAuto.n1.val", 2);
 
-    myNex.writeNum("piSoak", 5);
+    myNex.writeNum("piSoak", 0);
     myNex.writeNum("brewAuto.n4.val", 5);
     myNex.writeNum("regHz", 50);
 
@@ -1263,6 +1288,9 @@ void valuesLoadFromEEPROM() {
 
     myNex.writeNum("graphEnabled", 1);
     myNex.writeNum("brewSettings.btGraph.val", 1);
+
+    myNex.writeNum("deltaState", 1);
+    myNex.writeNum("brewSettings.btTempDelta.val", 1);
 
     myNex.writeNum("warmupState", 0);
     myNex.writeNum("morePower.bt0.val", 0);
