@@ -1326,12 +1326,14 @@ void pinInit() {
   pinMode(relayPin, OUTPUT);
   pinMode(brewPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
-  
+  pinMode(HX711_dout_1, INPUT_PULLUP);
+  pinMode(HX711_dout_2, INPUT_PULLUP);
+    
   #if defined(ARDUINO_ARCH_STM32)
   pinMode(HX711_sck_1, INPUT_PULLDOWN);
   pinMode(HX711_sck_2, INPUT_PULLDOWN);
-  pinMode(HX711_dout_1, INPUT_PULLDOWN);
-  pinMode(HX711_dout_2, INPUT_PULLDOWN);
+  pinMode(HX711_dout_1, INPUT_PULLUP);
+  pinMode(HX711_dout_2, INPUT_PULLUP);
   #endif
 }
 
