@@ -3,14 +3,10 @@
   #include <EEPROM.h>
 #elif defined(ARDUINO_ARCH_STM32)
   #include "ADS1X15.h"
+  #include <FlashStorage_STM32.h>
 #endif
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
-// #if defined(SINGLE_HX711_CLOCK)
-//   #include <HX711_2.h>
-// #else
-//   #include <HX711.h>
-// #endif
 #include <HX711_2.h>
 #include <PSM.h>
 
@@ -100,10 +96,12 @@ HX711 LoadCell_2; //HX711 2
 #endif
 
 
-//##################__Transducer_stuff__##################################
-//const float voltageZero = 0.49; // the voltage output by the transducer at 0bar - aka our offset
-const float voltageZero = 0.49f; // sensor output at 0 bar = 409.6
-//float pressureValue; //variable to store the value coming from the pressure transducer
+//##################__FLASH_storage_stuff__##################################
+#if defined(ARDUINO_ARCH_STM32)
+const int WRITTEN_SIGNATURE = 0xBEEFDEED;
+#endif
+
+
 
 // Some vars are better global
 //volatile vars
@@ -273,7 +271,7 @@ void calculateWeight() {
   if (millis() > scalesTimer) {
     if (scalesPresent && weighingStartRequested) {
       // Stop pump to prevent HX711 critical section from breaking timing
-      pump.set(0);
+      //pump.set(0);
       #if defined(SINGLE_HX711_CLOCK)
         float values[2];
         LoadCells.get_units(values);
@@ -282,7 +280,7 @@ void calculateWeight() {
         currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
       #endif
       // Resume pumping
-      pump.set(pumpValue);
+      //pump.set(pumpValue);
     }
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
   }
@@ -342,43 +340,56 @@ float getPressure() {  //returns sensor pressure data
 
 
 #if defined(ARDUINO_ARCH_AVR)
-void setPressure(int targetValue) {
+void setPressure(int targetValue) { 
+  static bool initialRampUp;
   if (targetValue == 0 || livePressure > targetValue) {
     pumpValue = 0;
-  } else if(livePressure < targetValue-1.f) {
+    initialRampUp = true;
+  } else if (livePressure < targetValue-1.f & !initialRampUp) {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
+      if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
     }else {
       pumpValue = PUMP_RANGE - livePressure * targetValue;
       if (livePressure > targetValue) pumpValue = 0;
+      if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
     }
-  } else if(livePressure >= targetValue-1.f && livePressure < targetValue) {
+  } else if (livePressure >= targetValue-1.f && livePressure < targetValue && initialRampUp) {
     if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
     }
+  } else {
+    pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
+    initialRampUp = false;
   }
   pump.set(pumpValue);
 }
 #elif defined(ARDUINO_ARCH_STM32)
 void setPressure(int targetValue) { 
-  unsigned int pumpValue; 
+  static bool initialRampUp;
   if (targetValue == 0 || livePressure > targetValue) {
     pumpValue = 0;
-  } else if(livePressure < targetValue-1.f) {
+    initialRampUp = true;
+  } else if (livePressure < targetValue-1.f & !initialRampUp) {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
       if (livePressure > targetValue) pumpValue = 0;
+      if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
     }else {
       pumpValue = PUMP_RANGE - livePressure * targetValue;
       if (livePressure > targetValue) pumpValue = 0;
+      if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
     }
-  } else if(livePressure >= targetValue-1.f && livePressure < targetValue) {
+  } else if (livePressure >= targetValue-1.f && livePressure < targetValue && initialRampUp) {
     if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
       if (livePressure > targetValue) pumpValue = 0;
     }
+  } else {
+    pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
+    initialRampUp = false;
   }
   pump.set(pumpValue);
 }
@@ -1021,6 +1032,7 @@ void brewDetect() {
       brewTimer(1); // nextion timer start
       brewActive = true;
       weighingStartRequested = true; // Flagging weighing start
+      
       if (selectedOperationalMode == 0) setPressure(9);
       if (selectedOperationalMode == 1 && preinfusionFinished) setPressure(9);
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
@@ -1030,7 +1042,8 @@ void brewDetect() {
   }else{
     brewTimer(0); // stopping timer
     /* Only resetting the brew activity value if it's been previously set */
-    brewActive = false; 
+    brewActive = false;
+    preinfusionFinished = false;
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) {
       /* Only setting the weight activity value if it's been previously unset */
       weighingStartRequested=true;
@@ -1320,4 +1333,62 @@ void pinInit() {
   pinMode(HX711_dout_1, INPUT_PULLDOWN);
   pinMode(HX711_dout_2, INPUT_PULLDOWN);
   #endif
+}
+
+void flashStorageInit() {
+#if defined(ARDUINO_ARCH_STM32)
+  // Check signature at address 0
+  int signature;
+
+  EEPROM.get(0, signature);
+
+  // If the EEPROM is empty then no WRITTEN_SIGNATURE
+  if (signature != WRITTEN_SIGNATURE)
+  {
+    Serial.println("EEPROM is empty, writing WRITTEN_SIGNATURE and some example data:");
+
+    EEPROM.put(0, WRITTEN_SIGNATURE);
+
+    Serial.print("->");
+
+    for (int i = sizeof(WRITTEN_SIGNATURE); i < 20; i++)
+    {
+      EEPROM.write(i, 100 + i);
+      Serial.print(" ");
+      Serial.print(100 + i);
+    }
+   // commit() saves all the changes to EEPROM, it must be called
+    // every time the content of virtual EEPROM is changed to make
+    // the change permanent.
+    // This operation burns Flash write cycles and should not be
+    // done too often. See readme for details:
+    // https://github.com/khoih-prog/FlashStorage_SAMD#limited-number-of-writes
+
+    EEPROM.commit();
+    Serial.println("\nDone writing to emulated EEPROM. You can reset now to test");
+  }
+  else
+  {
+    EEPROM.get(0, signature);
+
+    // Serial.print("EEPROM has been written.Signature = 0x"); Serial.println(signature, HEX);
+
+    // Serial.println("Here is the content of the next 16 bytes:");
+
+    // Serial.print("->");
+
+    for (int i = sizeof(WRITTEN_SIGNATURE); i < 20; i++)
+    {
+      Serial.print(" ");
+      Serial.print(EEPROM.read(i));
+    }
+
+    // Serial.println("\nClearing WRITTEN_SIGNATURE for next try");
+
+    EEPROM.put(0, 0);
+
+    //EEPROM.commit();
+    // Serial.println("Done clearing signature in emulated EEPROM. You can reset now");
+  }
+#endif
 }
