@@ -345,23 +345,23 @@ void setPressure(int targetValue) {
   if (targetValue == 0 || livePressure > targetValue) {
     pumpValue = 0;
     initialRampUp = true;
-  } else if (livePressure < targetValue-1.f & !initialRampUp) {
+  } else if (livePressure < targetValue-0.5f & !initialRampUp) {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
       if (livePressure > targetValue) pumpValue = 0;
-      if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
+      if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
     }else {
       pumpValue = PUMP_RANGE - livePressure * targetValue;
       if (livePressure > targetValue) pumpValue = 0;
-      if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
+      if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
     }
-  } else if (livePressure >= targetValue-1.f && livePressure < targetValue && initialRampUp) {
+  } else if (livePressure >= targetValue-0.5f && livePressure < targetValue && initialRampUp) {
     if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
-      pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
+      pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
       if (livePressure > targetValue) pumpValue = 0;
     }
   } else {
-    pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
+    pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
     initialRampUp = false;
   }
   pump.set(pumpValue);
