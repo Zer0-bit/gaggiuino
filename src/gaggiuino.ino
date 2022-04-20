@@ -164,7 +164,7 @@ unsigned int ppHold;
 unsigned int ppLength;
 unsigned int selectedOperationalMode;
 unsigned int regionHz;
-// unsigned int pumpValue;
+unsigned int pumpValue;
 
 // EEPROM  stuff
 const unsigned int  EEP_SETPOINT = 1;
@@ -352,7 +352,7 @@ float getPressure() {  //returns sensor pressure data
 
 // #if defined(ARDUINO_ARCH_AVR)
 void setPressure(int targetValue) { 
-  unsigned int pumpValue;
+  // unsigned int pumpValue;
 
   if (targetValue == 0 || livePressure > targetValue) pumpValue = 0;
   else {
