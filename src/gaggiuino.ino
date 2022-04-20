@@ -104,12 +104,20 @@ const int WRITTEN_SIGNATURE = 0xBEEFDEED;
 
 
 // Some vars are better global
+//Timers
+unsigned long thermoTimer = millis();
+unsigned long scalesTimer = millis();
+unsigned long flowTimer = millis();
+unsigned long pageRefreshTimer = millis();
+unsigned long ppTimer = millis();
+unsigned long piTimer = millis();
+
 //volatile vars
 volatile float kProbeReadValue; //temp val
 volatile float livePressure;
 volatile float liveWeight;
 
-float newBarValue;
+
 //scales vars
 /* If building for STM32 define the scales factors here */
 float scalesF1 = 1955.571428f;
@@ -126,6 +134,9 @@ bool tareDone;
 bool brewActive;
 bool previousBrewState;
 
+//PP&PI variables
+bool ppPhase_1 = true;
+bool ppPhase_2;
 
 
 bool POWER_ON;
@@ -153,7 +164,7 @@ unsigned int ppHold;
 unsigned int ppLength;
 unsigned int selectedOperationalMode;
 unsigned int regionHz;
-unsigned int pumpValue;
+// unsigned int pumpValue;
 
 // EEPROM  stuff
 const unsigned int  EEP_SETPOINT = 1;
@@ -239,7 +250,7 @@ void loop() {
 
 
 void sensorsRead() { // Reading the thermocouple temperature
-  static unsigned long thermoTimer;
+  // static unsigned long thermoTimer;
   // Reading the temperature every 350ms between the loops
   if (millis() > thermoTimer) {
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
@@ -263,7 +274,7 @@ void sensorsRead() { // Reading the thermocouple temperature
 }
 
 void calculateWeight() {
-  static unsigned long scalesTimer;
+  // static unsigned long scalesTimer;
 
   scalesTare(); //Tare at the start of any weighing cycle
 
@@ -288,12 +299,12 @@ void calculateWeight() {
 }
 
 void calculateFlow() {
-  static unsigned long refreshTimer;
+  // static unsigned long refreshTimer;
 
-  if (millis() >= refreshTimer) {
+  if (millis() >= flowTimer) {
     flowVal = (currentWeight - previousWeight)*10;
     previousWeight = currentWeight;
-    refreshTimer = millis() + 1000;
+    flowTimer = millis() + 1000;
   }
 }
 
@@ -339,16 +350,18 @@ float getPressure() {  //returns sensor pressure data
 }
 
 
-#if defined(ARDUINO_ARCH_AVR)
+// #if defined(ARDUINO_ARCH_AVR)
 void setPressure(int targetValue) { 
-  static bool initialRampUp;
+  unsigned int pumpValue;
 
-  if (targetValue == 0 || livePressure > targetValue) {
-    pumpValue = 0;
-    initialRampUp = true;
-  } else {
+  if (targetValue == 0 || livePressure > targetValue) pumpValue = 0;
+  else {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
-      pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
+      #if defined(ARDUINO_ARCH_AVR)
+        pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
+      #elif defined(ARDUINO_ARCH_STM32)
+        pumpValue = PUMP_RANGE - livePressure * targetValue;
+      #endif
       if (livePressure > targetValue) pumpValue = 0;
       //if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
     }else {
@@ -359,34 +372,36 @@ void setPressure(int targetValue) {
   }
   pump.set(pumpValue);
 }
-#elif defined(ARDUINO_ARCH_STM32)
-void setPressure(int targetValue) { 
-  static bool initialRampUp;
-  if (targetValue == 0 || livePressure > targetValue) {
-    pumpValue = 0;
-    initialRampUp = true;
-  } else if (livePressure < targetValue-1.f & !initialRampUp) {
-    if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
-      pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
-      if (livePressure > targetValue) pumpValue = 0;
-      if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
-    }else {
-      pumpValue = PUMP_RANGE - livePressure * targetValue;
-      if (livePressure > targetValue) pumpValue = 0;
-      if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
-    }
-  } else if (livePressure >= targetValue-1.f && livePressure < targetValue && initialRampUp) {
-    if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
-      pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
-      if (livePressure > targetValue) pumpValue = 0;
-    }
-  } else {
-    pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
-    initialRampUp = false;
-  }
-  pump.set(pumpValue);
-}
-#endif
+// #elif defined(ARDUINO_ARCH_STM32)
+// void setPressure(int targetValue) { 
+//   unsigned int pumpValue;
+//   static bool initialRampUp;
+  
+//   if (targetValue == 0 || livePressure > targetValue) {
+//     pumpValue = 0;
+//     initialRampUp = true;
+//   } else if (livePressure < targetValue-1.f & !initialRampUp) {
+//     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
+//       pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
+//       if (livePressure > targetValue) pumpValue = 0;
+//       if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
+//     }else {
+//       pumpValue = PUMP_RANGE - livePressure * targetValue;
+//       if (livePressure > targetValue) pumpValue = 0;
+//       if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
+//     }
+//   } else if (livePressure >= targetValue-1.f && livePressure < targetValue && initialRampUp) {
+//     if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
+//       pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
+//       if (livePressure > targetValue) pumpValue = 0;
+//     }
+//   } else {
+//     pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
+//     initialRampUp = false;
+//   }
+//   pump.set(pumpValue);
+// }
+// #endif
 
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
@@ -603,7 +618,7 @@ void steamCtrl() {
 //#############################################################################################
 
 void lcdRefresh() {
-  static unsigned long pageRefreshTimer;
+  // static unsigned long pageRefreshTimer;
   static float shotWeight;
   
   if (millis() > pageRefreshTimer) {
@@ -919,25 +934,19 @@ void deScale(bool c) {
 // Pressure profiling function, uses dimmer to dim the pump 
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
-  static bool phase_1 = true;
-  static bool phase_2;
-  static bool updateTimer = true;
-  static unsigned long ppTimer = millis();
+  float newBarValue;
+  // static unsigned long ppTimer = millis();
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected  
-    if ( updateTimer ) {
-      ppTimer = millis();
-      updateTimer = 0;
-    }
-    if ( phase_1 ) { //enters phase 1
+    if ( ppPhase_1 ) { //enters phase 1
       if ((millis() - ppTimer) >= (ppHold*1000)) { //pp start
-        phase_1 = false;
-        phase_2 = true;
+        ppPhase_1 = false;
+        ppPhase_2 = true;
         ppTimer = millis();
       }
       newBarValue=ppStartBar;
       setPressure(newBarValue);
-    } else if ( phase_2 ) { //enters pahse 2
+    } else if ( ppPhase_2 ) { //enters pahse 2
       if (ppStartBar < ppFinishBar) { // Incremental profiling curve
         newBarValue = mapRange(millis(),ppTimer,ppTimer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue < (float)ppStartBar) newBarValue = (float)ppStartBar;
@@ -946,19 +955,15 @@ void autoPressureProfile() {
         newBarValue = mapRange(millis(),ppTimer,ppTimer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue > (float)ppStartBar) newBarValue = (float)ppStartBar;
         else if (newBarValue < ppFinishBar) newBarValue = (float)ppFinishBar;      
-      }else { // Flat line profiling
-        newBarValue = mapRange(millis(),ppTimer,ppTimer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
-        if (newBarValue < (float)ppStartBar) newBarValue = (float)ppStartBar;
-        else if (newBarValue > (float)ppFinishBar) newBarValue = (float)ppFinishBar;
-      }
+      }else if (ppStartBar == ppFinishBar)  newBarValue = ppStartBar; // Flat line profiling
+
       setPressure(newBarValue);
     }
-  }else { 
+  }else { //these are all skipped in mode 4
     if (selectedOperationalMode == 1 ) setPressure(ppStartBar);
     else if (selectedOperationalMode == 4 ) preinfusionFinished = false;
-    phase_2 = false;
-    phase_1 = true;
-    updateTimer = true;
+    ppPhase_2 = false;
+    ppPhase_1 = true;
     newBarValue = 0.f;
     ppTimer = millis();
   }
@@ -981,7 +986,7 @@ void manualPressureProfile() {
 void preInfusion() {
   static bool preinfuse = true;
   static bool exitPreinfusion;
-  static unsigned long piTimer;
+  // static unsigned long piTimer;
 
   if (brewActive) {
     if (!exitPreinfusion) { //main preinfusion body
@@ -1034,6 +1039,11 @@ void brewDetect() {
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   }else{
     brewTimer(0); // stopping timer
+    /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
+    ppTimer = millis();
+    piTimer = millis();
+    ppPhase_2 = false;
+    ppPhase_1 = true;
     /* Only resetting the brew activity value if it's been previously set */
     brewActive = false;
     preinfusionFinished = false;
