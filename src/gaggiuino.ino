@@ -125,6 +125,7 @@ float scalesF2 = -2091.571428f;
 float currentWeight;
 float previousWeight;
 float flowVal;
+
 //unsigned int tarcalculateWeight;
 bool weighingStartRequested;
 bool scalesPresent;
@@ -137,6 +138,7 @@ bool previousBrewState;
 //PP&PI variables
 bool ppPhase_1 = true;
 bool ppPhase_2;
+bool updateTimer = true;
 
 
 bool POWER_ON;
@@ -164,7 +166,6 @@ unsigned int ppHold;
 unsigned int ppLength;
 unsigned int selectedOperationalMode;
 unsigned int regionHz;
-unsigned int pumpValue;
 
 // EEPROM  stuff
 const unsigned int  EEP_SETPOINT = 1;
@@ -352,7 +353,7 @@ float getPressure() {  //returns sensor pressure data
 
 // #if defined(ARDUINO_ARCH_AVR)
 void setPressure(int targetValue) { 
-  // unsigned int pumpValue;
+  unsigned int pumpValue;
 
   if (targetValue == 0 || livePressure > targetValue) pumpValue = 0;
   else {
@@ -937,7 +938,11 @@ void autoPressureProfile() {
   float newBarValue;
   // static unsigned long ppTimer = millis();
 
-  if (brewActive) { //runs this only when brew button activated and pressure profile selected  
+  if (brewActive) { //runs this only when brew button activated and pressure profile selected 
+    if ( updateTimer ) {
+      ppTimer = millis();
+      updateTimer = false;
+    } 
     if ( ppPhase_1 ) { //enters phase 1
       if ((millis() - ppTimer) >= (ppHold*1000)) { //pp start
         ppPhase_1 = false;
@@ -1044,6 +1049,7 @@ void brewDetect() {
     piTimer = millis();
     ppPhase_2 = false;
     ppPhase_1 = true;
+    updateTimer = true;
     /* Only resetting the brew activity value if it's been previously set */
     brewActive = false;
     preinfusionFinished = false;
