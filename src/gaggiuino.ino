@@ -991,12 +991,15 @@ void manualPressureProfile() {
 void preInfusion() {
   static bool preinfuse = true;
   static bool exitPreinfusion;
-  // static unsigned long piTimer;
+  float newBarValue;
 
   if (brewActive) {
     if (!exitPreinfusion) { //main preinfusion body
       if (preinfuse) { // Logic that switches between modes depending on the $blink value
-        setPressure(preinfuseBar);
+        newBarValue = mapRange(millis(),piTimer,piTimer + (preinfuseTime*1000),1.f,preinfuseBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
+        if (newBarValue < 1.f) newBarValue = 1.f;
+        else if (newBarValue > (float)preinfuseBar) newBarValue = (float)preinfuseBar;
+        setPressure(newBarValue);
         if (millis() - piTimer >= preinfuseTime*1000) {
           preinfuse = false;
           piTimer = millis();
