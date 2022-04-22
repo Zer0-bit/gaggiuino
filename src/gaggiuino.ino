@@ -996,9 +996,8 @@ void preInfusion() {
   if (brewActive) {
     if (!exitPreinfusion) { //main preinfusion body
       if (preinfuse) { // Logic that switches between modes depending on the $blink value
-        newBarValue = mapRange(millis(),piTimer,piTimer + (preinfuseTime*1000),1.f,preinfuseBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
-        if (newBarValue < 1.f) newBarValue = 1.f;
-        else if (newBarValue > (float)preinfuseBar) newBarValue = (float)preinfuseBar;
+        newBarValue = mapRange(millis(),piTimer,piTimer + (preinfuseTime*1000),0.5f,(float)preinfuseBar+0.5f,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
+        newBarValue = constrain(newBarValue, 0.5f, (float)preinfuseBar+0.5);
         setPressure(newBarValue);
         if (millis() - piTimer >= preinfuseTime*1000) {
           preinfuse = false;
