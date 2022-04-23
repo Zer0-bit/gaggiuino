@@ -86,7 +86,12 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // EasyNextion object init
 EasyNex myNex(USART_CH);
 //Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, FALLING);
+  #if defined(ARDUINO_ARCH_AVR)
+    #define ZC_MODE FALLING
+  #elif defined(ARDUINO_ARCH_STM32)
+    #define ZC_MODE RISING
+  #endif
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE);
 //#######################__HX711_stuff__##################################
 #if defined(SINGLE_HX711_CLOCK)
 HX711_2 LoadCells;
@@ -378,7 +383,7 @@ void setPressure(int targetValue) {
   #if defined(ARDUINO_ARCH_AVR)
     #define FLOW_DIV 4
   #elif defined(ARDUINO_ARCH_STM32)
-    #define FLOW_DIV 2
+    #define FLOW_DIV 4
   #endif
   unsigned int pumpValue;
   static bool initialRampUp;
