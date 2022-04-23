@@ -325,8 +325,7 @@ void presISR() {
 void initPressure(unsigned int hz) {
   #if defined(ARDUINO_ARCH_AVR)
     unsigned int pin = pressurePin - 14;
-    ADMUX = (DEFAULT << 6) | (pin & 0x07
-    );
+    ADMUX = (DEFAULT << 6) | (pin & 0x07);
     ADCSRB = (1 << ACME);
     ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
     
@@ -351,58 +350,63 @@ float getPressure() {  //returns sensor pressure data
 }
 
 
-// #if defined(ARDUINO_ARCH_AVR)
-void setPressure(int targetValue) { 
-  unsigned int pumpValue;
-
-  if (targetValue == 0 || livePressure > targetValue) pumpValue = 0;
-  else {
-    if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
-      #if defined(ARDUINO_ARCH_AVR)
-        pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
-      #elif defined(ARDUINO_ARCH_STM32)
-        pumpValue = PUMP_RANGE - livePressure * targetValue;
-      #endif
-      if (livePressure > targetValue) pumpValue = 0;
-      //if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
-    }else {
-      pumpValue = PUMP_RANGE - livePressure * targetValue;
-      if (livePressure > targetValue) pumpValue = 0;
-      //if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
-    }
-  }
-  pump.set(pumpValue);
-}
-// #elif defined(ARDUINO_ARCH_STM32)
 // void setPressure(int targetValue) { 
 //   unsigned int pumpValue;
 //   static bool initialRampUp;
-  
-//   if (targetValue == 0 || livePressure > targetValue) {
-//     pumpValue = 0;
-//     initialRampUp = true;
-//   } else if (livePressure < targetValue-1.f & !initialRampUp) {
+
+//   if (targetValue == 0 || livePressure > targetValue) pumpValue = 0;
+//   else {
 //     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
-//       pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
+//       // #if defined(ARDUINO_ARCH_AVR)
+//         pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
+//       // #elif defined(ARDUINO_ARCH_STM32)
+//       //   pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
+//       // #endif
 //       if (livePressure > targetValue) pumpValue = 0;
-//       if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
+//       //if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
 //     }else {
 //       pumpValue = PUMP_RANGE - livePressure * targetValue;
 //       if (livePressure > targetValue) pumpValue = 0;
-//       if (livePressure < targetValue-1.f && initialRampUp) initialRampUp = false;
+//       //if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
 //     }
-//   } else if (livePressure >= targetValue-1.f && livePressure < targetValue && initialRampUp) {
-//     if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
-//       pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
-//       if (livePressure > targetValue) pumpValue = 0;
-//     }
-//   } else {
-//     pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
-//     initialRampUp = false;
 //   }
 //   pump.set(pumpValue);
 // }
-// #endif
+
+
+void setPressure(int targetValue) { 
+  #if defined(ARDUINO_ARCH_AVR)
+    #define FLOW_DIV 4
+  #elif defined(ARDUINO_ARCH_STM32)
+    #define FLOW_DIV 2
+  #endif
+  unsigned int pumpValue;
+  static bool initialRampUp;
+  
+  if (targetValue == 0 || livePressure > targetValue) {
+    pumpValue = 0;
+    initialRampUp = true;
+  } else if (livePressure < targetValue-0.3f & !initialRampUp) {
+    if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
+      pumpValue = (PUMP_RANGE - livePressure * targetValue) / FLOW_DIV;
+      if (livePressure > targetValue) pumpValue = 0;
+      if (livePressure < targetValue-0.3f && initialRampUp) initialRampUp = false;
+    }else {
+      pumpValue = PUMP_RANGE - livePressure * targetValue;
+      if (livePressure > targetValue) pumpValue = 0;
+      if (livePressure < targetValue-0.3f && initialRampUp) initialRampUp = false;
+    }
+  } else if (livePressure >= targetValue-0.3f && livePressure < targetValue && initialRampUp) {
+    if (selectedOperationalMode == 1 || selectedOperationalMode == 4) {
+      pumpValue = (PUMP_RANGE - livePressure * targetValue) / FLOW_DIV;
+      if (livePressure > targetValue) pumpValue = 0;
+    }
+  } else {
+    pumpValue = (PUMP_RANGE - livePressure * targetValue) / FLOW_DIV;
+    initialRampUp = false;
+  }
+  pump.set(pumpValue);
+}
 
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
