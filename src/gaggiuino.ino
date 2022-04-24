@@ -420,25 +420,25 @@ void setPressure(int targetValue) {
 void pageValuesRefresh() {  // Refreshing our values on page changes
 
   if ( myNex.currentPageId != myNex.lastCurrentPageId || POWER_ON == true ) {
-    preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
-    pressureProfileState = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
-    preinfuseTime = myNex.readNumber("piSec");
-    preinfuseBar = myNex.readNumber("piBar"); 
-    preinfuseSoak = myNex.readNumber("piSoak"); // pre-infusion soak value
-    ppStartBar = myNex.readNumber("ppStart");
-    ppFinishBar = myNex.readNumber("ppFin");
-    ppHold = myNex.readNumber("ppHold"); // pp start pressure hold
-    ppLength = myNex.readNumber("ppLength"); // pp shot length
-    brewDeltaActive = myNex.readNumber("deltaState");
-    flushEnabled = myNex.readNumber("flushState");
-    descaleEnabled = myNex.readNumber("descaleState");
-    setPoint = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
-    offsetTemp = myNex.readNumber("offSet");  // reading the offset value from the lcd
-    HPWR = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
-    MainCycleDivider = myNex.readNumber("mDiv");  // reading the delay divider
-    BrewCycleDivider = myNex.readNumber("bDiv");  // reading the delay divider
-    regionHz = myNex.readNumber("regHz");
-    warmupEnabled = myNex.readNumber("warmupState");
+    preinfusionState        = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
+    pressureProfileState    = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
+    preinfuseTime           = myNex.readNumber("piSec");
+    preinfuseBar            = myNex.readNumber("piBar"); 
+    preinfuseSoak           = myNex.readNumber("piSoak"); // pre-infusion soak value
+    ppStartBar              = myNex.readNumber("ppStart");
+    ppFinishBar             = myNex.readNumber("ppFin");
+    ppHold                  = myNex.readNumber("ppHold"); // pp start pressure hold
+    ppLength                = myNex.readNumber("ppLength"); // pp shot length
+    brewDeltaActive         = myNex.readNumber("deltaState");
+    flushEnabled            = myNex.readNumber("flushState");
+    descaleEnabled          = myNex.readNumber("descaleState");
+    setPoint                = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
+    offsetTemp              = myNex.readNumber("offSet");  // reading the offset value from the lcd
+    HPWR                    = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
+    MainCycleDivider        = myNex.readNumber("mDiv");  // reading the delay divider
+    BrewCycleDivider        = myNex.readNumber("bDiv");  // reading the delay divider
+    regionHz                = myNex.readNumber("regHz");
+    warmupEnabled           = myNex.readNumber("warmupState");
     homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
 
     // MODE_SELECT should always be last
@@ -1348,13 +1348,6 @@ void pinInit() {
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(HX711_dout_1, INPUT_PULLUP);
   pinMode(HX711_dout_2, INPUT_PULLUP);
-    
-  #if defined(ARDUINO_ARCH_STM32)
-  pinMode(HX711_sck_1, INPUT_PULLDOWN);
-  pinMode(HX711_sck_2, INPUT_PULLDOWN);
-  pinMode(HX711_dout_1, INPUT_PULLUP);
-  pinMode(HX711_dout_2, INPUT_PULLUP);
-  #endif
 }
 
 void flashStorageInit() {
