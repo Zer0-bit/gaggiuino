@@ -612,7 +612,8 @@ void lcdRefresh() {
   
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure() <= (float)pressureTargetComparator + 0.5 ? getPressure()*10 : (float)pressureTargetComparator*10 : 0.0);
+    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= (float)pressureTargetComparator + 0.5) ? getPressure()*10 : (float)pressureTargetComparator*10 : 0.0);
+    else myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10 : 0.0);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     /*LCD weight output*/
