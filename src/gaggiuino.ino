@@ -55,8 +55,8 @@
   #define dimmerPin PB3
   #define pressurePin ADS115_A0 //set here just for reference 
   #define steamPin PA12
-  #define HX711_dout_1 PC15 //mcu > HX711 no 1 dout pin
-  #define HX711_dout_2 PA0 //mcu > HX711 no 2 dout pin
+  #define HX711_dout_1 PA0 //mcu > HX711 no 1 dout pin
+  #define HX711_dout_2 PA1 //mcu > HX711 no 2 dout pin
   #define HX711_sck_1 PC13 //mcu > HX711 no 1 sck pin
   #define HX711_sck_2 PC14 //mcu > HX711 no 2 sck pin
   #define USART_CH Serial
@@ -75,6 +75,11 @@
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define EEPROM_RESET 1 //change this value if want to reset to defaults
 #define PUMP_RANGE 127
+#if defined(ARDUINO_ARCH_AVR)
+  #define ZC_MODE FALLING
+#elif defined(ARDUINO_ARCH_STM32)
+  #define ZC_MODE RISING
+#endif
 
 #if defined(ARDUINO_ARCH_STM32)// if arch is stm32 
 //If additional USART ports want ti eb used thy should be enable first
@@ -86,11 +91,6 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 // EasyNextion object init
 EasyNex myNex(USART_CH);
 //Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
-  #if defined(ARDUINO_ARCH_AVR)
-    #define ZC_MODE FALLING
-  #elif defined(ARDUINO_ARCH_STM32)
-    #define ZC_MODE RISING
-  #endif
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE);
 //#######################__HX711_stuff__##################################
 #if defined(SINGLE_HX711_CLOCK)
@@ -340,9 +340,9 @@ void initPressure(unsigned int hz) {
 }
 
 float getPressure() {  //returns sensor pressure data
-    // 5V/1024 = 1/204.8 (10 bit) or 6553.6 (15 bit) 
+    // 5V/1024 = 1/204.8 (10 bit) or 6553.6 (15 bit)
     // voltageZero = 0.5V --> 102.4(10 bit) or 3276.8 (15 bit)
-    // voltageMax = 4.5V --> 921.6 (10 bit) or 29491.2 (15 bit) 
+    // voltageMax = 4.5V --> 921.6 (10 bit) or 29491.2 (15 bit)
     // range 921.6 - 102.4 = 819.2 or 26214.4
     // pressure gauge range 0-1.2MPa - 0-12 bar
     // 1 bar = 68.27 or 2184.5
@@ -353,30 +353,6 @@ float getPressure() {  //returns sensor pressure data
       return ADS.getValue() / 1706.6f - 1.49f; //2184.5f - 1.19f;
     #endif
 }
-
-
-// void setPressure(int targetValue) { 
-//   unsigned int pumpValue;
-//   static bool initialRampUp;
-
-//   if (targetValue == 0 || livePressure > targetValue) pumpValue = 0;
-//   else {
-//     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
-//       // #if defined(ARDUINO_ARCH_AVR)
-//         pumpValue = (PUMP_RANGE - livePressure * targetValue)/4;
-//       // #elif defined(ARDUINO_ARCH_STM32)
-//       //   pumpValue = (PUMP_RANGE - livePressure * targetValue)/2;
-//       // #endif
-//       if (livePressure > targetValue) pumpValue = 0;
-//       //if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
-//     }else {
-//       pumpValue = PUMP_RANGE - livePressure * targetValue;
-//       if (livePressure > targetValue) pumpValue = 0;
-//       //if (livePressure < targetValue-0.5f && initialRampUp) initialRampUp = false;
-//     }
-//   }
-//   pump.set(pumpValue);
-// }
 
 
 void setPressure(int targetValue) { 
@@ -1005,7 +981,7 @@ void preInfusion() {
   if (brewActive) {
     if (!exitPreinfusion) { //main preinfusion body
       if (preinfuse) { // Logic that switches between modes depending on the $blink value
-        newBarValue = mapRange(millis(),piTimer,piTimer + (preinfuseTime*1000),0.5f,(float)preinfuseBar+0.5f,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
+        newBarValue = mapRange(millis(),piTimer,piTimer + (preinfuseTime*1000),0.5f,(float)preinfuseBar+1.f,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         newBarValue = constrain(newBarValue, 0.5f, (float)preinfuseBar+0.5);
         setPressure(newBarValue);
         if (millis() - piTimer >= preinfuseTime*1000) {
