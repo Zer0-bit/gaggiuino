@@ -172,6 +172,9 @@ unsigned int ppLength;
 unsigned int selectedOperationalMode;
 unsigned int regionHz;
 
+// Other util vars
+unsigned int pressureTargetComparator;
+
 // EEPROM  stuff
 const unsigned int  EEP_SETPOINT = 1;
 const unsigned int  EEP_OFFSET = 20;
@@ -608,8 +611,8 @@ void lcdRefresh() {
   static float shotWeight;
   
   if (millis() > pageRefreshTimer) {
-    /*LCD pressure output*/
-    myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10 : 0.0);
+    /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
+    myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure() <= (float)pressureTargetComparator + 0.5 ? getPressure()*10 : (float)pressureTargetComparator*10 : 0.0);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     /*LCD weight output*/
@@ -957,7 +960,9 @@ void autoPressureProfile() {
     newBarValue = 0.f;
     ppTimer = millis();
   }
- // Keep that water at temp
+  // saving the target pressure
+  pressureTargetComparator = newBarValue;
+  // Keep that water at temp
   justDoCoffee();
 }
 
@@ -982,7 +987,7 @@ void preInfusion() {
     if (!exitPreinfusion) { //main preinfusion body
       if (preinfuse) { // Logic that switches between modes depending on the $blink value
         newBarValue = mapRange(millis(),piTimer,piTimer + (preinfuseTime*1000),0.5f,(float)preinfuseBar+1.f,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
-        newBarValue = constrain(newBarValue, 0.5f, (float)preinfuseBar+0.5);
+        newBarValue = constrain(newBarValue, 1.f, (float)preinfuseBar+0.5);
         setPressure(newBarValue);
         if (millis() - piTimer >= preinfuseTime*1000) {
           preinfuse = false;
@@ -1007,6 +1012,8 @@ void preInfusion() {
     exitPreinfusion = false;
     piTimer = millis();
   }
+  // saving the target pressure
+  pressureTargetComparator = newBarValue;
   //keeping it at temp
   justDoCoffee();
 }
