@@ -55,9 +55,9 @@
   #define dimmerPin PB3
   #define pressurePin ADS115_A0 //set here just for reference 
   #define steamPin PA12
-  #define HX711_dout_1 PA0 //mcu > HX711 no 1 dout pin
-  #define HX711_dout_2 PA1 //mcu > HX711 no 2 dout pin
-  #define HX711_sck_1 PC13 //mcu > HX711 no 1 sck pin
+  #define HX711_dout_1 PA1 //mcu > HX711 no 1 dout pin
+  #define HX711_dout_2 PA2 //mcu > HX711 no 2 dout pin
+  #define HX711_sck_1 PB0 //mcu > HX711 no 1 sck pin
   #define HX711_sck_2 PC14 //mcu > HX711 no 2 sck pin
   #define USART_CH Serial
   //#define // USART_CH1 Serial
@@ -125,8 +125,8 @@ volatile float liveWeight;
 
 //scales vars
 /* If building for STM32 define the scales factors here */
-float scalesF1 = 1955.571428f;
-float scalesF2 = -2091.571428f;
+float scalesF1 = 3911.142856f; // 3,911.142856
+float scalesF2 = -4183.142856f; // -4,183.142856
 float currentWeight;
 float previousWeight;
 float flowVal;
