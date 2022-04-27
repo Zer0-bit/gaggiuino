@@ -1288,8 +1288,8 @@ void valuesLoadFromEEPROM() {
     myNex.writeNum("bDiv", 2);
     myNex.writeNum("moreTemp.n5.val", 2);
 
-    myNex.writeNum("ppStart", 6);
-    myNex.writeNum("brewAuto.n2.val", 6);
+    myNex.writeNum("ppStart", 9);
+    myNex.writeNum("brewAuto.n2.val", 9);
 
     myNex.writeNum("ppFin", 6);
     myNex.writeNum("brewAuto.n3.val", 6);
@@ -1306,13 +1306,13 @@ void valuesLoadFromEEPROM() {
     myNex.writeNum("ppState", 1);
     myNex.writeNum("brewAuto.bt1.val", 1);
 
-    myNex.writeNum("piSec", 20);
-    myNex.writeNum("brewAuto.n0.val", 20);
+    myNex.writeNum("piSec", 10);
+    myNex.writeNum("brewAuto.n0.val", 10);
     myNex.writeNum("piBar", 2);
     myNex.writeNum("brewAuto.n1.val", 2);
 
-    myNex.writeNum("piSoak", 0);
-    myNex.writeNum("brewAuto.n4.val", 0);
+    myNex.writeNum("piSoak", 5);
+    myNex.writeNum("brewAuto.n4.val", 5);
     myNex.writeNum("regHz", 50);
 
     myNex.writeNum("homeOnBrewFinish", 1);
