@@ -990,12 +990,16 @@ void preInfusion() {
         newBarValue = mapRange(millis(),piTimer,piTimer + (preinfuseTime*1000),0.5f,(float)preinfuseBar+1.f,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         newBarValue = constrain(newBarValue, 1.f, (float)preinfuseBar+0.5);
         setPressure(newBarValue);
+        // saving the target pressure
+        pressureTargetComparator = newBarValue;
         if (millis() - piTimer >= preinfuseTime*1000) {
           preinfuse = false;
           piTimer = millis();
         }
       }else {
         setPressure(0);
+        // saving the target pressure
+        pressureTargetComparator = getPressure();
         if (millis() - piTimer >= preinfuseSoak*1000) { 
           exitPreinfusion = true;
           preinfuse = true;
@@ -1003,7 +1007,11 @@ void preInfusion() {
         }
       }
       // myNex.writeStr("t11.txt",String(getPressure(),1));
-    }else if(exitPreinfusion && selectedOperationalMode == 1) setPressure(9); // PI only
+    }else if(exitPreinfusion && selectedOperationalMode == 1) {
+      setPressure(9); // PI only
+      // saving the target pressure
+      pressureTargetComparator = getPressure();
+    }
     else if(exitPreinfusion && selectedOperationalMode == 4){ // PI + PP
       preinfusionFinished = true;
       setPressure(ppStartBar);
@@ -1014,7 +1022,7 @@ void preInfusion() {
     piTimer = millis();
   }
   // saving the target pressure
-  pressureTargetComparator = newBarValue;
+  //pressureTargetComparator = newBarValue;
   //keeping it at temp
   justDoCoffee();
 }
@@ -1031,8 +1039,14 @@ void brewDetect() {
       brewActive = true;
       weighingStartRequested = true; // Flagging weighing start
       
-      if (selectedOperationalMode == 0) setPressure(9);
-      if (selectedOperationalMode == 1 && preinfusionFinished) setPressure(9);
+      if (selectedOperationalMode == 0) {
+        setPressure(9);
+        pressureTargetComparator = 9;
+      }
+      if (selectedOperationalMode == 1 && preinfusionFinished) {
+        setPressure(9);
+        pressureTargetComparator = 9;
+      }
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
       if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) calculateWeight();
     }else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) pump.set(127); // setting the pump output target to 9 bars for non PP or PI profiles
