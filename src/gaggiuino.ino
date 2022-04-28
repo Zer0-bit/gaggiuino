@@ -58,7 +58,7 @@
   #define HX711_dout_1 PA1 //mcu > HX711 no 1 dout pin
   #define HX711_dout_2 PA2 //mcu > HX711 no 2 dout pin
   #define HX711_sck_1 PB0 //mcu > HX711 no 1 sck pin
-  #define HX711_sck_2 PC14 //mcu > HX711 no 2 sck pin
+  #define HX711_sck_2 PB1 //mcu > HX711 no 2 sck pin
   #define USART_CH Serial
   //#define // USART_CH1 Serial
 #endif
@@ -173,7 +173,7 @@ unsigned int selectedOperationalMode;
 unsigned int regionHz;
 
 // Other util vars
-unsigned int pressureTargetComparator;
+float pressureTargetComparator;
 
 // EEPROM  stuff
 const unsigned int  EEP_SETPOINT = 1;
@@ -612,7 +612,7 @@ void lcdRefresh() {
   
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= (float)pressureTargetComparator + 0.5) ? getPressure()*10 : (float)pressureTargetComparator*10 : 0.0);
+    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= pressureTargetComparator + 0.5) ? getPressure()*10 : pressureTargetComparator*10 : 0.0);
     else myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10 : 0.0);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
@@ -962,7 +962,7 @@ void autoPressureProfile() {
     ppTimer = millis();
   }
   // saving the target pressure
-  pressureTargetComparator = newBarValue;
+  pressureTargetComparator = (int)newBarValue;
   // Keep that water at temp
   justDoCoffee();
 }
@@ -991,7 +991,7 @@ void preInfusion() {
         newBarValue = constrain(newBarValue, 1.f, (float)preinfuseBar+0.5);
         setPressure(newBarValue);
         // saving the target pressure
-        pressureTargetComparator = newBarValue;
+        pressureTargetComparator = (int)newBarValue;
         if (millis() - piTimer >= preinfuseTime*1000) {
           preinfuse = false;
           piTimer = millis();
@@ -1010,7 +1010,7 @@ void preInfusion() {
     }else if(exitPreinfusion && selectedOperationalMode == 1) {
       setPressure(9); // PI only
       // saving the target pressure
-      pressureTargetComparator = getPressure();
+      pressureTargetComparator = (int)getPressure();
     }
     else if(exitPreinfusion && selectedOperationalMode == 4){ // PI + PP
       preinfusionFinished = true;
