@@ -1082,7 +1082,7 @@ void scalesInit() {
     LoadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1);
     LoadCells.set_scale(scalesF1, scalesF2);
     LoadCells.power_up();
-    
+
     delay(500);
 
     if (LoadCells.is_ready()) {
