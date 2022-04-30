@@ -68,27 +68,29 @@ void loop() {
 
     myNex.NextionListen();
 
-    #if defined(SINGLE_HX711_CLOCK)
-    loadcell.set_scale(calibration_factor_lc1, calibration_factor_lc2);
-    #else
-    loadcell_1.set_scale(calibration_factor_lc1); //Adjust to this calibration factor
-    loadcell_2.set_scale(calibration_factor_lc2); //Adjust to this calibration factor
-    #endif
+    if (myNex.currentPageId == 0) {  
+      #if defined(SINGLE_HX711_CLOCK)
+      loadcell.set_scale(calibration_factor_lc1, calibration_factor_lc2);
+      #else
+      loadcell_1.set_scale(calibration_factor_lc1); //Adjust to this calibration factor
+      loadcell_2.set_scale(calibration_factor_lc2); //Adjust to this calibration factor
+      #endif
 
-    if (millis() > timer) {
-        #if defined(SINGLE_HX711_CLOCK)
-        loadcell.get_units(values);
-        myNex.writeStr("t0.txt",String(values[0],2));
-        myNex.writeStr("t1.txt",String(values[1],2));
-        #else
-        myNex.writeStr("t0.txt",String(loadcell_1.get_units(),2));
-        myNex.writeStr("t1.txt",String(loadcell_2.get_units(),2));
-        #endif
+      if (millis() > timer) {    
+          #if defined(SINGLE_HX711_CLOCK)
+          loadcell.get_units(values);
+          myNex.writeStr("t0.txt",String(values[0],2));
+          myNex.writeStr("t1.txt",String(values[1],2));
+          #else
+          myNex.writeStr("t0.txt",String(loadcell_1.get_units(),2));
+          myNex.writeStr("t1.txt",String(loadcell_2.get_units(),2));
+          #endif
 
-        myNex.writeStr("t2.txt",String(calibration_factor_lc1,2));
-        myNex.writeStr("t3.txt",String(calibration_factor_lc2,2));
+          myNex.writeStr("t2.txt",String(calibration_factor_lc1,2));
+          myNex.writeStr("t3.txt",String(calibration_factor_lc2,2));
 
-        timer = millis() + 1000.0;
+          timer = millis() + 1000.0;
+      }
     }
 }
 
