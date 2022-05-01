@@ -7,7 +7,11 @@
 #endif
 #include <EasyNextionLibrary.h>
 #include <max6675.h>
-#include <HX711_2.h>
+#if defined(SINGLE_HX711_CLOCK)
+  #include <HX711_2.h>
+#else
+  #include <HX711.h>
+#endif
 #include <PSM.h>
 
 
