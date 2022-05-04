@@ -17,15 +17,13 @@ jobs:
       - name: Checkout master
         uses: actions/checkout@v2
 
-      - uses: arduino/compile-sketches@v1
-        with:
-          fqbn: 'arduino:avr:nano:cpu=atmega328'
-          libraries: |
-            - name: MAX6675 library
-            - name: Easy Nextion Library
-            - name: TimerInterrupt_Generic
-            - name: ADS1X15
-            - source-url: https://github.com/banoz/PSM.Library/archive/refs/heads/main.zip
-            - source-url: https://github.com/banoz/HX711/archive/refs/heads/master.zip
-          sketch-paths: |
-            - 'gaggiuino.ino'
+      - name: Set up Python
+        uses: actions/setup-python@v1
+
+      - name: Install Platformio
+        run: |
+          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+
+      - name: Build Gaggiuino
+        run: |
+          ~/.platformio/penv/bin/platformio run
