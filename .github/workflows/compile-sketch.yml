@@ -28,4 +28,5 @@ jobs:
             - source-url: https://github.com/banoz/PSM.Library/archive/refs/heads/main.zip
             - source-url: https://github.com/banoz/HX711/archive/refs/heads/master.zip
           sketch-paths: |
-            - 'gaggiuino.ino'
+            - 'src/gaggiuino.ino'
+            - 'scales-calibration/scales-calibration.ino'
