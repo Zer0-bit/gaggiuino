@@ -89,7 +89,7 @@ uint16_t  EEP_WARMUP = 210;
 
 
 void setup() {
-  
+
   Serial.begin(115200); // switching our board to the new serial speed
 
   dimmer.begin(NORMAL_MODE, ON); //dimmer initialisation: name.begin(MODE, STATE)
@@ -247,7 +247,7 @@ void kThermoRead() { // Reading the thermocouple temperature
 void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 
   if (POWER_ON == true) {
-    
+
     ReadAagain_1:
     // Making sure the serial communication finishes sending all the values
     setPoint = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
@@ -310,7 +310,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 //       myNex.writeStr("page popupMSG");
 //       goto ReadAagain_7;
 //     }
-    
+
 //     delay(5);
 
     ReadAagain_8:
@@ -331,7 +331,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 //     }
 //     delay(5);
 
-    ReadAagain_10:    
+    ReadAagain_10:
     ppStartBar = myNex.readNumber("ppStart");
     ppFinishBar = myNex.readNumber("ppFin");
 //     if (ppStartBar < 0 || ppStartBar > 9 || ppFinishBar < 0 || ppFinishBar > 9) {
@@ -346,7 +346,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
     regionHz = myNex.readNumber("regHz");
 //     if (regionVolts < 0 || regionVolts > 250 || regionHz < 0 || regionHz > 60) {
 //       myNex.writeStr("popupMSG.t0.txt","ReadAagain_11");
-//       myNex.writeStr("page popupMSG"); 
+//       myNex.writeStr("page popupMSG");
 //       goto ReadAagain_11;
 //     }
 //     delay(5);
@@ -358,7 +358,7 @@ void Power_ON_Values_Refresh() {  // Refreshing our values on first start
 //       goto ReadAagain_12;
 //     }
 //     delay(5);
-    
+
     // MODE_SELECT should always be last
     selectedOperationalMode = myNex.readNumber("modeSelect");
     if (selectedOperationalMode < 0 || selectedOperationalMode > 10) selectedOperationalMode = myNex.readNumber("modeSelect");
@@ -377,8 +377,8 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
   if (myNex.currentPageId != myNex.lastCurrentPageId) {
     preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
     pressureProfileState = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
-    preinfuseTime = myNex.readNumber("piSec"); 
-    preinfuseBar = myNex.readNumber("piBar"); 
+    preinfuseTime = myNex.readNumber("piSec");
+    preinfuseBar = myNex.readNumber("piBar");
     ppStartBar = myNex.readNumber("ppStart");
     ppFinishBar = myNex.readNumber("ppFin");
     flushEnabled = myNex.readNumber("flushState");
@@ -450,7 +450,7 @@ void justDoCoffee() {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
-      delay(HPWR_OUT); 
+      delay(HPWR_OUT);
     }
   } else if (brewState() == 0) {
     brewTimer(0);
@@ -473,7 +473,7 @@ void justDoCoffee() {
     } else {
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
     }
-  } 
+  }
 }
 
 //#############################################################################################
@@ -491,7 +491,7 @@ void heatCtrl() {
       PORTB |= _BV(PB0);   // relayPin -> HIGH
       delay(HPWR_OUT/BrewCycleDivider);  // delaying the relayPin state change
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
-      delay(HPWR_OUT); 
+      delay(HPWR_OUT);
     }
   } else if (brewState() == 0) {
     brewTimer(0);
@@ -515,17 +515,17 @@ void heatCtrl() {
       PORTB &= ~_BV(PB0);  // relayPin -> LOW
     }
   }
-} 
-  
+}
+
 //#############################################################################################
 //################################____LCD_REFRESH_CONTROL___###################################
 //#############################################################################################
 void lcdRefresh() {
   // Updating the LCD every 300ms
   static unsigned long pageRefreshTimer = millis();
-    
+
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
-    myNex.writeNum("currentHPWR", HPWR_OUT);      
+    myNex.writeNum("currentHPWR", HPWR_OUT);
     if(fineTempEnabled==1) {
       myNex.writeNum("currentTemp",int((currentTempReadValue-offsetTemp)*10));
     }else {
@@ -540,14 +540,14 @@ void lcdRefresh() {
 //#############################################################################################
 // Save the desired temp values to EEPROM
 void trigger1() {
-  uint16_t valueToSave; 
+  uint16_t valueToSave;
   uint8_t allValuesUpdated;
 
   switch (myNex.currentPageId){
-    case 6: 
+    case 6:
       // Reading the LCD side set values
       valueToSave = myNex.readNumber("setPoint");
-      if (valueToSave != NULL && valueToSave > 0) { 
+      if (valueToSave != NULL && valueToSave > 0) {
         EEPROM.put(EEP_SETPOINT, valueToSave);
         allValuesUpdated++;
       }else {
@@ -700,7 +700,7 @@ void trigger1() {
         allValuesUpdated=0;
         myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
         myNex.writeStr("page popupMSG");
-      }      
+      }
       break;
     default:
       break;
@@ -729,11 +729,11 @@ bool brewState() {
 
 
 bool brewTimer(bool c) {
-  if ( c == 1) {  
+  if ( c == 1) {
     if (brewState() == 1) {
       myNex.writeNum("timerState", 1);
     }
-  }else if( c == 0) { 
+  }else if( c == 0) {
     myNex.writeNum("timerState", 0);
   }
 }
@@ -779,7 +779,7 @@ void deScale(bool c) {
           }
           lastCycleRead = currentCycleRead*3;
           timer = millis();
-        } 
+        }
       }
     }else if (brewState() == 1 && descaleFinished == true){
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[0]);
@@ -804,8 +804,8 @@ void deScale(bool c) {
 //#############################################################################################
 
 
-// Pressure profiling function, uses dimmer to dim the pump 
-// as time passes, starts dimming at about 15 seconds mark 
+// Pressure profiling function, uses dimmer to dim the pump
+// as time passes, starts dimming at about 15 seconds mark
 // goes from 9bar to the lower threshold set in settings(default 4bar)
 void autoPressureProfile() {
   static bool setPerformed = 0, phase_1 = 1, phase_2 = 0, updateTimer = 1;
@@ -813,7 +813,7 @@ void autoPressureProfile() {
   static uint8_t dimmerOutput;
   static uint8_t dimmerNewPowerVal;
 
-  if (brewState() == 1) { //runs this only when brew button activated and pressure profile selected  
+  if (brewState() == 1) { //runs this only when brew button activated and pressure profile selected
     if (updateTimer == 1) {
       timer = millis();
       updateTimer = 0;
@@ -843,9 +843,9 @@ void autoPressureProfile() {
           myNex.writeNum("currentPressure",dimmerNewPowerVal);
         }
         timer = millis();
-      } 
+      }
     }
-  }else if ( brewState() == 0 ) { 
+  }else if ( brewState() == 0 ) {
     brewTimer(0);
     if (selectedOperationalMode == 1 ) {
       dimmer.setPower(BAR_TO_DIMMER_OUTPUT[ppStartBar]);
@@ -897,7 +897,7 @@ void preInfusion(bool c) {
       }else {
         // brewTimer(0);
         dimmer.setPower(BAR_TO_DIMMER_OUTPUT[0]);
-        if (millis() - timer > PI_SOAK_FOR) { 
+        if (millis() - timer > PI_SOAK_FOR) {
           exitPreinfusion = true;
           blink = true;
           timer = millis();

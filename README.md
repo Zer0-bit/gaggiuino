@@ -1,7 +1,7 @@
 <div align="center">
 
 [![Gaggiuino](/images/GAGGIUINO_LOGO_transp.png)](https://github.com/Zer0-bit/gaggiuino)
-  
+
 [![Compile Sketch](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml/badge.svg)](https://github.com/Zer0-bit/gaggiuino/actions/workflows/compile-sketch.yml)
 [![Discord Chat](https://img.shields.io/discord/890339612441063494)](https://discord.gg/eJTDJA3xfh "Join Discord Help Chat")
 </div>
