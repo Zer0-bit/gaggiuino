@@ -7,7 +7,7 @@
 
 #include <EasyNextionLibrary.h>
 #if defined(ARDUINO_ARCH_AVR)
-  #include <eeprom.h>
+  #include <EEPROM.h>
 #elif defined(ARDUINO_ARCH_STM32)
   #include "ADS1X15.h"
 #endif
