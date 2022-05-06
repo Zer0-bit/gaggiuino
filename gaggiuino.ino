@@ -180,6 +180,7 @@ const uint16_t  EEP_SCALES_F2 = 220;
 //##############################################################################################################################
 //############################################________________INIT______________################################################
 //##############################################################################################################################
+// cppcheck-suppress unusedFunction
 void setup() {
 
   USART_CH.begin(115200); // switching our board to the new serial speed
@@ -216,6 +217,7 @@ void setup() {
 
 
 //Main loop where all the logic is continuously run
+// cppcheck-suppress unusedFunction
 void loop() {
   pageValuesRefresh();
   myNex.NextionListen();
@@ -586,6 +588,7 @@ void lcdRefresh() {
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
 // Save the desired temp values to EEPROM
+// cppcheck-suppress unusedFunction
 void trigger1() {
   uint16_t valueToSave;
   uint8_t allValuesUpdated;
@@ -739,6 +742,7 @@ void trigger1() {
 //###################################_____SCALES_TARE____######################################
 //#############################################################################################
 
+// cppcheck-suppress unusedFunction
 void trigger2() {
   if (LoadCell_1.wait_ready_timeout(100) && LoadCell_2.wait_ready_timeout(100)) {
     LoadCell_1.tare();
