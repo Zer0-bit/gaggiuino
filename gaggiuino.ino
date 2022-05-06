@@ -85,13 +85,11 @@ bool brewState(void);
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 350 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
-#define GET_PRESSURE_READ_EVERY 50
 #define GET_SCALES_READ_EVERY 200
 #define REFRESH_SCREEN_EVERY 350 // Screen refresh interval (ms)
 #define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
-#define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define EEPROM_RESET 1 //change this value if want to reset to defaults
 #define PUMP_RANGE 127
 
@@ -393,7 +391,7 @@ void modeSelect() {
 void justDoCoffee() {
   uint8_t HPWR_LOW = HPWR/MainCycleDivider;
   static double heaterWave;
-  static uint8_t heaterState, heaterTempDirection;
+  static uint8_t heaterState;
   float BREW_TEMP_DELTA;
   // Calculating the boiler heating power range based on the below input values
   HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
@@ -766,7 +764,7 @@ bool steamState() {
   return (digitalRead(steamPin) != LOW) ? 0 : 1;
 }
 
-bool brewTimer(bool c) { // small function for easier timer start/stop
+void brewTimer(bool c) { // small function for easier timer start/stop
   if ( c == 1) myNex.writeNum("timerState", 1);
   else myNex.writeNum("timerState", 0);
 }
