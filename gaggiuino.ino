@@ -3,9 +3,35 @@
 #include <max6675.h>
 #include <HX711.h>
 #include <PSM.h>
+#include <Arduino.h>
 
+void setup(void);
+void loop(void);
+void setBoiler(uint8_t);
+void eepromInit(void);
+void initPressure(uint8_t);
+float getPressure(void);
+void setPressure(int);
+void scalesInit(void);
+void justDoCoffee(void);
+void pageValuesRefresh(void);
+void sensorsRead(void);
+void modeSelect(void);
+void lcdRefresh(void);
+void steamCtrl(void);
+void trigger1(void);
+void trigger2(void);
+bool steamState(void);
+void brewTimer(bool);
+float mapRange(float, float, float, float, float, int);
+void deScale(bool);
+void autoPressureProfile(void);
+void manualPressureProfile(void);
+void preInfusion(void);
+bool brewState(void);
 
 #if defined(ARDUINO_ARCH_AVR)
+  void presISR();
   // ATMega32P pins definitions
   #define zcPin 2
   #define thermoDO 4

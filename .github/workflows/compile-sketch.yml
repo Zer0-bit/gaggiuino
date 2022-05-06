@@ -48,3 +48,7 @@ jobs:
       - name: Build Gaggiuino
         run: |
           ~/.platformio/penv/bin/platformio run
+
+      - name: Run code analyzers
+        run: |
+          ~/.platformio/penv/bin/platformio check --fail-on-defect high
