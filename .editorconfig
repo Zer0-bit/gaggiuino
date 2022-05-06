@@ -1,0 +1,32 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[platformio_src/**]
+end_of_line = crlf
+
+[gaggiuino.ino]
+end_of_line = crlf
+
+[**.{md,adoc}]
+indent_style = space
+trim_trailing_whitespace = unset
+insert_final_newline = unset
+
+[platformio.ini]
+indent_style = tab
+
+[troubleshooting/platformio_src/**]
+end_of_line = crlf
+
+[troubleshooting/gaggiuino-debug.ino]
+end_of_line = crlf
+
+[troubleshooting/platformio.ini]
+indent_style = tab

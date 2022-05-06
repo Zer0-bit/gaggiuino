@@ -15,7 +15,7 @@
   #define relayPin 8  // PB0
   #define dimmerPin 9
   #define brewPin A0 // PD7
-  #define pressurePin A1 
+  #define pressurePin A1
   #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
   #define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
   #define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
@@ -47,7 +47,7 @@
   #define brewPin PA0 // PD7
   #define relayPin PB8  // PB0
   #define dimmerPin PB9
-  #define pressurePin PA1 
+  #define pressurePin PA1
   #define steamPin PA2
   #define HX711_dout_1 PB14 //mcu > HX711 no 1 dout pin
   #define HX711_dout_2 PB15 //mcu > HX711 no 2 dout pin
@@ -141,7 +141,7 @@ const uint16_t  EEP_PREINFUSION = 140;
 const uint16_t  EEP_P_PROFILE = 160;
 const uint16_t  EEP_PREINFUSION_SEC = 180;
 const uint16_t  EEP_PREINFUSION_BAR = 190;
-const uint16_t  EEP_PREINFUSION_SOAK = 170; 
+const uint16_t  EEP_PREINFUSION_SOAK = 170;
 const uint16_t  EEP_REGPWR_HZ = 195;
 const uint16_t  EEP_WARMUP = 200;
 const uint16_t  EEP_HOME_ON_SHOT_FINISH = 205;
@@ -155,7 +155,7 @@ const uint16_t  EEP_SCALES_F2 = 220;
 //############################################________________INIT______________################################################
 //##############################################################################################################################
 void setup() {
-  
+
   USART_CH.begin(115200); // switching our board to the new serial speed
 
   // relay port init and set initial operating mode
@@ -164,15 +164,15 @@ void setup() {
   pinMode(steamPin, INPUT_PULLUP);
 
   // relayPin LOW
-  setBoiler(LOW); 
-  //Pump 
+  setBoiler(LOW);
+  //Pump
   pump.set(0);
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
     delay(5);
   }
-  
+
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
   // start interrupt read for pressure transducer
@@ -249,7 +249,7 @@ void initPressure(uint8_t hz)
 
     ITimer1.init();
     ITimer1.attachInterrupt(hz * 2, presISR);
-  #endif 
+  #endif
 }
 
 float getPressure() {  //returns sensor pressure data
@@ -267,7 +267,7 @@ float getPressure() {  //returns sensor pressure data
 }
 
 
-void setPressure(int targetValue) {  
+void setPressure(int targetValue) {
  if (targetValue == 0 || livePressure > targetValue) {
    pump.set(0);
  } else {
@@ -287,7 +287,7 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     preinfusionState = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
     pressureProfileState = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
     preinfuseTime = myNex.readNumber("piSec");
-    preinfuseBar = myNex.readNumber("piBar"); 
+    preinfuseBar = myNex.readNumber("piBar");
     preinfuseSoak = myNex.readNumber("piSoak"); // pre-infusion soak value
     ppStartBar = myNex.readNumber("ppStart");
     ppFinishBar = myNex.readNumber("ppFin");
@@ -425,7 +425,7 @@ void justDoCoffee() {
         setBoiler(LOW);  // relayPin -> LOW
         heaterState=0;
         heaterWave=millis();
-      } 
+      }
     } else if ((kProbeReadValue >= ((float)setPoint - 0.5)) && kProbeReadValue < (float)setPoint) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState == 0) {
         setBoiler(HIGH);  // relayPin -> HIGH
@@ -474,7 +474,7 @@ void lcdRefresh() {
   static float fWghtEntryVal;
   float flowVal;
   //float gPressureCurveBeautify = newBarValue*10;
-  
+
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
 	//(preinfusionFinished == true) ? myNex.writeNum("pressure.val", int(gPressureCurveBeautify)) : myNex.writeNum("pressure.val", int(livePressure*10));
 	myNex.writeNum("pressure.val", int(livePressure*10));
@@ -501,14 +501,14 @@ void lcdRefresh() {
         }
         // soft smooth quite dumb atm just wanted ot have a more stable output value
         if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 8) {
-          currentWeight = previousWeight; 
+          currentWeight = previousWeight;
           wErr++;
         }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 8) {
           previousWeight = currentWeight;
           wErr = 0;
         }else previousWeight = currentWeight;// smoothing end
         scalesRefreshTimer = millis();
-      } 
+      }
       myNex.writeStr("weight.txt",String(currentWeight,1));
       // FLow calc
       if ((currentWeight - fWghtEntryVal) >= 0.5) {
@@ -538,7 +538,7 @@ void lcdRefresh() {
       myNex.writeStr("weight.txt",String(currentWeight,1));
       // soft smooth quite dumb atm just wanted ot have a more stable output value
       if (currentWeight > 1.5 && currentWeight<previousWeight && wErr < 4) {
-        currentWeight = previousWeight; 
+        currentWeight = previousWeight;
         wErr++;
       }else if (currentWeight > 1.5 && currentWeight<previousWeight && wErr >= 4) {
         previousWeight = currentWeight;
@@ -561,7 +561,7 @@ void lcdRefresh() {
 //#############################################################################################
 // Save the desired temp values to EEPROM
 void trigger1() {
-  uint16_t valueToSave; 
+  uint16_t valueToSave;
   uint8_t allValuesUpdated;
 
   switch (myNex.currentPageId){
@@ -646,10 +646,10 @@ void trigger1() {
       break;
     case 5:
       break;
-    case 6: 
+    case 6:
       // Reading the LCD side set values
       valueToSave = myNex.readNumber("setPoint");
-      if ( valueToSave > 0) { 
+      if ( valueToSave > 0) {
         EEPROM.put(EEP_SETPOINT, valueToSave);
         allValuesUpdated++;
       }else {}
@@ -848,7 +848,7 @@ void deScale(bool c) {
           }
           lastCycleRead = currentCycleRead*3;
           timer = millis();
-        } 
+        }
       }
     }else if (brewState() == 1 && descaleFinished == true){
       setPressure(0);
@@ -874,14 +874,14 @@ void deScale(bool c) {
 //#############################################################################################
 
 
-// Pressure profiling function, uses dimmer to dim the pump 
+// Pressure profiling function, uses dimmer to dim the pump
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
   static bool phase_1 = 1, phase_2 = 0, updateTimer = 1;
   static unsigned long timer;
   //static float newBarValue;
 
-  if (brewState() == 1) { //runs this only when brew button activated and pressure profile selected  
+  if (brewState() == 1) { //runs this only when brew button activated and pressure profile selected
     if (updateTimer == 1) {
       timer = millis();
       updateTimer = 0;
@@ -903,7 +903,7 @@ void autoPressureProfile() {
       }else if (ppStartBar > ppFinishBar) { // Decremental profiling curve
         newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue > (float)ppStartBar) newBarValue = (float)ppStartBar;
-        else if (newBarValue < ppFinishBar) newBarValue = (float)ppFinishBar;      
+        else if (newBarValue < ppFinishBar) newBarValue = (float)ppFinishBar;
       }else { // Flat line profiling
         newBarValue = mapRange(millis(),timer,timer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue < (float)ppStartBar) newBarValue = (float)ppStartBar;
@@ -911,7 +911,7 @@ void autoPressureProfile() {
       }
       setPressure(newBarValue);
     }
-  }else { 
+  }else {
     brewTimer(0);
     if (selectedOperationalMode == 1 ) setPressure(ppStartBar);
     else if (selectedOperationalMode == 4 ) preinfusionFinished = false;
@@ -959,7 +959,7 @@ void preInfusion() {
         }
       }else {
         setPressure(0);
-        if ((millis() - timer) >= (preinfuseSoak*1000)) { 
+        if ((millis() - timer) >= (preinfuseSoak*1000)) {
           exitPreinfusion = true;
           blink = true;
           timer = millis();
@@ -988,9 +988,9 @@ void preInfusion() {
 void scalesInit() {
   LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
   LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
-  
+
   if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
-    //good values - 1: 1708 2: -2162 | 
+    //good values - 1: 1708 2: -2162 |
     LoadCell_1.set_scale(scalesF1); // calibrated val1
     LoadCell_2.set_scale(scalesF2); // calibrated val2
     scalesPresent = true;
