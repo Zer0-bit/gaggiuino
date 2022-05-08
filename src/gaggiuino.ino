@@ -59,10 +59,10 @@
   #define dimmerPin PB3
   #define pressurePin ADS115_A0 //set here just for reference 
   #define steamPin PA12
-  #define HX711_dout_1 PA1 //mcu > HX711 no 1 dout pin
-  #define HX711_dout_2 PA2 //mcu > HX711 no 2 dout pin
   #define HX711_sck_1 PB0 //mcu > HX711 no 1 sck pin
   #define HX711_sck_2 PB1 //mcu > HX711 no 2 sck pin
+  #define HX711_dout_1 PA1 //mcu > HX711 no 1 dout pin
+  #define HX711_dout_2 PA2 //mcu > HX711 no 2 dout pin
   #define USART_CH Serial
   //#define // USART_CH1 Serial
 #endif
@@ -71,7 +71,7 @@
 // Define some const values
 #define GET_KTYPE_READ_EVERY 250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define GET_PRESSURE_READ_EVERY 50
-#define GET_SCALES_READ_EVERY 150
+#define GET_SCALES_READ_EVERY 100
 #define REFRESH_SCREEN_EVERY 150 // Screen refresh interval (ms)
 #define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
@@ -105,13 +105,6 @@ HX711 LoadCell_2; //HX711 2
 #endif
 
 
-//##################__FLASH_storage_stuff__##################################
-#if defined(ARDUINO_ARCH_STM32)
-const int WRITTEN_SIGNATURE = 0xBEEFDEED;
-#endif
-
-
-
 // Some vars are better global
 //Timers
 unsigned long thermoTimer = millis();
@@ -129,13 +122,13 @@ volatile float liveWeight;
 
 //scales vars
 /* If building for STM32 define the scales factors here */
-float scalesF1 = 3911.142856f; // 3,911.142856
-float scalesF2 = -4183.142856f; // -4,183.142856
+float scalesF1 = -4183.14f; // 3,911.142856
+float scalesF2 = 3911.14f; // -4,183.142856
 float currentWeight;
 float previousWeight;
 float flowVal;
 
-//unsigned int tarcalculateWeight;
+//int tarcalculateWeight;
 bool weighingStartRequested;
 bool scalesPresent;
 bool tareDone;
@@ -160,47 +153,48 @@ bool  descaleEnabled;
 bool preinfusionFinished;
 bool brewDeltaActive;
 bool homeScreenScalesEnabled;
-volatile unsigned int  HPWR;
-volatile unsigned int  HPWR_OUT;
-unsigned int  setPoint;
-unsigned int  offsetTemp;
-unsigned int  MainCycleDivider;
-unsigned int  BrewCycleDivider;
-unsigned int  preinfuseTime;
-unsigned int preinfuseBar;
-unsigned int preinfuseSoak;
-unsigned int ppStartBar;
-unsigned int ppFinishBar;
-unsigned int ppHold;
-unsigned int ppLength;
-unsigned int selectedOperationalMode;
-unsigned int regionHz;
+volatile int  HPWR;
+volatile int  HPWR_OUT;
+int  setPoint;
+int  offsetTemp;
+int  MainCycleDivider;
+int  BrewCycleDivider;
+int  preinfuseTime;
+int preinfuseBar;
+int preinfuseSoak;
+int ppStartBar;
+int ppFinishBar;
+int ppHold;
+int ppLength;
+int selectedOperationalMode;
+int regionHz;
 
 // Other util vars
 float pressureTargetComparator;
 
 // EEPROM  stuff
-const unsigned int  EEP_SETPOINT = 1;
-const unsigned int  EEP_OFFSET = 20;
-const unsigned int  EEP_HPWR = 40;
-const unsigned int  EEP_M_DIVIDER = 60;
-const unsigned int  EEP_B_DIVIDER = 80;
-const unsigned int  EEP_P_START = 100;
-const unsigned int  EEP_P_FINISH = 120;
-const unsigned int  EEP_P_HOLD = 110;
-const unsigned int  EEP_P_LENGTH = 130;
-const unsigned int  EEP_PREINFUSION = 140;
-const unsigned int  EEP_P_PROFILE = 160;
-const unsigned int  EEP_PREINFUSION_SEC = 180;
-const unsigned int  EEP_PREINFUSION_BAR = 190;
-const unsigned int  EEP_PREINFUSION_SOAK = 170; 
-const unsigned int  EEP_REGPWR_HZ = 195;
-const unsigned int  EEP_WARMUP = 200;
-const unsigned int  EEP_HOME_ON_SHOT_FINISH = 205;
-const unsigned int  EEP_GRAPH_BREW = 210;
-const unsigned int  EEP_BREW_DELTA = 212;
-const unsigned int  EEP_SCALES_F1 = 215;
-const unsigned int  EEP_SCALES_F2 = 220;
+#define  EEP_SIG                 0
+#define  EEP_SETPOINT            10
+#define  EEP_OFFSET              20
+#define  EEP_HPWR                40
+#define  EEP_M_DIVIDER           60
+#define  EEP_B_DIVIDER           80
+#define  EEP_P_START             100
+#define  EEP_P_FINISH            120
+#define  EEP_P_HOLD              110
+#define  EEP_P_LENGTH            130
+#define  EEP_PREINFUSION         140
+#define  EEP_P_PROFILE           160
+#define  EEP_PREINFUSION_SEC     180
+#define  EEP_PREINFUSION_BAR     190
+#define  EEP_PREINFUSION_SOAK    170
+#define  EEP_REGPWR_HZ           195
+#define  EEP_WARMUP              200
+#define  EEP_HOME_ON_SHOT_FINISH 205
+#define  EEP_GRAPH_BREW          210
+#define  EEP_BREW_DELTA          212
+#define  EEP_SCALES_F1           215
+#define  EEP_SCALES_F2           220
 
 
 void setup() {
@@ -263,7 +257,7 @@ void loop() {
 
 
 void sensorsRead() { // Reading the thermocouple temperature
-  // static unsigned long thermoTimer;
+  // static long thermoTimer;
   // Reading the temperature every 350ms between the loops
   if (millis() > thermoTimer) {
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
@@ -287,7 +281,7 @@ void sensorsRead() { // Reading the thermocouple temperature
 }
 
 void calculateWeight() {
-  // static unsigned long scalesTimer;
+  // static long scalesTimer;
 
   scalesTare(); //Tare at the start of any weighing cycle
 
@@ -312,7 +306,7 @@ void calculateWeight() {
 }
 
 void calculateFlow() {
-  // static unsigned long refreshTimer;
+  // static long refreshTimer;
 
   if (millis() >= flowTimer) {
     flowVal = (currentWeight - previousWeight)*10;
@@ -325,8 +319,8 @@ void calculateFlow() {
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
 #if defined(ARDUINO_ARCH_AVR)
-volatile unsigned int presData[2];
-volatile unsigned char presIndex = 0;
+volatile int presData[2];
+volatile char presIndex = 0;
 
 void presISR() {
   presData[presIndex] = ADCW;
@@ -334,9 +328,9 @@ void presISR() {
 }
 #endif
 
-void initPressure(unsigned int hz) {
+void initPressure(int hz) {
   #if defined(ARDUINO_ARCH_AVR)
-    unsigned int pin = pressurePin - 14;
+    int pin = pressurePin - 14;
     ADMUX = (DEFAULT << 6) | (pin & 0x07);
     ADCSRB = (1 << ACME);
     ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
@@ -357,7 +351,7 @@ float getPressure() {  //returns sensor pressure data
     #if defined(ARDUINO_ARCH_AVR)
       return (presData[0] + presData[1]) / 136.54f - 1.49f;
     #elif defined(ARDUINO_ARCH_STM32)
-      return ADS.getValue() / 1706.6f - 1.49f; //2184.5f - 1.19f;
+      return ADS.getValue() / 1706.6f - 1.49f;
     #endif
 }
 
@@ -368,7 +362,7 @@ void setPressure(int targetValue) {
   #elif defined(ARDUINO_ARCH_STM32)
     #define FLOW_DIV 4
   #endif
-  unsigned int pumpValue;
+  int pumpValue;
   static bool initialRampUp;
   
   if (targetValue == 0 || livePressure > targetValue) {
@@ -499,7 +493,7 @@ void modeSelect() {
 //#############################################################################################
 void justDoCoffee() {
   // USART_CH1.println("DO_COFFEE ENTER");
-  unsigned int HPWR_LOW = HPWR/MainCycleDivider;
+  int HPWR_LOW = HPWR/MainCycleDivider;
   static double heaterWave;
   static bool heaterState;
   float BREW_TEMP_DELTA;
@@ -611,7 +605,7 @@ void steamCtrl() {
 //#############################################################################################
 
 void lcdRefresh() {
-  // static unsigned long pageRefreshTimer;
+  // static long pageRefreshTimer;
   static float shotWeight;
   
   if (millis() > pageRefreshTimer) {
@@ -639,9 +633,9 @@ void lcdRefresh() {
 //#############################################################################################
 // Save the desired temp values to EEPROM
 void trigger1() {
-  #if defined(ARDUINO_ARCH_AVR)
-    unsigned int valueToSave; 
-    unsigned int allValuesUpdated;
+  #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_STM32)
+    int valueToSave; 
+    int allValuesUpdated;
 
     switch (myNex.currentPageId){
       case 1:
@@ -826,7 +820,7 @@ void brewTimer(bool c) { // small function for easier timer start/stop
 }
 
 // Actuating the heater element
-void setBoiler(unsigned int val) {
+void setBoiler(int val) {
 	// USART_CH1.println("SET_BOILER BEGIN");
   #if defined(ARDUINO_ARCH_AVR)
 	// USART_CH1.println("SET_BOILER AVR BLOCK BEGIN");
@@ -867,9 +861,9 @@ float mapRange(float sourceNumber, float fromA, float fromB, float toA, float to
 
 void deScale(bool c) {
   static bool blink = true;
-  static unsigned long timer = millis();
-  static unsigned int currentCycleRead = myNex.readNumber("j0.val");
-  static unsigned int lastCycleRead = 10;
+  static long timer = millis();
+  static int currentCycleRead = myNex.readNumber("j0.val");
+  static int lastCycleRead = 10;
   static bool descaleFinished = false;
   if (brewActive && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
@@ -929,7 +923,7 @@ void deScale(bool c) {
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
   float newBarValue;
-  // static unsigned long ppTimer = millis();
+  // static long ppTimer = millis();
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected 
     if ( updateTimer ) {
@@ -973,7 +967,7 @@ void autoPressureProfile() {
 
 void manualPressureProfile() {
   if( selectedOperationalMode == 3 ) {
-    unsigned int power_reading = myNex.readNumber("h0.val");
+    int power_reading = myNex.readNumber("h0.val");
     setPressure(power_reading);
   }
   justDoCoffee();
@@ -1126,11 +1120,23 @@ void scalesTare() {
 
 
 void eepromInit() {
+  int sig;
+
   #if defined(ARDUINO_ARCH_AVR)
+  sig = EEPROM.read(EEP_SIG);
+  setPoint = EEPROM.read(EEP_SETPOINT);
+  preinfuseSoak = EEPROM.read(EEP_PREINFUSION_SOAK);
+  #elif defined(ARDUINO_ARCH_STM32)
+  EEPROM.get(EEP_SIG, sig);
+  EEPROM.get(EEP_SETPOINT, setPoint);
+  EEPROM.get(EEP_PREINFUSION_SOAK, preinfuseSoak);
+  #endif
+
+  // #if defined(ARDUINO_ARCH_AVR)
     //If it's the first boot we'll need to set some defaults
-    if (EEPROM.read(0) != EEPROM_RESET || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535|| EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
-    USART_CH.println("SECU_CHECK FAILED! Applying defaults!");
-    EEPROM.put(0, EEPROM_RESET);
+    if (sig != EEPROM_RESET || setPoint <= 0 || setPoint > 160 || preinfuseSoak > 500) {
+    // USART_CH.print("SECU_CHECK FAILED! Applying defaults!");
+    EEPROM.put(EEP_SIG, EEPROM_RESET);
     //The values can be modified to accomodate whatever system it tagets
     //So on first boot it writes and reads the desired system values
     EEPROM.put(EEP_SETPOINT, 100);
@@ -1153,185 +1159,125 @@ void eepromInit() {
     EEPROM.put(EEP_P_LENGTH, 30);
     EEPROM.put(EEP_GRAPH_BREW, 1);
     EEPROM.put(EEP_BREW_DELTA, 1);
-    EEPROM.put(EEP_SCALES_F1, 1955.571428f);
-    EEPROM.put(EEP_SCALES_F2, -2091.571428f);
     }
-  #endif
 
   // Applying our saved EEPROM saved values
   valuesLoadFromEEPROM();
 }
 
 void valuesLoadFromEEPROM() {
-  #if defined(ARDUINO_ARCH_AVR)
-    unsigned int init_val;
-    // Loading the saved values fro EEPROM and sending them to the LCD
+  int init_val;
 
-    EEPROM.get(EEP_SETPOINT, init_val);// reading setpoint value from eeprom
-    if ( init_val > 0 ) {
-      myNex.writeNum("setPoint", init_val);
-      myNex.writeNum("moreTemp.n1.val", init_val);
-    }
-    EEPROM.get(EEP_OFFSET, init_val); // reading offset value from eeprom
-    if ( init_val >= 0 ) {
-      myNex.writeNum("offSet", init_val);
-      myNex.writeNum("moreTemp.n2.val", init_val);
-    }
-    EEPROM.get(EEP_HPWR, init_val);//reading HPWR value from eeprom
-    if (  init_val >= 0 ) {
-      myNex.writeNum("hpwr", init_val);
-      myNex.writeNum("moreTemp.n3.val", init_val);
-    }
-    EEPROM.get(EEP_M_DIVIDER, init_val);//reading main cycle div from eeprom
-    if ( init_val >= 1 ) {
-      myNex.writeNum("mDiv", init_val);
-      myNex.writeNum("moreTemp.n4.val", init_val);
-    }
-    EEPROM.get(EEP_B_DIVIDER, init_val);//reading brew cycle div from eeprom
-    if (  init_val >= 1 ) {
-      myNex.writeNum("bDiv", init_val);
-      myNex.writeNum("moreTemp.n5.val", init_val);
-    }
-    EEPROM.get(EEP_P_START, init_val);//reading pressure profile start value from eeprom
-    if (  init_val >= 0 ) {
-      myNex.writeNum("ppStart", init_val);
-      myNex.writeNum("brewAuto.n2.val", init_val);
-    }
+  // Loading the saved values fro EEPROM and sending them to the LCD
 
-    EEPROM.get(EEP_P_FINISH, init_val);// reading pressure profile finish value from eeprom
-    if (  init_val >= 0 ) {
-      myNex.writeNum("ppFin", init_val);
-      myNex.writeNum("brewAuto.n3.val", init_val);
-    }
-    EEPROM.get(EEP_P_HOLD, init_val);// reading pressure profile hold value from eeprom
-    if (  init_val >= 0 ) {
-      myNex.writeNum("ppHold", init_val);
-      myNex.writeNum("brewAuto.n5.val", init_val);
-    }
-    EEPROM.get(EEP_P_LENGTH, init_val);// reading pressure profile length value from eeprom
-    if (  init_val >= 0 ) {
-      myNex.writeNum("ppLength", init_val);
-      myNex.writeNum("brewAuto.n6.val", init_val);
-    }
+  EEPROM.get(EEP_SETPOINT, init_val);// reading setpoint value from eeprom
+  if ( init_val > 0 ) {
+    myNex.writeNum("setPoint", init_val);
+    myNex.writeNum("moreTemp.n1.val", init_val);
+  }
+  EEPROM.get(EEP_OFFSET, init_val); // reading offset value from eeprom
+  if ( init_val >= 0 ) {
+    myNex.writeNum("offSet", init_val);
+    myNex.writeNum("moreTemp.n2.val", init_val);
+  }
+  EEPROM.get(EEP_HPWR, init_val);//reading HPWR value from eeprom
+  if (  init_val >= 0 ) {
+    myNex.writeNum("hpwr", init_val);
+    myNex.writeNum("moreTemp.n3.val", init_val);
+  }
+  EEPROM.get(EEP_M_DIVIDER, init_val);//reading main cycle div from eeprom
+  if ( init_val >= 1 ) {
+    myNex.writeNum("mDiv", init_val);
+    myNex.writeNum("moreTemp.n4.val", init_val);
+  }
+  EEPROM.get(EEP_B_DIVIDER, init_val);//reading brew cycle div from eeprom
+  if (  init_val >= 1 ) {
+    myNex.writeNum("bDiv", init_val);
+    myNex.writeNum("moreTemp.n5.val", init_val);
+  }
+  EEPROM.get(EEP_P_START, init_val);//reading pressure profile start value from eeprom
+  if (  init_val >= 0 ) {
+    myNex.writeNum("ppStart", init_val);
+    myNex.writeNum("brewAuto.n2.val", init_val);
+  }
 
-    EEPROM.get(EEP_PREINFUSION, init_val);//reading preinfusion checkbox value from eeprom
-    if ( init_val >= 0 ) {
-      myNex.writeNum("piState", init_val);
-      myNex.writeNum("brewAuto.bt0.val", init_val);
-    }
+  EEPROM.get(EEP_P_FINISH, init_val);// reading pressure profile finish value from eeprom
+  if (  init_val >= 0 ) {
+    myNex.writeNum("ppFin", init_val);
+    myNex.writeNum("brewAuto.n3.val", init_val);
+  }
+  EEPROM.get(EEP_P_HOLD, init_val);// reading pressure profile hold value from eeprom
+  if (  init_val >= 0 ) {
+    myNex.writeNum("ppHold", init_val);
+    myNex.writeNum("brewAuto.n5.val", init_val);
+  }
+  EEPROM.get(EEP_P_LENGTH, init_val);// reading pressure profile length value from eeprom
+  if (  init_val >= 0 ) {
+    myNex.writeNum("ppLength", init_val);
+    myNex.writeNum("brewAuto.n6.val", init_val);
+  }
 
-    EEPROM.get(EEP_P_PROFILE, init_val);//reading pressure profile checkbox value from eeprom
-    if ( init_val >= 0 ) {
-      myNex.writeNum("ppState", init_val);
-      myNex.writeNum("brewAuto.bt1.val", init_val);
-    }
+  EEPROM.get(EEP_PREINFUSION, init_val);//reading preinfusion checkbox value from eeprom
+  if ( init_val >= 0 ) {
+    myNex.writeNum("piState", init_val);
+    myNex.writeNum("brewAuto.bt0.val", init_val);
+  }
 
-    EEPROM.get(EEP_PREINFUSION_SEC, init_val);//reading preinfusion time value from eeprom
-    if (init_val >= 0) {
-      myNex.writeNum("piSec", init_val);
-      myNex.writeNum("brewAuto.n0.val", init_val);
-    }
+  EEPROM.get(EEP_P_PROFILE, init_val);//reading pressure profile checkbox value from eeprom
+  if ( init_val >= 0 ) {
+    myNex.writeNum("ppState", init_val);
+    myNex.writeNum("brewAuto.bt1.val", init_val);
+  }
 
-    EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
-    if (  init_val >= 0 ) {
-      myNex.writeNum("piBar", init_val);
-      myNex.writeNum("brewAuto.n1.val", init_val);
-    }
-    EEPROM.get(EEP_PREINFUSION_SOAK, init_val);//reading preinfusion soak times value from eeprom
-    if (  init_val >= 0 ) {
-      myNex.writeNum("piSoak", init_val);
-      myNex.writeNum("brewAuto.n4.val", init_val);
-    }
-    // Region POWER value
-    EEPROM.get(EEP_REGPWR_HZ, init_val);//reading region frequency value from eeprom
-    if (  init_val == 50 || init_val == 60 ) myNex.writeNum("regHz", init_val);
+  EEPROM.get(EEP_PREINFUSION_SEC, init_val);//reading preinfusion time value from eeprom
+  if (init_val >= 0) {
+    myNex.writeNum("piSec", init_val);
+    myNex.writeNum("brewAuto.n0.val", init_val);
+  }
+
+  EEPROM.get(EEP_PREINFUSION_BAR, init_val);//reading preinfusion pressure value from eeprom
+  if (  init_val >= 0 ) {
+    myNex.writeNum("piBar", init_val);
+    myNex.writeNum("brewAuto.n1.val", init_val);
+  }
+  EEPROM.get(EEP_PREINFUSION_SOAK, init_val);//reading preinfusion soak times value from eeprom
+  if (  init_val >= 0 ) {
+    myNex.writeNum("piSoak", init_val);
+    myNex.writeNum("brewAuto.n4.val", init_val);
+  }
+  // Region POWER value
+  EEPROM.get(EEP_REGPWR_HZ, init_val);//reading region frequency value from eeprom
+  if (  init_val == 50 || init_val == 60 ) myNex.writeNum("regHz", init_val);
 
 
-    // Brew page settings
-    EEPROM.get(EEP_HOME_ON_SHOT_FINISH, init_val);//reading bre time value from eeprom
-    if (  init_val == 0 || init_val == 1 ) {
-      myNex.writeNum("homeOnBrewFinish", init_val);
-      myNex.writeNum("brewSettings.btGoHome.val", init_val);
-    }
+  // Brew page settings
+  EEPROM.get(EEP_HOME_ON_SHOT_FINISH, init_val);//reading bre time value from eeprom
+  if (  init_val == 0 || init_val == 1 ) {
+    myNex.writeNum("homeOnBrewFinish", init_val);
+    myNex.writeNum("brewSettings.btGoHome.val", init_val);
+  }
 
-    EEPROM.get(EEP_GRAPH_BREW, init_val);//reading preinfusion pressure value from eeprom
-    if (  init_val == 0 || init_val == 1) {
-      myNex.writeNum("graphEnabled", init_val);
-      myNex.writeNum("brewSettings.btGraph.val", init_val);
-    }
+  EEPROM.get(EEP_GRAPH_BREW, init_val);//reading preinfusion pressure value from eeprom
+  if (  init_val == 0 || init_val == 1) {
+    myNex.writeNum("graphEnabled", init_val);
+    myNex.writeNum("brewSettings.btGraph.val", init_val);
+  }
 
-    EEPROM.get(EEP_BREW_DELTA, init_val);//reading preinfusion pressure value from eeprom
-    if (  init_val == 0 || init_val == 1) {
-      myNex.writeNum("deltaState", init_val);
-      myNex.writeNum("brewSettings.btTempDelta.val", init_val);
-    }
+  EEPROM.get(EEP_BREW_DELTA, init_val);//reading preinfusion pressure value from eeprom
+  if (  init_val == 0 || init_val == 1) {
+    myNex.writeNum("deltaState", init_val);
+    myNex.writeNum("brewSettings.btTempDelta.val", init_val);
+  }
 
-    // Warmup checkbox value
-    EEPROM.get(EEP_WARMUP, init_val);//reading preinfusion pressure value from eeprom
-    if (  init_val == 0 || init_val == 1 ) {
-      myNex.writeNum("warmupState", init_val);
-      myNex.writeNum("morePower.bt0.val", init_val);
-    }
-    // Scales values
-    EEPROM.get(EEP_SCALES_F1, scalesF1);//reading scale factors value from eeprom
-    EEPROM.get(EEP_SCALES_F2, scalesF2);//reading scale factors value from eeprom
-  #elif defined(ARDUINO_ARCH_STM32)
-    /* If running on STM32 arch just loading some hardcoded defaults until the SDCARD board gets added */
-    myNex.writeNum("setPoint", 100);
-    myNex.writeNum("moreTemp.n1.val", 100);
-
-    myNex.writeNum("offSet", 7);
-    myNex.writeNum("moreTemp.n2.val", 7);
-
-    myNex.writeNum("hpwr", 550);
-    myNex.writeNum("moreTemp.n3.val", 550);
-
-    myNex.writeNum("mDiv", 5);
-    myNex.writeNum("moreTemp.n4.val", 5);
-
-    myNex.writeNum("bDiv", 2);
-    myNex.writeNum("moreTemp.n5.val", 2);
-
-    myNex.writeNum("ppStart", 9);
-    myNex.writeNum("brewAuto.n2.val", 9);
-
-    myNex.writeNum("ppFin", 6);
-    myNex.writeNum("brewAuto.n3.val", 6);
-
-    myNex.writeNum("ppHold", 5);
-    myNex.writeNum("brewAuto.n5.val", 5);
-
-    myNex.writeNum("ppLength", 20);
-    myNex.writeNum("brewAuto.n6.val", 20);
-
-    myNex.writeNum("piState", 1);
-    myNex.writeNum("brewAuto.bt0.val", 1);
-
-    myNex.writeNum("ppState", 1);
-    myNex.writeNum("brewAuto.bt1.val", 1);
-
-    myNex.writeNum("piSec", 10);
-    myNex.writeNum("brewAuto.n0.val", 10);
-    myNex.writeNum("piBar", 2);
-    myNex.writeNum("brewAuto.n1.val", 2);
-
-    myNex.writeNum("piSoak", 5);
-    myNex.writeNum("brewAuto.n4.val", 5);
-    myNex.writeNum("regHz", 50);
-
-    myNex.writeNum("homeOnBrewFinish", 1);
-    myNex.writeNum("brewSettings.btGoHome.val", 1);
-
-    myNex.writeNum("graphEnabled", 1);
-    myNex.writeNum("brewSettings.btGraph.val", 1);
-
-    myNex.writeNum("deltaState", 1);
-    myNex.writeNum("brewSettings.btTempDelta.val", 1);
-
-    myNex.writeNum("warmupState", 0);
-    myNex.writeNum("morePower.bt0.val", 0);
-  #endif
-
+  // Warmup checkbox value
+  EEPROM.get(EEP_WARMUP, init_val);//reading preinfusion pressure value from eeprom
+  if (  init_val == 0 || init_val == 1 ) {
+    myNex.writeNum("warmupState", init_val);
+    myNex.writeNum("morePower.bt0.val", init_val);
+  }
+  // Scales values
+  EEPROM.get(EEP_SCALES_F1, scalesF1);//reading scale factors value from eeprom
+  EEPROM.get(EEP_SCALES_F2, scalesF2);//reading scale factors value from eeprom
 }
 
 void ads1115Init() {
@@ -1350,62 +1296,4 @@ void pinInit() {
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(HX711_dout_1, INPUT_PULLUP);
   pinMode(HX711_dout_2, INPUT_PULLUP);
-}
-
-void flashStorageInit() {
-#if defined(ARDUINO_ARCH_STM32)
-  // Check signature at address 0
-  int signature;
-
-  EEPROM.get(0, signature);
-
-  // If the EEPROM is empty then no WRITTEN_SIGNATURE
-  if (signature != WRITTEN_SIGNATURE)
-  {
-    Serial.println("EEPROM is empty, writing WRITTEN_SIGNATURE and some example data:");
-
-    EEPROM.put(0, WRITTEN_SIGNATURE);
-
-    Serial.print("->");
-
-    for (int i = sizeof(WRITTEN_SIGNATURE); i < 20; i++)
-    {
-      EEPROM.write(i, 100 + i);
-      Serial.print(" ");
-      Serial.print(100 + i);
-    }
-   // commit() saves all the changes to EEPROM, it must be called
-    // every time the content of virtual EEPROM is changed to make
-    // the change permanent.
-    // This operation burns Flash write cycles and should not be
-    // done too often. See readme for details:
-    // https://github.com/khoih-prog/FlashStorage_SAMD#limited-number-of-writes
-
-    EEPROM.commit();
-    Serial.println("\nDone writing to emulated EEPROM. You can reset now to test");
-  }
-  else
-  {
-    EEPROM.get(0, signature);
-
-    // Serial.print("EEPROM has been written.Signature = 0x"); Serial.println(signature, HEX);
-
-    // Serial.println("Here is the content of the next 16 bytes:");
-
-    // Serial.print("->");
-
-    for (int i = sizeof(WRITTEN_SIGNATURE); i < 20; i++)
-    {
-      Serial.print(" ");
-      Serial.print(EEPROM.read(i));
-    }
-
-    // Serial.println("\nClearing WRITTEN_SIGNATURE for next try");
-
-    EEPROM.put(0, 0);
-
-    //EEPROM.commit();
-    // Serial.println("Done clearing signature in emulated EEPROM. You can reset now");
-  }
-#endif
 }
