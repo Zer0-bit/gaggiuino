@@ -1159,6 +1159,8 @@ void eepromInit() {
     EEPROM.put(EEP_P_LENGTH, 30);
     EEPROM.put(EEP_GRAPH_BREW, 1);
     EEPROM.put(EEP_BREW_DELTA, 1);
+    EEPROM.put(EEP_SCALES_F1, 4000);
+    EEPROM.put(EEP_SCALES_F2, 4000);
     }
 
   // Applying our saved EEPROM saved values
