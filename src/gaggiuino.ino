@@ -610,8 +610,8 @@ void lcdRefresh() {
   
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= pressureTargetComparator + 0.5) ? getPressure()*10 : pressureTargetComparator*10 : 0.0);
-    else myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10 : 0.0);
+    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= pressureTargetComparator + 0.5f) ? getPressure()*10.f : pressureTargetComparator*10.f : 0.f);
+    else myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10.f : 0.f);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     /*LCD weight output*/
@@ -623,7 +623,7 @@ void lcdRefresh() {
       else if(myNex.currentPageId == 0 && homeScreenScalesEnabled) (currentWeight > 0.f) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
     }
     /*LCD flow output*/
-    if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.0);
+    if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.f);
 
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
