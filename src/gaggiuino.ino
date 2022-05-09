@@ -192,7 +192,7 @@ float pressureTargetComparator;
 #define  EEP_WARMUP              200
 #define  EEP_HOME_ON_SHOT_FINISH 205
 #define  EEP_GRAPH_BREW          210
-#define  EEP_BREW_DELTA          212
+#define  EEP_BREW_DELTA          225
 #define  EEP_SCALES_F1           215
 #define  EEP_SCALES_F2           220
 
@@ -1144,20 +1144,19 @@ void eepromInit() {
     EEPROM.put(EEP_HPWR, 550);
     EEPROM.put(EEP_M_DIVIDER, 5);
     EEPROM.put(EEP_B_DIVIDER, 2);
-    EEPROM.put(EEP_PREINFUSION, 0);
+    EEPROM.put(EEP_PREINFUSION, 1);
     EEPROM.put(EEP_P_START, 9);
     EEPROM.put(EEP_P_FINISH, 6);
-    EEPROM.put(EEP_P_PROFILE, 0);
-    EEPROM.put(EEP_PREINFUSION_SEC, 8);
+    EEPROM.put(EEP_P_PROFILE, 1);
+    EEPROM.put(EEP_PREINFUSION_SEC, 10);
     EEPROM.put(EEP_PREINFUSION_BAR, 2);
     EEPROM.put(EEP_REGPWR_HZ, 50);
     EEPROM.put(EEP_WARMUP, 0);
-    EEPROM.put(EEP_GRAPH_BREW, 0);
-    EEPROM.put(EEP_HOME_ON_SHOT_FINISH, 1);
-    EEPROM.put(EEP_PREINFUSION_SOAK, 5);
-    EEPROM.put(EEP_P_HOLD, 7);
-    EEPROM.put(EEP_P_LENGTH, 30);
     EEPROM.put(EEP_GRAPH_BREW, 1);
+    EEPROM.put(EEP_HOME_ON_SHOT_FINISH, 1);
+    EEPROM.put(EEP_PREINFUSION_SOAK, 10);
+    EEPROM.put(EEP_P_HOLD, 5);
+    EEPROM.put(EEP_P_LENGTH, 15);
     EEPROM.put(EEP_BREW_DELTA, 1);
     EEPROM.put(EEP_SCALES_F1, 4000);
     EEPROM.put(EEP_SCALES_F2, 4000);
