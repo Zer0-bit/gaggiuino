@@ -9,6 +9,27 @@ on:
   workflow_dispatch:
 
 jobs:
+  coding-style:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install eclint
+        run: |
+          npm install -g eclint
+
+      - name: Check coding style
+        run: |
+          eclint check platformio_src/ troubleshooting/ platformio.ini
+
   compile-sketch:
     runs-on: ubuntu-latest
     timeout-minutes: 30
