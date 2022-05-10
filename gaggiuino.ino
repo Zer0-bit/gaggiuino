@@ -547,7 +547,7 @@ void lcdRefresh() {
       }
     }
   }else if (brewState() == 0 && scalesPresent == true  && (myNex.currentPageId == 1 || myNex.currentPageId == 2||myNex.currentPageId == 8)) {
-    myNex.writeStr("weight.txt",String(currentWeight+flowVal,1));
+    myNex.writeStr("weight.txt",String(currentWeight,1));
     previousBrewState=0;
     tareDone=0;
   }
