@@ -268,13 +268,13 @@ float getPressure() {  //returns sensor pressure data
 
 
 void setPressure(int targetValue) {
- if (targetValue == 0 || livePressure > targetValue) {
-   pump.set(0);
- } else {
-	unsigned int pumpValue = 127 - livePressure * 12;
-	if (livePressure > targetValue) pumpValue = 0;
-	pump.set(pumpValue);
- }
+  if (targetValue == 0 || livePressure > targetValue) {
+    pump.set(0);
+  } else {
+    unsigned int pumpValue = 127 - livePressure * 12;
+    if (livePressure > targetValue) pumpValue = 0;
+    pump.set(pumpValue);
+  }
 }
 
 //##############################################################################################################################
@@ -476,8 +476,8 @@ void lcdRefresh() {
   //float gPressureCurveBeautify = newBarValue*10;
 
   if (millis() - pageRefreshTimer > REFRESH_SCREEN_EVERY) {
-	//(preinfusionFinished == true) ? myNex.writeNum("pressure.val", int(gPressureCurveBeautify)) : myNex.writeNum("pressure.val", int(livePressure*10));
-	myNex.writeNum("pressure.val", int(livePressure*10));
+  //(preinfusionFinished == true) ? myNex.writeNum("pressure.val", int(gPressureCurveBeautify)) : myNex.writeNum("pressure.val", int(livePressure*10));
+  myNex.writeNum("pressure.val", int(livePressure*10));
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     pageRefreshTimer = millis();
   }
@@ -727,7 +727,7 @@ void trigger2() {
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
- return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is ON.
+  return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is ON.
 }
 
 // Returns HIGH when switch is OFF and LOW when ON
@@ -863,7 +863,7 @@ void deScale(bool c) {
       descaleFinished = false;
       timer = millis();
     }
-   //keeping it at temp
+    //keeping it at temp
     justDoCoffee();
   }
 }
@@ -921,7 +921,7 @@ void autoPressureProfile() {
     updateTimer = 1;
     newBarValue = 0.0;
   }
- // Keep that water at temp
+  // Keep that water at temp
   justDoCoffee();
 }
 
@@ -978,7 +978,7 @@ void preInfusion() {
     exitPreinfusion = false;
     timer = millis();
   }
- //keeping it at temp
+  //keeping it at temp
   justDoCoffee();
 }
 
@@ -999,7 +999,7 @@ void scalesInit() {
 
 
 void eepromInit() {
-	//If it's the first boot we'll need to set some defaults
+  //If it's the first boot we'll need to set some defaults
   if (EEPROM.read(0) != EEPROM_RESET || EEPROM.read(EEP_SETPOINT) == 0 || EEPROM.read(EEP_SETPOINT) == 65535|| EEPROM.read(EEP_PREINFUSION_SOAK) == 65535) {
     USART_CH.println("SECU_CHECK FAILED! Applying defaults!");
     EEPROM.put(0, EEPROM_RESET);
@@ -1024,8 +1024,8 @@ void eepromInit() {
     EEPROM.put(EEP_P_HOLD, 7);
     EEPROM.put(EEP_P_LENGTH, 30);
     EEPROM.put(EEP_GRAPH_BREW, 0);
-	EEPROM.put(EEP_SCALES_F1, 1955.571428f);
-	EEPROM.put(EEP_SCALES_F2, -2091.571428f);
+    EEPROM.put(EEP_SCALES_F1, 1955.571428f);
+    EEPROM.put(EEP_SCALES_F2, -2091.571428f);
   }
 
   // Applying our saved EEPROM saved values
