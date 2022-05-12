@@ -26,7 +26,7 @@
   #define relayPin 8  // PB0
   #define dimmerPin 9
   #define brewPin A0 // PD7
-  #define pressurePin A1 
+  #define pressurePin A1
   #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
   #define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
   #define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
@@ -57,7 +57,7 @@
   #define brewPin PA11 // PD7
   #define relayPin PB9  // PB0
   #define dimmerPin PB3
-  #define pressurePin ADS115_A0 //set here just for reference 
+  #define pressurePin ADS115_A0 //set here just for reference
   #define steamPin PA12
   #define HX711_sck_1 PB0 //mcu > HX711 no 1 sck pin
   #define HX711_sck_2 PB1 //mcu > HX711 no 2 sck pin
@@ -85,7 +85,7 @@
   #define ZC_MODE RISING
 #endif
 
-#if defined(ARDUINO_ARCH_STM32)// if arch is stm32 
+#if defined(ARDUINO_ARCH_STM32)// if arch is stm32
 //If additional USART ports want ti eb used thy should be enable first
 //HardwareSerial USART_CH(PA10, PA9);
 ADS1115 ADS(0x48);
@@ -199,8 +199,8 @@ float pressureTargetComparator;
 
 void setup() {
   // USART_CH1.begin(115200); //debug channel
-  USART_CH.begin(115200); // LCD comms channel 
-  
+  USART_CH.begin(115200); // LCD comms channel
+
   // Various pins operation mode handling
   pinInit();
 
@@ -212,7 +212,7 @@ void setup() {
   setBoiler(LOW);  // relayPin LOW
 
   // USART_CH1.println("Init step 3");
-  //Pump 
+  //Pump
   pump.set(0);
 
   // USART_CH1.println("Init step 4");
@@ -227,12 +227,12 @@ void setup() {
   eepromInit();
 
   initPressure(myNex.readNumber("regHz"));
-  
+
   // Scales handling
   scalesInit();
   myNex.lastCurrentPageId = myNex.currentPageId;
   POWER_ON = true;
-  
+
   // USART_CH1.println("Init step 6");
 }
 
@@ -263,12 +263,12 @@ void sensorsRead() { // Reading the thermocouple temperature
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
     /*
     This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
-    If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating 
+    If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating
     */
     while (kProbeReadValue <= 0.0 || kProbeReadValue == NAN || kProbeReadValue > 165.0) {
-      /* In the event of the temp failing to read while the SSR is HIGH 
+      /* In the event of the temp failing to read while the SSR is HIGH
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
-      setBoiler(LOW); 
+      setBoiler(LOW);
       if (millis() > thermoTimer) {
         kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
@@ -334,10 +334,10 @@ void initPressure(int hz) {
     ADMUX = (DEFAULT << 6) | (pin & 0x07);
     ADCSRB = (1 << ACME);
     ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
-    
+
     ITimer1.init();
     ITimer1.attachInterrupt(hz * 2, presISR);
-  #endif 
+  #endif
 }
 
 float getPressure() {  //returns sensor pressure data
@@ -356,7 +356,7 @@ float getPressure() {  //returns sensor pressure data
 }
 
 
-void setPressure(int targetValue) { 
+void setPressure(int targetValue) {
   #if defined(ARDUINO_ARCH_AVR)
     #define FLOW_DIV 4
   #elif defined(ARDUINO_ARCH_STM32)
@@ -364,7 +364,7 @@ void setPressure(int targetValue) {
   #endif
   int pumpValue;
   static bool initialRampUp;
-  
+
   if (targetValue == 0 || livePressure > targetValue) {
     pumpValue = 0;
     initialRampUp = true;
@@ -400,7 +400,7 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     preinfusionState        = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
     pressureProfileState    = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
     preinfuseTime           = myNex.readNumber("piSec");
-    preinfuseBar            = myNex.readNumber("piBar"); 
+    preinfuseBar            = myNex.readNumber("piBar");
     preinfuseSoak           = myNex.readNumber("piSoak"); // pre-infusion soak value
     ppStartBar              = myNex.readNumber("ppStart");
     ppFinishBar             = myNex.readNumber("ppFin");
@@ -561,7 +561,7 @@ void justDoCoffee() {
         setBoiler(LOW);  // relayPin -> LOW
         heaterState=false;
         heaterWave=millis();
-      } 
+      }
     } else if ((kProbeReadValue >= ((float)setPoint - 0.5f)) && kProbeReadValue < (float)setPoint) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState ) {
         setBoiler(HIGH);  // relayPin -> HIGH
@@ -607,7 +607,7 @@ void steamCtrl() {
 void lcdRefresh() {
   // static long pageRefreshTimer;
   static float shotWeight;
-  
+
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= pressureTargetComparator + 0.5f) ? getPressure()*10.f : pressureTargetComparator*10.f : 0.f);
@@ -634,7 +634,7 @@ void lcdRefresh() {
 // Save the desired temp values to EEPROM
 void trigger1() {
   #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_STM32)
-    int valueToSave; 
+    int valueToSave;
     int allValuesUpdated;
 
     switch (myNex.currentPageId){
@@ -724,10 +724,10 @@ void trigger1() {
         break;
       case 5:
         break;
-      case 6: 
+      case 6:
         // Reading the LCD side set values
         valueToSave = myNex.readNumber("setPoint");
-        if ( valueToSave > 0) { 
+        if ( valueToSave > 0) {
         EEPROM.put(EEP_SETPOINT, valueToSave);
           allValuesUpdated++;
         }
@@ -806,7 +806,7 @@ void trigger3() {
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
- return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is ON.
+  return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is ON.
 }
 
 // Returns HIGH when switch is OFF and LOW when ON
@@ -821,25 +821,25 @@ void brewTimer(bool c) { // small function for easier timer start/stop
 
 // Actuating the heater element
 void setBoiler(int val) {
-	// USART_CH1.println("SET_BOILER BEGIN");
+  // USART_CH1.println("SET_BOILER BEGIN");
   #if defined(ARDUINO_ARCH_AVR)
-	// USART_CH1.println("SET_BOILER AVR BLOCK BEGIN");
+  // USART_CH1.println("SET_BOILER AVR BLOCK BEGIN");
     if (val == HIGH) {
       PORTB |= _BV(PB0);  // boilerPin -> HIGH
     } else {
       PORTB &= ~_BV(PB0);  // boilerPin -> LOW
     }
-	// USART_CH1.println("SET_BOILER AVR BLOCK END");
+  // USART_CH1.println("SET_BOILER AVR BLOCK END");
   #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
-	// USART_CH1.println("SET_BOILER STM32 BLOCK BEGIN");
+  // USART_CH1.println("SET_BOILER STM32 BLOCK BEGIN");
     if (val == HIGH) {
       digitalWrite(relayPin, HIGH);  // boilerPin -> HIGH
     } else {
       digitalWrite(relayPin, LOW);   // boilerPin -> LOW
     }
-	// USART_CH1.println("SET_BOILER STM32 BLOCK END");
+  // USART_CH1.println("SET_BOILER STM32 BLOCK END");
   #endif
-	// USART_CH1.println("SET_BOILER END");
+  // USART_CH1.println("SET_BOILER END");
 }
 
 float mapRange(float sourceNumber, float fromA, float fromB, float toA, float toB, int decimalPrecision ) {
@@ -894,7 +894,7 @@ void deScale(bool c) {
         }
         lastCycleRead = currentCycleRead*3;
         timer = millis();
-      } 
+      }
     }
   }else if (brewActive && descaleFinished == true){
     pump.set(0);
@@ -919,17 +919,17 @@ void deScale(bool c) {
 //#############################################################################################
 
 
-// Pressure profiling function, uses dimmer to dim the pump 
+// Pressure profiling function, uses dimmer to dim the pump
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
   float newBarValue;
   // static long ppTimer = millis();
 
-  if (brewActive) { //runs this only when brew button activated and pressure profile selected 
+  if (brewActive) { //runs this only when brew button activated and pressure profile selected
     if ( updateTimer ) {
       ppTimer = millis();
       updateTimer = false;
-    } 
+    }
     if ( ppPhase_1 ) { //enters phase 1
       if ((millis() - ppTimer) >= (ppHold*1000)) { //pp start
         ppPhase_1 = false;
@@ -946,7 +946,7 @@ void autoPressureProfile() {
       }else if (ppStartBar > ppFinishBar) { // Decremental profiling curve
         newBarValue = mapRange(millis(),ppTimer,ppTimer + (ppLength*1000),ppStartBar,ppFinishBar,1); //Used to calculate the pressure drop/raise during a @ppLength sec shot
         if (newBarValue > (float)ppStartBar) newBarValue = (float)ppStartBar;
-        else if (newBarValue < ppFinishBar) newBarValue = (float)ppFinishBar;      
+        else if (newBarValue < ppFinishBar) newBarValue = (float)ppFinishBar;
       }else if (ppStartBar == ppFinishBar)  newBarValue = ppStartBar; // Flat line profiling
 
       setPressure(newBarValue);
@@ -998,7 +998,7 @@ void preInfusion() {
         setPressure(0);
         // saving the target pressure
         pressureTargetComparator = getPressure();
-        if (millis() - piTimer >= preinfuseSoak*1000) { 
+        if (millis() - piTimer >= preinfuseSoak*1000) {
           exitPreinfusion = true;
           preinfuse = true;
           piTimer = millis();
@@ -1032,11 +1032,11 @@ void preInfusion() {
 void brewDetect() {
   if ( brewState() ) {
     /* Applying the below block only when brew detected */
-    if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) { 
+    if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
       brewTimer(1); // nextion timer start
       brewActive = true;
       weighingStartRequested = true; // Flagging weighing start
-      
+
       if (selectedOperationalMode == 0) {
         setPressure(9);
         pressureTargetComparator = 9;
@@ -1063,7 +1063,7 @@ void brewDetect() {
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) {
       /* Only setting the weight activity value if it's been previously unset */
       weighingStartRequested=true;
-      calculateWeight(); 
+      calculateWeight();
     }else {/* Only resetting the scales values if on any other screens than brew or scales */
       weighingStartRequested = false; // Flagging weighing stop
       tareDone = false;
@@ -1094,7 +1094,7 @@ void scalesInit() {
     LoadCell_2.set_scale(scalesF2); // calibrated val2
 
     delay(500);
-    
+
     if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
       scalesPresent = true;
       LoadCell_1.tare();
