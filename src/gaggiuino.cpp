@@ -392,7 +392,7 @@ void setPressure(int targetValue) {
   if (targetValue == 0 || livePressure > targetValue) {
     pumpValue = 0;
     initialRampUp = true;
-  } else if (livePressure < targetValue-0.3f & !initialRampUp) {
+  } else if (livePressure < targetValue-0.3f && !initialRampUp) {
     if (!preinfusionFinished && (selectedOperationalMode == 1 || selectedOperationalMode == 4)) {
       pumpValue = (PUMP_RANGE - livePressure * targetValue) / FLOW_DIV;
       if (livePressure > targetValue) pumpValue = 0;
