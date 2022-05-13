@@ -219,7 +219,7 @@ float pressureTargetComparator;
 #define  EEP_SCALES_F1           215
 #define  EEP_SCALES_F2           220
 
-
+// cppcheck-suppress unusedFunction
 void setup() {
   // USART_CH1.begin(115200); //debug channel
   USART_CH.begin(115200); // LCD comms channel
@@ -265,6 +265,7 @@ void setup() {
 
 
 //Main loop where all the logic is continuously run
+// cppcheck-suppress unusedFunction
 void loop() {
   pageValuesRefresh();
   myNex.NextionListen();
@@ -655,6 +656,7 @@ void lcdRefresh() {
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
 // Save the desired temp values to EEPROM
+// cppcheck-suppress unusedFunction
 void trigger1() {
   #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_STM32)
     int valueToSave;
@@ -812,12 +814,14 @@ void trigger1() {
 //###################################_____SCALES_TARE____######################################
 //#############################################################################################
 
+// cppcheck-suppress unusedFunction
 void trigger2() {
   tareDone = false;
   previousBrewState = false;
   scalesTare();
 }
 
+// cppcheck-suppress unusedFunction
 void trigger3() {
   homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
 }
