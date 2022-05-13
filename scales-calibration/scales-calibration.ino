@@ -1,4 +1,4 @@
-#define SINGLE_HX711_CLOCK
+b#define SINGLE_HX711_CLOCK
 #if defined(SINGLE_HX711_CLOCK)
     #include <HX711_2.h>
 #else
@@ -87,7 +87,7 @@ void loop() {
   }
 
   if (myNex.currentPageId == 0) {
-    if (millis() > timer) {    
+    if (millis() > timer) {
       #if defined(SINGLE_HX711_CLOCK)
       loadcell.get_units(values);
       myNex.writeStr("t0.txt",String(values[0],2));
@@ -149,7 +149,7 @@ void trigger5() {
 //     float tempVal2 = loadcell_2.get_units();
 //     if(tempVal2 < val2) calDirection2 = true;
 //   }
-  
+
 //   if (calDirection1 && val1 != targetWeight1) calibration_factor_lc1++;
 //   else if (!calDirection1 && val1 != targetWeight1) calibration_factor_lc1--;
 
