@@ -660,7 +660,7 @@ void lcdRefresh() {
 void trigger1() {
   #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_STM32)
     int valueToSave;
-    int allValuesUpdated;
+    int allValuesUpdated = 0;
 
     switch (myNex.currentPageId){
       case 1:
@@ -719,7 +719,6 @@ void trigger1() {
           allValuesUpdated++;
         }
         if (allValuesUpdated == 9) {
-          allValuesUpdated=0;
           myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
         }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
         myNex.writeStr("page popupMSG");
@@ -742,7 +741,6 @@ void trigger1() {
           allValuesUpdated++;
         }
         if (allValuesUpdated == 3) {
-          allValuesUpdated=0;
           myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
         }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
         myNex.writeStr("page popupMSG");
@@ -781,7 +779,6 @@ void trigger1() {
           allValuesUpdated++;
         }
         if (allValuesUpdated == 5) {
-          allValuesUpdated=0;
           myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
         }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
         myNex.writeStr("page popupMSG");
@@ -799,7 +796,6 @@ void trigger1() {
           allValuesUpdated++;
         }
         if (allValuesUpdated == 2) {
-          allValuesUpdated=0;
           myNex.writeStr("popupMSG.t0.txt","UPDATE SUCCESSFUL!");
         }else myNex.writeStr("popupMSG.t0.txt","ERROR!");
         myNex.writeStr("page popupMSG");
