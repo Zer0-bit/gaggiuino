@@ -385,7 +385,7 @@ void setPressure(int targetValue) {
   #elif defined(ARDUINO_ARCH_STM32)
     #define FLOW_DIV 4
   #endif
-  int pumpValue;
+  int pumpValue = 0;
   static bool initialRampUp;
 
   if (targetValue == 0 || livePressure > targetValue) {
@@ -945,7 +945,7 @@ void deScale(bool c) {
 // Pressure profiling function, uses dimmer to dim the pump
 // Linear dimming as time passes, goes from pressure start to end incrementally or decrementally
 void autoPressureProfile() {
-  float newBarValue;
+  float newBarValue = 0;
   // static long ppTimer = millis();
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
