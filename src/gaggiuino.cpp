@@ -481,7 +481,7 @@ void modeSelect() {
       // USART_CH1.println("MODE SELECT 4");
       if (!steamState() ) {
         if(!preinfusionFinished) preInfusion();
-        else if(preinfusionFinished) autoPressureProfile();
+        else autoPressureProfile();
       } else steamCtrl();
       break;
     case 5:
@@ -613,7 +613,7 @@ void steamCtrl() {
       if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) setBoiler(HIGH);  // relayPin -> HIGH
       else setBoiler(LOW);  // relayPin -> LOW
     }else if(livePressure >=9.1) setBoiler(LOW);  // relayPin -> LOW
-  }else if (brewActive) { //added to cater for hot water from steam wand functionality
+  }else { //added to cater for hot water from steam wand functionality
     if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=105)) {
       setBoiler(HIGH);  // relayPin -> HIGH
       setPressure(9);
@@ -621,7 +621,7 @@ void steamCtrl() {
       setBoiler(LOW);  // relayPin -> LOW
       setPressure(9);
     }
-  }else setBoiler(LOW);  // relayPin -> LOW
+  }
 }
 
 //#############################################################################################
