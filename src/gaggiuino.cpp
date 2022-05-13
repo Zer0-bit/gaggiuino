@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #define SINGLE_HX711_CLOCK
 #if defined(ARDUINO_ARCH_AVR)
   #include <EEPROM.h>
@@ -13,7 +14,6 @@
   #include <HX711.h>
 #endif
 #include <PSM.h>
-
 
 
 #if defined(ARDUINO_ARCH_AVR)
@@ -104,6 +104,29 @@ HX711 LoadCell_1; //HX711 1
 HX711 LoadCell_2; //HX711 2
 #endif
 
+void pinInit();
+void ads1115Init();
+void setBoiler(int);
+void eepromInit();
+void initPressure(int);
+void scalesInit();
+void pageValuesRefresh();
+void sensorsRead();
+void brewDetect();
+void modeSelect();
+void lcdRefresh();
+float getPressure();
+void scalesTare();
+void calculateFlow();
+bool steamState();
+void justDoCoffee();
+void steamCtrl();
+void preInfusion();
+void autoPressureProfile();
+void manualPressureProfile();
+void deScale(bool);
+float mapRange(float, float, float, float, float, int);
+void valuesLoadFromEEPROM();
 
 // Some vars are better global
 //Timers
