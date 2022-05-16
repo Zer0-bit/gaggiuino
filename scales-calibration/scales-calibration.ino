@@ -69,7 +69,7 @@ void setup() {
 }
 
 void loop() {
-  unsigned long timer = millis();
+  static unsigned long timer = millis();
   float values[2];
   static float previousFactor1, previousFactor2;
 
