@@ -48,3 +48,7 @@ jobs:
       - name: Build Gaggiuino
         run: |
           ~/.platformio/penv/bin/platformio run
+
+      - name: Run tests
+        run: |
+          ~/.platformio/penv/bin/platformio test --environment=test 
