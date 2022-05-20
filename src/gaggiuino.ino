@@ -110,7 +110,7 @@ unsigned long thermoTimer = millis();
 unsigned long scalesTimer = millis();
 unsigned long flowTimer = millis();
 unsigned long pageRefreshTimer = millis();
-unsigned long ppTimer = millis();
+unsigned long brewingTimer = millis();
 
 //volatile vars
 volatile float kProbeReadValue; //temp val
@@ -145,7 +145,7 @@ Phase phaseArray[] = {
 };
 Phases phases {5,  phaseArray};
 int preInfusionFinishedPhaseIdx = 3;
-bool updateTimer = true;
+
 bool preinfusionFinished;
 
 bool POWER_ON;
@@ -925,21 +925,15 @@ void newPressureProfile() {
   float newBarValue;
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
-    if ( updateTimer ) {
-      ppTimer = millis();
-      updateTimer = false;
-    }
-    long timeInPP = millis() - ppTimer;
+    long timeInPP = millis() - brewingTimer;
     CurrentPhase currentPhase = phases.getCurrentPhase(timeInPP);
     newBarValue = phases.phases[currentPhase.phaseIndex].getPressure(currentPhase.timeInPhase);
     preinfusionFinished = currentPhase.phaseIndex >= preInfusionFinishedPhaseIdx;
-    setPressure(newBarValue);
   }
   else {
     newBarValue = 0.0f;
-    ppTimer = millis();
-    updateTimer = true;
   }
+  setPressure(newBarValue);
   // saving the target pressure
   pressureTargetComparator = preinfusionFinished ? (int) newBarValue : getPressure();
   // Keep that water at temp
@@ -971,10 +965,10 @@ void brewDetect() {
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   } else{
     brewTimer(0); // stopping timer
-    /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
-    ppTimer = millis();
-    /* Only resetting the brew activity value if it's been previously set */
     brewActive = false;
+    /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
+    brewingTimer = millis();
+    /* Only resetting the brew activity value if it's been previously set */
     preinfusionFinished = false;
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) {
       /* Only setting the weight activity value if it's been previously unset */
