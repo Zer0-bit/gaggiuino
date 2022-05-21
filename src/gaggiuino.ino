@@ -367,7 +367,7 @@ void setPressure(float targetValue) {
     pumpValue = 0;
   } else {
     float diff = targetValue - livePressure;
-    pumpValue = PUMP_RANGE / (1 + exp(1.7 - diff/0.9));
+    pumpValue = PUMP_RANGE / (1.f + exp(1.7f - diff/0.9f));
   }
 
   pump.set(pumpValue);
