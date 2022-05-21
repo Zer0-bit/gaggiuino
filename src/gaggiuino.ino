@@ -269,7 +269,7 @@ void sensorsRead() { // Reading the thermocouple temperature
     This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
     If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating
     */
-    while (kProbeReadValue <= 0.0 || kProbeReadValue == NAN || kProbeReadValue > 165.0) {
+    while (kProbeReadValue <= 0.0f || kProbeReadValue == NAN || kProbeReadValue > 165.0f) {
       /* In the event of the temp failing to read while the SSR is HIGH
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoiler(LOW);
@@ -554,12 +554,12 @@ void justDoCoffee() {
 void steamCtrl() {
 
   if (!brewActive) {
-    if (livePressure <= 9.0) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
-      if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=155)) setBoiler(HIGH);
+    if (livePressure <= 9.f) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
+      if ((kProbeReadValue > setPoint-10.f) && (kProbeReadValue <= 155.f)) setBoiler(HIGH);
       else setBoiler(LOW);
-    } else if(livePressure >=9.1) setBoiler(LOW);
+    } else if(livePressure >= 9.1f) setBoiler(LOW);
   } else if (brewActive) { //added to cater for hot water from steam wand functionality
-    if ((kProbeReadValue > setPoint-10.00) && (kProbeReadValue <=105)) {
+    if ((kProbeReadValue > setPoint-10.f) && (kProbeReadValue <= 105.f)) {
       setBoiler(HIGH);
       setPressure(9);
     } else {
@@ -579,8 +579,8 @@ void lcdRefresh() {
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10.f : 0.f);
-    // if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= pressureTargetComparator + 0.5f) ? getPressure()*10.f : pressureTargetComparator*10.f : 0.f);
+    // if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10.f : 0.f);
+    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= pressureTargetComparator + 0.5f) ? getPressure()*10.f : pressureTargetComparator*10.f : 0.f);
     else myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10.f : 0.f);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
