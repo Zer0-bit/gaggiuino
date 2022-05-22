@@ -1,4 +1,4 @@
-b#define SINGLE_HX711_CLOCK
+#define SINGLE_HX711_CLOCK
 #if defined(SINGLE_HX711_CLOCK)
     #include <HX711_2.h>
 #else
