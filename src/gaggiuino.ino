@@ -1217,12 +1217,12 @@ void pinInit() {
 }
 
 void dbgInit() {
-  #if defined(ARDUINO_ARC_STN32) && defined(DEBUG_ENABLED)
+  #if defined(STM32F4xx) && defined(DEBUG_ENABLED)
   analogReadResolution(12);
   #endif
 }
 void dbgOutput() {
-  #if defined(ARDUINO_ARCH_STM32) && defined(DEBUG_ENABLED)
+  #if defined(STM32F4xx) && defined(DEBUG_ENABLED)
   int VRef = readVref();
   myNex.writeNum("debug1",readTempSensor(VRef));
   myNex.writeNum("debug2",ADS.getError());
