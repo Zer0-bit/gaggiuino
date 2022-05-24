@@ -1,7 +1,9 @@
 #ifndef DBG_H
 #define DBG_H
-#include "stm32yyxx_ll_adc.h"
 #if defined(STM32F4xx)
+#include "stm32yyxx_ll_adc.h"
+#endif
+
 #define CALX_TEMP 25
 #define V25       760
 #define AVG_SLOPE 2500
@@ -28,6 +30,5 @@ static int readTempSensor(int32_t VRef) {
   return 0;
 #endif
 }
-#endif
 #endif
 #endif
