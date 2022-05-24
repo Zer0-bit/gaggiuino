@@ -1,4 +1,4 @@
-#define SINGLE_HX711_CLOCK
+// #define SINGLE_HX711_CLOCK
 #if defined(SINGLE_HX711_CLOCK)
     #include <HX711_2.h>
 #else
@@ -54,7 +54,7 @@ void setup() {
   }
 
 #if defined(SINGLE_HX711_CLOCK)
-    loadcell.begin(LOADCELL_1_DOUT_PIN,LOADCELL_2_DOUT_PIN, LOADCELL_1_SCK_PIN);
+    loadcell.begin(LOADCELL_1_DOUT_PIN,LOADCELL_2_DOUT_PIN, LOADCELL_1_SCK_PIN, LOADCELL_2_SCK_PIN);
     loadcell.set_scale();
     loadcell.tare();
 #else

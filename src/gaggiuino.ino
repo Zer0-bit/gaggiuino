@@ -1,4 +1,8 @@
-#define SINGLE_HX711_CLOCK
+// #define SINGLE_HX711_CLOCK
+#define DEBUG_ENABLED
+#if defined(DEBUG_ENABLED)
+  #include "dbg.h"
+#endif
 #if defined(ARDUINO_ARCH_AVR)
   #include <EEPROM.h>
 #elif defined(ARDUINO_ARCH_STM32)
@@ -210,12 +214,13 @@ void setup() {
 
   // init the exteranl ADC
   ads1115Init();
-  // USART_CH1.println("Init step 1");
-
-  // USART_CH1.println("Init step 2");
+  
+  // Debug init if enabled
+  dbgInit();
+  
+  // Turn off boiler in case init is unsecessful
   setBoiler(LOW);  // relayPin LOW
 
-  // USART_CH1.println("Init step 3");
   //Pump
   pump.set(0);
 
@@ -594,6 +599,8 @@ void lcdRefresh() {
     }
     /*LCD flow output*/
     if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.f);
+
+    dbgOutput();
 
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
@@ -1207,4 +1214,17 @@ void pinInit() {
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(HX711_dout_1, INPUT_PULLUP);
   pinMode(HX711_dout_2, INPUT_PULLUP);
+}
+
+void dbgInit() {
+  #if defined(ARDUINO_ARC_STN32) && defined(DEBUG_ENABLED)
+  analogReadResolution(12);
+  #endif
+}
+void dbgOutput() {
+  #if defined(ARDUINO_ARCH_STM32) && defined(DEBUG_ENABLED)
+  int VRef = readVref();
+  myNex.writeNum("debug1",readTempSensor(VRef));
+  myNex.writeNum("debug2",ADS.getError());
+  #endif
 }
