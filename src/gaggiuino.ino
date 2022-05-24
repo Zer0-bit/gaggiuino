@@ -1,6 +1,6 @@
 // #define SINGLE_HX711_CLOCK
 #define DEBUG_ENABLED
-#if defined(DEBUG_ENABLED)
+#if defined(DEBUG_ENABLED) && defined(ARDUINO_ARCH_STM32)
   #include "dbg.h"
 #endif
 #if defined(ARDUINO_ARCH_AVR)
@@ -214,10 +214,10 @@ void setup() {
 
   // init the exteranl ADC
   ads1115Init();
-  
+
   // Debug init if enabled
   dbgInit();
-  
+
   // Turn off boiler in case init is unsecessful
   setBoiler(LOW);  // relayPin LOW
 
