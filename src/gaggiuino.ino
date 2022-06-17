@@ -1,6 +1,7 @@
 // #define SINGLE_HX711_CLOCK
 #define DEBUG_ENABLED
 // #define MAX31855_ENABLED
+#define TIMERINTERRUPT_ENABLED
 #if defined(DEBUG_ENABLED) && defined(ARDUINO_ARCH_STM32)
   #include "dbg.h"
 #endif
@@ -41,20 +42,22 @@
   #define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
   #define USART_CH Serial
 
-// configuration for TimerInterruptGeneric
-  #define TIMER_INTERRUPT_DEBUG 0
-  #define _TIMERINTERRUPT_LOGLEVEL_ 0
+  #if defined(TIMERINTERRUPT_ENABLED)
+    // configuration for TimerInterruptGeneric
+    #define TIMER_INTERRUPT_DEBUG 0
+    #define _TIMERINTERRUPT_LOGLEVEL_ 0
 
-  #define USING_16MHZ true
-  #define USING_8MHZ false
-  #define USING_250KHZ false
+    #define USING_16MHZ true
+    #define USING_8MHZ false
+    #define USING_250KHZ false
 
-  #define USE_TIMER_0 false
-  #define USE_TIMER_1 true
-  #define USE_TIMER_2 false
-  #define USE_TIMER_3 false
-
-  #include <TimerInterrupt_Generic.h>
+    #define USE_TIMER_0 false
+    #define USE_TIMER_1 true
+    #define USE_TIMER_2 false
+    #define USE_TIMER_3 false
+    
+    #include <TimerInterrupt_Generic.h>
+  #endif  
 
 #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
   // STM32F4 pins definitions
@@ -244,7 +247,9 @@ void setup() {
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
 
-  initPressure(myNex.readNumber("regHz"));
+  #if defined(TIMERINTERRUPT_GENERIC_H)
+    initPressure(myNex.readNumber("regHz"));
+  #endif
 
   #if defined(ADAFRUIT_MAX31855_H)
     thermocouple.begin();
@@ -298,8 +303,16 @@ void sensorsRead() { // Reading the thermocouple temperature
     }
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
+
   // Read pressure and store in a global var for further controls
-  livePressure = getPressure();
+  #if defined(TIMERINTERRUPT_GENERIC_H)
+    livePressure = getPressure();
+  #else
+    if (millis() > thermoTimer) {
+      livePressure = getPressure();
+      thermoTimer = millis() + GET_PRESSURE_READ_EVERY;
+    }
+  #endif
 }
 
 void calculateWeight() {
@@ -340,18 +353,16 @@ void calculateFlow() {
 //##############################################################################################################################
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
-#if defined(ARDUINO_ARCH_AVR)
-volatile int presData[2];
-volatile char presIndex = 0;
+#if defined(ARDUINO_ARCH_AVR) && defined(TIMERINTERRUPT_GENERIC_H)
+  volatile int presData[2];
+  volatile char presIndex = 0;
 
-void presISR() {
-  presData[presIndex] = ADCW;
-  presIndex ^= 1;
-}
-#endif
+  void presISR() {
+    presData[presIndex] = ADCW;
+    presIndex ^= 1;
+  }
 
-void initPressure(int hz) {
-  #if defined(ARDUINO_ARCH_AVR)
+  void initPressure(int hz) {
     int pin = pressurePin - 14;
     ADMUX = (DEFAULT << 6) | (pin & 0x07);
     ADCSRB = (1 << ACME);
@@ -359,8 +370,8 @@ void initPressure(int hz) {
 
     ITimer1.init();
     ITimer1.attachInterrupt(hz * 2, presISR);
-  #endif
-}
+  }
+#endif
 
 float getPressure() {  //returns sensor pressure data
     // 5V/1024 = 1/204.8 (10 bit) or 6553.6 (15 bit)
@@ -371,7 +382,11 @@ float getPressure() {  //returns sensor pressure data
     // 1 bar = 68.27 or 2184.5
 
     #if defined(ARDUINO_ARCH_AVR)
-      return (presData[0] + presData[1]) / 136.54f - 1.49f;
+      #if defined(TIMERINTERRUPT_GENERIC_H)
+        return (presData[0] + presData[1]) / 136.54f - 1.49f;
+      #else
+        return analogRead(pressurePin) / 68.0F - 1.5F;
+      #endif
     #elif defined(ARDUINO_ARCH_STM32)
       return ADS.getValue() / 1706.6f - 1.49f;
     #endif
