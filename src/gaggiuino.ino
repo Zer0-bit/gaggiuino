@@ -34,6 +34,7 @@
   #define steamPin 7
   #define relayPin 8  // PB0
   #define dimmerPin 9
+  #define valvePin -1
   #define brewPin A0 // PD7
   #define pressurePin A1
   #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
@@ -68,6 +69,7 @@
   #define brewPin PA11 // PD7
   #define relayPin PB9  // PB0
   #define dimmerPin PB3
+  #define valvePin PC15
   #define pressurePin ADS115_A0 //set here just for reference
   #define steamPin PA12
   #define HX711_sck_1 PB0 //mcu > HX711 no 1 sck pin
@@ -235,6 +237,8 @@ void setup() {
 
   //Pump
   pump.set(0);
+
+  digitalWrite(valvePin, LOW);
 
   // USART_CH1.println("Init step 4");
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
@@ -989,6 +993,7 @@ void manualPressureProfile() {
 
 void brewDetect() {
   if ( brewState() ) {
+    digitalWrite(valvePin, HIGH);
     /* Applying the below block only when brew detected */
     if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
       brewTimer(1); // nextion timer start
@@ -999,6 +1004,7 @@ void brewDetect() {
     } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) pump.set(127); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   } else{
+    digitalWrite(valvePin, LOW);
     brewTimer(0); // stopping timer
     brewActive = false;
     /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
@@ -1238,6 +1244,7 @@ void ads1115Init() {
 
 void pinInit() {
   pinMode(relayPin, OUTPUT);
+  pinMode(valvePin, OUTPUT);
   pinMode(brewPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(HX711_dout_1, INPUT_PULLUP);
