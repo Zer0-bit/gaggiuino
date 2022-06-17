@@ -124,11 +124,12 @@ HX711 LoadCell_2; //HX711 2
 
 // Some vars are better global
 //Timers
-unsigned long thermoTimer = millis();
-unsigned long scalesTimer = millis();
-unsigned long flowTimer = millis();
-unsigned long pageRefreshTimer = millis();
-unsigned long brewingTimer = millis();
+unsigned long pressureTimer = 0;
+unsigned long thermoTimer = 0;
+unsigned long scalesTimer = 0;
+unsigned long flowTimer = 0;
+unsigned long pageRefreshTimer = 0;
+unsigned long brewingTimer = 0;
 
 //volatile vars
 volatile float kProbeReadValue; //temp val
@@ -312,9 +313,9 @@ void sensorsRead() { // Reading the thermocouple temperature
   #if defined(TIMERINTERRUPT_GENERIC_H)
     livePressure = getPressure();
   #else
-    if (millis() > thermoTimer) {
+    if (millis() > pressureTimer) {
       livePressure = getPressure();
-      thermoTimer = millis() + GET_PRESSURE_READ_EVERY;
+      pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
     }
   #endif
 }
