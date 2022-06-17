@@ -1,5 +1,6 @@
 // #define SINGLE_HX711_CLOCK
 #define DEBUG_ENABLED
+// #define MAX31855_ENABLED
 #if defined(DEBUG_ENABLED) && defined(ARDUINO_ARCH_STM32)
   #include "dbg.h"
 #endif
@@ -10,7 +11,11 @@
   #include <FlashStorage_STM32.h>
 #endif
 #include <EasyNextionLibrary.h>
-#include <max6675.h>
+#if defined(MAX31855_ENABLED)
+  #include <Adafruit_MAX31855.h>
+#else
+  #include <max6675.h>
+#endif
 #if defined(SINGLE_HX711_CLOCK)
   #include <HX711_2.h>
 #else
@@ -94,7 +99,11 @@
 ADS1115 ADS(0x48);
 #endif
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
-MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
+#if defined(ADAFRUIT_MAX31855_H)
+  Adafruit_MAX31855 thermocouple(thermoCLK, thermoCS, thermoDO);
+#else
+  MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
+#endif
 // EasyNextion object init
 EasyNex myNex(USART_CH);
 //Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
@@ -236,6 +245,10 @@ void setup() {
   eepromInit();
 
   initPressure(myNex.readNumber("regHz"));
+
+  #if defined(ADAFRUIT_MAX31855_H)
+    thermocouple.begin();
+  #endif
 
   // Scales handling
   scalesInit();
