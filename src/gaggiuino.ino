@@ -66,7 +66,7 @@
   #define HX711_sck_2 PB1 //mcu > HX711 no 2 sck pin
   #define HX711_dout_1 PA1 //mcu > HX711 no 1 dout pin
   #define HX711_dout_2 PA2 //mcu > HX711 no 2 dout pin
-  #define USART_CH Serial
+  #define USART_CH Serial1
   //#define // USART_CH1 Serial
 #endif
 
