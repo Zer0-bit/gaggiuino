@@ -1,16 +1,5 @@
 // #define SINGLE_HX711_CLOCK
 #define DEBUG_ENABLED
-// #define MAX31855_ENABLED
-#define TIMERINTERRUPT_ENABLED
-#if defined(DEBUG_ENABLED) && defined(ARDUINO_ARCH_STM32)
-  #include "dbg.h"
-#endif
-#if defined(ARDUINO_ARCH_AVR)
-  #include <EEPROM.h>
-#elif defined(ARDUINO_ARCH_STM32)
-  #include "ADS1X15.h"
-  #include <FlashStorage_STM32.h>
-#endif
 #include <EasyNextionLibrary.h>
 #if defined(MAX31855_ENABLED)
   #include <Adafruit_MAX31855.h>
@@ -23,65 +12,14 @@
   #include <HX711.h>
 #endif
 #include <PSM.h>
-#include "PressureProfile.h"
 
-#if defined(ARDUINO_ARCH_AVR)
-  // ATMega32P pins definitions
-  #define zcPin 2
-  #define thermoDO 4
-  #define thermoCS 5
-  #define thermoCLK 6
-  #define steamPin 7
-  #define relayPin 8  // PB0
-  #define dimmerPin 9
-  #define valvePin -1
-  #define brewPin A0 // PD7
-  #define pressurePin A1
-  #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
-  #define HX711_dout_2 13 //mcu > HX711 no 2 dout pin
-  #define HX711_sck_1 10 //mcu > HX711 no 1 sck pin
-  #define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
-  #define USART_CH Serial
-
-  #if defined(TIMERINTERRUPT_ENABLED)
-    // configuration for TimerInterruptGeneric
-    #define TIMER_INTERRUPT_DEBUG 0
-    #define _TIMERINTERRUPT_LOGLEVEL_ 0
-
-    #define USING_16MHZ true
-    #define USING_8MHZ false
-    #define USING_250KHZ false
-
-    #define USE_TIMER_0 false
-    #define USE_TIMER_1 true
-    #define USE_TIMER_2 false
-    #define USE_TIMER_3 false
-
-    #include <TimerInterrupt_Generic.h>
-
-    void initPressure(int);
-  #endif
-
-#elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
-  // STM32F4 pins definitions
-  #define zcPin PA15
-  #define thermoDO PA5 //PB4
-  #define thermoCS PA6 //PB5
-  #define thermoCLK PA7 //PB6
-  #define brewPin PA11 // PD7
-  #define relayPin PB9  // PB0
-  #define dimmerPin PB3
-  #define valvePin PC15
-  #define pressurePin ADS115_A0 //set here just for reference
-  #define steamPin PA12
-  #define HX711_sck_1 PB0 //mcu > HX711 no 1 sck pin
-  #define HX711_sck_2 PB1 //mcu > HX711 no 2 sck pin
-  #define HX711_dout_1 PA1 //mcu > HX711 no 1 dout pin
-  #define HX711_dout_2 PA2 //mcu > HX711 no 2 dout pin
-  #define USART_CH Serial1
-  //#define // USART_CH1 Serial
+#if defined(DEBUG_ENABLED)
+  #include "dbg.h"
 #endif
 
+#include "FlashStorage_STM32.h"
+#include "peripherals.h"
+#include "PressureProfile.h"
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
@@ -94,19 +32,9 @@
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
 #define EEPROM_RESET 1 //change this value if want to reset to defaults
 #define PUMP_RANGE 127
-#if defined(ARDUINO_ARCH_AVR)
-  #define ZC_MODE FALLING
-#elif defined(ARDUINO_ARCH_STM32)
-  #define ZC_MODE RISING
-#endif
 
-#if defined(ARDUINO_ARCH_STM32)// if arch is stm32
-//If additional USART ports want ti eb used thy should be enable first
-//HardwareSerial USART_CH(PA10, PA9);
-ADS1115 ADS(0x48);
-#endif
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
-#if defined(ADAFRUIT_MAX31855_H)
+#if defined(MAX31855_ENABLED)
   Adafruit_MAX31855 thermocouple(thermoCLK, thermoCS, thermoDO);
 #else
   MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
@@ -223,51 +151,37 @@ float pressureTargetComparator;
 
 
 void setup() {
-  // USART_CH1.begin(115200); //debug channel
-  USART_CH.begin(115200); // LCD comms channel
+  uartInit();
 
   // Various pins operation mode handling
   pinInit();
 
-  // init the exteranl ADC
-  ads1115Init();
-
   // Debug init if enabled
   dbgInit();
 
-  // Turn off boiler in case init is unsecessful
-  setBoiler(LOW);  // relayPin LOW
+  setBoilerOff();  // relayPin LOW
 
   //Pump
   pump.set(0);
 
-  digitalWrite(valvePin, LOW);
-
-  // USART_CH1.println("Init step 4");
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
     delay(100);
   }
 
-  // USART_CH1.println("Init step 5");
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
+  LOG_INFO("EEPROM Init");
 
-  #if defined(ARDUINO_ARCH_AVR) && defined(TIMERINTERRUPT_GENERIC_H)
-    initPressure(myNex.readNumber("regHz"));
-  #endif
-
-  #if defined(ADAFRUIT_MAX31855_H)
+  #if defined(MAX31855_ENABLED)
     thermocouple.begin();
   #endif
-
-  // Scales handling
+  pressureSensorInit();
   scalesInit();
+
   myNex.lastCurrentPageId = myNex.currentPageId;
   POWER_ON = true;
-
-  // USART_CH1.println("Init step 6");
 }
 
 //##############################################################################################################################
@@ -302,7 +216,7 @@ void sensorsRead() { // Reading the thermocouple temperature
     while (kProbeReadValue <= 0.0f || kProbeReadValue == NAN || kProbeReadValue > 165.0f) {
       /* In the event of the temp failing to read while the SSR is HIGH
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
-      setBoiler(LOW);
+      setBoilerOff();
       if (millis() > thermoTimer) {
         kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
@@ -312,14 +226,10 @@ void sensorsRead() { // Reading the thermocouple temperature
   }
 
   // Read pressure and store in a global var for further controls
-  #if defined(TIMERINTERRUPT_GENERIC_H)
+  if (millis() > pressureTimer) {
     livePressure = getPressure();
-  #else
-    if (millis() > pressureTimer) {
-      livePressure = getPressure();
-      pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
-    }
-  #endif
+    pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
+  }
 }
 
 void calculateWeight() {
@@ -362,44 +272,6 @@ void calculateFlow() {
 //##############################################################################################################################
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
-#if defined(ARDUINO_ARCH_AVR) && defined(TIMERINTERRUPT_GENERIC_H)
-  volatile int presData[2];
-  volatile char presIndex = 0;
-
-  void presISR() {
-    presData[presIndex] = ADCW;
-    presIndex ^= 1;
-  }
-
-  void initPressure(int hz) {
-    int pin = pressurePin - 14;
-    ADMUX = (DEFAULT << 6) | (pin & 0x07);
-    ADCSRB = (1 << ACME);
-    ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
-
-    ITimer1.init();
-    ITimer1.attachInterrupt(hz * 2, presISR);
-  }
-#endif
-
-float getPressure() {  //returns sensor pressure data
-    // 5V/1024 = 1/204.8 (10 bit) or 6553.6 (15 bit)
-    // voltageZero = 0.5V --> 102.4(10 bit) or 3276.8 (15 bit)
-    // voltageMax = 4.5V --> 921.6 (10 bit) or 29491.2 (15 bit)
-    // range 921.6 - 102.4 = 819.2 or 26214.4
-    // pressure gauge range 0-1.2MPa - 0-12 bar
-    // 1 bar = 68.27 or 2184.5
-
-    #if defined(ARDUINO_ARCH_AVR)
-      #if defined(TIMERINTERRUPT_GENERIC_H)
-        return (presData[0] + presData[1]) / 136.54f - 1.49f;
-      #else
-        return analogRead(pressurePin) / 68.0F - 1.5F;
-      #endif
-    #elif defined(ARDUINO_ARCH_STM32)
-      return ADS.getValue() / 1706.6f - 1.49f;
-    #endif
-}
 
 void setPressure(float targetValue) {
   int pumpValue;
@@ -518,73 +390,73 @@ void justDoCoffee() {
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+0.25f && !preinfusionFinished ) {
       if (millis() - heaterWave > HPWR_OUT*BrewCycleDivider && !heaterState ) {
-        setBoiler(LOW);
+        setBoilerOff();
         heaterState=true;
         heaterWave=millis();
       } else if (millis() - heaterWave > HPWR_LOW*MainCycleDivider && heaterState ) {
-        setBoiler(HIGH);
+        setBoilerOn();
         heaterState=false;
         heaterWave=millis();
       }
     } else if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+(brewDeltaActive ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
       if (millis() - heaterWave > HPWR*BrewCycleDivider && !heaterState ) {
-        setBoiler(HIGH);
+        setBoilerOn();
         heaterState=true;
         heaterWave=millis();
       } else if (millis() - heaterWave > HPWR && heaterState ) {
-        setBoiler(LOW);
+        setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
     } else if (brewDeltaActive && kProbeReadValue >= (setPoint+BREW_TEMP_DELTA) && kProbeReadValue <= (setPoint+BREW_TEMP_DELTA+2.5f)  && preinfusionFinished ) {
       if (millis() - heaterWave > HPWR*MainCycleDivider && !heaterState ) {
-        setBoiler(HIGH);
+        setBoilerOn();
         heaterState=true;
         heaterWave=millis();
       } else if (millis() - heaterWave > HPWR && heaterState ) {
-        setBoiler(LOW);
+        setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
     } else if(kProbeReadValue <= setPoint-1.5f) {
-    setBoiler(HIGH);
+    setBoilerOn();
     } else {
-      setBoiler(LOW);
+      setBoilerOff();
     }
   } else { //if brewState == 0
     // USART_CH1.println("DO_COFFEE BREW BTN NOT ACTIVE BLOCK");
     //brewTimer(0);
     if (kProbeReadValue < ((float)setPoint - 10.00f)) {
-      setBoiler(HIGH);
+      setBoilerOn();
     } else if (kProbeReadValue >= ((float)setPoint - 10.00f) && kProbeReadValue < ((float)setPoint - 3.00f)) {
-      setBoiler(HIGH);
+      setBoilerOn();
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider) {
-        setBoiler(LOW);
+        setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
     } else if ((kProbeReadValue >= ((float)setPoint - 3.00f)) && (kProbeReadValue <= ((float)setPoint - 1.00f))) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState) {
-        setBoiler(HIGH);
+        setBoilerOn();
         heaterState=true;
         heaterWave=millis();
       } else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
-        setBoiler(LOW);
+        setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
     } else if ((kProbeReadValue >= ((float)setPoint - 0.5f)) && kProbeReadValue < (float)setPoint) {
       if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState ) {
-        setBoiler(HIGH);
+        setBoilerOn();
         heaterState=true;
         heaterWave=millis();
       } else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
-        setBoiler(LOW);
+        setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
     } else {
-      setBoiler(LOW);
+      setBoilerOff();
     }
   }
 }
@@ -597,18 +469,18 @@ void steamCtrl() {
 
   if (!brewActive) {
     if (livePressure <= 9.f) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
-      if ((kProbeReadValue > setPoint-10.f) && (kProbeReadValue <= 155.f)) setBoiler(HIGH);
-      else setBoiler(LOW);
-    } else if(livePressure >= 9.1f) setBoiler(LOW);
+      if ((kProbeReadValue > setPoint-10.f) && (kProbeReadValue <= 155.f)) setBoilerOn();
+      else setBoilerOff();
+    } else if(livePressure >= 9.1f) setBoilerOff();
   } else if (brewActive) { //added to cater for hot water from steam wand functionality
     if ((kProbeReadValue > setPoint-10.f) && (kProbeReadValue <= 105.f)) {
-      setBoiler(HIGH);
+      setBoilerOn();
       setPressure(9);
     } else {
-      setBoiler(LOW);
+      setBoilerOff();
       setPressure(9);
     }
-  } else setBoiler(LOW);
+  } else setBoilerOff();
 }
 
 //#############################################################################################
@@ -647,7 +519,6 @@ void lcdRefresh() {
 //#############################################################################################
 // Save the desired temp values to EEPROM
 void trigger1() {
-  #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_STM32)
     int valueToSave;
     int allValuesUpdated;
 
@@ -796,7 +667,6 @@ void trigger1() {
       default:
         break;
     }
-  #endif
 }
 
 //#############################################################################################
@@ -817,42 +687,10 @@ void trigger3() {
 //###############################_____HELPER_FUCTIONS____######################################
 //#############################################################################################
 
-//Function to get the state of the brew switch button
-bool brewState() {
-  return digitalRead(brewPin) == LOW; // pin will be low when switch is ON.
-}
-
-//Function to get the state of the steam switch button
-bool steamState() {
-  return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
-}
-
 void brewTimer(bool c) { // small function for easier timer start/stop
   myNex.writeNum("timerState", c ? 1 : 0);
 }
 
-// Actuating the heater element
-void setBoiler(int val) {
-  // USART_CH1.println("SET_BOILER BEGIN");
-  #if defined(ARDUINO_ARCH_AVR)
-  // USART_CH1.println("SET_BOILER AVR BLOCK BEGIN");
-    if (val == HIGH) {
-      PORTB |= _BV(PB0);  // boilerPin -> HIGH
-    } else {
-      PORTB &= ~_BV(PB0);  // boilerPin -> LOW
-    }
-  // USART_CH1.println("SET_BOILER AVR BLOCK END");
-  #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
-  // USART_CH1.println("SET_BOILER STM32 BLOCK BEGIN");
-    if (val == HIGH) {
-      digitalWrite(relayPin, HIGH);  // boilerPin -> HIGH
-    } else {
-      digitalWrite(relayPin, LOW);   // boilerPin -> LOW
-    }
-  // USART_CH1.println("SET_BOILER STM32 BLOCK END");
-  #endif
-  // USART_CH1.println("SET_BOILER END");
-}
 
 //#############################################################################################
 //###############################____DESCALE__CONTROL____######################################
@@ -1235,25 +1073,6 @@ void valuesLoadFromEEPROM() {
   EEPROM.get(EEP_SCALES_F2, scalesF2);//reading scale factors value from eeprom
 }
 
-void ads1115Init() {
-#if defined(ARDUINO_ARCH_STM32)
-  ADS.begin();
-  ADS.setGain(0);      // 6.144 volt
-  ADS.setDataRate(7);  // fast
-  ADS.setMode(0);      // continuous mode
-  ADS.readADC(0);      // first read to trigger
-#endif
-}
-
-void pinInit() {
-  pinMode(relayPin, OUTPUT);
-  pinMode(valvePin, OUTPUT);
-  pinMode(brewPin, INPUT_PULLUP);
-  pinMode(steamPin, INPUT_PULLUP);
-  pinMode(HX711_dout_1, INPUT_PULLUP);
-  pinMode(HX711_dout_2, INPUT_PULLUP);
-}
-
 void dbgInit() {
   #if defined(STM32F4xx) && defined(DEBUG_ENABLED)
   analogReadResolution(12);
@@ -1263,6 +1082,6 @@ void dbgOutput() {
   #if defined(STM32F4xx) && defined(DEBUG_ENABLED)
   int VRef = readVref();
   myNex.writeNum("debug1",readTempSensor(VRef));
-  myNex.writeNum("debug2",ADS.getError());
+  myNex.writeNum("debug2",getAdsError());
   #endif
 }

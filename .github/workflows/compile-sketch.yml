@@ -45,11 +45,6 @@ jobs:
         run: |
           python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
 
-      - name: Build for Nano
-        run: |
-          ~/.platformio/penv/bin/platformio run -e nano
-          ~/.platformio/penv/bin/platformio run -e nanonew
-
       - name: Build for Blackpill
         run: |
           ~/.platformio/penv/bin/platformio run -e blackpill
