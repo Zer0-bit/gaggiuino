@@ -1,4 +1,4 @@
-#include "EEPROM.h"
+#include "FlashStorage_STM32.h"
 
 EEPROMClass::EEPROMClass(void) {
 
