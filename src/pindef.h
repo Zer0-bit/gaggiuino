@@ -21,6 +21,4 @@
 #define USART_LCD     Serial1 // Refer to platformio.ini for
 #define USART_DEBUG   Serial2 // the actual pinout.
 
-#define ZC_MODE       RISING
-
 #endif

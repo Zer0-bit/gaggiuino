@@ -9,16 +9,17 @@
 #else
   #include <HX711.h>
 #endif
-#include <PSM.h>
 
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
 #endif
 
-#include "peripherals.h"
 #include "PressureProfile.h"
 #include "log.h"
 #include "eeprom_data.h"
+#include "peripherals/pump.h"
+#include "peripherals/pressure_sensor.h"
+#include "peripherals/peripherals.h"
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY 250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
@@ -29,8 +30,6 @@
 #define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
-#define EEPROM_RESET 1 //change this value if want to reset to defaults
-#define PUMP_RANGE 127
 
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
 #if defined(MAX31855_ENABLED)
@@ -40,8 +39,6 @@
 #endif
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
-//Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE);
 //#######################__HX711_stuff__##################################
 #if defined(SINGLE_HX711_CLOCK)
 HX711_2 LoadCells;
@@ -140,11 +137,11 @@ void setup() {
   LOG_INFO("Boiler turned off");
 
   //Pump
-  pump.set(0);
+  setPumpOff();
   LOG_INFO("Pump turned off");
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
-  uartInit();
+  USART_LCD.begin(115200);
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
     LOG_VERBOSE("Connecting to Nextion LCD");
@@ -237,8 +234,6 @@ void calculateWeight() {
   // Weight output
   if (millis() > scalesTimer) {
     if (scalesPresent && weighingStartRequested) {
-      // Stop pump to prevent HX711 critical section from breaking timing
-      //pump.set(0);
       #if defined(SINGLE_HX711_CLOCK)
         if (LoadCells.is_ready()) {
           float values[2];
@@ -248,8 +243,6 @@ void calculateWeight() {
       #else
         currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
       #endif
-      // Resume pumping
-      //pump.set(pumpValue);
     }
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
   }
@@ -264,24 +257,6 @@ void calculateFlow() {
     previousWeight = currentWeight;
     flowTimer = millis() + 1000;
   }
-}
-
-//##############################################################################################################################
-//############################################______PRESSURE_____TRANSDUCER_____################################################
-//##############################################################################################################################
-
-void setPressure(float targetValue) {
-  int pumpValue;
-  float diff = targetValue - livePressure;
-
-  if (targetValue == 0 || livePressure > targetValue) {
-    pumpValue = 0;
-  } else {
-    float diff = targetValue - livePressure;
-    pumpValue = PUMP_RANGE / (1.f + exp(1.7f - diff/0.9f));
-  }
-
-  pump.set(pumpValue);
 }
 
 //##############################################################################################################################
@@ -472,10 +447,10 @@ void steamCtrl() {
   } else if (brewActive) { //added to cater for hot water from steam wand functionality
     if ((kProbeReadValue > setPoint-10.f) && (kProbeReadValue <= 105.f)) {
       setBoilerOn();
-      setPressure(9);
+      setPumpPressure(livePressure, 9);
     } else {
       setBoilerOff();
-      setPressure(9);
+      setPumpPressure(livePressure, 9);
     }
   } else setBoilerOff();
 }
@@ -604,7 +579,7 @@ void deScale(bool c) {
   if (brewActive && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
       if (blink == true) { // Logic that switches between modes depending on the $blink value
-        pump.set(15);
+        setPumpToRawValue(15);
         if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to max descale value for 10 sec
           if (currentCycleRead >=100) descaleFinished = true;
           blink = false;
@@ -612,7 +587,7 @@ void deScale(bool c) {
           timer = millis();
         }
       } else {
-        pump.set(30);
+        setPumpToRawValue(30);
         if (millis() - timer > DESCALE_PHASE2_EVERY) { //set dimmer power to min descale value for 20 sec
           blink = true;
           currentCycleRead++;
@@ -621,7 +596,7 @@ void deScale(bool c) {
         }
       }
     } else {
-      pump.set(0);
+      setPumpOff();
       if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
         if (currentCycleRead*3 < 100) myNex.writeNum("j0.val", currentCycleRead*3);
         else {
@@ -633,7 +608,7 @@ void deScale(bool c) {
       }
     }
   } else if (brewActive && descaleFinished == true){
-    pump.set(0);
+    setPumpOff();
     if ((millis() - timer) > 1000) {
       brewTimer(0);
       myNex.writeStr("t14.txt", "FINISHED!");
@@ -712,7 +687,7 @@ void newPressureProfile() {
   else {
     newBarValue = 0.0f;
   }
-  setPressure(newBarValue);
+  setPumpPressure(livePressure, newBarValue);
   // saving the target pressure
   pressureTargetComparator = preinfusionFinished ? (int) newBarValue : livePressure;
   // Keep that water at temp
@@ -722,7 +697,7 @@ void newPressureProfile() {
 void manualPressureProfile() {
   if( selectedOperationalMode == 3 ) {
     int power_reading = myNex.readNumber("h0.val");
-    setPressure(power_reading);
+    setPumpPressure(livePressure, power_reading);
   }
   justDoCoffee();
 }
@@ -741,7 +716,7 @@ void brewDetect() {
       weighingStartRequested = true; // Flagging weighing start
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
       if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) calculateWeight();
-    } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) pump.set(127); // setting the pump output target to 9 bars for non PP or PI profiles
+    } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPumpToRawValue(127); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   } else{
     digitalWrite(valvePin, LOW);
