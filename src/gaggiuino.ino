@@ -616,9 +616,9 @@ void lcdRefresh() {
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    // if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10.f : 0.f);
-    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= pressureTargetComparator + 0.5f) ? getPressure()*10.f : pressureTargetComparator*10.f : 0.f);
-    else myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10.f : 0.f);
+    // if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
+    if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? (livePressure <= pressureTargetComparator + 0.5f) ? livePressure*10.f : pressureTargetComparator*10.f : 0.f);
+    else myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     /*LCD weight output*/
@@ -974,7 +974,7 @@ void newPressureProfile() {
   }
   setPressure(newBarValue);
   // saving the target pressure
-  pressureTargetComparator = preinfusionFinished ? (int) newBarValue : getPressure();
+  pressureTargetComparator = preinfusionFinished ? (int) newBarValue : livePressure;
   // Keep that water at temp
   justDoCoffee();
 }
