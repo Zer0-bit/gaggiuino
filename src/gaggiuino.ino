@@ -331,9 +331,11 @@ void calculateWeight() {
       // Stop pump to prevent HX711 critical section from breaking timing
       //pump.set(0);
       #if defined(SINGLE_HX711_CLOCK)
-        float values[2];
-        LoadCells.get_units(values);
-        currentWeight = values[0] + values[1];
+        if (LoadCells.is_ready()) {
+          float values[2];
+          LoadCells.get_units(values);
+          currentWeight = values[0] + values[1];
+        }
       #else
         currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
       #endif
@@ -814,15 +816,13 @@ void trigger3() {
 //#############################################################################################
 
 //Function to get the state of the brew switch button
-//returns true or false based on the read P(power) value
-bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
-  return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is ON.
+bool brewState() {
+  return digitalRead(brewPin) == LOW; // pin will be low when switch is ON.
 }
 
-// Returns HIGH when switch is OFF and LOW when ON
-// pin will be high when switch is ON.
+//Function to get the state of the steam switch button
 bool steamState() {
-  return (digitalRead(steamPin) != LOW) ? 0 : 1;
+  return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
 }
 
 void brewTimer(bool c) { // small function for easier timer start/stop
