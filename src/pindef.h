@@ -16,9 +16,11 @@
 #define HX711_sck_1   PB0
 #define HX711_sck_2   PB1
 #define HX711_dout_1  PA1
-#define HX711_dout_2  PA2
+#define HX711_dout_2  PA4
 
-#define USART_CH      Serial
+#define USART_LCD     Serial1 // Refer to platformio.ini for
+#define USART_DEBUG   Serial2 // the actual pinout.
+
 #define ZC_MODE       RISING
 
 #endif

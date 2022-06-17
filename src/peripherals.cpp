@@ -4,7 +4,7 @@
 ADS1115 ADS(0x48);
 
 void uartInit() {
-  USART_CH.begin(115200);
+  USART_LCD.begin(115200);
 }
 
 void pinInit() {
