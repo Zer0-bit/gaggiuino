@@ -56,9 +56,9 @@
     #define USE_TIMER_1 true
     #define USE_TIMER_2 false
     #define USE_TIMER_3 false
-    
+
     #include <TimerInterrupt_Generic.h>
-  #endif  
+  #endif
 
 #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
   // STM32F4 pins definitions
@@ -252,7 +252,7 @@ void setup() {
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
 
-  #if defined(TIMERINTERRUPT_GENERIC_H)
+  #if defined(ARDUINO_ARCH_AVR) && defined(TIMERINTERRUPT_GENERIC_H)
     initPressure(myNex.readNumber("regHz"));
   #endif
 
