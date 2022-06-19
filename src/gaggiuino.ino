@@ -58,6 +58,8 @@
     #define USE_TIMER_3 false
 
     #include <TimerInterrupt_Generic.h>
+
+    void initPressure(int); 
   #endif
 
 #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
