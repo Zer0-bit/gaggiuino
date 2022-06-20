@@ -501,12 +501,12 @@ void trigger1() {
     case 2:
       break;
     case 3:
-      eepromCurrentValues.preinfusionStart    = myNex.readNumber("ppStart");
-      eepromCurrentValues.preinfusionFinish   = myNex.readNumber("ppFin");
-      eepromCurrentValues.preinfusionHold     = myNex.readNumber("ppHold");
-      eepromCurrentValues.preinfusionLength   = myNex.readNumber("ppLength");
+      eepromCurrentValues.pressureProfilingStart    = myNex.readNumber("ppStart");
+      eepromCurrentValues.pressureProfilingFinish   = myNex.readNumber("ppFin");
+      eepromCurrentValues.pressureProfilingHold     = myNex.readNumber("ppHold");
+      eepromCurrentValues.pressureProfilingLength   = myNex.readNumber("ppLength");
+      eepromCurrentValues.pressureProfilingState  = myNex.readNumber("ppState");
       eepromCurrentValues.preinfusionState    = myNex.readNumber("piState");
-      eepromCurrentValues.preinfusionProfile  = myNex.readNumber("ppState");
       eepromCurrentValues.preinfusionSec      = myNex.readNumber("piSec");
       eepromCurrentValues.preinfusionBar      = myNex.readNumber("piBar");
       eepromCurrentValues.preinfusionSoak     = myNex.readNumber("piSoak");
@@ -802,23 +802,23 @@ void lcdInit() {
   myNex.writeNum("bDiv", eepromCurrentValues.brewDivider);
   myNex.writeNum("moreTemp.n5.val", eepromCurrentValues.brewDivider);
 
-  myNex.writeNum("ppStart", eepromCurrentValues.preinfusionStart);
-  myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.preinfusionStart);
+  myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart);
+  myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.pressureProfilingStart);
 
-  myNex.writeNum("ppFin", eepromCurrentValues.preinfusionFinish);
-  myNex.writeNum("brewAuto.n3.val", eepromCurrentValues.preinfusionFinish);
+  myNex.writeNum("ppFin", eepromCurrentValues.pressureProfilingFinish);
+  myNex.writeNum("brewAuto.n3.val", eepromCurrentValues.pressureProfilingFinish);
 
-  myNex.writeNum("ppHold", eepromCurrentValues.preinfusionHold);
-  myNex.writeNum("brewAuto.n5.val", eepromCurrentValues.preinfusionHold);
+  myNex.writeNum("ppHold", eepromCurrentValues.pressureProfilingHold);
+  myNex.writeNum("brewAuto.n5.val", eepromCurrentValues.pressureProfilingHold);
 
-  myNex.writeNum("ppLength", eepromCurrentValues.preinfusionLength);
-  myNex.writeNum("brewAuto.n6.val", eepromCurrentValues.preinfusionLength);
+  myNex.writeNum("ppLength", eepromCurrentValues.pressureProfilingLength);
+  myNex.writeNum("brewAuto.n6.val", eepromCurrentValues.pressureProfilingLength);
 
   myNex.writeNum("piState", eepromCurrentValues.preinfusionState);
   myNex.writeNum("brewAuto.bt0.val", eepromCurrentValues.preinfusionState);
 
-  myNex.writeNum("ppState", eepromCurrentValues.preinfusionProfile);
-  myNex.writeNum("brewAuto.bt1.val", eepromCurrentValues.preinfusionProfile);
+  myNex.writeNum("ppState", eepromCurrentValues.pressureProfilingState);
+  myNex.writeNum("brewAuto.bt1.val", eepromCurrentValues.pressureProfilingState);
 
   myNex.writeNum("piSec", eepromCurrentValues.preinfusionSec);
   myNex.writeNum("brewAuto.n0.val", eepromCurrentValues.preinfusionSec);

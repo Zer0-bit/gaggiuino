@@ -8,11 +8,11 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   /*
     No need to do these check since it checks UNSIGNED integers
 
-    if (eepromValuesNew.preinfusionHold < 0)
-    if (eepromValuesNew.preinfusionLength < 0)
+    if (eepromValuesNew.pressureProfilingHold < 0)
+    if (eepromValuesNew.pressureProfilingLength < 0)
     if (eepromValuesNew.preinfusionSec < 0)
     if (eepromValuesNew.preinfusionSoak < 0)
-    if (eepromValuesNew.preinfusionLength < 0)
+    if (eepromValuesNew.pressureProfilingLength < 0)
     if (eepromValuesNew.offset < 0)
     if (eepromValuesNew.hpwr < 0) {
   */
@@ -24,7 +24,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
-  if (eepromValuesNew.preinfusionProfile != 0 && eepromValuesNew.preinfusionProfile != 1) {
+  if (eepromValuesNew.pressureProfilingState != 0 && eepromValuesNew.pressureProfilingState != 1) {
     LOG_ERROR(errMsg.c_str());
     return false;
   }
@@ -49,12 +49,12 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
-  if (eepromValuesNew.preinfusionStart < 1) {
+  if (eepromValuesNew.pressureProfilingStart < 1) {
     LOG_ERROR(errMsg.c_str());
     return false;
   }
 
-  if (eepromValuesNew.preinfusionFinish < 1) {
+  if (eepromValuesNew.pressureProfilingFinish < 1) {
     LOG_ERROR(errMsg.c_str());
     return false;
   }
@@ -96,11 +96,11 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.hpwr                = 550;
   defaultData.mainDivider         = 5;
   defaultData.brewDivider         = 2;
-  defaultData.preinfusionStart    = 9;
-  defaultData.preinfusionFinish   = 6;
-  defaultData.preinfusionHold     = 5;
-  defaultData.preinfusionLength   = 15;
-  defaultData.preinfusionProfile  = 1;
+  defaultData.pressureProfilingStart    = 9;
+  defaultData.pressureProfilingFinish   = 6;
+  defaultData.pressureProfilingHold     = 5;
+  defaultData.pressureProfilingLength   = 15;
+  defaultData.pressureProfilingState    = true;
   defaultData.preinfusionState    = true;
   defaultData.preinfusionSec      = 10;
   defaultData.preinfusionBar      = 2;

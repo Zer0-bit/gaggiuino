@@ -12,11 +12,11 @@ struct eepromValues_t {
   uint16_t hpwr;
   uint16_t mainDivider;
   uint16_t brewDivider;
-  uint16_t preinfusionStart;
-  uint16_t preinfusionFinish;
-  uint16_t preinfusionHold;
-  uint16_t preinfusionLength;
-  bool     preinfusionProfile;
+  uint16_t pressureProfilingStart;
+  uint16_t pressureProfilingFinish;
+  uint16_t pressureProfilingHold;
+  uint16_t pressureProfilingLength;
+  bool     pressureProfilingState;
   bool     preinfusionState;
   uint16_t preinfusionSec;
   uint16_t preinfusionBar;
