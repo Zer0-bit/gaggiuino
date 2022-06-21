@@ -1,5 +1,7 @@
 // #define SINGLE_HX711_CLOCK
 #define DEBUG_ENABLED
+// #define MAX31855_ENABLED
+#define TIMERINTERRUPT_ENABLED
 #if defined(DEBUG_ENABLED) && defined(ARDUINO_ARCH_STM32)
   #include "dbg.h"
 #endif
@@ -10,7 +12,11 @@
   #include <FlashStorage_STM32.h>
 #endif
 #include <EasyNextionLibrary.h>
-#include <max6675.h>
+#if defined(MAX31855_ENABLED)
+  #include <Adafruit_MAX31855.h>
+#else
+  #include <max6675.h>
+#endif
 #if defined(SINGLE_HX711_CLOCK)
   #include <HX711_2.h>
 #else
@@ -28,6 +34,7 @@
   #define steamPin 7
   #define relayPin 8  // PB0
   #define dimmerPin 9
+  #define valvePin -1
   #define brewPin A0 // PD7
   #define pressurePin A1
   #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
@@ -36,20 +43,24 @@
   #define HX711_sck_2 11 //mcu > HX711 no 2 sck pin
   #define USART_CH Serial
 
-// configuration for TimerInterruptGeneric
-  #define TIMER_INTERRUPT_DEBUG 0
-  #define _TIMERINTERRUPT_LOGLEVEL_ 0
+  #if defined(TIMERINTERRUPT_ENABLED)
+    // configuration for TimerInterruptGeneric
+    #define TIMER_INTERRUPT_DEBUG 0
+    #define _TIMERINTERRUPT_LOGLEVEL_ 0
 
-  #define USING_16MHZ true
-  #define USING_8MHZ false
-  #define USING_250KHZ false
+    #define USING_16MHZ true
+    #define USING_8MHZ false
+    #define USING_250KHZ false
 
-  #define USE_TIMER_0 false
-  #define USE_TIMER_1 true
-  #define USE_TIMER_2 false
-  #define USE_TIMER_3 false
+    #define USE_TIMER_0 false
+    #define USE_TIMER_1 true
+    #define USE_TIMER_2 false
+    #define USE_TIMER_3 false
 
-  #include <TimerInterrupt_Generic.h>
+    #include <TimerInterrupt_Generic.h>
+
+    void initPressure(int);
+  #endif
 
 #elif defined(ARDUINO_ARCH_STM32)// if arch is stm32
   // STM32F4 pins definitions
@@ -60,13 +71,14 @@
   #define brewPin PA11 // PD7
   #define relayPin PB9  // PB0
   #define dimmerPin PB3
+  #define valvePin PC15
   #define pressurePin ADS115_A0 //set here just for reference
   #define steamPin PA12
   #define HX711_sck_1 PB0 //mcu > HX711 no 1 sck pin
   #define HX711_sck_2 PB1 //mcu > HX711 no 2 sck pin
   #define HX711_dout_1 PA1 //mcu > HX711 no 1 dout pin
   #define HX711_dout_2 PA2 //mcu > HX711 no 2 dout pin
-  #define USART_CH Serial
+  #define USART_CH Serial1
   //#define // USART_CH1 Serial
 #endif
 
@@ -94,7 +106,11 @@
 ADS1115 ADS(0x48);
 #endif
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
-MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
+#if defined(ADAFRUIT_MAX31855_H)
+  Adafruit_MAX31855 thermocouple(thermoCLK, thermoCS, thermoDO);
+#else
+  MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
+#endif
 // EasyNextion object init
 EasyNex myNex(USART_CH);
 //Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
@@ -110,11 +126,12 @@ HX711 LoadCell_2; //HX711 2
 
 // Some vars are better global
 //Timers
-unsigned long thermoTimer = millis();
-unsigned long scalesTimer = millis();
-unsigned long flowTimer = millis();
-unsigned long pageRefreshTimer = millis();
-unsigned long brewingTimer = millis();
+unsigned long pressureTimer = 0;
+unsigned long thermoTimer = 0;
+unsigned long scalesTimer = 0;
+unsigned long flowTimer = 0;
+unsigned long pageRefreshTimer = 0;
+unsigned long brewingTimer = 0;
 
 //volatile vars
 volatile float kProbeReadValue; //temp val
@@ -224,6 +241,8 @@ void setup() {
   //Pump
   pump.set(0);
 
+  digitalWrite(valvePin, LOW);
+
   // USART_CH1.println("Init step 4");
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   while (myNex.readNumber("safetyTempCheck") != 100 )
@@ -235,7 +254,13 @@ void setup() {
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
 
-  initPressure(myNex.readNumber("regHz"));
+  #if defined(ARDUINO_ARCH_AVR) && defined(TIMERINTERRUPT_GENERIC_H)
+    initPressure(myNex.readNumber("regHz"));
+  #endif
+
+  #if defined(ADAFRUIT_MAX31855_H)
+    thermocouple.begin();
+  #endif
 
   // Scales handling
   scalesInit();
@@ -285,8 +310,16 @@ void sensorsRead() { // Reading the thermocouple temperature
     }
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
+
   // Read pressure and store in a global var for further controls
-  livePressure = getPressure();
+  #if defined(TIMERINTERRUPT_GENERIC_H)
+    livePressure = getPressure();
+  #else
+    if (millis() > pressureTimer) {
+      livePressure = getPressure();
+      pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
+    }
+  #endif
 }
 
 void calculateWeight() {
@@ -300,9 +333,11 @@ void calculateWeight() {
       // Stop pump to prevent HX711 critical section from breaking timing
       //pump.set(0);
       #if defined(SINGLE_HX711_CLOCK)
-        float values[2];
-        LoadCells.get_units(values);
-        currentWeight = values[0] + values[1];
+        if (LoadCells.is_ready()) {
+          float values[2];
+          LoadCells.get_units(values);
+          currentWeight = values[0] + values[1];
+        }
       #else
         currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
       #endif
@@ -327,18 +362,16 @@ void calculateFlow() {
 //##############################################################################################################################
 //############################################______PRESSURE_____TRANSDUCER_____################################################
 //##############################################################################################################################
-#if defined(ARDUINO_ARCH_AVR)
-volatile int presData[2];
-volatile char presIndex = 0;
+#if defined(ARDUINO_ARCH_AVR) && defined(TIMERINTERRUPT_GENERIC_H)
+  volatile int presData[2];
+  volatile char presIndex = 0;
 
-void presISR() {
-  presData[presIndex] = ADCW;
-  presIndex ^= 1;
-}
-#endif
+  void presISR() {
+    presData[presIndex] = ADCW;
+    presIndex ^= 1;
+  }
 
-void initPressure(int hz) {
-  #if defined(ARDUINO_ARCH_AVR)
+  void initPressure(int hz) {
     int pin = pressurePin - 14;
     ADMUX = (DEFAULT << 6) | (pin & 0x07);
     ADCSRB = (1 << ACME);
@@ -346,8 +379,8 @@ void initPressure(int hz) {
 
     ITimer1.init();
     ITimer1.attachInterrupt(hz * 2, presISR);
-  #endif
-}
+  }
+#endif
 
 float getPressure() {  //returns sensor pressure data
     // 5V/1024 = 1/204.8 (10 bit) or 6553.6 (15 bit)
@@ -358,7 +391,11 @@ float getPressure() {  //returns sensor pressure data
     // 1 bar = 68.27 or 2184.5
 
     #if defined(ARDUINO_ARCH_AVR)
-      return (presData[0] + presData[1]) / 136.54f - 1.49f;
+      #if defined(TIMERINTERRUPT_GENERIC_H)
+        return (presData[0] + presData[1]) / 136.54f - 1.49f;
+      #else
+        return analogRead(pressurePin) / 68.0F - 1.5F;
+      #endif
     #elif defined(ARDUINO_ARCH_STM32)
       return ADS.getValue() / 1706.6f - 1.49f;
     #endif
@@ -584,9 +621,9 @@ void lcdRefresh() {
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    // if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10.f : 0.f);
-    if (brewActive) myNex.writeNum("pressure.val", (getPressure() > 0.f) ? (getPressure() <= pressureTargetComparator + 0.5f) ? getPressure()*10.f : pressureTargetComparator*10.f : 0.f);
-    else myNex.writeNum("pressure.val", (getPressure() > 0.f) ? getPressure()*10.f : 0.f);
+    // if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
+    if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? (livePressure <= pressureTargetComparator + 0.5f) ? livePressure*10.f : pressureTargetComparator*10.f : 0.f);
+    else myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
     /*LCD weight output*/
@@ -781,15 +818,13 @@ void trigger3() {
 //#############################################################################################
 
 //Function to get the state of the brew switch button
-//returns true or false based on the read P(power) value
-bool brewState() {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
-  return (digitalRead(brewPin) != LOW ) ? 0 : 1; // pin will be high when switch is ON.
+bool brewState() {
+  return digitalRead(brewPin) == LOW; // pin will be low when switch is ON.
 }
 
-// Returns HIGH when switch is OFF and LOW when ON
-// pin will be high when switch is ON.
+//Function to get the state of the steam switch button
 bool steamState() {
-  return (digitalRead(steamPin) != LOW) ? 0 : 1;
+  return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
 }
 
 void brewTimer(bool c) { // small function for easier timer start/stop
@@ -942,7 +977,7 @@ void newPressureProfile() {
   }
   setPressure(newBarValue);
   // saving the target pressure
-  pressureTargetComparator = preinfusionFinished ? (int) newBarValue : getPressure();
+  pressureTargetComparator = preinfusionFinished ? (int) newBarValue : livePressure;
   // Keep that water at temp
   justDoCoffee();
 }
@@ -961,6 +996,7 @@ void manualPressureProfile() {
 
 void brewDetect() {
   if ( brewState() ) {
+    digitalWrite(valvePin, HIGH);
     /* Applying the below block only when brew detected */
     if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
       brewTimer(1); // nextion timer start
@@ -971,6 +1007,7 @@ void brewDetect() {
     } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) pump.set(127); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   } else{
+    digitalWrite(valvePin, LOW);
     brewTimer(0); // stopping timer
     brewActive = false;
     /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
@@ -1210,6 +1247,7 @@ void ads1115Init() {
 
 void pinInit() {
   pinMode(relayPin, OUTPUT);
+  pinMode(valvePin, OUTPUT);
   pinMode(brewPin, INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(HX711_dout_1, INPUT_PULLUP);
