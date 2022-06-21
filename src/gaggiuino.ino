@@ -140,6 +140,10 @@ void setup() {
   setPumpOff();
   LOG_INFO("Pump turned off");
 
+  // Valve
+  openValve();
+  LOG_INFO("Valve opened");
+
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   USART_LCD.begin(115200);
   while (myNex.readNumber("safetyTempCheck") != 100 )
@@ -708,7 +712,7 @@ void manualPressureProfile() {
 
 void brewDetect() {
   if ( brewState() ) {
-    digitalWrite(valvePin, HIGH);
+    closeValve();
     /* Applying the below block only when brew detected */
     if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
       brewTimer(1); // nextion timer start
@@ -719,7 +723,7 @@ void brewDetect() {
     } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPumpToRawValue(127); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   } else{
-    digitalWrite(valvePin, LOW);
+    openValve();
     brewTimer(0); // stopping timer
     brewActive = false;
     /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */

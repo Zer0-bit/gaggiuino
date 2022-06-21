@@ -6,7 +6,6 @@ void pinInit() {
   pinMode(relayPin, OUTPUT);
   pinMode(brewPin,  INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
-  digitalWrite(valvePin, LOW);
   pinMode(HX711_dout_1, INPUT_PULLUP);
   pinMode(HX711_dout_2, INPUT_PULLUP);
 }
@@ -30,4 +29,12 @@ bool brewState() {  //Monitors the current flowing through the ACS712 circuit an
 // pin will be high when switch is ON.
 bool steamState() {
   return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
+}
+
+void closeValve() {
+  digitalWrite(valvePin, HIGH);
+}
+
+void openValve() {
+  digitalWrite(valvePin, LOW);
 }
