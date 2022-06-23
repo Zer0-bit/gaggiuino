@@ -22,14 +22,15 @@
 #include "peripherals/peripherals.h"
 
 // Define some const values
-#define GET_KTYPE_READ_EVERY 250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+#define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define GET_PRESSURE_READ_EVERY 50
-#define GET_SCALES_READ_EVERY 100
-#define REFRESH_SCREEN_EVERY 150 // Screen refresh interval (ms)
-#define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
-#define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
-#define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
+#define GET_SCALES_READ_EVERY   100
+#define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
+#define REFRESH_FLOW_EVERY      1000
+#define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
+#define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
+#define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
+#define MAX_SETPOINT_VALUE      110 //Defines the max value of the setpoint
 
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
 #if defined(MAX31855_ENABLED)
@@ -260,7 +261,7 @@ void calculateFlow() {
   if (millis() >= flowTimer) {
     flowVal = (currentWeight - previousWeight)*10;
     previousWeight = currentWeight;
-    flowTimer = millis() + 1000;
+    flowTimer = millis() + REFRESH_FLOW_EVERY;
   }
 }
 
