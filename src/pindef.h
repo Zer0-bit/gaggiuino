@@ -2,13 +2,13 @@
 #define PINDEF_H
 
 // STM32F4 pins definitions
-#define thermoDO      PA5
-#define thermoCS      PA15
-#define thermoCLK     PA7
+#define thermoDO      PB4
+#define thermoCS      PA6
+#define thermoCLK     PA5
 
 #define zcPin         PA0
 #define brewPin       PC14
-#define relayPin      PA6
+#define relayPin      PA15
 #define dimmerPin     PA1
 #define steamPin      PC15
 #define valvePin      PC13
