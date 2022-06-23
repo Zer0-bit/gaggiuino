@@ -129,9 +129,11 @@ void setup() {
   pinInit();
   LOG_INFO("Pin init");
 
+#if defined(DEBUG_ENABLED)
   // Debug init if enabled
   dbgInit();
   LOG_INFO("DBG init");
+#endif
 
   setBoilerOff();  // relayPin LOW
   LOG_INFO("Boiler turned off");
@@ -485,7 +487,10 @@ void lcdRefresh() {
     /*LCD flow output*/
     if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.f);
 
-    dbgOutput();
+    #if defined(DEBUG_ENABLED)
+    myNex.writeNum("debug1",readTempSensor());
+    myNex.writeNum("debug2",getAdsError());
+    #endif
 
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
@@ -853,15 +858,4 @@ void lcdInit() {
   myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
 }
 
-void dbgInit() {
-  #if defined(STM32F4xx) && defined(DEBUG_ENABLED)
-  analogReadResolution(12);
-  #endif
-}
-void dbgOutput() {
-  #if defined(STM32F4xx) && defined(DEBUG_ENABLED)
-  int VRef = readVref();
-  myNex.writeNum("debug1",readTempSensor(VRef));
-  myNex.writeNum("debug2",getAdsError());
-  #endif
-}
+
