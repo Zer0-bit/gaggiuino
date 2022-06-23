@@ -94,7 +94,6 @@ int preInfusionFinishedPhaseIdx = 3;
 bool preinfusionFinished;
 
 bool POWER_ON;
-bool  descaleCheckBox;
 bool  preinfusionState;
 bool  pressureProfileState;
 bool  warmupEnabled;
@@ -327,7 +326,7 @@ void modeSelect() {
       break;
     case 6:
       // USART_CH1.println("MODE SELECT 6");
-      deScale(descaleCheckBox);
+      deScale();
       break;
     case 7:
       // USART_CH1.println("MODE SELECT 7");
@@ -581,7 +580,7 @@ void brewTimer(bool c) { // small function for easier timer start/stop
 //###############################____DESCALE__CONTROL____######################################
 //#############################################################################################
 
-void deScale(bool c) {
+void deScale() {
   static bool blink = true;
   static long timer = millis();
   static int currentCycleRead = myNex.readNumber("j0.val");
