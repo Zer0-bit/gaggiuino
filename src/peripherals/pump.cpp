@@ -4,7 +4,7 @@
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE);
 
-void setPumpPressure(float targetValue, float livePressure) {
+void setPumpPressure(float livePressure, float targetValue) {
   int pumpValue;
   float diff = targetValue - livePressure;
 
