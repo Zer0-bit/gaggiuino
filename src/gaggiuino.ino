@@ -529,6 +529,7 @@ void trigger1() {
       eepromCurrentValues.mainDivider = myNex.readNumber("mDiv");
       eepromCurrentValues.brewDivider = myNex.readNumber("bDiv");
       break;
+    case 7:
       eepromCurrentValues.powerLineFrequency = myNex.readNumber("regHz");
       eepromCurrentValues.warmupState = myNex.readNumber("warmupState");
       break;
