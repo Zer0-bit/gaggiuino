@@ -117,6 +117,7 @@ int ppHold;
 int ppLength;
 int selectedOperationalMode;
 int regionHz;
+int lcdSleepTime;
 
 // Other util vars
 float pressureTargetComparator;
@@ -288,6 +289,7 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     MainCycleDivider        = myNex.readNumber("mDiv");  // reading the delay divider
     BrewCycleDivider        = myNex.readNumber("bDiv");  // reading the delay divider
     regionHz                = myNex.readNumber("regHz");
+    lcdSleepTime            = myNex.readNumber("systemSleepTime"); // display sleep time
     warmupEnabled           = myNex.readNumber("warmupState");
     homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
 
@@ -359,7 +361,7 @@ void justDoCoffee() {
   HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
   BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.10, setPoint*0.10f, 0, 0);
-  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.10f);
+  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.25f);
 
   // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
@@ -509,16 +511,17 @@ void trigger1() {
       eepromCurrentValues.pressureProfilingFinish   = myNex.readNumber("ppFin");
       eepromCurrentValues.pressureProfilingHold     = myNex.readNumber("ppHold");
       eepromCurrentValues.pressureProfilingLength   = myNex.readNumber("ppLength");
-      eepromCurrentValues.pressureProfilingState  = myNex.readNumber("ppState");
-      eepromCurrentValues.preinfusionState    = myNex.readNumber("piState");
-      eepromCurrentValues.preinfusionSec      = myNex.readNumber("piSec");
-      eepromCurrentValues.preinfusionBar      = myNex.readNumber("piBar");
-      eepromCurrentValues.preinfusionSoak     = myNex.readNumber("piSoak");
+      eepromCurrentValues.pressureProfilingState    = myNex.readNumber("ppState");
+      eepromCurrentValues.preinfusionState          = myNex.readNumber("piState");
+      eepromCurrentValues.preinfusionSec            = myNex.readNumber("piSec");
+      eepromCurrentValues.preinfusionBar            = myNex.readNumber("piBar");
+      eepromCurrentValues.preinfusionSoak           = myNex.readNumber("piSoak");
       break;
     case 4:
       eepromCurrentValues.homeOnShotFinish  = myNex.readNumber("homeOnBrewFinish");
       eepromCurrentValues.graphBrew         = myNex.readNumber("graphEnabled");
       eepromCurrentValues.brewDeltaState    = myNex.readNumber("deltaState");
+      eepromCurrentValues.warmupState       = myNex.readNumber("warmupState");
       break;
     case 5:
       break;
@@ -531,7 +534,7 @@ void trigger1() {
       break;
     case 7:
       eepromCurrentValues.powerLineFrequency = myNex.readNumber("regHz");
-      eepromCurrentValues.warmupState = myNex.readNumber("warmupState");
+      eepromCurrentValues.lcdSleep           = myNex.readNumber("systemSleepTime");
       break;
     default:
       break;
@@ -807,6 +810,9 @@ void lcdInit() {
   myNex.writeNum("bDiv", eepromCurrentValues.brewDivider);
   myNex.writeNum("moreTemp.n5.val", eepromCurrentValues.brewDivider);
 
+  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep);
+  myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
+
   myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart);
   myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.pressureProfilingStart);
 
@@ -836,6 +842,9 @@ void lcdInit() {
 
   myNex.writeNum("regHz", eepromCurrentValues.powerLineFrequency);
 
+  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep);
+  myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
+
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
   myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
 
@@ -843,7 +852,7 @@ void lcdInit() {
   myNex.writeNum("brewSettings.btGraph.val", eepromCurrentValues.graphBrew);
 
   myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
-  myNex.writeNum("morePower.bt0.val", eepromCurrentValues.warmupState);
+  myNex.writeNum("brewSettings.btWarmup.val", eepromCurrentValues.warmupState);
 
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
   myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);

@@ -79,6 +79,11 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
+  if (eepromValuesNew.lcdSleep < 0) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
   eepromMetadata.timestamp = millis();
   eepromMetadata.version = EEPROM_DATA_VERSION;
   eepromMetadata.values = eepromValuesNew;
@@ -91,27 +96,28 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
 eepromValues_t getEepromDefaults(void) {
   eepromValues_t defaultData;
 
-  defaultData.setpoint            = 100;
-  defaultData.offsetTemp          = 7;
-  defaultData.hpwr                = 550;
-  defaultData.mainDivider         = 5;
-  defaultData.brewDivider         = 2;
-  defaultData.pressureProfilingStart    = 9;
-  defaultData.pressureProfilingFinish   = 6;
-  defaultData.pressureProfilingHold     = 5;
-  defaultData.pressureProfilingLength   = 15;
-  defaultData.pressureProfilingState    = true;
-  defaultData.preinfusionState    = true;
-  defaultData.preinfusionSec      = 10;
-  defaultData.preinfusionBar      = 2;
-  defaultData.preinfusionSoak     = 10;
-  defaultData.powerLineFrequency  = 50;
-  defaultData.warmupState         = false;
-  defaultData.homeOnShotFinish    = true;
-  defaultData.graphBrew           = true;
-  defaultData.brewDeltaState      = true;
-  defaultData.scalesF1            = 4000;
-  defaultData.scalesF2            = 4000;
+  defaultData.setpoint                 = 100;
+  defaultData.offsetTemp               = 7;
+  defaultData.hpwr                     = 550;
+  defaultData.mainDivider              = 5;
+  defaultData.brewDivider              = 2;
+  defaultData.pressureProfilingStart   = 9;
+  defaultData.pressureProfilingFinish  = 6;
+  defaultData.pressureProfilingHold    = 5;
+  defaultData.pressureProfilingLength  = 15;
+  defaultData.pressureProfilingState   = true;
+  defaultData.preinfusionState         = true;
+  defaultData.preinfusionSec           = 10;
+  defaultData.preinfusionBar           = 2;
+  defaultData.preinfusionSoak          = 10;
+  defaultData.powerLineFrequency       = 50;
+  defaultData.lcdSleep                 = 600;
+  defaultData.warmupState              = false;
+  defaultData.homeOnShotFinish         = true;
+  defaultData.graphBrew                = true;
+  defaultData.brewDeltaState           = true;
+  defaultData.scalesF1                 = 4000;
+  defaultData.scalesF2                 = 4000;
 
   return defaultData;
 }

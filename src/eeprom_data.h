@@ -22,6 +22,7 @@ struct eepromValues_t {
   uint16_t preinfusionBar;
   uint16_t preinfusionSoak;
   uint16_t powerLineFrequency;
+  uint16_t lcdSleep;
   bool     warmupState;
   bool     homeOnShotFinish;
   bool     graphBrew;
