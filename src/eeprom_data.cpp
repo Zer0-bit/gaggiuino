@@ -111,7 +111,7 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.preinfusionBar           = 2;
   defaultData.preinfusionSoak          = 10;
   defaultData.powerLineFrequency       = 50;
-  defaultData.lcdSleep                 = 600;
+  defaultData.lcdSleep                 = 1800;
   defaultData.warmupState              = false;
   defaultData.homeOnShotFinish         = true;
   defaultData.graphBrew                = true;
