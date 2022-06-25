@@ -1,3 +1,6 @@
+// #define DEBUG_ENABLED
+// #define SINGLE_BOARD
+
 #include <EasyNextionLibrary.h>
 #if defined(MAX31855_ENABLED)
   #include <Adafruit_MAX31855.h>
