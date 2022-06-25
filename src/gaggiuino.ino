@@ -1,6 +1,3 @@
-// #define DEBUG_ENABLED
-// #define SINGLE_BOARD
-
 #include <EasyNextionLibrary.h>
 #if defined(MAX31855_ENABLED)
   #include <Adafruit_MAX31855.h>
@@ -120,7 +117,6 @@ int ppHold;
 int ppLength;
 int selectedOperationalMode;
 int regionHz;
-int lcdSleepTime;
 
 // Other util vars
 float pressureTargetComparator;
@@ -292,7 +288,6 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     MainCycleDivider        = myNex.readNumber("mDiv");  // reading the delay divider
     BrewCycleDivider        = myNex.readNumber("bDiv");  // reading the delay divider
     regionHz                = myNex.readNumber("regHz");
-    lcdSleepTime            = myNex.readNumber("systemSleepTime"); // display sleep time
     warmupEnabled           = myNex.readNumber("warmupState");
     homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
 
@@ -812,9 +807,6 @@ void lcdInit() {
 
   myNex.writeNum("bDiv", eepromCurrentValues.brewDivider);
   myNex.writeNum("moreTemp.n5.val", eepromCurrentValues.brewDivider);
-
-  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep);
-  myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
 
   myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart);
   myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.pressureProfilingStart);
