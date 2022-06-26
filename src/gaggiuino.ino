@@ -34,7 +34,7 @@
   #define steamPin 7
   #define relayPin 8  // PB0
   #define dimmerPin 9
-  #define valvePin -1
+  #define valvePin 3
   #define brewPin A0 // PD7
   #define pressurePin A1
   #define HX711_dout_1 12 //mcu > HX711 no 1 dout pin
