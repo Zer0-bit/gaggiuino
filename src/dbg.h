@@ -20,8 +20,13 @@ static int readVref() {
 #endif
 }
 
+static inline void dbgInit() {
+  analogReadResolution(12);
+}
+
 #ifdef ATEMP
-static int readTempSensor(int32_t VRef) {
+static int readTempSensor() {
+  int32_t VRef = readVref();
 #ifdef __LL_ADC_CALC_TEMPERATURE
   return (__LL_ADC_CALC_TEMPERATURE(VRef, analogRead(ATEMP), LL_ADC_RESOLUTION));
 #elif defined(__LL_ADC_CALC_TEMPERATURE_TYP_PARAMS)

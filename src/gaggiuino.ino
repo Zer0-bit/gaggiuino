@@ -22,14 +22,15 @@
 #include "peripherals/peripherals.h"
 
 // Define some const values
-#define GET_KTYPE_READ_EVERY 250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+#define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define GET_PRESSURE_READ_EVERY 50
-#define GET_SCALES_READ_EVERY 100
-#define REFRESH_SCREEN_EVERY 150 // Screen refresh interval (ms)
-#define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
-#define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
-#define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
+#define GET_SCALES_READ_EVERY   100
+#define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
+#define REFRESH_FLOW_EVERY      1000
+#define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
+#define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
+#define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
+#define MAX_SETPOINT_VALUE      110 //Defines the max value of the setpoint
 
 //Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
 #if defined(MAX31855_ENABLED)
@@ -94,7 +95,6 @@ int preInfusionFinishedPhaseIdx = 3;
 bool preinfusionFinished;
 
 bool POWER_ON;
-bool  descaleCheckBox;
 bool  preinfusionState;
 bool  pressureProfileState;
 bool  warmupEnabled;
@@ -129,9 +129,11 @@ void setup() {
   pinInit();
   LOG_INFO("Pin init");
 
+#if defined(DEBUG_ENABLED)
   // Debug init if enabled
   dbgInit();
   LOG_INFO("DBG init");
+#endif
 
   setBoilerOff();  // relayPin LOW
   LOG_INFO("Boiler turned off");
@@ -259,7 +261,7 @@ void calculateFlow() {
   if (millis() >= flowTimer) {
     flowVal = (currentWeight - previousWeight)*10;
     previousWeight = currentWeight;
-    flowTimer = millis() + 1000;
+    flowTimer = millis() + REFRESH_FLOW_EVERY;
   }
 }
 
@@ -325,7 +327,7 @@ void modeSelect() {
       break;
     case 6:
       // USART_CH1.println("MODE SELECT 6");
-      deScale(descaleCheckBox);
+      deScale();
       break;
     case 7:
       // USART_CH1.println("MODE SELECT 7");
@@ -485,7 +487,10 @@ void lcdRefresh() {
     /*LCD flow output*/
     if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.f);
 
-    dbgOutput();
+    #if defined(DEBUG_ENABLED)
+    myNex.writeNum("debug1",readTempSensor());
+    myNex.writeNum("debug2",getAdsError());
+    #endif
 
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
@@ -576,7 +581,7 @@ void brewTimer(bool c) { // small function for easier timer start/stop
 //###############################____DESCALE__CONTROL____######################################
 //#############################################################################################
 
-void deScale(bool c) {
+void deScale() {
   static bool blink = true;
   static long timer = millis();
   static int currentCycleRead = myNex.readNumber("j0.val");
@@ -853,15 +858,4 @@ void lcdInit() {
   myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
 }
 
-void dbgInit() {
-  #if defined(STM32F4xx) && defined(DEBUG_ENABLED)
-  analogReadResolution(12);
-  #endif
-}
-void dbgOutput() {
-  #if defined(STM32F4xx) && defined(DEBUG_ENABLED)
-  int VRef = readVref();
-  myNex.writeNum("debug1",readTempSensor(VRef));
-  myNex.writeNum("debug2",getAdsError());
-  #endif
-}
+
