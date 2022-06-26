@@ -1,9 +1,4 @@
 #include <EasyNextionLibrary.h>
-#if defined(MAX31855_ENABLED)
-  #include <Adafruit_MAX31855.h>
-#else
-  #include <max6675.h>
-#endif
 #if defined(SINGLE_HX711_CLOCK)
   #include <HX711_2.h>
 #else
@@ -19,6 +14,7 @@
 #include "eeprom_data.h"
 #include "peripherals/pump.h"
 #include "peripherals/pressure_sensor.h"
+#include "peripherals/thermocouple.h"
 #include "peripherals/peripherals.h"
 
 // Define some const values
@@ -32,12 +28,6 @@
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
 #define MAX_SETPOINT_VALUE      110 //Defines the max value of the setpoint
 
-//Init the thermocouples with the appropriate pins defined above with the prefix "thermo"
-#if defined(MAX31855_ENABLED)
-  Adafruit_MAX31855 thermocouple(thermoCLK, thermoCS, thermoDO);
-#else
-  MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
-#endif
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
 //#######################__HX711_stuff__##################################
@@ -158,9 +148,8 @@ void setup() {
   eepromInit();
   LOG_INFO("EEPROM Init");
 
-  #if defined(MAX31855_ENABLED)
-    thermocouple.begin();
-  #endif
+  thermocoupleInit();
+  LOG_INFO("Thermocouple Init");
 
   lcdInit();
   LOG_INFO("LCD init");
