@@ -26,7 +26,7 @@ struct Phases
     short count;
     Phase *phases;
 
-    CurrentPhase getCurrentPhase(long timeInPP)
+    CurrentPhase getCurrentPhase(unsigned long timeInPP)
     {
         short phase = 0;
         unsigned long accumulatedTime = 0;
