@@ -1,9 +1,4 @@
 #include <EasyNextionLibrary.h>
-#if defined(SINGLE_HX711_CLOCK)
-  #include <HX711_2.h>
-#else
-  #include <HX711.h>
-#endif
 
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
@@ -15,6 +10,7 @@
 #include "peripherals/pump.h"
 #include "peripherals/pressure_sensor.h"
 #include "peripherals/thermocouple.h"
+#include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
 
 // Define some const values
@@ -30,13 +26,6 @@
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
-//#######################__HX711_stuff__##################################
-#if defined(SINGLE_HX711_CLOCK)
-HX711_2 LoadCells;
-#else
-HX711 LoadCell_1; //HX711 1
-HX711 LoadCell_2; //HX711 2
-#endif
 
 
 // Some vars are better global
@@ -54,21 +43,16 @@ volatile float livePressure;
 volatile float liveWeight;
 
 //scales vars
-/* If building for STM32 define the scales factors here */
-float scalesF1 = -4183.14f; // 3,911.142856
-float scalesF2 = 3911.14f; // -4,183.142856
 float currentWeight;
 float previousWeight;
 float flowVal;
 
 //int tarcalculateWeight;
 bool weighingStartRequested;
-bool scalesPresent;
-bool tareDone;
+bool tareDone = false;
 
 // brew detection vars
 bool brewActive;
-bool previousBrewState;
 
 //PP&PI variables
 //default phases. Updated in updatePressureProfilePhases.
@@ -146,6 +130,9 @@ void setup() {
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  setPoint = eepromCurrentValues.setpoint;
+  preinfuseSoak = eepromCurrentValues.preinfusionSoak;
   LOG_INFO("EEPROM Init");
 
   thermocoupleInit();
@@ -154,17 +141,11 @@ void setup() {
   lcdInit();
   LOG_INFO("LCD init");
 
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  scalesF1 = eepromCurrentValues.scalesF1;
-  scalesF2 = eepromCurrentValues.scalesF2;
-  setPoint = eepromCurrentValues.setpoint;
-  preinfuseSoak = eepromCurrentValues.preinfusionSoak;
-
   pressureSensorInit();
   LOG_INFO("Pressure sensor init");
 
   // Scales handling
-  scalesInit();
+  scalesInit(eepromCurrentValues.scalesF1, eepromCurrentValues.scalesF2);
   LOG_INFO("Scales init");
 
   myNex.lastCurrentPageId = myNex.currentPageId;
@@ -221,36 +202,22 @@ void sensorsRead() { // Reading the thermocouple temperature
   }
 }
 
-void calculateWeight() {
-  // static long scalesTimer;
-
-  scalesTare(); //Tare at the start of any weighing cycle
-
-  // Weight output
-  if (millis() > scalesTimer) {
-    if (scalesPresent && weighingStartRequested) {
-      #if defined(SINGLE_HX711_CLOCK)
-        if (LoadCells.is_ready()) {
-          float values[2];
-          LoadCells.get_units(values);
-          currentWeight = values[0] + values[1];
-        }
-      #else
-        currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
-      #endif
+void calculateWeightAndFlow() {
+  if (weighingStartRequested) {
+    if (millis() > scalesTimer) {
+      if(!tareDone) {
+        scalesTare(); //Tare at the start of any weighing cycle
+        tareDone = true;
+      }
+      currentWeight = scalesGetWeight();
+      scalesTimer = millis() + GET_SCALES_READ_EVERY;
     }
-    scalesTimer = millis() + GET_SCALES_READ_EVERY;
-  }
-  calculateFlow();
-}
 
-void calculateFlow() {
-  // static long refreshTimer;
-
-  if (millis() >= flowTimer) {
-    flowVal = (currentWeight - previousWeight)*10;
-    previousWeight = currentWeight;
-    flowTimer = millis() + REFRESH_FLOW_EVERY;
+    if (millis() > flowTimer) {
+      flowVal = (currentWeight - previousWeight)*10;
+      previousWeight = currentWeight;
+      flowTimer = millis() + REFRESH_FLOW_EVERY;
+    }
   }
 }
 
@@ -547,8 +514,6 @@ void trigger1() {
 
 void trigger2() {
   LOG_VERBOSE("Tare scales");
-  tareDone = false;
-  previousBrewState = false;
   scalesTare();
 }
 
@@ -715,7 +680,7 @@ void brewDetect() {
       brewActive = true;
       weighingStartRequested = true; // Flagging weighing start
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
-      if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) calculateWeight();
+      if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) calculateWeightAndFlow();
     } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPumpToRawValue(127); // setting the pump output target to 9 bars for non PP or PI profiles
     else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
   } else{
@@ -729,58 +694,13 @@ void brewDetect() {
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) {
       /* Only setting the weight activity value if it's been previously unset */
       weighingStartRequested=true;
-      calculateWeight();
+      calculateWeightAndFlow();
     } else {/* Only resetting the scales values if on any other screens than brew or scales */
       weighingStartRequested = false; // Flagging weighing stop
       tareDone = false;
-      previousBrewState = false;
       currentWeight = 0.f;
       previousWeight = 0.f;
     }
-  }
-}
-
-void scalesInit() {
-
-  #if defined(SINGLE_HX711_CLOCK)
-    LoadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1);
-    LoadCells.set_scale(scalesF1, scalesF2);
-    LoadCells.power_up();
-
-    delay(500);
-
-    if (LoadCells.is_ready()) {
-      LoadCells.tare(5);
-      scalesPresent = true;
-    }
-  #else
-    LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
-    LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
-    LoadCell_1.set_scale(scalesF1); // calibrated val1
-    LoadCell_2.set_scale(scalesF2); // calibrated val2
-
-    delay(500);
-
-    if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
-      scalesPresent = true;
-      LoadCell_1.tare();
-      LoadCell_2.tare();
-    }
-  #endif
-}
-
-void scalesTare() {
-  if( scalesPresent && (!tareDone || !previousBrewState) ) {
-    #if defined(SINGLE_HX711_CLOCK)
-      if (LoadCells.is_ready()) LoadCells.tare(5);
-    #else
-      if (LoadCell_1.wait_ready_timeout(300) && LoadCell_2.wait_ready_timeout(300)) {
-        LoadCell_1.tare(2);
-        LoadCell_2.tare(2);
-      }
-    #endif
-    tareDone=1;
-    previousBrewState=1;
   }
 }
 
