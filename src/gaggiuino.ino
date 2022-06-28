@@ -93,7 +93,7 @@ int regionHz;
 // Other util vars
 float pressureTargetComparator;
 
-void setup() {
+void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino booting");
 
@@ -156,7 +156,7 @@ void setup() {
 
 
 //Main loop where all the logic is continuously run
-void loop() {
+void loop(void) {
   pageValuesRefresh(false);
   myNex.NextionListen();
   sensorsRead();
@@ -170,7 +170,7 @@ void loop() {
 //##############################################################################################################################
 
 
-void sensorsRead() { // Reading the thermocouple temperature
+static void sensorsRead(void) { // Reading the thermocouple temperature
   // static long thermoTimer;
   // Reading the temperature every 350ms between the loops
   if (millis() > thermoTimer) {
@@ -199,7 +199,7 @@ void sensorsRead() { // Reading the thermocouple temperature
   }
 }
 
-void calculateWeightAndFlow() {
+static void calculateWeightAndFlow(void) {
   if (weighingStartRequested) {
     if (millis() > scalesTimer) {
       if(!tareDone) {
@@ -222,7 +222,7 @@ void calculateWeightAndFlow() {
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 
-void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
+static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
 
   if ( myNex.currentPageId != myNex.lastCurrentPageId || forcedUpdate == true ) {
     preinfusionState        = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
@@ -258,7 +258,7 @@ void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page ch
 //#############################################################################################
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
-void modeSelect() {
+static void modeSelect(void) {
   // USART_CH1.println("MODE SELECT ENTER");
   switch (selectedOperationalMode) {
     case 0:
@@ -302,7 +302,7 @@ void modeSelect() {
 //#############################################################################################
 //#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
 //#############################################################################################
-void justDoCoffee() {
+static void justDoCoffee(void) {
   // USART_CH1.println("DO_COFFEE ENTER");
   int HPWR_LOW = HPWR/MainCycleDivider;
   static double heaterWave;
@@ -394,7 +394,7 @@ void justDoCoffee() {
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
-void steamCtrl() {
+static void steamCtrl(void) {
 
   if (!brewActive) {
     if (livePressure <= 9.f) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
@@ -416,7 +416,7 @@ void steamCtrl() {
 //################################____LCD_REFRESH_CONTROL___###################################
 //#############################################################################################
 
-void lcdRefresh() {
+static void lcdRefresh(void) {
   // static long pageRefreshTimer;
   static float shotWeight;
 
@@ -450,7 +450,7 @@ void lcdRefresh() {
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
 // Save the desired temp values to EEPROM
-void trigger1() {
+void trigger1(void) {
   LOG_VERBOSE("Saving values to EEPROM");
   bool rc;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
@@ -507,12 +507,12 @@ void trigger1() {
 //###################################_____SCALES_TARE____######################################
 //#############################################################################################
 
-void trigger2() {
+void trigger2(void) {
   LOG_VERBOSE("Tare scales");
   scalesTare();
 }
 
-void trigger3() {
+void trigger3(void) {
   LOG_VERBOSE("Scales enabled or disabled");
   homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
 }
@@ -521,7 +521,7 @@ void trigger3() {
 //###############################_____HELPER_FUCTIONS____######################################
 //#############################################################################################
 
-void brewTimer(bool c) { // small function for easier timer start/stop
+static void brewTimer(bool c) { // small function for easier timer start/stop
   myNex.writeNum("timerState", c ? 1 : 0);
 }
 
@@ -530,7 +530,7 @@ void brewTimer(bool c) { // small function for easier timer start/stop
 //###############################____DESCALE__CONTROL____######################################
 //#############################################################################################
 
-void deScale() {
+static void deScale(void) {
   static bool blink = true;
   static long timer = millis();
   static int currentCycleRead = myNex.readNumber("j0.val");
@@ -588,7 +588,7 @@ void deScale() {
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
-void updatePressureProfilePhases() {
+static void updatePressureProfilePhases(void) {
   switch (selectedOperationalMode)
   {
   case 0: // no PI and no PP -> Pressure fixed at 9bar
@@ -635,7 +635,7 @@ void setPhase(int phaseIdx, int fromBar, int toBar, int timeMs) {
     phases.phases[phaseIdx].durationMs = timeMs;
 }
 
-void newPressureProfile() {
+static void newPressureProfile(void) {
   float newBarValue;
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
@@ -654,7 +654,7 @@ void newPressureProfile() {
   justDoCoffee();
 }
 
-void manualPressureProfile() {
+static void manualPressureProfile(void) {
   if( selectedOperationalMode == 3 ) {
     int power_reading = myNex.readNumber("h0.val");
     setPumpPressure(livePressure, power_reading);
@@ -666,7 +666,7 @@ void manualPressureProfile() {
 //###############################____INIT_AND_ADMIN_CTRL____###################################
 //#############################################################################################
 
-void brewDetect() {
+static void brewDetect(void) {
   if ( brewState() ) {
     openValve();
     /* Applying the below block only when brew detected */
@@ -699,7 +699,7 @@ void brewDetect() {
   }
 }
 
-void lcdInit() {
+static void lcdInit(void) {
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
 
   myNex.writeNum("setPoint", eepromCurrentValues.setpoint);
