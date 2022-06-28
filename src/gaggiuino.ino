@@ -97,7 +97,7 @@ float pressureTargetComparator;
 
 void setup() {
   LOG_INIT();
-  LOG_INFO("Gaggiuino booting");
+  LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
 
   // Various pins operation mode handling
   pinInit();
