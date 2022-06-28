@@ -77,7 +77,6 @@ bool  descaleEnabled;
 bool brewDeltaActive;
 bool homeScreenScalesEnabled;
 volatile int  HPWR;
-volatile int  HPWR_OUT;
 int  setPoint;
 int  offsetTemp;
 int  MainCycleDivider;
@@ -314,7 +313,7 @@ void justDoCoffee() {
   static bool heaterState;
   float BREW_TEMP_DELTA;
   // Calculating the boiler heating power range based on the below input values
-  HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
+  int HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
   BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.10, setPoint*0.10f, 0, 0);
   BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.25f);
