@@ -68,7 +68,6 @@ int preInfusionFinishedPhaseIdx = 3;
 
 bool preinfusionFinished;
 
-bool POWER_ON;
 bool  preinfusionState;
 bool  pressureProfileState;
 bool  warmupEnabled;
@@ -147,8 +146,7 @@ void setup() {
   scalesInit(eepromCurrentValues.scalesF1, eepromCurrentValues.scalesF2);
   LOG_INFO("Scales init");
 
-  myNex.lastCurrentPageId = myNex.currentPageId;
-  POWER_ON = true;
+  pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
 }
 
@@ -159,7 +157,7 @@ void setup() {
 
 //Main loop where all the logic is continuously run
 void loop() {
-  pageValuesRefresh();
+  pageValuesRefresh(false);
   myNex.NextionListen();
   sensorsRead();
   brewDetect();
@@ -224,9 +222,9 @@ void calculateWeightAndFlow() {
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 
-void pageValuesRefresh() {  // Refreshing our values on page changes
+void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
 
-  if ( myNex.currentPageId != myNex.lastCurrentPageId || POWER_ON == true ) {
+  if ( myNex.currentPageId != myNex.lastCurrentPageId || forcedUpdate == true ) {
     preinfusionState        = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
     pressureProfileState    = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
     preinfuseTime           = myNex.readNumber("piSec");
@@ -254,7 +252,6 @@ void pageValuesRefresh() {  // Refreshing our values on page changes
     updatePressureProfilePhases();
 
     myNex.lastCurrentPageId = myNex.currentPageId;
-    POWER_ON = false;
   }
 }
 
@@ -296,8 +293,7 @@ void modeSelect() {
       else steamCtrl();
       break;
     default:
-      POWER_ON = true;
-      pageValuesRefresh();
+      pageValuesRefresh(true);
       break;
   }
   // USART_CH1.println("MODE SELECT EXIT");
