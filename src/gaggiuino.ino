@@ -22,7 +22,6 @@
 #define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
-#define MAX_SETPOINT_VALUE      110 //Defines the max value of the setpoint
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
