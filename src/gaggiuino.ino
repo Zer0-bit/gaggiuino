@@ -1009,6 +1009,7 @@ void brewDetect() {
   } else{
     digitalWrite(valvePin, LOW);
     brewTimer(0); // stopping timer
+    pump.set(0);
     brewActive = false;
     /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
     brewingTimer = millis();
