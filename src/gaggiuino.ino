@@ -68,27 +68,10 @@ int preInfusionFinishedPhaseIdx = 3;
 
 bool preinfusionFinished;
 
-bool  preinfusionState;
-bool  pressureProfileState;
-bool  warmupEnabled;
-bool  flushEnabled;
-bool  descaleEnabled;
-bool brewDeltaActive;
-bool homeScreenScalesEnabled;
-volatile int  HPWR;
-int  setPoint;
-int  offsetTemp;
-int  MainCycleDivider;
-int  BrewCycleDivider;
-int  preinfuseTime;
-int preinfuseBar;
-int preinfuseSoak;
-int ppStartBar;
-int ppFinishBar;
-int ppHold;
-int ppLength;
+eepromValues_t runningCfg;
+
 int selectedOperationalMode;
-int regionHz;
+bool homeScreenScalesEnabled;
 
 // Other util vars
 float pressureTargetComparator;
@@ -130,14 +113,12 @@ void setup(void) {
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  setPoint = eepromCurrentValues.setpoint;
-  preinfuseSoak = eepromCurrentValues.preinfusionSoak;
   LOG_INFO("EEPROM Init");
 
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdInit();
+  lcdInit(eepromCurrentValues);
   LOG_INFO("LCD init");
 
   pressureSensorInit();
@@ -226,29 +207,28 @@ static void calculateWeightAndFlow(void) {
 static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
 
   if ( myNex.currentPageId != myNex.lastCurrentPageId || forcedUpdate == true ) {
-    preinfusionState        = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
-    pressureProfileState    = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
-    preinfuseTime           = myNex.readNumber("piSec");
-    preinfuseBar            = myNex.readNumber("piBar");
-    preinfuseSoak           = myNex.readNumber("piSoak"); // pre-infusion soak value
-    ppStartBar              = myNex.readNumber("ppStart");
-    ppFinishBar             = myNex.readNumber("ppFin");
-    ppHold                  = myNex.readNumber("ppHold"); // pp start pressure hold
-    ppLength                = myNex.readNumber("ppLength"); // pp shot length
-    brewDeltaActive         = myNex.readNumber("deltaState");
-    flushEnabled            = myNex.readNumber("flushState");
-    descaleEnabled          = myNex.readNumber("descaleState");
-    setPoint                = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
-    offsetTemp              = myNex.readNumber("offSet");  // reading the offset value from the lcd
-    HPWR                    = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
-    MainCycleDivider        = myNex.readNumber("mDiv");  // reading the delay divider
-    BrewCycleDivider        = myNex.readNumber("bDiv");  // reading the delay divider
-    regionHz                = myNex.readNumber("regHz");
-    warmupEnabled           = myNex.readNumber("warmupState");
-    homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
+    runningCfg.preinfusionState           = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
+    runningCfg.preinfusionSec             = myNex.readNumber("piSec");
+    runningCfg.preinfusionBar             = myNex.readNumber("piBar");
+    runningCfg.preinfusionSoak            = myNex.readNumber("piSoak"); // pre-infusion soak value
 
-    // MODE_SELECT should always be last
-    selectedOperationalMode = myNex.readNumber("modeSelect");
+    runningCfg.pressureProfilingState     = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
+    runningCfg.pressureProfilingStart     = myNex.readNumber("ppStart");
+    runningCfg.pressureProfilingFinish    = myNex.readNumber("ppFin");
+    runningCfg.pressureProfilingHold      = myNex.readNumber("ppHold"); // pp start pressure hold
+    runningCfg.pressureProfilingLength    = myNex.readNumber("ppLength"); // pp shot length
+
+    runningCfg.brewDeltaState             = myNex.readNumber("deltaState");
+    runningCfg.setpoint                   = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
+    runningCfg.offsetTemp                 = myNex.readNumber("offSet");  // reading the offset value from the lcd
+    runningCfg.hpwr                       = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
+    runningCfg.mainDivider                = myNex.readNumber("mDiv");  // reading the delay divider
+    runningCfg.brewDivider                = myNex.readNumber("bDiv");  // reading the delay divider
+    runningCfg.powerLineFrequency         = myNex.readNumber("regHz");
+    runningCfg.warmupState                = myNex.readNumber("warmupState");
+
+    homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
+    selectedOperationalMode = myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
 
     updatePressureProfilePhases();
 
@@ -310,50 +290,50 @@ inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
 
 static void justDoCoffee(void) {
   // USART_CH1.println("DO_COFFEE ENTER");
-  int HPWR_LOW = HPWR/MainCycleDivider;
+  int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
   static double heaterWave;
   static bool heaterState;
   float BREW_TEMP_DELTA;
   // Calculating the boiler heating power range based on the below input values
-  int HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
-  HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+TEMP_DELTA(setPoint), TEMP_DELTA(setPoint), 0, 0);
-  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(setPoint));
+  int HPWR_OUT = mapRange(kProbeReadValue, runningCfg.setpoint - 10, runningCfg.setpoint, runningCfg.hpwr, HPWR_LOW, 0);
+  HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
+  BREW_TEMP_DELTA = mapRange(kProbeReadValue, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
+  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(runningCfg.setpoint));
 
   // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+0.25f && !preinfusionFinished ) {
-      if (millis() - heaterWave > HPWR_OUT*BrewCycleDivider && !heaterState ) {
+    if (kProbeReadValue > runningCfg.setpoint && kProbeReadValue < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
+      if (millis() - heaterWave > HPWR_OUT * runningCfg.brewDivider && !heaterState ) {
         setBoilerOff();
         heaterState=true;
         heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_LOW*MainCycleDivider && heaterState ) {
+      } else if (millis() - heaterWave > HPWR_LOW * runningCfg.mainDivider && heaterState ) {
         setBoilerOn();
         heaterState=false;
         heaterWave=millis();
       }
-    } else if (kProbeReadValue > setPoint-1.5f && kProbeReadValue < setPoint+(brewDeltaActive ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
-      if (millis() - heaterWave > HPWR*BrewCycleDivider && !heaterState ) {
+    } else if (kProbeReadValue > runningCfg.setpoint - 1.5f && kProbeReadValue < runningCfg.setpoint + (runningCfg.brewDeltaState ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
+      if (millis() - heaterWave > runningCfg.hpwr * runningCfg.brewDivider && !heaterState ) {
         setBoilerOn();
         heaterState=true;
         heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR && heaterState ) {
+      } else if (millis() - heaterWave > runningCfg.hpwr && heaterState ) {
         setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
-    } else if (brewDeltaActive && kProbeReadValue >= (setPoint+BREW_TEMP_DELTA) && kProbeReadValue <= (setPoint+BREW_TEMP_DELTA+2.5f)  && preinfusionFinished ) {
-      if (millis() - heaterWave > HPWR*MainCycleDivider && !heaterState ) {
+    } else if (runningCfg.brewDeltaState && kProbeReadValue >= (runningCfg.setpoint + BREW_TEMP_DELTA) && kProbeReadValue <= (runningCfg.setpoint + BREW_TEMP_DELTA + 2.5f)  && preinfusionFinished ) {
+      if (millis() - heaterWave > runningCfg.hpwr * runningCfg.mainDivider && !heaterState ) {
         setBoilerOn();
         heaterState=true;
         heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR && heaterState ) {
+      } else if (millis() - heaterWave > runningCfg.hpwr && heaterState ) {
         setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
-    } else if(kProbeReadValue <= setPoint-1.5f) {
+    } else if(kProbeReadValue <= runningCfg.setpoint - 1.5f) {
     setBoilerOn();
     } else {
       setBoilerOff();
@@ -361,31 +341,31 @@ static void justDoCoffee(void) {
   } else { //if brewState == 0
     // USART_CH1.println("DO_COFFEE BREW BTN NOT ACTIVE BLOCK");
     //brewTimer(0);
-    if (kProbeReadValue < ((float)setPoint - 10.00f)) {
+    if (kProbeReadValue < ((float)runningCfg.setpoint - 10.00f)) {
       setBoilerOn();
-    } else if (kProbeReadValue >= ((float)setPoint - 10.00f) && kProbeReadValue < ((float)setPoint - 3.00f)) {
+    } else if (kProbeReadValue >= ((float)runningCfg.setpoint - 10.00f) && kProbeReadValue < ((float)runningCfg.setpoint - 3.00f)) {
       setBoilerOn();
-      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider) {
+      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider) {
         setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
-    } else if ((kProbeReadValue >= ((float)setPoint - 3.00f)) && (kProbeReadValue <= ((float)setPoint - 1.00f))) {
-      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState) {
+    } else if ((kProbeReadValue >= ((float)runningCfg.setpoint - 3.00f)) && (kProbeReadValue <= ((float)runningCfg.setpoint - 1.00f))) {
+      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState) {
         setBoilerOn();
         heaterState=true;
         heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
+      } else if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && heaterState ) {
         setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
-    } else if ((kProbeReadValue >= ((float)setPoint - 0.5f)) && kProbeReadValue < (float)setPoint) {
-      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState ) {
+    } else if ((kProbeReadValue >= ((float)runningCfg.setpoint - 0.5f)) && kProbeReadValue < (float)runningCfg.setpoint) {
+      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState ) {
         setBoilerOn();
         heaterState=true;
         heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
+      } else if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && heaterState ) {
         setBoilerOff();
         heaterState=false;
         heaterWave=millis();
@@ -404,11 +384,11 @@ static void steamCtrl(void) {
 
   if (!brewActive) {
     if (livePressure <= 9.f) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
-      if ((kProbeReadValue > setPoint-10.f) && (kProbeReadValue <= 155.f)) setBoilerOn();
+      if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= 155.f)) setBoilerOn();
       else setBoilerOff();
     } else if(livePressure >= 9.1f) setBoilerOff();
   } else if (brewActive) { //added to cater for hot water from steam wand functionality
-    if ((kProbeReadValue > setPoint-10.f) && (kProbeReadValue <= 105.f)) {
+    if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= 105.f)) {
       setBoilerOn();
       setPumpPressure(livePressure, 9);
     } else {
@@ -432,7 +412,7 @@ static void lcdRefresh(void) {
     if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? (livePressure <= pressureTargetComparator + 0.5f) ? livePressure*10.f : pressureTargetComparator*10.f : 0.f);
     else myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
     /*LCD temp output*/
-    myNex.writeNum("currentTemp",int(kProbeReadValue-offsetTemp));
+    myNex.writeNum("currentTemp",int(kProbeReadValue - runningCfg.offsetTemp));
     /*LCD weight output*/
     if (weighingStartRequested && brewActive) {
       (currentWeight > 0.f) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
@@ -604,19 +584,19 @@ static void updatePressureProfilePhases(void) {
     break;
   case 1: // Just PI no PP -> after PI pressure fixed at 9bar
     phases.count = 4;
-    setPreInfusionPhases(0, preinfuseBar, preinfuseTime, preinfuseSoak);
+    setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
     setPhase(3, 9, 9, 1000);
     preInfusionFinishedPhaseIdx = 3;
     break;
   case 2: // No PI, yes PP
     phases.count = 2;
-    setPresureProfilePhases(0, ppStartBar, ppFinishBar, ppHold, ppLength);
+    setPresureProfilePhases(0, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
     preInfusionFinishedPhaseIdx = 0;
     break;
   case 4: // Both PI + PP
     phases.count = 5;
-    setPreInfusionPhases(0, preinfuseBar, preinfuseTime, preinfuseSoak);
-    setPresureProfilePhases(3, ppStartBar, ppFinishBar, ppHold, ppLength);
+    setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
+    setPresureProfilePhases(3, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
     preInfusionFinishedPhaseIdx = 3;
     break;
   default:
@@ -705,8 +685,7 @@ static void brewDetect(void) {
   }
 }
 
-static void lcdInit(void) {
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+static void lcdInit(eepromValues_t eepromCurrentValues) {
 
   myNex.writeNum("setPoint", eepromCurrentValues.setpoint);
   myNex.writeNum("moreTemp.n1.val", eepromCurrentValues.setpoint);
