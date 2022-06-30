@@ -22,11 +22,11 @@
 #define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
-#define TEMP_DELTA(d)            (d*0.25f)
+#define DELTA_RANGE             0.25f // % to apply as delta
+
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
-
 
 // Some vars are better global
 //Timers
@@ -303,6 +303,11 @@ static void modeSelect(void) {
 //#############################################################################################
 //#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
 //#############################################################################################
+
+//delta stuff
+inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
+
+
 static void justDoCoffee(void) {
   // USART_CH1.println("DO_COFFEE ENTER");
   int HPWR_LOW = HPWR/MainCycleDivider;
