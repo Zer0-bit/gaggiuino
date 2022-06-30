@@ -15,7 +15,7 @@
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
-#define GET_PRESSURE_READ_EVERY 50
+#define GET_PRESSURE_READ_EVERY 10
 #define GET_SCALES_READ_EVERY   100
 #define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
 #define REFRESH_FLOW_EVERY      1000
@@ -646,7 +646,7 @@ static void newPressureProfile(void) {
   else {
     newBarValue = 0.0f;
   }
-  setPumpPressure(livePressure, newBarValue);
+  setPumpPressure(livePressure, newBarValue, isPressureFalling());
   // saving the target pressure
   pressureTargetComparator = preinfusionFinished ? (int) newBarValue : livePressure;
   // Keep that water at temp
