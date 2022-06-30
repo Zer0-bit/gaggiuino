@@ -22,6 +22,7 @@
 #define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
+#define TEMP_DELTA              setPoint*0.25f
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
@@ -310,8 +311,8 @@ static void justDoCoffee(void) {
   // Calculating the boiler heating power range based on the below input values
   int HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.25f, setPoint*0.25f, 0, 0);
-  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.25f);
+  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+TEMP_DELTA, TEMP_DELTA, 0, 0);
+  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA);
 
   // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
