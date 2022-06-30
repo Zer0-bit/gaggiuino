@@ -310,7 +310,7 @@ static void justDoCoffee(void) {
   // Calculating the boiler heating power range based on the below input values
   int HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.10, setPoint*0.10f, 0, 0);
+  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.25f, setPoint*0.25f, 0, 0);
   BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.25f);
 
   // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
