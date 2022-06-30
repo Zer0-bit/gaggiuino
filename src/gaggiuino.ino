@@ -125,6 +125,7 @@ void setup(void) {
     LOG_VERBOSE("Connecting to Nextion LCD");
     delay(100);
   }
+  myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
