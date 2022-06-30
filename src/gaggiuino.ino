@@ -126,12 +126,12 @@ HX711 LoadCell_2; //HX711 2
 
 // Some vars are better global
 //Timers
-unsigned long pressureTimer = 0;
-unsigned long thermoTimer = 0;
-unsigned long scalesTimer = 0;
-unsigned long flowTimer = 0;
-unsigned long pageRefreshTimer = 0;
-unsigned long brewingTimer = 0;
+unsigned long pressureTimer = millis();
+unsigned long thermoTimer = millis();
+unsigned long scalesTimer = millis();
+unsigned long flowTimer = millis();
+unsigned long pageRefreshTimer = millis();
+unsigned long brewingTimer = millis();
 
 //volatile vars
 volatile float kProbeReadValue; //temp val
@@ -1009,6 +1009,7 @@ void brewDetect() {
   } else{
     digitalWrite(valvePin, LOW);
     brewTimer(0); // stopping timer
+    pump.set(0);
     brewActive = false;
     /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
     brewingTimer = millis();
