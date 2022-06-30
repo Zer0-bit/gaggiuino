@@ -22,10 +22,11 @@
 #define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
+#define DELTA_RANGE             0.25f // % to apply as delta
+
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
-
 
 // Some vars are better global
 //Timers
@@ -124,6 +125,7 @@ void setup(void) {
     LOG_VERBOSE("Connecting to Nextion LCD");
     delay(100);
   }
+  myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -301,6 +303,11 @@ static void modeSelect(void) {
 //#############################################################################################
 //#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
 //#############################################################################################
+
+//delta stuff
+inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
+
+
 static void justDoCoffee(void) {
   // USART_CH1.println("DO_COFFEE ENTER");
   int HPWR_LOW = HPWR/MainCycleDivider;
@@ -310,8 +317,8 @@ static void justDoCoffee(void) {
   // Calculating the boiler heating power range based on the below input values
   int HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.10, setPoint*0.10f, 0, 0);
-  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.25f);
+  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+TEMP_DELTA(setPoint), TEMP_DELTA(setPoint), 0, 0);
+  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(setPoint));
 
   // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
