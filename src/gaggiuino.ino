@@ -50,6 +50,7 @@ float flowVal;
 //int tarcalculateWeight;
 bool weighingStartRequested;
 bool tareDone = false;
+bool forcedValuesRefresh = false;
 
 // brew detection vars
 bool brewActive;
@@ -106,9 +107,9 @@ void setup(void) {
   while (myNex.readNumber("safetyTempCheck") != 100 )
   {
     LOG_VERBOSE("Connecting to Nextion LCD");
-    delay(100);
+    myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
   }
-  myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
+  
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -128,7 +129,8 @@ void setup(void) {
   scalesInit(eepromCurrentValues.scalesF1, eepromCurrentValues.scalesF2);
   LOG_INFO("Scales init");
 
-  pageValuesRefresh(true);
+  // pageValuesRefresh(true);
+  forcedValuesRefresh = true;
   LOG_INFO("Setup sequence finished");
 }
 
@@ -139,7 +141,7 @@ void setup(void) {
 
 //Main loop where all the logic is continuously run
 void loop(void) {
-  pageValuesRefresh(false);
+  pageValuesRefresh();
   myNex.NextionListen();
   sensorsRead();
   brewDetect();
@@ -204,9 +206,9 @@ static void calculateWeightAndFlow(void) {
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 
-static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
+static void pageValuesRefresh(void) {  // Refreshing our values on page changes
 
-  if ( myNex.currentPageId != myNex.lastCurrentPageId || forcedUpdate == true ) {
+  if ( myNex.currentPageId != myNex.lastCurrentPageId || forcedValuesRefresh ) {
     runningCfg.preinfusionState           = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
     runningCfg.preinfusionSec             = myNex.readNumber("piSec");
     runningCfg.preinfusionBar             = myNex.readNumber("piBar");
@@ -233,6 +235,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     updatePressureProfilePhases();
 
     myNex.lastCurrentPageId = myNex.currentPageId;
+    forcedValuesRefresh = false;
   }
 }
 
@@ -274,7 +277,8 @@ static void modeSelect(void) {
       else steamCtrl();
       break;
     default:
-      pageValuesRefresh(true);
+      // pageValuesRefresh(true);
+      forcedValuesRefresh = true;
       break;
   }
   // USART_CH1.println("MODE SELECT EXIT");
