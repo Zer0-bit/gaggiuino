@@ -635,7 +635,7 @@ static void newPressureProfile(void) {
   }
   setPumpPressure(livePressure, newBarValue, isPressureFalling());
   // saving the target pressure
-  pressureTargetComparator = preinfusionFinished ? (int) newBarValue : livePressure;
+  pressureTargetComparator = preinfusionFinished ? newBarValue : livePressure;
   // Keep that water at temp
   justDoCoffee();
 }
