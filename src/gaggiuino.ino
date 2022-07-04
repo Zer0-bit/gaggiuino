@@ -63,7 +63,6 @@ Phase phaseArray[] = {
 };
 Phases phases {5,  phaseArray};
 int preInfusionFinishedPhaseIdx = 3;
-
 bool preinfusionFinished;
 
 eepromValues_t runningCfg;
@@ -125,6 +124,10 @@ void setup(void) {
   // Scales handling
   scalesInit(eepromCurrentValues.scalesF1, eepromCurrentValues.scalesF2);
   LOG_INFO("Scales init");
+
+  // Pump init
+  pumpInit(eepromCurrentValues.powerLineFrequency);
+  LOG_INFO("Pump init");
 
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
@@ -204,6 +207,15 @@ static void calculateWeightAndFlow(void) {
       if (millis() > flowTimer) {
         flowVal = shotWeight - previousWeight;
         previousWeight = shotWeight;
+        flowTimer = millis() + REFRESH_FLOW_EVERY;
+      }
+    } else {
+      if (millis() > flowTimer) {
+        flowVal = getPumpFlow(getAndResetClickCounter(), livePressure) * 1000 / REFRESH_FLOW_EVERY;
+        if (preinfusionFinished) {
+          currentWeight += flowVal;
+          shotWeight = currentWeight;
+        }
         flowTimer = millis() + REFRESH_FLOW_EVERY;
       }
     }
@@ -344,7 +356,7 @@ static void justDoCoffee(void) {
         heaterWave=millis();
       }
     } else if(kProbeReadValue <= runningCfg.setpoint - 1.5f) {
-    setBoilerOn();
+      setBoilerOn();
     } else {
       setBoilerOff();
     }
@@ -400,10 +412,10 @@ static void steamCtrl(void) {
   } else if (brewActive) { //added to cater for hot water from steam wand functionality
     if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= 105.f)) {
       setBoilerOn();
-      setPumpPressure(livePressure, 9);
+      pumpFullOn();
     } else {
       setBoilerOff();
-      setPumpPressure(livePressure, 9);
+      pumpFullOn();
     }
   } else setBoilerOff();
 }
@@ -652,7 +664,7 @@ static void newPressureProfile(void) {
   else {
     newBarValue = 0.0f;
   }
-  setPumpPressure(livePressure, newBarValue, isPressureFalling());
+  setPumpPressure(livePressure, newBarValue, flowVal, isPressureFalling());
   // saving the target pressure
   pressureTargetComparator = preinfusionFinished ? newBarValue : livePressure;
   // Keep that water at temp
@@ -662,7 +674,7 @@ static void newPressureProfile(void) {
 static void manualPressureProfile(void) {
   if( selectedOperationalMode == 3 ) {
     int power_reading = myNex.readNumber("h0.val");
-    setPumpPressure(livePressure, power_reading);
+    setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
   }
   justDoCoffee();
 }
@@ -673,7 +685,7 @@ static void pumpFullOn(void) {
 }
 
 //#############################################################################################
-//###############################____INIT_AND_ADMIN_CTRL____###################################
+//###################################____BREW DETECT____#######################################
 //#############################################################################################
 
 static void brewDetect(void) {

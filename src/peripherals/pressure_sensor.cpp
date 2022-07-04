@@ -27,7 +27,7 @@ float getPressure() {  //returns sensor pressure data
 }
 
 bool isPressureFalling() {
-  return previousPressure >= currentPressure + 0.01f;
+  return previousPressure >= currentPressure + 0.03f;
 }
 
 int8_t getAdsError() {
