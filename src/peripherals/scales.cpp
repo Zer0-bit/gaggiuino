@@ -71,3 +71,7 @@ float scalesGetWeight(void) {
 
   return currentWeight;
 }
+
+bool scalesIsPresent(void) {
+  return scalesPresent;
+}

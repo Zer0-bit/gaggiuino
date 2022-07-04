@@ -23,7 +23,7 @@
 #define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
 #define DELTA_RANGE             0.25f // % to apply as delta
-
+#define BEAUTIFY_GRAPH          true
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
@@ -43,6 +43,7 @@ volatile float livePressure;
 volatile float liveWeight;
 
 //scales vars
+float shotWeight;
 float currentWeight;
 float previousWeight;
 float flowVal;
@@ -152,9 +153,14 @@ void loop(void) {
 //##############################################################################################################################
 
 
-static void sensorsRead(void) { // Reading the thermocouple temperature
-  // static long thermoTimer;
-  // Reading the temperature every 350ms between the loops
+static void sensorsRead(void) {
+  sensorsReadTemperature();
+  sensorsReadWeight();
+  sensorsReadPressure();
+  calculateWeightAndFlow();
+}
+
+static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
     kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
     /*
@@ -173,8 +179,20 @@ static void sensorsRead(void) { // Reading the thermocouple temperature
     }
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
+}
 
-  // Read pressure and store in a global var for further controls
+static void sensorsReadWeight(void) {
+  if (scalesIsPresent() && millis() > scalesTimer) {
+    if(!tareDone) {
+      scalesTare(); //Tare at the start of any weighing cycle
+      tareDone = true;
+    }
+    currentWeight = scalesGetWeight();
+    scalesTimer = millis() + GET_SCALES_READ_EVERY;
+  }
+}
+
+static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
     livePressure = getPressure();
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
@@ -182,20 +200,15 @@ static void sensorsRead(void) { // Reading the thermocouple temperature
 }
 
 static void calculateWeightAndFlow(void) {
-  if (weighingStartRequested) {
-    if (millis() > scalesTimer) {
-      if(!tareDone) {
-        scalesTare(); //Tare at the start of any weighing cycle
-        tareDone = true;
-      }
-      currentWeight = scalesGetWeight();
-      scalesTimer = millis() + GET_SCALES_READ_EVERY;
-    }
+  if (brewActive) {
+    if (scalesIsPresent()) {
+      shotWeight = currentWeight;
 
-    if (millis() > flowTimer) {
-      flowVal = (currentWeight - previousWeight)*10;
-      previousWeight = currentWeight;
-      flowTimer = millis() + REFRESH_FLOW_EVERY;
+      if (millis() > flowTimer) {
+        flowVal = shotWeight - previousWeight;
+        previousWeight = shotWeight;
+        flowTimer = millis() + REFRESH_FLOW_EVERY;
+      }
     }
   }
 }
@@ -255,7 +268,7 @@ static void modeSelect(void) {
       break;
     case 5:
       // USART_CH1.println("MODE SELECT 5");
-      if (!steamState() ) justDoCoffee();
+      if (!steamState()) pumpFullOn();
       else steamCtrl();
       break;
     case 6:
@@ -270,7 +283,7 @@ static void modeSelect(void) {
       break;
     case 9:
       // USART_CH1.println("MODE SELECT 9");
-      if (!steamState() ) justDoCoffee();
+      if (!steamState()) pumpFullOn();
       else steamCtrl();
       break;
     default:
@@ -403,31 +416,40 @@ static void steamCtrl(void) {
 //#############################################################################################
 
 static void lcdRefresh(void) {
-  // static long pageRefreshTimer;
-  static float shotWeight;
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    // if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
-    if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? (livePressure <= pressureTargetComparator + 0.5f) ? livePressure*10.f : pressureTargetComparator*10.f : 0.f);
-    else myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
+    if (BEAUTIFY_GRAPH) {
+      myNex.writeNum("pressure.val", (livePressure > 0.f) ? (livePressure <= pressureTargetComparator + 0.5f) ? livePressure*10.f : pressureTargetComparator*10.f : 0.f);
+    } else {
+      myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
+    }
+
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue - runningCfg.offsetTemp));
+
     /*LCD weight output*/
-    if (weighingStartRequested && brewActive) {
-      (currentWeight > 0.f) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
-      shotWeight = currentWeight;
-    } else if (weighingStartRequested && !brewActive) {
-      if (myNex.currentPageId != 0 && !homeScreenScalesEnabled) myNex.writeStr("weight.txt",String(shotWeight,1));
-      else if(myNex.currentPageId == 0 && homeScreenScalesEnabled) (currentWeight > 0.f) ? myNex.writeStr("weight.txt",String(currentWeight,1)) : myNex.writeStr("weight.txt", "0.0");
+    if (myNex.currentPageId == 0 && homeScreenScalesEnabled) {
+      myNex.writeStr("weight.txt", (currentWeight > 0.f) ? String(currentWeight,1) : "0.0");
+    } else {
+      myNex.writeStr("weight.txt", (currentWeight > 0.f) ? String(shotWeight,1) : "0.0");
     }
+
     /*LCD flow output*/
-    if (weighingStartRequested) (flowVal>0.f) ? myNex.writeNum("flow.val", int(flowVal)) : myNex.writeNum("flow.val", 0.f);
+    myNex.writeNum("flow.val", int((flowVal>0.f) ? flowVal * 10 : 0));
 
     #if defined(DEBUG_ENABLED)
     myNex.writeNum("debug1",readTempSensor());
     myNex.writeNum("debug2",getAdsError());
     #endif
+
+    /*LCD timer and warmup*/
+    if (brewActive) {
+      brewTimer(1); // nextion timer start
+      myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
+    } else {
+      brewTimer(0); // nextion timer start
+    }
 
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
@@ -648,6 +670,11 @@ static void manualPressureProfile(void) {
   justDoCoffee();
 }
 
+static void pumpFullOn(void) {
+  setPumpToRawValue(PUMP_RANGE);
+  justDoCoffee();
+}
+
 //#############################################################################################
 //###############################____INIT_AND_ADMIN_CTRL____###################################
 //#############################################################################################
@@ -655,34 +682,23 @@ static void manualPressureProfile(void) {
 static void brewDetect(void) {
   if ( brewState() ) {
     openValve();
-    /* Applying the below block only when brew detected */
-    if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
-      brewTimer(1); // nextion timer start
-      brewActive = true;
-      weighingStartRequested = true; // Flagging weighing start
-      myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
-      if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) calculateWeightAndFlow();
-    } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) setPumpToRawValue(127); // setting the pump output target to 9 bars for non PP or PI profiles
-    else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
+    if (!brewActive) {
+      brewJustStarted();
+    }
+    brewActive = true;
   } else{
     closeValve();
-    brewTimer(0); // stopping timer
     brewActive = false;
-    /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
-    brewingTimer = millis();
-    /* Only resetting the brew activity value if it's been previously set */
-    preinfusionFinished = false;
-    if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) {
-      /* Only setting the weight activity value if it's been previously unset */
-      weighingStartRequested=true;
-      calculateWeightAndFlow();
-    } else {/* Only resetting the scales values if on any other screens than brew or scales */
-      weighingStartRequested = false; // Flagging weighing stop
-      tareDone = false;
-      currentWeight = 0.f;
-      previousWeight = 0.f;
-    }
   }
+}
+
+static void brewJustStarted() {
+  tareDone = false;
+  shotWeight = 0.f;
+  currentWeight = 0.f;
+  previousWeight = 0.f;
+  brewingTimer = millis();
+  preinfusionFinished = false;
 }
 
 static void lcdInit(eepromValues_t eepromCurrentValues) {
