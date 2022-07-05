@@ -42,32 +42,32 @@ void scalesInit(float scalesF1, float scalesF2) {
 }
 
 void scalesTare(void) {
-  if(scalesPresent) {
-    #if defined(SINGLE_HX711_CLOCK)
-      if (LoadCells.is_ready()) LoadCells.tare(5);
-    #else
-      if (LoadCell_1.wait_ready_timeout(300) && LoadCell_2.wait_ready_timeout(300)) {
-        LoadCell_1.tare(2);
-        LoadCell_2.tare(2);
-      }
-    #endif
-  }
+  #if defined(SINGLE_HX711_CLOCK)
+    if (LoadCells.is_ready()) LoadCells.tare(5);
+  #else
+    if (LoadCell_1.wait_ready_timeout(300) && LoadCell_2.wait_ready_timeout(300)) {
+      LoadCell_1.tare(2);
+      LoadCell_2.tare(2);
+    }
+  #endif
 }
 
 float scalesGetWeight(void) {
   float currentWeight = 0;
 
-  if(scalesPresent) {
-    #if defined(SINGLE_HX711_CLOCK)
-      if (LoadCells.is_ready()) {
-        float values[2];
-        LoadCells.get_units(values);
-        currentWeight = values[0] + values[1];
-      }
-    #else
-      currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
-    #endif
-  }
+  #if defined(SINGLE_HX711_CLOCK)
+    if (LoadCells.is_ready()) {
+      float values[2];
+      LoadCells.get_units(values);
+      currentWeight = values[0] + values[1];
+    }
+  #else
+    currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
+  #endif
 
   return currentWeight;
+}
+
+bool scalesIsPresent(void) {
+  return scalesPresent;
 }
