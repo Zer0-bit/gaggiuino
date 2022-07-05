@@ -23,7 +23,7 @@
 #define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
 #define DELTA_RANGE             0.25f // % to apply as delta
-#define BEAUTIFY_GRAPH          true
+#define BEAUTIFY_GRAPH
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
@@ -419,11 +419,11 @@ static void lcdRefresh(void) {
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    if (BEAUTIFY_GRAPH) {
+    #ifdef BEAUTIFY_GRAPH
       myNex.writeNum("pressure.val", (livePressure > 0.f) ? (livePressure <= pressureTargetComparator + 0.5f) ? livePressure*10.f : pressureTargetComparator*10.f : 0.f);
-    } else {
+    #else
       myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
-    }
+    #endif
 
     /*LCD temp output*/
     myNex.writeNum("currentTemp",int(kProbeReadValue - runningCfg.offsetTemp));
