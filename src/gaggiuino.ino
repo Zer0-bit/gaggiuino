@@ -54,14 +54,8 @@ bool brewActive;
 
 //PP&PI variables
 //default phases. Updated in updatePressureProfilePhases.
-Phase phaseArray[] = {
-  Phase{1, 2, 6000},
-  Phase{2, 2, 6000},
-  Phase{0, 0, 2000},
-  Phase{9, 9, 500},
-  Phase{9, 6, 40000}
-};
-Phases phases {5,  phaseArray};
+Phase phaseArray[6];
+Phases phases {6,  phaseArray};
 int preInfusionFinishedPhaseIdx = 3;
 bool preinfusionFinished;
 
@@ -625,9 +619,10 @@ static void updatePressureProfilePhases(void) {
     preInfusionFinishedPhaseIdx = 0;
     break;
   case 4: // Both PI + PP
-    phases.count = 5;
+    phases.count = 6;
     setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
-    setPresureProfilePhases(3, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
+    setPhase(3, runningCfg.preinfusionBar, runningCfg.pressureProfilingStart, 4000);
+    setPresureProfilePhases(4, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
     preInfusionFinishedPhaseIdx = 3;
     break;
   default:
