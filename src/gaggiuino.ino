@@ -47,9 +47,6 @@ float shotWeight;
 float currentWeight;
 float previousWeight;
 float flowVal;
-
-//int tarcalculateWeight;
-bool weighingStartRequested;
 bool tareDone = false;
 
 // brew detection vars
