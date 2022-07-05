@@ -517,7 +517,7 @@ void trigger1(void) {
 
 void trigger2(void) {
   LOG_VERBOSE("Tare scales");
-  scalesTare();
+  if (scalesIsPresent()) scalesTare();
 }
 
 void trigger3(void) {
