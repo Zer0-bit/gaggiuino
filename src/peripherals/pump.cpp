@@ -3,10 +3,14 @@
 #include <PSM.h>
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
+
+float flowPerClickAtZeroBar = 0.2628f;
+float flowSlopeConstant = 0.01467f;
 short maxPumpClicksPerSecond = 50;
 
 void pumpInit(int powerLineFrequency) {
   maxPumpClicksPerSecond = powerLineFrequency;
+  flowPerClickAtZeroBar = 50 * flowPerClickAtZeroBar / powerLineFrequency;
 }
 
 int getPumpPct(float livePressure, float targetValue, float flow, bool isPressureFalling) {
@@ -50,7 +54,7 @@ long getAndResetClickCounter(void) {
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
 float getPumpFlow(long clickCount, float pressure) {
-  return clickCount * (0.2628f -  0.01752f * pressure);
+  return clickCount * (flowPerClickAtZeroBar - pressure * flowSlopeConstant);
 }
 
 long getClicksForFlow(float flow, float pressure) {
