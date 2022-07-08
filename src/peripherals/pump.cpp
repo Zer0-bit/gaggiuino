@@ -8,11 +8,15 @@ float flowPerClickAtZeroBar = 0.2628f;
 float flowSlopeConstant = 0.01467f;
 short maxPumpClicksPerSecond = 50;
 
+// Initialising some pump specific specs, mainly:
+// - max pump clicks(dependant on region power grid spec)
+// - pump clicks at 0 pressure in the system
 void pumpInit(int powerLineFrequency) {
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = 50 * flowPerClickAtZeroBar / powerLineFrequency;
 }
 
+// Function that returns the percentage of clicks the pump makes in it's current phase
 int getPumpPct(float livePressure, float targetValue, float flow, bool isPressureFalling) {
   if (targetValue == 0) {
     return 0;
@@ -32,6 +36,11 @@ int getPumpPct(float livePressure, float targetValue, float flow, bool isPressur
   return 0;
 }
 
+// Sets the pump output based on a couple input params:
+// - live system pressure
+// - expected target
+// - flow
+// - pressure direction
 void setPumpPressure(float livePressure, float targetValue, float flow, bool isPressureFalling) {
   int pumpPct = fmin(100.f, getPumpPct(livePressure, targetValue, flow, isPressureFalling));
 

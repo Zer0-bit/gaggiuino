@@ -227,6 +227,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.preinfusionSec             = myNex.readNumber("piSec");
     runningCfg.preinfusionBar             = myNex.readNumber("piBar");
     runningCfg.preinfusionSoak            = myNex.readNumber("piSoak"); // pre-infusion soak value
+    runningCfg.preinfusionRamp            = myNex.readNumber("piRamp"); // ramp speed btw PI and PP pressures
 
     runningCfg.pressureProfilingState     = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
     runningCfg.pressureProfilingStart     = myNex.readNumber("ppStart");
@@ -355,8 +356,6 @@ static void justDoCoffee(void) {
       setBoilerOff();
     }
   } else { //if brewState == 0
-    // USART_CH1.println("DO_COFFEE BREW BTN NOT ACTIVE BLOCK");
-    //brewTimer(0);
     if (kProbeReadValue < ((float)runningCfg.setpoint - 10.00f)) {
       setBoilerOn();
     } else if (kProbeReadValue >= ((float)runningCfg.setpoint - 10.00f) && kProbeReadValue < ((float)runningCfg.setpoint - 3.00f)) {
@@ -481,6 +480,7 @@ void trigger1(void) {
       eepromCurrentValues.preinfusionSec            = myNex.readNumber("piSec");
       eepromCurrentValues.preinfusionBar            = myNex.readNumber("piBar");
       eepromCurrentValues.preinfusionSoak           = myNex.readNumber("piSoak");
+      eepromCurrentValues.preinfusionRamp           = myNex.readNumber("piRamp");
       break;
     case 4:
       eepromCurrentValues.homeOnShotFinish  = myNex.readNumber("homeOnBrewFinish");
@@ -610,18 +610,19 @@ static void updatePressureProfilePhases(void) {
   case 1: // Just PI no PP -> after PI pressure fixed at 9bar
     phases.count = 4;
     setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
-    setPhase(3, 9, 9, 1000);
+    setPhase(3, runningCfg.preinfusionBar, 9, runningCfg.preinfusionRamp*1000);
     preInfusionFinishedPhaseIdx = 3;
     break;
   case 2: // No PI, yes PP
     phases.count = 2;
+    setPhase(3, 0, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
     setPresureProfilePhases(0, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
     preInfusionFinishedPhaseIdx = 0;
     break;
   case 4: // Both PI + PP
     phases.count = 6;
     setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
-    setPhase(3, runningCfg.preinfusionBar, runningCfg.pressureProfilingStart, 4000);
+    setPhase(3, runningCfg.preinfusionBar, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
     setPresureProfilePhases(4, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
     preInfusionFinishedPhaseIdx = 3;
     break;
@@ -748,6 +749,9 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
 
   myNex.writeNum("piSoak", eepromCurrentValues.preinfusionSoak);
   myNex.writeNum("brewAuto.n4.val", eepromCurrentValues.preinfusionSoak);
+
+  myNex.writeNum("piRamp", eepromCurrentValues.preinfusionRamp);
+  myNex.writeNum("brewAuto.rampSpeed.val", eepromCurrentValues.preinfusionRamp);
 
   myNex.writeNum("regHz", eepromCurrentValues.powerLineFrequency);
 

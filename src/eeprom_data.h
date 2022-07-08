@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "log.h"
 
-#define EEPROM_DATA_VERSION 1
+#define EEPROM_DATA_VERSION 2
 
 struct eepromValues_t {
   uint16_t setpoint;
@@ -21,6 +21,7 @@ struct eepromValues_t {
   uint16_t preinfusionSec;
   uint16_t preinfusionBar;
   uint16_t preinfusionSoak;
+  uint16_t preinfusionRamp;
   uint16_t powerLineFrequency;
   uint16_t lcdSleep;
   bool     warmupState;
