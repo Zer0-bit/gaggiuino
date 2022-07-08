@@ -34,8 +34,8 @@
 #define valvePin PC15
 #define pressurePin ADS115_A0 //set here just for reference
 #define steamPin PA12
-#define HX711_sck_1 PB0 //mcu > HX711 no 1 sck pin
-#define HX711_sck_2 PB1 //mcu > HX711 no 2 sck pin
+#define HX711_sck_1 PB1 //mcu > HX711 no 1 sck pin
+#define HX711_sck_2 PB0 //mcu > HX711 no 2 sck pin
 #define HX711_dout_1 PA1 //mcu > HX711 no 1 dout pin
 #define HX711_dout_2 PA2 //mcu > HX711 no 2 dout pin
 #define USART_LCD Serial1

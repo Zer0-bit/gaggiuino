@@ -12,9 +12,11 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     if (eepromValuesNew.pressureProfilingLength < 0)
     if (eepromValuesNew.preinfusionSec < 0)
     if (eepromValuesNew.preinfusionSoak < 0)
+    if (eepromValuesNew.preinfusionRamp < 0)
     if (eepromValuesNew.pressureProfilingLength < 0)
     if (eepromValuesNew.offset < 0)
-    if (eepromValuesNew.hpwr < 0) {
+    if (eepromValuesNew.hpwr < 0)
+    if (eepromValuesNew.lcdSleep < 0)
   */
 
   String errMsg = String("Data out of range");
@@ -79,11 +81,6 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
-  if (eepromValuesNew.lcdSleep < 0) {
-    LOG_ERROR(errMsg.c_str());
-    return false;
-  }
-
   eepromMetadata.timestamp = millis();
   eepromMetadata.version = EEPROM_DATA_VERSION;
   eepromMetadata.values = eepromValuesNew;
@@ -110,14 +107,15 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.preinfusionSec           = 10;
   defaultData.preinfusionBar           = 2;
   defaultData.preinfusionSoak          = 10;
+  defaultData.preinfusionRamp          = 0;
   defaultData.powerLineFrequency       = 50;
   defaultData.lcdSleep                 = 1800;
   defaultData.warmupState              = false;
   defaultData.homeOnShotFinish         = true;
   defaultData.graphBrew                = true;
   defaultData.brewDeltaState           = true;
-  defaultData.scalesF1                 = 4000;
-  defaultData.scalesF2                 = 4000;
+  defaultData.scalesF1                 = 4210;
+  defaultData.scalesF2                 = 3920;
 
   return defaultData;
 }
