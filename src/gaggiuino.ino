@@ -257,7 +257,6 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
 static void modeSelect(void) {
-  // USART_CH1.println("MODE SELECT ENTER");
   switch (selectedOperationalMode) {
     case 0:
     case 1:
@@ -267,26 +266,20 @@ static void modeSelect(void) {
       else steamCtrl();
       break;
     case 3:
-      // USART_CH1.println("MODE SELECT 3");
       manualPressureProfile();
       break;
     case 5:
-      // USART_CH1.println("MODE SELECT 5");
       if (!steamState()) pumpFullOn();
       else steamCtrl();
       break;
     case 6:
-      // USART_CH1.println("MODE SELECT 6");
       deScale();
       break;
     case 7:
-      // USART_CH1.println("MODE SELECT 7");
       break;
     case 8:
-      // USART_CH1.println("MODE SELECT 8");
       break;
     case 9:
-      // USART_CH1.println("MODE SELECT 9");
       if (!steamState()) pumpFullOn();
       else steamCtrl();
       break;
@@ -294,7 +287,6 @@ static void modeSelect(void) {
       pageValuesRefresh(true);
       break;
   }
-  // USART_CH1.println("MODE SELECT EXIT");
 }
 
 //#############################################################################################
@@ -306,7 +298,6 @@ inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
 
 
 static void justDoCoffee(void) {
-  // USART_CH1.println("DO_COFFEE ENTER");
   int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
   static double heaterWave;
   static bool heaterState;
@@ -317,7 +308,6 @@ static void justDoCoffee(void) {
   BREW_TEMP_DELTA = mapRange(kProbeReadValue, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
   BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(runningCfg.setpoint));
 
-  // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (kProbeReadValue > runningCfg.setpoint && kProbeReadValue < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
