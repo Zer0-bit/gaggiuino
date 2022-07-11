@@ -271,7 +271,10 @@ static void modeSelect(void) {
       manualPressureProfile();
       break;
     case 5:
-      if (!steamState()) pumpFullOn();
+      if (!steamState()) {
+        setPumpFullOn();
+        justDoCoffee();
+      }
       else steamCtrl();
       break;
     case 6:
@@ -282,7 +285,10 @@ static void modeSelect(void) {
     case 8:
       break;
     case 9:
-      if (!steamState()) pumpFullOn();
+      if (!steamState()) {
+        setPumpFullOn();
+        justDoCoffee();
+      }
       else steamCtrl();
       break;
     default:
@@ -402,7 +408,7 @@ static void steamCtrl(void) {
     } else {
       setBoilerOff();
     }
-    pumpFullOn();
+    setPumpFullOn();
   }
 }
 
@@ -665,11 +671,6 @@ static void manualPressureProfile(void) {
     int power_reading = myNex.readNumber("h0.val");
     setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
   }
-  justDoCoffee();
-}
-
-static void pumpFullOn(void) {
-  setPumpToRawValue(PUMP_RANGE);
   justDoCoffee();
 }
 
