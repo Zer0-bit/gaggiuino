@@ -24,6 +24,8 @@
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
 #define DELTA_RANGE             0.25f // % to apply as delta
 #define BEAUTIFY_GRAPH
+#define STEAM_TEMPERATURE         155.f
+#define STEAM_WAND_HOT_WATER_TEMP 105.f
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
@@ -388,19 +390,20 @@ static void justDoCoffee(void) {
 static void steamCtrl(void) {
 
   if (!brewActive) {
-    if (livePressure <= 9.f) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
-      if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= 155.f)) setBoilerOn();
-      else setBoilerOff();
-    } else if(livePressure >= 9.1f) setBoilerOff();
-  } else if (brewActive) { //added to cater for hot water from steam wand functionality
-    if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= 105.f)) {
+    // steam temp control, needs to be aggressive to keep steam pressure acceptable
+    if ((livePressure <= 9.f) && (kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= STEAM_TEMPERATURE)) {
       setBoilerOn();
-      pumpFullOn();
     } else {
       setBoilerOff();
-      pumpFullOn();
     }
-  } else setBoilerOff();
+  } else { //added to cater for hot water from steam wand functionality
+    if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= STEAM_WAND_HOT_WATER_TEMP)) {
+      setBoilerOn();
+    } else {
+      setBoilerOff();
+    }
+    pumpFullOn();
+  }
 }
 
 //#############################################################################################
