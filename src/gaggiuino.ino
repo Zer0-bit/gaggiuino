@@ -4,6 +4,7 @@
   #include "dbg.h"
 #endif
 
+#include "gaggiuino.h"
 #include "PressureProfile.h"
 #include "log.h"
 #include "eeprom_data.h"
@@ -63,7 +64,7 @@ bool preinfusionFinished;
 
 eepromValues_t runningCfg;
 
-int selectedOperationalMode;
+OPERATION_MODES selectedOperationalMode;
 bool homeScreenScalesEnabled;
 
 // Other util vars
@@ -247,7 +248,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.warmupState                = myNex.readNumber("warmupState");
 
     homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
-    selectedOperationalMode = myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
+    selectedOperationalMode = (OPERATION_MODES) myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
 
     updatePressureProfilePhases();
 
@@ -260,29 +261,29 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
 //#############################################################################################
 static void modeSelect(void) {
   switch (selectedOperationalMode) {
-    case 0:
-    case 1:
-    case 2:
-    case 4:
+    case OPMODE_straight9Bar:
+    case OPMODE_justPreinfusion:
+    case OPMODE_justPressureProfile:
+    case OPMODE_preinfusionAndPressureProfile:
       if (!steamState()) newPressureProfile();
       else steamCtrl();
       break;
-    case 3:
+    case OPMODE_manual:
       manualPressureProfile();
       break;
-    case 5:
-    case 9:
+    case OPMODE_flush:
+    case OPMODE_steam:
       if (!steamState()) {
         setPumpFullOn();
         justDoCoffee();
       }
       else steamCtrl();
       break;
-    case 6:
+    case OPMODE_descale:
       deScale();
       break;
-    case 7:
-    case 8:
+    case OPMODE_backflush:
+    case OPMODE__empty:
       break;
     default:
       pageValuesRefresh(true);
@@ -594,24 +595,24 @@ static void deScale(void) {
 static void updatePressureProfilePhases(void) {
   switch (selectedOperationalMode)
   {
-  case 0: // no PI and no PP -> Pressure fixed at 9bar
+  case OPMODE_straight9Bar: // no PI and no PP -> Pressure fixed at 9bar
     phases.count = 1;
     setPhase(0, 9, 9, 1000);
     preInfusionFinishedPhaseIdx = 0;
     break;
-  case 1: // Just PI no PP -> after PI pressure fixed at 9bar
+  case OPMODE_justPreinfusion: // Just PI no PP -> after PI pressure fixed at 9bar
     phases.count = 4;
     setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
     setPhase(3, runningCfg.preinfusionBar, 9, runningCfg.preinfusionRamp*1000);
     preInfusionFinishedPhaseIdx = 3;
     break;
-  case 2: // No PI, yes PP
+  case OPMODE_justPressureProfile: // No PI, yes PP
     phases.count = 2;
     setPhase(3, 0, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
     setPresureProfilePhases(0, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
     preInfusionFinishedPhaseIdx = 0;
     break;
-  case 4: // Both PI + PP
+  case OPMODE_preinfusionAndPressureProfile: // Both PI + PP
     phases.count = 6;
     setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
     setPhase(3, runningCfg.preinfusionBar, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
