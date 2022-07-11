@@ -660,10 +660,8 @@ static void newPressureProfile(void) {
 }
 
 static void manualPressureProfile(void) {
-  if( selectedOperationalMode == 3 ) {
-    int power_reading = myNex.readNumber("h0.val");
-    setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
-  }
+  int power_reading = myNex.readNumber("h0.val");
+  setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
   justDoCoffee();
 }
 
