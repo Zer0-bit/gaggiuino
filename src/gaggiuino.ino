@@ -90,7 +90,7 @@ void setup(void) {
 
   // Valve
   closeValve();
-  LOG_INFO("Valve opened");
+  LOG_INFO("Valve closed");
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   USART_LCD.begin(115200);
