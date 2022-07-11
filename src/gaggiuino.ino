@@ -271,6 +271,7 @@ static void modeSelect(void) {
       manualPressureProfile();
       break;
     case 5:
+    case 9:
       if (!steamState()) {
         setPumpFullOn();
         justDoCoffee();
@@ -281,15 +282,7 @@ static void modeSelect(void) {
       deScale();
       break;
     case 7:
-      break;
     case 8:
-      break;
-    case 9:
-      if (!steamState()) {
-        setPumpFullOn();
-        justDoCoffee();
-      }
-      else steamCtrl();
       break;
     default:
       pageValuesRefresh(true);
