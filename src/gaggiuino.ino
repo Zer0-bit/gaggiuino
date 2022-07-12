@@ -4,6 +4,7 @@
   #include "dbg.h"
 #endif
 
+#include "gaggiuino.h"
 #include "PressureProfile.h"
 #include "log.h"
 #include "eeprom_data.h"
@@ -24,6 +25,8 @@
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
 #define DELTA_RANGE             0.25f // % to apply as delta
 #define BEAUTIFY_GRAPH
+#define STEAM_TEMPERATURE         155.f
+#define STEAM_WAND_HOT_WATER_TEMP 105.f
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
@@ -61,7 +64,7 @@ bool preinfusionFinished;
 
 eepromValues_t runningCfg;
 
-int selectedOperationalMode;
+OPERATION_MODES selectedOperationalMode;
 bool homeScreenScalesEnabled;
 
 // Other util vars
@@ -90,7 +93,7 @@ void setup(void) {
 
   // Valve
   closeValve();
-  LOG_INFO("Valve opened");
+  LOG_INFO("Valve closed");
 
   // Will wait hereuntil full serial is established, this is done so the LCD fully initializes before passing the EEPROM values
   USART_LCD.begin(115200);
@@ -245,7 +248,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.warmupState                = myNex.readNumber("warmupState");
 
     homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
-    selectedOperationalMode = myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
+    selectedOperationalMode = (OPERATION_MODES) myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
 
     updatePressureProfilePhases();
 
@@ -257,44 +260,35 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
 static void modeSelect(void) {
-  // USART_CH1.println("MODE SELECT ENTER");
   switch (selectedOperationalMode) {
-    case 0:
-    case 1:
-    case 2:
-    case 4:
+    case OPMODE_straight9Bar:
+    case OPMODE_justPreinfusion:
+    case OPMODE_justPressureProfile:
+    case OPMODE_preinfusionAndPressureProfile:
       if (!steamState()) newPressureProfile();
       else steamCtrl();
       break;
-    case 3:
-      // USART_CH1.println("MODE SELECT 3");
+    case OPMODE_manual:
       manualPressureProfile();
       break;
-    case 5:
-      // USART_CH1.println("MODE SELECT 5");
-      if (!steamState()) pumpFullOn();
+    case OPMODE_flush:
+    case OPMODE_steam:
+      if (!steamState()) {
+        setPumpFullOn();
+        justDoCoffee();
+      }
       else steamCtrl();
       break;
-    case 6:
-      // USART_CH1.println("MODE SELECT 6");
+    case OPMODE_descale:
       deScale();
       break;
-    case 7:
-      // USART_CH1.println("MODE SELECT 7");
-      break;
-    case 8:
-      // USART_CH1.println("MODE SELECT 8");
-      break;
-    case 9:
-      // USART_CH1.println("MODE SELECT 9");
-      if (!steamState()) pumpFullOn();
-      else steamCtrl();
+    case OPMODE_backflush:
+    case OPMODE__empty:
       break;
     default:
       pageValuesRefresh(true);
       break;
   }
-  // USART_CH1.println("MODE SELECT EXIT");
 }
 
 //#############################################################################################
@@ -306,7 +300,6 @@ inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
 
 
 static void justDoCoffee(void) {
-  // USART_CH1.println("DO_COFFEE ENTER");
   int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
   static double heaterWave;
   static bool heaterState;
@@ -317,7 +310,6 @@ static void justDoCoffee(void) {
   BREW_TEMP_DELTA = mapRange(kProbeReadValue, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
   BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(runningCfg.setpoint));
 
-  // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
     if (kProbeReadValue > runningCfg.setpoint && kProbeReadValue < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
@@ -398,19 +390,20 @@ static void justDoCoffee(void) {
 static void steamCtrl(void) {
 
   if (!brewActive) {
-    if (livePressure <= 9.f) { // steam temp control, needs to be aggressive to keep steam pressure acceptable
-      if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= 155.f)) setBoilerOn();
-      else setBoilerOff();
-    } else if(livePressure >= 9.1f) setBoilerOff();
-  } else if (brewActive) { //added to cater for hot water from steam wand functionality
-    if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= 105.f)) {
+    // steam temp control, needs to be aggressive to keep steam pressure acceptable
+    if ((livePressure <= 9.f) && (kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= STEAM_TEMPERATURE)) {
       setBoilerOn();
-      pumpFullOn();
     } else {
       setBoilerOff();
-      pumpFullOn();
     }
-  } else setBoilerOff();
+  } else { //added to cater for hot water from steam wand functionality
+    if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= STEAM_WAND_HOT_WATER_TEMP)) {
+      setBoilerOn();
+    } else {
+      setBoilerOff();
+    }
+    setPumpFullOn();
+  }
 }
 
 //#############################################################################################
@@ -602,24 +595,24 @@ static void deScale(void) {
 static void updatePressureProfilePhases(void) {
   switch (selectedOperationalMode)
   {
-  case 0: // no PI and no PP -> Pressure fixed at 9bar
+  case OPMODE_straight9Bar: // no PI and no PP -> Pressure fixed at 9bar
     phases.count = 1;
     setPhase(0, 9, 9, 1000);
     preInfusionFinishedPhaseIdx = 0;
     break;
-  case 1: // Just PI no PP -> after PI pressure fixed at 9bar
+  case OPMODE_justPreinfusion: // Just PI no PP -> after PI pressure fixed at 9bar
     phases.count = 4;
     setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
     setPhase(3, runningCfg.preinfusionBar, 9, runningCfg.preinfusionRamp*1000);
     preInfusionFinishedPhaseIdx = 3;
     break;
-  case 2: // No PI, yes PP
+  case OPMODE_justPressureProfile: // No PI, yes PP
     phases.count = 2;
     setPhase(3, 0, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
     setPresureProfilePhases(0, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
     preInfusionFinishedPhaseIdx = 0;
     break;
-  case 4: // Both PI + PP
+  case OPMODE_preinfusionAndPressureProfile: // Both PI + PP
     phases.count = 6;
     setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
     setPhase(3, runningCfg.preinfusionBar, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
@@ -668,15 +661,8 @@ static void newPressureProfile(void) {
 }
 
 static void manualPressureProfile(void) {
-  if( selectedOperationalMode == 3 ) {
-    int power_reading = myNex.readNumber("h0.val");
-    setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
-  }
-  justDoCoffee();
-}
-
-static void pumpFullOn(void) {
-  setPumpToRawValue(PUMP_RANGE);
+  int power_reading = myNex.readNumber("h0.val");
+  setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
   justDoCoffee();
 }
 

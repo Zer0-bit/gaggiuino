@@ -47,8 +47,12 @@ void setPumpPressure(float livePressure, float targetValue, float flow, bool isP
   pump.set(pumpPct * PUMP_RANGE / 100);
 }
 
-void setPumpOff() {
+void setPumpOff(void) {
   pump.set(0);
+}
+
+void setPumpFullOn(void) {
+  pump.set(PUMP_RANGE);
 }
 
 void setPumpToRawValue(uint8_t val) {
