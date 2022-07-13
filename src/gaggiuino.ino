@@ -114,7 +114,7 @@ ADS1115 ADS(0x48);
 // EasyNextion object init
 EasyNex myNex(USART_CH);
 //Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE);
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2);
 //#######################__HX711_stuff__##################################
 #if defined(SINGLE_HX711_CLOCK)
 HX711_2 LoadCells;
