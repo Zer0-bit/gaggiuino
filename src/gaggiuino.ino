@@ -246,7 +246,6 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.preinfusionSoak            = myNex.readNumber("piSoak"); // pre-infusion soak value
     runningCfg.preinfusionRamp            = myNex.readNumber("piRamp"); // ramp speed btw PI and PP pressures
 
-
     runningCfg.pressureProfilingStart     = myNex.readNumber("ppStart");
     runningCfg.pressureProfilingFinish    = myNex.readNumber("ppFin");
     runningCfg.pressureProfilingHold      = myNex.readNumber("ppHold"); // pp start pressure hold
