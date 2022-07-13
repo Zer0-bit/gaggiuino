@@ -11,6 +11,7 @@ void setPumpPressure(float livePressure, float targetValue, float flow, bool isP
 void setPumpOff(void);
 void setPumpFullOn(void);
 void setPumpToRawValue(uint8_t val);
+void setPumpFlow(float liveFlow, float targetFlow, float pressureTarget);
 long  getAndResetClickCounter(void);
 float getPumpFlow(long clickCount, float pressure);
 long getClicksForFlow(float flow, float pressure);

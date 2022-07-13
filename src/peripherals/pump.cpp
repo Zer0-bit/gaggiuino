@@ -18,18 +18,18 @@ void pumpInit(int powerLineFrequency) {
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
 int getPumpPct(float livePressure, float targetValue, float flow, bool isPressureFalling) {
-  if (targetValue == 0) {
+  if (targetValue == 0.f) {
     return 0;
   }
 
   float diff = targetValue - livePressure;
   float pumpPctToMaintainFlow = getClicksForFlow(fmin(flow, 5.f), (targetValue + livePressure) / 2.f) / (float) maxPumpClicksPerSecond;
 
-  if (diff > 0) {
+  if (diff > 0.f) {
     return pumpPctToMaintainFlow + 100 / (1.f + exp(1.5f - diff/1.4f));
   }
 
-  if (diff <= 0 &&  isPressureFalling) {
+  if (diff <= 0.f &&  isPressureFalling) {
     return pumpPctToMaintainFlow / 2.f + 100.f / (1.f + exp(2.f - diff/0.2f));
   }
 
@@ -72,4 +72,19 @@ float getPumpFlow(long clickCount, float pressure) {
 
 long getClicksForFlow(float flow, float pressure) {
   return flow / getPumpFlow(1, pressure);
+}
+
+/* POint of this func is to set the pump output to the desired flow output in ml/s based on a vibratory pump specifications */
+void setPumpFlow(float liveFlow, float targetFlow, float pressureTarget) {
+  // Calculating the number of clicks needed to achieve targetFlow
+  float flowVal  = ((targetFlow * maxPumpClicksPerSecond) / (650.f/maxPumpClicksPerSecond))* (650.f / (float)pow(maxPumpClicksPerSecond, 2)*10.f);
+  flowVal += flowVal*flowSlopeConstant*10.f;
+  flowVal = constrain(flowVal, 0, 127);
+  if (pressureTarget > 0.f && liveFlow < targetFlow ) {
+    pump.set((int)flowVal);
+  } else if (pressureTarget > 0.f && liveFlow >= targetFlow){
+    pump.set(0);
+  } else { //for them cases where we don't care about pressure whatsoever we just need a constant flow output
+    pump.set((int)flowVal);
+  }
 }
