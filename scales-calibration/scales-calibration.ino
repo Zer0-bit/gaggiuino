@@ -19,12 +19,14 @@
     #define LOADCELL_2_DOUT_PIN 13 //mcu > HX711 no 2 dout pin
     #define LOADCELL_1_SCK_PIN 10 //mcu > HX711 no 1 sck pin
     #define LOADCELL_2_SCK_PIN 11 //mcu > HX711 no 2 sck pin
+    #define UART_LCD Serial
 #elif defined(ARDUINO_ARCH_STM32)
-    #define relayPin PB9  // PB0
-    #define LOADCELL_1_DOUT_PIN  PA1
-    #define LOADCELL_2_DOUT_PIN  PA2
+    #define relayPin PA15  // PB0
+    #define LOADCELL_1_DOUT_PIN  PB8
+    #define LOADCELL_2_DOUT_PIN  PB9
     #define LOADCELL_1_SCK_PIN  PB0
     #define LOADCELL_2_SCK_PIN  PB1
+    #define UART_LCD Serial2
 #endif
 
 #if defined(SINGLE_HX711_CLOCK)
@@ -42,10 +44,10 @@ float calibration_factor_lc1 = 4000; //-7050 worked for my 440lb max scale setup
 float calibration_factor_lc2 = 4000; //-7050 worked for my 440lb max scale setup
 
 //Nextion object init
-EasyNex myNex(Serial);
+EasyNex myNex(UART_LCD);
 
 void setup() {
-  Serial.begin(115200);
+  myNex.begin(115200);
   digitalWrite(relayPin, LOW);
 
   while (myNex.readNumber("initCheck") != 100 )

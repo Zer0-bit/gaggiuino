@@ -30,6 +30,18 @@ struct eepromValues_t {
   bool     brewDeltaState;
   float    scalesF1;
   float    scalesF2;
+  bool     preinfusionFlowState;
+  float    preinfusionFlowVol;
+  uint16_t preinfusionFlowTime;
+  uint16_t preinfusionFlowSoakTime;
+  uint16_t preinfusionFlowPressureTarget;
+  bool     flowProfileState;
+  float    flowProfileStart;
+  float    flowProfileEnd;
+  uint16_t flowProfilePressureTarget;
+  uint16_t flowProfileCurveSpeed;
+
+
 };
 
 struct eepromMetadata_t {

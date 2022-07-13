@@ -21,7 +21,7 @@ void pumpInit(int powerLineFrequency) {
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
 int getPumpPct(float livePressure, float targetValue, float flow, bool isPressureFalling) {
-  if (targetValue == 0) {
+  if (targetValue == 0.f) {
     return 0;
   }
 
