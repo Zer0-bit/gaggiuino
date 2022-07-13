@@ -67,8 +67,6 @@ eepromValues_t runningCfg;
 OPERATION_MODES selectedOperationalMode;
 bool homeScreenScalesEnabled;
 
-String operationModesArray[13];
-
 // Other util vars
 float pressureTargetComparator;
 
@@ -294,18 +292,34 @@ static void modeSelect(void) {
       manualPressureProfile();
       break;
     case OPMODE_flush:
+      setPumpFullOn();
+      break;
     case OPMODE_steam:
-      if (!steamState()) {
+      if (brewActive) {
+        setPumpToRawValue(3);
+      } else if (!steamState()) {
         setPumpFullOn();
         justDoCoffee();
+      } else {
+        steamCtrl();
       }
-      else steamCtrl();
       break;
     case OPMODE_descale:
       deScale();
       break;
-    case OPMODE_backflush:
-    case OPMODE__empty:
+    case OPMODE_empty:
+      break;
+    case OPMODE_justFlowBasedProfiling:
+      justDoCoffee();
+      break;
+    case OPMODE_justFlowBasedPreinfusion:
+      justDoCoffee();
+      break;
+    case OPMODE_everythingFlowProfiled:
+      justDoCoffee();
+      break;
+    case OPMODE_pressureBasedPreinfusionAndFlowProfile:
+      justDoCoffee();
       break;
     default:
       pageValuesRefresh(true);

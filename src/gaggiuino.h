@@ -9,9 +9,12 @@ typedef enum {
     OPMODE_preinfusionAndPressureProfile,
     OPMODE_flush,
     OPMODE_descale,
-    OPMODE_backflush,
-    OPMODE__empty,
-    OPMODE_steam
+    OPMODE_empty,
+    OPMODE_justFlowBasedProfiling,
+    OPMODE_steam,
+    OPMODE_justFlowBasedPreinfusion,
+    OPMODE_everythingFlowProfiled,
+    OPMODE_pressureBasedPreinfusionAndFlowProfile
 } OPERATION_MODES;
 
 #endif
