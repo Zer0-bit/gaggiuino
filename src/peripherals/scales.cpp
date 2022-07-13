@@ -15,7 +15,7 @@ bool scalesPresent;
 void scalesInit(float scalesF1, float scalesF2) {
 
   #if defined(SINGLE_HX711_CLOCK)
-    LoadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1);
+    LoadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, OUTPUT_OPEN_DRAIN);
     LoadCells.set_scale(scalesF1, scalesF2);
     LoadCells.power_up();
 
