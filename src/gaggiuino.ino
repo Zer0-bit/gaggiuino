@@ -236,7 +236,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.pressureProfilingHold      = myNex.readNumber("ppHold"); // pp start pressure hold
     runningCfg.pressureProfilingLength    = myNex.readNumber("ppLength"); // pp shot length
 
-    runningCfg.flowProfileEnd                = myNex.readNumber("ppFlowEnd");
+    runningCfg.flowProfileEnd                = myNex.readNumber("ppFlowFinish");
     runningCfg.flowProfilePressureTarget     = myNex.readNumber("ppFlowPressure");
     runningCfg.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
     runningCfg.preinfusionFlowState          = myNex.readNumber("piFlowState");
@@ -500,7 +500,7 @@ void trigger1(void) {
       eepromCurrentValues.preinfusionRamp               = myNex.readNumber("piRamp");
       eepromCurrentValues.flowProfileState              = myNex.readNumber("ppFlowState");
       eepromCurrentValues.flowProfileStart              = myNex.readNumber("ppFlowStart");
-      eepromCurrentValues.flowProfileEnd                = myNex.readNumber("ppFlowEnd");
+      eepromCurrentValues.flowProfileEnd                = myNex.readNumber("ppFlowFinish");
       eepromCurrentValues.flowProfilePressureTarget     = myNex.readNumber("ppFlowPressure");
       eepromCurrentValues.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
       eepromCurrentValues.preinfusionFlowState          = myNex.readNumber("piFlowState");
@@ -653,6 +653,18 @@ static void updatePressureProfilePhases(void) {
     setPresureProfilePhases(4, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
     preInfusionFinishedPhaseIdx = 3;
     break;
+  case OPMODE_everythingFlowProfiled:
+    // phases.count = 6;
+    // setFlowProfilePhases();
+    break;
+  case OPMODE_justFlowBasedPreinfusion:
+    // phases.count = 3;
+    // setFlowProfilePhases();
+    break;
+  case OPMODE_justFlowBasedProfiling:
+    // phases.count = 3;
+    // setFlowProfilePhases();
+    break;
   default:
     break;
   }
@@ -664,9 +676,14 @@ void setPreInfusionPhases(int startingIdx, int piBar, int piTime, int piSoakTime
     setPhase(startingIdx + 2, 0, 0, piSoakTime * 1000);
 }
 
-void setPresureProfilePhases(int startingIdx,int fromBar, int toBar, int holdTime, int dropTime) {
+void setPresureProfilePhases(int startingIdx,int fromBar, int toBar, int holdTime, int curveTime) {
     setPhase(startingIdx + 0, fromBar, fromBar, holdTime * 1000);
-    setPhase(startingIdx + 1, fromBar, toBar, dropTime * 1000);
+    setPhase(startingIdx + 1, fromBar, toBar, curveTime * 1000);
+}
+
+void setFlowProfilePhases(int startingIdx,int fromFlow, int toFlow, int holdTime, int curveTime) {
+    setPhase(startingIdx + 0, fromFlow, fromFlow, holdTime * 1000);
+    setPhase(startingIdx + 1, fromFlow, toFlow, curveTime * 1000);
 }
 
 void setPhase(int phaseIdx, int fromBar, int toBar, int timeMs) {
@@ -752,7 +769,7 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
   myNex.writeNum("ppFin", eepromCurrentValues.pressureProfilingFinish);
   myNex.writeNum("brewAuto.n3.val", eepromCurrentValues.pressureProfilingFinish);
 
-  myNex.writeNum("ppFlowEnd", eepromCurrentValues.flowProfileEnd);
+  myNex.writeNum("ppFlowFinish", eepromCurrentValues.flowProfileEnd);
   myNex.writeNum("brewAuto.flowEndBox.val", eepromCurrentValues.flowProfileEnd);
 
   myNex.writeNum("ppHold", eepromCurrentValues.pressureProfilingHold);
