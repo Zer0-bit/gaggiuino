@@ -114,7 +114,7 @@ ADS1115 ADS(0x48);
 // EasyNextion object init
 EasyNex myNex(USART_CH);
 //Banoz PSM - for more cool shit visit https://github.com/banoz  and don't forget to star
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE);
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2);
 //#######################__HX711_stuff__##################################
 #if defined(SINGLE_HX711_CLOCK)
 HX711_2 LoadCells;
@@ -132,6 +132,7 @@ unsigned long scalesTimer = millis();
 unsigned long flowTimer = millis();
 unsigned long pageRefreshTimer = millis();
 unsigned long brewingTimer = millis();
+unsigned long activeBrewingStart = 4294967295; // max value so timer only updates after start defined
 
 //volatile vars
 volatile float kProbeReadValue; //temp val
@@ -153,6 +154,7 @@ bool tareDone;
 
 // brew detection vars
 bool brewActive;
+bool brewTimerActive; // active if brewing or descaling
 bool previousBrewState;
 
 //PP&PI variables
@@ -620,6 +622,8 @@ void lcdRefresh() {
   static float shotWeight;
 
   if (millis() > pageRefreshTimer) {
+    /*LCD brew timer output*/
+    if (brewTimerActive) myNex.writeNum("activeBrewTime", (millis() > activeBrewingStart) ? (int)((millis() - activeBrewingStart) / 1000) : 0);
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     // if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
     if (brewActive) myNex.writeNum("pressure.val", (livePressure > 0.f) ? (livePressure <= pressureTargetComparator + 0.5f) ? livePressure*10.f : pressureTargetComparator*10.f : 0.f);
@@ -827,8 +831,17 @@ bool steamState() {
   return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
 }
 
-void brewTimer(bool c) { // small function for easier timer start/stop
-  myNex.writeNum("timerState", c ? 1 : 0);
+void brewTimer(bool start) { // small function for easier brew timer start/stop
+  if (!brewTimerActive && start) {
+    myNex.writeNum("activeBrewTime", 0);
+    myNex.writeNum("timerState", 1);
+    activeBrewingStart = millis();
+    brewTimerActive = true;
+  } else if (!start) {
+    brewTimerActive = false;
+    myNex.writeNum("timerState", 0);
+    activeBrewingStart = 4294967295;
+  } 
 }
 
 // Actuating the heater element
@@ -898,7 +911,7 @@ void deScale(bool c) {
   } else if (brewActive && descaleFinished == true){
     pump.set(0);
     if ((millis() - timer) > 1000) {
-      brewTimer(0);
+      brewTimer(false);
       myNex.writeStr("t14.txt", "FINISHED!");
       timer=millis();
     }
@@ -999,16 +1012,16 @@ void brewDetect() {
     digitalWrite(valvePin, HIGH);
     /* Applying the below block only when brew detected */
     if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
-      brewTimer(1); // nextion timer start
+      brewTimer(true); // nextion timer start
       brewActive = true;
       weighingStartRequested = true; // Flagging weighing start
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
       if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) calculateWeight();
     } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) pump.set(127); // setting the pump output target to 9 bars for non PP or PI profiles
-    else if (selectedOperationalMode == 6) brewTimer(1); // starting the timerduring descaling
+    else if (selectedOperationalMode == 6) brewTimer(true); // starting the timer during descaling
   } else{
     digitalWrite(valvePin, LOW);
-    brewTimer(0); // stopping timer
+    brewTimer(false);
     pump.set(0);
     brewActive = false;
     /* UPDATE VARIOUS INTRASHOT TIMERS and VARS */
