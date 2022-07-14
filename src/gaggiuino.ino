@@ -84,16 +84,17 @@
 
 
 // Define some const values
-#define GET_KTYPE_READ_EVERY 250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+#define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define GET_PRESSURE_READ_EVERY 50
-#define GET_SCALES_READ_EVERY 100
-#define REFRESH_SCREEN_EVERY 150 // Screen refresh interval (ms)
-#define DESCALE_PHASE1_EVERY 500 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY 5000 // short pause for pulse effficience activation
-#define DESCALE_PHASE3_EVERY 120000 // long pause for scale softening
-#define MAX_SETPOINT_VALUE 110 //Defines the max value of the setpoint
-#define EEPROM_RESET 1 //change this value if want to reset to defaults
-#define PUMP_RANGE 127
+#define GET_SCALES_READ_EVERY   100
+#define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
+#define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
+#define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
+#define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
+#define MAX_SETPOINT_VALUE      110 //Defines the max value of the setpoint
+#define EEPROM_RESET            1 //change this value if want to reset to defaults
+#define PUMP_RANGE              127
+#define DELTA_RANGE             0.25f // % to apply as delta
 #if defined(ARDUINO_ARCH_AVR)
   #define ZC_MODE FALLING
 #elif defined(ARDUINO_ARCH_STM32)
@@ -503,6 +504,10 @@ void modeSelect() {
 //#############################################################################################
 //#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
 //#############################################################################################
+
+//delta stuff
+inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
+
 void justDoCoffee() {
   // USART_CH1.println("DO_COFFEE ENTER");
   int HPWR_LOW = HPWR/MainCycleDivider;
@@ -510,10 +515,10 @@ void justDoCoffee() {
   static bool heaterState;
   float BREW_TEMP_DELTA;
   // Calculating the boiler heating power range based on the below input values
-  HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
+  int HPWR_OUT = mapRange(kProbeReadValue, setPoint - 10, setPoint, HPWR, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, HPWR);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint+setPoint*0.10, setPoint*0.10f, 0, 0);
-  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0,  setPoint*0.10f);
+  BREW_TEMP_DELTA = mapRange(kProbeReadValue, setPoint, setPoint + TEMP_DELTA(setPoint), TEMP_DELTA(setPoint), 0, 0);
+  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(setPoint));
 
   // USART_CH1.println("DO_COFFEE TEMP CTRL BEGIN");
   if (brewActive) {
