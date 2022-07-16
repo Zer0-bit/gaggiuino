@@ -11,7 +11,7 @@
 ## Intro
 **Gaggiuino started as an idea to improve an already capable coffee machine while keeping the machine appearance and button functionality as close as possible to the original. An important part is that no internal cables/connectors were modified; all the connections were made by creating splitters using the purchased spade connectors.**
 ***
-**For install instructions head to the project [WIKI](https://github.com/Zer0-bit/gaggiuino/wiki) section.**
+**For install instructions head to the project [documentation](https://zer0-bit.github.io/#/) section.**
 
 *For project related help join us on [discord](https://discord.gg/eJTDJA3xfh).*
 
