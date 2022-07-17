@@ -433,7 +433,8 @@ static void lcdRefresh(void) {
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     #ifdef BEAUTIFY_GRAPH
-      myNex.writeNum("pressure.val", (livePressure > 0.f) ? (livePressure <= pressureTargetComparator + 0.5f) ? livePressure*10.f : pressureTargetComparator*10.f : 0.f);
+      float beautifiedPressure = fmin(livePressure, pressureTargetComparator + 0.5f);
+      myNex.writeNum("pressure.val", brewActive ? beautifiedPressure * 10.f : livePressure * 10.f);
     #else
       myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
     #endif
