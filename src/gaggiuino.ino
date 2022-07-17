@@ -279,9 +279,7 @@ static void modeSelect(void) {
       setPumpFullOn();
       break;
     case OPMODE_steam:
-      if (brewActive) {
-        setPumpToRawValue(3);
-      } else if (!steamState()) {
+      if (!steamState()) {
         setPumpFullOn();
         justDoCoffee();
       } else { 
@@ -672,6 +670,11 @@ void setPreInfusionPhases(int startingIdx, int piBar, int piTime, int piSoakTime
     setPhase(startingIdx + 2, 0, 0, piSoakTime * 1000);
 }
 
+void setFlowInfusionPases(int startingIdx, float fiVal, int fiTime, int fiSoakTime, int fiBar) {
+  setPhase(startingIdx + 0, fiVal, fiBar, fiTime * 1000);
+  setPhase(startingIdx + 1, fiVal, fiBar, fiSoakTime * 1000);
+}
+
 void setPresureProfilePhases(int startingIdx,int fromBar, int toBar, int holdTime, int curveTime) {
     setPhase(startingIdx + 0, fromBar, fromBar, holdTime * 1000);
     setPhase(startingIdx + 1, fromBar, toBar, curveTime * 1000);
@@ -708,11 +711,9 @@ static void newPressureProfile(void) {
 }
 
 static void manualPressureProfile(void) {
-  if( selectedOperationalMode == 3 ) {
-    float power_reading = myNex.readNumber("h0.val");
-    // setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
-    setPumpFlow(0.f, power_reading/10.0f, livePressure);
-  }
+  float power_reading = myNex.readNumber("h0.val");
+  // setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
+  setPumpFlow(0.f, power_reading/10.0f, livePressure);
   justDoCoffee();
 }
 

@@ -78,7 +78,7 @@ long getClicksForFlow(float flow, float pressure) {
 void setPumpFlow(float liveFlow, float targetFlow, float pressureTarget) {
   // Calculating the number of clicks needed to achieve targetFlow
   float flowVal  = ((targetFlow * maxPumpClicksPerSecond) / (650.f/maxPumpClicksPerSecond))* (650.f / (float)pow(maxPumpClicksPerSecond, 2)*10.f);
-  flowVal += flowVal*flowSlopeConstant*10.f;
+  if (flowVal > 60.f) flowVal += flowVal*flowSlopeConstant*15.f;
   flowVal = constrain(flowVal, 0, 127);
   if (pressureTarget > 0.f && liveFlow < targetFlow ) {
     pump.set((int)flowVal);

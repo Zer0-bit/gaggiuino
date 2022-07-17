@@ -11,7 +11,7 @@
 #define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
 #define DELTA_RANGE             0.25f // % to apply as delta
-#define BEAUTIFY_GRAPH
+// #define BEAUTIFY_GRAPH          
 #define STEAM_TEMPERATURE         155.f
 #define STEAM_WAND_HOT_WATER_TEMP 105.f
 
