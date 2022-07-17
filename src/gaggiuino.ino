@@ -282,9 +282,7 @@ static void modeSelect(void) {
       setPumpFullOn();
       break;
     case OPMODE_steam:
-      if (brewActive) {
-        setPumpToRawValue(3);
-      } else if (!steamState()) {
+      if (!steamState()) {
         setPumpFullOn();
         justDoCoffee();
       } else {
@@ -674,6 +672,11 @@ void setPreInfusionPhases(int startingIdx, int piBar, int piTime, int piSoakTime
     setPhase(startingIdx + 0, piBar/2, piBar, piTime * 1000 / 2);
     setPhase(startingIdx + 1, piBar, piBar, piTime * 1000 / 2);
     setPhase(startingIdx + 2, 0, 0, piSoakTime * 1000);
+}
+
+void setFlowInfusionPases(int startingIdx, float fiVal, int fiTime, int fiSoakTime, int fiBar) {
+  setPhase(startingIdx + 0, fiVal, fiBar, fiTime * 1000);
+  setPhase(startingIdx + 1, fiVal, fiBar, fiSoakTime * 1000);
 }
 
 void setPresureProfilePhases(int startingIdx,int fromBar, int toBar, int holdTime, int curveTime) {
