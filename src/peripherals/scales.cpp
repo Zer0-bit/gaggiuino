@@ -43,9 +43,9 @@ void scalesInit(float scalesF1, float scalesF2) {
 
 void scalesTare(void) {
   #if defined(SINGLE_HX711_CLOCK)
-    if (LoadCells.is_ready()) LoadCells.tare(5);
+    if (LoadCells.wait_ready_timeout(200, 50)) LoadCells.tare(4);
   #else
-    if (LoadCell_1.wait_ready_timeout(300) && LoadCell_2.wait_ready_timeout(300)) {
+    if (LoadCell_1.wait_ready_timeout(200, 50) && LoadCell_2.wait_ready_timeout(300)) {
       LoadCell_1.tare(2);
       LoadCell_2.tare(2);
     }
