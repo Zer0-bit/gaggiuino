@@ -19,10 +19,8 @@ void scalesInit(float scalesF1, float scalesF2) {
     LoadCells.set_scale(scalesF1, scalesF2);
     LoadCells.power_up();
 
-    delay(500);
-
-    if (LoadCells.is_ready()) {
-      LoadCells.tare(5);
+    if (LoadCells.wait_ready_timeout(700, 50)) {
+      LoadCells.tare(4);
       scalesPresent = true;
     }
   #else
@@ -31,9 +29,7 @@ void scalesInit(float scalesF1, float scalesF2) {
     LoadCell_1.set_scale(scalesF1); // calibrated val1
     LoadCell_2.set_scale(scalesF2); // calibrated val2
 
-    delay(500);
-
-    if (LoadCell_1.is_ready() && LoadCell_2.is_ready()) {
+    if (LoadCell_1.wait_ready_timeout(700, 50) && LoadCell_2.wait_ready_timeout(700, 50)) {
       scalesPresent = true;
       LoadCell_1.tare();
       LoadCell_2.tare();
@@ -43,9 +39,9 @@ void scalesInit(float scalesF1, float scalesF2) {
 
 void scalesTare(void) {
   #if defined(SINGLE_HX711_CLOCK)
-    if (LoadCells.is_ready()) LoadCells.tare(5);
+    if (LoadCells.wait_ready_timeout(200, 50)) LoadCells.tare(4);
   #else
-    if (LoadCell_1.wait_ready_timeout(300) && LoadCell_2.wait_ready_timeout(300)) {
+    if (LoadCell_1.wait_ready_timeout(200, 50) && LoadCell_2.wait_ready_timeout(200, 50)) {
       LoadCell_1.tare(2);
       LoadCell_2.tare(2);
     }
