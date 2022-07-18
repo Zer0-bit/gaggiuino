@@ -194,13 +194,17 @@ static void calculateWeightAndFlow(void) {
         flowTimer = millis() + REFRESH_FLOW_EVERY;
       }
     } else {
-      if (millis() > flowTimer) {
-        flowVal = getPumpFlow(getAndResetClickCounter(), livePressure) * 1000 / REFRESH_FLOW_EVERY;
+      long elapsedTime = millis() - flowTimer;
+      if (elapsedTime > REFRESH_FLOW_EVERY) {
+        long pumpClicks =  getAndResetClickCounter();
+        float cps = 1000.f * pumpClicks / elapsedTime;
+
+        flowVal = getPumpFlow(cps, livePressure);
         if (preinfusionFinished) {
-          currentWeight += flowVal;
+          currentWeight += flowVal * elapsedTime / 1000;
           shotWeight = currentWeight;
         }
-        flowTimer = millis() + REFRESH_FLOW_EVERY;
+        flowTimer = millis();
       }
     }
   }
@@ -227,7 +231,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.preinfusionSoak            = myNex.readNumber("piSoak"); // pre-infusion soak value
     runningCfg.preinfusionRamp            = myNex.readNumber("piRamp"); // ramp speed btw PI and PP pressures
 
-    
+
     runningCfg.pressureProfilingStart     = myNex.readNumber("ppStart");
     runningCfg.pressureProfilingFinish    = myNex.readNumber("ppFin");
     runningCfg.pressureProfilingHold      = myNex.readNumber("ppHold"); // pp start pressure hold
@@ -282,8 +286,8 @@ static void modeSelect(void) {
       if (!steamState()) {
         setPumpFullOn();
         justDoCoffee();
-      } else { 
-        steamCtrl(); 
+      } else {
+        steamCtrl();
       }
       break;
     case OPMODE_descale:
@@ -714,7 +718,7 @@ static void newPressureProfile(void) {
 static void manualPressureProfile(void) {
   float power_reading = myNex.readNumber("h0.val");
   // setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
-  setPumpFlow(0.f, power_reading/10.0f, livePressure);
+  setPumpFlow(power_reading/10.0f, livePressure);
   justDoCoffee();
 }
 
