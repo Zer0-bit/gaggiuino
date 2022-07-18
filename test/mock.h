@@ -1,3 +1,6 @@
+#ifndef MOCKS_H
+#define MOCKS_H
+
 #define PB4   1
 #define PA6   1
 #define PA5   1
@@ -17,3 +20,4 @@
 
 #define Serial2 Serial
 
+#endif

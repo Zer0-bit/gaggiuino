@@ -73,12 +73,10 @@ void test_phases_with_zero_duration_are_skipped(void) {
     TEST_ASSERT_EQUAL(3, phases.getCurrentPhase(0).phaseIndex);
 }
 
-int main( int argc, char **argv) {
-    UNITY_BEGIN();
+void runAllPressureProfilerTests() {
     RUN_TEST(test_current_phase_calculation);
     RUN_TEST(test_get_pressure_for_phase);
     RUN_TEST(test_get_pressure_for_phase_with_negative_change);
     RUN_TEST(test_get_pressure_for_phase_with_time_larger_than_duration);
     RUN_TEST(test_phases_with_zero_duration_are_skipped);
-    UNITY_END();
 }
