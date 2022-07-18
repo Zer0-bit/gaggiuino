@@ -5,7 +5,7 @@
 #endif
 
 #include "gaggiuino.h"
-#include "PressureProfile.h"
+#include "profiling_phases.h"
 #include "log.h"
 #include "eeprom_data.h"
 #include "peripherals/pump.h"
@@ -268,11 +268,16 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
 //#############################################################################################
 static void modeSelect(void) {
   switch (selectedOperationalMode) {
+    //REPLACE ALL THE BELOW WITH OPMODE_auto_profiling
     case OPMODE_straight9Bar:
     case OPMODE_justPreinfusion:
     case OPMODE_justPressureProfile:
     case OPMODE_preinfusionAndPressureProfile:
-      if (!steamState()) newPressureProfile();
+    case OPMODE_justFlowBasedProfiling:
+    case OPMODE_justFlowBasedPreinfusion:
+    case OPMODE_everythingFlowProfiled:
+    case OPMODE_pressureBasedPreinfusionAndFlowProfile:
+      if (!steamState()) profiling();
       else steamCtrl();
       break;
     case OPMODE_manual:
@@ -293,18 +298,6 @@ static void modeSelect(void) {
       deScale();
       break;
     case OPMODE_empty:
-      break;
-    case OPMODE_justFlowBasedProfiling:
-      justDoCoffee();
-      break;
-    case OPMODE_justFlowBasedPreinfusion:
-      justDoCoffee();
-      break;
-    case OPMODE_everythingFlowProfiled:
-      justDoCoffee();
-      break;
-    case OPMODE_pressureBasedPreinfusionAndFlowProfile:
-      justDoCoffee();
       break;
     default:
       pageValuesRefresh(true);
@@ -625,91 +618,78 @@ static void deScale(void) {
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
 static void updatePressureProfilePhases(void) {
-  switch (selectedOperationalMode)
-  {
-  case OPMODE_straight9Bar: // no PI and no PP -> Pressure fixed at 9bar
-    phases.count = 1;
-    setPhase(0, 9, 9, 1000);
-    preInfusionFinishedPhaseIdx = 0;
-    break;
-  case OPMODE_justPreinfusion: // Just PI no PP -> after PI pressure fixed at 9bar
-    phases.count = 4;
-    setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
-    setPhase(3, runningCfg.preinfusionBar, 9, runningCfg.preinfusionRamp*1000);
-    preInfusionFinishedPhaseIdx = 3;
-    break;
-  case OPMODE_justPressureProfile: // No PI, yes PP
-    phases.count = 2;
-    setPhase(3, 0, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
-    setPresureProfilePhases(0, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
-    preInfusionFinishedPhaseIdx = 0;
-    break;
-  case OPMODE_preinfusionAndPressureProfile: // Both PI + PP
-    phases.count = 6;
-    setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
-    setPhase(3, runningCfg.preinfusionBar, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
-    setPresureProfilePhases(4, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
-    preInfusionFinishedPhaseIdx = 3;
-    break;
-  case OPMODE_everythingFlowProfiled:
-    // phases.count = 6;
-    // setFlowProfilePhases();
-    break;
-  case OPMODE_justFlowBasedPreinfusion:
-    // phases.count = 3;
-    // setFlowProfilePhases();
-    break;
-  case OPMODE_justFlowBasedProfiling:
-    // phases.count = 3;
-    // setFlowProfilePhases();
-    break;
-  default:
-    break;
+  int phaseCount = 0;
+  float preInfusionFinishBar = 0.f;
+
+  // Setup pre-infusion if needed
+  if (runningCfg.preinfusionState) {
+    if (runningCfg.preinfusionFlowState) { // flow based PI enabled
+      setFlowPhase(phaseCount++, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000);
+      setFlowPhase(phaseCount++, 0, 0, 0, runningCfg.preinfusionFlowSoakTime * 1000);
+    } else { // pressure based PI enabled
+      setPressurePhase(phaseCount++, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, runningCfg.preinfusionSec * 1000);
+      setPressurePhase(phaseCount++, 0, 0, -1, runningCfg.preinfusionSoak * 1000);
+      preInfusionFinishBar = runningCfg.preinfusionBar;
+    }
   }
+  preInfusionFinishedPhaseIdx = phaseCount;
+
+  // Setup shot profiling
+  if (runningCfg.pressureProfilingState) {
+    if (runningCfg.flowProfileState) { // flow based profiling enabled
+      setFlowPhase(phaseCount++, runningCfg.flowProfileStart, runningCfg.flowProfileEnd, runningCfg.preinfusionFlowPressureTarget, runningCfg.flowProfileCurveSpeed * 1000);
+    } else { // pressure based profiling enabled
+      setPressurePhase(phaseCount++, preInfusionFinishBar, runningCfg.pressureProfilingStart, -1, runningCfg.preinfusionRamp * 1000);
+      setPressurePhase(phaseCount++, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingStart, -1, runningCfg.pressureProfilingHold * 1000);
+      setPressurePhase(phaseCount++, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, -1, runningCfg.pressureProfilingLength * 1000);
+    }
+  } else { // Shot profiling disabled. Default to 9 bars
+    setPressurePhase(phaseCount++, preInfusionFinishBar, 9, -1, runningCfg.preinfusionRamp * 1000);
+    setPressurePhase(phaseCount++, 9, 9, -1, 1000);
+  }
+
+  phases.count = phaseCount;
 }
 
-void setPreInfusionPhases(int startingIdx, int piBar, int piTime, int piSoakTime) {
-    setPhase(startingIdx + 0, piBar/2, piBar, piTime * 1000 / 2);
-    setPhase(startingIdx + 1, piBar, piBar, piTime * 1000 / 2);
-    setPhase(startingIdx + 2, 0, 0, piSoakTime * 1000);
+void setPressurePhase(int phaseIdx, int startBar, int endBar, float flowRestriction, int timeMs) {
+  setPhase(phaseIdx, PHASE_TYPE_PRESSURE, startBar, endBar, flowRestriction, flowRestriction, timeMs);
 }
 
-void setFlowInfusionPases(int startingIdx, float fiVal, int fiTime, int fiSoakTime, int fiBar) {
-  setPhase(startingIdx + 0, fiVal, fiBar, fiTime * 1000);
-  setPhase(startingIdx + 1, fiVal, fiBar, fiSoakTime * 1000);
+void setFlowPhase(int phaseIdx, float startFlow, float endFlow, float pressureRestriction, int timeMs) {
+  setPhase(phaseIdx, PHASE_TYPE_FLOW, startFlow, endFlow, pressureRestriction, pressureRestriction, timeMs);
 }
 
-void setPresureProfilePhases(int startingIdx,int fromBar, int toBar, int holdTime, int curveTime) {
-    setPhase(startingIdx + 0, fromBar, fromBar, holdTime * 1000);
-    setPhase(startingIdx + 1, fromBar, toBar, curveTime * 1000);
-}
-
-void setFlowProfilePhases(int startingIdx,int fromFlow, int toFlow, int holdTime, int curveTime) {
-    setPhase(startingIdx + 0, fromFlow, fromFlow, holdTime * 1000);
-    setPhase(startingIdx + 1, fromFlow, toFlow, curveTime * 1000);
-}
-
-void setPhase(int phaseIdx, int fromBar, int toBar, int timeMs) {
-    phases.phases[phaseIdx].startPressure = fromBar;
-    phases.phases[phaseIdx].endPressure = toBar;
+void setPhase(int phaseIdx, PHASE_TYPE type, int startValue, int endValue, float startRestriction, float endRestriction, int timeMs) {
+    phases.phases[phaseIdx].type = type;
+    phases.phases[phaseIdx].startValue = startValue;
+    phases.phases[phaseIdx].endValue = endValue;
+    phases.phases[phaseIdx].startRestriction = startRestriction;
+    phases.phases[phaseIdx].endRestriction = endRestriction;
     phases.phases[phaseIdx].durationMs = timeMs;
 }
 
-static void newPressureProfile(void) {
-  float newBarValue;
+static void profiling(void) {
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     long timeInPP = millis() - brewingTimer;
     CurrentPhase currentPhase = phases.getCurrentPhase(timeInPP);
-    newBarValue = phases.phases[currentPhase.phaseIndex].getPressure(currentPhase.timeInPhase);
     preinfusionFinished = currentPhase.phaseIndex >= preInfusionFinishedPhaseIdx;
+
+    if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
+      float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
+      float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+      setPumpPressure(livePressure, newBarValue, flowVal, isPressureFalling(), -1);
+
+      pressureTargetComparator = preinfusionFinished ? newBarValue : livePressure;
+    } else {
+      float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
+      float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+      setPumpFlow(newFlowValue, livePressure, pressureRestriction);
+    }
   }
   else {
-    newBarValue = 0.0f;
+    setPumpToRawValue(0);
   }
-  setPumpPressure(livePressure, newBarValue, flowVal, isPressureFalling());
-  // saving the target pressure
-  pressureTargetComparator = preinfusionFinished ? newBarValue : livePressure;
   // Keep that water at temp
   justDoCoffee();
 }
