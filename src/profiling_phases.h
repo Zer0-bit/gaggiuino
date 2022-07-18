@@ -1,21 +1,27 @@
-#ifndef PRESSURE_PROFILER_H
-#define PRESSURE_PROFILER_H
+#ifndef PROFILING_PHASES_H
+#define PROFILING_PHASES_H
 
 #include "utils.h"
 
+enum PHASE_TYPE {
+  PHASE_TYPE_FLOW,
+  PHASE_TYPE_PRESSURE,
+ };
+
 struct Phase {
-    float startPressure;
-    float endPressure;
-    float startFlow;
-    float endFlow;
+    PHASE_TYPE type;
+    float startValue;
+    float endValue;
+    float startRestriction;
+    float endRestriction;
     unsigned int durationMs;
 
-    float getPressure(unsigned long timeInPhase) {
-        return mapRange(timeInPhase, 0, durationMs, startPressure, endPressure, 1);
+    float getTarget(unsigned long timeInPhase) {
+      return mapRange(timeInPhase, 0, durationMs, startValue, endValue, 1);
     }
 
-    float getFlow(unsigned long timeInPhase) {
-        return mapRange(timeInPhase, 0, durationMs, startFlow, endFlow, 1);
+    float getRestriction(unsigned long timeInPhase) {
+      return mapRange(timeInPhase, 0, durationMs, startRestriction, endRestriction, 1);
     }
 };
 
