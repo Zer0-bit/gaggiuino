@@ -1,7 +1,6 @@
 #ifndef MOCKS_H
 #define MOCKS_H
 
-#define PB9   1
 #define PB4   1
 #define PA6   1
 #define PA5   1
