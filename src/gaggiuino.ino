@@ -207,13 +207,17 @@ static void calculateWeightAndFlow(void) {
         flowTimer = millis() + REFRESH_FLOW_EVERY;
       }
     } else {
-      if (millis() > flowTimer) {
-        flowVal = getPumpFlow(getAndResetClickCounter(), livePressure) * 1000 / REFRESH_FLOW_EVERY;
+      long elapsedTime = millis() - flowTimer;
+      if (elapsedTime > REFRESH_FLOW_EVERY) {
+        long pumpClicks =  getAndResetClickCounter();
+        float cps = 1000.f * pumpClicks / elapsedTime;
+
+        flowVal = getPumpFlow(cps, livePressure);
         if (preinfusionFinished) {
-          currentWeight += flowVal;
+          currentWeight += flowVal * elapsedTime / 1000;
           shotWeight = currentWeight;
         }
-        flowTimer = millis() + REFRESH_FLOW_EVERY;
+        flowTimer = millis();
       }
     }
   }

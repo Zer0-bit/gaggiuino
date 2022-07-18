@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define PUMP_RANGE 127
+#define PUMP_RANGE 100
 #define ZC_MODE    RISING
 
 void pumpInit(int powerLineFrequency);
@@ -12,6 +12,7 @@ void setPumpOff(void);
 void setPumpFullOn(void);
 void setPumpToRawValue(uint8_t val);
 long  getAndResetClickCounter(void);
-float getPumpFlow(long clickCount, float pressure);
-long getClicksForFlow(float flow, float pressure);
+float getPumpFlow(float cps, float pressure);
+long getClicksPerSecondForFlow(float flow, float pressure);
+void setPumpFlow(float flow, float pressure);
 #endif
