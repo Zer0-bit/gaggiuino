@@ -19,8 +19,6 @@ void scalesInit(float scalesF1, float scalesF2) {
     LoadCells.set_scale(scalesF1, scalesF2);
     LoadCells.power_up();
 
-    //delay(500);
-
     if (LoadCells.wait_ready_timeout(700, 50)) {
       LoadCells.tare(4);
       scalesPresent = true;
@@ -30,8 +28,6 @@ void scalesInit(float scalesF1, float scalesF2) {
     LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
     LoadCell_1.set_scale(scalesF1); // calibrated val1
     LoadCell_2.set_scale(scalesF2); // calibrated val2
-
-    //delay(500);
 
     if (LoadCell_1.wait_ready_timeout(700, 50) && LoadCell_2.wait_ready_timeout(700, 50)) {
       scalesPresent = true;
