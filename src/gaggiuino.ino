@@ -694,7 +694,7 @@ static void profiling(void) {
 
 static void manualPressureProfile(void) {
   int power_reading = myNex.readNumber("h0.val");
-  setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
+  setPumpPressure(livePressure, power_reading, pumpFlow, isPressureFalling(), -1);
   justDoCoffee();
 }
 
