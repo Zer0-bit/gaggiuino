@@ -233,12 +233,12 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.pressureProfilingHold          = myNex.readNumber("ppHold"); // pp start pressure hold
     runningCfg.pressureProfilingLength        = myNex.readNumber("ppLength"); // pp shot length
 
-    runningCfg.flowProfileStart               = myNex.readNumber("ppFlowStart");
-    runningCfg.flowProfileEnd                 = myNex.readNumber("ppFlowFinish");
+    runningCfg.flowProfileStart               = myNex.readNumber("ppFlowStart") / 10.f;
+    runningCfg.flowProfileEnd                 = myNex.readNumber("ppFlowFinish") / 10.f;
     runningCfg.flowProfilePressureTarget      = myNex.readNumber("ppFlowPressure");
     runningCfg.flowProfileCurveSpeed          = myNex.readNumber("ppFlowCurveSpeed");
 
-    runningCfg.preinfusionFlowVol             = myNex.readNumber("piFlow");
+    runningCfg.preinfusionFlowVol             = myNex.readNumber("piFlow") / 10.f;
     runningCfg.preinfusionFlowTime            = myNex.readNumber("piFlowTime" );
     runningCfg.preinfusionFlowSoakTime        = myNex.readNumber("piFlowSoak");
     runningCfg.preinfusionFlowPressureTarget  = myNex.readNumber("piFlowPressure");
@@ -488,12 +488,12 @@ void trigger1(void) {
       eepromCurrentValues.preinfusionSoak               = myNex.readNumber("piSoak");
       eepromCurrentValues.preinfusionRamp               = myNex.readNumber("piRamp");
       eepromCurrentValues.flowProfileState              = myNex.readNumber("ppFlowState");
-      eepromCurrentValues.flowProfileStart              = myNex.readNumber("ppFlowStart");
-      eepromCurrentValues.flowProfileEnd                = myNex.readNumber("ppFlowFinish");
+      eepromCurrentValues.flowProfileStart              = myNex.readNumber("ppFlowStart") / 10.f;
+      eepromCurrentValues.flowProfileEnd                = myNex.readNumber("ppFlowFinish") / 10.f;
       eepromCurrentValues.flowProfilePressureTarget     = myNex.readNumber("ppFlowPressure");
       eepromCurrentValues.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
       eepromCurrentValues.preinfusionFlowState          = myNex.readNumber("piFlowState");
-      eepromCurrentValues.preinfusionFlowVol            = myNex.readNumber("piFlow");
+      eepromCurrentValues.preinfusionFlowVol            = myNex.readNumber("piFlow") / 10.f;
       eepromCurrentValues.preinfusionFlowTime           = myNex.readNumber("piFlowTime" );
       eepromCurrentValues.preinfusionFlowSoakTime       = myNex.readNumber("piFlowSoak");
       eepromCurrentValues.preinfusionFlowPressureTarget = myNex.readNumber("piFlowPressure");
@@ -744,14 +744,14 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
   myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart);
   myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.pressureProfilingStart);
 
-  myNex.writeNum("ppFlowStart", eepromCurrentValues.flowProfileStart);
-  myNex.writeNum("brewAuto.flowStartBox.val", eepromCurrentValues.flowProfileStart);
+  myNex.writeNum("ppFlowStart", eepromCurrentValues.flowProfileStart * 10);
+  myNex.writeNum("brewAuto.flowStartBox.val", eepromCurrentValues.flowProfileStart * 10);
 
   myNex.writeNum("ppFin", eepromCurrentValues.pressureProfilingFinish);
   myNex.writeNum("brewAuto.n3.val", eepromCurrentValues.pressureProfilingFinish);
 
-  myNex.writeNum("ppFlowFinish", eepromCurrentValues.flowProfileEnd);
-  myNex.writeNum("brewAuto.flowEndBox.val", eepromCurrentValues.flowProfileEnd);
+  myNex.writeNum("ppFlowFinish", eepromCurrentValues.flowProfileEnd * 10);
+  myNex.writeNum("brewAuto.flowEndBox.val", eepromCurrentValues.flowProfileEnd * 10);
 
   myNex.writeNum("ppHold", eepromCurrentValues.pressureProfilingHold);
   myNex.writeNum("brewAuto.n5.val", eepromCurrentValues.pressureProfilingHold);
@@ -781,8 +781,8 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
   myNex.writeNum("piSec", eepromCurrentValues.preinfusionSec);
   myNex.writeNum("brewAuto.n0.val", eepromCurrentValues.preinfusionSec);
 
-  myNex.writeNum("piFlow", eepromCurrentValues.preinfusionFlowVol);
-  myNex.writeNum("brewAuto.flowPIbox.val", eepromCurrentValues.preinfusionFlowVol);
+  myNex.writeNum("piFlow", eepromCurrentValues.preinfusionFlowVol * 10);
+  myNex.writeNum("brewAuto.flowPIbox.val", eepromCurrentValues.preinfusionFlowVol * 10);
 
   myNex.writeNum("piBar", eepromCurrentValues.preinfusionBar);
   myNex.writeNum("brewAuto.n1.val", eepromCurrentValues.preinfusionBar);
