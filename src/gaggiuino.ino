@@ -36,7 +36,8 @@ volatile float liveWeight;
 float shotWeight;
 float currentWeight;
 float previousWeight;
-float flowVal;
+float weightFlow;
+float pumpFlow;
 bool tareDone = false;
 
 // brew detection vars
@@ -187,25 +188,23 @@ static void calculateWeightAndFlow(void) {
   if (brewActive) {
     if (scalesIsPresent()) {
       shotWeight = currentWeight;
+    }
 
-      if (millis() > flowTimer) {
-        flowVal = shotWeight - previousWeight;
+    long elapsedTime = millis() - flowTimer;
+    if (elapsedTime > REFRESH_FLOW_EVERY) {
+      long pumpClicks =  getAndResetClickCounter();
+      float cps = 1000.f * pumpClicks / elapsedTime;
+      pumpFlow = getPumpFlow(cps, livePressure);
+
+      if (scalesIsPresent()) {
+        weightFlow = shotWeight - previousWeight;
         previousWeight = shotWeight;
-        flowTimer = millis() + REFRESH_FLOW_EVERY;
+      } else if (preinfusionFinished) {
+        currentWeight += pumpFlow * elapsedTime / 1000;
+        shotWeight = currentWeight;
       }
-    } else {
-      long elapsedTime = millis() - flowTimer;
-      if (elapsedTime > REFRESH_FLOW_EVERY) {
-        long pumpClicks =  getAndResetClickCounter();
-        float cps = 1000.f * pumpClicks / elapsedTime;
 
-        flowVal = getPumpFlow(cps, livePressure);
-        if (preinfusionFinished) {
-          currentWeight += flowVal * elapsedTime / 1000;
-          shotWeight = currentWeight;
-        }
-        flowTimer = millis();
-      }
+      flowTimer = millis();
     }
   }
 }
@@ -444,7 +443,8 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-    myNex.writeNum("flow.val", int((flowVal>0.f) ? flowVal * 10 : 0));
+
+    myNex.writeNum("flow.val", int((weightFlow>0.f) ? weightFlow * 10 : pumpFlow * 10));
 
     #if defined(DEBUG_ENABLED)
     myNex.writeNum("debug1",readTempSensor());
@@ -676,7 +676,7 @@ static void profiling(void) {
     if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
       float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
-      setPumpPressure(livePressure, newBarValue, flowVal, isPressureFalling(), -1);
+      setPumpPressure(livePressure, newBarValue, fmaxf(pumpFlow, weightFlow), isPressureFalling(), -1);
 
       pressureTargetComparator = preinfusionFinished ? newBarValue : livePressure;
     } else {
