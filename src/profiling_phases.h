@@ -6,7 +6,7 @@
 enum PHASE_TYPE {
   PHASE_TYPE_FLOW,
   PHASE_TYPE_PRESSURE,
- };
+};
 
 struct Phase {
     PHASE_TYPE type;
