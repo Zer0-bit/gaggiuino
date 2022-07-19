@@ -3,8 +3,8 @@
 
 // STM32F4 pins definitions
 #define thermoDO      PB4
-#define thermoCS      PB5
-#define thermoCLK     PB3
+#define thermoCS      PA6
+#define thermoCLK     PA5
 
 #define zcPin         PA0
 #define brewPin       PC14
