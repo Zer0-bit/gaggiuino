@@ -217,48 +217,46 @@ static void calculateWeightAndFlow(void) {
 static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
 
   if ( myNex.currentPageId != myNex.lastCurrentPageId || forcedUpdate == true ) {
+    /* No need to read these here since currently we're not using them at all across the code */
 
-    /* No need to read these here since currently we're not using them at all across the code
+    runningCfg.preinfusionState               = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
+    runningCfg.pressureProfilingState         = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
+    runningCfg.flowProfileState               = myNex.readNumber("ppFlowState");
+    runningCfg.preinfusionFlowState           = myNex.readNumber("piFlowState");
 
-    runningCfg.preinfusionState           = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
-    runningCfg.pressureProfilingState     = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
-    runningCfg.flowProfileState           = myNex.readNumber("ppFlowState");
-    runningCfg.flowProfileStart           = myNex.readNumber("ppFlowStart"); */
+    runningCfg.preinfusionSec                 = myNex.readNumber("piSec");
+    runningCfg.preinfusionBar                 = myNex.readNumber("piBar");
+    runningCfg.preinfusionSoak                = myNex.readNumber("piSoak"); // pre-infusion soak value
+    runningCfg.preinfusionRamp                = myNex.readNumber("piRamp"); // ramp speed btw PI and PP pressures
 
+    runningCfg.pressureProfilingStart         = myNex.readNumber("ppStart");
+    runningCfg.pressureProfilingFinish        = myNex.readNumber("ppFin");
+    runningCfg.pressureProfilingHold          = myNex.readNumber("ppHold"); // pp start pressure hold
+    runningCfg.pressureProfilingLength        = myNex.readNumber("ppLength"); // pp shot length
 
-    runningCfg.preinfusionSec             = myNex.readNumber("piSec");
-    runningCfg.preinfusionBar             = myNex.readNumber("piBar");
-    runningCfg.preinfusionSoak            = myNex.readNumber("piSoak"); // pre-infusion soak value
-    runningCfg.preinfusionRamp            = myNex.readNumber("piRamp"); // ramp speed btw PI and PP pressures
+    runningCfg.flowProfileStart               = myNex.readNumber("ppFlowStart");
+    runningCfg.flowProfileEnd                 = myNex.readNumber("ppFlowFinish");
+    runningCfg.flowProfilePressureTarget      = myNex.readNumber("ppFlowPressure");
+    runningCfg.flowProfileCurveSpeed          = myNex.readNumber("ppFlowCurveSpeed");
 
-    runningCfg.pressureProfilingStart     = myNex.readNumber("ppStart");
-    runningCfg.pressureProfilingFinish    = myNex.readNumber("ppFin");
-    runningCfg.pressureProfilingHold      = myNex.readNumber("ppHold"); // pp start pressure hold
-    runningCfg.pressureProfilingLength    = myNex.readNumber("ppLength"); // pp shot length
+    runningCfg.preinfusionFlowVol             = myNex.readNumber("piFlow");
+    runningCfg.preinfusionFlowTime            = myNex.readNumber("piFlowTime" );
+    runningCfg.preinfusionFlowSoakTime        = myNex.readNumber("piFlowSoak");
+    runningCfg.preinfusionFlowPressureTarget  = myNex.readNumber("piFlowPressure");
 
-    runningCfg.flowProfileEnd                = myNex.readNumber("ppFlowFinish");
-    runningCfg.flowProfilePressureTarget     = myNex.readNumber("ppFlowPressure");
-    runningCfg.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
-    runningCfg.preinfusionFlowState          = myNex.readNumber("piFlowState");
-    runningCfg.preinfusionFlowVol            = myNex.readNumber("piFlow");
-    runningCfg.preinfusionFlowTime           = myNex.readNumber("piFlowTime" );
-    runningCfg.preinfusionFlowSoakTime       = myNex.readNumber("piFlowSoak");
-    runningCfg.preinfusionFlowPressureTarget = myNex.readNumber("piFlowPressure");
+    runningCfg.brewDeltaState                 = myNex.readNumber("deltaState");
+    runningCfg.setpoint                       = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
+    runningCfg.offsetTemp                     = myNex.readNumber("offSet");  // reading the offset value from the lcd
+    runningCfg.hpwr                           = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
+    runningCfg.mainDivider                    = myNex.readNumber("mDiv");  // reading the delay divider
+    runningCfg.brewDivider                    = myNex.readNumber("bDiv");  // reading the delay divider
+    runningCfg.powerLineFrequency             = myNex.readNumber("regHz");
+    runningCfg.warmupState                    = myNex.readNumber("warmupState");
 
-    runningCfg.brewDeltaState             = myNex.readNumber("deltaState");
-    runningCfg.setpoint                   = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
-    runningCfg.offsetTemp                 = myNex.readNumber("offSet");  // reading the offset value from the lcd
-    runningCfg.hpwr                       = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
-    runningCfg.mainDivider                = myNex.readNumber("mDiv");  // reading the delay divider
-    runningCfg.brewDivider                = myNex.readNumber("bDiv");  // reading the delay divider
-    runningCfg.powerLineFrequency         = myNex.readNumber("regHz");
-    runningCfg.warmupState                = myNex.readNumber("warmupState");
-
-    homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
-    selectedOperationalMode = (OPERATION_MODES) myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
+    homeScreenScalesEnabled                   = myNex.readNumber("scalesEnabled");
+    selectedOperationalMode                   = (OPERATION_MODES) myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
 
     updatePressureProfilePhases();
-
     myNex.lastCurrentPageId = myNex.currentPageId;
   }
 }
@@ -637,7 +635,7 @@ static void updatePressureProfilePhases(void) {
   // Setup shot profiling
   if (runningCfg.pressureProfilingState) {
     if (runningCfg.flowProfileState) { // flow based profiling enabled
-      setFlowPhase(phaseCount++, runningCfg.flowProfileStart, runningCfg.flowProfileEnd, runningCfg.preinfusionFlowPressureTarget, runningCfg.flowProfileCurveSpeed * 1000);
+      setFlowPhase(phaseCount++, runningCfg.flowProfileStart, runningCfg.flowProfileEnd, runningCfg.flowProfilePressureTarget, runningCfg.flowProfileCurveSpeed * 1000);
     } else { // pressure based profiling enabled
       setPressurePhase(phaseCount++, preInfusionFinishBar, runningCfg.pressureProfilingStart, -1, runningCfg.preinfusionRamp * 1000);
       setPressurePhase(phaseCount++, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingStart, -1, runningCfg.pressureProfilingHold * 1000);
