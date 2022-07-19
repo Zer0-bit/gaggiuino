@@ -5,7 +5,7 @@
 #endif
 
 #include "gaggiuino.h"
-#include "PressureProfile.h"
+#include "profiling_phases.h"
 #include "log.h"
 #include "eeprom_data.h"
 #include "peripherals/pump.h"
@@ -14,19 +14,6 @@
 #include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
 
-// Define some const values
-#define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
-#define GET_PRESSURE_READ_EVERY 10
-#define GET_SCALES_READ_EVERY   100
-#define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
-#define REFRESH_FLOW_EVERY      1000
-#define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
-#define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
-#define DELTA_RANGE             0.25f // % to apply as delta
-#define BEAUTIFY_GRAPH
-#define STEAM_TEMPERATURE         155.f
-#define STEAM_WAND_HOT_WATER_TEMP 105.f
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
@@ -49,7 +36,8 @@ volatile float liveWeight;
 float shotWeight;
 float currentWeight;
 float previousWeight;
-float flowVal;
+float weightFlow;
+float pumpFlow;
 bool tareDone = false;
 
 // brew detection vars
@@ -200,25 +188,23 @@ static void calculateWeightAndFlow(void) {
   if (brewActive) {
     if (scalesIsPresent()) {
       shotWeight = currentWeight;
+    }
 
-      if (millis() > flowTimer) {
-        flowVal = shotWeight - previousWeight;
+    long elapsedTime = millis() - flowTimer;
+    if (elapsedTime > REFRESH_FLOW_EVERY) {
+      long pumpClicks =  getAndResetClickCounter();
+      float cps = 1000.f * pumpClicks / elapsedTime;
+      pumpFlow = getPumpFlow(cps, livePressure);
+
+      if (scalesIsPresent()) {
+        weightFlow = shotWeight - previousWeight;
         previousWeight = shotWeight;
-        flowTimer = millis() + REFRESH_FLOW_EVERY;
+      } else if (preinfusionFinished) {
+        currentWeight += pumpFlow * elapsedTime / 1000;
+        shotWeight = currentWeight;
       }
-    } else {
-      long elapsedTime = millis() - flowTimer;
-      if (elapsedTime > REFRESH_FLOW_EVERY) {
-        long pumpClicks =  getAndResetClickCounter();
-        float cps = 1000.f * pumpClicks / elapsedTime;
 
-        flowVal = getPumpFlow(cps, livePressure);
-        if (preinfusionFinished) {
-          currentWeight += flowVal * elapsedTime / 1000;
-          shotWeight = currentWeight;
-        }
-        flowTimer = millis();
-      }
+      flowTimer = millis();
     }
   }
 }
@@ -230,32 +216,46 @@ static void calculateWeightAndFlow(void) {
 static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
 
   if ( myNex.currentPageId != myNex.lastCurrentPageId || forcedUpdate == true ) {
-    runningCfg.preinfusionState           = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
-    runningCfg.preinfusionSec             = myNex.readNumber("piSec");
-    runningCfg.preinfusionBar             = myNex.readNumber("piBar");
-    runningCfg.preinfusionSoak            = myNex.readNumber("piSoak"); // pre-infusion soak value
-    runningCfg.preinfusionRamp            = myNex.readNumber("piRamp"); // ramp speed btw PI and PP pressures
+    /* No need to read these here since currently we're not using them at all across the code */
 
-    runningCfg.pressureProfilingState     = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
-    runningCfg.pressureProfilingStart     = myNex.readNumber("ppStart");
-    runningCfg.pressureProfilingFinish    = myNex.readNumber("ppFin");
-    runningCfg.pressureProfilingHold      = myNex.readNumber("ppHold"); // pp start pressure hold
-    runningCfg.pressureProfilingLength    = myNex.readNumber("ppLength"); // pp shot length
+    runningCfg.preinfusionState               = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
+    runningCfg.pressureProfilingState         = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
+    runningCfg.flowProfileState               = myNex.readNumber("ppFlowState");
+    runningCfg.preinfusionFlowState           = myNex.readNumber("piFlowState");
 
-    runningCfg.brewDeltaState             = myNex.readNumber("deltaState");
-    runningCfg.setpoint                   = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
-    runningCfg.offsetTemp                 = myNex.readNumber("offSet");  // reading the offset value from the lcd
-    runningCfg.hpwr                       = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
-    runningCfg.mainDivider                = myNex.readNumber("mDiv");  // reading the delay divider
-    runningCfg.brewDivider                = myNex.readNumber("bDiv");  // reading the delay divider
-    runningCfg.powerLineFrequency         = myNex.readNumber("regHz");
-    runningCfg.warmupState                = myNex.readNumber("warmupState");
+    runningCfg.preinfusionSec                 = myNex.readNumber("piSec");
+    runningCfg.preinfusionBar                 = myNex.readNumber("piBar");
+    runningCfg.preinfusionSoak                = myNex.readNumber("piSoak"); // pre-infusion soak value
+    runningCfg.preinfusionRamp                = myNex.readNumber("piRamp"); // ramp speed btw PI and PP pressures
 
-    homeScreenScalesEnabled = myNex.readNumber("scalesEnabled");
-    selectedOperationalMode = (OPERATION_MODES) myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
+    runningCfg.pressureProfilingStart         = myNex.readNumber("ppStart");
+    runningCfg.pressureProfilingFinish        = myNex.readNumber("ppFin");
+    runningCfg.pressureProfilingHold          = myNex.readNumber("ppHold"); // pp start pressure hold
+    runningCfg.pressureProfilingLength        = myNex.readNumber("ppLength"); // pp shot length
+
+    runningCfg.flowProfileStart               = myNex.readNumber("ppFlowStart") / 10.f;
+    runningCfg.flowProfileEnd                 = myNex.readNumber("ppFlowFinish") / 10.f;
+    runningCfg.flowProfilePressureTarget      = myNex.readNumber("ppFlowPressure");
+    runningCfg.flowProfileCurveSpeed          = myNex.readNumber("ppFlowCurveSpeed");
+
+    runningCfg.preinfusionFlowVol             = myNex.readNumber("piFlow") / 10.f;
+    runningCfg.preinfusionFlowTime            = myNex.readNumber("piFlowTime" );
+    runningCfg.preinfusionFlowSoakTime        = myNex.readNumber("piFlowSoak");
+    runningCfg.preinfusionFlowPressureTarget  = myNex.readNumber("piFlowPressure");
+
+    runningCfg.brewDeltaState                 = myNex.readNumber("deltaState");
+    runningCfg.setpoint                       = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
+    runningCfg.offsetTemp                     = myNex.readNumber("offSet");  // reading the offset value from the lcd
+    runningCfg.hpwr                           = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
+    runningCfg.mainDivider                    = myNex.readNumber("mDiv");  // reading the delay divider
+    runningCfg.brewDivider                    = myNex.readNumber("bDiv");  // reading the delay divider
+    runningCfg.powerLineFrequency             = myNex.readNumber("regHz");
+    runningCfg.warmupState                    = myNex.readNumber("warmupState");
+
+    homeScreenScalesEnabled                   = myNex.readNumber("scalesEnabled");
+    selectedOperationalMode                   = (OPERATION_MODES) myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
 
     updatePressureProfilePhases();
-
     myNex.lastCurrentPageId = myNex.currentPageId;
   }
 }
@@ -265,29 +265,36 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
 //#############################################################################################
 static void modeSelect(void) {
   switch (selectedOperationalMode) {
+    //REPLACE ALL THE BELOW WITH OPMODE_auto_profiling
     case OPMODE_straight9Bar:
     case OPMODE_justPreinfusion:
     case OPMODE_justPressureProfile:
     case OPMODE_preinfusionAndPressureProfile:
-      if (!steamState()) newPressureProfile();
+    case OPMODE_justFlowBasedProfiling:
+    case OPMODE_justFlowBasedPreinfusion:
+    case OPMODE_everythingFlowProfiled:
+    case OPMODE_pressureBasedPreinfusionAndFlowProfile:
+      if (!steamState()) profiling();
       else steamCtrl();
       break;
     case OPMODE_manual:
       manualPressureProfile();
       break;
     case OPMODE_flush:
+      setPumpFullOn();
+      break;
     case OPMODE_steam:
       if (!steamState()) {
         setPumpFullOn();
         justDoCoffee();
+      } else {
+        steamCtrl();
       }
-      else steamCtrl();
       break;
     case OPMODE_descale:
       deScale();
       break;
-    case OPMODE_backflush:
-    case OPMODE__empty:
+    case OPMODE_empty:
       break;
     default:
       pageValuesRefresh(true);
@@ -436,7 +443,8 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-    myNex.writeNum("flow.val", int((flowVal>0.f) ? flowVal * 10 : 0));
+
+    myNex.writeNum("flow.val", int((weightFlow>0.f) ? weightFlow * 10 : pumpFlow * 10));
 
     #if defined(DEBUG_ENABLED)
     myNex.writeNum("debug1",readTempSensor());
@@ -469,16 +477,26 @@ void trigger1(void) {
     case 2:
       break;
     case 3:
-      eepromCurrentValues.pressureProfilingStart    = myNex.readNumber("ppStart");
-      eepromCurrentValues.pressureProfilingFinish   = myNex.readNumber("ppFin");
-      eepromCurrentValues.pressureProfilingHold     = myNex.readNumber("ppHold");
-      eepromCurrentValues.pressureProfilingLength   = myNex.readNumber("ppLength");
-      eepromCurrentValues.pressureProfilingState    = myNex.readNumber("ppState");
-      eepromCurrentValues.preinfusionState          = myNex.readNumber("piState");
-      eepromCurrentValues.preinfusionSec            = myNex.readNumber("piSec");
-      eepromCurrentValues.preinfusionBar            = myNex.readNumber("piBar");
-      eepromCurrentValues.preinfusionSoak           = myNex.readNumber("piSoak");
-      eepromCurrentValues.preinfusionRamp           = myNex.readNumber("piRamp");
+      eepromCurrentValues.pressureProfilingStart        = myNex.readNumber("ppStart");
+      eepromCurrentValues.pressureProfilingFinish       = myNex.readNumber("ppFin");
+      eepromCurrentValues.pressureProfilingHold         = myNex.readNumber("ppHold");
+      eepromCurrentValues.pressureProfilingLength       = myNex.readNumber("ppLength");
+      eepromCurrentValues.pressureProfilingState        = myNex.readNumber("ppState");
+      eepromCurrentValues.preinfusionState              = myNex.readNumber("piState");
+      eepromCurrentValues.preinfusionSec                = myNex.readNumber("piSec");
+      eepromCurrentValues.preinfusionBar                = myNex.readNumber("piBar");
+      eepromCurrentValues.preinfusionSoak               = myNex.readNumber("piSoak");
+      eepromCurrentValues.preinfusionRamp               = myNex.readNumber("piRamp");
+      eepromCurrentValues.flowProfileState              = myNex.readNumber("ppFlowState");
+      eepromCurrentValues.flowProfileStart              = myNex.readNumber("ppFlowStart") / 10.f;
+      eepromCurrentValues.flowProfileEnd                = myNex.readNumber("ppFlowFinish") / 10.f;
+      eepromCurrentValues.flowProfilePressureTarget     = myNex.readNumber("ppFlowPressure");
+      eepromCurrentValues.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
+      eepromCurrentValues.preinfusionFlowState          = myNex.readNumber("piFlowState");
+      eepromCurrentValues.preinfusionFlowVol            = myNex.readNumber("piFlow") / 10.f;
+      eepromCurrentValues.preinfusionFlowTime           = myNex.readNumber("piFlowTime" );
+      eepromCurrentValues.preinfusionFlowSoakTime       = myNex.readNumber("piFlowSoak");
+      eepromCurrentValues.preinfusionFlowPressureTarget = myNex.readNumber("piFlowPressure");
       break;
     case 4:
       eepromCurrentValues.homeOnShotFinish  = myNex.readNumber("homeOnBrewFinish");
@@ -546,10 +564,10 @@ static void deScale(void) {
   static int lastCycleRead = 10;
   static bool descaleFinished = false;
   if (brewActive && !descaleFinished) {
-    if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
+    if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         setPumpToRawValue(15);
-        if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to max descale value for 10 sec
+        if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to min descale value for 10 sec
           if (currentCycleRead >=100) descaleFinished = true;
           blink = false;
           currentCycleRead = myNex.readNumber("j0.val");
@@ -557,7 +575,7 @@ static void deScale(void) {
         }
       } else {
         setPumpToRawValue(30);
-        if (millis() - timer > DESCALE_PHASE2_EVERY) { //set dimmer power to min descale value for 20 sec
+        if (millis() - timer > DESCALE_PHASE2_EVERY) { //set dimmer power to max descale value for 20 sec
           blink = true;
           currentCycleRead++;
           if (currentCycleRead<100) myNex.writeNum("j0.val", currentCycleRead);
@@ -598,76 +616,85 @@ static void deScale(void) {
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
 static void updatePressureProfilePhases(void) {
-  switch (selectedOperationalMode)
-  {
-  case OPMODE_straight9Bar: // no PI and no PP -> Pressure fixed at 9bar
-    phases.count = 1;
-    setPhase(0, 9, 9, 1000);
-    preInfusionFinishedPhaseIdx = 0;
-    break;
-  case OPMODE_justPreinfusion: // Just PI no PP -> after PI pressure fixed at 9bar
-    phases.count = 4;
-    setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
-    setPhase(3, runningCfg.preinfusionBar, 9, runningCfg.preinfusionRamp*1000);
-    preInfusionFinishedPhaseIdx = 3;
-    break;
-  case OPMODE_justPressureProfile: // No PI, yes PP
-    phases.count = 2;
-    setPhase(3, 0, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
-    setPresureProfilePhases(0, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
-    preInfusionFinishedPhaseIdx = 0;
-    break;
-  case OPMODE_preinfusionAndPressureProfile: // Both PI + PP
-    phases.count = 6;
-    setPreInfusionPhases(0, runningCfg.preinfusionBar, runningCfg.preinfusionSec, runningCfg.preinfusionSoak);
-    setPhase(3, runningCfg.preinfusionBar, runningCfg.pressureProfilingStart, runningCfg.preinfusionRamp*1000);
-    setPresureProfilePhases(4, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingHold, runningCfg.pressureProfilingLength);
-    preInfusionFinishedPhaseIdx = 3;
-    break;
-  default:
-    break;
+  int phaseCount = 0;
+  float preInfusionFinishBar = 0.f;
+
+  // Setup pre-infusion if needed
+  if (runningCfg.preinfusionState) {
+    if (runningCfg.preinfusionFlowState) { // flow based PI enabled
+      setFlowPhase(phaseCount++, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000);
+      setFlowPhase(phaseCount++, 0, 0, 0, runningCfg.preinfusionFlowSoakTime * 1000);
+    } else { // pressure based PI enabled
+      setPressurePhase(phaseCount++, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, runningCfg.preinfusionSec * 1000);
+      setPressurePhase(phaseCount++, 0, 0, -1, runningCfg.preinfusionSoak * 1000);
+      preInfusionFinishBar = runningCfg.preinfusionBar;
+    }
   }
+  preInfusionFinishedPhaseIdx = phaseCount;
+
+  // Setup shot profiling
+  if (runningCfg.pressureProfilingState) {
+    if (runningCfg.flowProfileState) { // flow based profiling enabled
+      setFlowPhase(phaseCount++, runningCfg.flowProfileStart, runningCfg.flowProfileEnd, runningCfg.flowProfilePressureTarget, runningCfg.flowProfileCurveSpeed * 1000);
+    } else { // pressure based profiling enabled
+      setPressurePhase(phaseCount++, preInfusionFinishBar, runningCfg.pressureProfilingStart, -1, runningCfg.preinfusionRamp * 1000);
+      setPressurePhase(phaseCount++, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingStart, -1, runningCfg.pressureProfilingHold * 1000);
+      setPressurePhase(phaseCount++, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, -1, runningCfg.pressureProfilingLength * 1000);
+    }
+  } else { // Shot profiling disabled. Default to 9 bars
+    setPressurePhase(phaseCount++, preInfusionFinishBar, 9, -1, runningCfg.preinfusionRamp * 1000);
+    setPressurePhase(phaseCount++, 9, 9, -1, 1000);
+  }
+
+  phases.count = phaseCount;
 }
 
-void setPreInfusionPhases(int startingIdx, int piBar, int piTime, int piSoakTime) {
-    setPhase(startingIdx + 0, piBar/2, piBar, piTime * 1000 / 2);
-    setPhase(startingIdx + 1, piBar, piBar, piTime * 1000 / 2);
-    setPhase(startingIdx + 2, 0, 0, piSoakTime * 1000);
+void setPressurePhase(int phaseIdx, int startBar, int endBar, float flowRestriction, int timeMs) {
+  setPhase(phaseIdx, PHASE_TYPE_PRESSURE, startBar, endBar, flowRestriction, flowRestriction, timeMs);
 }
 
-void setPresureProfilePhases(int startingIdx,int fromBar, int toBar, int holdTime, int dropTime) {
-    setPhase(startingIdx + 0, fromBar, fromBar, holdTime * 1000);
-    setPhase(startingIdx + 1, fromBar, toBar, dropTime * 1000);
+void setFlowPhase(int phaseIdx, float startFlow, float endFlow, float pressureRestriction, int timeMs) {
+  setPhase(phaseIdx, PHASE_TYPE_FLOW, startFlow, endFlow, pressureRestriction, pressureRestriction, timeMs);
 }
 
-void setPhase(int phaseIdx, int fromBar, int toBar, int timeMs) {
-    phases.phases[phaseIdx].startPressure = fromBar;
-    phases.phases[phaseIdx].endPressure = toBar;
+void setPhase(int phaseIdx, PHASE_TYPE type, int startValue, int endValue, float startRestriction, float endRestriction, int timeMs) {
+    phases.phases[phaseIdx].type = type;
+    phases.phases[phaseIdx].startValue = startValue;
+    phases.phases[phaseIdx].endValue = endValue;
+    phases.phases[phaseIdx].startRestriction = startRestriction;
+    phases.phases[phaseIdx].endRestriction = endRestriction;
     phases.phases[phaseIdx].durationMs = timeMs;
 }
 
-static void newPressureProfile(void) {
-  float newBarValue;
+static void profiling(void) {
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     long timeInPP = millis() - brewingTimer;
     CurrentPhase currentPhase = phases.getCurrentPhase(timeInPP);
-    newBarValue = phases.phases[currentPhase.phaseIndex].getPressure(currentPhase.timeInPhase);
     preinfusionFinished = currentPhase.phaseIndex >= preInfusionFinishedPhaseIdx;
+
+    if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
+      float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
+      float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+      setPumpPressure(livePressure, newBarValue, fmaxf(pumpFlow, weightFlow), isPressureFalling(), -1);
+
+      pressureTargetComparator = preinfusionFinished ? newBarValue : livePressure;
+    } else {
+      float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
+      float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+      setPumpFlow(newFlowValue, livePressure, pressureRestriction);
+    }
   }
   else {
-    newBarValue = 0.0f;
+    setPumpToRawValue(0);
   }
-  setPumpPressure(livePressure, newBarValue, flowVal, isPressureFalling());
-  // saving the target pressure
-  pressureTargetComparator = preinfusionFinished ? newBarValue : livePressure;
   // Keep that water at temp
   justDoCoffee();
 }
 
 static void manualPressureProfile(void) {
   int power_reading = myNex.readNumber("h0.val");
-  setPumpPressure(livePressure, power_reading, flowVal, isPressureFalling());
+  setPumpPressure(livePressure, power_reading, pumpFlow, isPressureFalling(), -1);
   justDoCoffee();
 }
 
@@ -717,14 +744,26 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
   myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart);
   myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.pressureProfilingStart);
 
+  myNex.writeNum("ppFlowStart", eepromCurrentValues.flowProfileStart * 10);
+  myNex.writeNum("brewAuto.flowStartBox.val", eepromCurrentValues.flowProfileStart * 10);
+
   myNex.writeNum("ppFin", eepromCurrentValues.pressureProfilingFinish);
   myNex.writeNum("brewAuto.n3.val", eepromCurrentValues.pressureProfilingFinish);
+
+  myNex.writeNum("ppFlowFinish", eepromCurrentValues.flowProfileEnd * 10);
+  myNex.writeNum("brewAuto.flowEndBox.val", eepromCurrentValues.flowProfileEnd * 10);
 
   myNex.writeNum("ppHold", eepromCurrentValues.pressureProfilingHold);
   myNex.writeNum("brewAuto.n5.val", eepromCurrentValues.pressureProfilingHold);
 
+  myNex.writeNum("ppFlowPressure", eepromCurrentValues.flowProfilePressureTarget);
+  myNex.writeNum("brewAuto.flowBarBox.val", eepromCurrentValues.flowProfilePressureTarget);
+
   myNex.writeNum("ppLength", eepromCurrentValues.pressureProfilingLength);
   myNex.writeNum("brewAuto.n6.val", eepromCurrentValues.pressureProfilingLength);
+
+  myNex.writeNum("ppFlowCurveSpeed", eepromCurrentValues.flowProfileCurveSpeed);
+  myNex.writeNum("brewAuto.flowRampBox.val", eepromCurrentValues.flowProfileCurveSpeed);
 
   myNex.writeNum("piState", eepromCurrentValues.preinfusionState);
   myNex.writeNum("brewAuto.bt0.val", eepromCurrentValues.preinfusionState);
@@ -732,21 +771,40 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
   myNex.writeNum("ppState", eepromCurrentValues.pressureProfilingState);
   myNex.writeNum("brewAuto.bt1.val", eepromCurrentValues.pressureProfilingState);
 
+  myNex.writeNum("ppFlowState", eepromCurrentValues.flowProfileState);
+  myNex.writeNum("brewAuto.bt2.val", eepromCurrentValues.flowProfileState);
+
+  myNex.writeNum("piFlowState", eepromCurrentValues.preinfusionFlowState);
+  myNex.writeNum("brewAuto.bt3.val", eepromCurrentValues.preinfusionFlowState);
+
+
   myNex.writeNum("piSec", eepromCurrentValues.preinfusionSec);
   myNex.writeNum("brewAuto.n0.val", eepromCurrentValues.preinfusionSec);
+
+  myNex.writeNum("piFlow", eepromCurrentValues.preinfusionFlowVol * 10);
+  myNex.writeNum("brewAuto.flowPIbox.val", eepromCurrentValues.preinfusionFlowVol * 10);
 
   myNex.writeNum("piBar", eepromCurrentValues.preinfusionBar);
   myNex.writeNum("brewAuto.n1.val", eepromCurrentValues.preinfusionBar);
 
+  myNex.writeNum("piFlowTime", eepromCurrentValues.preinfusionFlowTime);
+  myNex.writeNum("brewAuto.flowPiSecBox.val", eepromCurrentValues.preinfusionFlowTime);
+
   myNex.writeNum("piSoak", eepromCurrentValues.preinfusionSoak);
   myNex.writeNum("brewAuto.n4.val", eepromCurrentValues.preinfusionSoak);
+
+  myNex.writeNum("piFlowSoak", eepromCurrentValues.preinfusionFlowSoakTime);
+  myNex.writeNum("brewAuto.flowPiSoakBox.val", eepromCurrentValues.preinfusionFlowSoakTime);
+
+  myNex.writeNum("piFlowPressure", eepromCurrentValues.preinfusionFlowPressureTarget);
+  myNex.writeNum("brewAuto.flowPiBarBox.val", eepromCurrentValues.preinfusionFlowPressureTarget);
 
   myNex.writeNum("piRamp", eepromCurrentValues.preinfusionRamp);
   myNex.writeNum("brewAuto.rampSpeed.val", eepromCurrentValues.preinfusionRamp);
 
   myNex.writeNum("regHz", eepromCurrentValues.powerLineFrequency);
 
-  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep);
+  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
   myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
 
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
