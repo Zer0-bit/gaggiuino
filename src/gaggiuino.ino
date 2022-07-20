@@ -192,7 +192,7 @@ static void calculateWeightAndFlow(void) {
       currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
 
       if (scalesIsPresent()) {
-        currentState.weightFlow = shotWeight - previousWeight;
+        currentState.weightFlow = (shotWeight - previousWeight) * 1000 / elapsedTime;
         previousWeight = shotWeight;
       } else if (preinfusionFinished) {
         currentState.weight += currentState.pumpFlow * elapsedTime / 1000;
