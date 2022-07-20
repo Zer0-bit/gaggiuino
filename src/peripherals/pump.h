@@ -14,6 +14,6 @@ void setPumpFullOn(void);
 void setPumpToRawValue(uint8_t val);
 long  getAndResetClickCounter(void);
 float getPumpFlow(float cps, float pressure);
-long getClicksPerSecondForFlow(float flow, float pressure);
+float getClicksPerSecondForFlow(float flow, float pressure);
 void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState);
 #endif

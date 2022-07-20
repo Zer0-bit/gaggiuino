@@ -85,21 +85,22 @@ float getPumpFlow(float cps, float pressure) {
 
 // Binary search for correct CPS in the range of 0,maxCps
 // This is needed to find the solution for CPS of the cubicfunction cps * flowPerClick(pressure, cps)
-// This loop always finds the solution in log2(maxCps) iterations ~= 6 iterations.
-long getClicksPerSecondForFlow(float flow, float pressure) {
-  int minCps = 0;
-  int maxCps = maxPumpClicksPerSecond;
-  int cps = 0;
+// This loop always finds the solution in log2(maxCps) iterations ~= 7 iterations.
+float getClicksPerSecondForFlow(float flow, float pressure) {
+  float minCps = 0;
+  float maxCps = maxPumpClicksPerSecond;
+  float accuracy = 0.5f;
+  float cps = 0;
 
   while (minCps <= maxCps) {
-    cps = (minCps + maxCps) / 2;
+    cps = (minCps + maxCps) / 2.f;
     float estFlow = cps * getFlowPerClick(pressure, cps);
     if (estFlow == flow) {
       return cps;
     } else if (estFlow < flow) {
-      minCps = cps + 1;
+      minCps = cps + accuracy;
     } else {
-      maxCps = cps - 1;
+      maxCps = cps - accuracy;
     }
   }
   return cps;
