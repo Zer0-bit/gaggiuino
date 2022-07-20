@@ -192,11 +192,10 @@ static void calculateWeightAndFlow(void) {
       currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
 
       if (scalesIsPresent()) {
-        currentState.weightFlow = (shotWeight - previousWeight) * 1000 / elapsedTime;
+        currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000 / elapsedTime);
         previousWeight = shotWeight;
       } else if (preinfusionFinished) {
-        currentState.weight += currentState.pumpFlow * elapsedTime / 1000;
-        shotWeight = currentState.weight;
+        shotWeight += currentState.pumpFlow * elapsedTime / 1000;
       }
 
       flowTimer = millis();
@@ -450,15 +449,11 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-    if (scalesIsPresent) { // write predicted flow only for the preinfusion phase if system has scales detected
-      myNex.writeNum("flow.val",
-        preinfusionFinished
-        ? (currentState.weightFlow>0.f) ? currentState.weightFlow * 10.f : 0.f
+    myNex.writeNum("flow.val",
+      currentState.weight > 0.f // currentState.weight is always zero if scales are not present
+        ? currentState.weightFlow * 10.f
         : currentState.pumpFlow * 10.f
-      );
-    } else { // write predicted flow throughout the whole pull is system has no scales detected
-      myNex.writeNum("flow.val", currentState.pumpFlow * 10.f);
-    }
+    );
 
     #if defined(DEBUG_ENABLED)
     myNex.writeNum("debug1",readTempSensor());
