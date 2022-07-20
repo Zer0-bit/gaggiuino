@@ -450,11 +450,19 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-    myNex.writeNum("flow.val",
-      preinfusionFinished
-      ? (currentState.weightFlow>0.f) ? currentState.weightFlow * 10.f : 0.f
-      : currentState.pumpFlow * 10.f
-    );
+    if (scalesIsPresent) { // write predicted flow only for the preinfusion phase if system has scales detected
+      myNex.writeNum("flow.val",
+        preinfusionFinished
+        ? (currentState.weightFlow>0.f) ? currentState.weightFlow * 10.f : 0.f
+        : currentState.pumpFlow * 10.f
+      );
+    } else { // write predicted flow throughout the whole pull is system has no scales detected
+      myNex.writeNum("flow.val",
+        currentState.weightFlow > 0.f
+          ? currentState.weightFlow * 10.f
+          : currentState.pumpFlow * 10.f
+      );
+    }
 
     #if defined(DEBUG_ENABLED)
     myNex.writeNum("debug1",readTempSensor());
