@@ -115,7 +115,7 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.graphBrew                      = true;
   defaultData.brewDeltaState                 = true;
   defaultData.scalesF1                       = 4210;
-  defaultData.scalesF2                       = 3920;
+  defaultData.scalesF2                       = 4010; //3920
   defaultData.preinfusionFlowState           = false;
   defaultData.preinfusionFlowVol             = 4.5;
   defaultData.preinfusionFlowTime            = 10;

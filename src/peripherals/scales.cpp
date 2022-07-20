@@ -52,13 +52,15 @@ float scalesGetWeight(void) {
   float currentWeight = 0;
 
   #if defined(SINGLE_HX711_CLOCK)
-    if (LoadCells.is_ready()) {
+    if (LoadCells.wait_ready_timeout(100, 20)) {
       float values[2];
       LoadCells.get_units(values);
       currentWeight = values[0] + values[1];
     }
   #else
-    currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
+    if (LoadCell_1.wait_ready_timeout(100, 20) && LoadCell_2.wait_ready_timeout(100, 20)) {
+      currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
+    }
   #endif
 
   return currentWeight;
