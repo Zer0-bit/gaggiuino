@@ -457,11 +457,7 @@ static void lcdRefresh(void) {
         : currentState.pumpFlow * 10.f
       );
     } else { // write predicted flow throughout the whole pull is system has no scales detected
-      myNex.writeNum("flow.val",
-        currentState.weightFlow > 0.f
-          ? currentState.weightFlow * 10.f
-          : currentState.pumpFlow * 10.f
-      );
+      myNex.writeNum("flow.val", currentState.pumpFlow * 10.f);
     }
 
     #if defined(DEBUG_ENABLED)
