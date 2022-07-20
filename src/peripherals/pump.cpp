@@ -20,20 +20,20 @@ void pumpInit(int powerLineFrequency) {
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
-int getPumpPct(float livePressure, float targetValue, float liveFlow, bool isPressureFalling, float flowRestriction) {
-  if (targetValue == 0) {
+int getPumpPct(float targetPressure, float flowRestriction, SensorState &currentState) {
+  if (targetPressure == 0) {
     return 0;
   }
 
-  float diff = targetValue - livePressure;
-  float maxPumpPct = flowRestriction > 0 ? 100.f * getClicksPerSecondForFlow(flowRestriction, livePressure) / maxPumpClicksPerSecond : 100.f;
-  float pumpPctToMaintainFlow = 100.f * getClicksPerSecondForFlow(liveFlow, livePressure) / maxPumpClicksPerSecond;
+  float diff = targetPressure - currentState.pressure;
+  float maxPumpPct = flowRestriction > 0 ? 100.f * getClicksPerSecondForFlow(flowRestriction, currentState.pressure) / maxPumpClicksPerSecond : 100.f;
+  float pumpPctToMaintainFlow = 100.f * getClicksPerSecondForFlow(currentState.pumpFlow, currentState.pressure) / maxPumpClicksPerSecond;
 
   if (diff > 0) {
     return fminf(maxPumpPct, pumpPctToMaintainFlow + fmin(100.f, 25 + 20 * diff));
   }
 
-  if (diff <= 0 &&  isPressureFalling) {
+  if (diff <= 0 &&  currentState.isPressureFalling) {
     return fminf(maxPumpPct, pumpPctToMaintainFlow / 2.f + fmax(0.f, 10 + 20 * diff));
   }
 
@@ -45,8 +45,8 @@ int getPumpPct(float livePressure, float targetValue, float liveFlow, bool isPre
 // - expected target
 // - flow
 // - pressure direction
-void setPumpPressure(float livePressure, float targetPressure, float liveFlow, bool isPressureFalling, float flowRestriction) {
-  int pumpPct = fmin(100.f, getPumpPct(livePressure, targetPressure, liveFlow, isPressureFalling, flowRestriction));
+void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState) {
+  int pumpPct = fmin(100.f, getPumpPct(targetPressure, flowRestriction, currentState));
 
   pump.set(pumpPct * PUMP_RANGE / 100);
 }
@@ -106,11 +106,11 @@ long getClicksPerSecondForFlow(float flow, float pressure) {
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value
-void setPumpFlow(float flow, float livePressure, float pressureRestriction) {
-  if (pressureRestriction > 0 && livePressure > pressureRestriction) {
     setPumpToRawValue(0);
+void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState) {
+  if (pressureRestriction > 0 && currentState.pressure > pressureRestriction) {
   } else {
-    float pumpPct = getClicksPerSecondForFlow(flow, livePressure) / (float) maxPumpClicksPerSecond;
+    float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.pressure) / (float) maxPumpClicksPerSecond;
     setPumpToRawValue(pumpPct * PUMP_RANGE);
   }
 }

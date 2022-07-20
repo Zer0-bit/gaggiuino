@@ -13,7 +13,7 @@
 #include "peripherals/thermocouple.h"
 #include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
-
+#include "sensors_state.h"
 
 // EasyNextion object init
 EasyNex myNex(USART_LCD);
@@ -27,17 +27,11 @@ unsigned long flowTimer = 0;
 unsigned long pageRefreshTimer = 0;
 unsigned long brewingTimer = 0;
 
-//volatile vars
-volatile float kProbeReadValue; //temp val
-volatile float livePressure;
-volatile float liveWeight;
+SensorState currentState;
 
 //scales vars
 float shotWeight;
-float currentWeight;
 float previousWeight;
-float weightFlow;
-float pumpFlow;
 bool tareDone = false;
 
 // brew detection vars
@@ -147,18 +141,18 @@ static void sensorsRead(void) {
 
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
-    kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
+    currentState.temperature = thermocouple.readCelsius();
     /*
     This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
     If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating
     */
-    while (kProbeReadValue <= 0.0f || kProbeReadValue == NAN || kProbeReadValue > 165.0f) {
+    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  > 165.0f) {
       /* In the event of the temp failing to read while the SSR is HIGH
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoilerOff();
       if (millis() > thermoTimer) {
-        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", kProbeReadValue);
-        kProbeReadValue = thermocouple.readCelsius();  // Making sure we're getting a value
+        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature );
+        currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
       }
     }
@@ -172,14 +166,15 @@ static void sensorsReadWeight(void) {
       scalesTare(); //Tare at the start of any weighing cycle
       tareDone = true;
     }
-    currentWeight = scalesGetWeight();
+    currentState.weight = scalesGetWeight();
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
   }
 }
 
 static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
-    livePressure = getPressure();
+    currentState.pressure = getPressure();
+    currentState.isPressureFalling = isPressureFalling();
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -187,21 +182,21 @@ static void sensorsReadPressure(void) {
 static void calculateWeightAndFlow(void) {
   if (brewActive) {
     if (scalesIsPresent()) {
-      shotWeight = currentWeight;
+      shotWeight = currentState.weight;
     }
 
     long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       long pumpClicks =  getAndResetClickCounter();
       float cps = 1000.f * pumpClicks / elapsedTime;
-      pumpFlow = getPumpFlow(cps, livePressure);
+      currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
 
       if (scalesIsPresent()) {
-        weightFlow = shotWeight - previousWeight;
+        currentState.weightFlow = shotWeight - previousWeight;
         previousWeight = shotWeight;
       } else if (preinfusionFinished) {
-        currentWeight += pumpFlow * elapsedTime / 1000;
-        shotWeight = currentWeight;
+        currentState.weight += currentState.pumpFlow * elapsedTime / 1000;
+        shotWeight = currentState.weight;
       }
 
       flowTimer = millis();
@@ -316,14 +311,14 @@ static void justDoCoffee(void) {
   static bool heaterState;
   float BREW_TEMP_DELTA;
   // Calculating the boiler heating power range based on the below input values
-  int HPWR_OUT = mapRange(kProbeReadValue, runningCfg.setpoint - 10, runningCfg.setpoint, runningCfg.hpwr, HPWR_LOW, 0);
+  int HPWR_OUT = mapRange(currentState.temperature, runningCfg.setpoint - 10, runningCfg.setpoint, runningCfg.hpwr, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(kProbeReadValue, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
+  BREW_TEMP_DELTA = mapRange(currentState.temperature, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
   BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(runningCfg.setpoint));
 
   if (brewActive) {
   // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (kProbeReadValue > runningCfg.setpoint && kProbeReadValue < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
+    if (currentState.temperature > runningCfg.setpoint && currentState.temperature < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
       if (millis() - heaterWave > HPWR_OUT * runningCfg.brewDivider && !heaterState ) {
         setBoilerOff();
         heaterState=true;
@@ -333,7 +328,7 @@ static void justDoCoffee(void) {
         heaterState=false;
         heaterWave=millis();
       }
-    } else if (kProbeReadValue > runningCfg.setpoint - 1.5f && kProbeReadValue < runningCfg.setpoint + (runningCfg.brewDeltaState ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
+    } else if (currentState.temperature > runningCfg.setpoint - 1.5f && currentState.temperature < runningCfg.setpoint + (runningCfg.brewDeltaState ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
       if (millis() - heaterWave > runningCfg.hpwr * runningCfg.brewDivider && !heaterState ) {
         setBoilerOn();
         heaterState=true;
@@ -343,7 +338,7 @@ static void justDoCoffee(void) {
         heaterState=false;
         heaterWave=millis();
       }
-    } else if (runningCfg.brewDeltaState && kProbeReadValue >= (runningCfg.setpoint + BREW_TEMP_DELTA) && kProbeReadValue <= (runningCfg.setpoint + BREW_TEMP_DELTA + 2.5f)  && preinfusionFinished ) {
+    } else if (runningCfg.brewDeltaState && currentState.temperature >= (runningCfg.setpoint + BREW_TEMP_DELTA) && currentState.temperature <= (runningCfg.setpoint + BREW_TEMP_DELTA + 2.5f)  && preinfusionFinished ) {
       if (millis() - heaterWave > runningCfg.hpwr * runningCfg.mainDivider && !heaterState ) {
         setBoilerOn();
         heaterState=true;
@@ -353,22 +348,22 @@ static void justDoCoffee(void) {
         heaterState=false;
         heaterWave=millis();
       }
-    } else if(kProbeReadValue <= runningCfg.setpoint - 1.5f) {
+    } else if(currentState.temperature <= runningCfg.setpoint - 1.5f) {
       setBoilerOn();
     } else {
       setBoilerOff();
     }
   } else { //if brewState == 0
-    if (kProbeReadValue < ((float)runningCfg.setpoint - 10.00f)) {
+    if (currentState.temperature < ((float)runningCfg.setpoint - 10.00f)) {
       setBoilerOn();
-    } else if (kProbeReadValue >= ((float)runningCfg.setpoint - 10.00f) && kProbeReadValue < ((float)runningCfg.setpoint - 3.00f)) {
+    } else if (currentState.temperature >= ((float)runningCfg.setpoint - 10.00f) && currentState.temperature < ((float)runningCfg.setpoint - 3.00f)) {
       setBoilerOn();
       if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider) {
         setBoilerOff();
         heaterState=false;
         heaterWave=millis();
       }
-    } else if ((kProbeReadValue >= ((float)runningCfg.setpoint - 3.00f)) && (kProbeReadValue <= ((float)runningCfg.setpoint - 1.00f))) {
+    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 3.00f)) && (currentState.temperature <= ((float)runningCfg.setpoint - 1.00f))) {
       if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState) {
         setBoilerOn();
         heaterState=true;
@@ -378,7 +373,7 @@ static void justDoCoffee(void) {
         heaterState=false;
         heaterWave=millis();
       }
-    } else if ((kProbeReadValue >= ((float)runningCfg.setpoint - 0.5f)) && kProbeReadValue < (float)runningCfg.setpoint) {
+    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 0.5f)) && currentState.temperature < (float)runningCfg.setpoint) {
       if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState ) {
         setBoilerOn();
         heaterState=true;
@@ -402,13 +397,13 @@ static void steamCtrl(void) {
 
   if (!brewActive) {
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
-    if ((livePressure <= 9.f) && (kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= STEAM_TEMPERATURE)) {
+    if ((currentState.pressure <= 9.f) && (currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_TEMPERATURE)) {
       setBoilerOn();
     } else {
       setBoilerOff();
     }
   } else { //added to cater for hot water from steam wand functionality
-    if ((kProbeReadValue > runningCfg.setpoint - 10.f) && (kProbeReadValue <= STEAM_WAND_HOT_WATER_TEMP)) {
+    if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
       setBoilerOn();
     } else {
       setBoilerOff();
@@ -426,25 +421,25 @@ static void lcdRefresh(void) {
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     #ifdef BEAUTIFY_GRAPH
-      float beautifiedPressure = fmin(livePressure, pressureTargetComparator + 0.5f);
-      myNex.writeNum("pressure.val", brewActive ? beautifiedPressure * 10.f : livePressure * 10.f);
+      float beautifiedPressure = fmin(currentState.pressure, pressureTargetComparator + 0.5f);
+      myNex.writeNum("pressure.val", brewActive ? beautifiedPressure * 10.f : currentState.pressure * 10.f);
     #else
-      myNex.writeNum("pressure.val", (livePressure > 0.f) ? livePressure*10.f : 0.f);
+      myNex.writeNum("pressure.val", (currentState.pressure > 0.f) ? currentState.pressure*10.f : 0.f);
     #endif
 
     /*LCD temp output*/
-    myNex.writeNum("currentTemp",int(kProbeReadValue - runningCfg.offsetTemp));
+    myNex.writeNum("currentTemp",int(currentState.temperature - runningCfg.offsetTemp));
 
     /*LCD weight output*/
     if (myNex.currentPageId == 0 && homeScreenScalesEnabled) {
-      myNex.writeStr("weight.txt", (currentWeight > 0.f) ? String(currentWeight,1) : "0.0");
+      myNex.writeStr("weight.txt", (currentState.weight > 0.f) ? String(currentState.weight,1) : "0.0");
     } else {
-      myNex.writeStr("weight.txt", (currentWeight > 0.f) ? String(shotWeight,1) : "0.0");
+      myNex.writeStr("weight.txt", (shotWeight > 0.f) ? String(shotWeight,1) : "0.0");
     }
 
     /*LCD flow output*/
 
-    myNex.writeNum("flow.val", int((weightFlow>0.f) ? weightFlow * 10 : pumpFlow * 10));
+    myNex.writeNum("flow.val", int((currentState.weightFlow>0.f) ? currentState.weightFlow * 10 : currentState.pumpFlow * 10));
 
     #if defined(DEBUG_ENABLED)
     myNex.writeNum("debug1",readTempSensor());
@@ -676,13 +671,13 @@ static void profiling(void) {
     if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
       float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
-      setPumpPressure(livePressure, newBarValue, fmaxf(pumpFlow, weightFlow), isPressureFalling(), -1);
+      setPumpPressure(newBarValue, flowRestriction, currentState);
 
-      pressureTargetComparator = preinfusionFinished ? newBarValue : livePressure;
+      pressureTargetComparator = preinfusionFinished ? newBarValue : currentState.pressure;
     } else {
       float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
-      setPumpFlow(newFlowValue, livePressure, pressureRestriction);
+      setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   }
   else {
@@ -694,7 +689,7 @@ static void profiling(void) {
 
 static void manualPressureProfile(void) {
   int power_reading = myNex.readNumber("h0.val");
-  setPumpPressure(livePressure, power_reading, pumpFlow, isPressureFalling(), -1);
+  setPumpPressure(power_reading, 0.f, currentState);
   justDoCoffee();
 }
 
@@ -718,7 +713,7 @@ static void brewDetect(void) {
 static void brewJustStarted() {
   tareDone = false;
   shotWeight = 0.f;
-  currentWeight = 0.f;
+  currentState.weight = 0.f;
   previousWeight = 0.f;
   brewingTimer = millis();
   preinfusionFinished = false;
