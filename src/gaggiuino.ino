@@ -451,14 +451,16 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-    if (scalesIsPresent) { // write predicted flow only for the preinfusion phase if system has scales detected
-      myNex.writeNum("flow.val",
-        preinfusionFinished
-        ? (currentState.weightFlow>0.f) ? currentState.weightFlow * 10.f : 0.f
-        : currentState.pumpFlow * 10.f
-      );
-    } else { // write predicted flow throughout the whole pull is system has no scales detected
-      myNex.writeNum("flow.val", currentState.pumpFlow * 10.f);
+    if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 ) { // no point sending this continuously if on any other screens than brew related ones
+      if (scalesIsPresent) { // write predicted flow only for the preinfusion phase if system has scales detected
+        myNex.writeNum("flow.val",
+          preinfusionFinished
+          ? (currentState.weightFlow>0.f) ? currentState.weightFlow * 10.f : 0.f
+          : currentState.pumpFlow * 10.f
+        );
+      } else { // write predicted flow throughout the whole pull is system has no scales detected
+        myNex.writeNum("flow.val", currentState.pumpFlow * 10.f);
+      }
     }
 
     #if defined(DEBUG_ENABLED)
@@ -747,7 +749,7 @@ static void brewJustStarted() {
 static void lcdInit(eepromValues_t eepromCurrentValues) {
 
   myNex.writeNum("setPoint", eepromCurrentValues.setpoint);
-  myNex.writeNum("moreTemp.n1.val", eepromCurrentValues.setpoint);
+  myNex.writeNum("moreTemp.n1.val", eepromCurrentValues.setpoint-eepromCurrentValues.offsetTemp);
 
   myNex.writeNum("offSet", eepromCurrentValues.offsetTemp);
   myNex.writeNum("moreTemp.n2.val", eepromCurrentValues.offsetTemp);
