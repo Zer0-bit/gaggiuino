@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "log.h"
 
-#define EEPROM_DATA_VERSION 2
+#define EEPROM_DATA_VERSION 1
 
 struct eepromValues_t {
   uint16_t setpoint;
@@ -40,6 +40,7 @@ struct eepromValues_t {
   float    flowProfileEnd;
   uint16_t flowProfilePressureTarget;
   uint16_t flowProfileCurveSpeed;
+  float    pumpFlowAtZero;
 
 
 };

@@ -114,18 +114,19 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.homeOnShotFinish               = true;
   defaultData.graphBrew                      = true;
   defaultData.brewDeltaState                 = true;
-  defaultData.scalesF1                       = 4210;
-  defaultData.scalesF2                       = 4010; //3920
+  defaultData.scalesF1                       = 4210.f;
+  defaultData.scalesF2                       = 3920.f; //3920
   defaultData.preinfusionFlowState           = false;
-  defaultData.preinfusionFlowVol             = 4.5;
+  defaultData.preinfusionFlowVol             = 3.5f;
   defaultData.preinfusionFlowTime            = 10;
   defaultData.preinfusionFlowSoakTime        = 5;
   defaultData.preinfusionFlowPressureTarget  = 0;
   defaultData.flowProfileState               = false;
-  defaultData.flowProfileStart               = 8.5;
-  defaultData.flowProfileEnd                 = 6.0;
+  defaultData.flowProfileStart               = 3.5f;
+  defaultData.flowProfileEnd                 = 2.0f;
   defaultData.flowProfilePressureTarget      = 7;
   defaultData.flowProfileCurveSpeed          = 15;
+  defaultData.pumpFlowAtZero                 = 0.24f;
 
   return defaultData;
 }
