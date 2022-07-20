@@ -277,6 +277,7 @@ static void modeSelect(void) {
       break;
     case OPMODE_flush:
       setPumpFullOn();
+      justDoCoffee();
       break;
     case OPMODE_steam:
       if (!steamState()) {
@@ -491,6 +492,7 @@ void trigger1(void) {
     case 2:
       break;
     case 3:
+      // PRESSURE PARAMS
       eepromCurrentValues.pressureProfilingStart        = myNex.readNumber("ppStart");
       eepromCurrentValues.pressureProfilingFinish       = myNex.readNumber("ppFin");
       eepromCurrentValues.pressureProfilingHold         = myNex.readNumber("ppHold");
@@ -501,16 +503,17 @@ void trigger1(void) {
       eepromCurrentValues.preinfusionBar                = myNex.readNumber("piBar");
       eepromCurrentValues.preinfusionSoak               = myNex.readNumber("piSoak");
       eepromCurrentValues.preinfusionRamp               = myNex.readNumber("piRamp");
-      eepromCurrentValues.flowProfileState              = myNex.readNumber("ppFlowState");
-      eepromCurrentValues.flowProfileStart              = myNex.readNumber("ppFlowStart") / 10.f;
-      eepromCurrentValues.flowProfileEnd                = myNex.readNumber("ppFlowFinish") / 10.f;
-      eepromCurrentValues.flowProfilePressureTarget     = myNex.readNumber("ppFlowPressure");
-      eepromCurrentValues.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
+      // FLOW PARAMS
       eepromCurrentValues.preinfusionFlowState          = myNex.readNumber("piFlowState");
-      eepromCurrentValues.preinfusionFlowVol            = myNex.readNumber("piFlow") / 10.f;
+      eepromCurrentValues.preinfusionFlowVol            = myNex.readNumber("piFlow") / 10;
       eepromCurrentValues.preinfusionFlowTime           = myNex.readNumber("piFlowTime" );
       eepromCurrentValues.preinfusionFlowSoakTime       = myNex.readNumber("piFlowSoak");
       eepromCurrentValues.preinfusionFlowPressureTarget = myNex.readNumber("piFlowPressure");
+      eepromCurrentValues.flowProfileState              = myNex.readNumber("ppFlowState");
+      eepromCurrentValues.flowProfileStart              = myNex.readNumber("ppFlowStart") / 10;
+      eepromCurrentValues.flowProfileEnd                = myNex.readNumber("ppFlowFinish") / 10;
+      eepromCurrentValues.flowProfilePressureTarget     = myNex.readNumber("ppFlowPressure");
+      eepromCurrentValues.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
       break;
     case 4:
       eepromCurrentValues.homeOnShotFinish  = myNex.readNumber("homeOnBrewFinish");
@@ -530,6 +533,9 @@ void trigger1(void) {
     case 7:
       eepromCurrentValues.powerLineFrequency = myNex.readNumber("regHz");
       eepromCurrentValues.lcdSleep           = myNex.readNumber("systemSleepTime");
+      eepromCurrentValues.scalesF1           = myNex.readNumber("morePower.lc1.val");
+      eepromCurrentValues.scalesF2           = myNex.readNumber("morePower.lc2.val");
+      eepromCurrentValues.pumpFlowAtZero     = myNex.readNumber("morePower.pump_zero.val") / 100;
       break;
     default:
       break;
@@ -820,6 +826,10 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
 
   myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
   myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
+
+  myNex.writeNum("morePower.lc1.val", eepromCurrentValues.scalesF1);
+  myNex.writeNum("morePower.lc2.val", eepromCurrentValues.scalesF2);
+  myNex.writeNum("morePower.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 100);
 
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
   myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
