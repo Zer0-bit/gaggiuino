@@ -450,7 +450,7 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-    myNex.writeNum("flow.val", 
+    myNex.writeNum("flow.val",
       preinfusionFinished
       ? (currentState.weightFlow>0.f) ? currentState.weightFlow * 10.f : 0.f
       : currentState.pumpFlow * 10.f
