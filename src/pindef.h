@@ -5,6 +5,8 @@
 #define thermoDO      PB4
 #define thermoCS      PA6
 #define thermoCLK     PA5
+// #define thermoCS      PB5 // used by Zer0 cause of somr SPI issues
+// #define thermoCLK     PB3 // used by Zer0 cause of somr SPI issues
 
 #define zcPin         PA0
 #define brewPin       PC14
