@@ -422,24 +422,39 @@ static void lcdRefresh(void) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     #ifdef BEAUTIFY_GRAPH
       float beautifiedPressure = fmin(currentState.pressure, pressureTargetComparator + 0.5f);
-      myNex.writeNum("pressure.val", brewActive ? beautifiedPressure * 10.f : currentState.pressure * 10.f);
+      myNex.writeNum("pressure.val",
+        brewActive
+          ? beautifiedPressure * 10.f
+          : currentState.pressure * 10.f
+      );
     #else
-      myNex.writeNum("pressure.val", (currentState.pressure > 0.f) ? currentState.pressure*10.f : 0.f);
+      myNex.writeNum("pressure.val",
+        currentState.pressure > 0.f
+          ? currentState.pressure * 10.f
+          : 0.f
+      );
     #endif
 
     /*LCD temp output*/
-    myNex.writeNum("currentTemp",int(currentState.temperature - runningCfg.offsetTemp));
+    myNex.writeNum("currentTemp",currentState.temperature - runningCfg.offsetTemp);
 
     /*LCD weight output*/
     if (myNex.currentPageId == 0 && homeScreenScalesEnabled) {
-      myNex.writeStr("weight.txt", (currentState.weight > 0.f) ? String(currentState.weight,1) : "0.0");
+      myNex.writeStr("weight.txt", String(currentState.weight,1));
     } else {
-      myNex.writeStr("weight.txt", (shotWeight > 0.f) ? String(shotWeight,1) : "0.0");
+      myNex.writeStr("weight.txt",
+        shotWeight > 0.f
+          ? String(shotWeight, 1)
+          : "0.0"
+      );
     }
 
     /*LCD flow output*/
-
-    myNex.writeNum("flow.val", int((currentState.weightFlow>0.f) ? currentState.weightFlow * 10 : currentState.pumpFlow * 10));
+    myNex.writeNum("flow.val",
+      currentState.weightFlow > 0.f
+        ? currentState.weightFlow * 10.f
+        : currentState.pumpFlow * 10.f
+    );
 
     #if defined(DEBUG_ENABLED)
     myNex.writeNum("debug1",readTempSensor());
@@ -451,7 +466,7 @@ static void lcdRefresh(void) {
       brewTimer(1); // nextion timer start
       myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
     } else {
-      brewTimer(0); // nextion timer start
+      brewTimer(0); // nextion timer stop
     }
 
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
