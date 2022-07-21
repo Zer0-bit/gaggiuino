@@ -450,28 +450,13 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-<<<<<<< HEAD
-<<<<<<< HEAD
-    myNex.writeNum("flow.val",
-      currentState.weight > 0.f // currentState.weight is always zero if scales are not present
-        ? currentState.weightFlow * 10.f
-        : currentState.pumpFlow * 10.f
-    );
-=======
-=======
->>>>>>> 83cea3d2544fd750fa12e8f35071ae73a60cc716
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 ) { // no point sending this continuously if on any other screens than brew related ones
-      if (scalesIsPresent) { // write predicted flow only for the preinfusion phase if system has scales detected
-        myNex.writeNum("flow.val",
-          preinfusionFinished
-          ? (currentState.weightFlow>0.f) ? currentState.weightFlow * 10.f : 0.f
+      myNex.writeNum("flow.val",
+        currentState.weight > 0.f // currentState.weight is always zero if scales are not present
+          ? currentState.weightFlow * 10.f
           : currentState.pumpFlow * 10.f
-        );
-      } else { // write predicted flow throughout the whole pull is system has no scales detected
-        myNex.writeNum("flow.val", currentState.pumpFlow * 10.f);
-      }
+      );
     }
->>>>>>> 2ea7a03 (temp and other misc changes)
 
     #if defined(DEBUG_ENABLED)
     myNex.writeNum("debug1",readTempSensor());
@@ -496,7 +481,6 @@ static void lcdRefresh(void) {
 void trigger1(void) {
   LOG_VERBOSE("Saving values to EEPROM");
   bool rc;
-  float tempVal;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
 
   switch (myNex.currentPageId){
