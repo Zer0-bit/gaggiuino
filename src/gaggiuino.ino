@@ -451,12 +451,15 @@ static void lcdRefresh(void) {
 
     /*LCD flow output*/
 <<<<<<< HEAD
+<<<<<<< HEAD
     myNex.writeNum("flow.val",
       currentState.weight > 0.f // currentState.weight is always zero if scales are not present
         ? currentState.weightFlow * 10.f
         : currentState.pumpFlow * 10.f
     );
 =======
+=======
+>>>>>>> 83cea3d2544fd750fa12e8f35071ae73a60cc716
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 ) { // no point sending this continuously if on any other screens than brew related ones
       if (scalesIsPresent) { // write predicted flow only for the preinfusion phase if system has scales detected
         myNex.writeNum("flow.val",
