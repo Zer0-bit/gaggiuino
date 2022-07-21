@@ -126,7 +126,7 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.flowProfileEnd                 = 20;
   defaultData.flowProfilePressureTarget      = 7;
   defaultData.flowProfileCurveSpeed          = 15;
-  defaultData.pumpFlowAtZero                 = 24; 
+  defaultData.pumpFlowAtZero                 = 24;
 
   return defaultData;
 }
