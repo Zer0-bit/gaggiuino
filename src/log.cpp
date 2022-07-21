@@ -6,19 +6,14 @@ void log_init() {
 
 void log(const char *prefix, const char *file, const int line, const char *msg, ...)
 {
-  char buf[LOG_MAX_STRING_LEN];
+  char msgBuf[LOG_MAX_STRING_LEN];
   va_list args;
   va_start(args, msg);
-  vsnprintf(buf, LOG_MAX_STRING_LEN, msg, args);
+  vsnprintf(msgBuf, LOG_MAX_STRING_LEN, msg, args);
   va_end(args);
 
-  String tmp = prefix;
-  tmp += " (";
-  tmp += file;
-  tmp += ":";
-  tmp += line;
-  tmp += "): ";
-  tmp += buf;
+  char logLineBuf[LOG_MAX_PREFIX_LEN + LOG_MAX_STRING_LEN];
+  snprintf(logLineBuf, sizeof(logLineBuf), "%s (%s:%i): %s", prefix, file, line, msgBuf);
 
-  USART_DEBUG.println(tmp);
+  USART_DEBUG.println(logLineBuf);
 }
