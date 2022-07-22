@@ -31,6 +31,31 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
+  if (eepromValuesNew.preinfusionFlowState != 0 && eepromValuesNew.preinfusionFlowState != 1) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.preinfusionFlowVol < 0.f) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.flowProfileStart < 0.f) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.flowProfileEnd < 0.f) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.flowProfileState != 0 && eepromValuesNew.flowProfileState != 1) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
   if (eepromValuesNew.homeOnShotFinish != 0 && eepromValuesNew.homeOnShotFinish != 1) {
     LOG_ERROR(errMsg.c_str());
     return false;

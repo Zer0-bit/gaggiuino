@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "log.h"
 
-#define EEPROM_DATA_VERSION 2
+#define EEPROM_DATA_VERSION 3
 
 struct eepromValues_t {
   uint16_t setpoint;
