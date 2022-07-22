@@ -19,6 +19,12 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     if (eepromValuesNew.lcdSleep < 0)
   */
 
+  /* THIS IS STILL VERY MUCH UNPROVEN AND GUESSWORK DUE TO ABSENCE OF SOLID EVIDENCE
+  Due to flash memory access speeds varying for diffrent operations a theoretical delayMicroseconds(X)
+  might be needed in the future. For now this limitation was overcome by spending
+  time before a write needs to happen with some additional data integrity checks.
+  YOLO
+  */
   String errMsg = String("Data out of range");
 
   if (eepromValuesNew.preinfusionState != 0 && eepromValuesNew.preinfusionState != 1) {
@@ -27,6 +33,31 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   }
 
   if (eepromValuesNew.pressureProfilingState != 0 && eepromValuesNew.pressureProfilingState != 1) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.preinfusionFlowState != 0 && eepromValuesNew.preinfusionFlowState != 1) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.preinfusionFlowVol < 0.f) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.flowProfileStart < 0.f) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.flowProfileEnd < 0.f) {
+    LOG_ERROR(errMsg.c_str());
+    return false;
+  }
+
+  if (eepromValuesNew.flowProfileState != 0 && eepromValuesNew.flowProfileState != 1) {
     LOG_ERROR(errMsg.c_str());
     return false;
   }
@@ -108,24 +139,25 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.preinfusionBar                 = 2;
   defaultData.preinfusionSoak                = 10;
   defaultData.preinfusionRamp                = 0;
+  defaultData.preinfusionFlowState           = false;
+  defaultData.preinfusionFlowVol             = 3.5f;
+  defaultData.preinfusionFlowTime            = 10;
+  defaultData.preinfusionFlowSoakTime        = 5;
+  defaultData.preinfusionFlowPressureTarget  = 0;
+  defaultData.flowProfileState               = false;
+  defaultData.flowProfileStart               = 3.5f;
+  defaultData.flowProfileEnd                 = 2.0f;
+  defaultData.flowProfilePressureTarget      = 7;
+  defaultData.flowProfileCurveSpeed          = 15;
   defaultData.powerLineFrequency             = 50;
   defaultData.lcdSleep                       = 16;
   defaultData.warmupState                    = false;
   defaultData.homeOnShotFinish               = true;
   defaultData.graphBrew                      = true;
   defaultData.brewDeltaState                 = true;
-  defaultData.scalesF1                       = 4210;
-  defaultData.scalesF2                       = 4010; //3920
-  defaultData.preinfusionFlowState           = false;
-  defaultData.preinfusionFlowVol             = 4.5;
-  defaultData.preinfusionFlowTime            = 10;
-  defaultData.preinfusionFlowSoakTime        = 5;
-  defaultData.preinfusionFlowPressureTarget  = 0;
-  defaultData.flowProfileState               = false;
-  defaultData.flowProfileStart               = 8.5;
-  defaultData.flowProfileEnd                 = 6.0;
-  defaultData.flowProfilePressureTarget      = 7;
-  defaultData.flowProfileCurveSpeed          = 15;
+  defaultData.scalesF1                       = 4210.f;
+  defaultData.scalesF2                       = 3920.f;
+  defaultData.pumpFlowAtZero                 = 0.24f;
 
   return defaultData;
 }

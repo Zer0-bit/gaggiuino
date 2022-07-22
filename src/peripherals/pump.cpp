@@ -14,9 +14,9 @@ short maxPumpClicksPerSecond = 50;
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
-void pumpInit(int powerLineFrequency) {
+void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
-  flowPerClickAtZeroBar = 50 * flowPerClickAtZeroBar / powerLineFrequency;
+  flowPerClickAtZeroBar = 50 * pumpFlowAtZero / powerLineFrequency;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
