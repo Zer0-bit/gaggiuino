@@ -20,10 +20,10 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   */
 
   /* THIS IS STILL VERY MUCH UNPROVEN AND GUESSWORK DUE TO ABSENCE OF SOLID EVIDENCE
-  Due to flash memory access speeds varying for diffrent operations a theoretical delayMicroseconds(X) 
-  might be needed in the future. For now this limitation was overcome by spending 
+  Due to flash memory access speeds varying for diffrent operations a theoretical delayMicroseconds(X)
+  might be needed in the future. For now this limitation was overcome by spending
   time before a write needs to happen with some additional data integrity checks.
-  YOLO  
+  YOLO
   */
   String errMsg = String("Data out of range");
 
