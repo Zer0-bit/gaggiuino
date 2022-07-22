@@ -6,6 +6,7 @@
 
 #define __FILENAME__ (__builtin_strrchr("/" __FILE__, '/') + 1)
 #define LOG_MAX_STRING_LEN 64
+#define LOG_MAX_PREFIX_LEN 64
 
 #ifdef LOG_LEVEL
   void log(const char *prefix, const char *file, const int line, const char *msg, ...);
