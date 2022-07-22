@@ -117,7 +117,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   eepromMetadata.values = eepromValuesNew;
   eepromMetadata.versionTimestampXOR = eepromMetadata.timestamp ^ eepromMetadata.version;
   EEPROM.put(0, eepromMetadata);
-  LOG_VERBOSE("sizeof%i", sizeof(eepromMetadata));
+
   return true;
 }
 
