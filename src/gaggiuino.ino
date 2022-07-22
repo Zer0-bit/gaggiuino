@@ -105,7 +105,7 @@ void setup(void) {
   LOG_INFO("Scales init");
 
   // Pump init
-  pumpInit(eepromCurrentValues.powerLineFrequency);
+  pumpInit(eepromCurrentValues.powerLineFrequency, eepromCurrentValues.pumpFlowAtZero);
   LOG_INFO("Pump init");
 
   pageValuesRefresh(true);

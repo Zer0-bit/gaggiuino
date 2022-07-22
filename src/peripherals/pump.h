@@ -7,7 +7,7 @@
 #define PUMP_RANGE 100
 #define ZC_MODE    RISING
 
-void pumpInit(int powerLineFrequency);
+void pumpInit(int powerLineFrequency, float pumpFlowAtZero);
 void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState);
 void setPumpOff(void);
 void setPumpFullOn(void);
