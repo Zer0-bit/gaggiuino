@@ -666,7 +666,7 @@ static void updatePressureProfilePhases(void) {
   phases.count = phaseCount;
 }
 
-void setPressurePhase(int phaseIdx, int startBar, int endBar, float flowRestriction, int timeMs) {
+void setPressurePhase(int phaseIdx, float startBar, float endBar, float flowRestriction, int timeMs) {
   setPhase(phaseIdx, PHASE_TYPE_PRESSURE, startBar, endBar, flowRestriction, flowRestriction, timeMs);
 }
 
@@ -674,7 +674,7 @@ void setFlowPhase(int phaseIdx, float startFlow, float endFlow, float pressureRe
   setPhase(phaseIdx, PHASE_TYPE_FLOW, startFlow, endFlow, pressureRestriction, pressureRestriction, timeMs);
 }
 
-void setPhase(int phaseIdx, PHASE_TYPE type, int startValue, int endValue, float startRestriction, float endRestriction, int timeMs) {
+void setPhase(int phaseIdx, PHASE_TYPE type, float startValue, float endValue, float startRestriction, float endRestriction, int timeMs) {
     phases.phases[phaseIdx].type = type;
     phases.phases[phaseIdx].startValue = startValue;
     phases.phases[phaseIdx].endValue = endValue;
