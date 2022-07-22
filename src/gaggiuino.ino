@@ -452,7 +452,7 @@ static void lcdRefresh(void) {
     /*LCD flow output*/
     if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 ) { // no point sending this continuously if on any other screens than brew related ones
       myNex.writeNum("flow.val",
-        currentState.weight > 0.f // currentState.weight is always zero if scales are not present
+        currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.weightFlow * 10.f
           : currentState.pumpFlow * 10.f
       );
