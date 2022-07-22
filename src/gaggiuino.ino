@@ -529,7 +529,7 @@ void trigger1(void) {
       break;
     case 7:
       eepromCurrentValues.powerLineFrequency = myNex.readNumber("regHz");
-      eepromCurrentValues.lcdSleep           = myNex.readNumber("systemSleepTime");
+      eepromCurrentValues.lcdSleep           = myNex.readNumber("systemSleepTime")/60;
       eepromCurrentValues.scalesF1           = myNex.readNumber("morePower.lc1.val");
       eepromCurrentValues.scalesF2           = myNex.readNumber("morePower.lc2.val");
       eepromCurrentValues.pumpFlowAtZero     = myNex.readNumber("morePower.pump_zero.val") / 100.f;
