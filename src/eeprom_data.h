@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "log.h"
 
-#define EEPROM_DATA_VERSION 3
+#define EEPROM_DATA_VERSION 2
 
 struct eepromValues_t {
   uint16_t setpoint;
@@ -22,25 +22,25 @@ struct eepromValues_t {
   uint16_t preinfusionBar;
   uint16_t preinfusionSoak;
   uint16_t preinfusionRamp;
+  bool     preinfusionFlowState;
+  float    preinfusionFlowVol;
+  uint16_t preinfusionFlowTime;
+  uint16_t preinfusionFlowSoakTime;
+  uint16_t preinfusionFlowPressureTarget;
+  bool     flowProfileState;
+  float    flowProfileStart;
+  float    flowProfileEnd;
+  uint16_t flowProfilePressureTarget;
+  uint16_t flowProfileCurveSpeed;
   uint16_t powerLineFrequency;
   uint16_t lcdSleep;
   bool     warmupState;
   bool     homeOnShotFinish;
   bool     graphBrew;
   bool     brewDeltaState;
-  uint16_t scalesF1;
-  uint16_t scalesF2;
-  bool     preinfusionFlowState;
-  uint16_t preinfusionFlowVol;
-  uint16_t preinfusionFlowTime;
-  uint16_t preinfusionFlowSoakTime;
-  uint16_t preinfusionFlowPressureTarget;
-  bool     flowProfileState;
-  uint16_t flowProfileStart;
-  uint16_t flowProfileEnd;
-  uint16_t flowProfilePressureTarget;
-  uint16_t flowProfileCurveSpeed;
-  uint16_t pumpFlowAtZero;
+  float    scalesF1;
+  float    scalesF2;
+  float    pumpFlowAtZero;
 
 
 };

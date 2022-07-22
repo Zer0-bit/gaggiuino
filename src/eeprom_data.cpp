@@ -86,7 +86,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   eepromMetadata.values = eepromValuesNew;
   eepromMetadata.versionTimestampXOR = eepromMetadata.timestamp ^ eepromMetadata.version;
   EEPROM.put(0, eepromMetadata);
-
+  LOG_VERBOSE("sizeof%i", sizeof(eepromMetadata));
   return true;
 }
 
@@ -108,25 +108,25 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.preinfusionBar                 = 2;
   defaultData.preinfusionSoak                = 10;
   defaultData.preinfusionRamp                = 0;
+  defaultData.preinfusionFlowState           = false;
+  defaultData.preinfusionFlowVol             = 3.5f;
+  defaultData.preinfusionFlowTime            = 10;
+  defaultData.preinfusionFlowSoakTime        = 5;
+  defaultData.preinfusionFlowPressureTarget  = 0;
+  defaultData.flowProfileState               = false;
+  defaultData.flowProfileStart               = 3.5f;
+  defaultData.flowProfileEnd                 = 2.0f;
+  defaultData.flowProfilePressureTarget      = 7;
+  defaultData.flowProfileCurveSpeed          = 15;
   defaultData.powerLineFrequency             = 50;
   defaultData.lcdSleep                       = 16;
   defaultData.warmupState                    = false;
   defaultData.homeOnShotFinish               = true;
   defaultData.graphBrew                      = true;
   defaultData.brewDeltaState                 = true;
-  defaultData.scalesF1                       = 4210;
-  defaultData.scalesF2                       = 3920;
-  defaultData.preinfusionFlowState           = false;
-  defaultData.preinfusionFlowVol             = 35;
-  defaultData.preinfusionFlowTime            = 10;
-  defaultData.preinfusionFlowSoakTime        = 5;
-  defaultData.preinfusionFlowPressureTarget  = 0;
-  defaultData.flowProfileState               = false;
-  defaultData.flowProfileStart               = 35;
-  defaultData.flowProfileEnd                 = 20;
-  defaultData.flowProfilePressureTarget      = 7;
-  defaultData.flowProfileCurveSpeed          = 15;
-  defaultData.pumpFlowAtZero                 = 24;
+  defaultData.scalesF1                       = 4210.f;
+  defaultData.scalesF2                       = 3920.f;
+  defaultData.pumpFlowAtZero                 = 0.24f;
 
   return defaultData;
 }
