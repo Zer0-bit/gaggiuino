@@ -23,7 +23,7 @@ public:
       cfg.freq_read  = 16000000;    // 受信時のSPIクロック
       cfg.spi_3wire  = false;        // 受信をMOSIピンで行う場合はtrueを設定
       cfg.use_lock   = true;        // トランザクションロックを使用する場合はtrueを設定
-      // cfg.dma_channel = SPI_DMA_CH_AUTO; // 使用するDMAチャンネルを設定 (0=DMA不使用 / 1=1ch / 2=ch / SPI_DMA_CH_AUTO=自動設定)
+      cfg.dma_channel = 0; // 使用するDMAチャンネルを設定 (0=DMA不使用 / 1=1ch / 2=ch / SPI_DMA_CH_AUTO=自動設定)
       // ※ ESP-IDFバージョンアップに伴い、DMAチャンネルはSPI_DMA_CH_AUTO(自動設定)が推奨になりました。1ch,2chの指定は非推奨になります。
       cfg.pin_sclk = 18;            // SPIのSCLKピン番号を設定
       cfg.pin_mosi = 23;            // SPIのMOSIピン番号を設定
