@@ -1,6 +1,6 @@
 #ifndef LGFX_GRAPHICS_DRIVER_H
 #define LGFX_GRAPHICS_DRIVER_H
-#define LGFX_USE_V1
+
 #include <LovyanGFX.hpp>
 
 class LGFX : public lgfx::LGFX_Device
@@ -13,8 +13,7 @@ lgfx::Touch_XPT2046   _touch_instance;
 
 public:
 
-  LGFX(void)
-  {
+  LGFX(void) {
     { // バス制御の設定を行います。
       auto cfg = _bus_instance.config();    // バス設定用の構造体を取得します。
       cfg.spi_host = VSPI_HOST;     // 使用するSPIを選択  ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
@@ -24,7 +23,7 @@ public:
       cfg.freq_read  = 16000000;    // 受信時のSPIクロック
       cfg.spi_3wire  = false;        // 受信をMOSIピンで行う場合はtrueを設定
       cfg.use_lock   = true;        // トランザクションロックを使用する場合はtrueを設定
-      cfg.dma_channel = SPI_DMA_CH_AUTO; // 使用するDMAチャンネルを設定 (0=DMA不使用 / 1=1ch / 2=ch / SPI_DMA_CH_AUTO=自動設定)
+      // cfg.dma_channel = SPI_DMA_CH_AUTO; // 使用するDMAチャンネルを設定 (0=DMA不使用 / 1=1ch / 2=ch / SPI_DMA_CH_AUTO=自動設定)
       // ※ ESP-IDFバージョンアップに伴い、DMAチャンネルはSPI_DMA_CH_AUTO(自動設定)が推奨になりました。1ch,2chの指定は非推奨になります。
       cfg.pin_sclk = 18;            // SPIのSCLKピン番号を設定
       cfg.pin_mosi = 23;            // SPIのMOSIピン番号を設定
