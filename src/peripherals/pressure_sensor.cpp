@@ -22,7 +22,8 @@ float getPressure() {  //returns sensor pressure data
   // pressure gauge range 0-1.2MPa - 0-12 bar
   // 1 bar = 68.27 or 2184.5
   previousPressure = currentPressure;
-  currentPressure = ADS.getValue() / 1706.6f - 1.49f;
+  // currentPressure = ADS.getValue() / 1706.6f - 1.49f;
+  currentPressure = (ADS.toVoltage(ADS.getValue()) - 0.5f) * 3.f;
   return currentPressure;
 }
 
