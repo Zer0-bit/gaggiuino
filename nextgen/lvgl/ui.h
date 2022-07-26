@@ -1,3 +1,6 @@
+#ifndef UI_H
+#define UI_H
+
 #include <lvgl.h>
 #include <Arduino.h>
 
@@ -8,3 +11,5 @@ LV_FONT_DECLARE(fontHomeScreenTempArc);
 void ui_init(void);
 void lcd_init(void);
 void my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
+
+#endif
