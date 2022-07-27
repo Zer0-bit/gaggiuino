@@ -136,7 +136,7 @@ void ui_systemHomeScreen_init(void) {
 
     lv_obj_set_style_text_color(ui_Label_Celsius, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_set_style_text_opa(ui_Label_Celsius, 255, LV_PART_MAIN);
-    lv_obj_set_style_text_font(ui_Label_Celsius, &fontHomeScreenTempArc, LV_PART_MAIN);
+    lv_obj_set_style_text_font(ui_Label_Celsius, &lv_font_montserrat_48, LV_PART_MAIN);
     
 
 }
