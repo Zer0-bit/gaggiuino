@@ -90,5 +90,5 @@ void my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data) {
 
 void ui_init(void) {
     splash_init();
-    home_init();
+    // home_init();
 }
