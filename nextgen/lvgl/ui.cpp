@@ -32,12 +32,13 @@ void setup() {
     lcd_init();
 
     // Init LCD objects
-    ui_init();
+    // ui_init();
+    splash_init();
 }
 
 void loop() {
     lv_timer_handler(); /* let the GUI do its work */
-    // delay(5);
+    lv_scr_act();
 }
 
 /////////////// LCD INIT////////////////
@@ -88,7 +89,8 @@ void my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data) {
     }
 }
 
-void ui_init(void) {
-    splash_init();
-    // home_init();
-}
+// void ui_init(void) {
+//     splash_init();
+//     home_init();
+//     lv_scr_act();
+// }
