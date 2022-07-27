@@ -38,18 +38,15 @@ void ui_systemInitScreen_screen_init(void) {
     lv_obj_set_style_arc_width(ui_initScreenSpinner, 14, LV_PART_INDICATOR);
     lv_obj_set_style_arc_rounded(ui_initScreenSpinner, false, LV_PART_INDICATOR);
 
-    // ui_labelGAGGIUINO
+    // // ui_labelGAGGIUINO
     ui_labelGAGGIUINO = lv_label_create(ui_systemInitScreen);
 
-    lv_obj_set_width(ui_labelGAGGIUINO, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_labelGAGGIUINO, LV_SIZE_CONTENT);
     lv_obj_set_x(ui_labelGAGGIUINO, -27);
     lv_obj_set_y(ui_labelGAGGIUINO, 77);
     lv_obj_set_align(ui_labelGAGGIUINO, LV_ALIGN_CENTER);
     lv_label_set_text(ui_labelGAGGIUINO, "GAGGIUIN");
     lv_label_set_recolor(ui_labelGAGGIUINO, "true");
     lv_obj_set_style_text_color(ui_labelGAGGIUINO, lv_color_hex(0xAE4500), LV_PART_MAIN);
-    lv_obj_set_style_text_opa(ui_labelGAGGIUINO, 255, LV_PART_MAIN);
     lv_obj_set_style_text_font(ui_labelGAGGIUINO, &lv_font_montserrat_48, LV_PART_MAIN);
 }
 
