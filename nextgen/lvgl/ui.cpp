@@ -32,13 +32,11 @@ void setup() {
     lcd_init();
 
     // Init LCD objects
-    // ui_init();
-    splash_init();
+    splash_init(); 
 }
 
 void loop() {
     lv_timer_handler(); /* let the GUI do its work */
-    lv_scr_act();
 }
 
 /////////////// LCD INIT////////////////
