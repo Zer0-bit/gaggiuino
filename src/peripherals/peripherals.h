@@ -7,6 +7,7 @@
 
 void pinInit(void) {
   pinMode(relayPin, OUTPUT);
+  pinMode(valvePin, OUTPUT);
   pinMode(brewPin,  INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(HX711_dout_1, INPUT_PULLUP);
