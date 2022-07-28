@@ -37,6 +37,7 @@ void setup() {
 
 void loop() {
     lv_timer_handler(); /* let the GUI do its work */
+    // splash_init();
 }
 
 /////////////// LCD INIT////////////////
