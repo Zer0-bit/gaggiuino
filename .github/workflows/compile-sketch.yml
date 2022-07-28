@@ -47,7 +47,7 @@ jobs:
 
       - name: Build for Blackpill
         run: |
-          ~/.platformio/penv/bin/platformio run -e blackpill
+          ~/.platformio/penv/bin/platformio run -e blackpill-dfu
 
       - name: Run tests
         run: |
