@@ -13,8 +13,10 @@ lv_obj_t * ui_labelGAGGIUINO;
 // Screen switch function
 static void ui_event_systemInitScreen(lv_event_t * e) {
     lv_event_code_t event = lv_event_get_code(e);
-    if(event == LV_EVENT_GESTURE) {
+    if(event == LV_EVENT_SCREEN_LOADED) {
+        ui_systemHomeScreen_init();
         lv_scr_load_anim(ui_systemHomeScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 4500, false);
+        
     }
 }
 
