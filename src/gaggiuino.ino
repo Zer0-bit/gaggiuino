@@ -73,6 +73,9 @@ void setup(void) {
   closeValve();
   LOG_INFO("Valve closed");
 
+  lcdInit();
+  LOG_INFO("LCD Init");
+
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
@@ -81,9 +84,8 @@ void setup(void) {
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdInit();
   lcdUploadCfg(eepromCurrentValues);
-  LOG_INFO("LCD init");
+  LOG_INFO("LCD cfg uploaded");
 
   pressureSensorInit();
   LOG_INFO("Pressure sensor init");
