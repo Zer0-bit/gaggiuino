@@ -480,7 +480,7 @@ void modeSelect() {
       break;
     case 6:
       // USART_CH1.println("MODE SELECT 6");
-      deScale(descaleCheckBox);
+      deScale(descaleEnabled);
       break;
     case 7:
       // USART_CH1.println("MODE SELECT 7");
