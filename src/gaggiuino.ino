@@ -535,7 +535,7 @@ void trigger1(void) {
       break;
     case 5:
       eepromCurrentValues.stopOnWeightState = myNex.readNumber("shotState");
-      eepromCurrentValues.shotDose = myNex.readNumber("shotTarget") / 10.f;
+      eepromCurrentValues.shotDose = myNex.readNumber("shotDose") / 10.f;
       eepromCurrentValues.shotPreset = myNex.readNumber("shotPreset");
       eepromCurrentValues.shotStopOnCustomWeight = myNex.readNumber("shotCustomVal") / 10.f;
     case 6:
@@ -873,7 +873,7 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
 
 ////////////BREW WEIGHT SETTINGS////////////////
   myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
-  myNex.writeNum("shotTarget", eepromCurrentValues.shotDose * 10.f);
+  myNex.writeNum("shotDose", eepromCurrentValues.shotDose * 10.f);
   myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
   myNex.writeNum("shotCustomVal", eepromCurrentValues.shotStopOnCustomWeight * 10.f); 
 }
