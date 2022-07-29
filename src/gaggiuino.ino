@@ -196,10 +196,10 @@ static void calculateWeightAndFlow(void) {
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
   if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-    if (currentState.weight > runningCfg.shotDose-0.5f) return true;
+    if (currentState.weight > runningCfg.shotDose-0.5f && previousWeight > 0.f) return true;
     else return false;
   } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-    if (currentState.weight > runningCfg.shotStopOnCustomWeight-0.5f) return true;
+    if (currentState.weight > runningCfg.shotStopOnCustomWeight-0.5f && previousWeight > 0.f) return true;
     else return false;
   }
   return false;
@@ -678,19 +678,29 @@ static void manualPressureProfile(void) {
 //#############################################################################################
 
 static void brewDetect(void) {
+  static bool paramsReset = true;
+
   if ( brewState() && !stopOnWeight()) {
-    openValve();
-    if (!brewActive) {
-      brewJustStarted();
+    if(!paramsReset) {
+      brewParamsReset();
+      paramsReset = true;
     }
+    openValve();
     brewActive = true;
-  } else{
+  } else if ( brewState() && stopOnWeight()) {
     closeValve();
     brewActive = false;
+  } else if (!brewState()){
+    closeValve();
+    brewActive = false;
+    if(paramsReset) {
+      brewParamsReset();
+      paramsReset = false;
+    }
   }
 }
 
-static void brewJustStarted() {
+static void brewParamsReset() {
   tareDone = false;
   shotWeight = 0.f;
   currentState.weight = 0.f;
