@@ -875,7 +875,5 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
   myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
   myNex.writeNum("shotDose", eepromCurrentValues.shotDose * 10.f);
   myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
-  myNex.writeNum("shotCustomVal", eepromCurrentValues.shotStopOnCustomWeight * 10.f); 
+  myNex.writeNum("shotCustomVal", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
 }
-
-
