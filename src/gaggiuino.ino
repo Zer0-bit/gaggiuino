@@ -538,7 +538,7 @@ static void deScale(void) {
   static int currentCycleRead = lcdGetDescaleCycle();
   static int lastCycleRead = 10;
   static bool descaleFinished = false;
-  if (brewActive && !descaleFinished) {
+  if (brewState() && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         setPumpToRawValue(15);
@@ -560,16 +560,23 @@ static void deScale(void) {
     } else {
       setPumpOff();
       if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
+<<<<<<< HEAD
         if (currentCycleRead*3 < 100) lcdSetDescaleCycle(currentCycleRead*3);
         else {
           lcdSetDescaleCycle(100);
+=======
+        if (currentCycleRead*3 < 100) {
+          myNex.writeNum("j0.val", currentCycleRead*3);
+        } else {
+          myNex.writeNum("j0.val", 100);
+>>>>>>> 1d118ff (possible descale fix)
           descaleFinished = true;
         }
         lastCycleRead = currentCycleRead*3;
         timer = millis();
       }
     }
-  } else if (brewActive && descaleFinished == true){
+  } else if (brewState() && descaleFinished == true){
     setPumpOff();
     if ((millis() - timer) > 1000) {
       lcdBrewTimerStop();
