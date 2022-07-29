@@ -41,8 +41,10 @@ struct eepromValues_t {
   float    scalesF1;
   float    scalesF2;
   float    pumpFlowAtZero;
-
-
+  bool     stopOnWeightState;
+  float    shotDose;
+  float    shotStopOnCustomWeight;
+  uint16_t shotPreset;
 };
 
 struct eepromMetadata_t {

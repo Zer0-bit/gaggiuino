@@ -193,6 +193,17 @@ static void calculateWeightAndFlow(void) {
   }
 }
 
+// Stops the pump if setting active and dose/weight conditions met
+bool stopOnWeight() {
+  if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
+    if (currentState.weight < runningCfg.shotDose-0.5f) return true;
+    else return false;
+  } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
+    if (currentState.weight < runningCfg.shotStopOnCustomWeight-0.5f) return true;
+    else return false;
+  }
+  return false;
+}
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
@@ -477,7 +488,10 @@ void lcdTrigger1(void) {
       eepromCurrentValues.warmupState       = lcdValues.warmupState;
       break;
     case 5:
-      break;
+      eepromCurrentValues.stopOnWeightState = myNex.readNumber("shotState");
+      eepromCurrentValues.shotDose = myNex.readNumber("shotTarget") / 10.f;
+      eepromCurrentValues.shotPreset = myNex.readNumber("shotPreset");
+      eepromCurrentValues.shotStopOnCustomWeight = myNex.readNumber("shotCustomVal") / 10.f;
     case 6:
       eepromCurrentValues.setpoint    = lcdValues.setpoint;
       eepromCurrentValues.offsetTemp  = lcdValues.offsetTemp;
@@ -664,7 +678,7 @@ static void manualPressureProfile(void) {
 //#############################################################################################
 
 static void brewDetect(void) {
-  if ( brewState() ) {
+  if ( brewState() && !stopOnWeight()) {
     openValve();
     if (!brewActive) {
       brewJustStarted();
