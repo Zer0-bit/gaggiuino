@@ -480,7 +480,7 @@ void modeSelect() {
       break;
     case 6:
       // USART_CH1.println("MODE SELECT 6");
-      deScale(descaleEnabled);
+      deScale();
       break;
     case 7:
       // USART_CH1.println("MODE SELECT 7");
@@ -876,13 +876,13 @@ void setBoiler(int val) {
 //###############################____DESCALE__CONTROL____######################################
 //#############################################################################################
 
-void deScale(bool c) {
+void deScale() {
   static bool blink = true;
   static long timer = millis();
   static int currentCycleRead = myNex.readNumber("j0.val");
   static int lastCycleRead = 10;
   static bool descaleFinished = false;
-  if (brewActive && !descaleFinished) {
+  if (brewState() && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         pump.set(15);
@@ -913,7 +913,7 @@ void deScale(bool c) {
         timer = millis();
       }
     }
-  } else if (brewActive && descaleFinished == true){
+  } else if (brewState() && descaleFinished == true){
     pump.set(0);
     if ((millis() - timer) > 1000) {
       brewTimer(false);
