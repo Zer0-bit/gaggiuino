@@ -203,6 +203,17 @@ static void calculateWeightAndFlow(void) {
   }
 }
 
+// Stops the pump if setting active and dose/weight conditions met
+bool stopOnWeight() {
+  if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
+    if (currentState.weight < runningCfg.shotDose-0.5f) return true;
+    else return false;
+  } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
+    if (currentState.weight < runningCfg.shotStopOnCustomWeight-0.5f) return true;
+    else return false;
+  }
+  return false;
+}
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
@@ -236,6 +247,10 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.preinfusionFlowTime            = myNex.readNumber("piFlowTime" );
     runningCfg.preinfusionFlowSoakTime        = myNex.readNumber("piFlowSoak");
     runningCfg.preinfusionFlowPressureTarget  = myNex.readNumber("piFlowPressure");
+
+    runningCfg.stopOnWeightState              = myNex.readNumber("shotState");
+    runningCfg.shotDose                       = myNex.readNumber("shotTarget") / 10.f;
+    runningCfg.shotStopOnCustomWeight         = myNex.readNumber("shotCustomVal") / 10.f;
 
     runningCfg.brewDeltaState                 = myNex.readNumber("deltaState");
     runningCfg.setpoint                       = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
@@ -519,7 +534,10 @@ void trigger1(void) {
       eepromCurrentValues.warmupState       = myNex.readNumber("warmupState");
       break;
     case 5:
-      break;
+      eepromCurrentValues.stopOnWeightState = myNex.readNumber("shotState");
+      eepromCurrentValues.shotDose = myNex.readNumber("shotTarget") / 10.f;
+      eepromCurrentValues.shotPreset = myNex.readNumber("shotPreset");
+      eepromCurrentValues.shotStopOnCustomWeight = myNex.readNumber("shotCustomVal") / 10.f;
     case 6:
       eepromCurrentValues.setpoint    = myNex.readNumber("setPoint");
       eepromCurrentValues.offsetTemp  = myNex.readNumber("offSet");
@@ -720,7 +738,7 @@ static void manualPressureProfile(void) {
 //#############################################################################################
 
 static void brewDetect(void) {
-  if ( brewState() ) {
+  if ( brewState() && !stopOnWeight()) {
     openValve();
     if (!brewActive) {
       brewJustStarted();
@@ -742,7 +760,7 @@ static void brewJustStarted() {
 }
 
 static void lcdInit(eepromValues_t eepromCurrentValues) {
-
+////////////SYSTEM TEMP SETTINGS////////////////
   myNex.writeNum("setPoint", eepromCurrentValues.setpoint);
   myNex.writeNum("moreTemp.n1.val", eepromCurrentValues.setpoint-eepromCurrentValues.offsetTemp);
 
@@ -758,6 +776,7 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
   myNex.writeNum("bDiv", eepromCurrentValues.brewDivider);
   myNex.writeNum("moreTemp.n5.val", eepromCurrentValues.brewDivider);
 
+////////////SYSTEM BREW SETTINGS////////////////
   myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart);
   myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.pressureProfilingStart);
 
@@ -819,15 +838,17 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
   myNex.writeNum("piRamp", eepromCurrentValues.preinfusionRamp);
   myNex.writeNum("brewAuto.rampSpeed.val", eepromCurrentValues.preinfusionRamp);
 
+////////////SYSTEM VARIOUS SETTINGS////////////////
   myNex.writeNum("regHz", eepromCurrentValues.powerLineFrequency);
 
-  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
+  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep * 60);
   myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
 
   myNex.writeNum("morePower.lc1.val", eepromCurrentValues.scalesF1);
   myNex.writeNum("morePower.lc2.val", eepromCurrentValues.scalesF2);
   myNex.writeNum("morePower.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 100.f);
 
+////////////BREW MORE SETTINGS////////////////
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
   myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
 
@@ -839,6 +860,12 @@ static void lcdInit(eepromValues_t eepromCurrentValues) {
 
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
   myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
+
+////////////BREW WEIGHT SETTINGS////////////////
+  myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
+  myNex.writeNum("shotTarget", eepromCurrentValues.shotDose * 10.f);
+  myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
+  myNex.writeNum("shotCustomVal", eepromCurrentValues.shotStopOnCustomWeight * 10.f); 
 }
 
 
