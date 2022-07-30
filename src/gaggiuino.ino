@@ -195,12 +195,15 @@ static void calculateWeightAndFlow(void) {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-    if (shotWeight > runningCfg.shotDose-0.5f ) return true;
-    else return false;
-  } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-    if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) return true;
-    else return false;
+  if (selectedOperationalMode != OPMODE_flush || selectedOperationalMode != OPMODE_descale || selectedOperationalMode != OPMODE_steam)
+  {
+    if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
+      if (shotWeight > runningCfg.shotDose-0.5f ) return true;
+      else return false;
+    } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
+      if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) return true;
+      else return false;
+    }
   }
   return false;
 }
