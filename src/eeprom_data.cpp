@@ -158,6 +158,10 @@ eepromValues_t getEepromDefaults(void) {
   defaultData.scalesF1                       = 4210.f;
   defaultData.scalesF2                       = 3920.f;
   defaultData.pumpFlowAtZero                 = 0.24f;
+  defaultData.stopOnWeightState              = false;
+  defaultData.shotDose                       = 18.0f;
+  defaultData.shotStopOnCustomWeight         = 0.f;
+  defaultData.shotPreset                     = 0;
 
   return defaultData;
 }
