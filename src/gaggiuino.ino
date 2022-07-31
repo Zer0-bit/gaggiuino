@@ -882,7 +882,7 @@ void deScale() {
   static int currentCycleRead = myNex.readNumber("j0.val");
   static int lastCycleRead = 10;
   static bool descaleFinished = false;
-  if (brewState() && !descaleFinished) {
+  if (brewActive && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         pump.set(15);
@@ -913,7 +913,7 @@ void deScale() {
         timer = millis();
       }
     }
-  } else if (brewState() && descaleFinished == true){
+  } else if (brewActive && descaleFinished == true){
     pump.set(0);
     if ((millis() - timer) > 1000) {
       brewTimer(false);
