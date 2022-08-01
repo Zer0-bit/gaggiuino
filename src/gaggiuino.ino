@@ -1017,14 +1017,19 @@ void brewDetect() {
     digitalWrite(valvePin, HIGH);
     /* Applying the below block only when brew detected */
     if (selectedOperationalMode == 0 || selectedOperationalMode == 1 || selectedOperationalMode == 2 || selectedOperationalMode == 3 || selectedOperationalMode == 4) {
-      brewTimer(true); // nextion timer start
-      brewActive = true;
       weighingStartRequested = true; // Flagging weighing start
-      myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
+      if (!brewActive) {
+        myNex.writeNum("warmupState", 0); // Flaggig warmup notification on Nextion needs to stop (if enabled)
+      }
       if (myNex.currentPageId == 1 || myNex.currentPageId == 2 || myNex.currentPageId == 8 || homeScreenScalesEnabled ) calculateWeight();
-    } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) pump.set(127); // setting the pump output target to 9 bars for non PP or PI profiles
-    else if (selectedOperationalMode == 6) brewTimer(true); // starting the timer during descaling
-  } else{
+    } else if (selectedOperationalMode == 5 || selectedOperationalMode == 9) {
+       pump.set(PUMP_RANGE); // setting the pump output target to 9 bars for non PP or PI profiles
+    }
+    if (!brewActive) {
+      brewTimer(true); // nextion timer start
+    }
+    brewActive = true;
+  } else {
     digitalWrite(valvePin, LOW);
     brewTimer(false);
     pump.set(0);
