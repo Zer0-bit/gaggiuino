@@ -1,7 +1,8 @@
 #ifndef UI_HOME_SCREEN_H
 #define UI_HOME_SCREEN_H
 
-#include <ui_init_screen.h>
+#include <lvgl.h>
+#include "colors.h"
 
 ///////////////////// VARIABLES ////////////////////
 lv_obj_t * ui_systemHomeScreen;
@@ -44,7 +45,7 @@ void ui_systemHomeScreen_init(void) {
     ui_systemHomeScreen = lv_obj_create(NULL);
 
     // ui_homeScreen
-    lv_obj_set_style_bg_color(ui_systemHomeScreen, lv_color_hex(0x000000), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_systemHomeScreen, COLOR_BOTTOM_BG, LV_PART_MAIN);
 
     // ui_screenTempArc
     // ui_Arc_Group
@@ -55,7 +56,7 @@ void ui_systemHomeScreen_init(void) {
     lv_obj_set_height(ui_Arc_Group, 320);
     lv_obj_set_align(ui_Arc_Group, LV_ALIGN_RIGHT_MID);
     lv_obj_clear_flag(ui_Arc_Group, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color(ui_Arc_Group, lv_color_hex(0x272935), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_Arc_Group, COLOR_UPPER_BG, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(ui_Arc_Group, 255, LV_PART_MAIN);
     lv_obj_set_style_border_width(ui_Arc_Group, 0, LV_PART_MAIN);
 
@@ -72,24 +73,24 @@ void ui_systemHomeScreen_init(void) {
     lv_arc_set_bg_angles(ui_Arc1, 120, 60);
 
     lv_obj_set_style_radius(ui_Arc1, 350, LV_PART_MAIN);
-    lv_obj_set_style_bg_color(ui_Arc1, lv_color_hex(0x1E232D), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_Arc1, COLOR_UPPER_BG, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(ui_Arc1, 255, LV_PART_MAIN);
     lv_obj_set_style_pad_left(ui_Arc1, 10, LV_PART_MAIN);
     lv_obj_set_style_pad_right(ui_Arc1, 10, LV_PART_MAIN);
     lv_obj_set_style_pad_top(ui_Arc1, 10, LV_PART_MAIN);
     lv_obj_set_style_pad_bottom(ui_Arc1, 10, LV_PART_MAIN);
-    lv_obj_set_style_arc_color(ui_Arc1, lv_color_hex(0x0F1215), LV_PART_MAIN);
+    lv_obj_set_style_arc_color(ui_Arc1, COLOR_ARC_BG, LV_PART_MAIN);
     lv_obj_set_style_arc_opa(ui_Arc1, 255, LV_PART_MAIN);
     lv_obj_set_style_arc_width(ui_Arc1, 15, LV_PART_MAIN);
 
-    lv_obj_set_style_arc_color(ui_Arc1, lv_color_hex(0xfe575f), LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(ui_Arc1, COLOR_TEXT_VALUES, LV_PART_INDICATOR);
     lv_obj_set_style_arc_opa(ui_Arc1, 255, LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(ui_Arc1, 15, LV_PART_INDICATOR);
 
-    lv_obj_set_style_bg_color(ui_Arc1, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+    lv_obj_set_style_bg_color(ui_Arc1, COLOR_UPPER_BG, LV_PART_KNOB);
     lv_obj_set_style_bg_opa(ui_Arc1, 0, LV_PART_KNOB);
 
-
+/*
     // ui_Temp_Bg
 
     ui_Temp_Bg = lv_obj_create(ui_Arc_Group);
@@ -119,7 +120,6 @@ void ui_systemHomeScreen_init(void) {
     lv_obj_set_style_shadow_ofs_x(ui_Temp_Bg, 0, LV_PART_MAIN);
     lv_obj_set_style_shadow_ofs_y(ui_Temp_Bg, 30, LV_PART_MAIN);
 
-/*
     // ui_Temp_Num_Bg
 
     ui_Temp_Num_Bg = lv_obj_create(ui_Temp_Bg);
