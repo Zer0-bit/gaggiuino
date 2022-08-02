@@ -54,10 +54,7 @@ void ui_systemHomeScreen_init(void) {
   lv_obj_set_width(temperatureCelsiusLabel, LV_SIZE_CONTENT);
   lv_obj_set_height(temperatureCelsiusLabel, LV_SIZE_CONTENT);
 
-  lv_obj_set_x(temperatureCelsiusLabel, 10);
-  lv_obj_set_y(temperatureCelsiusLabel, 0);
-
-  lv_obj_set_align(temperatureCelsiusLabel, LV_ALIGN_CENTER);
+  lv_obj_align(temperatureCelsiusLabel, LV_ALIGN_CENTER, 10, 0);
   lv_label_set_text(temperatureCelsiusLabel, "23°C");
   lv_obj_set_style_text_color(temperatureCelsiusLabel, COLOR_TEXT_PINK, LV_PART_MAIN);
   lv_obj_set_style_text_font(temperatureCelsiusLabel, &lv_font_montserrat_48, LV_PART_MAIN);
