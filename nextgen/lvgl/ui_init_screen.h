@@ -2,7 +2,8 @@
 #define UI_INIT_SCREEN_H
 
 #include <lvgl.h>
-#include <ui_home_screen.h>
+#include "ui_home_screen.h"
+#include "colors.h"
 
 
 ///////////////////// VARIABLES ////////////////////
@@ -24,7 +25,7 @@ void ui_systemInitScreen_screen_init(void) {
     // ui_systemInitScreen
     ui_systemInitScreen = lv_obj_create(NULL);
 
-    lv_obj_set_style_bg_color(ui_systemInitScreen, lv_color_hex(0x000000), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_systemInitScreen, COLOR_BOTTOM_BG, LV_PART_MAIN);
     lv_obj_set_style_bg_img_src(ui_systemInitScreen, &ui_img_gaggiuino_icon_transp_png, LV_PART_MAIN);
 
 
@@ -37,7 +38,7 @@ void ui_systemInitScreen_screen_init(void) {
     lv_obj_set_x(ui_initScreenSpinner, 136);
     lv_obj_set_y(ui_initScreenSpinner, 78);
     lv_obj_set_align(ui_initScreenSpinner, LV_ALIGN_CENTER);
-    lv_obj_set_style_arc_color(ui_initScreenSpinner, lv_color_hex(0xE64829), LV_PART_MAIN);
+    lv_obj_set_style_arc_color(ui_initScreenSpinner, COLOR_TEXT_VALUES, LV_PART_MAIN);
     lv_obj_set_style_arc_opa(ui_initScreenSpinner, 255, LV_PART_MAIN);
     lv_obj_set_style_arc_width(ui_initScreenSpinner, 13, LV_PART_MAIN);
     lv_obj_set_style_arc_color(ui_initScreenSpinner, lv_color_hex(0x000000), LV_PART_INDICATOR);
@@ -53,7 +54,7 @@ void ui_systemInitScreen_screen_init(void) {
     lv_obj_set_align(ui_labelGAGGIUINO, LV_ALIGN_CENTER);
     lv_label_set_text(ui_labelGAGGIUINO, "GAGGIUIN");
     lv_label_set_recolor(ui_labelGAGGIUINO, "true");
-    lv_obj_set_style_text_color(ui_labelGAGGIUINO, lv_color_hex(0xE64829), LV_PART_MAIN);
+    lv_obj_set_style_text_color(ui_labelGAGGIUINO, COLOR_TEXT_VALUES, LV_PART_MAIN);
     lv_obj_set_style_text_font(ui_labelGAGGIUINO, &lv_font_montserrat_48, LV_PART_MAIN);
 
     lv_obj_add_event_cb(ui_systemInitScreen, ui_event_systemInitScreen, LV_EVENT_ALL, NULL);
