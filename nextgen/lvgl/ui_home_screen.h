@@ -6,7 +6,8 @@
 
 ///////////////////// VARIABLES ////////////////////
 lv_obj_t * ui_systemHomeScreen;
-lv_obj_t * LeftPane;
+lv_obj_t * leftPane;
+lv_obj_t * rightPane;
 lv_obj_t * temperatureArc;
 lv_obj_t * temperatureCelsiusLabel;
 
@@ -15,18 +16,18 @@ void ui_systemHomeScreen_init(void) {
     ui_systemHomeScreen = lv_obj_create(NULL);
     lv_obj_set_style_bg_color(ui_systemHomeScreen, COLOR_BOTTOM_BG, LV_PART_MAIN);
 
-    // LeftPane
-    LeftPane = lv_obj_create(ui_systemHomeScreen);
+    // rightPane
+    rightPane = lv_obj_create(ui_systemHomeScreen);
 
-    lv_obj_set_width(LeftPane, 320);
-    lv_obj_set_height(LeftPane, 320);
-    lv_obj_set_align(LeftPane, LV_ALIGN_RIGHT_MID);
-    lv_obj_clear_flag(LeftPane, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color(LeftPane, COLOR_UPPER_BG, LV_PART_MAIN);
-    lv_obj_set_style_border_width(LeftPane, 0, LV_PART_MAIN);
+    lv_obj_set_width(rightPane, 280);
+    lv_obj_set_height(rightPane, 272);
+    lv_obj_set_align(rightPane, LV_ALIGN_BOTTOM_RIGHT);
+    lv_obj_clear_flag(rightPane, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(rightPane, COLOR_UPPER_BG, LV_PART_MAIN);
+    lv_obj_set_style_border_width(rightPane, 0, LV_PART_MAIN);
 
     // temperatureArc
-    temperatureArc = lv_arc_create(LeftPane);
+    temperatureArc = lv_arc_create(rightPane);
 
     lv_obj_set_width(temperatureArc, 200);
     lv_obj_set_height(temperatureArc, 200);
@@ -62,6 +63,17 @@ void ui_systemHomeScreen_init(void) {
     lv_label_set_text(temperatureCelsiusLabel, "23°C");
     lv_obj_set_style_text_color(temperatureCelsiusLabel, COLOR_TEXT_VALUES, LV_PART_MAIN);
     lv_obj_set_style_text_font(temperatureCelsiusLabel, &lv_font_montserrat_48, LV_PART_MAIN);
+
+
+    // leftPane
+    leftPane = lv_obj_create(ui_systemHomeScreen);
+
+    lv_obj_set_width(leftPane, 190);
+    lv_obj_set_height(leftPane, 272);
+    lv_obj_set_align(leftPane, LV_ALIGN_BOTTOM_LEFT);
+    lv_obj_clear_flag(leftPane, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(leftPane, COLOR_UPPER_BG, LV_PART_MAIN);
+    lv_obj_set_style_border_width(leftPane, 0, LV_PART_MAIN);
 
 }
 
