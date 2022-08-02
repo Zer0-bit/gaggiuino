@@ -75,6 +75,17 @@ void ui_systemHomeScreen_init(void) {
     lv_obj_set_style_bg_color(leftPane, COLOR_UPPER_BG, LV_PART_MAIN);
     lv_obj_set_style_border_width(leftPane, 0, LV_PART_MAIN);
 
+    // Left Pane heading
+    lv_obj_t *leftPaneHeading = lv_label_create(leftPane);
+
+    lv_obj_set_width(leftPaneHeading, LV_SIZE_CONTENT);
+    lv_obj_set_height(leftPaneHeading, LV_SIZE_CONTENT);
+
+    lv_obj_set_align(leftPaneHeading, LV_ALIGN_TOP_MID);
+    lv_label_set_text(leftPaneHeading, "BREW SETTINGS");
+    lv_obj_set_style_text_color(leftPaneHeading, COLOR_TEXT_BLUE, LV_PART_MAIN);
+    lv_obj_set_style_text_font(leftPaneHeading, &lv_font_montserrat_18, LV_PART_MAIN);
+
 }
 
 #endif
