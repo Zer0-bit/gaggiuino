@@ -3,6 +3,7 @@
 
 #include <lvgl.h>
 #include "colors.h"
+#include "global_dimensions.h"
 
 ///////////////////// VARIABLES ////////////////////
 lv_obj_t *ui_systemHomeScreen;
@@ -20,7 +21,7 @@ void ui_systemHomeScreen_init(void) {
   lv_obj_t *rightPane = lv_obj_create(ui_systemHomeScreen);
 
   lv_obj_set_width(rightPane, 280);
-  lv_obj_set_height(rightPane, 272);
+  lv_obj_set_height(rightPane, MAIN_CONTENT_HEIGHT);
   lv_obj_set_align(rightPane, LV_ALIGN_BOTTOM_RIGHT);
   lv_obj_clear_flag(rightPane, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_style_bg_color(rightPane, COLOR_UPPER_BG, LV_PART_MAIN);
@@ -65,7 +66,7 @@ void ui_systemHomeScreen_init(void) {
   lv_obj_t *leftPane = lv_obj_create(ui_systemHomeScreen);
 
   lv_obj_set_width(leftPane, 190);
-  lv_obj_set_height(leftPane, 272);
+  lv_obj_set_height(leftPane, MAIN_CONTENT_HEIGHT);
   lv_obj_set_align(leftPane, LV_ALIGN_BOTTOM_LEFT);
   lv_obj_clear_flag(leftPane, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_style_bg_color(leftPane, COLOR_UPPER_BG, LV_PART_MAIN);
