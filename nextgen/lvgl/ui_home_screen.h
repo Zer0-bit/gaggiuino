@@ -8,6 +8,8 @@
 lv_obj_t *ui_systemHomeScreen;
 lv_obj_t *temperatureArc;
 lv_obj_t *temperatureCelsiusLabel;
+lv_obj_t *preinfussionSettingsText;
+lv_obj_t *pressureSettingsText;
 
 void ui_systemHomeScreen_init(void) {
   // ui_systemHomeScreen
@@ -86,10 +88,21 @@ void ui_systemHomeScreen_init(void) {
   lv_obj_set_width(leftPaneHeading1, LV_SIZE_CONTENT);
   lv_obj_set_height(leftPaneHeading1, LV_SIZE_CONTENT);
 
-  lv_obj_align_to(leftPaneHeading1, leftPaneHeading, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+  lv_obj_align_to(leftPaneHeading1, leftPaneHeading, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
   lv_label_set_text(leftPaneHeading1, "Pre-Infusion");
   lv_obj_set_style_text_color(leftPaneHeading1, COLOR_TEXT_GRAY, LV_PART_MAIN);
   lv_obj_set_style_text_font(leftPaneHeading1, &lv_font_montserrat_18, LV_PART_MAIN);
+
+  // Left Pane pre-infusion settings text
+  preinfussionSettingsText = lv_label_create(leftPane);
+
+  lv_obj_set_width(preinfussionSettingsText, LV_SIZE_CONTENT);
+  lv_obj_set_height(preinfussionSettingsText, LV_SIZE_CONTENT);
+
+  lv_obj_align_to(preinfussionSettingsText, leftPaneHeading1, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+  lv_label_set_text(preinfussionSettingsText, "7 sec, 2 bar");
+  lv_obj_set_style_text_color(preinfussionSettingsText, COLOR_TEXT_WHITE, LV_PART_MAIN);
+  lv_obj_set_style_text_font(preinfussionSettingsText, &lv_font_montserrat_18, LV_PART_MAIN);
 
   /// Left Pane pressure heading
   lv_obj_t *leftPaneHeading2 = lv_label_create(leftPane);
@@ -97,10 +110,21 @@ void ui_systemHomeScreen_init(void) {
   lv_obj_set_width(leftPaneHeading2, LV_SIZE_CONTENT);
   lv_obj_set_height(leftPaneHeading2, LV_SIZE_CONTENT);
 
-  lv_obj_align_to(leftPaneHeading2, leftPaneHeading1, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+  lv_obj_align_to(leftPaneHeading2, preinfussionSettingsText, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
   lv_label_set_text(leftPaneHeading2, "Pressure");
   lv_obj_set_style_text_color(leftPaneHeading2, COLOR_TEXT_GRAY, LV_PART_MAIN);
   lv_obj_set_style_text_font(leftPaneHeading2, &lv_font_montserrat_18, LV_PART_MAIN);
+
+  // Left Pane pressure settings text
+  pressureSettingsText = lv_label_create(leftPane);
+
+  lv_obj_set_width(pressureSettingsText, LV_SIZE_CONTENT);
+  lv_obj_set_height(pressureSettingsText, LV_SIZE_CONTENT);
+
+  lv_obj_align_to(pressureSettingsText, leftPaneHeading2, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+  lv_label_set_text(pressureSettingsText, "9 -> 6 bar");
+  lv_obj_set_style_text_color(pressureSettingsText, COLOR_TEXT_WHITE, LV_PART_MAIN);
+  lv_obj_set_style_text_font(pressureSettingsText, &lv_font_montserrat_18, LV_PART_MAIN);
 
 }
 
