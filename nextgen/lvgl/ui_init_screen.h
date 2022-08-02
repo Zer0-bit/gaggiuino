@@ -28,8 +28,6 @@ void ui_systemInitScreen_screen_init(void) {
     lv_obj_set_style_bg_color(ui_systemInitScreen, COLOR_BOTTOM_BG, LV_PART_MAIN);
     lv_obj_set_style_bg_img_src(ui_systemInitScreen, &ui_img_gaggiuino_icon_transp_png, LV_PART_MAIN);
 
-
-
     // ui_initScreenSpinner
     ui_initScreenSpinner = lv_spinner_create(ui_systemInitScreen, 1000, 90);
 
@@ -39,10 +37,8 @@ void ui_systemInitScreen_screen_init(void) {
     lv_obj_set_y(ui_initScreenSpinner, 78);
     lv_obj_set_align(ui_initScreenSpinner, LV_ALIGN_CENTER);
     lv_obj_set_style_arc_color(ui_initScreenSpinner, COLOR_TEXT_VALUES, LV_PART_MAIN);
-    lv_obj_set_style_arc_opa(ui_initScreenSpinner, 255, LV_PART_MAIN);
     lv_obj_set_style_arc_width(ui_initScreenSpinner, 13, LV_PART_MAIN);
-    lv_obj_set_style_arc_color(ui_initScreenSpinner, lv_color_hex(0x000000), LV_PART_INDICATOR);
-    lv_obj_set_style_arc_opa(ui_initScreenSpinner, 255, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(ui_initScreenSpinner, COLOR_BOTTOM_BG, LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(ui_initScreenSpinner, 14, LV_PART_INDICATOR);
     lv_obj_set_style_arc_rounded(ui_initScreenSpinner, false, LV_PART_INDICATOR);
 
