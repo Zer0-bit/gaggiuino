@@ -33,9 +33,7 @@ void ui_systemInitScreen_screen_init(void) {
 
     lv_obj_set_width(ui_initScreenSpinner, 62);
     lv_obj_set_height(ui_initScreenSpinner, 65);
-    lv_obj_set_x(ui_initScreenSpinner, 136);
-    lv_obj_set_y(ui_initScreenSpinner, 78);
-    lv_obj_set_align(ui_initScreenSpinner, LV_ALIGN_CENTER);
+    lv_obj_align(ui_initScreenSpinner, LV_ALIGN_CENTER, 136, 78);
     lv_obj_set_style_arc_color(ui_initScreenSpinner, COLOR_TEXT_PINK, LV_PART_MAIN);
     lv_obj_set_style_arc_width(ui_initScreenSpinner, 13, LV_PART_MAIN);
     lv_obj_set_style_arc_color(ui_initScreenSpinner, COLOR_BOTTOM_BG, LV_PART_INDICATOR);
