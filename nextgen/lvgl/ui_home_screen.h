@@ -68,11 +68,11 @@ void ui_systemHomeScreen_init(void) {
     lv_obj_set_height(ui_Arc1, 200);
     lv_obj_set_align(ui_Arc1, LV_ALIGN_TOP_MID);
 
-    lv_arc_set_range(ui_Arc1, 15, 35);
+    lv_arc_set_range(ui_Arc1, 0, 120);
     lv_arc_set_value(ui_Arc1, 23);
-    lv_arc_set_bg_angles(ui_Arc1, 120, 60);
+    lv_arc_set_bg_angles(ui_Arc1, 0, 360);
+    lv_arc_set_rotation(ui_Arc1, 270);
 
-    lv_obj_set_style_radius(ui_Arc1, 350, LV_PART_MAIN);
     lv_obj_set_style_bg_color(ui_Arc1, COLOR_UPPER_BG, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(ui_Arc1, 255, LV_PART_MAIN);
     lv_obj_set_style_pad_left(ui_Arc1, 10, LV_PART_MAIN);
