@@ -5,11 +5,9 @@
 #include "colors.h"
 
 ///////////////////// VARIABLES ////////////////////
-lv_obj_t * ui_systemHomeScreen;
-lv_obj_t * leftPane;
-lv_obj_t * rightPane;
-lv_obj_t * temperatureArc;
-lv_obj_t * temperatureCelsiusLabel;
+lv_obj_t *ui_systemHomeScreen;
+lv_obj_t *temperatureArc;
+lv_obj_t *temperatureCelsiusLabel;
 
 void ui_systemHomeScreen_init(void) {
   // ui_systemHomeScreen
@@ -17,7 +15,7 @@ void ui_systemHomeScreen_init(void) {
   lv_obj_set_style_bg_color(ui_systemHomeScreen, COLOR_BOTTOM_BG, LV_PART_MAIN);
 
   // rightPane
-  rightPane = lv_obj_create(ui_systemHomeScreen);
+  lv_obj_t *rightPane = lv_obj_create(ui_systemHomeScreen);
 
   lv_obj_set_width(rightPane, 280);
   lv_obj_set_height(rightPane, 272);
@@ -65,7 +63,7 @@ void ui_systemHomeScreen_init(void) {
   lv_obj_set_style_text_font(temperatureCelsiusLabel, &lv_font_montserrat_48, LV_PART_MAIN);
 
   // leftPane
-  leftPane = lv_obj_create(ui_systemHomeScreen);
+  lv_obj_t *leftPane = lv_obj_create(ui_systemHomeScreen);
 
   lv_obj_set_width(leftPane, 190);
   lv_obj_set_height(leftPane, 272);
@@ -74,7 +72,7 @@ void ui_systemHomeScreen_init(void) {
   lv_obj_set_style_bg_color(leftPane, COLOR_UPPER_BG, LV_PART_MAIN);
   lv_obj_set_style_border_width(leftPane, 0, LV_PART_MAIN);
 
-  // Left Pane heading
+  // Left Pane brew settings heading
   lv_obj_t *leftPaneHeading = lv_label_create(leftPane);
 
   lv_obj_set_width(leftPaneHeading, LV_SIZE_CONTENT);
@@ -84,6 +82,28 @@ void ui_systemHomeScreen_init(void) {
   lv_label_set_text(leftPaneHeading, "BREW SETTINGS");
   lv_obj_set_style_text_color(leftPaneHeading, COLOR_TEXT_BLUE, LV_PART_MAIN);
   lv_obj_set_style_text_font(leftPaneHeading, &lv_font_montserrat_18, LV_PART_MAIN);
+
+  // Left Pane pre-infusion heading
+  lv_obj_t *leftPaneHeading1 = lv_label_create(leftPane);
+
+  lv_obj_set_width(leftPaneHeading1, LV_SIZE_CONTENT);
+  lv_obj_set_height(leftPaneHeading1, LV_SIZE_CONTENT);
+
+  lv_obj_align_to(leftPaneHeading1, leftPaneHeading, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+  lv_label_set_text(leftPaneHeading1, "Pre-Infusion");
+  lv_obj_set_style_text_color(leftPaneHeading1, COLOR_TEXT_GRAY, LV_PART_MAIN);
+  lv_obj_set_style_text_font(leftPaneHeading1, &lv_font_montserrat_18, LV_PART_MAIN);
+
+  /// Left Pane pressure heading
+  lv_obj_t *leftPaneHeading2 = lv_label_create(leftPane);
+
+  lv_obj_set_width(leftPaneHeading2, LV_SIZE_CONTENT);
+  lv_obj_set_height(leftPaneHeading2, LV_SIZE_CONTENT);
+
+  lv_obj_align_to(leftPaneHeading2, leftPaneHeading1, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+  lv_label_set_text(leftPaneHeading2, "Pressure");
+  lv_obj_set_style_text_color(leftPaneHeading2, COLOR_TEXT_GRAY, LV_PART_MAIN);
+  lv_obj_set_style_text_font(leftPaneHeading2, &lv_font_montserrat_18, LV_PART_MAIN);
 
 }
 
