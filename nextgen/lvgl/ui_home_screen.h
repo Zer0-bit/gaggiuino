@@ -46,7 +46,7 @@ void ui_systemHomeScreen_init(void) {
     lv_obj_set_style_arc_color(temperatureArc, COLOR_ARC_BG, LV_PART_MAIN);
     lv_obj_set_style_arc_width(temperatureArc, 15, LV_PART_MAIN);
 
-    lv_obj_set_style_arc_color(temperatureArc, COLOR_TEXT_VALUES, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(temperatureArc, COLOR_TEXT_PINK, LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(temperatureArc, 15, LV_PART_INDICATOR);
     lv_obj_set_style_bg_opa(temperatureArc, 0, LV_PART_KNOB);
 
@@ -61,7 +61,7 @@ void ui_systemHomeScreen_init(void) {
 
     lv_obj_set_align(temperatureCelsiusLabel, LV_ALIGN_CENTER);
     lv_label_set_text(temperatureCelsiusLabel, "23°C");
-    lv_obj_set_style_text_color(temperatureCelsiusLabel, COLOR_TEXT_VALUES, LV_PART_MAIN);
+    lv_obj_set_style_text_color(temperatureCelsiusLabel, COLOR_TEXT_PINK, LV_PART_MAIN);
     lv_obj_set_style_text_font(temperatureCelsiusLabel, &lv_font_montserrat_48, LV_PART_MAIN);
 
 
