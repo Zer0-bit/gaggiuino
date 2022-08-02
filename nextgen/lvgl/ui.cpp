@@ -32,7 +32,7 @@ void setup() {
     lcd_init();
 
     // Init LCD objects
-    splash_init(); 
+    splash_init();
 }
 
 void loop() {

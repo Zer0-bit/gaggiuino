@@ -13,10 +13,10 @@ lv_obj_t * ui_labelGAGGIUINO;
 // Screen switch function
 static void ui_event_systemInitScreen(lv_event_t * e) {
     lv_event_code_t event = lv_event_get_code(e);
-    if(event == LV_EVENT_SCREEN_LOADED) {
+    if(event == LV_EVENT_GESTURE) {
         ui_systemHomeScreen_init();
         lv_scr_load_anim(ui_systemHomeScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 4500, false);
-        
+
     }
 }
 
@@ -26,7 +26,7 @@ void ui_systemInitScreen_screen_init(void) {
 
     lv_obj_set_style_bg_color(ui_systemInitScreen, lv_color_hex(0x000000), LV_PART_MAIN);
     lv_obj_set_style_bg_img_src(ui_systemInitScreen, &ui_img_gaggiuino_icon_transp_png, LV_PART_MAIN);
-    
+
 
 
     // ui_initScreenSpinner
