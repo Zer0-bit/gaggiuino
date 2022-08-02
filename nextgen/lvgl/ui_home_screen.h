@@ -51,31 +51,21 @@ void ui_systemHomeScreen_init(void) {
 
     ui_Arc_Group = lv_obj_create(ui_systemHomeScreen);
 
-    lv_obj_set_width(ui_Arc_Group, 400);
-    lv_obj_set_height(ui_Arc_Group, 400);
-
-    lv_obj_set_x(ui_Arc_Group, 0);
-    lv_obj_set_y(ui_Arc_Group, 0);
-
-    lv_obj_set_align(ui_Arc_Group, LV_ALIGN_LEFT_MID);
-
+    lv_obj_set_width(ui_Arc_Group, 320);
+    lv_obj_set_height(ui_Arc_Group, 320);
+    lv_obj_set_align(ui_Arc_Group, LV_ALIGN_RIGHT_MID);
     lv_obj_clear_flag(ui_Arc_Group, LV_OBJ_FLAG_SCROLLABLE);
-
-    lv_obj_set_style_bg_color(ui_Arc_Group, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(ui_Arc_Group, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_Arc_Group, lv_color_hex(0x272935), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(ui_Arc_Group, 255, LV_PART_MAIN);
     lv_obj_set_style_border_width(ui_Arc_Group, 0, LV_PART_MAIN);
 
     // ui_Arc1
 
     ui_Arc1 = lv_arc_create(ui_Arc_Group);
 
-    lv_obj_set_width(ui_Arc1, 320);
-    lv_obj_set_height(ui_Arc1, 320);
-
-    lv_obj_set_x(ui_Arc1, 0);
-    lv_obj_set_y(ui_Arc1, 0);
-
-    lv_obj_set_align(ui_Arc1, LV_ALIGN_CENTER);
+    lv_obj_set_width(ui_Arc1, 200);
+    lv_obj_set_height(ui_Arc1, 200);
+    lv_obj_set_align(ui_Arc1, LV_ALIGN_TOP_MID);
 
     lv_arc_set_range(ui_Arc1, 15, 35);
     lv_arc_set_value(ui_Arc1, 23);
@@ -92,12 +82,13 @@ void ui_systemHomeScreen_init(void) {
     lv_obj_set_style_arc_opa(ui_Arc1, 255, LV_PART_MAIN);
     lv_obj_set_style_arc_width(ui_Arc1, 15, LV_PART_MAIN);
 
-    lv_obj_set_style_arc_color(ui_Arc1, lv_color_hex(0x36B9F6), LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(ui_Arc1, lv_color_hex(0xfe575f), LV_PART_INDICATOR);
     lv_obj_set_style_arc_opa(ui_Arc1, 255, LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(ui_Arc1, 15, LV_PART_INDICATOR);
 
     lv_obj_set_style_bg_color(ui_Arc1, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
     lv_obj_set_style_bg_opa(ui_Arc1, 0, LV_PART_KNOB);
+
 
     // ui_Temp_Bg
 
@@ -128,6 +119,7 @@ void ui_systemHomeScreen_init(void) {
     lv_obj_set_style_shadow_ofs_x(ui_Temp_Bg, 0, LV_PART_MAIN);
     lv_obj_set_style_shadow_ofs_y(ui_Temp_Bg, 30, LV_PART_MAIN);
 
+/*
     // ui_Temp_Num_Bg
 
     ui_Temp_Num_Bg = lv_obj_create(ui_Temp_Bg);
@@ -167,8 +159,8 @@ void ui_systemHomeScreen_init(void) {
     lv_obj_set_style_text_color(ui_Label_Celsius, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_set_style_text_opa(ui_Label_Celsius, 255, LV_PART_MAIN);
     lv_obj_set_style_text_font(ui_Label_Celsius, &lv_font_montserrat_48, LV_PART_MAIN);
-    
 
+*/
 }
 
 #endif
