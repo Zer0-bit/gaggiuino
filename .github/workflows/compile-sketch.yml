@@ -45,9 +45,13 @@ jobs:
         run: |
           python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
 
-      - name: Build for Blackpill
+      - name: Build the main project
         run: |
-          ~/.platformio/penv/bin/platformio run -e blackpill
+          ~/.platformio/penv/bin/platformio run -e blackpill-dfu
+
+      - name: Build scales
+        run: |
+          ~/.platformio/penv/bin/platformio run -e scales-dfu
 
       - name: Run tests
         run: |

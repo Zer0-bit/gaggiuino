@@ -25,90 +25,90 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   time before a write needs to happen with some additional data integrity checks.
   YOLO
   */
-  String errMsg = String("Data out of range");
+  char *errMsg = "Data out of range";
 
   if (eepromValuesNew.preinfusionState != 0 && eepromValuesNew.preinfusionState != 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.pressureProfilingState != 0 && eepromValuesNew.pressureProfilingState != 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.preinfusionFlowState != 0 && eepromValuesNew.preinfusionFlowState != 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.preinfusionFlowVol < 0.f) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.flowProfileStart < 0.f) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.flowProfileEnd < 0.f) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.flowProfileState != 0 && eepromValuesNew.flowProfileState != 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.homeOnShotFinish != 0 && eepromValuesNew.homeOnShotFinish != 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.graphBrew != 0 && eepromValuesNew.graphBrew != 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.warmupState != 0 && eepromValuesNew.warmupState != 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.brewDeltaState != 0 && eepromValuesNew.brewDeltaState != 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.pressureProfilingStart < 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.pressureProfilingFinish < 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.setpoint < 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.mainDivider < 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.brewDivider < 1) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 
   if (eepromValuesNew.powerLineFrequency != 50 && eepromValuesNew.powerLineFrequency != 60) {
-    LOG_ERROR(errMsg.c_str());
+    LOG_ERROR(errMsg);
     return false;
   }
 

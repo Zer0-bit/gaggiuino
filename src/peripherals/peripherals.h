@@ -5,8 +5,9 @@
 #include "peripherals.h"
 #include <Arduino.h>
 
-void pinInit(void) {
+static inline void pinInit(void) {
   pinMode(relayPin, OUTPUT);
+  pinMode(valvePin, OUTPUT_OPEN_DRAIN);
   pinMode(brewPin,  INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(HX711_dout_1, INPUT_PULLUP);
