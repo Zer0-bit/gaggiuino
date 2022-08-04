@@ -488,6 +488,7 @@ void lcdTrigger1(void) {
       eepromCurrentValues.shotDose = lcdValues.shotDose;
       eepromCurrentValues.shotPreset = lcdValues.shotPreset;
       eepromCurrentValues.shotStopOnCustomWeight = lcdValues.shotStopOnCustomWeight;
+      break;
     case 6:
       eepromCurrentValues.setpoint    = lcdValues.setpoint;
       eepromCurrentValues.offsetTemp  = lcdValues.offsetTemp;
