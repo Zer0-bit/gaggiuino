@@ -122,6 +122,11 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
   myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
+
+  myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
+  myNex.writeNum("shotDose", eepromCurrentValues.shotDose * 10.f);
+  myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
+  myNex.writeNum("shotCustomVal", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
 }
 
 eepromValues_t lcdDownloadCfg(void) {
@@ -149,6 +154,10 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.flowProfileEnd                = myNex.readNumber("ppFlowFinish") / 10.f;
   lcdCfg.flowProfilePressureTarget     = myNex.readNumber("ppFlowPressure");
   lcdCfg.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
+
+  lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");
+  lcdCfg.shotDose                       = myNex.readNumber("shotTarget") / 10.f;
+  lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotCustomVal") / 10.f;
 
   lcdCfg.brewDeltaState             = myNex.readNumber("deltaState");
   lcdCfg.setpoint                   = myNex.readNumber("setPoint");
@@ -232,6 +241,10 @@ void lcdBrewTimerStop(void) {
 
 void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
+}
+
+void lcdWriteLcdMessage(String msg) {
+  return myNex.writeStr("popupMSG.t0.txt", msg);
 }
 
 void trigger1(void) { lcdTrigger1(); }

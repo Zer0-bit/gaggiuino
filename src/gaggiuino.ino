@@ -142,7 +142,7 @@ static void sensorsReadTemperature(void) {
       setBoilerOff();
       if (millis() > thermoTimer) {
         LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature );
-        myNex.writeStr("popupMSG.t0.txt","TEMP READ ERROR"); // writing a LCD message
+        lcdWriteLcdMessage("TEMP READ ERROR"); // writing a LCD message
         currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
       }
@@ -484,10 +484,10 @@ void lcdTrigger1(void) {
       eepromCurrentValues.warmupState       = lcdValues.warmupState;
       break;
     case 5:
-      eepromCurrentValues.stopOnWeightState = myNex.readNumber("shotState");
-      eepromCurrentValues.shotDose = myNex.readNumber("shotDose") / 10.f;
-      eepromCurrentValues.shotPreset = myNex.readNumber("shotPreset");
-      eepromCurrentValues.shotStopOnCustomWeight = myNex.readNumber("shotCustomVal") / 10.f;
+      eepromCurrentValues.stopOnWeightState = lcdValues.stopOnWeightState;
+      eepromCurrentValues.shotDose = lcdValues.shotDose;
+      eepromCurrentValues.shotPreset = lcdValues.shotPreset;
+      eepromCurrentValues.shotStopOnCustomWeight = lcdValues.shotStopOnCustomWeight;
     case 6:
       eepromCurrentValues.setpoint    = lcdValues.setpoint;
       eepromCurrentValues.offsetTemp  = lcdValues.offsetTemp;
@@ -556,16 +556,12 @@ static void deScale(void) {
     } else {
       setPumpOff();
       if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
-        if (currentCycleRead*3 < 100) lcdSetDescaleCycle(currentCycleRead*3);
+        if (currentCycleRead*2 < 100) lcdSetDescaleCycle(currentCycleRead*3);
         else {
           lcdSetDescaleCycle(100);
-        if (currentCycleRead*3 < 100) {
-          myNex.writeNum("j0.val", currentCycleRead*3);
-        } else {
-          myNex.writeNum("j0.val", 100);
           descaleFinished = true;
         }
-        lastCycleRead = currentCycleRead*3;
+        lastCycleRead = currentCycleRead*2;
         timer = millis();
       }
     }

@@ -29,6 +29,7 @@ void lcdShowDescaleFinished(void);
 void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);
 void lcdWarmupStateStop(void);
+void lcdWriteLcdMessage(String msg);
 
 /* Triggers */
 void lcdTrigger1(void);
