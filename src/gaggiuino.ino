@@ -142,6 +142,7 @@ static void sensorsReadTemperature(void) {
       setBoilerOff();
       if (millis() > thermoTimer) {
         LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature );
+        lcdWriteLcdMessage("TEMP READ ERROR"); // writing a LCD message
         currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
       }
@@ -193,6 +194,17 @@ static void calculateWeightAndFlow(void) {
   }
 }
 
+// Stops the pump if setting active and dose/weight conditions met
+bool stopOnWeight() {
+  if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
+    if (shotWeight > runningCfg.shotDose-0.5f ) return true;
+    else return false;
+  } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
+    if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) return true;
+    else return false;
+  }
+  return false;
+}
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
@@ -201,6 +213,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
 
   if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) {
     runningCfg = lcdDownloadCfg();
+
 
     homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
     selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode(); // MODE_SELECT should always be LAST
@@ -351,21 +364,15 @@ static void justDoCoffee(void) {
 //#############################################################################################
 
 static void steamCtrl(void) {
-
-  if (!brewActive) {
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
-    if ((currentState.pressure <= 9.f) && (currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_TEMPERATURE)) {
-      setBoilerOn();
-    } else {
-      setBoilerOff();
-    }
-  } else { //added to cater for hot water from steam wand functionality
-    if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
-      setBoilerOn();
-    } else {
-      setBoilerOff();
-    }
-    setPumpFullOn();
+  if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
+    setBoilerOn();
+    brewActive ? setPumpFullOn() : setPumpOff();
+  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
+    setBoilerOn();
+    brewActive ? setPumpToRawValue(25) : setPumpOff();
+  } else {
+    setBoilerOff();
   }
 }
 
@@ -477,7 +484,10 @@ void lcdTrigger1(void) {
       eepromCurrentValues.warmupState       = lcdValues.warmupState;
       break;
     case 5:
-      break;
+      eepromCurrentValues.stopOnWeightState = lcdValues.stopOnWeightState;
+      eepromCurrentValues.shotDose = lcdValues.shotDose;
+      eepromCurrentValues.shotPreset = lcdValues.shotPreset;
+      eepromCurrentValues.shotStopOnCustomWeight = lcdValues.shotStopOnCustomWeight;
     case 6:
       eepromCurrentValues.setpoint    = lcdValues.setpoint;
       eepromCurrentValues.offsetTemp  = lcdValues.offsetTemp;
@@ -524,7 +534,7 @@ static void deScale(void) {
   static int currentCycleRead = lcdGetDescaleCycle();
   static int lastCycleRead = 10;
   static bool descaleFinished = false;
-  if (brewActive && !descaleFinished) {
+  if (brewState() && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         setPumpToRawValue(15);
@@ -546,16 +556,16 @@ static void deScale(void) {
     } else {
       setPumpOff();
       if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
-        if (currentCycleRead*3 < 100) lcdSetDescaleCycle(currentCycleRead*3);
+        if (currentCycleRead*2 < 100) lcdSetDescaleCycle(currentCycleRead*3);
         else {
           lcdSetDescaleCycle(100);
           descaleFinished = true;
         }
-        lastCycleRead = currentCycleRead*3;
+        lastCycleRead = currentCycleRead*2;
         timer = millis();
       }
     }
-  } else if (brewActive && descaleFinished == true){
+  } else if (brewState() && descaleFinished == true){
     setPumpOff();
     if ((millis() - timer) > 1000) {
       lcdBrewTimerStop();
@@ -664,19 +674,29 @@ static void manualPressureProfile(void) {
 //#############################################################################################
 
 static void brewDetect(void) {
-  if ( brewState() ) {
-    openValve();
-    if (!brewActive) {
-      brewJustStarted();
+  static bool paramsReset = true;
+
+  if ( brewState() && !stopOnWeight()) {
+    if(!paramsReset) {
+      brewParamsReset();
+      paramsReset = true;
     }
+    openValve();
     brewActive = true;
-  } else{
+  } else if ( brewState() && stopOnWeight()) {
     closeValve();
     brewActive = false;
+  } else if (!brewState()){
+    closeValve();
+    brewActive = false;
+    if(paramsReset) {
+      brewParamsReset();
+      paramsReset = false;
+    }
   }
 }
 
-static void brewJustStarted() {
+static void brewParamsReset() {
   tareDone = false;
   shotWeight = 0.f;
   currentState.weight = 0.f;
@@ -684,3 +704,4 @@ static void brewJustStarted() {
   brewingTimer = millis();
   preinfusionFinished = false;
 }
+
