@@ -152,6 +152,7 @@ static void sensorsReadTemperature(void) {
       setBoilerOff();
       if (millis() > thermoTimer) {
         LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature );
+        myNex.writeStr("popupMSG.t0.txt","TEMP READ ERROR"); // writing a LCD message
         currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
       }
@@ -412,21 +413,15 @@ static void justDoCoffee(void) {
 //#############################################################################################
 
 static void steamCtrl(void) {
-
-  if (!brewActive) {
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
-    if ((currentState.pressure <= 9.f) && (currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_TEMPERATURE)) {
-      setBoilerOn();
-    } else {
-      setBoilerOff();
-    }
-  } else { //added to cater for hot water from steam wand functionality
-    if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
-      setBoilerOn();
-    } else {
-      setBoilerOff();
-    }
-    setPumpFullOn();
+  if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
+    setBoilerOn();
+    brewActive ? setPumpFullOn() : setPumpOff();
+  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
+    setBoilerOn();
+    brewActive ? setPumpToRawValue(25) : setPumpOff();
+  } else {
+    setBoilerOff();
   }
 }
 
