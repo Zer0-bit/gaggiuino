@@ -6,6 +6,11 @@
 #include <Arduino.h>
 
 static inline void pinInit(void) {
+  #if defined(LEGO_VALVE_RELAY)
+    pinMode(valvePin, OUTPUT_OPEN_DRAIN);
+  #else
+    pinMode(valvePin, OUTPUT);
+  #endif
   pinMode(relayPin, OUTPUT);
   pinMode(valvePin, OUTPUT_OPEN_DRAIN);
   pinMode(brewPin,  INPUT_PULLUP);
@@ -36,11 +41,19 @@ static inline bool steamState(void) {
 }
 
 static inline void openValve(void) {
-  digitalWrite(valvePin, HIGH);
+  #if defined(LEGO_VALVE_RELAY)
+    digitalWrite(valvePin, LOW);
+  #else
+    digitalWrite(valvePin, HIGH);
+  #endif
 }
 
 static inline void closeValve(void) {
-  digitalWrite(valvePin, LOW);
+  #if defined(LEGO_VALVE_RELAY)
+    digitalWrite(valvePin, HIGH);
+  #else
+    digitalWrite(valvePin, LOW);
+  #endif
 }
 
 #endif
