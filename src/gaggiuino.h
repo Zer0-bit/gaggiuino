@@ -1,19 +1,27 @@
 #ifndef GAGGIUINO_H
 #define GAGGIUINO_H
 
+#include "profiling_phases.h"
+#include "log.h"
+#include "eeprom_data.h"
+#include "lcd/lcd.h"
+#include "peripherals/pump.h"
+#include "peripherals/pressure_sensor.h"
+#include "peripherals/thermocouple.h"
+#include "peripherals/scales.h"
+#include "peripherals/peripherals.h"
+#include "sensors_state.h"
+#include "descale.h"
+#include "just_do_coffee.h"
+#include "globals.h"
+
 // Define some const values
 #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define GET_PRESSURE_READ_EVERY 10
 #define GET_SCALES_READ_EVERY   100
 #define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
 #define REFRESH_FLOW_EVERY      500
-#define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
-#define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
-#define DELTA_RANGE             0.25f // % to apply as delta
-// #define BEAUTIFY_GRAPH
-#define STEAM_TEMPERATURE         155.f
-#define STEAM_WAND_HOT_WATER_TEMP 105.f
+
 
 
 typedef enum {
@@ -32,4 +40,5 @@ typedef enum {
     OPMODE_pressureBasedPreinfusionAndFlowProfile
 } OPERATION_MODES;
 
+OPERATION_MODES selectedOperationalMode;
 #endif

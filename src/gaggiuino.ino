@@ -3,54 +3,13 @@
 #endif
 
 #include "gaggiuino.h"
-#include "profiling_phases.h"
-#include "log.h"
-#include "eeprom_data.h"
-#include "lcd/lcd.h"
-#include "peripherals/pump.h"
-#include "peripherals/pressure_sensor.h"
-#include "peripherals/thermocouple.h"
-#include "peripherals/scales.h"
-#include "peripherals/peripherals.h"
-#include "sensors_state.h"
-
-// Some vars are better global
-//Timers
-unsigned long pressureTimer = 0;
-unsigned long thermoTimer = 0;
-unsigned long scalesTimer = 0;
-unsigned long flowTimer = 0;
-unsigned long pageRefreshTimer = 0;
-unsigned long brewingTimer = 0;
-
-SensorState currentState;
-
-//scales vars
-float shotWeight;
-float previousWeight;
-bool tareDone = false;
-
-// brew detection vars
-bool brewActive;
-
-//PP&PI variables
-//default phases. Updated in updatePressureProfilePhases.
-Phase phaseArray[6];
-Phases phases {6,  phaseArray};
-int preInfusionFinishedPhaseIdx = 3;
-bool preinfusionFinished;
-
-eepromValues_t runningCfg;
-
-OPERATION_MODES selectedOperationalMode;
-bool homeScreenScalesEnabled;
-
-// Other util vars
-float pressureTargetComparator;
 
 void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
+
+  lcdInit();
+  LOG_INFO("LCD Init");
 
   // Various pins operation mode handling
   pinInit();
@@ -72,9 +31,6 @@ void setup(void) {
   // Valve
   closeValve();
   LOG_INFO("Valve closed");
-
-  lcdInit();
-  LOG_INFO("LCD Init");
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -268,115 +224,6 @@ static void modeSelect(void) {
 }
 
 //#############################################################################################
-//#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
-//#############################################################################################
-
-//delta stuff
-inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
-
-
-static void justDoCoffee(void) {
-  int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
-  static double heaterWave;
-  static bool heaterState;
-  float BREW_TEMP_DELTA;
-  // Calculating the boiler heating power range based on the below input values
-  int HPWR_OUT = mapRange(currentState.temperature, runningCfg.setpoint - 10, runningCfg.setpoint, runningCfg.hpwr, HPWR_LOW, 0);
-  HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(currentState.temperature, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
-  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(runningCfg.setpoint));
-
-  if (brewActive) {
-  // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (currentState.temperature > runningCfg.setpoint && currentState.temperature < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
-      if (millis() - heaterWave > HPWR_OUT * runningCfg.brewDivider && !heaterState ) {
-        setBoilerOff();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_LOW * runningCfg.mainDivider && heaterState ) {
-        setBoilerOn();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if (currentState.temperature > runningCfg.setpoint - 1.5f && currentState.temperature < runningCfg.setpoint + (runningCfg.brewDeltaState ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
-      if (millis() - heaterWave > runningCfg.hpwr * runningCfg.brewDivider && !heaterState ) {
-        setBoilerOn();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > runningCfg.hpwr && heaterState ) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if (runningCfg.brewDeltaState && currentState.temperature >= (runningCfg.setpoint + BREW_TEMP_DELTA) && currentState.temperature <= (runningCfg.setpoint + BREW_TEMP_DELTA + 2.5f)  && preinfusionFinished ) {
-      if (millis() - heaterWave > runningCfg.hpwr * runningCfg.mainDivider && !heaterState ) {
-        setBoilerOn();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > runningCfg.hpwr && heaterState ) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if(currentState.temperature <= runningCfg.setpoint - 1.5f) {
-      setBoilerOn();
-    } else {
-      setBoilerOff();
-    }
-  } else { //if brewState == 0
-    if (currentState.temperature < ((float)runningCfg.setpoint - 10.00f)) {
-      setBoilerOn();
-    } else if (currentState.temperature >= ((float)runningCfg.setpoint - 10.00f) && currentState.temperature < ((float)runningCfg.setpoint - 3.00f)) {
-      setBoilerOn();
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 3.00f)) && (currentState.temperature <= ((float)runningCfg.setpoint - 1.00f))) {
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState) {
-        setBoilerOn();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && heaterState ) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 0.5f)) && currentState.temperature < (float)runningCfg.setpoint) {
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState ) {
-        setBoilerOn();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && heaterState ) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else {
-      setBoilerOff();
-    }
-  }
-}
-
-//#############################################################################################
-//################################____STEAM_POWER_CONTROL____##################################
-//#############################################################################################
-
-static void steamCtrl(void) {
-    // steam temp control, needs to be aggressive to keep steam pressure acceptable
-  if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
-    setBoilerOn();
-    brewActive ? setPumpFullOn() : setPumpOff();
-  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
-    setBoilerOn();
-    brewActive ? setPumpToRawValue(25) : setPumpOff();
-  } else {
-    setBoilerOff();
-  }
-}
-
-//#############################################################################################
 //################################____LCD_REFRESH_CONTROL___###################################
 //#############################################################################################
 
@@ -524,65 +371,6 @@ void lcdTrigger3(void) {
   LOG_VERBOSE("Scales enabled or disabled");
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
 }
-
-//#############################################################################################
-//###############################____DESCALE__CONTROL____######################################
-//#############################################################################################
-
-static void deScale(void) {
-  static bool blink = true;
-  static long timer = millis();
-  static int currentCycleRead = lcdGetDescaleCycle();
-  static int lastCycleRead = 10;
-  static bool descaleFinished = false;
-  if (brewState() && !descaleFinished) {
-    if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
-      if (blink == true) { // Logic that switches between modes depending on the $blink value
-        setPumpToRawValue(15);
-        if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to min descale value for 10 sec
-          if (currentCycleRead >=100) descaleFinished = true;
-          blink = false;
-          currentCycleRead = lcdGetDescaleCycle();
-          timer = millis();
-        }
-      } else {
-        setPumpToRawValue(30);
-        if (millis() - timer > DESCALE_PHASE2_EVERY) { //set dimmer power to max descale value for 20 sec
-          blink = true;
-          currentCycleRead++;
-          if (currentCycleRead<100) lcdSetDescaleCycle(currentCycleRead);
-          timer = millis();
-        }
-      }
-    } else {
-      setPumpOff();
-      if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
-        if (currentCycleRead*2 < 100) lcdSetDescaleCycle(currentCycleRead*3);
-        else {
-          lcdSetDescaleCycle(100);
-          descaleFinished = true;
-        }
-        lastCycleRead = currentCycleRead*2;
-        timer = millis();
-      }
-    }
-  } else if (brewState() && descaleFinished == true){
-    setPumpOff();
-    if ((millis() - timer) > 1000) {
-      lcdBrewTimerStop();
-      lcdShowDescaleFinished();
-      timer=millis();
-    }
-  } else {
-    currentCycleRead = 0;
-    lastCycleRead = 10;
-    descaleFinished = false;
-    timer = millis();
-  }
-  //keeping it at temp
-  justDoCoffee();
-}
-
 
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
