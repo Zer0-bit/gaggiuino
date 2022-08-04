@@ -217,8 +217,51 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
   if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) {
     runningCfg = lcdDownloadCfg();
 
+<<<<<<< HEAD
     homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
     selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode(); // MODE_SELECT should always be LAST
+=======
+    runningCfg.preinfusionState               = myNex.readNumber("piState"); // reding the preinfusion state value which should be 0 or 1
+    runningCfg.pressureProfilingState         = myNex.readNumber("ppState"); // reding the pressure profile state value which should be 0 or 1
+    runningCfg.flowProfileState               = myNex.readNumber("ppFlowState");
+    runningCfg.preinfusionFlowState           = myNex.readNumber("piFlowState");
+
+    runningCfg.preinfusionSec                 = myNex.readNumber("piSec");
+    runningCfg.preinfusionBar                 = myNex.readNumber("piBar");
+    runningCfg.preinfusionSoak                = myNex.readNumber("piSoak"); // pre-infusion soak value
+    runningCfg.preinfusionRamp                = myNex.readNumber("piRamp"); // ramp speed btw PI and PP pressures
+
+    runningCfg.pressureProfilingStart         = myNex.readNumber("ppStart");
+    runningCfg.pressureProfilingFinish        = myNex.readNumber("ppFin");
+    runningCfg.pressureProfilingHold          = myNex.readNumber("ppHold"); // pp start pressure hold
+    runningCfg.pressureProfilingLength        = myNex.readNumber("ppLength"); // pp shot length
+
+    runningCfg.flowProfileStart               = myNex.readNumber("ppFlowStart") / 10.f;
+    runningCfg.flowProfileEnd                 = myNex.readNumber("ppFlowFinish") / 10.f;
+    runningCfg.flowProfilePressureTarget      = myNex.readNumber("ppFlowPressure");
+    runningCfg.flowProfileCurveSpeed          = myNex.readNumber("ppFlowCurveSpeed");
+
+    runningCfg.preinfusionFlowVol             = myNex.readNumber("piFlow") / 10.f;
+    runningCfg.preinfusionFlowTime            = myNex.readNumber("piFlowTime" );
+    runningCfg.preinfusionFlowSoakTime        = myNex.readNumber("piFlowSoak");
+    runningCfg.preinfusionFlowPressureTarget  = myNex.readNumber("piFlowPressure");
+
+    runningCfg.stopOnWeightState              = myNex.readNumber("shotState");
+    runningCfg.shotDose                       = myNex.readNumber("shotTarget") / 10.f;
+    runningCfg.shotStopOnCustomWeight         = myNex.readNumber("shotCustomVal") / 10.f;
+
+    runningCfg.brewDeltaState                 = myNex.readNumber("deltaState");
+    runningCfg.setpoint                       = myNex.readNumber("setPoint");  // reading the setPoint value from the lcd
+    runningCfg.offsetTemp                     = myNex.readNumber("offSet");  // reading the offset value from the lcd
+    runningCfg.hpwr                           = myNex.readNumber("hpwr");  // reading the brew time delay used to apply heating in waves
+    runningCfg.mainDivider                    = myNex.readNumber("mDiv");  // reading the delay divider
+    runningCfg.brewDivider                    = myNex.readNumber("bDiv");  // reading the delay divider
+    runningCfg.powerLineFrequency             = myNex.readNumber("regHz");
+    runningCfg.warmupState                    = myNex.readNumber("warmupState");
+
+    homeScreenScalesEnabled                   = myNex.readNumber("scalesEnabled");
+    selectedOperationalMode                   = (OPERATION_MODES) myNex.readNumber("modeSelect"); // MODE_SELECT should always be LAST
+>>>>>>> 754f2d38b8cfb349a84dafe42d4ba98ec56c5c25
 
     updatePressureProfilePhases();
 
@@ -559,10 +602,13 @@ static void deScale(void) {
       setPumpOff();
       if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (currentCycleRead*3 < 100) lcdSetDescaleCycle(currentCycleRead*3);
         else {
           lcdSetDescaleCycle(100);
 =======
+=======
+>>>>>>> 754f2d38b8cfb349a84dafe42d4ba98ec56c5c25
         if (currentCycleRead*3 < 100) {
           myNex.writeNum("j0.val", currentCycleRead*3);
         } else {
@@ -713,3 +759,115 @@ static void brewParamsReset() {
   brewingTimer = millis();
   preinfusionFinished = false;
 }
+<<<<<<< HEAD
+=======
+
+static void lcdInit(eepromValues_t eepromCurrentValues) {
+////////////SYSTEM TEMP SETTINGS////////////////
+  myNex.writeNum("setPoint", eepromCurrentValues.setpoint);
+  myNex.writeNum("moreTemp.n1.val", eepromCurrentValues.setpoint-eepromCurrentValues.offsetTemp);
+
+  myNex.writeNum("offSet", eepromCurrentValues.offsetTemp);
+  myNex.writeNum("moreTemp.n2.val", eepromCurrentValues.offsetTemp);
+
+  myNex.writeNum("hpwr", eepromCurrentValues.hpwr);
+  myNex.writeNum("moreTemp.n3.val", eepromCurrentValues.hpwr);
+
+  myNex.writeNum("mDiv", eepromCurrentValues.mainDivider);
+  myNex.writeNum("moreTemp.n4.val", eepromCurrentValues.mainDivider);
+
+  myNex.writeNum("bDiv", eepromCurrentValues.brewDivider);
+  myNex.writeNum("moreTemp.n5.val", eepromCurrentValues.brewDivider);
+
+////////////SYSTEM BREW SETTINGS////////////////
+  myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart);
+  myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.pressureProfilingStart);
+
+  myNex.writeNum("ppFlowStart", eepromCurrentValues.flowProfileStart * 10.f);
+  myNex.writeNum("brewAuto.flowStartBox.val", eepromCurrentValues.flowProfileStart * 10.f);
+
+  myNex.writeNum("ppFin", eepromCurrentValues.pressureProfilingFinish);
+  myNex.writeNum("brewAuto.n3.val", eepromCurrentValues.pressureProfilingFinish);
+
+  myNex.writeNum("ppFlowFinish", eepromCurrentValues.flowProfileEnd * 10.f);
+  myNex.writeNum("brewAuto.flowEndBox.val", eepromCurrentValues.flowProfileEnd * 10.f);
+
+  myNex.writeNum("ppHold", eepromCurrentValues.pressureProfilingHold);
+  myNex.writeNum("brewAuto.n5.val", eepromCurrentValues.pressureProfilingHold);
+
+  myNex.writeNum("ppFlowPressure", eepromCurrentValues.flowProfilePressureTarget);
+  myNex.writeNum("brewAuto.flowBarBox.val", eepromCurrentValues.flowProfilePressureTarget);
+
+  myNex.writeNum("ppLength", eepromCurrentValues.pressureProfilingLength);
+  myNex.writeNum("brewAuto.n6.val", eepromCurrentValues.pressureProfilingLength);
+
+  myNex.writeNum("ppFlowCurveSpeed", eepromCurrentValues.flowProfileCurveSpeed);
+  myNex.writeNum("brewAuto.flowRampBox.val", eepromCurrentValues.flowProfileCurveSpeed);
+
+  myNex.writeNum("piState", eepromCurrentValues.preinfusionState);
+  myNex.writeNum("brewAuto.bt0.val", eepromCurrentValues.preinfusionState);
+
+  myNex.writeNum("ppState", eepromCurrentValues.pressureProfilingState);
+  myNex.writeNum("brewAuto.bt1.val", eepromCurrentValues.pressureProfilingState);
+
+  myNex.writeNum("ppFlowState", eepromCurrentValues.flowProfileState);
+  myNex.writeNum("brewAuto.bt2.val", eepromCurrentValues.flowProfileState);
+
+  myNex.writeNum("piFlowState", eepromCurrentValues.preinfusionFlowState);
+  myNex.writeNum("brewAuto.bt3.val", eepromCurrentValues.preinfusionFlowState);
+
+
+  myNex.writeNum("piSec", eepromCurrentValues.preinfusionSec);
+  myNex.writeNum("brewAuto.n0.val", eepromCurrentValues.preinfusionSec);
+
+  myNex.writeNum("piFlow", eepromCurrentValues.preinfusionFlowVol * 10.f);
+  myNex.writeNum("brewAuto.flowPIbox.val", eepromCurrentValues.preinfusionFlowVol * 10.f);
+
+  myNex.writeNum("piBar", eepromCurrentValues.preinfusionBar);
+  myNex.writeNum("brewAuto.n1.val", eepromCurrentValues.preinfusionBar);
+
+  myNex.writeNum("piFlowTime", eepromCurrentValues.preinfusionFlowTime);
+  myNex.writeNum("brewAuto.flowPiSecBox.val", eepromCurrentValues.preinfusionFlowTime);
+
+  myNex.writeNum("piSoak", eepromCurrentValues.preinfusionSoak);
+  myNex.writeNum("brewAuto.n4.val", eepromCurrentValues.preinfusionSoak);
+
+  myNex.writeNum("piFlowSoak", eepromCurrentValues.preinfusionFlowSoakTime);
+  myNex.writeNum("brewAuto.flowPiSoakBox.val", eepromCurrentValues.preinfusionFlowSoakTime);
+
+  myNex.writeNum("piFlowPressure", eepromCurrentValues.preinfusionFlowPressureTarget);
+  myNex.writeNum("brewAuto.flowPiBarBox.val", eepromCurrentValues.preinfusionFlowPressureTarget);
+
+  myNex.writeNum("piRamp", eepromCurrentValues.preinfusionRamp);
+  myNex.writeNum("brewAuto.rampSpeed.val", eepromCurrentValues.preinfusionRamp);
+
+////////////SYSTEM VARIOUS SETTINGS////////////////
+  myNex.writeNum("regHz", eepromCurrentValues.powerLineFrequency);
+
+  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep * 60);
+  myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
+
+  myNex.writeNum("morePower.lc1.val", eepromCurrentValues.scalesF1);
+  myNex.writeNum("morePower.lc2.val", eepromCurrentValues.scalesF2);
+  myNex.writeNum("morePower.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 100.f);
+
+////////////BREW MORE SETTINGS////////////////
+  myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
+  myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
+
+  myNex.writeNum("graphEnabled", eepromCurrentValues.graphBrew);
+  myNex.writeNum("brewSettings.btGraph.val", eepromCurrentValues.graphBrew);
+
+  myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
+  myNex.writeNum("brewSettings.btWarmup.val", eepromCurrentValues.warmupState);
+
+  myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
+  myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
+
+////////////BREW WEIGHT SETTINGS////////////////
+  myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
+  myNex.writeNum("shotDose", eepromCurrentValues.shotDose * 10.f);
+  myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
+  myNex.writeNum("shotCustomVal", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
+}
+>>>>>>> 754f2d38b8cfb349a84dafe42d4ba98ec56c5c25
