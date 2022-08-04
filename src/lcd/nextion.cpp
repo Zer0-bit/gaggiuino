@@ -243,10 +243,6 @@ void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
 }
 
-void lcdWriteLcdMessage(String msg) {
-  return myNex.writeStr("popupMSG.t0.txt", msg);
-}
-
 void trigger1(void) { lcdTrigger1(); }
 void trigger2(void) { lcdTrigger2(); }
 void trigger3(void) { lcdTrigger3(); }
