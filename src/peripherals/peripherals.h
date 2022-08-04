@@ -5,7 +5,7 @@
 #include "peripherals.h"
 #include <Arduino.h>
 
-void pinInit(void) {
+static inline void pinInit(void) {
   #if defined(LEGO_VALVE_RELAY)
     pinMode(valvePin, OUTPUT_OPEN_DRAIN);
   #else
