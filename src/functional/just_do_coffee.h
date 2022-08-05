@@ -3,6 +3,8 @@
 
 #include "../gaggiuino.h"
 
+extern eepromValues_t runningCfg;
+extern SensorState currentState;
 
 // #define BEAUTIFY_GRAPH
 #define STEAM_TEMPERATURE         155.f

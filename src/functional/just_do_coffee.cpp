@@ -1,7 +1,5 @@
 #include "just_do_coffee.h"
 
-extern eepromValues_t runningCfg;
-extern SensorState currentState;
 
 void justDoCoffee(void) {
   int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
