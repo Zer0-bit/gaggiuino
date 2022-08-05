@@ -7,13 +7,11 @@
 #include "lcd/lcd.h"
 #include "peripherals/pump.h"
 #include "peripherals/pressure_sensor.h"
-#include "peripherals/thermocouple.h"
 #include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
 #include "sensors_state.h"
-#include "descale.h"
-#include "just_do_coffee.h"
-#include "globals.h"
+#include "functional/descale.h"
+#include "functional/just_do_coffee.h"
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
@@ -40,5 +38,27 @@ typedef enum {
     OPMODE_pressureBasedPreinfusionAndFlowProfile
 } OPERATION_MODES;
 
-OPERATION_MODES selectedOperationalMode;
+//Timers
+extern unsigned long pressureTimer;
+extern unsigned long thermoTimer;
+extern unsigned long scalesTimer;
+extern unsigned long flowTimer;
+extern unsigned long pageRefreshTimer;
+extern unsigned long brewingTimer;
+
+//scales vars
+extern float shotWeight;
+extern float previousWeight;
+extern bool tareDone;
+
+// brew detection vars
+extern bool brewActive;
+
+//PP&PI variables
+extern int preInfusionFinishedPhaseIdx;
+extern bool preinfusionFinished;
+extern bool homeScreenScalesEnabled;
+
+// Other util vars
+extern float pressureTargetComparator;
 #endif

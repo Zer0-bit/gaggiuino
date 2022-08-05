@@ -1,23 +1,9 @@
-#ifndef JUST_DO_COFFEE_H
-#define JUST_DO_COFFEE_H
+#include "just_do_coffee.h"
 
-#include "globals.h"
-#include "eeprom_data.h"
+extern eepromValues_t runningCfg;
+extern SensorState currentState;
 
-// #define BEAUTIFY_GRAPH
-#define STEAM_TEMPERATURE         155.f
-#define STEAM_WAND_HOT_WATER_TEMP 105.f
-#define DELTA_RANGE             0.25f // % to apply as delta
-
-//#############################################################################################
-//#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
-//#############################################################################################
-
-//delta stuff
-inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
-
-
-static void justDoCoffee(void) {
+void justDoCoffee(void) {
   int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
   static double heaterWave;
   static bool heaterState;
@@ -105,7 +91,7 @@ static void justDoCoffee(void) {
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
-static void steamCtrl(void) {
+void steamCtrl(void) {
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
   if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
     setBoilerOn();
@@ -117,4 +103,3 @@ static void steamCtrl(void) {
     setBoilerOff();
   }
 }
-#endif

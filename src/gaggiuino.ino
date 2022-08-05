@@ -3,6 +3,35 @@
 #endif
 
 #include "gaggiuino.h"
+#include "peripherals/thermocouple.h"
+
+unsigned long pageRefreshTimer = 0;
+unsigned long pressureTimer = 0;
+unsigned long brewingTimer = 0;
+unsigned long thermoTimer = 0;
+unsigned long scalesTimer = 0;
+unsigned long flowTimer = 0;
+
+int preInfusionFinishedPhaseIdx = 3;
+
+float pressureTargetComparator;
+float previousWeight;
+float shotWeight;
+
+bool homeScreenScalesEnabled;
+bool preinfusionFinished;
+bool tareDone = false;
+bool brewActive;
+
+//default phases. Updated in updatePressureProfilePhases.
+Phase phaseArray[6];
+Phases phases {6,  phaseArray};
+
+SensorState currentState;
+
+OPERATION_MODES selectedOperationalMode;
+
+eepromValues_t runningCfg;
 
 void setup(void) {
   LOG_INIT();
