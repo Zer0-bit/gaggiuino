@@ -38,6 +38,9 @@ typedef enum {
     OPMODE_pressureBasedPreinfusionAndFlowProfile
 } OPERATION_MODES;
 
+extern eepromValues_t runningCfg;
+extern SensorState currentState;
+
 //Timers
 extern unsigned long pressureTimer;
 extern unsigned long thermoTimer;
