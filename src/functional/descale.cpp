@@ -1,6 +1,6 @@
 #include "descale.h"
 
-void deScale(void) {
+void deScale() {
   static bool blink = true;
   static long timer = millis();
   static int currentCycleRead = lcdGetDescaleCycle();

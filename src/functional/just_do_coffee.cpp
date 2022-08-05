@@ -1,7 +1,7 @@
 #include "just_do_coffee.h"
 
 
-void justDoCoffee(void) {
+void justDoCoffee() {
   int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
   static double heaterWave;
   static bool heaterState;
@@ -89,7 +89,7 @@ void justDoCoffee(void) {
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
-void steamCtrl(void) {
+void steamCtrl() {
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
   if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
     setBoilerOn();
