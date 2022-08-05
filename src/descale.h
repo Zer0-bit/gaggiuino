@@ -1,7 +1,6 @@
 #ifndef DESCALE_H
 #define DESCALE_H
 
-#include "gaggiuino.h"
 #include "peripherals/pump.h"
 #include "just_do_coffee.h"
 
