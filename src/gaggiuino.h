@@ -10,8 +10,8 @@
 #include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
 #include "sensors_state.h"
-#include "functional/descale.h"
-#include "functional/just_do_coffee.h"
+#include "z_functional/descale.h"
+#include "z_functional/just_do_coffee.h"
 #include <Arduino.h>
 
 // Define some const values
