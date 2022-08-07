@@ -9,7 +9,7 @@
 #include <Arduino.h>
 
 
-#define STEAM_TEMPERATURE         155.f
+#define STEAM_TEMPERATURE         162.f
 #define STEAM_WAND_HOT_WATER_TEMP 105.f
 #define DELTA_RANGE             0.25f // % to apply as delta
 

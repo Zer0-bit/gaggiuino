@@ -1,7 +1,5 @@
 #include "just_do_coffee.h"
 
-extern eepromValues_t runningCfg;
-
 void justDoCoffee() {
   int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
   static double heaterWave;
