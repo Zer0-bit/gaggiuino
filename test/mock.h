@@ -26,7 +26,7 @@
 #define va_start(args, msg)
 #define va_end(args)
 
-typedef enum { false, true } bool;
+#include <stdbool.h>
 
 struct eepromValues_t {
     int setpoint;
