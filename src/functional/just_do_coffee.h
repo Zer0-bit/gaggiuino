@@ -6,6 +6,7 @@
 #include "../peripherals/peripherals.h"
 #include "../peripherals/pump.h"
 #include "../eeprom_data.h"
+#include "../sensors_state.h"
 
 
 #define STEAM_TEMPERATURE         155.f
