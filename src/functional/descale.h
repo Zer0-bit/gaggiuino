@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include "../peripherals/peripherals.h"
 #include "../peripherals/pump.h"
-#include "../gaggiuino.h"
 #include "../lcd/lcd.h"
+#include "just_do_coffee.h"
 
 #define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
