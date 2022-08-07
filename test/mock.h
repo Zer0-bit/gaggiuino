@@ -37,8 +37,6 @@ struct eepromValues_t {
 };
 struct eepromValues_t runningCfg;
 
-struct SensorState currentState;
-
 bool preinfusionFinished;
 bool brewActive;
 
