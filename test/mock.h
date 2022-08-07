@@ -37,10 +37,6 @@ struct eepromValues_t {
 };
 struct eepromValues_t runningCfg;
 
-struct SensorState {
-  float temperature;
-  float pressure;
-};
 struct SensorState currentState;
 
 bool preinfusionFinished;
