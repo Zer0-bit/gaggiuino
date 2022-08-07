@@ -41,8 +41,8 @@ struct SensorState {
 };
 struct SensorState currentState;
 
-boolean preinfusionFinished;
-boolean brewActive;
+bool preinfusionFinished;
+bool brewActive;
 
 static void lcdTrigger1(void) {}
 static void lcdTrigger2(void) {}
