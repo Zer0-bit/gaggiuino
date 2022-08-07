@@ -28,17 +28,10 @@
 
 #include <stdbool.h>
 
-struct eepromValues_t {
-    int setpoint;
-    int offsetTemp;
-    int hpwr;
-    int mainDivider;
-    int brewDivider;
-};
-struct eepromValues_t runningCfg;
+// eepromValues_t runningCfg;
 
-bool preinfusionFinished;
-bool brewActive;
+// bool preinfusionFinished;
+// bool brewActive;
 
 static void lcdTrigger1(void) {}
 static void lcdTrigger2(void) {}
