@@ -99,7 +99,7 @@ void steamCtrl() {
     if (currentState.pressure < 1.5f) {
       openValve();
       setPumpToRawValue(5);
-    } 
+    }
   } else {
     setBoilerOff();
     (currentState.pressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
