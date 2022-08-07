@@ -26,6 +26,8 @@
 #define va_start(args, msg)
 #define va_end(args)
 
+typedef enum { false, true } bool;
+
 struct eepromValues_t {
     int setpoint;
     int offsetTemp;
