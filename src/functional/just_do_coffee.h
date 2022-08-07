@@ -1,6 +1,7 @@
 #ifndef JUST_DO_COFFEE_H
 #define JUST_DO_COFFEE_H
 
+#include <Arduino.h>
 #include "../gaggiuino.h"
 
 // #define BEAUTIFY_GRAPH

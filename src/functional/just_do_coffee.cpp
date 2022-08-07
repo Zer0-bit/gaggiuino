@@ -96,14 +96,12 @@ void steamCtrl() {
     brewActive ? setPumpFullOn() : setPumpOff();
   }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
     setBoilerOn();
-    if (currentState.pressure < 1.2f) {
+    if (currentState.pressure < 1.5f) {
       openValve();
       setPumpToRawValue(5);
-    } else {
-      setPumpOff();
-    }
+    } 
   } else {
     setBoilerOff();
-    setPumpOff();
+    (currentState.pressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
   }
 }

@@ -1,6 +1,7 @@
 #ifndef GAGGIUINO_H
 #define GAGGIUINO_H
 
+#include <Arduino.h>
 #include "profiling_phases.h"
 #include "log.h"
 #include "eeprom_data.h"

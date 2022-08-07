@@ -1,6 +1,7 @@
 #ifndef DESCALE_H
 #define DESCALE_H
 
+#include <Arduino.h>
 #include "../peripherals/peripherals.h"
 #include "../peripherals/pump.h"
 #include "../gaggiuino.h"
