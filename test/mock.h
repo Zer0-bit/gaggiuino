@@ -27,22 +27,22 @@
 #define va_end(args)
 
 struct eepromValues_t {
-    uint16_t setpoint;
-    uint16_t offsetTemp;
-    uint16_t hpwr;
-    uint16_t mainDivider;
-    uint16_t brewDivider;
+    int setpoint;
+    int offsetTemp;
+    int hpwr;
+    int mainDivider;
+    int brewDivider;
 };
-eepromValues_t runningCfg;
+struct eepromValues_t runningCfg;
 
 struct SensorState {
   float temperature;
   float pressure;
 };
-SensorState currentState;
+struct SensorState currentState;
 
-bool preinfusionFinished;
-bool brewActive;
+boolean preinfusionFinished;
+boolean brewActive;
 
 static void lcdTrigger1(void) {}
 static void lcdTrigger2(void) {}
