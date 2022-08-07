@@ -26,6 +26,24 @@
 #define va_start(args, msg)
 #define va_end(args)
 
+struct eepromValues_t {
+    uint16_t setpoint;
+    uint16_t offsetTemp;
+    uint16_t hpwr;
+    uint16_t mainDivider;
+    uint16_t brewDivider;
+};
+eepromValues_t runningCfg;
+
+struct SensorState {
+  float temperature;
+  float pressure;
+};
+SensorState currentState;
+
+bool preinfusionFinished;
+bool brewActive;
+
 static void lcdTrigger1(void) {}
 static void lcdTrigger2(void) {}
 static void lcdTrigger3(void) {}
