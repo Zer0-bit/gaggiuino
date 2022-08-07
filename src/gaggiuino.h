@@ -1,7 +1,6 @@
 #ifndef GAGGIUINO_H
 #define GAGGIUINO_H
 
-#include <Arduino.h>
 #include "profiling_phases.h"
 #include "log.h"
 #include "eeprom_data.h"
@@ -13,6 +12,7 @@
 #include "sensors_state.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
+#include <Arduino.h>
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
