@@ -11,8 +11,8 @@
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
 #include "sensors_state.h"
-#include "z_functional/descale.h"
-#include "z_functional/just_do_coffee.h"
+#include "functional/descale.h"
+#include "functional/just_do_coffee.h"
 #include <Arduino.h>
 
 // Define some const values

@@ -8,8 +8,8 @@
 #include "just_do_coffee.h"
 #include <Arduino.h>
 
-#define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
+#define DESCALE_PHASE1_EVERY    120000 // short pump pulses during descale
+#define DESCALE_PHASE2_EVERY    3000 // short pause for pulse effficience activation
 #define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
 
 //#############################################################################################
@@ -17,5 +17,6 @@
 //#############################################################################################
 
 void deScale(eepromValues_t &runningCfg, SensorState &currentState);
+void solenoidBeat(void);
 
 #endif

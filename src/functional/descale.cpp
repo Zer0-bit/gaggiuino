@@ -9,7 +9,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   if (brewState() && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
       if (blink == true) { // Logic that switches between modes depending on the $blink value
-        setPumpToRawValue(15);
+        setPumpToRawValue(5);
         if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to min descale value for 10 sec
           if (currentCycleRead >=100) descaleFinished = true;
           blink = false;
@@ -19,6 +19,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
       } else {
         setPumpToRawValue(30);
         if (millis() - timer > DESCALE_PHASE2_EVERY) { //set dimmer power to max descale value for 20 sec
+          solenoidBeat();
           blink = true;
           currentCycleRead++;
           if (currentCycleRead<100) lcdSetDescaleCycle(currentCycleRead);
@@ -28,7 +29,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
     } else {
       setPumpOff();
       if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
-        if (currentCycleRead*2 < 100) lcdSetDescaleCycle(currentCycleRead*3);
+        if (currentCycleRead*2 < 100) lcdSetDescaleCycle(currentCycleRead*2);
         else {
           lcdSetDescaleCycle(100);
           descaleFinished = true;
@@ -52,4 +53,20 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   }
   //keeping it at temp
   justDoCoffee(runningCfg, currentState, false, false);
+}
+
+void solenoidBeat() {
+  setPumpFullOn();
+  closeValve();
+  delay(5);
+  openValve();
+  delay(5);
+  closeValve();
+  delay(5);
+  openValve();
+  delay(5);
+  closeValve();
+  delay(5);
+  openValve();
+  setPumpOff();
 }
