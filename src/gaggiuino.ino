@@ -3,25 +3,6 @@
 #endif
 
 #include "gaggiuino.h"
-#include "peripherals/thermocouple.h"
-
-unsigned long pageRefreshTimer = 0;
-unsigned long pressureTimer = 0;
-unsigned long brewingTimer = 0;
-unsigned long thermoTimer = 0;
-unsigned long scalesTimer = 0;
-unsigned long flowTimer = 0;
-
-int preInfusionFinishedPhaseIdx = 3;
-
-float pressureTargetComparator;
-float previousWeight;
-float shotWeight;
-
-bool homeScreenScalesEnabled;
-bool preinfusionFinished;
-bool tareDone = false;
-bool brewActive;
 
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
@@ -224,25 +205,25 @@ static void modeSelect(void) {
     case OPMODE_everythingFlowProfiled:
     case OPMODE_pressureBasedPreinfusionAndFlowProfile:
       if (!steamState()) profiling();
-      else steamCtrl();
+      else steamCtrl(runningCfg, currentState, brewActive);
       break;
     case OPMODE_manual:
       manualPressureProfile();
       break;
     case OPMODE_flush:
       setPumpFullOn();
-      justDoCoffee();
+      justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPMODE_steam:
       if (!steamState()) {
         setPumpFullOn();
-        justDoCoffee();
+        justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       } else {
-        steamCtrl();
+        steamCtrl(runningCfg, currentState, brewActive);
       }
       break;
     case OPMODE_descale:
-      deScale();
+      deScale(runningCfg, currentState);
       break;
     case OPMODE_empty:
       break;
@@ -478,13 +459,13 @@ static void profiling(void) {
     setPumpToRawValue(0);
   }
   // Keep that water at temp
-  justDoCoffee();
+  justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
 static void manualPressureProfile(void) {
   int power_reading = lcdGetManualPressurePower();
   setPumpPressure(power_reading, 0.f, currentState);
-  justDoCoffee();
+  justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
 //#############################################################################################

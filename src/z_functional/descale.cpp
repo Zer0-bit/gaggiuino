@@ -1,6 +1,6 @@
 #include "descale.h"
 
-void deScale() {
+void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   static bool blink = true;
   static long timer = millis();
   static int currentCycleRead = lcdGetDescaleCycle();
@@ -51,5 +51,5 @@ void deScale() {
     timer = millis();
   }
   //keeping it at temp
-  justDoCoffee();
+  justDoCoffee(runningCfg, currentState, false, false);
 }

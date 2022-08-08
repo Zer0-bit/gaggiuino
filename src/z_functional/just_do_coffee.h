@@ -13,17 +13,8 @@
 #define STEAM_WAND_HOT_WATER_TEMP 105.f
 #define DELTA_RANGE             0.25f // % to apply as delta
 
-extern eepromValues_t runningCfg;
-extern SensorState currentState;
-
-extern bool brewActive;
-extern bool preinfusionFinished;
-
-//delta stuff
-inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
-
-void justDoCoffee(void);
-void steamCtrl(void);
+void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, bool preinfusionFinished);
+void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive);
 
 #endif
 

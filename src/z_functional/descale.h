@@ -1,9 +1,10 @@
 #ifndef DESCALE_H
 #define DESCALE_H
 
-#include "../peripherals/peripherals.h"
 #include "../peripherals/pump.h"
 #include "../lcd/lcd.h"
+#include "../eeprom_data.h"
+#include "../sensors_state.h"
 #include "just_do_coffee.h"
 #include <Arduino.h>
 
@@ -15,6 +16,6 @@
 //###############################____DESCALE__CONTROL____######################################
 //#############################################################################################
 
-void deScale(void);
+void deScale(eepromValues_t &runningCfg, SensorState &currentState);
 
 #endif

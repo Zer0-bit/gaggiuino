@@ -1,6 +1,9 @@
 #include "just_do_coffee.h"
 
-void justDoCoffee() {
+//delta stuff
+inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
+
+void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, bool preinfusionFinished) {
   int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
   static double heaterWave;
   static bool heaterState;
@@ -88,7 +91,7 @@ void justDoCoffee() {
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
-void steamCtrl() {
+void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
   if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
     setBoilerOn();

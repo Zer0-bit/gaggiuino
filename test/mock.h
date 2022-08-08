@@ -26,13 +26,6 @@
 #define va_start(args, msg)
 #define va_end(args)
 
-#include <stdbool.h>
-
-// eepromValues_t runningCfg;
-
-// bool preinfusionFinished;
-// bool brewActive;
-
 static void lcdTrigger1(void) {}
 static void lcdTrigger2(void) {}
 static void lcdTrigger3(void) {}

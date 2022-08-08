@@ -9,6 +9,7 @@
 #include "peripherals/pressure_sensor.h"
 #include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
+#include "peripherals/thermocouple.h"
 #include "sensors_state.h"
 #include "z_functional/descale.h"
 #include "z_functional/just_do_coffee.h"
@@ -39,30 +40,28 @@ typedef enum {
     OPMODE_pressureBasedPreinfusionAndFlowProfile
 } OPERATION_MODES;
 
-extern eepromValues_t runningCfg;
-extern SensorState currentState;
 
 //Timers
-extern unsigned long pressureTimer;
-extern unsigned long thermoTimer;
-extern unsigned long scalesTimer;
-extern unsigned long flowTimer;
-extern unsigned long pageRefreshTimer;
-extern unsigned long brewingTimer;
+unsigned long pageRefreshTimer = 0;
+unsigned long pressureTimer = 0;
+unsigned long brewingTimer = 0;
+unsigned long thermoTimer = 0;
+unsigned long scalesTimer = 0;
+unsigned long flowTimer = 0;
 
 //scales vars
-extern float shotWeight;
-extern float previousWeight;
-extern bool tareDone;
+float previousWeight  = 0;
+float shotWeight      = 0;
+bool tareDone         = false;
 
 // brew detection vars
-extern bool brewActive;
+bool brewActive = false;
 
 //PP&PI variables
-extern int preInfusionFinishedPhaseIdx;
-extern bool preinfusionFinished;
-extern bool homeScreenScalesEnabled;
+int preInfusionFinishedPhaseIdx = 3;
+bool preinfusionFinished = false;
+bool homeScreenScalesEnabled = false;
 
 // Other util vars
-extern float pressureTargetComparator;
+float pressureTargetComparator = 0.0;
 #endif
