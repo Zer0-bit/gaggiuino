@@ -58,15 +58,15 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
 void solenoidBeat() {
   setPumpFullOn();
   closeValve();
-  delay(5);
+  delay(50);
   openValve();
-  delay(5);
+  delay(50);
   closeValve();
-  delay(5);
+  delay(50);
   openValve();
-  delay(5);
+  delay(50);
   closeValve();
-  delay(5);
+  delay(50);
   openValve();
   setPumpOff();
 }
