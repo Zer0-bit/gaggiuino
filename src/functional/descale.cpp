@@ -20,6 +20,8 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         setPumpOff();
         if ((millis() - timer) > DESCALE_PHASE2_EVERY) { //nothing for 5 minutes
           if (currentCycleRead<100) lcdSetDescaleCycle(currentCycleRead);
+          currentCycleRead++;
+          blink = true;
           timer = millis();
         }
       }
@@ -29,12 +31,12 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         solenoidBeat();
         blink = true;
         currentCycleRead++;
+        lastCycleRead = currentCycleRead*2;
         if (currentCycleRead*2 < 100) lcdSetDescaleCycle(currentCycleRead*2);
         else {
           lcdSetDescaleCycle(100);
           descaleFinished = true;
         }
-        lastCycleRead = currentCycleRead*2;
         timer = millis();
       }
     }
