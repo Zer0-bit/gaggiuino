@@ -4,7 +4,11 @@
 
 float previousPressure;
 float currentPressure;
-ADS1115 ADS(0x48);
+#ifdef SINGLE_BOARD
+  ADS1015 ADS(0x48);
+#else
+  ADS1115 ADS(0x48);
+#endif
 
 void pressureSensorInit() {
   ADS.begin();

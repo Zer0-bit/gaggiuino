@@ -12,10 +12,16 @@ HX711 LoadCell_2; //HX711 2
 
 bool scalesPresent;
 
+#ifdef SINGLE_BOARD
+byte scale_clk = OUTPUT_OPEN_DRAIN
+#else
+byte scale_clk = OUTPUT
+#endif
+
 void scalesInit(float scalesF1, float scalesF2) {
 
   #if defined(SINGLE_HX711_CLOCK)
-    LoadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, HX711_sck_2, 128, OUTPUT_OPEN_DRAIN);
+    LoadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, HX711_sck_2, 128, scale_clk);
     LoadCells.set_scale(scalesF1, scalesF2);
     LoadCells.power_up();
 
