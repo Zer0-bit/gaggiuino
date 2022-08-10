@@ -163,11 +163,15 @@ static void calculateWeightAndFlow(void) {
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
   if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-    if (shotWeight > runningCfg.shotDose-0.5f ) return true;
-    else return false;
+    if (shotWeight > runningCfg.shotDose-0.5f ) {
+      brewStopWeight = shotWeight;
+      return true;
+    } else return false;
   } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-    if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) return true;
-    else return false;
+    if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) {
+      brewStopWeight = shotWeight;
+      return true;
+    } else return false;
   }
   return false;
 }
@@ -211,7 +215,7 @@ static void modeSelect(void) {
       manualPressureProfile();
       break;
     case OPMODE_flush:
-      setPumpFullOn();
+      brewState() ? setPumpFullOn() : setPumpOff();
       justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPMODE_steam:
@@ -264,9 +268,9 @@ static void lcdRefresh(void) {
       lcdSetWeight(currentState.weight);
     } else {
       lcdSetWeight(
-        shotWeight > 0.f
+        (shotWeight > 0.f && !stopOnWeight())
           ? currentState.weight
-          : 0.0f
+          : brewStopWeight
       );
     }
 
@@ -496,11 +500,12 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset() {
-  tareDone = false;
-  shotWeight = 0.f;
+  tareDone            = false;
+  shotWeight          = 0.f;
   currentState.weight = 0.f;
-  previousWeight = 0.f;
-  brewingTimer = millis();
+  brewStopWeight      = 0.f;
+  previousWeight      = 0.f;
+  brewingTimer        = millis();
   preinfusionFinished = false;
 }
 

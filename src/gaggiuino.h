@@ -51,6 +51,7 @@ unsigned long flowTimer = 0;
 
 //scales vars
 float previousWeight  = 0;
+float brewStopWeight  = 0;
 float shotWeight      = 0;
 bool tareDone         = false;
 
