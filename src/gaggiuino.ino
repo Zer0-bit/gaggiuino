@@ -162,16 +162,18 @@ static void calculateWeightAndFlow(void) {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-    if (shotWeight > runningCfg.shotDose-0.5f ) {
-      brewStopWeight = shotWeight;
-      return true;
-    } else return false;
-  } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-    if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) {
-      brewStopWeight = shotWeight;
-      return true;
-    } else return false;
+  if ( !nonBrewTimeHandling() ) {
+    if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
+      if (shotWeight > runningCfg.shotDose-0.5f ) {
+        brewStopWeight = shotWeight;
+        return true;
+      } else return false;
+    } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
+      if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) {
+        brewStopWeight = shotWeight;
+        return true;
+      } else return false;
+    }
   }
   return false;
 }
@@ -509,3 +511,22 @@ static void brewParamsReset() {
   preinfusionFinished = false;
 }
 
+
+bool nonBrewTimeHandling() {
+  bool modeRetrun = false;
+  switch (selectedOperationalMode) {
+    case OPMODE_flush:
+      modeRetrun = true;
+      break;
+    case OPMODE_descale:
+      modeRetrun = true;
+      break;
+    case OPMODE_steam:
+      modeRetrun = true;
+      break;
+    default:
+      modeRetrun = false;
+      break;
+  }
+  return modeRetrun;
+}
