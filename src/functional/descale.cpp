@@ -4,7 +4,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   static bool blink = true;
   static long timer = millis();
   static int currentCycleRead = lcdGetDescaleCycle();
-  static int lastCycleRead = 10;
+  static int lastCycleRead = 5;
   static bool descaleFinished = false;
   if (brewState() && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
