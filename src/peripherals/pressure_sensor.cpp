@@ -22,7 +22,11 @@ float getPressure() {  //returns sensor pressure data
   // 1 bar = 17.1 or 68.27 or 1777.8
 
   previousPressure = currentPressure;
-  currentPressure = (ADS.getValue() - 2666) / 1777.8f;
+  #ifndef SINGLE_BOARD
+    currentPressure = (ADS.getValue() - 2666) / 1777.8f;
+  #else
+    currentPressure = (ADS.getValue() - 102.4f) / 68.27f;
+  #endif
   return currentPressure;
 }
 
