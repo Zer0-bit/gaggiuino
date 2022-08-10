@@ -9,8 +9,8 @@
 #include <Arduino.h>
 
 #define DESCALE_PHASE1_EVERY    120000 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY    3000 // short pause for pulse effficience activation
-#define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
+#define DESCALE_PHASE2_EVERY    300000 // long pause for scale softening
+#define DESCALE_PHASE3_EVERY    4000 // short pause for pulse effficience activation
 
 //#############################################################################################
 //###############################____DESCALE__CONTROL____######################################
