@@ -13,9 +13,9 @@ HX711 LoadCell_2; //HX711 2
 bool scalesPresent;
 
 #ifdef SINGLE_BOARD
-byte scale_clk = OUTPUT_OPEN_DRAIN
+unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 #else
-byte scale_clk = OUTPUT
+unsigned char scale_clk = OUTPUT;
 #endif
 
 void scalesInit(float scalesF1, float scalesF2) {
