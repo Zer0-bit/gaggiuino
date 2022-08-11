@@ -68,14 +68,14 @@ float pressureTargetComparator = 0.0;
 
 static inline void flushActivated() {
     setPumpFullOn();
-    #if SINGLE_BOARD
+    #ifdef SINGLE_BOARD
         openValve();
     #endif
 }
 
 static inline void flushDeactivated() {
     setPumpOff();
-    #if SINGLE_BOARD
+    #ifdef SINGLE_BOARD
         closeValve();
     #endif
 }
