@@ -428,8 +428,9 @@ static void lcdRefresh(void) {
 
     /*LCD timer and warmup*/
     if (brewActive) {
+      lcdSetBrewTimer((millis() > brewingTimer) ? (int)((millis() - brewingTimer) / 1000) : 0);
       lcdBrewTimerStart(); // nextion timer start
-      lcdWarmupStateStop(); // Flaggig warmup notification on Nextion needs to stop (if enabled)
+      lcdWarmupStateStop(); // Flagging warmup notification on Nextion needs to stop (if enabled)
     } else {
       lcdBrewTimerStop(); // nextion timer stop
     }
