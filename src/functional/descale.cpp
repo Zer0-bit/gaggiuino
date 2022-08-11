@@ -11,7 +11,8 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         setPumpToRawValue(10);
         if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to min descale value for 10 sec
-          if (currentCycleRead >=100) descaleFinished = true;
+          if(currentCycleRead < 100) lcdSetDescaleCycle(currentCycleRead);
+          else descaleFinished = true;
           blink = false;
           currentCycleRead = lcdGetDescaleCycle();
           timer = millis();
@@ -19,8 +20,9 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
       } else {
         setPumpOff();
         if ((millis() - timer) > DESCALE_PHASE2_EVERY) { //nothing for 5 minutes
-          if (currentCycleRead<100) lcdSetDescaleCycle(currentCycleRead);
           currentCycleRead++;
+          if(currentCycleRead < 100) lcdSetDescaleCycle(currentCycleRead);
+          else descaleFinished = true;
           blink = true;
           timer = millis();
         }
@@ -32,7 +34,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         blink = true;
         currentCycleRead++;
         lastCycleRead = currentCycleRead*2;
-        if (currentCycleRead*2 < 100) lcdSetDescaleCycle(currentCycleRead*2);
+        if (lastCycleRead < 100) lcdSetDescaleCycle(lastCycleRead);
         else {
           lcdSetDescaleCycle(100);
           descaleFinished = true;
