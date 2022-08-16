@@ -513,21 +513,21 @@ static void brewParamsReset() {
 
 
 bool nonBrewTimeHandling() {
-  bool modeRetrun = false;
+  bool modeReturn = false;
   switch (selectedOperationalMode) {
     case OPMODE_flush:
-      modeRetrun = true;
+      modeReturn = true;
       break;
     case OPMODE_descale:
-      modeRetrun = true;
+      modeReturn = true;
       break;
     case OPMODE_steam:
-      modeRetrun = true;
+      modeReturn = true;
       break;
     default:
-      modeRetrun = false;
+      modeReturn = false;
       break;
   }
-  return modeRetrun;
+  return modeReturn;
 }
 

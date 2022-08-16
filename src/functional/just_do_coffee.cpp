@@ -54,15 +54,8 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
   } else { //if brewState == 0
     if (currentState.temperature < ((float)runningCfg.setpoint - 10.00f)) {
       setBoilerOn();
-    } else if (currentState.temperature >= ((float)runningCfg.setpoint - 10.00f) && currentState.temperature < ((float)runningCfg.setpoint - 3.00f)) {
-      setBoilerOn();
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 3.00f)) && (currentState.temperature <= ((float)runningCfg.setpoint - 1.00f))) {
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState) {
+    } else if (currentState.temperature >= ((float)runningCfg.setpoint - 10.f) && currentState.temperature < ((float)runningCfg.setpoint - 5.f)) {
+      if (millis() - heaterWave > HPWR_OUT && !heaterState) {
         setBoilerOn();
         heaterState=true;
         heaterWave=millis();
@@ -71,14 +64,14 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
         heaterState=false;
         heaterWave=millis();
       }
-    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 0.5f)) && currentState.temperature < (float)runningCfg.setpoint) {
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState ) {
+    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 5.f)) && (currentState.temperature <= ((float)runningCfg.setpoint - 0.25f))) {
+      if (millis() - heaterWave > HPWR_OUT * runningCfg.brewDivider && !heaterState) {
         setBoilerOn();
-        heaterState=true;
+        heaterState=!heaterState;
         heaterWave=millis();
       } else if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && heaterState ) {
         setBoilerOff();
-        heaterState=false;
+        heaterState=!heaterState;
         heaterWave=millis();
       }
     } else {
