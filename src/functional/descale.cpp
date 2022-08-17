@@ -33,7 +33,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         solenoidBeat();
         blink = true;
         currentCycleRead++;
-        lastCycleRead = currentCycleRead*2;
+        lastCycleRead = currentCycleRead*3;
         if (lastCycleRead < 100) lcdSetDescaleCycle(lastCycleRead);
         else {
           lcdSetDescaleCycle(100);
