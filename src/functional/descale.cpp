@@ -3,7 +3,7 @@
 void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   static bool blink = true;
   static long timer = millis();
-  static int currentCycleRead = lcdGetDescaleCycle();
+  static int currentCycleRead = 0;
   static int lastCycleRead = 5;
   static bool descaleFinished = false;
   if (brewState() && !descaleFinished) {
