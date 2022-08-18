@@ -4,17 +4,17 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   static bool blink = true;
   static long timer = millis();
   static int currentCycleRead = 0;
-  static int lastCycleRead = 5;
+  static int lastCycleRead = 2;
   static bool descaleFinished = false;
+
   if (brewState() && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
       if (blink == true) { // Logic that switches between modes depending on the $blink value
-        setPumpToRawValue(10);
+        // setPumpToRawValue(10);
         if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to min descale value for 10 sec
           if(currentCycleRead < 100) lcdSetDescaleCycle(currentCycleRead);
           else descaleFinished = true;
           blink = false;
-          currentCycleRead = lcdGetDescaleCycle();
           timer = millis();
         }
       } else {
@@ -28,13 +28,13 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         }
       }
     } else {
-      setPumpToRawValue(30);
+      // setPumpToRawValue(30);
       if (millis() - timer > DESCALE_PHASE3_EVERY) { //set dimmer power to max descale value for 20 sec
         solenoidBeat();
         blink = true;
         currentCycleRead++;
         lastCycleRead = currentCycleRead*3;
-        if (lastCycleRead < 100) lcdSetDescaleCycle(lastCycleRead);
+        if (lastCycleRead < 100) lcdSetDescaleCycle(currentCycleRead);
         else {
           lcdSetDescaleCycle(100);
           descaleFinished = true;
@@ -60,7 +60,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
 }
 
 void solenoidBeat() {
-  setPumpFullOn();
+  // setPumpFullOn();
   closeValve();
   delay(200);
   openValve();
