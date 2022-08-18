@@ -10,7 +10,7 @@
 
 #define DESCALE_PHASE1_EVERY    30000 //60000 // short pump pulses during descale
 #define DESCALE_PHASE2_EVERY    60000 //120000 // long pause for scale softening
-#define DESCALE_PHASE3_EVERY    4000 //4000 // short burst for efficiency
+#define DESCALE_PHASE3_EVERY    10000 //4000 // short burst for efficiency
 
 //#############################################################################################
 //###############################____DESCALE__CONTROL____######################################
