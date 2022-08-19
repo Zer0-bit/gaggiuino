@@ -66,18 +66,7 @@ bool homeScreenScalesEnabled = false;
 // Other util vars
 float pressureTargetComparator = 0.0;
 
-static inline void flushActivated() {
-    setPumpFullOn();
-    #ifdef SINGLE_BOARD
-        openValve();
-    #endif
-}
-
-static inline void flushDeactivated() {
-    setPumpOff();
-    #ifdef SINGLE_BOARD
-        closeValve();
-    #endif
-}
+static inline void flushActivated(void);
+static inline void flushDeactivated(void);
 
 #endif

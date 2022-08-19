@@ -217,7 +217,7 @@ static void modeSelect(void) {
       manualPressureProfile();
       break;
     case OPMODE_flush:
-      brewState() ? flushActivated() : flushDeactivated();
+      brewActive ? flushActivated() : flushDeactivated();
       justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPMODE_steam:
@@ -531,3 +531,16 @@ bool nonBrewTimeHandling() {
   return modeReturn;
 }
 
+static inline void flushActivated() {
+  setPumpFullOn();
+  #ifdef SINGLE_BOARD
+      openValve();
+  #endif
+}
+
+static inline void flushDeactivated() {
+  setPumpOff();
+  #ifdef SINGLE_BOARD
+      closeValve();
+  #endif
+}
