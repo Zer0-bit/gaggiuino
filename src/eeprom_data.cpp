@@ -25,7 +25,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   time before a write needs to happen with some additional data integrity checks.
   YOLO
   */
-  char *errMsg = "Data out of range";
+  const char *errMsg = "Data out of range";
 
   if (eepromValuesNew.preinfusionState != 0 && eepromValuesNew.preinfusionState != 1) {
     LOG_ERROR(errMsg);

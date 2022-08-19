@@ -1,7 +1,6 @@
 #include "lcd.h"
 #include "pindef.h"
 #include "log.h"
-#include <EasyNextionLibrary.h>
 
 EasyNex myNex(USART_LCD);
 volatile int lcdCurrentPageId;
