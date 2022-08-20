@@ -222,7 +222,7 @@ static void modeSelect(void) {
       break;
     case OPMODE_steam:
       if (!steamState()) {
-        setPumpFullOn();
+        brewActive ? flushActivated() : flushDeactivated();
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       } else {
         steamCtrl(runningCfg, currentState, brewActive);
