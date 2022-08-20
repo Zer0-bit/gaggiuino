@@ -238,7 +238,7 @@ void lcdBrewTimerStop(void) {
   myNex.writeNum("timerState", 0);
 }
 
-void lcdSetBrewTimer(long seconds) {
+void lcdSetBrewTimer(int seconds) {
   myNex.writeNum("activeBrewTime", seconds);
 }
 
