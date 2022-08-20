@@ -490,9 +490,11 @@ static void brewDetect(void) {
     brewActive = true;
   } else if ( brewState() && stopOnWeight()) {
     closeValve();
+    setPumpOff();
     brewActive = false;
   } else if (!brewState()){
     closeValve();
+    setPumpOff();
     brewActive = false;
     if(paramsReset) {
       brewParamsReset();
@@ -512,7 +514,7 @@ static void brewParamsReset() {
 }
 
 
-bool nonBrewTimeHandling() {
+bool nonBrewTimeHandling(void) {
   bool modeReturn = false;
   switch (selectedOperationalMode) {
     case OPMODE_flush:
