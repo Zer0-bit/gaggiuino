@@ -1,19 +1,27 @@
 #ifndef GAGGIUINO_H
 #define GAGGIUINO_H
 
+#include "profiling_phases.h"
+#include "log.h"
+#include "eeprom_data.h"
+#include "lcd/lcd.h"
+#include "peripherals/pump.h"
+#include "peripherals/pressure_sensor.h"
+#include "peripherals/scales.h"
+#include "peripherals/peripherals.h"
+#include "peripherals/thermocouple.h"
+#include "sensors_state.h"
+#include "functional/descale.h"
+#include "functional/just_do_coffee.h"
+#include <Arduino.h>
+
 // Define some const values
 #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #define GET_PRESSURE_READ_EVERY 10
 #define GET_SCALES_READ_EVERY   100
 #define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
 #define REFRESH_FLOW_EVERY      500
-#define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
-#define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
-#define DELTA_RANGE             0.25f // % to apply as delta
-// #define BEAUTIFY_GRAPH
-#define STEAM_TEMPERATURE         155.f
-#define STEAM_WAND_HOT_WATER_TEMP 105.f
+
 
 
 typedef enum {
@@ -31,5 +39,34 @@ typedef enum {
     OPMODE_everythingFlowProfiled,
     OPMODE_pressureBasedPreinfusionAndFlowProfile
 } OPERATION_MODES;
+
+
+//Timers
+unsigned long pageRefreshTimer = 0;
+unsigned long pressureTimer = 0;
+unsigned long brewingTimer = 0;
+unsigned long thermoTimer = 0;
+unsigned long scalesTimer = 0;
+unsigned long flowTimer = 0;
+
+//scales vars
+float previousWeight  = 0;
+float brewStopWeight  = 0;
+float shotWeight      = 0;
+bool tareDone         = false;
+
+// brew detection vars
+bool brewActive = false;
+
+//PP&PI variables
+int preInfusionFinishedPhaseIdx = 3;
+bool preinfusionFinished = false;
+bool homeScreenScalesEnabled = false;
+
+// Other util vars
+float pressureTargetComparator = 0.0;
+
+static inline void flushActivated(void);
+static inline void flushDeactivated(void);
 
 #endif

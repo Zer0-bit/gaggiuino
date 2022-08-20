@@ -4,7 +4,11 @@
 
 float previousPressure;
 float currentPressure;
-ADS1115 ADS(0x48);
+#ifdef SINGLE_BOARD
+  ADS1015 ADS(0x48);
+#else
+  ADS1115 ADS(0x48);
+#endif
 
 void pressureSensorInit() {
   ADS.begin();
@@ -15,14 +19,18 @@ void pressureSensorInit() {
 }
 
 float getPressure() {  //returns sensor pressure data
-  // 5V/1024 = 1/204.8 (10 bit) or 6553.6 (15 bit)
-  // voltageZero = 0.5V --> 102.4(10 bit) or 3276.8 (15 bit)
-  // voltageMax = 4.5V --> 921.6 (10 bit) or 29491.2 (15 bit)
-  // range 921.6 - 102.4 = 819.2 or 26214.4
+  // voltageZero = 0.5V --> 25.6 (8 bit) or 102.4 (10 bit) or 2666.7 (ADS 15 bit)
+  // voltageMax = 4.5V --> 230.4 (8 bit) or 921.6 (10 bit) or 24000 (ADS 15 bit)
+  // range 921.6 - 102.4 = 204.8 or 819.2 or 21333.3
   // pressure gauge range 0-1.2MPa - 0-12 bar
-  // 1 bar = 68.27 or 2184.5
+  // 1 bar = 17.1 or 68.27 or 1777.8
+
   previousPressure = currentPressure;
-  currentPressure = ADS.getValue() / 1706.6f - 1.49f;
+  #ifndef SINGLE_BOARD
+    currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
+  #else
+    currentPressure = (ADS.getValue() - 333) / 222.25f; // 12bit
+  #endif
   return currentPressure;
 }
 

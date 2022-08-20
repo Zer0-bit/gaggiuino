@@ -3,54 +3,23 @@
 #endif
 
 #include "gaggiuino.h"
-#include "profiling_phases.h"
-#include "log.h"
-#include "eeprom_data.h"
-#include "lcd/lcd.h"
-#include "peripherals/pump.h"
-#include "peripherals/pressure_sensor.h"
-#include "peripherals/thermocouple.h"
-#include "peripherals/scales.h"
-#include "peripherals/peripherals.h"
-#include "sensors_state.h"
 
-// Some vars are better global
-//Timers
-unsigned long pressureTimer = 0;
-unsigned long thermoTimer = 0;
-unsigned long scalesTimer = 0;
-unsigned long flowTimer = 0;
-unsigned long pageRefreshTimer = 0;
-unsigned long brewingTimer = 0;
-
-SensorState currentState;
-
-//scales vars
-float shotWeight;
-float previousWeight;
-bool tareDone = false;
-
-// brew detection vars
-bool brewActive;
-
-//PP&PI variables
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
 Phases phases {6,  phaseArray};
-int preInfusionFinishedPhaseIdx = 3;
-bool preinfusionFinished;
 
-eepromValues_t runningCfg;
+SensorState currentState;
 
 OPERATION_MODES selectedOperationalMode;
-bool homeScreenScalesEnabled;
 
-// Other util vars
-float pressureTargetComparator;
+eepromValues_t runningCfg;
 
 void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
+
+  lcdInit();
+  LOG_INFO("LCD Init");
 
   // Various pins operation mode handling
   pinInit();
@@ -72,9 +41,6 @@ void setup(void) {
   // Valve
   closeValve();
   LOG_INFO("Valve closed");
-
-  lcdInit();
-  LOG_INFO("LCD Init");
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -136,7 +102,7 @@ static void sensorsReadTemperature(void) {
     This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
     If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating
     */
-    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  > 165.0f) {
+    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  > 170.0f) {
       /* In the event of the temp failing to read while the SSR is HIGH
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoilerOff();
@@ -196,12 +162,18 @@ static void calculateWeightAndFlow(void) {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-    if (shotWeight > runningCfg.shotDose-0.5f ) return true;
-    else return false;
-  } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-    if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) return true;
-    else return false;
+  if ( !nonBrewTimeHandling() ) {
+    if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
+      if (shotWeight > runningCfg.shotDose-0.5f ) {
+        brewStopWeight = shotWeight;
+        return true;
+      } else return false;
+    } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
+      if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) {
+        brewStopWeight = shotWeight;
+        return true;
+      } else return false;
+    }
   }
   return false;
 }
@@ -239,140 +211,31 @@ static void modeSelect(void) {
     case OPMODE_everythingFlowProfiled:
     case OPMODE_pressureBasedPreinfusionAndFlowProfile:
       if (!steamState()) profiling();
-      else steamCtrl();
+      else steamCtrl(runningCfg, currentState, brewActive);
       break;
     case OPMODE_manual:
       manualPressureProfile();
       break;
     case OPMODE_flush:
-      setPumpFullOn();
-      justDoCoffee();
+      brewActive ? flushActivated() : flushDeactivated();
+      justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPMODE_steam:
       if (!steamState()) {
         setPumpFullOn();
-        justDoCoffee();
+        justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       } else {
-        steamCtrl();
+        steamCtrl(runningCfg, currentState, brewActive);
       }
       break;
     case OPMODE_descale:
-      deScale();
+      deScale(runningCfg, currentState);
       break;
     case OPMODE_empty:
       break;
     default:
       pageValuesRefresh(true);
       break;
-  }
-}
-
-//#############################################################################################
-//#########################____NO_OPTIONS_ENABLED_POWER_CONTROL____############################
-//#############################################################################################
-
-//delta stuff
-inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
-
-
-static void justDoCoffee(void) {
-  int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
-  static double heaterWave;
-  static bool heaterState;
-  float BREW_TEMP_DELTA;
-  // Calculating the boiler heating power range based on the below input values
-  int HPWR_OUT = mapRange(currentState.temperature, runningCfg.setpoint - 10, runningCfg.setpoint, runningCfg.hpwr, HPWR_LOW, 0);
-  HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(currentState.temperature, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
-  BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(runningCfg.setpoint));
-
-  if (brewActive) {
-  // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (currentState.temperature > runningCfg.setpoint && currentState.temperature < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
-      if (millis() - heaterWave > HPWR_OUT * runningCfg.brewDivider && !heaterState ) {
-        setBoilerOff();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_LOW * runningCfg.mainDivider && heaterState ) {
-        setBoilerOn();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if (currentState.temperature > runningCfg.setpoint - 1.5f && currentState.temperature < runningCfg.setpoint + (runningCfg.brewDeltaState ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
-      if (millis() - heaterWave > runningCfg.hpwr * runningCfg.brewDivider && !heaterState ) {
-        setBoilerOn();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > runningCfg.hpwr && heaterState ) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if (runningCfg.brewDeltaState && currentState.temperature >= (runningCfg.setpoint + BREW_TEMP_DELTA) && currentState.temperature <= (runningCfg.setpoint + BREW_TEMP_DELTA + 2.5f)  && preinfusionFinished ) {
-      if (millis() - heaterWave > runningCfg.hpwr * runningCfg.mainDivider && !heaterState ) {
-        setBoilerOn();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > runningCfg.hpwr && heaterState ) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if(currentState.temperature <= runningCfg.setpoint - 1.5f) {
-      setBoilerOn();
-    } else {
-      setBoilerOff();
-    }
-  } else { //if brewState == 0
-    if (currentState.temperature < ((float)runningCfg.setpoint - 10.00f)) {
-      setBoilerOn();
-    } else if (currentState.temperature >= ((float)runningCfg.setpoint - 10.00f) && currentState.temperature < ((float)runningCfg.setpoint - 3.00f)) {
-      setBoilerOn();
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 3.00f)) && (currentState.temperature <= ((float)runningCfg.setpoint - 1.00f))) {
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState) {
-        setBoilerOn();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && heaterState ) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 0.5f)) && currentState.temperature < (float)runningCfg.setpoint) {
-      if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && !heaterState ) {
-        setBoilerOn();
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_OUT / runningCfg.brewDivider && heaterState ) {
-        setBoilerOff();
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else {
-      setBoilerOff();
-    }
-  }
-}
-
-//#############################################################################################
-//################################____STEAM_POWER_CONTROL____##################################
-//#############################################################################################
-
-static void steamCtrl(void) {
-    // steam temp control, needs to be aggressive to keep steam pressure acceptable
-  if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
-    setBoilerOn();
-    brewActive ? setPumpFullOn() : setPumpOff();
-  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
-    setBoilerOn();
-    brewActive ? setPumpToRawValue(25) : setPumpOff();
-  } else {
-    setBoilerOff();
   }
 }
 
@@ -407,9 +270,9 @@ static void lcdRefresh(void) {
       lcdSetWeight(currentState.weight);
     } else {
       lcdSetWeight(
-        shotWeight > 0.f
+        (shotWeight > 0.f && !stopOnWeight())
           ? currentState.weight
-          : 0.0f
+          : brewStopWeight
       );
     }
 
@@ -527,65 +390,6 @@ void lcdTrigger3(void) {
 }
 
 //#############################################################################################
-//###############################____DESCALE__CONTROL____######################################
-//#############################################################################################
-
-static void deScale(void) {
-  static bool blink = true;
-  static long timer = millis();
-  static int currentCycleRead = lcdGetDescaleCycle();
-  static int lastCycleRead = 10;
-  static bool descaleFinished = false;
-  if (brewState() && !descaleFinished) {
-    if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
-      if (blink == true) { // Logic that switches between modes depending on the $blink value
-        setPumpToRawValue(15);
-        if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to min descale value for 10 sec
-          if (currentCycleRead >=100) descaleFinished = true;
-          blink = false;
-          currentCycleRead = lcdGetDescaleCycle();
-          timer = millis();
-        }
-      } else {
-        setPumpToRawValue(30);
-        if (millis() - timer > DESCALE_PHASE2_EVERY) { //set dimmer power to max descale value for 20 sec
-          blink = true;
-          currentCycleRead++;
-          if (currentCycleRead<100) lcdSetDescaleCycle(currentCycleRead);
-          timer = millis();
-        }
-      }
-    } else {
-      setPumpOff();
-      if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
-        if (currentCycleRead*2 < 100) lcdSetDescaleCycle(currentCycleRead*3);
-        else {
-          lcdSetDescaleCycle(100);
-          descaleFinished = true;
-        }
-        lastCycleRead = currentCycleRead*2;
-        timer = millis();
-      }
-    }
-  } else if (brewState() && descaleFinished == true){
-    setPumpOff();
-    if ((millis() - timer) > 1000) {
-      lcdBrewTimerStop();
-      lcdShowDescaleFinished();
-      timer=millis();
-    }
-  } else {
-    currentCycleRead = 0;
-    lastCycleRead = 10;
-    descaleFinished = false;
-    timer = millis();
-  }
-  //keeping it at temp
-  justDoCoffee();
-}
-
-
-//#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
 static void updatePressureProfilePhases(void) {
@@ -662,13 +466,13 @@ static void profiling(void) {
     setPumpToRawValue(0);
   }
   // Keep that water at temp
-  justDoCoffee();
+  justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
 static void manualPressureProfile(void) {
   int power_reading = lcdGetManualPressurePower();
   setPumpPressure(power_reading, 0.f, currentState);
-  justDoCoffee();
+  justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
 //#############################################################################################
@@ -699,11 +503,45 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset() {
-  tareDone = false;
-  shotWeight = 0.f;
+  tareDone            = false;
+  shotWeight          = 0.f;
   currentState.weight = 0.f;
-  previousWeight = 0.f;
-  brewingTimer = millis();
+  brewStopWeight      = 0.f;
+  previousWeight      = 0.f;
+  brewingTimer        = millis();
   preinfusionFinished = false;
 }
 
+
+bool nonBrewTimeHandling() {
+  bool modeReturn = false;
+  switch (selectedOperationalMode) {
+    case OPMODE_flush:
+      modeReturn = true;
+      break;
+    case OPMODE_descale:
+      modeReturn = true;
+      break;
+    case OPMODE_steam:
+      modeReturn = true;
+      break;
+    default:
+      modeReturn = false;
+      break;
+  }
+  return modeReturn;
+}
+
+static inline void flushActivated() {
+  setPumpFullOn();
+  #ifdef SINGLE_BOARD
+      openValve();
+  #endif
+}
+
+static inline void flushDeactivated() {
+  setPumpOff();
+  #ifdef SINGLE_BOARD
+      closeValve();
+  #endif
+}
