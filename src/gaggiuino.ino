@@ -940,6 +940,21 @@ void deScale() {
   justDoCoffee();
 }
 
+void solenoidBeat() {
+  pump.set(PUMP_RANGE);
+  digitalWrite(valvePin, LOW);
+  delay(200);
+  digitalWrite(valvePin, HIGH);
+  delay(200);
+  digitalWrite(valvePin, LOW);
+  delay(200);
+  digitalWrite(valvePin, HIGH);
+  delay(200);
+  digitalWrite(valvePin, LOW);
+  delay(200);
+  digitalWrite(valvePin, HIGH);
+  pump.set(0);
+}
 
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
