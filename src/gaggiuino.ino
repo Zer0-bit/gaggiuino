@@ -88,9 +88,9 @@
 #define GET_PRESSURE_READ_EVERY 50
 #define GET_SCALES_READ_EVERY   100
 #define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
-#define DESCALE_PHASE1_EVERY    500 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY    5000 // short pause for pulse effficience activation
-#define DESCALE_PHASE3_EVERY    120000 // long pause for scale softening
+#define DESCALE_PHASE1_EVERY    60000 // short pump pulses during descale
+#define DESCALE_PHASE2_EVERY    120000 // long pause for scale softening
+#define DESCALE_PHASE3_EVERY    4000 // short pause for pulse effficience activation
 #define MAX_SETPOINT_VALUE      110 //Defines the max value of the setpoint
 #define EEPROM_RESET            1 //change this value if want to reset to defaults
 #define PUMP_RANGE              127
@@ -878,51 +878,61 @@ void setBoiler(int val) {
 
 void deScale() {
   static bool blink = true;
-  static long timer = millis();
-  static int currentCycleRead = myNex.readNumber("j0.val");
-  static int lastCycleRead = 10;
+  static long timer = 0;
+  static int currentCycleRead = 0;
+  static int lastCycleRead = 0;
   static bool descaleFinished = false;
   if (brewActive && !descaleFinished) {
     if (currentCycleRead < lastCycleRead) { // descale in cycles for 5 times then wait according to the below condition
       if (blink == true) { // Logic that switches between modes depending on the $blink value
-        pump.set(15);
-        if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to max descale value for 10 sec
-          if (currentCycleRead >=100) descaleFinished = true;
+        pump.set(10);
+        if (millis() - timer > DESCALE_PHASE1_EVERY) { // 60 sec
           blink = false;
-          currentCycleRead = myNex.readNumber("j0.val");
+          currentCycleRead += 2;
           timer = millis();
         }
       } else {
-        pump.set(30);
-        if (millis() - timer > DESCALE_PHASE2_EVERY) { //set dimmer power to min descale value for 20 sec
+        pump.set(0);
+        if (millis() - timer > DESCALE_PHASE2_EVERY) { // nothing for 120 sec
           blink = true;
-          currentCycleRead++;
-          if (currentCycleRead<100) myNex.writeNum("j0.val", currentCycleRead);
+          currentCycleRead += 4;
           timer = millis();
         }
       }
     } else {
-      pump.set(0);
-      if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //nothing for 5 minutes
-        if (currentCycleRead*3 < 100) myNex.writeNum("j0.val", currentCycleRead*3);
-        else {
-          myNex.writeNum("j0.val", 100);
-          descaleFinished = true;
-        }
-        lastCycleRead = currentCycleRead*3;
+      pump.set(30);
+      if ((millis() - timer) > DESCALE_PHASE3_EVERY) { //set dimmer power to max descale value for 4 sec
+        solenoidBeat();
+        blink = true;
+        currentCycleRead += 4; // need an overflow on 3rd cycle (34 -> 68 -> 102)
+        lastCycleRead += 33;
         timer = millis();
       }
     }
-  } else if (brewActive && descaleFinished == true){
+
+    if (currentCycleRead >= 100) {
+      descaleFinished = true;
+    }
+
+    if (millis() > pageRefreshTimer) {
+      if (currentCycleRead < 100) {
+        myNex.writeNum("j0.val", currentCycleRead);
+      } else {
+        myNex.writeNum("j0.val", 100);
+      }
+    }
+  } else if (brewActive && descaleFinished) {
     pump.set(0);
     if ((millis() - timer) > 1000) {
-      brewTimer(false);
+      brewTimer(0);
       myNex.writeStr("t14.txt", "FINISHED!");
-      timer=millis();
+      timer = millis();
     }
   } else {
+    pump.set(0);
+    blink = true;
     currentCycleRead = 0;
-    lastCycleRead = 10;
+    lastCycleRead = 30;
     descaleFinished = false;
     timer = millis();
   }
