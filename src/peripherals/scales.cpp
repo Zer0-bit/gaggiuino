@@ -35,7 +35,7 @@ void scalesInit(float scalesF1, float scalesF2) {
     LoadCell_1.set_scale(scalesF1); // calibrated val1
     LoadCell_2.set_scale(scalesF2); // calibrated val2
 
-    if (LoadCell_1.wait_ready_timeout(700, 50) && LoadCell_2.wait_ready_timeout(700, 50)) {
+    if (LoadCell_1.wait_ready_timeout(700, 100) && LoadCell_2.wait_ready_timeout(700, 100)) {
       scalesPresent = true;
       LoadCell_1.tare();
       LoadCell_2.tare();
@@ -45,12 +45,19 @@ void scalesInit(float scalesF1, float scalesF2) {
 
 void scalesTare(void) {
   #if defined(SINGLE_HX711_CLOCK)
-    if (LoadCells.wait_ready_timeout(200, 50)) LoadCells.tare(4);
+    if (LoadCells.wait_ready_timeout(700, 100)) {
+      TARE_AGAIN:
+      LoadCells.tare(4);
+      if (scalesGetWeight() < -0.1 && scalesGetWeight() > 0.1) goto TARE_AGAIN;
+    }
   #else
-    if (LoadCell_1.wait_ready_timeout(200, 50) && LoadCell_2.wait_ready_timeout(200, 50)) {
+    if (LoadCell_1.wait_ready_timeout(700, 100) && LoadCell_2.wait_ready_timeout(700, 100)) {
+      TARE_AGAIN:
       LoadCell_1.tare(2);
       LoadCell_2.tare(2);
+      if (scalesGetWeight() < -0.1 && scalesGetWeight() > 0.1) goto TARE_AGAIN;
     }
+
   #endif
 }
 
@@ -64,7 +71,7 @@ float scalesGetWeight(void) {
       currentWeight = values[0] + values[1];
     }
   #else
-    if (LoadCell_1.wait_ready_timeout(100, 20) && LoadCell_2.wait_ready_timeout(100, 20)) {
+    if (LoadCell_1.wait_ready_timeout(200, 100) && LoadCell_2.wait_ready_timeout(200, 100)) {
       currentWeight = LoadCell_1.get_units() + LoadCell_2.get_units();
     }
   #endif
