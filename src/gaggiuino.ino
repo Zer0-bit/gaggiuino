@@ -120,7 +120,9 @@ static void sensorsReadTemperature(void) {
 static void sensorsReadWeight(void) {
   if (scalesIsPresent() && millis() > scalesTimer) {
     if(!tareDone) {
+      TARE_AGAIN:
       scalesTare(); //Tare at the start of any weighing cycle
+      if (scalesGetWeight() < -0.1f && scalesGetWeight() > 0.1f) goto TARE_AGAIN;
       tareDone = true;
     }
     currentState.weight = scalesGetWeight();
@@ -222,7 +224,7 @@ static void modeSelect(void) {
       break;
     case OPMODE_steam:
       if (!steamState()) {
-        setPumpFullOn();
+        brewActive ? flushActivated() : flushDeactivated();
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       } else {
         steamCtrl(runningCfg, currentState, brewActive);
@@ -490,9 +492,11 @@ static void brewDetect(void) {
     brewActive = true;
   } else if ( brewState() && stopOnWeight()) {
     closeValve();
+    setPumpOff();
     brewActive = false;
   } else if (!brewState()){
     closeValve();
+    setPumpOff();
     brewActive = false;
     if(paramsReset) {
       brewParamsReset();
@@ -512,7 +516,7 @@ static void brewParamsReset() {
 }
 
 
-bool nonBrewTimeHandling() {
+bool nonBrewTimeHandling(void) {
   bool modeReturn = false;
   switch (selectedOperationalMode) {
     case OPMODE_flush:
