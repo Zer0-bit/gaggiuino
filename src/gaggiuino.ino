@@ -120,7 +120,9 @@ static void sensorsReadTemperature(void) {
 static void sensorsReadWeight(void) {
   if (scalesIsPresent() && millis() > scalesTimer) {
     if(!tareDone) {
+      TARE_AGAIN:
       scalesTare(); //Tare at the start of any weighing cycle
+      if (scalesGetWeight() < -0.1f && scalesGetWeight() > 0.1f) goto TARE_AGAIN;
       tareDone = true;
     }
     currentState.weight = scalesGetWeight();
