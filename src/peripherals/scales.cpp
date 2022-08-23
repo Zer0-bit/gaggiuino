@@ -46,16 +46,12 @@ void scalesInit(float scalesF1, float scalesF2) {
 void scalesTare(void) {
   #if defined(SINGLE_HX711_CLOCK)
     if (LoadCells.wait_ready_timeout(700, 100)) {
-      TARE_AGAIN:
       LoadCells.tare(4);
-      if (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f) goto TARE_AGAIN;
     }
   #else
     if (LoadCell_1.wait_ready_timeout(700, 100) && LoadCell_2.wait_ready_timeout(700, 100)) {
-      TARE_AGAIN:
       LoadCell_1.tare(2);
       LoadCell_2.tare(2);
-      if (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f) goto TARE_AGAIN;
     }
 
   #endif
