@@ -16,7 +16,7 @@ short maxPumpClicksPerSecond = 50;
 // - pump clicks at 0 pressure in the system
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
-  flowPerClickAtZeroBar = 50 * pumpFlowAtZero / powerLineFrequency;
+  flowPerClickAtZeroBar = pumpFlowAtZero;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
@@ -80,7 +80,8 @@ float getFlowPerClick(float pressure, float cps) {
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
 float getPumpFlow(float cps, float pressure) {
-  return cps * getFlowPerClick(pressure, cps);
+  float frequencyEquivalentCps = 50 * cps / maxPumpClicksPerSecond;
+  return frequencyEquivalentCps * getFlowPerClick(pressure, frequencyEquivalentCps);
 }
 
 // Binary search for correct CPS in the range of 0,maxCps
@@ -94,7 +95,7 @@ float getClicksPerSecondForFlow(float flow, float pressure) {
 
   while (minCps <= maxCps) {
     cps = (minCps + maxCps) / 2.f;
-    float estFlow = cps * getFlowPerClick(pressure, cps);
+    float estFlow = getPumpFlow(cps, pressure);
     if (estFlow == flow) {
       return cps;
     } else if (estFlow < flow) {

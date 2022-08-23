@@ -520,11 +520,7 @@ bool nonBrewTimeHandling(void) {
   bool modeReturn = false;
   switch (selectedOperationalMode) {
     case OPMODE_flush:
-      modeReturn = true;
-      break;
     case OPMODE_descale:
-      modeReturn = true;
-      break;
     case OPMODE_steam:
       modeReturn = true;
       break;
