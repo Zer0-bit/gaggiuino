@@ -57,6 +57,7 @@ bool tareDone         = false;
 
 // brew detection vars
 bool brewActive = false;
+bool nonBrewModeActive = false;
 
 //PP&PI variables
 int preInfusionFinishedPhaseIdx = 3;

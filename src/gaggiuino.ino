@@ -121,7 +121,7 @@ static void sensorsReadWeight(void) {
   if (scalesIsPresent() && millis() > scalesTimer) {
     if(!tareDone) {
       scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewTimeHandling() && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f)) tareDone = false;
+      if (!nonBrewModeActive && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f)) tareDone = false;
       else tareDone = true;
     }
     currentState.weight = scalesGetWeight();
@@ -163,7 +163,7 @@ static void calculateWeightAndFlow(void) {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  if ( !nonBrewTimeHandling() ) {
+  if ( !nonBrewModeActive ) {
     if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
       if (shotWeight > runningCfg.shotDose-0.5f ) {
         brewStopWeight = shotWeight;
@@ -211,17 +211,21 @@ static void modeSelect(void) {
     case OPMODE_justFlowBasedPreinfusion:
     case OPMODE_everythingFlowProfiled:
     case OPMODE_pressureBasedPreinfusionAndFlowProfile:
+      nonBrewModeActive = false;
       if (!steamState()) profiling();
       else steamCtrl(runningCfg, currentState, brewActive);
       break;
     case OPMODE_manual:
+      nonBrewModeActive = false;
       manualPressureProfile();
       break;
     case OPMODE_flush:
+      nonBrewModeActive = true;
       brewActive ? flushActivated() : flushDeactivated();
       justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPMODE_steam:
+      nonBrewModeActive = true;
       if (!steamState()) {
         brewActive ? flushActivated() : flushDeactivated();
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
@@ -230,6 +234,7 @@ static void modeSelect(void) {
       }
       break;
     case OPMODE_descale:
+      nonBrewModeActive = true;
       deScale(runningCfg, currentState);
       break;
     case OPMODE_empty:
@@ -514,21 +519,6 @@ static void brewParamsReset() {
   preinfusionFinished = false;
 }
 
-
-bool nonBrewTimeHandling(void) {
-  bool modeReturn = false;
-  switch (selectedOperationalMode) {
-    case OPMODE_flush:
-    case OPMODE_descale:
-    case OPMODE_steam:
-      modeReturn = true;
-      break;
-    default:
-      modeReturn = false;
-      break;
-  }
-  return modeReturn;
-}
 
 static void flushActivated(void) {
   setPumpFullOn();
