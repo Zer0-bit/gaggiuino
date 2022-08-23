@@ -66,7 +66,4 @@ bool homeScreenScalesEnabled = false;
 // Other util vars
 float pressureTargetComparator = 0.0;
 
-static inline void flushActivated(void);
-static inline void flushDeactivated(void);
-
 #endif
