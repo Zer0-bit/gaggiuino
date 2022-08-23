@@ -122,7 +122,7 @@ static void sensorsReadWeight(void) {
     if(!tareDone) {
       TARE_AGAIN:
       scalesTare(); //Tare at the start of any weighing cycle
-      if (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f) goto TARE_AGAIN;
+      if (!nonBrewTimeHandling() && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f)) goto TARE_AGAIN;
       tareDone = true;
     }
     currentState.weight = scalesGetWeight();
@@ -535,14 +535,14 @@ bool nonBrewTimeHandling(void) {
   return modeReturn;
 }
 
-static inline void flushActivated() {
+static void flushActivated(void) {
   setPumpFullOn();
   #ifdef SINGLE_BOARD
       openValve();
   #endif
 }
 
-static inline void flushDeactivated() {
+static void flushDeactivated(void) {
   setPumpOff();
   #ifdef SINGLE_BOARD
       closeValve();
