@@ -517,6 +517,7 @@ static void brewParamsReset() {
   previousWeight      = 0.f;
   brewingTimer        = millis();
   preinfusionFinished = false;
+  lcdSendFakeTouch();
 }
 
 
