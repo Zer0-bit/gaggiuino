@@ -242,7 +242,7 @@ void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
 }
 
-/* 
+/*
 Sends a fake touch event to the component with id=0 on nextion
 to reset the nextion touch events timer hence the screen wouldn't
 go into sleep mode if machine is being actively used
