@@ -4,6 +4,8 @@
 
 #include "gaggiuino.h"
 
+SimpleKalmanFilter smoothPressure(2, 2, 1.00);
+
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
 Phases phases {6,  phaseArray};
@@ -133,6 +135,7 @@ static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
     currentState.pressure = getPressure();
     currentState.isPressureFalling = isPressureFalling();
+    smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -254,10 +257,9 @@ static void lcdRefresh(void) {
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     #ifdef BEAUTIFY_GRAPH
-      float beautifiedPressure = fmin(currentState.pressure, pressureTargetComparator + 0.5f);
       lcdSetPressure(
         brewActive
-          ? beautifiedPressure * 10.f
+          ? smoothedPressure * 10.f
           : currentState.pressure * 10.f
       );
     #else
@@ -459,8 +461,6 @@ static void profiling(void) {
       float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
       setPumpPressure(newBarValue, flowRestriction, currentState);
-
-      pressureTargetComparator = preinfusionFinished ? newBarValue : currentState.pressure;
     } else {
       float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
@@ -517,6 +517,7 @@ static void brewParamsReset() {
   previousWeight      = 0.f;
   brewingTimer        = millis();
   preinfusionFinished = false;
+  lcdSendFakeTouch();
 }
 
 

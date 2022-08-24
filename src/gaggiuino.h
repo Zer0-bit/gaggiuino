@@ -13,7 +13,9 @@
 #include "sensors_state.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
+
 #include <Arduino.h>
+#include <SimpleKalmanFilter.h>
 
 // Define some const values
 #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
@@ -65,6 +67,7 @@ bool preinfusionFinished = false;
 bool homeScreenScalesEnabled = false;
 
 // Other util vars
-float pressureTargetComparator = 0.0;
+float smoothedPressure;
+
 
 #endif
