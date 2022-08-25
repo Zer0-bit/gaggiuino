@@ -5,10 +5,12 @@
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 
 
-float cpsInefficiencyConstant1 = 0.00473f;
-float cpsInefficiencyConstant2 = 0.000046f;
-float pressureInefficiencyConstant = 0.01467f;
-float flowPerClickAtZeroBar = 0.296f;
+float pressureInefficiencyConstant1 = 0.1224f;
+float pressureInefficiencyConstant2 = 0.01052f;
+float pressureInefficiencyConstant3 = 0.00421f;
+float pressureInefficiencyConstant4 = 0.0007f;
+float pressureInefficiencyConstant5 = 0.00002916f;
+float flowPerClickAtZeroBar = 0.275f;
 short maxPumpClicksPerSecond = 50;
 
 // Initialising some pump specific specs, mainly:
@@ -69,42 +71,32 @@ long getAndResetClickCounter(void) {
   return counter;
 }
 
-// Models the flow per click taking into account
-// - the pump inefficiency due to pressure (linear)
-// - the pump inefficiency due to higher cps (quadratic)
-float getFlowPerClick(float pressure, float cps) {
-  return flowPerClickAtZeroBar
-        - (cpsInefficiencyConstant1 - cpsInefficiencyConstant2 * cps) * cps
-        - pressureInefficiencyConstant * pressure;
+// Models the flow per click 
+// Follows a compromise between the schematic and recorded findings
+//
+// The function is split to compensate for the rapid decline in fpc at low pressures
+float getFlowPerClick(float pressure) {
+    float fpc;
+    if (pressure <= 0.5f) {
+        fpc = flowPerClickAtZeroBar - pressureInefficiencyConstant1 * pressure;
+    } else {
+        fpc = (flowPerClickAtZeroBar - 0.055f) - (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 - (pressureInefficiencyConstant4 - pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
+    }
+
+    return 50.0f * fpc / float(maxPumpClicksPerSecond);
 }
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
 float getPumpFlow(float cps, float pressure) {
-  float frequencyEquivalentCps = 50 * cps / maxPumpClicksPerSecond;
-  return frequencyEquivalentCps * getFlowPerClick(pressure, frequencyEquivalentCps);
+    return cps * getFlowPerClick(pressure);
 }
 
-// Binary search for correct CPS in the range of 0,maxCps
-// This is needed to find the solution for CPS of the cubicfunction cps * flowPerClick(pressure, cps)
-// This loop always finds the solution in log2(maxCps) iterations ~= 7 iterations.
+// Currently there is no compensation for pressure measured at the puck, resulting in incorrect estimates
 float getClicksPerSecondForFlow(float flow, float pressure) {
-  float minCps = 0;
-  float maxCps = maxPumpClicksPerSecond;
-  float accuracy = 0.5f;
-  float cps = 0;
-
-  while (minCps <= maxCps) {
-    cps = (minCps + maxCps) / 2.f;
-    float estFlow = getPumpFlow(cps, pressure);
-    if (estFlow == flow) {
-      return cps;
-    } else if (estFlow < flow) {
-      minCps = cps + accuracy;
-    } else {
-      maxCps = cps - accuracy;
-    }
-  }
-  return cps;
+    float flowPerClick = getFlowPerClick(pressure);
+    float cps = flow / flowPerClick;
+    
+    return fminf(cps, maxPumpClicksPerSecond);
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value
