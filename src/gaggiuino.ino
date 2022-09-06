@@ -4,6 +4,8 @@
 
 #include "gaggiuino.h"
 
+SimpleKalmanFilter smoothPressure(2, 2, 1.00);
+
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
 Phases phases {6,  phaseArray};
@@ -121,7 +123,8 @@ static void sensorsReadWeight(void) {
   if (scalesIsPresent() && millis() > scalesTimer) {
     if(!tareDone) {
       scalesTare(); //Tare at the start of any weighing cycle
-      tareDone = true;
+      if (!nonBrewModeActive && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f)) tareDone = false;
+      else tareDone = true;
     }
     currentState.weight = scalesGetWeight();
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
@@ -132,6 +135,7 @@ static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
     currentState.pressure = getPressure();
     currentState.isPressureFalling = isPressureFalling();
+    smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -162,7 +166,7 @@ static void calculateWeightAndFlow(void) {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  if ( !nonBrewTimeHandling() ) {
+  if ( !nonBrewModeActive ) {
     if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
       if (shotWeight > runningCfg.shotDose-0.5f ) {
         brewStopWeight = shotWeight;
@@ -210,25 +214,30 @@ static void modeSelect(void) {
     case OPMODE_justFlowBasedPreinfusion:
     case OPMODE_everythingFlowProfiled:
     case OPMODE_pressureBasedPreinfusionAndFlowProfile:
+      nonBrewModeActive = false;
       if (!steamState()) profiling();
       else steamCtrl(runningCfg, currentState, brewActive);
       break;
     case OPMODE_manual:
+      nonBrewModeActive = false;
       manualPressureProfile();
       break;
     case OPMODE_flush:
+      nonBrewModeActive = true;
       brewActive ? flushActivated() : flushDeactivated();
       justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPMODE_steam:
+      nonBrewModeActive = true;
       if (!steamState()) {
-        setPumpFullOn();
+        brewActive ? flushActivated() : flushDeactivated();
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       } else {
         steamCtrl(runningCfg, currentState, brewActive);
       }
       break;
     case OPMODE_descale:
+      nonBrewModeActive = true;
       deScale(runningCfg, currentState);
       break;
     case OPMODE_empty:
@@ -248,10 +257,9 @@ static void lcdRefresh(void) {
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     #ifdef BEAUTIFY_GRAPH
-      float beautifiedPressure = fmin(currentState.pressure, pressureTargetComparator + 0.5f);
       lcdSetPressure(
         brewActive
-          ? beautifiedPressure * 10.f
+          ? smoothedPressure * 10.f
           : currentState.pressure * 10.f
       );
     #else
@@ -454,8 +462,6 @@ static void profiling(void) {
       float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
       setPumpPressure(newBarValue, flowRestriction, currentState);
-
-      pressureTargetComparator = preinfusionFinished ? newBarValue : currentState.pressure;
     } else {
       float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
@@ -491,9 +497,11 @@ static void brewDetect(void) {
     brewActive = true;
   } else if ( brewState() && stopOnWeight()) {
     closeValve();
+    setPumpOff();
     brewActive = false;
   } else if (!brewState()){
     closeValve();
+    setPumpOff();
     brewActive = false;
     if(paramsReset) {
       brewParamsReset();
@@ -510,36 +518,18 @@ static void brewParamsReset() {
   previousWeight      = 0.f;
   brewingTimer        = millis();
   preinfusionFinished = false;
+  lcdSendFakeTouch();
 }
 
 
-bool nonBrewTimeHandling() {
-  bool modeReturn = false;
-  switch (selectedOperationalMode) {
-    case OPMODE_flush:
-      modeReturn = true;
-      break;
-    case OPMODE_descale:
-      modeReturn = true;
-      break;
-    case OPMODE_steam:
-      modeReturn = true;
-      break;
-    default:
-      modeReturn = false;
-      break;
-  }
-  return modeReturn;
-}
-
-static inline void flushActivated() {
+static void flushActivated(void) {
   setPumpFullOn();
   #ifdef SINGLE_BOARD
       openValve();
   #endif
 }
 
-static inline void flushDeactivated() {
+static void flushDeactivated(void) {
   setPumpOff();
   #ifdef SINGLE_BOARD
       closeValve();
