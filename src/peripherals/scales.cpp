@@ -4,6 +4,9 @@
 #if defined(SINGLE_HX711_CLOCK)
 #include <HX711_2.h>
 HX711_2 LoadCells;
+#elif defined(SINGLE_LOAD_CELL)
+#include <HX711.h>
+HX711 LoadCell_1; //HX711 1
 #else
 #include <HX711.h>
 HX711 LoadCell_1; //HX711 1
@@ -29,6 +32,14 @@ void scalesInit(float scalesF1, float scalesF2) {
       LoadCells.tare(4);
       scalesPresent = true;
     }
+  #elif defined(SINGLE_LOAD_CELL)
+    LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
+    LoadCell_1.set_scale(scalesF1); // calibrated val1
+
+    if (LoadCell_1.wait_ready_timeout(700, 100)) {
+      scalesPresent = true;
+      LoadCell_1.tare();
+    }
   #else
     LoadCell_1.begin(HX711_dout_1, HX711_sck_1);
     LoadCell_2.begin(HX711_dout_2, HX711_sck_2);
@@ -48,6 +59,10 @@ void scalesTare(void) {
     if (LoadCells.wait_ready_timeout(700, 100)) {
       LoadCells.tare(4);
     }
+  #elif defined(SINGLE_LOAD_CELL)
+    if (LoadCell_1.wait_ready_timeout(700, 100)) {
+      LoadCell_1.tare(2);
+    }
   #else
     if (LoadCell_1.wait_ready_timeout(700, 100) && LoadCell_2.wait_ready_timeout(700, 100)) {
       LoadCell_1.tare(2);
@@ -65,6 +80,10 @@ float scalesGetWeight(void) {
       float values[2];
       LoadCells.get_units(values);
       currentWeight = values[0] + values[1];
+    }
+  #elif defined(SINGLE_LOAD_CELL)
+    if (LoadCell_1.wait_ready_timeout(200, 100)) {
+      currentWeight = LoadCell_1.get_units();
     }
   #else
     if (LoadCell_1.wait_ready_timeout(200, 100) && LoadCell_2.wait_ready_timeout(200, 100)) {
