@@ -155,7 +155,7 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.flowProfileCurveSpeed         = myNex.readNumber("ppFlowCurveSpeed");
 
   lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");
-  lcdCfg.shotDose                       = myNex.readNumber("shotTarget") / 10.f;
+  lcdCfg.shotDose                       = myNex.readNumber("shotDose") / 10.f;
   lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotCustomVal") / 10.f;
 
   lcdCfg.brewDeltaState             = myNex.readNumber("deltaState");

@@ -171,9 +171,11 @@ static void calculateWeightAndFlow(void) {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
+  shotTarget = runningCfg.shotDose * runningCfg.shotPreset;
+  
   if ( !nonBrewModeActive ) {
     if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-      if (shotWeight > runningCfg.shotDose-0.5f ) {
+      if (shotWeight > (shotTarget - 0.5f)) {
         brewStopWeight = shotWeight;
         return true;
       } else return false;
