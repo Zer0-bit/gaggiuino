@@ -22,7 +22,10 @@
 #define GET_PRESSURE_READ_EVERY 10
 #define GET_SCALES_READ_EVERY   100
 #define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
-#define REFRESH_FLOW_EVERY      500
+#define REFRESH_FLOW_EVERY      150
+#define READ_TRAY_OFFSET_EVERY  1000
+#define EMPTY_TRAY_WEIGHT       23456.f
+#define TRAY_FULL_THRESHOLD     700.f
 
 
 
@@ -50,6 +53,7 @@ unsigned long brewingTimer = 0;
 unsigned long thermoTimer = 0;
 unsigned long scalesTimer = 0;
 unsigned long flowTimer = 0;
+unsigned long trayTimer = millis();
 
 //scales vars
 float previousWeight  = 0;

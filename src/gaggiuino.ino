@@ -68,6 +68,7 @@ void setup(void) {
 
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
+  
 }
 
 //##############################################################################################################################
@@ -95,6 +96,7 @@ static void sensorsRead(void) {
   sensorsReadWeight();
   sensorsReadPressure();
   calculateWeightAndFlow();
+  // monitorDripTrayState();
 }
 
 static void sensorsReadTemperature(void) {
@@ -104,7 +106,7 @@ static void sensorsReadTemperature(void) {
     This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
     If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating
     */
-    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  > 170.0f) {
+    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
       /* In the event of the temp failing to read while the SSR is HIGH
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoilerOff();
@@ -134,6 +136,7 @@ static void sensorsReadWeight(void) {
 static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
     currentState.pressure = getPressure();
+    currentState.isPressureRaising = isPressureRaising();
     currentState.isPressureFalling = isPressureFalling();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
@@ -155,8 +158,10 @@ static void calculateWeightAndFlow(void) {
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000 / elapsedTime);
         previousWeight = shotWeight;
-      } else if (preinfusionFinished) {
-        shotWeight += currentState.pumpFlow * elapsedTime / 1000;
+      } else {
+        if (preinfusionFinished /*&& !currentState.isPressureRaising*/) {
+          shotWeight += currentState.pumpFlow * elapsedTime / 1000;
+        }
       }
 
       flowTimer = millis();
@@ -276,12 +281,21 @@ static void lcdRefresh(void) {
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
+      // lcdSetWeight(scalesDripTrayWeight());
     } else {
-      lcdSetWeight(
-        (shotWeight > 0.f && !stopOnWeight())
-          ? currentState.weight
+      if (scalesIsPresent()) {
+        lcdSetWeight(
+          (shotWeight > 0.f && !stopOnWeight())
+            ? currentState.weight
+            : brewStopWeight
+        );
+      } else {
+        lcdSetWeight(
+          (preinfusionFinished && !stopOnWeight())
+          ? shotWeight
           : brewStopWeight
-      );
+        );
+      }
     }
 
     /*LCD flow output*/
@@ -509,7 +523,7 @@ static void brewDetect(void) {
   }
 }
 
-static void brewParamsReset() {
+static void brewParamsReset(void) {
   tareDone            = false;
   shotWeight          = 0.f;
   currentState.weight = 0.f;
@@ -533,4 +547,23 @@ static void flushDeactivated(void) {
   #ifdef SINGLE_BOARD
       closeValve();
   #endif
+}
+
+static void monitorDripTrayState(void) {
+  static bool dripTrayFull = false;
+  float currentTotalTrayWeight = scalesDripTrayWeight();
+  float actualTrayWeight  = currentTotalTrayWeight - EMPTY_TRAY_WEIGHT;
+
+  if ( !brewActive && !steamState() ) {
+    if (actualTrayWeight > TRAY_FULL_THRESHOLD) {
+      if (millis() > trayTimer) {
+        dripTrayFull = true;
+        trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
+      }
+    } else {
+      trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
+      dripTrayFull = false;
+    }
+    if (dripTrayFull) lcdShowPopup("DRIP TRAY FULL");
+  }
 }
