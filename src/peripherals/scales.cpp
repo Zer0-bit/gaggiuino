@@ -41,6 +41,7 @@ void scalesInit(float scalesF1, float scalesF2) {
       LoadCell_2.tare();
     }
   #endif
+  scalesPresent = false;
 }
 
 void scalesTare(void) {
@@ -77,4 +78,15 @@ float scalesGetWeight(void) {
 
 bool scalesIsPresent(void) {
   return scalesPresent;
+}
+
+float scalesDripTrayWeight() {
+  long value[2];
+  #if defined(SINGLE_HX711_CLOCK)
+    LoadCells.read_average(value, 4);
+  #else
+    value[0] = LoadCell_1.read_average(4);
+    value[1] = LoadCell_2.read_average(4);
+  #endif
+  return ((float)value[0] + (float)value[1]);
 }
