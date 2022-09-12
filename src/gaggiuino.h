@@ -73,6 +73,7 @@ bool homeScreenScalesEnabled = false;
 
 // Other util vars
 float smoothedPressure;
+float smoothedPumpFlow;
 
 
 #endif
