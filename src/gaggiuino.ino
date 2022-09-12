@@ -5,6 +5,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(2, 2, 1.00);
+SimpleKalmanFilter smoothPumpFlow(2, 2, 1.00);
 
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
@@ -154,6 +155,7 @@ static void calculateWeightAndFlow(void) {
       long pumpClicks =  getAndResetClickCounter();
       float cps = 1000.f * pumpClicks / elapsedTime;
       currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+      smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
 
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000 / elapsedTime);
@@ -307,7 +309,7 @@ static void lcdRefresh(void) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.weightFlow * 10.f
-          : currentState.pumpFlow * 10.f
+          : smoothedPumpFlow * 10.f
       );
     }
 
