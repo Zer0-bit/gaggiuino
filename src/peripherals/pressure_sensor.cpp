@@ -29,7 +29,7 @@ float getPressure() {  //returns sensor pressure data
   #ifndef SINGLE_BOARD
     currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
   #else
-    currentPressure = (ADS.getValue() - 333) / 222.25f; // 12bit
+    currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
   #endif
   return currentPressure;
 }
