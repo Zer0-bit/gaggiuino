@@ -559,35 +559,26 @@ void justDoCoffee() {
       setBoiler(LOW);
     }
   } else { //if brewState == 0
-    // USART_CH1.println("DO_COFFEE BREW BTN NOT ACTIVE BLOCK");
-    //brewTimer(0);
     if (kProbeReadValue < ((float)setPoint - 10.00f)) {
       setBoiler(HIGH);
-    } else if (kProbeReadValue >= ((float)setPoint - 10.00f) && kProbeReadValue < ((float)setPoint - 3.00f)) {
-      setBoiler(HIGH);
-      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider) {
+    } else if (kProbeReadValue >= ((float)setPoint - 10.f) && kProbeReadValue < ((float)setPoint - 5.f)) {
+      if (millis() - heaterWave > HPWR_OUT && !heaterState) {
+        setBoiler(HIGH);
+        heaterState=true;
+        heaterWave=millis();
+      } else if (millis() - heaterWave > HPWR_OUT / BrewCycleDivider && heaterState ) {
         setBoiler(LOW);
         heaterState=false;
         heaterWave=millis();
       }
-    } else if ((kProbeReadValue >= ((float)setPoint - 3.00f)) && (kProbeReadValue <= ((float)setPoint - 1.00f))) {
-      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState) {
+    } else if ((kProbeReadValue >= ((float)setPoint - 5.f)) && (kProbeReadValue <= ((float)setPoint - 0.25f))) {
+      if (millis() - heaterWave > HPWR_OUT * BrewCycleDivider && !heaterState) {
         setBoiler(HIGH);
-        heaterState=true;
+        heaterState=!heaterState;
         heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
+      } else if (millis() - heaterWave > HPWR_OUT / BrewCycleDivider && heaterState ) {
         setBoiler(LOW);
-        heaterState=false;
-        heaterWave=millis();
-      }
-    } else if ((kProbeReadValue >= ((float)setPoint - 0.5f)) && kProbeReadValue < (float)setPoint) {
-      if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && !heaterState ) {
-        setBoiler(HIGH);
-        heaterState=true;
-        heaterWave=millis();
-      } else if (millis() - heaterWave > HPWR_OUT/BrewCycleDivider && heaterState ) {
-        setBoiler(LOW);
-        heaterState=false;
+        heaterState=!heaterState;
         heaterWave=millis();
       }
     } else {
