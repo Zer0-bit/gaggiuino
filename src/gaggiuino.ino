@@ -177,13 +177,13 @@ bool stopOnWeight() {
   
   if ( !nonBrewModeActive ) {
     if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-      if (shotWeight > (shotTarget - 2.0f)) {
+      if (shotWeight > (shotTarget - 0.5f)) {
         if (scalesIsPresent && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
         else brewStopWeight = shotWeight + (smoothedPumpFlow * 2.f * 10.f);
         return true;
       } else return false;
     } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-      if (shotWeight > runningCfg.shotStopOnCustomWeight-2.0f) {
+      if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) {
         if (scalesIsPresent && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
         else brewStopWeight = shotWeight + (smoothedPumpFlow * 2.f * 10.f);
         return true;
