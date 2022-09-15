@@ -137,7 +137,7 @@ static void sensorsReadWeight(void) {
 static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
     currentState.pressure = getPressure();
-    currentState.isPressureRaising = isPressureRaising();
+    currentState.isPressureRising = isPressureRaising();
     currentState.isPressureFalling = isPressureFalling();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
@@ -161,7 +161,7 @@ static void calculateWeightAndFlow(void) {
         currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000 / elapsedTime);
         previousWeight = shotWeight;
       } else {
-        if (preinfusionFinished /*&& !currentState.isPressureRaising*/) {
+        if (preinfusionFinished && !currentState.isPressureRising) {
           shotWeight += smoothedPumpFlow * elapsedTime / 1000;
         }
       }

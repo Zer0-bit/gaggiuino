@@ -35,7 +35,7 @@ float getPressure() {  //returns sensor pressure data
 }
 
 bool isPressureRaising() {
-  return currentPressure > previousPressure + 0.1f;
+  return currentPressure > previousPressure + 0.3f;
 }
 
 bool isPressureFalling() {
