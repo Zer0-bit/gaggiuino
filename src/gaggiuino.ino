@@ -154,6 +154,7 @@ static void calculateWeightAndFlow(void) {
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       long pumpClicks =  getAndResetClickCounter();
       float cps = 1000.f * pumpClicks / elapsedTime;
+      previousPumpFlow = currentState.pumpFlow;
       currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
       smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
 
@@ -161,14 +162,17 @@ static void calculateWeightAndFlow(void) {
         currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000 / elapsedTime);
         previousWeight = shotWeight;
       } else {
-        if (preinfusionFinished && !currentState.isPressureRising) {
+        if (preinfusionFinished && !currentState.isPressureRising && !currentState.isPumpFlowRisingFast) {
           shotWeight += smoothedPumpFlow * elapsedTime / 1000;
         }
       }
-
       flowTimer = millis();
     }
   }
+}
+
+bool isPumpFlowRisingFast() {
+  return currentState.pumpFlow > previousPumpFlow + 0.7f;
 }
 
 // Stops the pump if setting active and dose/weight conditions met
@@ -178,13 +182,13 @@ bool stopOnWeight() {
   if ( !nonBrewModeActive ) {
     if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
       if (shotWeight > (shotTarget - 0.5f)) {
-        if (scalesIsPresent && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
+        if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
         else brewStopWeight = shotWeight + (smoothedPumpFlow * 2.f * 10.f);
         return true;
       } else return false;
     } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
       if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) {
-        if (scalesIsPresent && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
+        if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
         else brewStopWeight = shotWeight + (smoothedPumpFlow * 2.f * 10.f);
         return true;
       } else return false;
