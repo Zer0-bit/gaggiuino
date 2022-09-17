@@ -1,5 +1,5 @@
 #if defined(DEBUG_ENABLED)
-  #include "dbg.h"
+#include "dbg.h"
 #endif
 
 #include "gaggiuino.h"
@@ -8,9 +8,9 @@ SimpleKalmanFilter smoothPressure(2, 2, 1.00);
 SimpleKalmanFilter smoothPumpFlow(2, 2, 1.00);
 SimpleKalmanFilter smoothScalesFlow(2, 2, 1.00);
 
-//default phases. Updated in updatePressureProfilePhases.
+// default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
-Phases phases {6,  phaseArray};
+Phases phases{6, phaseArray};
 
 SensorState currentState;
 
@@ -35,10 +35,10 @@ void setup(void) {
   LOG_INFO("DBG init");
 #endif
 
-  setBoilerOff();  // relayPin LOW
+  setBoilerOff(); // relayPin LOW
   LOG_INFO("Boiler turned off");
 
-  //Pump
+  // Pump
   setPumpOff();
   LOG_INFO("Pump turned off");
 
@@ -70,15 +70,13 @@ void setup(void) {
 
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
-  
 }
 
 //##############################################################################################################################
 //############################################________________MAIN______________################################################
 //##############################################################################################################################
 
-
-//Main loop where all the logic is continuously run
+// Main loop where all the logic is continuously run
 void loop(void) {
   pageValuesRefresh(false);
   lcdListen();
@@ -91,7 +89,6 @@ void loop(void) {
 //##############################################################################################################################
 //#############################################___________SENSORS_READ________##################################################
 //##############################################################################################################################
-
 
 static void sensorsRead(void) {
   sensorsReadTemperature();
@@ -109,14 +106,14 @@ static void sensorsReadTemperature(void) {
     This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
     If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating
     */
-    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
+    while (currentState.temperature <= 0.0f || currentState.temperature == NAN || currentState.temperature >= 170.0f) {
       /* In the event of the temp failing to read while the SSR is HIGH
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoilerOff();
       if (millis() > thermoTimer) {
         LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
-        lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
-        currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
+        lcdShowPopup("TEMP READ ERROR");                       // writing a LCD message
+        currentState.temperature = thermocouple.readCelsius(); // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
       }
     }
@@ -126,10 +123,12 @@ static void sensorsReadTemperature(void) {
 
 static void sensorsReadWeight(void) {
   if (scalesIsPresent() && millis() > scalesTimer) {
-    if(!tareDone) {
-      scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewModeActive && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f)) tareDone = false;
-      else tareDone = true;
+    if (!tareDone) {
+      scalesTare(); // Tare at the start of any weighing cycle
+      if (!nonBrewModeActive && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f))
+        tareDone = false;
+      else
+        tareDone = true;
     }
     currentState.weight = scalesGetWeight();
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
@@ -244,14 +243,13 @@ bool stopOnWeight() {
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 
-static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
+static void pageValuesRefresh(bool forcedUpdate) { // Refreshing our values on page changes
 
-  if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) {
+  if (lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true) {
     runningCfg = lcdDownloadCfg();
 
-
     homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
-    selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode(); // MODE_SELECT should always be LAST
+    selectedOperationalMode = (OPERATION_MODES)lcdGetSelectedOperationalMode(); // MODE_SELECT should always be LAST
 
     updatePressureProfilePhases();
 
@@ -314,20 +312,18 @@ static void modeSelect(void) {
 static void lcdRefresh(void) {
 
   if (millis() > pageRefreshTimer) {
-    /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    #ifdef BEAUTIFY_GRAPH
-      lcdSetPressure(
+/*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
+#ifdef BEAUTIFY_GRAPH
+    lcdSetPressure(
         brewActive
-          ? smoothedPressure * 10.f
-          : currentState.pressure * 10.f
-      );
-    #else
-      lcdSetPressure(
+            ? smoothedPressure * 10.f
+            : currentState.pressure * 10.f);
+#else
+    lcdSetPressure(
         currentState.pressure > 0.f
-          ? currentState.pressure * 10.f
-          : 0.f
-      );
-    #endif
+            ? currentState.pressure * 10.f
+            : 0.f);
+#endif
 
     /*LCD temp output*/
     lcdSetTemperature(currentState.temperature - runningCfg.offsetTemp);
@@ -345,20 +341,18 @@ static void lcdRefresh(void) {
         );
       } else if(shotWeight || brewStopWeight) {
         lcdSetWeight(
-          (preinfusionFinished && !stopOnWeight())
-          ? shotWeight
-          : brewStopWeight
-        );
+            (preinfusionFinished && !stopOnWeight())
+                ? shotWeight
+                : brewStopWeight);
       }
     }
 
     /*LCD flow output*/
-    if (lcdCurrentPageId == 1 || lcdCurrentPageId == 2 || lcdCurrentPageId == 8 ) { // no point sending this continuously if on any other screens than brew related ones
+    if (lcdCurrentPageId == 1 || lcdCurrentPageId == 2 || lcdCurrentPageId == 8) { // no point sending this continuously if on any other screens than brew related ones
       lcdSetFlow(
-        currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
-          ? currentState.weightFlow * 10.f
-          : smoothedPumpFlow * 10.f
-      );
+          currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
+              ? currentState.weightFlow * 10.f
+              : smoothedPumpFlow * 10.f);
     }
 
 #if defined(DEBUG_ENABLED)
@@ -387,23 +381,23 @@ void lcdTrigger1(void) {
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   eepromValues_t lcdValues = lcdDownloadCfg();
 
-  switch (lcdCurrentPageId){
-    case 1:
-      break;
-    case 2:
-      break;
-    case 3:
-      // PRESSURE PARAMS
-      eepromCurrentValues.pressureProfilingStart    = lcdValues.pressureProfilingStart;
-      eepromCurrentValues.pressureProfilingFinish   = lcdValues.pressureProfilingFinish;
-      eepromCurrentValues.pressureProfilingHold     = lcdValues.pressureProfilingHold;
-      eepromCurrentValues.pressureProfilingLength   = lcdValues.pressureProfilingLength;
-      eepromCurrentValues.pressureProfilingState    = lcdValues.pressureProfilingState;
-      eepromCurrentValues.preinfusionState          = lcdValues.preinfusionState;
-      eepromCurrentValues.preinfusionSec            = lcdValues.preinfusionSec;
-      eepromCurrentValues.preinfusionBar            = lcdValues.preinfusionBar;
-      eepromCurrentValues.preinfusionSoak           = lcdValues.preinfusionSoak;
-      eepromCurrentValues.preinfusionRamp           = lcdValues.preinfusionRamp;
+  switch (lcdCurrentPageId) {
+  case 1:
+    break;
+  case 2:
+    break;
+  case 3:
+    // PRESSURE PARAMS
+    eepromCurrentValues.pressureProfilingStart = lcdValues.pressureProfilingStart;
+    eepromCurrentValues.pressureProfilingFinish = lcdValues.pressureProfilingFinish;
+    eepromCurrentValues.pressureProfilingHold = lcdValues.pressureProfilingHold;
+    eepromCurrentValues.pressureProfilingLength = lcdValues.pressureProfilingLength;
+    eepromCurrentValues.pressureProfilingState = lcdValues.pressureProfilingState;
+    eepromCurrentValues.preinfusionState = lcdValues.preinfusionState;
+    eepromCurrentValues.preinfusionSec = lcdValues.preinfusionSec;
+    eepromCurrentValues.preinfusionBar = lcdValues.preinfusionBar;
+    eepromCurrentValues.preinfusionSoak = lcdValues.preinfusionSoak;
+    eepromCurrentValues.preinfusionRamp = lcdValues.preinfusionRamp;
 
       // FLOW PARAMS
       eepromCurrentValues.preinfusionFlowState          = lcdValues.preinfusionFlowState;
@@ -457,7 +451,8 @@ void lcdTrigger1(void) {
 
 void lcdTrigger2(void) {
   LOG_VERBOSE("Tare scales");
-  if (scalesIsPresent()) scalesTare();
+  if (scalesIsPresent())
+    scalesTare();
 }
 
 void lcdTrigger3(void) {
@@ -511,28 +506,28 @@ void setFlowPhase(int phaseIdx, float startFlow, float endFlow, float pressureRe
 }
 
 void setPhase(int phaseIdx, PHASE_TYPE type, float startValue, float endValue, float startRestriction, float endRestriction, int timeMs) {
-    phases.phases[phaseIdx].type = type;
-    phases.phases[phaseIdx].startValue = startValue;
-    phases.phases[phaseIdx].endValue = endValue;
-    phases.phases[phaseIdx].startRestriction = startRestriction;
-    phases.phases[phaseIdx].endRestriction = endRestriction;
-    phases.phases[phaseIdx].durationMs = timeMs;
+  phases.phases[phaseIdx].type = type;
+  phases.phases[phaseIdx].startValue = startValue;
+  phases.phases[phaseIdx].endValue = endValue;
+  phases.phases[phaseIdx].startRestriction = startRestriction;
+  phases.phases[phaseIdx].endRestriction = endRestriction;
+  phases.phases[phaseIdx].durationMs = timeMs;
 }
 
 static void profiling(void) {
 
-  if (brewActive) { //runs this only when brew button activated and pressure profile selected
+  if (brewActive) { // runs this only when brew button activated and pressure profile selected
     long timeInPP = millis() - brewingTimer;
     CurrentPhase currentPhase = phases.getCurrentPhase(timeInPP);
     preinfusionFinished = currentPhase.phaseIndex >= preInfusionFinishedPhaseIdx;
 
     if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
       float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
-      float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+      float flowRestriction = phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
       setPumpPressure(newBarValue, flowRestriction, currentState);
     } else {
       float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
-      float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+      float pressureRestriction = phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   } else {
@@ -588,19 +583,18 @@ static void brewParamsReset(void) {
   lcdSendFakeTouch();
 }
 
-
 static void flushActivated(void) {
   setPumpFullOn();
-  #ifdef SINGLE_BOARD
-      openValve();
-  #endif
+#ifdef SINGLE_BOARD
+  openValve();
+#endif
 }
 
 static void flushDeactivated(void) {
   setPumpOff();
-  #ifdef SINGLE_BOARD
-      closeValve();
-  #endif
+#ifdef SINGLE_BOARD
+  closeValve();
+#endif
 }
 
 static void fillBoiler(float targetBoilerFullPressure) {
@@ -616,9 +610,9 @@ static void fillBoiler(float targetBoilerFullPressure) {
 static void monitorDripTrayState(void) {
   static bool dripTrayFull = false;
   float currentTotalTrayWeight = scalesDripTrayWeight();
-  float actualTrayWeight  = currentTotalTrayWeight - EMPTY_TRAY_WEIGHT;
+  float actualTrayWeight = currentTotalTrayWeight - EMPTY_TRAY_WEIGHT;
 
-  if ( !brewActive && !steamState() ) {
+  if (!brewActive && !steamState()) {
     if (actualTrayWeight > TRAY_FULL_THRESHOLD) {
       if (millis() > trayTimer) {
         dripTrayFull = true;
@@ -628,6 +622,7 @@ static void monitorDripTrayState(void) {
       trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
       dripTrayFull = false;
     }
-    if (dripTrayFull) lcdShowPopup("DRIP TRAY FULL");
+    if (dripTrayFull)
+      lcdShowPopup("DRIP TRAY FULL");
   }
 }
