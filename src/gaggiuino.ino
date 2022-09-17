@@ -140,6 +140,7 @@ static void sensorsReadPressure(void) {
     currentState.isPressureRising = isPressureRaising();
     currentState.isPressureFalling = isPressureFalling();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
+    isPumpFlowRisingFast();
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
