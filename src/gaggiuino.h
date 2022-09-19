@@ -73,8 +73,12 @@ bool homeScreenScalesEnabled = false;
 
 // Other util vars
 float smoothedPressure;
+<<<<<<< HEAD
 float smoothedPumpFlow;
 bool startupInitFinished;
+=======
+float previousPumpFlow;
+>>>>>>> 29a0d67 (fix flow display)
 
 
 #endif

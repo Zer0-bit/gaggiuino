@@ -352,7 +352,7 @@ static void lcdRefresh(void) {
       lcdSetFlow(
           currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
               ? currentState.weightFlow * 10.f
-              : smoothedPumpFlow * 10.f);
+              : currentState.pumpFlow * 10.f);
     }
 
 #if defined(DEBUG_ENABLED)
