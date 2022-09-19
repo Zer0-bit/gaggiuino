@@ -184,7 +184,7 @@ bool stopOnWeight() {
         if (scalesIsPresent() && preinfusionFinished)
           brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
         else
-          brewStopWeight = shotWeight + (smoothedPumpFlow * 2.f * 10.f);
+          brewStopWeight = shotWeight + (currentState.pumpFlow * 2.f * 10.f);
         return true;
       } else
         return false;
@@ -193,7 +193,7 @@ bool stopOnWeight() {
         if (scalesIsPresent() && preinfusionFinished)
           brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
         else
-          brewStopWeight = shotWeight + (smoothedPumpFlow * 2.f * 10.f);
+          brewStopWeight = shotWeight + (currentState.pumpFlow * 2.f * 10.f);
         return true;
       } else
         return false;
@@ -315,7 +315,7 @@ static void lcdRefresh(void) {
       lcdSetFlow(
           currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
               ? currentState.weightFlow * 10.f
-              : smoothedPumpFlow * 10.f);
+              : currentState.pumpFlow * 10.f);
     }
 
 #if defined(DEBUG_ENABLED)
