@@ -1,5 +1,5 @@
 #if defined(DEBUG_ENABLED)
-#include "dbg.h"
+  #include "dbg.h"
 #endif
 
 #include "gaggiuino.h"
@@ -127,8 +127,7 @@ static void sensorsReadWeight(void) {
       scalesTare(); // Tare at the start of any weighing cycle
       if (!nonBrewModeActive && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f))
         tareDone = false;
-      else
-        tareDone = true;
+      else tareDone = true;
     }
     currentState.weight = scalesGetWeight();
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
@@ -388,16 +387,16 @@ void lcdTrigger1(void) {
     break;
   case 3:
     // PRESSURE PARAMS
-    eepromCurrentValues.pressureProfilingStart = lcdValues.pressureProfilingStart;
+    eepromCurrentValues.pressureProfilingStart  = lcdValues.pressureProfilingStart;
     eepromCurrentValues.pressureProfilingFinish = lcdValues.pressureProfilingFinish;
-    eepromCurrentValues.pressureProfilingHold = lcdValues.pressureProfilingHold;
+    eepromCurrentValues.pressureProfilingHold   = lcdValues.pressureProfilingHold;
     eepromCurrentValues.pressureProfilingLength = lcdValues.pressureProfilingLength;
-    eepromCurrentValues.pressureProfilingState = lcdValues.pressureProfilingState;
-    eepromCurrentValues.preinfusionState = lcdValues.preinfusionState;
-    eepromCurrentValues.preinfusionSec = lcdValues.preinfusionSec;
-    eepromCurrentValues.preinfusionBar = lcdValues.preinfusionBar;
-    eepromCurrentValues.preinfusionSoak = lcdValues.preinfusionSoak;
-    eepromCurrentValues.preinfusionRamp = lcdValues.preinfusionRamp;
+    eepromCurrentValues.pressureProfilingState  = lcdValues.pressureProfilingState;
+    eepromCurrentValues.preinfusionState        = lcdValues.preinfusionState;
+    eepromCurrentValues.preinfusionSec          = lcdValues.preinfusionSec;
+    eepromCurrentValues.preinfusionBar          = lcdValues.preinfusionBar;
+    eepromCurrentValues.preinfusionSoak         = lcdValues.preinfusionSoak;
+    eepromCurrentValues.preinfusionRamp         = lcdValues.preinfusionRamp;
 
       // FLOW PARAMS
       eepromCurrentValues.preinfusionFlowState          = lcdValues.preinfusionFlowState;
