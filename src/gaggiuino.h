@@ -59,6 +59,7 @@ unsigned long trayTimer = millis();
 float previousWeight  = 0;
 float brewStopWeight  = 0;
 float shotWeight      = 0;
+float shotTarget      = 0;
 bool tareDone         = false;
 
 // brew detection vars
@@ -72,6 +73,7 @@ bool homeScreenScalesEnabled = false;
 
 // Other util vars
 float smoothedPressure;
+float smoothedPumpFlow;
 float previousPumpFlow;
 
 
