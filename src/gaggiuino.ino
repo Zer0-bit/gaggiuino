@@ -160,11 +160,11 @@ static void calculateWeightAndFlow(void) {
       smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
 
       if (scalesIsPresent()) {
-        currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000 / elapsedTime);
+        currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
         previousWeight = shotWeight;
       } else {
         if (preinfusionFinished && !currentState.isPressureRising && !currentState.isPumpFlowRisingFast) {
-          shotWeight += smoothedPumpFlow * elapsedTime / 1000;
+          shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
         }
       }
       flowTimer = millis();
@@ -173,7 +173,7 @@ static void calculateWeightAndFlow(void) {
 }
 
 bool isPumpFlowRisingFast() {
-  return currentState.pumpFlow > previousPumpFlow + 0.7f;
+  return currentState.pumpFlow > previousPumpFlow + 0.25f;
 }
 
 // Stops the pump if setting active and dose/weight conditions met
@@ -300,7 +300,7 @@ static void lcdRefresh(void) {
             ? currentState.weight
             : brewStopWeight
         );
-      } else {
+      } else if(shotWeight || brewStopWeight) {
         lcdSetWeight(
           (preinfusionFinished && !stopOnWeight())
           ? shotWeight
