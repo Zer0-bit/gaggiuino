@@ -1,5 +1,5 @@
 #if defined(DEBUG_ENABLED)
-#include "dbg.h"
+  #include "dbg.h"
 #endif
 
 #include "gaggiuino.h"
@@ -125,8 +125,7 @@ static void sensorsReadWeight(void) {
       scalesTare(); // Tare at the start of any weighing cycle
       if (!nonBrewModeActive && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f))
         tareDone = false;
-      else
-        tareDone = true;
+      else tareDone = true;
     }
     currentState.weight = scalesGetWeight();
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
@@ -158,11 +157,11 @@ static void calculateWeightAndFlow(void) {
       currentState.isPumpFlowRisingFast = isPumpFlowRisingFast();
 
       if (scalesIsPresent()) {
-        currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000 / elapsedTime);
+        currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
         previousWeight = shotWeight;
       } else {
         if (preinfusionFinished && (!currentState.isPressureRising || !currentState.isPumpFlowRisingFast)) {
-          shotWeight += currentState.pumpFlow * elapsedTime / 1000;
+          shotWeight += currentState.pumpFlow * (float)elapsedTime / 1000.f;
         }
       }
       flowTimer = millis();
@@ -176,27 +175,14 @@ bool isPumpFlowRisingFast() {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  shotTarget = runningCfg.shotDose * runningCfg.shotPreset;
-
-  if (!nonBrewModeActive) {
-    if (runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-      if (shotWeight > (shotTarget - 0.5f)) {
-        if (scalesIsPresent() && preinfusionFinished)
-          brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
-        else
-          brewStopWeight = shotWeight + (currentState.pumpFlow * 2.f * 10.f);
-        return true;
-      } else
-        return false;
-    } else if (runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-      if (shotWeight > runningCfg.shotStopOnCustomWeight - 0.5f) {
-        if (scalesIsPresent() && preinfusionFinished)
-          brewStopWeight = shotWeight + currentState.weightFlow * 10.f;
-        else
-          brewStopWeight = shotWeight + (currentState.pumpFlow * 2.f * 10.f);
-        return true;
-      } else
-        return false;
+  if (!nonBrewModeActive && runningCfg.stopOnWeightState) {
+    float shotTarget = runningCfg.shotStopOnCustomWeight < 1.f ? runningCfg.shotDose * runningCfg.shotPreset : runningCfg.shotStopOnCustomWeight;
+    if (shotWeight > (shotTarget - 0.5f)) {
+      if (scalesIsPresent() && preinfusionFinished)
+        brewStopWeight = brewStopWeight ? brewStopWeight : shotWeight + currentState.weightFlow / 2.f;
+      else
+        brewStopWeight = brewStopWeight ? brewStopWeight : shotWeight + currentState.pumpFlow / 2.f;
+      return true;
     }
   }
   return false;
@@ -234,10 +220,8 @@ static void modeSelect(void) {
   case OPMODE_everythingFlowProfiled:
   case OPMODE_pressureBasedPreinfusionAndFlowProfile:
     nonBrewModeActive = false;
-    if (!steamState())
-      profiling();
-    else
-      steamCtrl(runningCfg, currentState, brewActive);
+    if (!steamState()) profiling();
+    else steamCtrl(runningCfg, currentState, brewActive);
     break;
   case OPMODE_manual:
     nonBrewModeActive = false;
@@ -351,54 +335,54 @@ void lcdTrigger1(void) {
     break;
   case 3:
     // PRESSURE PARAMS
-    eepromCurrentValues.pressureProfilingStart = lcdValues.pressureProfilingStart;
+    eepromCurrentValues.pressureProfilingStart  = lcdValues.pressureProfilingStart;
     eepromCurrentValues.pressureProfilingFinish = lcdValues.pressureProfilingFinish;
-    eepromCurrentValues.pressureProfilingHold = lcdValues.pressureProfilingHold;
+    eepromCurrentValues.pressureProfilingHold   = lcdValues.pressureProfilingHold;
     eepromCurrentValues.pressureProfilingLength = lcdValues.pressureProfilingLength;
-    eepromCurrentValues.pressureProfilingState = lcdValues.pressureProfilingState;
-    eepromCurrentValues.preinfusionState = lcdValues.preinfusionState;
-    eepromCurrentValues.preinfusionSec = lcdValues.preinfusionSec;
-    eepromCurrentValues.preinfusionBar = lcdValues.preinfusionBar;
-    eepromCurrentValues.preinfusionSoak = lcdValues.preinfusionSoak;
-    eepromCurrentValues.preinfusionRamp = lcdValues.preinfusionRamp;
+    eepromCurrentValues.pressureProfilingState  = lcdValues.pressureProfilingState;
+    eepromCurrentValues.preinfusionState        = lcdValues.preinfusionState;
+    eepromCurrentValues.preinfusionSec          = lcdValues.preinfusionSec;
+    eepromCurrentValues.preinfusionBar          = lcdValues.preinfusionBar;
+    eepromCurrentValues.preinfusionSoak         = lcdValues.preinfusionSoak;
+    eepromCurrentValues.preinfusionRamp         = lcdValues.preinfusionRamp;
 
     // FLOW PARAMS
-    eepromCurrentValues.preinfusionFlowState = lcdValues.preinfusionFlowState;
-    eepromCurrentValues.preinfusionFlowVol = lcdValues.preinfusionFlowVol;
-    eepromCurrentValues.preinfusionFlowTime = lcdValues.preinfusionFlowTime;
-    eepromCurrentValues.preinfusionFlowSoakTime = lcdValues.preinfusionFlowSoakTime;
+    eepromCurrentValues.preinfusionFlowState          = lcdValues.preinfusionFlowState;
+    eepromCurrentValues.preinfusionFlowVol            = lcdValues.preinfusionFlowVol;
+    eepromCurrentValues.preinfusionFlowTime           = lcdValues.preinfusionFlowTime;
+    eepromCurrentValues.preinfusionFlowSoakTime       = lcdValues.preinfusionFlowSoakTime;
     eepromCurrentValues.preinfusionFlowPressureTarget = lcdValues.preinfusionFlowPressureTarget;
-    eepromCurrentValues.flowProfileState = lcdValues.flowProfileState;
-    eepromCurrentValues.flowProfileStart = lcdValues.flowProfileStart;
-    eepromCurrentValues.flowProfileEnd = lcdValues.flowProfileEnd;
-    eepromCurrentValues.flowProfilePressureTarget = lcdValues.flowProfilePressureTarget;
-    eepromCurrentValues.flowProfileCurveSpeed = lcdValues.flowProfileCurveSpeed;
+    eepromCurrentValues.flowProfileState              = lcdValues.flowProfileState;
+    eepromCurrentValues.flowProfileStart              = lcdValues.flowProfileStart;
+    eepromCurrentValues.flowProfileEnd                = lcdValues.flowProfileEnd;
+    eepromCurrentValues.flowProfilePressureTarget     = lcdValues.flowProfilePressureTarget;
+    eepromCurrentValues.flowProfileCurveSpeed         = lcdValues.flowProfileCurveSpeed;
     break;
   case 4:
-    eepromCurrentValues.homeOnShotFinish = lcdValues.homeOnShotFinish;
-    eepromCurrentValues.graphBrew = lcdValues.graphBrew;
-    eepromCurrentValues.brewDeltaState = lcdValues.brewDeltaState;
-    eepromCurrentValues.warmupState = lcdValues.warmupState;
+    eepromCurrentValues.homeOnShotFinish  = lcdValues.homeOnShotFinish;
+    eepromCurrentValues.graphBrew         = lcdValues.graphBrew;
+    eepromCurrentValues.brewDeltaState    = lcdValues.brewDeltaState;
+    eepromCurrentValues.warmupState       = lcdValues.warmupState;
     break;
   case 5:
-    eepromCurrentValues.stopOnWeightState = lcdValues.stopOnWeightState;
-    eepromCurrentValues.shotDose = lcdValues.shotDose;
-    eepromCurrentValues.shotPreset = lcdValues.shotPreset;
-    eepromCurrentValues.shotStopOnCustomWeight = lcdValues.shotStopOnCustomWeight;
+    eepromCurrentValues.stopOnWeightState       = lcdValues.stopOnWeightState;
+    eepromCurrentValues.shotDose                = lcdValues.shotDose;
+    eepromCurrentValues.shotPreset              = lcdValues.shotPreset;
+    eepromCurrentValues.shotStopOnCustomWeight  = lcdValues.shotStopOnCustomWeight;
     break;
   case 6:
-    eepromCurrentValues.setpoint = lcdValues.setpoint;
-    eepromCurrentValues.offsetTemp = lcdValues.offsetTemp;
-    eepromCurrentValues.hpwr = lcdValues.hpwr;
+    eepromCurrentValues.setpoint    = lcdValues.setpoint;
+    eepromCurrentValues.offsetTemp  = lcdValues.offsetTemp;
+    eepromCurrentValues.hpwr        = lcdValues.hpwr;
     eepromCurrentValues.mainDivider = lcdValues.mainDivider;
     eepromCurrentValues.brewDivider = lcdValues.brewDivider;
     break;
   case 7:
-    eepromCurrentValues.powerLineFrequency = lcdValues.powerLineFrequency;
-    eepromCurrentValues.lcdSleep = lcdValues.lcdSleep;
-    eepromCurrentValues.scalesF1 = lcdValues.scalesF1;
-    eepromCurrentValues.scalesF2 = lcdValues.scalesF2;
-    eepromCurrentValues.pumpFlowAtZero = lcdValues.pumpFlowAtZero;
+    eepromCurrentValues.powerLineFrequency  = lcdValues.powerLineFrequency;
+    eepromCurrentValues.lcdSleep            = lcdValues.lcdSleep;
+    eepromCurrentValues.scalesF1            = lcdValues.scalesF1;
+    eepromCurrentValues.scalesF2            = lcdValues.scalesF2;
+    eepromCurrentValues.pumpFlowAtZero      = lcdValues.pumpFlowAtZero;
     break;
   default:
     break;

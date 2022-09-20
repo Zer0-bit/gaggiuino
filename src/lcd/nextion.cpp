@@ -108,7 +108,7 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 
   myNex.writeNum("morePower.lc1.val", eepromCurrentValues.scalesF1);
   myNex.writeNum("morePower.lc2.val", eepromCurrentValues.scalesF2);
-  myNex.writeNum("morePower.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 100.f);
+  myNex.writeNum("morePower.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 10000.f);
 
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
   myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
@@ -157,6 +157,7 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");
   lcdCfg.shotDose                       = myNex.readNumber("shotDose") / 10.f;
   lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotCustomVal") / 10.f;
+  lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
 
   lcdCfg.brewDeltaState             = myNex.readNumber("deltaState");
   lcdCfg.setpoint                   = myNex.readNumber("setPoint");
@@ -173,7 +174,7 @@ eepromValues_t lcdDownloadCfg(void) {
 
   lcdCfg.scalesF1           = myNex.readNumber("morePower.lc1.val");
   lcdCfg.scalesF2           = myNex.readNumber("morePower.lc2.val");
-  lcdCfg.pumpFlowAtZero     = myNex.readNumber("morePower.pump_zero.val") / 100.f;
+  lcdCfg.pumpFlowAtZero     = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
 
   return lcdCfg;
 }
