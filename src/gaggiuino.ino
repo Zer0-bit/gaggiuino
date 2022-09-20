@@ -227,7 +227,7 @@ static void modeSelect(void) {
       break;
     case OPMODE_manual:
       nonBrewModeActive = false;
-      manualPressureProfile();
+      manualFlowControl();
       break;
     case OPMODE_flush:
       nonBrewModeActive = true;
@@ -490,9 +490,9 @@ static void profiling(void) {
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
-static void manualPressureProfile(void) {
-  int power_reading = lcdGetManualPressurePower();
-  setPumpPressure(power_reading, 0.f, currentState);
+static void manualFlowControl(void) {
+  float flow_reading = lcdGetManualPressurePower() / 10 ;
+  setPumpFlow(flow_reading, 0.f, currentState);
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
