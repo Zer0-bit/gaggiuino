@@ -140,7 +140,6 @@ static void sensorsReadPressure(void) {
     currentState.isPressureRising = isPressureRaising();
     currentState.isPressureFalling = isPressureFalling();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
-    currentState.isPumpFlowRisingFast = isPumpFlowRisingFast();
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -153,27 +152,46 @@ static void calculateWeightAndFlow(void) {
 
     long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
-      long pumpClicks =  getAndResetClickCounter();
-      float cps = 1000.f * pumpClicks / elapsedTime;
-      previousPumpFlow = currentState.pumpFlow;
-      currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
-      smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+      currentState.isOutputFlow = checkForOutputFlow(elapsedTime);
 
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
         previousWeight = shotWeight;
-      } else {
-        if (preinfusionFinished && (!currentState.isPressureRising || !currentState.isPumpFlowRisingFast)) {
-          shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
-        }
+      } else if (currentState.isOutputFlow) {
+        shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
       }
+      currentState.liquidPumped += smoothedPumpFlow * (float)elapsedTime / 1000.f;
+      
       flowTimer = millis();
     }
   }
 }
 
-bool isPumpFlowRisingFast() {
-  return currentState.pumpFlow > previousPumpFlow + 0.25f;
+bool checkForOutputFlow(long elapsedTime) {
+  long pumpClicks = getAndResetClickCounter();
+  float cps = 1000.f * pumpClicks / elapsedTime;
+
+  float previousPumpFlow = currentState.pumpFlow;
+  currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+  smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.5f;
+
+  float lastResistance = currentState.resistance;
+  currentState.resistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
+  float resistanceDelta = currentState.resistance - lastResistance;
+
+  if(!preinfusionFinished) {
+    // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
+    if(currentState.liquidPumped > 45.f && currentState.resistance < 150) return true;
+
+    // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow. 
+    // Noisy readings make it impossible to use flat out, but it should at least somewhat work
+    // Although a good threshold is very much experimental and not determined
+  } else if(resistanceDelta > 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
+    return false;
+  } else return true;
+
+  return false;
 }
 
 // Stops the pump if setting active and dose/weight conditions met
@@ -526,13 +544,14 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset(void) {
-  tareDone            = false;
-  shotWeight          = 0.f;
-  currentState.weight = 0.f;
-  brewStopWeight      = 0.f;
-  previousWeight      = 0.f;
-  brewingTimer        = millis();
-  preinfusionFinished = false;
+  tareDone                  = false;
+  shotWeight                = 0.f;
+  currentState.weight       = 0.f;
+  currentState.liquidPumped = 0.f;
+  brewStopWeight            = 0.f;
+  previousWeight            = 0.f;
+  brewingTimer              = millis();
+  preinfusionFinished       = false;
   lcdSendFakeTouch();
 }
 
