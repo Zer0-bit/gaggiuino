@@ -163,7 +163,7 @@ static void calculateWeightAndFlow(void) {
         currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
         previousWeight = shotWeight;
       } else {
-        if (preinfusionFinished && !currentState.isPressureRising && !currentState.isPumpFlowRisingFast) {
+        if (preinfusionFinished && (!currentState.isPressureRising || !currentState.isPumpFlowRisingFast)) {
           shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
         }
       }
