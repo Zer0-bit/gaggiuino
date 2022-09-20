@@ -389,10 +389,10 @@ void lcdTrigger1(void) {
       eepromCurrentValues.warmupState       = lcdValues.warmupState;
       break;
     case 5:
-      eepromCurrentValues.stopOnWeightState = lcdValues.stopOnWeightState;
-      eepromCurrentValues.shotDose = lcdValues.shotDose;
-      eepromCurrentValues.shotPreset = lcdValues.shotPreset;
-      eepromCurrentValues.shotStopOnCustomWeight = lcdValues.shotStopOnCustomWeight;
+      eepromCurrentValues.stopOnWeightState       = lcdValues.stopOnWeightState;
+      eepromCurrentValues.shotDose                = lcdValues.shotDose;
+      eepromCurrentValues.shotPreset              = lcdValues.shotPreset;
+      eepromCurrentValues.shotStopOnCustomWeight  = lcdValues.shotStopOnCustomWeight;
       break;
     case 6:
       eepromCurrentValues.setpoint    = lcdValues.setpoint;
@@ -521,22 +521,18 @@ static void manualFlowControl(void) {
 static void brewDetect(void) {
   static bool paramsReset = true;
 
-  if ( brewState() && !stopOnWeight()) {
+  if (brewState() && !stopOnWeight()) {
     if(!paramsReset) {
       brewParamsReset();
       paramsReset = true;
     }
     openValve();
     brewActive = true;
-  } else if ( brewState() && stopOnWeight()) {
+  } else {
     closeValve();
     setPumpOff();
     brewActive = false;
-  } else if (!brewState()){
-    closeValve();
-    setPumpOff();
-    brewActive = false;
-    if(paramsReset) {
+    if(!brewState() && paramsReset) {
       brewParamsReset();
       paramsReset = false;
     }
