@@ -178,22 +178,13 @@ bool isPumpFlowRisingFast() {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  shotTarget = runningCfg.shotDose * runningCfg.shotPreset;
-  
-  if ( !nonBrewModeActive ) {
-    if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-      if (shotWeight > (shotTarget - 0.5f)) {
-        if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow;
-        else brewStopWeight = shotWeight + smoothedPumpFlow;
-        return true;
-      } else return false;
-    } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-      if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) {
-        if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow;
-        else brewStopWeight = shotWeight + smoothedPumpFlow;
-        return true;
-      } else return false;
-    }
+  if (!nonBrewModeActive && runningCfg.stopOnWeightState) {
+    shotTarget = runningCfg.shotStopOnCustomWeight < 1.f ? runningCfg.shotDose * runningCfg.shotPreset : runningCfg.shotStopOnCustomWeight;
+    if (shotWeight > (shotTarget - 0.5f)) {
+      if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow / 2.f;
+      else brewStopWeight = shotWeight + smoothedPumpFlow / 2.f;
+      return true;
+    } 
   }
   return false;
 }
