@@ -112,7 +112,7 @@ static void sensorsReadTemperature(void) {
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoilerOff();
       if (millis() > thermoTimer) {
-        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature );
+        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
         lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
         currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
@@ -140,7 +140,6 @@ static void sensorsReadPressure(void) {
     currentState.isPressureRising = isPressureRaising();
     currentState.isPressureFalling = isPressureFalling();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
-    currentState.isPumpFlowRisingFast = isPumpFlowRisingFast();
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -153,34 +152,57 @@ static void calculateWeightAndFlow(void) {
 
     long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
-      long pumpClicks =  getAndResetClickCounter();
-      float cps = 1000.f * pumpClicks / elapsedTime;
-      previousPumpFlow = currentState.pumpFlow;
-      currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
-      smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+      flowTimer = millis();
+      // if(elapsedTime > 200) return;
+
+      currentState.isOutputFlow = checkForOutputFlow(elapsedTime);
 
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
         previousWeight = shotWeight;
-      } else {
-        if (preinfusionFinished && (!currentState.isPressureRising || !currentState.isPumpFlowRisingFast)) {
-          shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
-        }
+      } else if (currentState.isOutputFlow) {
+        shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
       }
-      flowTimer = millis();
+      currentState.liquidPumped += smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
   }
 }
 
-bool isPumpFlowRisingFast() {
-  return currentState.pumpFlow > previousPumpFlow + 0.25f;
+bool checkForOutputFlow(long elapsedTime) {
+  long pumpClicks = getAndResetClickCounter();
+  float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
+
+  float previousPumpFlow = currentState.pumpFlow;
+  currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+  smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.45f;
+
+  float lastResistance = currentState.resistance;
+  currentState.resistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
+  float resistanceDelta = currentState.resistance - lastResistance;
+
+  // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
+  if(currentState.liquidPumped > 60.f) return true;
+
+  if(!preinfusionFinished) {
+    // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
+    if(currentState.liquidPumped > 45.f && currentState.resistance < 150) return true;
+
+    // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow. 
+    // Noisy readings make it impossible to use flat out, but it should at least somewhat work
+    // Although a good threshold is very much experimental and not determined
+  } else if(resistanceDelta > 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
+    return false;
+  } else return true;
+
+  return false;
 }
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
   if (!nonBrewModeActive && runningCfg.stopOnWeightState) {
     shotTarget = runningCfg.shotStopOnCustomWeight < 1.f ? runningCfg.shotDose * runningCfg.shotPreset : runningCfg.shotStopOnCustomWeight;
-    if (shotWeight > (shotTarget - 0.5f)) {
+    if (shotWeight > (shotTarget - 0.5f) || brewStopWeight) {
       if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow / 2.f;
       else brewStopWeight = shotWeight + smoothedPumpFlow / 2.f;
       return true;
@@ -371,10 +393,10 @@ void lcdTrigger1(void) {
       eepromCurrentValues.warmupState       = lcdValues.warmupState;
       break;
     case 5:
-      eepromCurrentValues.stopOnWeightState = lcdValues.stopOnWeightState;
-      eepromCurrentValues.shotDose = lcdValues.shotDose;
-      eepromCurrentValues.shotPreset = lcdValues.shotPreset;
-      eepromCurrentValues.shotStopOnCustomWeight = lcdValues.shotStopOnCustomWeight;
+      eepromCurrentValues.stopOnWeightState       = lcdValues.stopOnWeightState;
+      eepromCurrentValues.shotDose                = lcdValues.shotDose;
+      eepromCurrentValues.shotPreset              = lcdValues.shotPreset;
+      eepromCurrentValues.shotStopOnCustomWeight  = lcdValues.shotStopOnCustomWeight;
       break;
     case 6:
       eepromCurrentValues.setpoint    = lcdValues.setpoint;
@@ -482,8 +504,7 @@ static void profiling(void) {
       float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
-  }
-  else {
+  } else {
     setPumpToRawValue(0);
   }
   // Keep that water at temp
@@ -503,22 +524,18 @@ static void manualFlowControl(void) {
 static void brewDetect(void) {
   static bool paramsReset = true;
 
-  if ( brewState() && !stopOnWeight()) {
+  if (brewState() && !stopOnWeight()) {
     if(!paramsReset) {
       brewParamsReset();
       paramsReset = true;
     }
     openValve();
     brewActive = true;
-  } else if ( brewState() && stopOnWeight()) {
+  } else {
     closeValve();
     setPumpOff();
     brewActive = false;
-  } else if (!brewState()){
-    closeValve();
-    setPumpOff();
-    brewActive = false;
-    if(paramsReset) {
+    if(!brewState() && paramsReset) {
       brewParamsReset();
       paramsReset = false;
     }
@@ -526,13 +543,14 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset(void) {
-  tareDone            = false;
-  shotWeight          = 0.f;
-  currentState.weight = 0.f;
-  brewStopWeight      = 0.f;
-  previousWeight      = 0.f;
-  brewingTimer        = millis();
-  preinfusionFinished = false;
+  tareDone                  = false;
+  shotWeight                = 0.f;
+  currentState.weight       = 0.f;
+  currentState.liquidPumped = 0.f;
+  brewStopWeight            = 0.f;
+  previousWeight            = 0.f;
+  brewingTimer              = millis();
+  preinfusionFinished       = false;
   lcdSendFakeTouch();
 }
 
