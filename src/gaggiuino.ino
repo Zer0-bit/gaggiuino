@@ -201,12 +201,15 @@ bool checkForOutputFlow(long elapsedTime) {
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
   if (!nonBrewModeActive && runningCfg.stopOnWeightState) {
-    shotTarget = runningCfg.shotStopOnCustomWeight < 1.f ? runningCfg.shotDose * runningCfg.shotPreset : runningCfg.shotStopOnCustomWeight;
+    if (runningCfg.shotStopOnCustomWeight < 1.f)
+      shotTarget = runningCfg.shotDose * runningCfg.shotPreset;
+    else
+      shotTarget = runningCfg.shotStopOnCustomWeight;
     if (shotWeight > (shotTarget - 0.5f) || brewStopWeight) {
       if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow / 2.f;
       else brewStopWeight = shotWeight + smoothedPumpFlow / 2.f;
       return true;
-    } 
+    }
   }
   return false;
 }
