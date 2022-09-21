@@ -169,12 +169,12 @@ static void calculateWeightAndFlow(void) {
 
 bool checkForOutputFlow(long elapsedTime) {
   long pumpClicks = getAndResetClickCounter();
-  float cps = 1000.f * pumpClicks / elapsedTime;
+  float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
 
   float previousPumpFlow = currentState.pumpFlow;
   currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
   smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.5f;
+  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.35f;
 
   float lastResistance = currentState.resistance;
   currentState.resistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
@@ -198,7 +198,7 @@ bool checkForOutputFlow(long elapsedTime) {
 bool stopOnWeight() {
   if (!nonBrewModeActive && runningCfg.stopOnWeightState) {
     shotTarget = runningCfg.shotStopOnCustomWeight < 1.f ? runningCfg.shotDose * runningCfg.shotPreset : runningCfg.shotStopOnCustomWeight;
-    if (shotWeight > (shotTarget - 0.5f)) {
+    if (shotWeight > (shotTarget - 0.5f) || brewStopWeight) {
       if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow / 2.f;
       else brewStopWeight = shotWeight + smoothedPumpFlow / 2.f;
       return true;
@@ -501,8 +501,7 @@ static void profiling(void) {
       float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
-  }
-  else {
+  } else {
     setPumpToRawValue(0);
   }
   // Keep that water at temp
