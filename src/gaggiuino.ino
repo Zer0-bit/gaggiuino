@@ -114,7 +114,7 @@ static void sensorsReadTemperature(void) {
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoilerOff();
       if (millis() > thermoTimer) {
-        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature );
+        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
         lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
         currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
