@@ -112,7 +112,7 @@ static void sensorsReadTemperature(void) {
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoilerOff();
       if (millis() > thermoTimer) {
-        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature );
+        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
         lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
         currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
@@ -153,7 +153,7 @@ static void calculateWeightAndFlow(void) {
     long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
-      if(elapsedTime > 200) return;
+      // if(elapsedTime > 200) return;
 
       currentState.isOutputFlow = checkForOutputFlow(elapsedTime);
 
@@ -175,11 +175,14 @@ bool checkForOutputFlow(long elapsedTime) {
   float previousPumpFlow = currentState.pumpFlow;
   currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
   smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.35f;
+  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.45f;
 
   float lastResistance = currentState.resistance;
   currentState.resistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
   float resistanceDelta = currentState.resistance - lastResistance;
+
+  // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
+  if(currentState.liquidPumped > 60.f) return true;
 
   if(!preinfusionFinished) {
     // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
@@ -188,7 +191,7 @@ bool checkForOutputFlow(long elapsedTime) {
     // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow. 
     // Noisy readings make it impossible to use flat out, but it should at least somewhat work
     // Although a good threshold is very much experimental and not determined
-  } else if(resistanceDelta > 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast) || currentState.resistance == NAN) {  
+  } else if(resistanceDelta > 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
     return false;
   } else return true;
 
