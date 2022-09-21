@@ -152,6 +152,9 @@ static void calculateWeightAndFlow(void) {
 
     long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
+      flowTimer = millis();
+      if(elapsedTime > 200) return;
+
       currentState.isOutputFlow = checkForOutputFlow(elapsedTime);
 
       if (scalesIsPresent()) {
@@ -161,8 +164,6 @@ static void calculateWeightAndFlow(void) {
         shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
       }
       currentState.liquidPumped += smoothedPumpFlow * (float)elapsedTime / 1000.f;
-      
-      flowTimer = millis();
     }
   }
 }
@@ -187,7 +188,7 @@ bool checkForOutputFlow(long elapsedTime) {
     // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow. 
     // Noisy readings make it impossible to use flat out, but it should at least somewhat work
     // Although a good threshold is very much experimental and not determined
-  } else if(resistanceDelta > 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
+  } else if(resistanceDelta > 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast) || currentState.resistance == NAN) {  
     return false;
   } else return true;
 
