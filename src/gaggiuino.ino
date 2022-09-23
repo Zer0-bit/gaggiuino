@@ -189,12 +189,16 @@ bool checkForOutputFlow(long elapsedTime) {
 
   if (!preinfusionFinished) {
     // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
-    if (currentState.liquidPumped > 45.f && currentState.puckResistance < 150) return true;
+    if (currentState.liquidPumped > 45.f 
+      && currentState.puckResistance > lastResistance 
+      && resistanceDelta > 0.f 
+      && resistanceDelta < 400.f
+    ) return true;
 
     // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow. 
     // Noisy readings make it impossible to use flat out, but it should at least somewhat work
     // Although a good threshold is very much experimental and not determined
-  } else if (resistanceDelta > 350.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
+  } else if (resistanceDelta >= 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
     return false;
   } else return true;
 
