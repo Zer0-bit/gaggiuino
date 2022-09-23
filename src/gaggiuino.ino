@@ -185,20 +185,31 @@ bool checkForOutputFlow(long elapsedTime) {
   float resistanceDelta = currentState.puckResistance - lastResistance;
 
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
-  if (currentState.liquidPumped > 60.f) return true;
+  if (currentState.liquidPumped > 60.f) {
+    currentState.isHeadSpaceFilled = true;
+    return true;
+  } else if (currentState.liquidPumped < 60.f 
+    && currentState.isPressureRising 
+    && preinfusionFinished) currentState.isHeadSpaceFilled = true;
 
   if (!preinfusionFinished) {
-    // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
-    if (currentState.liquidPumped > 45.f 
-      && currentState.puckResistance > lastResistance 
-      && resistanceDelta > 0.f 
-      && resistanceDelta < 400.f
-    ) return true;
+    // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
+    // it must have been a short ass preinfusion and it's blooming for some time
+    if (currentState.liquidPumped < 45.f && (currentState.isPressureFalling || currentState.pumpFlow < 0.2f)) {
+      currentState.isHeadSpaceFilled = false;
+      return false;
+    }
 
+    // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
+    if (currentState.liquidPumped > 45.f && currentState.puckResistance > lastResistance 
+      && resistanceDelta > 0.f && resistanceDelta < 400.f) {
+        currentState.isHeadSpaceFilled = true;
+        return true;
+      }
     // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow. 
     // Noisy readings make it impossible to use flat out, but it should at least somewhat work
     // Although a good threshold is very much experimental and not determined
-  } else if (resistanceDelta >= 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
+  } else if (resistanceDelta >= 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) {  
     return false;
   } else return true;
 
@@ -555,14 +566,15 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset(void) {
-  tareDone                  = false;
-  shotWeight                = 0.f;
-  currentState.weight       = 0.f;
-  currentState.liquidPumped = 0.f;
-  brewStopWeight            = 0.f;
-  previousWeight            = 0.f;
-  brewingTimer              = millis();
-  preinfusionFinished       = false;
+  tareDone                        = false;
+  shotWeight                      = 0.f;
+  currentState.weight             = 0.f;
+  currentState.liquidPumped       = 0.f;
+  currentState.isHeadSpaceFilled  = false;
+  brewStopWeight                  = 0.f;
+  previousWeight                  = 0.f;
+  brewingTimer                    = millis();
+  preinfusionFinished             = false;
   lcdSendFakeTouch();
 }
 
