@@ -41,7 +41,7 @@ void scalesInit(float scalesF1, float scalesF2) {
       LoadCell_2.tare();
     }
   #endif
-  scalesPresent = false;
+  // scalesPresent = false;
 }
 
 void scalesTare(void) {
