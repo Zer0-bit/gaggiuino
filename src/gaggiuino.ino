@@ -6,6 +6,7 @@
 
 SimpleKalmanFilter smoothPressure(2, 2, 1.00);
 SimpleKalmanFilter smoothPumpFlow(2, 2, 1.00);
+SimpleKalmanFilter smoothScalesFlow(2, 2, 1.00);
 
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
@@ -98,6 +99,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   // monitorDripTrayState();
+  fillBoiler(2.f);
 }
 
 static void sensorsReadTemperature(void) {
@@ -159,6 +161,7 @@ static void calculateWeightAndFlow(void) {
 
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
+        currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = shotWeight;
       } else if (currentState.isOutputFlow) {
         shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
@@ -177,21 +180,21 @@ bool checkForOutputFlow(long elapsedTime) {
   smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
   currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.45f;
 
-  float lastResistance = currentState.resistance;
-  currentState.resistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
-  float resistanceDelta = currentState.resistance - lastResistance;
+  float lastResistance = currentState.puckResistance;
+  currentState.puckResistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
+  float resistanceDelta = currentState.puckResistance - lastResistance;
 
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
-  if(currentState.liquidPumped > 60.f) return true;
+  if (currentState.liquidPumped > 60.f) return true;
 
-  if(!preinfusionFinished) {
+  if (!preinfusionFinished) {
     // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
-    if(currentState.liquidPumped > 45.f && currentState.resistance < 150) return true;
+    if (currentState.liquidPumped > 45.f && currentState.puckResistance < 150) return true;
 
     // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow. 
     // Noisy readings make it impossible to use flat out, but it should at least somewhat work
     // Although a good threshold is very much experimental and not determined
-  } else if(resistanceDelta > 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
+  } else if (resistanceDelta > 350.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast)) {  
     return false;
   } else return true;
 
@@ -508,7 +511,7 @@ static void profiling(void) {
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   } else {
-    setPumpToRawValue(0);
+    if (startupInitFinished) setPumpToRawValue(0);
   }
   // Keep that water at temp
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
@@ -535,9 +538,11 @@ static void brewDetect(void) {
     openValve();
     brewActive = true;
   } else {
-    closeValve();
-    setPumpOff();
     brewActive = false;
+    if (startupInitFinished) {
+      closeValve();
+      setPumpOff();
+    }
     if(!brewState() && paramsReset) {
       brewParamsReset();
       paramsReset = false;
@@ -570,6 +575,16 @@ static void flushDeactivated(void) {
   #ifdef SINGLE_BOARD
       closeValve();
   #endif
+}
+
+static void fillBoiler(float targetBoilerFullPressure) {
+  static float timePassed = millis();
+
+  if (currentState.pressure < targetBoilerFullPressure && !startupInitFinished ) {
+    openValve();
+    setPumpToRawValue(80);
+    if (millis() - timePassed > 5000.f) startupInitFinished = true;
+  } else startupInitFinished = true;
 }
 
 static void monitorDripTrayState(void) {
