@@ -74,6 +74,7 @@ bool homeScreenScalesEnabled = false;
 // Other util vars
 float smoothedPressure;
 float smoothedPumpFlow;
+bool startupInitFinished;
 
 
 #endif
