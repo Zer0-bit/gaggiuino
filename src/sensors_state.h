@@ -4,7 +4,7 @@
 struct SensorState {
   float temperature;
   float pressure;
-  float resistance;
+  float puckResistance;
   bool isPressureFalling;
   bool isPressureRising;
   bool isPumpFlowRisingFast;
