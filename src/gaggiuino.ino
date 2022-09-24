@@ -141,6 +141,7 @@ static void sensorsReadPressure(void) {
     currentState.pressure = getPressure();
     currentState.isPressureRising = isPressureRaising();
     currentState.isPressureFalling = isPressureFalling();
+    currentState.isPressureFallingFast = isPressureFallingFast();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
@@ -185,18 +186,22 @@ bool checkForOutputFlow(long elapsedTime) {
   float resistanceDelta = currentState.puckResistance - lastResistance;
 
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
-  if (currentState.liquidPumped > 60.f) {
-    currentState.isHeadSpaceFilled = true;
-    return true;
-  } else if (currentState.liquidPumped < 60.f 
+  if (currentState.liquidPumped > 60.f) return true;
+  else if (currentState.liquidPumped < 60.f 
     && currentState.isPressureRising 
-    && preinfusionFinished) currentState.isHeadSpaceFilled = true;
+    && preinfusionFinished
+  ) currentState.isHeadSpaceFilled = true;
 
   if (!preinfusionFinished) {
     // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
-    // it must have been a short ass preinfusion and it's blooming for some time
+    // it must have been a short ass preinfusion and it's blooming for some time 
     if (currentState.liquidPumped < 45.f 
-      && (smoothedPressure < (runningCfg.flowProfileState) ? runningCfg.flowProfilePressureTarget - 1.f : runningCfg.preinfusionBar - 1.f
+      && ((
+          smoothedPressure < (runningCfg.flowProfileState) 
+            ? runningCfg.flowProfilePressureTarget - 0.7f 
+            : runningCfg.preinfusionBar - 0.7f
+          ) 
+      || currentState.isPressureFalling 
       || currentState.pumpFlow < 0.2f)) {
       currentState.isHeadSpaceFilled = false;
       return false;
