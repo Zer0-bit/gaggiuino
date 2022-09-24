@@ -42,6 +42,10 @@ bool isPressureFalling() {
   return previousPressure >= currentPressure + 0.03f;
 }
 
+bool isPressureFallingFast() {
+  return previousPressure >= currentPressure + 0.1f;
+}
+
 int8_t getAdsError() {
   return ADS.getError();
 }

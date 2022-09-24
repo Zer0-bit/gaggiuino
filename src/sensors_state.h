@@ -6,6 +6,7 @@ struct SensorState {
   float pressure;
   float puckResistance;
   bool isPressureFalling;
+  bool isPressureFallingFast;
   bool isPressureRising;
   bool isPumpFlowRisingFast;
   bool isOutputFlow;
