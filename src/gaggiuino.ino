@@ -198,8 +198,8 @@ bool checkForOutputFlow(long elapsedTime) {
     if (currentState.liquidPumped < 45.f 
       && ((
           smoothedPressure < (runningCfg.flowProfileState) 
-            ? runningCfg.flowProfilePressureTarget - 0.7f 
-            : runningCfg.preinfusionBar - 0.7f
+            ? runningCfg.flowProfilePressureTarget - 0.2f 
+            : runningCfg.preinfusionBar - 0.2f
           ) 
       || currentState.isPressureFalling 
       || currentState.pumpFlow < 0.2f)) {
