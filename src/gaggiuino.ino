@@ -195,7 +195,7 @@ bool checkForOutputFlow(long elapsedTime) {
 
   if (!preinfusionFinished) {
     // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
-    // it must have been a short ass preinfusion and it's blooming for some time 
+    // it must have been a short ass preinfusion and it's blooming for some time
     if (currentState.liquidPumped < 45.f
       && ((
           smoothedPressure < (runningCfg.flowProfileState)
