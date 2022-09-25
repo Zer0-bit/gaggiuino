@@ -29,6 +29,7 @@ void lcdShowDescaleFinished(void);
 
 void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);
+void lcdSetBrewTimer(int seconds);
 void lcdWarmupStateStop(void);
 void lcdSendFakeTouch(void);
 
