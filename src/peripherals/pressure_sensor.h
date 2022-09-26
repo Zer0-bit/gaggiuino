@@ -6,6 +6,8 @@
 void    pressureSensorInit(void);
 float   getPressure(void);
 bool    isPressureFalling(void);
+bool    isPressureFallingFast(void);
+bool    isPressureRaising(void);
 int8_t  getAdsError(void);
 
 #endif

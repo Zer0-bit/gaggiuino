@@ -18,11 +18,18 @@
 #include <SimpleKalmanFilter.h>
 
 // Define some const values
+#ifdef SINGLE_BOARD
+#define GET_KTYPE_READ_EVERY    70 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+#else
 #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+#endif
 #define GET_PRESSURE_READ_EVERY 10
 #define GET_SCALES_READ_EVERY   100
 #define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
-#define REFRESH_FLOW_EVERY      500
+#define REFRESH_FLOW_EVERY      150
+#define READ_TRAY_OFFSET_EVERY  1000
+#define EMPTY_TRAY_WEIGHT       23456.f
+#define TRAY_FULL_THRESHOLD     700.f
 
 
 
@@ -50,11 +57,13 @@ unsigned long brewingTimer = 0;
 unsigned long thermoTimer = 0;
 unsigned long scalesTimer = 0;
 unsigned long flowTimer = 0;
+unsigned long trayTimer = millis();
 
 //scales vars
 float previousWeight  = 0;
 float brewStopWeight  = 0;
 float shotWeight      = 0;
+float shotTarget      = 0;
 bool tareDone         = false;
 
 // brew detection vars
@@ -68,6 +77,8 @@ bool homeScreenScalesEnabled = false;
 
 // Other util vars
 float smoothedPressure;
+float smoothedPumpFlow;
+bool startupInitFinished;
 
 
 #endif

@@ -5,6 +5,8 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(2, 2, 1.00);
+SimpleKalmanFilter smoothPumpFlow(2, 2, 1.00);
+SimpleKalmanFilter smoothScalesFlow(2, 2, 1.00);
 
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
@@ -95,6 +97,8 @@ static void sensorsRead(void) {
   sensorsReadWeight();
   sensorsReadPressure();
   calculateWeightAndFlow();
+  // monitorDripTrayState();
+  fillBoiler(2.f);
 }
 
 static void sensorsReadTemperature(void) {
@@ -104,12 +108,12 @@ static void sensorsReadTemperature(void) {
     This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
     If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating
     */
-    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  > 170.0f) {
+    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
       /* In the event of the temp failing to read while the SSR is HIGH
       we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
       setBoilerOff();
       if (millis() > thermoTimer) {
-        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature );
+        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
         lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
         currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
         thermoTimer = millis() + GET_KTYPE_READ_EVERY;
@@ -134,7 +138,9 @@ static void sensorsReadWeight(void) {
 static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
     currentState.pressure = getPressure();
+    currentState.isPressureRising = isPressureRaising();
     currentState.isPressureFalling = isPressureFalling();
+    currentState.isPressureFallingFast = isPressureFallingFast();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
@@ -148,35 +154,87 @@ static void calculateWeightAndFlow(void) {
 
     long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
-      long pumpClicks =  getAndResetClickCounter();
-      float cps = 1000.f * pumpClicks / elapsedTime;
-      currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+      flowTimer = millis();
+      // if(elapsedTime > 200) return;
+
+      currentState.isOutputFlow = checkForOutputFlow(elapsedTime);
 
       if (scalesIsPresent()) {
-        currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000 / elapsedTime);
+        currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
+        currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = shotWeight;
-      } else if (preinfusionFinished) {
-        shotWeight += currentState.pumpFlow * elapsedTime / 1000;
+      } else if (currentState.isOutputFlow) {
+        previousWeight = shotWeight; // temporary measure to avoid those 30 -45 grams sudden jumps
+        shotWeight += smoothedPumpFlow * (float)elapsedTime / 1000.f;
+        if (shotWeight > previousWeight + 5.f) shotWeight = 0.f; // temporary measure to avoid those 30 -45 grams sudden jumps
       }
-
-      flowTimer = millis();
+      currentState.liquidPumped += smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
   }
 }
 
+bool checkForOutputFlow(long elapsedTime) {
+  long pumpClicks = getAndResetClickCounter();
+  float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
+
+  float previousPumpFlow = currentState.pumpFlow;
+  currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+  smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.45f;
+
+  float lastResistance = currentState.puckResistance;
+  currentState.puckResistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
+  float resistanceDelta = currentState.puckResistance - lastResistance;
+
+  // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
+  if (currentState.liquidPumped > 60.f) return true;
+  else if (currentState.liquidPumped < 60.f
+    && currentState.isPressureRising
+    && preinfusionFinished
+  ) currentState.isHeadSpaceFilled = true;
+
+  if (!preinfusionFinished) {
+    // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
+    // it must have been a short ass preinfusion and it's blooming for some time
+    if (currentState.liquidPumped < 45.f
+      && ((
+          smoothedPressure < (runningCfg.flowProfileState)
+            ? runningCfg.preinfusionFlowPressureTarget - 0.9f
+            : runningCfg.preinfusionBar - 0.9f
+          )
+      || currentState.isPressureFalling
+      || currentState.pumpFlow < 0.2f)) {
+      currentState.isHeadSpaceFilled = false;
+      return false;
+    }
+
+    // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
+    if (currentState.liquidPumped > 45.f && currentState.puckResistance > lastResistance
+      && resistanceDelta > 0.f && resistanceDelta < 400.f) {
+        currentState.isHeadSpaceFilled = true;
+        return true;
+      }
+  // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
+  // Noisy readings make it impossible to use flat out, but it should at least somewhat work
+  // Although a good threshold is very much experimental and not determined
+  } else if (resistanceDelta >= 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) {
+    return false;
+  } else return true;
+
+  return false;
+}
+
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  if ( !nonBrewModeActive ) {
-    if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-      if (shotWeight > runningCfg.shotDose-0.5f ) {
-        brewStopWeight = shotWeight;
-        return true;
-      } else return false;
-    } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-      if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) {
-        brewStopWeight = shotWeight;
-        return true;
-      } else return false;
+  if (!nonBrewModeActive && runningCfg.stopOnWeightState) {
+    if (runningCfg.shotStopOnCustomWeight < 1.f)
+      shotTarget = runningCfg.shotDose * runningCfg.shotPreset;
+    else
+      shotTarget = runningCfg.shotStopOnCustomWeight;
+    if (shotWeight > (shotTarget - 0.5f) || brewStopWeight) {
+      if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow / 2.f;
+      else brewStopWeight = shotWeight + smoothedPumpFlow / 2.f;
+      return true;
     }
   }
   return false;
@@ -220,7 +278,7 @@ static void modeSelect(void) {
       break;
     case OPMODE_manual:
       nonBrewModeActive = false;
-      manualPressureProfile();
+      manualFlowControl();
       break;
     case OPMODE_flush:
       nonBrewModeActive = true;
@@ -276,12 +334,21 @@ static void lcdRefresh(void) {
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
+      // lcdSetWeight(scalesDripTrayWeight());
     } else {
-      lcdSetWeight(
-        (shotWeight > 0.f && !stopOnWeight())
-          ? currentState.weight
+      if (scalesIsPresent()) {
+        lcdSetWeight(
+          (shotWeight > 0.f && !stopOnWeight())
+            ? currentState.weight
+            : brewStopWeight
+        );
+      } else if(shotWeight || brewStopWeight) {
+        lcdSetWeight(
+          (preinfusionFinished && !stopOnWeight())
+          ? shotWeight
           : brewStopWeight
-      );
+        );
+      }
     }
 
     /*LCD flow output*/
@@ -289,7 +356,7 @@ static void lcdRefresh(void) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.weightFlow * 10.f
-          : currentState.pumpFlow * 10.f
+          : smoothedPumpFlow * 10.f
       );
     }
 
@@ -356,10 +423,10 @@ void lcdTrigger1(void) {
       eepromCurrentValues.warmupState       = lcdValues.warmupState;
       break;
     case 5:
-      eepromCurrentValues.stopOnWeightState = lcdValues.stopOnWeightState;
-      eepromCurrentValues.shotDose = lcdValues.shotDose;
-      eepromCurrentValues.shotPreset = lcdValues.shotPreset;
-      eepromCurrentValues.shotStopOnCustomWeight = lcdValues.shotStopOnCustomWeight;
+      eepromCurrentValues.stopOnWeightState       = lcdValues.stopOnWeightState;
+      eepromCurrentValues.shotDose                = lcdValues.shotDose;
+      eepromCurrentValues.shotPreset              = lcdValues.shotPreset;
+      eepromCurrentValues.shotStopOnCustomWeight  = lcdValues.shotStopOnCustomWeight;
       break;
     case 6:
       eepromCurrentValues.setpoint    = lcdValues.setpoint;
@@ -467,17 +534,16 @@ static void profiling(void) {
       float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
-  }
-  else {
-    setPumpToRawValue(0);
+  } else {
+    if (startupInitFinished) setPumpToRawValue(0);
   }
   // Keep that water at temp
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
-static void manualPressureProfile(void) {
-  int power_reading = lcdGetManualPressurePower();
-  setPumpPressure(power_reading, 0.f, currentState);
+static void manualFlowControl(void) {
+  float flow_reading = lcdGetManualPressurePower() / 10 ;
+  setPumpFlow(flow_reading, 0.f, currentState);
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
@@ -488,36 +554,36 @@ static void manualPressureProfile(void) {
 static void brewDetect(void) {
   static bool paramsReset = true;
 
-  if ( brewState() && !stopOnWeight()) {
+  if (brewState() && !stopOnWeight()) {
     if(!paramsReset) {
       brewParamsReset();
       paramsReset = true;
     }
     openValve();
     brewActive = true;
-  } else if ( brewState() && stopOnWeight()) {
-    closeValve();
-    setPumpOff();
+  } else {
     brewActive = false;
-  } else if (!brewState()){
-    closeValve();
-    setPumpOff();
-    brewActive = false;
-    if(paramsReset) {
+    if (startupInitFinished) {
+      closeValve();
+      setPumpOff();
+    }
+    if(!brewState() && paramsReset) {
       brewParamsReset();
       paramsReset = false;
     }
   }
 }
 
-static void brewParamsReset() {
-  tareDone            = false;
-  shotWeight          = 0.f;
-  currentState.weight = 0.f;
-  brewStopWeight      = 0.f;
-  previousWeight      = 0.f;
-  brewingTimer        = millis();
-  preinfusionFinished = false;
+static void brewParamsReset(void) {
+  tareDone                        = false;
+  shotWeight                      = 0.f;
+  currentState.weight             = 0.f;
+  currentState.liquidPumped       = 0.f;
+  currentState.isHeadSpaceFilled  = false;
+  brewStopWeight                  = 0.f;
+  previousWeight                  = 0.f;
+  brewingTimer                    = millis();
+  preinfusionFinished             = false;
   lcdSendFakeTouch();
 }
 
@@ -534,4 +600,33 @@ static void flushDeactivated(void) {
   #ifdef SINGLE_BOARD
       closeValve();
   #endif
+}
+
+static void fillBoiler(float targetBoilerFullPressure) {
+  static float timePassed = millis();
+
+  if (currentState.pressure < targetBoilerFullPressure && !startupInitFinished ) {
+    openValve();
+    setPumpToRawValue(80);
+    if (millis() - timePassed > 5000.f) startupInitFinished = true;
+  } else startupInitFinished = true;
+}
+
+static void monitorDripTrayState(void) {
+  static bool dripTrayFull = false;
+  float currentTotalTrayWeight = scalesDripTrayWeight();
+  float actualTrayWeight  = currentTotalTrayWeight - EMPTY_TRAY_WEIGHT;
+
+  if ( !brewActive && !steamState() ) {
+    if (actualTrayWeight > TRAY_FULL_THRESHOLD) {
+      if (millis() > trayTimer) {
+        dripTrayFull = true;
+        trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
+      }
+    } else {
+      trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
+      dripTrayFull = false;
+    }
+    if (dripTrayFull) lcdShowPopup("DRIP TRAY FULL");
+  }
 }

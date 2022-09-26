@@ -29,13 +29,21 @@ float getPressure() {  //returns sensor pressure data
   #ifndef SINGLE_BOARD
     currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
   #else
-    currentPressure = (ADS.getValue() - 333) / 222.25f; // 12bit
+    currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
   #endif
   return currentPressure;
 }
 
+bool isPressureRaising() {
+  return currentPressure > previousPressure + 0.3f;
+}
+
 bool isPressureFalling() {
   return previousPressure >= currentPressure + 0.03f;
+}
+
+bool isPressureFallingFast() {
+  return previousPressure >= currentPressure + 0.1f;
 }
 
 int8_t getAdsError() {
