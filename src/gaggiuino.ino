@@ -188,11 +188,8 @@ bool checkForOutputFlow(long elapsedTime) {
 
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
   if (currentState.liquidPumped > 50.f) return true;
-  else if (currentState.liquidPumped < 50.f && currentState.isPressureRising) {
-    if (runningCfg.preinfusionState && preinfusionFinished) currentState.isHeadSpaceFilled = true;
-    else if (!runningCfg.preinfusionState && currentState.isPumpFlowRisingFast) currentState.isHeadSpaceFilled = false;
-    else currentState.isHeadSpaceFilled = true;
-  } 
+  else if (currentState.liquidPumped < 50.f && !runningCfg.preinfusionState && resistanceDelta > 250.f) return false;
+  else if (currentState.liquidPumped < 50.f && !runningCfg.preinfusionState && resistanceDelta <= 250.f) return true;
 
   if (!preinfusionFinished) {
     // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
@@ -204,21 +201,21 @@ bool checkForOutputFlow(long elapsedTime) {
             : runningCfg.preinfusionBar - 0.6f
           )
       || currentState.isPressureFalling
-      || currentState.pumpFlow < 0.2f)) {
+      || smoothedPumpFlow < 0.2f)) {
       currentState.isHeadSpaceFilled = false;
       return false;
     }
 
     // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
     if (currentState.liquidPumped > 45.f && currentState.puckResistance > lastResistance
-      && resistanceDelta < 150.f) {
+      && resistanceDelta <= 250.f) {
         currentState.isHeadSpaceFilled = true;
         return true;
       }
   // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
   // Noisy readings make it impossible to use flat out, but it should at least somewhat work
   // Although a good threshold is very much experimental and not determined
-  } else if ((resistanceDelta >= 150.f && (currentState.isPressureRising || currentState.isPumpFlowRisingFast)) || !currentState.isHeadSpaceFilled) {
+  } else if ((resistanceDelta > 250.f && (currentState.isPressureRising || currentState.isPumpFlowRisingFast)) || !currentState.isHeadSpaceFilled) {
     return false;
   } else return true;
 
