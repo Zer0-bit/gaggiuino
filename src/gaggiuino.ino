@@ -212,7 +212,7 @@ bool checkForOutputFlow(long elapsedTime) {
   // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
   // Noisy readings make it impossible to use flat out, but it should at least somewhat work
   // Although a good threshold is very much experimental and not determined
-  } else if ((resistanceDelta > 600.f && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) return false;
+  } else if (resistanceDelta > 600.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
   else if (resistanceDelta <= 600.f  && !currentState.isHeadSpaceFilled) {
     currentState.isHeadSpaceFilled = true;
     return true;
