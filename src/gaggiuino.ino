@@ -214,7 +214,7 @@ bool checkForOutputFlow(long elapsedTime) {
   // Noisy readings make it impossible to use flat out, but it should at least somewhat work
   // Although a good threshold is very much experimental and not determined
   } else if ((resistanceDelta > 250.f && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) return false;
-  else if ((resistanceDelta < 250.f  && !currentState.isHeadSpaceFilled) {
+  else if (resistanceDelta < 250.f  && !currentState.isHeadSpaceFilled) {
     currentState.isHeadSpaceFilled = true;
     return true;
   } else {
