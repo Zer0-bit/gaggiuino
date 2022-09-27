@@ -14,6 +14,8 @@ bool scalesPresent;
 
 #ifdef SINGLE_BOARD
   unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
+#elif defined(SINGLE_BOARD) && defined(SINGLE_HX711_BOARD)
+  unsigned char scale_clk = OUTPUT;
 #else
   unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 #endif
