@@ -205,16 +205,15 @@ bool checkForOutputFlow(long elapsedTime) {
     }
 
     // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
-    if (currentState.liquidPumped > 45.f && currentState.puckResistance > lastResistance
-      && resistanceDelta <= 250.f) {
+    if (currentState.liquidPumped > 45.f && resistanceDelta <= 600.f) {
         currentState.isHeadSpaceFilled = true;
         return true;
       }
   // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
   // Noisy readings make it impossible to use flat out, but it should at least somewhat work
   // Although a good threshold is very much experimental and not determined
-  } else if ((resistanceDelta > 250.f && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) return false;
-  else if (resistanceDelta < 250.f  && !currentState.isHeadSpaceFilled) {
+  } else if ((resistanceDelta > 600.f && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) return false;
+  else if (resistanceDelta <= 600.f  && !currentState.isHeadSpaceFilled) {
     currentState.isHeadSpaceFilled = true;
     return true;
   } else {
