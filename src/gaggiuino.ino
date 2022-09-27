@@ -98,7 +98,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   // monitorDripTrayState();
-  fillBoiler(2.f);
+  fillBoiler(2.3f);
 }
 
 static void sensorsReadTemperature(void) {
