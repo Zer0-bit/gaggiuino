@@ -187,9 +187,7 @@ bool checkForOutputFlow(long elapsedTime) {
   float resistanceDelta = currentState.puckResistance - lastResistance;
 
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
-  if (currentState.liquidPumped > 50.f) return true;
-  else if (currentState.liquidPumped < 50.f && !runningCfg.preinfusionState && resistanceDelta > 250.f) return false;
-  else if (currentState.liquidPumped < 50.f && !runningCfg.preinfusionState && resistanceDelta <= 250.f) return true;
+  if (currentState.liquidPumped > 60.f) return true;
 
   if (!preinfusionFinished) {
     // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
@@ -215,11 +213,14 @@ bool checkForOutputFlow(long elapsedTime) {
   // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
   // Noisy readings make it impossible to use flat out, but it should at least somewhat work
   // Although a good threshold is very much experimental and not determined
-  } else if ((resistanceDelta > 250.f && (currentState.isPressureRising || currentState.isPumpFlowRisingFast)) || !currentState.isHeadSpaceFilled) {
-    return false;
-  } else return true;
-
-  return false;
+  } else if ((resistanceDelta > 250.f && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) return false;
+  else if ((resistanceDelta < 250.f  && !currentState.isHeadSpaceFilled) {
+    currentState.isHeadSpaceFilled = true;
+    return true;
+  } else {
+    currentState.isHeadSpaceFilled = true;
+    return true;
+  }
 }
 
 // Stops the pump if setting active and dose/weight conditions met
