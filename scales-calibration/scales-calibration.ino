@@ -3,30 +3,16 @@
 #else
     #include <HX711.h>
 #endif
-
 #include <EasyNextionLibrary.h>
-#if defined(ARDUINO_ARCH_AVR)
-  #include <EEPROM.h>
-#elif defined(ARDUINO_ARCH_STM32)
-  #include "ADS1X15.h"
-#endif
+#include "ADS1X15.h"
 
+#define relayPin PA15  // PB0
+#define LOADCELL_1_DOUT_PIN  PB8
+#define LOADCELL_2_DOUT_PIN  PB9
+#define LOADCELL_1_SCK_PIN  PB0
+#define LOADCELL_2_SCK_PIN  PB1
+#define UART_LCD Serial2
 
-#if defined(ARDUINO_ARCH_AVR)
-    #define relayPin 8  // PB0
-    #define LOADCELL_1_DOUT_PIN 12 //mcu > HX711 no 1 dout pin
-    #define LOADCELL_2_DOUT_PIN 13 //mcu > HX711 no 2 dout pin
-    #define LOADCELL_1_SCK_PIN 10 //mcu > HX711 no 1 sck pin
-    #define LOADCELL_2_SCK_PIN 11 //mcu > HX711 no 2 sck pin
-    #define UART_LCD Serial
-#elif defined(ARDUINO_ARCH_STM32)
-    #define relayPin PA15  // PB0
-    #define LOADCELL_1_DOUT_PIN  PB8
-    #define LOADCELL_2_DOUT_PIN  PB9
-    #define LOADCELL_1_SCK_PIN  PB0
-    #define LOADCELL_2_SCK_PIN  PB1
-    #define UART_LCD Serial2
-#endif
 
 #if defined(SINGLE_HX711_CLOCK)
 HX711_2 loadcell;
@@ -35,10 +21,12 @@ HX711 loadcell_1;
 HX711 loadcell_2;
 #endif
 
-#if defined(ARDUINO_ARCH_AVR)
-const unsigned int  EEP_SCALES_F1 = 215;
-const unsigned int  EEP_SCALES_F2 = 220;
+#ifdef SINGLE_BOARD
+  unsigned char scale_clk = OUTPUT;
+#else
+  unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 #endif
+
 float calibration_factor_lc1 = 4000; //-7050 worked for my 440lb max scale setup
 float calibration_factor_lc2 = 4000; //-7050 worked for my 440lb max scale setup
 
@@ -55,7 +43,7 @@ void setup() {
   }
 
 #if defined(SINGLE_HX711_CLOCK)
-    loadcell.begin(LOADCELL_1_DOUT_PIN,LOADCELL_2_DOUT_PIN, LOADCELL_1_SCK_PIN, LOADCELL_2_SCK_PIN);
+    loadcell.begin(LOADCELL_1_DOUT_PIN,LOADCELL_2_DOUT_PIN, LOADCELL_1_SCK_PIN, LOADCELL_2_SCK_PIN, 128, scale_clk);
     loadcell.set_scale();
     loadcell.tare();
 #else
