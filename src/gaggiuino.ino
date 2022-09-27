@@ -98,7 +98,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   // monitorDripTrayState();
-  fillBoiler(2.f);
+  fillBoiler(2.3f);
 }
 
 static void sensorsReadTemperature(void) {
@@ -187,11 +187,12 @@ bool checkForOutputFlow(long elapsedTime) {
   float resistanceDelta = currentState.puckResistance - lastResistance;
 
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
-  if (currentState.liquidPumped > 60.f) return true;
-  else if (currentState.liquidPumped < 60.f
-    && currentState.isPressureRising
-    && preinfusionFinished
-  ) currentState.isHeadSpaceFilled = true;
+  if (currentState.liquidPumped > 50.f) return true;
+  else if (currentState.liquidPumped < 50.f && currentState.isPressureRising) {
+    if (runningCfg.preinfusionState && preinfusionFinished) currentState.isHeadSpaceFilled = true;
+    else if (!runningCfg.preinfusionState && currentState.isPumpFlowRisingFast) currentState.isHeadSpaceFilled = false;
+    else currentState.isHeadSpaceFilled = true;
+  } 
 
   if (!preinfusionFinished) {
     // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
@@ -199,8 +200,8 @@ bool checkForOutputFlow(long elapsedTime) {
     if (currentState.liquidPumped < 45.f
       && ((
           smoothedPressure < (runningCfg.flowProfileState)
-            ? runningCfg.preinfusionFlowPressureTarget - 0.9f
-            : runningCfg.preinfusionBar - 0.9f
+            ? runningCfg.preinfusionFlowPressureTarget - 0.6f
+            : runningCfg.preinfusionBar - 0.6f
           )
       || currentState.isPressureFalling
       || currentState.pumpFlow < 0.2f)) {
@@ -210,14 +211,14 @@ bool checkForOutputFlow(long elapsedTime) {
 
     // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
     if (currentState.liquidPumped > 45.f && currentState.puckResistance > lastResistance
-      && resistanceDelta > 0.f && resistanceDelta < 400.f) {
+      && resistanceDelta < 150.f) {
         currentState.isHeadSpaceFilled = true;
         return true;
       }
   // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
   // Noisy readings make it impossible to use flat out, but it should at least somewhat work
   // Although a good threshold is very much experimental and not determined
-  } else if (resistanceDelta >= 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) {
+  } else if ((resistanceDelta >= 150.f && (currentState.isPressureRising || currentState.isPumpFlowRisingFast)) || !currentState.isHeadSpaceFilled) {
     return false;
   } else return true;
 

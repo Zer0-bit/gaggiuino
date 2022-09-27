@@ -13,6 +13,8 @@ HX711 LoadCell_2; //HX711 2
 bool scalesPresent;
 
 #ifdef SINGLE_BOARD
+  unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
+#elif defined(SINGLE_BOARD && SINGLE_HX711_BOARD)
   unsigned char scale_clk = OUTPUT;
 #else
   unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
@@ -41,7 +43,9 @@ void scalesInit(float scalesF1, float scalesF2) {
       LoadCell_2.tare();
     }
   #endif
+  #ifdef FORCE_PREDICTIVE_SCALES
   scalesPresent = false;
+  #endif
 }
 
 void scalesTare(void) {
