@@ -178,9 +178,10 @@ bool checkForOutputFlow(long elapsedTime) {
   float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
 
   float previousPumpFlow = currentState.pumpFlow;
+  previousSmoothedPumpFlow = smoothedPumpFlow;
   currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
   smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.45f;
+  currentState.isPumpFlowRisingFast = smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
 
   float lastResistance = currentState.puckResistance;
   currentState.puckResistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
@@ -217,7 +218,8 @@ bool checkForOutputFlow(long elapsedTime) {
   // Noisy readings make it impossible to use flat out, but it should at least somewhat work
   // Although a good threshold is very much experimental and not determined
   } else if (resistanceDelta > 600.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
-  else return true;
+  
+  return true;
 }
 
 // Stops the pump if setting active and dose/weight conditions met
