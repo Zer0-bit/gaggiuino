@@ -188,6 +188,10 @@ bool checkForOutputFlow(long elapsedTime) {
 
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
   if (currentState.liquidPumped > 60.f) return true;
+  else if (currentState.liquidPumped <= 60.f) {
+    if (preinfusionFinished && currentState.isPumpFlowRisingFast) currentState.isHeadSpaceFilled = false;
+    else currentState.isHeadSpaceFilled = true;
+  }
 
   if (!preinfusionFinished) {
     // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
@@ -213,13 +217,7 @@ bool checkForOutputFlow(long elapsedTime) {
   // Noisy readings make it impossible to use flat out, but it should at least somewhat work
   // Although a good threshold is very much experimental and not determined
   } else if (resistanceDelta > 600.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
-  else if (resistanceDelta <= 600.f  && !currentState.isHeadSpaceFilled) {
-    currentState.isHeadSpaceFilled = true;
-    return true;
-  } else {
-    currentState.isHeadSpaceFilled = true;
-    return true;
-  }
+  else return true;
 }
 
 // Stops the pump if setting active and dose/weight conditions met
