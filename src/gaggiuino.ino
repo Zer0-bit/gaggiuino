@@ -199,10 +199,10 @@ bool checkForOutputFlow(long elapsedTime) {
       (pumpClicks >= 0) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
     }
     else if (!runningCfg.preinfusionState) {
-      if (resistanceDelta < 200 && smoothedPressure / smoothedPumpFlow >= 1.1f) return true;
+      if (resistanceDelta < 200 && currentState.puckResistance >= 1100) return true;
       else return false;
     } 
-    else if (smoothedPressure / smoothedPumpFlow > 1.1f) currentState.isHeadSpaceFilled = true;
+    else if (currentState.puckResistance > 1100) currentState.isHeadSpaceFilled = true;
     else currentState.isHeadSpaceFilled = false;
   }
 
@@ -222,7 +222,7 @@ bool checkForOutputFlow(long elapsedTime) {
     }
 
     // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
-    if (currentState.liquidPumped > 45.f && resistanceDelta <= 600.f) {
+    if (currentState.liquidPumped > 45.f && currentState.puckResistance <= 500.f) {
         currentState.isHeadSpaceFilled = true;
         return true;
       }
@@ -352,9 +352,12 @@ static void lcdRefresh(void) {
             ? currentState.weight
             : brewStopWeight
         );
-      } else if(shotWeight || brewStopWeight) {
-        if (preinfusionFinished && !stopOnWeight()) lcdSetWeight(shotWeight);
-        else if (stopOnWeight()) lcdSetWeight(brewStopWeight);
+      } else if (shotWeight || brewStopWeight) {
+        lcdSetWeight(
+          stopOnWeight() 
+          ? brewStopWeight
+          : shotWeight
+        );
       }
     }
 

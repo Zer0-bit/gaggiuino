@@ -82,7 +82,7 @@ float getFlowPerClick(float pressure) {
         fpc = (flowPerClickAtZeroBar - 0.055f) - (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 - (pressureInefficiencyConstant4 - pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
     }
 
-    return 50.0f * fpc / float(maxPumpClicksPerSecond);
+    return 50.0f * fpc / (float)maxPumpClicksPerSecond;
 }
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
