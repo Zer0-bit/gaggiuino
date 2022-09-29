@@ -199,10 +199,11 @@ bool checkForOutputFlow(long elapsedTime) {
       (pumpClicks >= 0) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
     }
     else if (!runningCfg.preinfusionState) {
-      if (resistanceDelta < 200 && smoothedPressure / smoothedPumpFlow >= 0.9f) return true;
+      if (resistanceDelta < 200 && smoothedPressure / smoothedPumpFlow >= 1.1f) return true;
       else return false;
-    } else if (smoothedPressure / smoothedPumpFlow >= 0.9f) currentState.isHeadSpaceFilled = true;
-    else currentState.isHeadSpaceFilled = true;
+    } 
+    else if (smoothedPressure / smoothedPumpFlow > 1.1f) currentState.isHeadSpaceFilled = true;
+    else currentState.isHeadSpaceFilled = false;
   }
 
   if (!preinfusionFinished) {
