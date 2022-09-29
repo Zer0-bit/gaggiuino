@@ -192,11 +192,8 @@ bool checkForOutputFlow(long elapsedTime) {
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
   if (currentState.liquidPumped > 60.f) return true;
   else if (currentState.liquidPumped <= 60.f) {
-    if (preinfusionFinished && (currentState.isPumpFlowRisingFast || currentState.isPressureRisingFast)) {
-      (pumpClicks >= 0 && pumpClicks < 70) ? currentState.isHeadSpaceFilled = false : currentState.isHeadSpaceFilled = true;
-    }
     else if (preinfusionFinished && (!currentState.isPumpFlowRisingFast || !currentState.isPressureRisingFast)) {
-      (pumpClicks >= 0) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
+      (pumpClicks < 70 && currentState.puckResistance > 1100) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
     }
     else if (!runningCfg.preinfusionState) {
       if (resistanceDelta < 200 && currentState.puckResistance >= 1100) return true;
