@@ -193,13 +193,13 @@ bool checkForOutputFlow(long elapsedTime) {
   if (currentState.liquidPumped > 60.f) return true;
   else if (currentState.liquidPumped <= 60.f) {
     if (preinfusionFinished && (!currentState.isPumpFlowRisingFast || !currentState.isPressureRisingFast)) {
-      (pumpClicks < 70 && currentState.puckResistance > 1100) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
+      (pumpClicks < 70 && currentState.puckResistance > 1500) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
     }
     else if (!runningCfg.preinfusionState) {
-      if (resistanceDelta < 200 && currentState.puckResistance >= 1100) return true;
+      if (resistanceDelta < 200 && currentState.puckResistance >= 1500) return true;
       else return false;
     } 
-    else if (currentState.puckResistance > 1100) currentState.isHeadSpaceFilled = true;
+    else if (currentState.puckResistance > 1500) currentState.isHeadSpaceFilled = true;
     else currentState.isHeadSpaceFilled = false;
   }
 
