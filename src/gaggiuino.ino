@@ -137,8 +137,10 @@ static void sensorsReadWeight(void) {
 
 static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
+    previousSmoothedPressure = smoothedPressure;
     currentState.pressure = getPressure();
     currentState.isPressureRising = isPressureRaising();
+    currentState.isPressureRisingFast = smoothedPressure >= previousSmoothedPressure + 0.06f;
     currentState.isPressureFalling = isPressureFalling();
     currentState.isPressureFallingFast = isPressureFallingFast();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
@@ -190,7 +192,16 @@ bool checkForOutputFlow(long elapsedTime) {
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
   if (currentState.liquidPumped > 60.f) return true;
   else if (currentState.liquidPumped <= 60.f) {
-    if (preinfusionFinished && currentState.isPumpFlowRisingFast) currentState.isHeadSpaceFilled = false;
+    if (preinfusionFinished && (currentState.isPumpFlowRisingFast || currentState.isPressureRisingFast)) {
+      (pumpClicks >= 0 && pumpClicks < 70) ? currentState.isHeadSpaceFilled = false : currentState.isHeadSpaceFilled = true;
+    }
+    else if (preinfusionFinished && (!currentState.isPumpFlowRisingFast || !currentState.isPressureRisingFast)) {
+      (pumpClicks >= 0) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
+    }
+    else if (!runningCfg.preinfusionState) {
+      if (resistanceDelta < 200 && smoothedPressure / smoothedPumpFlow >= 0.9f) return true;
+      else return false;
+    } else if (smoothedPressure / smoothedPumpFlow >= 0.9f) currentState.isHeadSpaceFilled = true;
     else currentState.isHeadSpaceFilled = true;
   }
 
@@ -341,11 +352,8 @@ static void lcdRefresh(void) {
             : brewStopWeight
         );
       } else if(shotWeight || brewStopWeight) {
-        lcdSetWeight(
-          (preinfusionFinished && !stopOnWeight())
-          ? shotWeight
-          : brewStopWeight
-        );
+        if (preinfusionFinished && !stopOnWeight()) lcdSetWeight(shotWeight);
+        else if (stopOnWeight()) lcdSetWeight(brewStopWeight);
       }
     }
 
