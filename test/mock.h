@@ -30,4 +30,5 @@
 static void lcdTrigger1(void) {}
 static void lcdTrigger2(void) {}
 static void lcdTrigger3(void) {}
+static void lcdTrigger4(void) {}
 #endif
