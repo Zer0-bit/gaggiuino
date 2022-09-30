@@ -199,7 +199,7 @@ bool checkForOutputFlow(long elapsedTime) {
       else if (!runningCfg.preinfusionState) {
         if (resistanceDelta < 200 && currentState.puckResistance >= 1500) return true;
         else return false;
-      } 
+      }
       else if (currentState.puckResistance > 1500) currentState.isHeadSpaceFilled = true;
       else currentState.isHeadSpaceFilled = false;
     }
@@ -352,7 +352,7 @@ static void lcdRefresh(void) {
         );
       } else if (shotWeight || brewStopWeight) {
         lcdSetWeight(
-          stopOnWeight() 
+          stopOnWeight()
           ? brewStopWeight
           : shotWeight
         );
