@@ -137,8 +137,10 @@ static void sensorsReadWeight(void) {
 
 static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
+    previousSmoothedPressure = smoothedPressure;
     currentState.pressure = getPressure();
     currentState.isPressureRising = isPressureRaising();
+    currentState.isPressureRisingFast = smoothedPressure >= previousSmoothedPressure + 0.06f;
     currentState.isPressureFalling = isPressureFalling();
     currentState.isPressureFallingFast = isPressureFallingFast();
     smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
@@ -178,50 +180,56 @@ bool checkForOutputFlow(long elapsedTime) {
   float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
 
   float previousPumpFlow = currentState.pumpFlow;
+  previousSmoothedPumpFlow = smoothedPumpFlow;
   currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
   smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-  currentState.isPumpFlowRisingFast = currentState.pumpFlow > previousPumpFlow + 0.45f;
+  currentState.isPumpFlowRisingFast = smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
 
   float lastResistance = currentState.puckResistance;
   currentState.puckResistance = smoothedPressure * 1000.f / smoothedPumpFlow; // Resistance in mBar * s / g
   float resistanceDelta = currentState.puckResistance - lastResistance;
 
-  // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
-  if (currentState.liquidPumped > 60.f) return true;
-  else if (currentState.liquidPumped < 60.f
-    && currentState.isPressureRising
-    && preinfusionFinished
-  ) currentState.isHeadSpaceFilled = true;
-
-  if (!preinfusionFinished) {
-    // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
-    // it must have been a short ass preinfusion and it's blooming for some time
-    if (currentState.liquidPumped < 45.f
-      && ((
-          smoothedPressure < (runningCfg.flowProfileState)
-            ? runningCfg.preinfusionFlowPressureTarget - 0.9f
-            : runningCfg.preinfusionBar - 0.9f
-          )
-      || currentState.isPressureFalling
-      || currentState.pumpFlow < 0.2f)) {
-      currentState.isHeadSpaceFilled = false;
-      return false;
+  if (!currentState.isPredictiveWeightForceStarted) {
+    // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
+    if (currentState.liquidPumped > 60.f) return true;
+    else if (currentState.liquidPumped <= 60.f) {
+      if (preinfusionFinished && (!currentState.isPumpFlowRisingFast || !currentState.isPressureRisingFast)) {
+        (pumpClicks < 70 && currentState.puckResistance > 1500) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
+      }
+      else if (!runningCfg.preinfusionState) {
+        if (resistanceDelta < 200 && currentState.puckResistance >= 1500) return true;
+        else return false;
+      } 
+      else if (currentState.puckResistance > 1500) currentState.isHeadSpaceFilled = true;
+      else currentState.isHeadSpaceFilled = false;
     }
 
-    // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
-    if (currentState.liquidPumped > 45.f && currentState.puckResistance > lastResistance
-      && resistanceDelta > 0.f && resistanceDelta < 400.f) {
-        currentState.isHeadSpaceFilled = true;
-        return true;
+    if (!preinfusionFinished) {
+      // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
+      // it must have been a short ass preinfusion and it's blooming for some time
+      if (currentState.liquidPumped < 45.f
+        && ((
+            smoothedPressure < (runningCfg.flowProfileState)
+              ? runningCfg.preinfusionFlowPressureTarget - 0.6f
+              : runningCfg.preinfusionBar - 0.6f
+            )
+        || currentState.isPressureFalling
+        || smoothedPumpFlow < 0.2f)) {
+        currentState.isHeadSpaceFilled = false;
+        return false;
       }
-  // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
-  // Noisy readings make it impossible to use flat out, but it should at least somewhat work
-  // Although a good threshold is very much experimental and not determined
-  } else if (resistanceDelta >= 400.f || (currentState.isPressureRising && currentState.isPumpFlowRisingFast) || !currentState.isHeadSpaceFilled) {
-    return false;
-  } else return true;
 
-  return false;
+      // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
+      if (currentState.liquidPumped > 45.f && currentState.puckResistance <= 500.f) {
+          currentState.isHeadSpaceFilled = true;
+          return true;
+        }
+    // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
+    // Noisy readings make it impossible to use flat out, but it should at least somewhat work
+    // Although a good threshold is very much experimental and not determined
+    } else if (resistanceDelta > 600.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
+  }
+  return true;
 }
 
 // Stops the pump if setting active and dose/weight conditions met
@@ -342,11 +350,11 @@ static void lcdRefresh(void) {
             ? currentState.weight
             : brewStopWeight
         );
-      } else if(shotWeight || brewStopWeight) {
+      } else if (shotWeight || brewStopWeight) {
         lcdSetWeight(
-          (preinfusionFinished && !stopOnWeight())
-          ? shotWeight
-          : brewStopWeight
+          stopOnWeight() 
+          ? brewStopWeight
+          : shotWeight
         );
       }
     }
@@ -464,6 +472,16 @@ void lcdTrigger3(void) {
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
 }
 
+void lcdTrigger4(void) {
+  LOG_VERBOSE("Predictive scales tare action completed!");
+  if (!scalesIsPresent()) {
+    if (shotWeight > 0.f) {
+      shotWeight = 0.f;
+      currentState.isPredictiveWeightForceStarted = true;
+    } else currentState.isPredictiveWeightForceStarted = true;
+  } else scalesTare();
+}
+
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
@@ -575,15 +593,16 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset(void) {
-  tareDone                        = false;
-  shotWeight                      = 0.f;
-  currentState.weight             = 0.f;
-  currentState.liquidPumped       = 0.f;
-  currentState.isHeadSpaceFilled  = false;
-  brewStopWeight                  = 0.f;
-  previousWeight                  = 0.f;
-  brewingTimer                    = millis();
-  preinfusionFinished             = false;
+  tareDone                                    = false;
+  shotWeight                                  = 0.f;
+  brewStopWeight                              = 0.f;
+  previousWeight                              = 0.f;
+  currentState.weight                         = 0.f;
+  currentState.liquidPumped                   = 0.f;
+  currentState.isHeadSpaceFilled              = false;
+  currentState.isPredictiveWeightForceStarted = false;
+  preinfusionFinished                         = false;
+  brewingTimer                                = millis();
   lcdSendFakeTouch();
 }
 

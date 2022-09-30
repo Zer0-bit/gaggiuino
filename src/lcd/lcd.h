@@ -37,5 +37,6 @@ void lcdSendFakeTouch(void);
 void lcdTrigger1(void);
 void lcdTrigger2(void);
 void lcdTrigger3(void);
+void lcdTrigger4(void);
 
 #endif
