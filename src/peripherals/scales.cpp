@@ -38,10 +38,13 @@ void scalesInit(float scalesF1, float scalesF2) {
     LoadCell_2.set_scale(scalesF2); // calibrated val2
 
     if (LoadCell_1.wait_ready_timeout(700, 100) && LoadCell_2.wait_ready_timeout(700, 100)) {
+      scalesPresent = true;
       LoadCell_1.tare();
       LoadCell_2.tare();
-      scalesPresent = true;
     }
+  #endif
+  #ifdef FORCE_PREDICTIVE_SCALES
+  scalesPresent = false;
   #endif
 }
 
