@@ -12,6 +12,7 @@ struct SensorState {
   bool isPumpFlowRisingFast;
   bool isOutputFlow;
   bool isHeadSpaceFilled;
+  bool isPredictiveWeightForceStarted;
   float pumpFlow;
   float liquidPumped;
   float weightFlow;
