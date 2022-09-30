@@ -479,7 +479,7 @@ void lcdTrigger4(void) {
       shotWeight = 0.f;
       currentState.isPredictiveWeightForceStarted = true;
     } else currentState.isPredictiveWeightForceStarted = true;
-  }
+  } else scalesTare();
 }
 
 //#############################################################################################
