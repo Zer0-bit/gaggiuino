@@ -22,18 +22,9 @@ void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
 
-  lcdInit();
-  LOG_INFO("LCD Init");
-
   // Various pins operation mode handling
   pinInit();
   LOG_INFO("Pin init");
-
-#if defined(DEBUG_ENABLED)
-  // Debug init if enabled
-  dbgInit();
-  LOG_INFO("DBG init");
-#endif
 
   setBoilerOff();  // relayPin LOW
   LOG_INFO("Boiler turned off");
@@ -45,6 +36,15 @@ void setup(void) {
   // Valve
   closeValve();
   LOG_INFO("Valve closed");
+
+  lcdInit();
+  LOG_INFO("LCD Init");
+
+#if defined(DEBUG_ENABLED)
+  // Debug init if enabled
+  dbgInit();
+  LOG_INFO("DBG init");
+#endif
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
