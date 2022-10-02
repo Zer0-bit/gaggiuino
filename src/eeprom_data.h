@@ -38,8 +38,8 @@ struct eepromValues_t {
   bool     homeOnShotFinish;
   bool     graphBrew;
   bool     brewDeltaState;
-  float    scalesF1;
-  float    scalesF2;
+  int      scalesF1;
+  int      scalesF2;
   float    pumpFlowAtZero;
   bool     stopOnWeightState;
   float    shotDose;
