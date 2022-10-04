@@ -657,21 +657,21 @@ static void fillBoiler(float targetBoilerFullPressure) {
   } else startupInitFinished = true;
 }
 
-static void monitorDripTrayState(void) {
-  static bool dripTrayFull = false;
-  float currentTotalTrayWeight = scalesDripTrayWeight();
-  float actualTrayWeight  = currentTotalTrayWeight - EMPTY_TRAY_WEIGHT;
+// static void monitorDripTrayState(void) {
+//   static bool dripTrayFull = false;
+//   float currentTotalTrayWeight = scalesDripTrayWeight();
+//   float actualTrayWeight  = currentTotalTrayWeight - EMPTY_TRAY_WEIGHT;
 
-  if ( !brewActive && !steamState() ) {
-    if (actualTrayWeight > TRAY_FULL_THRESHOLD) {
-      if (millis() > trayTimer) {
-        dripTrayFull = true;
-        trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
-      }
-    } else {
-      trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
-      dripTrayFull = false;
-    }
-    if (dripTrayFull) lcdShowPopup("DRIP TRAY FULL");
-  }
-}
+//   if ( !brewActive && !steamState() ) {
+//     if (actualTrayWeight > TRAY_FULL_THRESHOLD) {
+//       if (millis() > trayTimer) {
+//         dripTrayFull = true;
+//         trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
+//       }
+//     } else {
+//       trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
+//       dripTrayFull = false;
+//     }
+//     if (dripTrayFull) lcdShowPopup("DRIP TRAY FULL");
+//   }
+// }
