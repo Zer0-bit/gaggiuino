@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "log.h"
 
-#define EEPROM_DATA_VERSION 3
+#define EEPROM_DATA_VERSION 4
 
 struct eepromValues_t {
   uint16_t setpoint;
@@ -38,6 +38,7 @@ struct eepromValues_t {
   bool     homeOnShotFinish;
   bool     graphBrew;
   bool     brewDeltaState;
+  bool     switchPhaseOnThreshold;
   int      scalesF1;
   int      scalesF2;
   float    pumpFlowAtZero;
