@@ -3,16 +3,16 @@
 #include "utils.h"
 
 
-Phase pressurePhase(float start, float end, unsigned int time) {
-  return Phase{PHASE_TYPE_PRESSURE, STAGE_TYPE, start, end, 0.f, 0.f, time};
+Phase pressurePhase(STAGE_TYPE stage, float start, float end, unsigned int time) {
+  return Phase{PHASE_TYPE_PRESSURE, stage, start, end, 0.f, 0.f, time};
 }
 
 Phase phaseArray[] = {
-    pressurePhase(0, 2, 1000),
-    pressurePhase(2, 2, 10000),
-    pressurePhase(2, 9, 1000),
-    pressurePhase(9, 9, 10000),
-    pressurePhase(9, 6, 30000),
+    pressurePhase(STAGE_PI_FILL, 0, 2, 1000),
+    pressurePhase(STAGE_PI_SOAK, 2, 2, 10000),
+    pressurePhase(STAGE_PI_RAMP, 2, 9, 1000),
+    pressurePhase(STAGE_PP_HOLD, 9, 9, 10000),
+    pressurePhase(STAGE_PP_MAIN, 9, 6, 30000),
 };
 
 Phases phases = {5, phaseArray};
