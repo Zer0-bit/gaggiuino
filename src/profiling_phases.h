@@ -66,7 +66,7 @@ struct Phases {
     CurrentPhase getCurrentPhase(PhaseConditions& phaseConditions) {
         short phase = 0;
         unsigned long accumulatedTime = 0;
-        
+
         while (phase < count - 1 && phaseConditions.timeInPhase >= accumulatedTime + phases[phase].durationMs) {
             accumulatedTime += phases[phase].durationMs;
             phase += 1;

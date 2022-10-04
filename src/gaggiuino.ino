@@ -185,7 +185,7 @@ bool checkForOutputFlow(long elapsedTime) {
   currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
   smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
   currentState.isPumpFlowRisingFast = smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
-  
+
   // No point going through all the below logic if we hardsetting the predictive scales to start counting
   if (currentState.isPredictiveWeightForceStarted) return true;
 
@@ -233,7 +233,7 @@ bool checkForOutputFlow(long elapsedTime) {
   // Although a good threshold is very much experimental and not determined
   } else if (resistanceDelta > 600.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
   else return true;
-  
+
   return false;
 }
 
@@ -561,12 +561,12 @@ void setPhase(int phaseIdx, PHASE_TYPE type, STAGE_TYPE stage, float startValue,
 }
 
 static void profiling(void) {
-  
+
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     // long timeInPhase = millis() - brewingTimer;
     PhaseConditions phaseConditions = { millis() - brewingTimer };
     CurrentPhase currentPhase = phases.getCurrentPhase(phaseConditions);
-    
+
     preinfusionFinished = currentPhase.phaseIndex >= preInfusionFinishedPhaseIdx;
 
     if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
