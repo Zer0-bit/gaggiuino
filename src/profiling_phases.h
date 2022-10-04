@@ -39,14 +39,13 @@ struct Phase {
     }
 
     float getTimeRestriction(SensorState& currentState, eepromValues_t& runningCfg) {
-      if (runningCfg.switchPhaseOnThreshold) {
-        if (runningCfg.flowProfileState) {
-          return mapRange(currentState.pressure, 0, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime, 0, 1);
-        }
-        else {
-          return mapRange(currentState.pressure, 0, runningCfg.preinfusionBar ,runningCfg.preinfusionFlowTime, 0, 1);
-        }
+      if (runningCfg.flowProfileState) {
+        return mapRange(currentState.pressure, 0, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime, 0, 1);
       }
+      else {
+        return mapRange(currentState.pressure, 0, runningCfg.preinfusionBar ,runningCfg.preinfusionFlowTime, 0, 1);
+      }
+      return 0.f;
     }
 };
 
