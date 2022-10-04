@@ -4,7 +4,7 @@
 
 
 Phase pressurePhase(float start, float end, unsigned int time) {
-  return Phase{PHASE_TYPE_PRESSURE, start, end, 0.f, 0.f, time};
+  return Phase{PHASE_TYPE_PRESSURE, STAGE_TYPE, start, end, 0.f, 0.f, time};
 }
 
 Phase phaseArray[] = {
@@ -21,24 +21,29 @@ Phases phases = {5, phaseArray};
 void test_current_phase_calculation(void)
 {
     CurrentPhase currentPhase;
+    PhaseConditions phaseConditions = {0};
 
-    currentPhase = phases.getCurrentPhase(0);
+    currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(0, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(0, currentPhase.timeInPhase);
 
-    currentPhase = phases.getCurrentPhase(550);
+    PhaseConditions phaseConditions = {550};
+    currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(0, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(550, currentPhase.timeInPhase);
 
-    currentPhase = phases.getCurrentPhase(1000);
+    PhaseConditions phaseConditions = {1000};
+    currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(1, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(0, currentPhase.timeInPhase);
 
-    currentPhase = phases.getCurrentPhase(5000);
+    PhaseConditions phaseConditions = {5000};
+    currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(1, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(4000, currentPhase.timeInPhase);
 
-    currentPhase = phases.getCurrentPhase(30000);
+    PhaseConditions phaseConditions = {30000};
+    currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(4, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(8000, currentPhase.timeInPhase);
 }
@@ -81,7 +86,8 @@ void test_phases_with_zero_duration_are_skipped(void) {
     };
     Phases phases = Phases {4, array};
 
-    TEST_ASSERT_EQUAL(3, phases.getCurrentPhase(0).phaseIndex);
+    PhaseConditions phaseConditions = {0};
+    TEST_ASSERT_EQUAL(3, phases.getCurrentPhase(phaseConditions).phaseIndex);
 }
 
 void runAllPressureProfilerTests() {
