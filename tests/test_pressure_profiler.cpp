@@ -16,33 +16,32 @@ Phase phaseArray[] = {
 };
 
 Phases phases = {5, phaseArray};
-
+PhaseConditions phaseConditions = {0};
 
 void test_current_phase_calculation(void)
 {
     CurrentPhase currentPhase;
-    PhaseConditions phaseConditions = {0};
 
     currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(0, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(0, currentPhase.timeInPhase);
 
-    PhaseConditions phaseConditions = {550};
+    phaseConditions.timeInPhase = 550;
     currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(0, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(550, currentPhase.timeInPhase);
 
-    PhaseConditions phaseConditions = {1000};
+    phaseConditions.timeInPhase = 1000;
     currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(1, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(0, currentPhase.timeInPhase);
 
-    PhaseConditions phaseConditions = {5000};
+    phaseConditions.timeInPhase = 5000;
     currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(1, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(4000, currentPhase.timeInPhase);
 
-    PhaseConditions phaseConditions = {30000};
+    phaseConditions.timeInPhase = 30000;
     currentPhase = phases.getCurrentPhase(phaseConditions);
     TEST_ASSERT_EQUAL(4, currentPhase.phaseIndex);
     TEST_ASSERT_EQUAL(8000, currentPhase.timeInPhase);
@@ -86,7 +85,7 @@ void test_phases_with_zero_duration_are_skipped(void) {
     };
     Phases phases = Phases {4, array};
 
-    PhaseConditions phaseConditions = {0};
+    phaseConditions.timeInPhase = 0;
     TEST_ASSERT_EQUAL(3, phases.getCurrentPhase(phaseConditions).phaseIndex);
 }
 
