@@ -503,11 +503,9 @@ static void updatePressureProfilePhases(void) {
     CurrentPhase currentPhase = phases.getCurrentPhase(phaseConditions);
 
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
-      // float newTimeMs = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
       setFlowPhase(phaseCount++, STAGE_PI_FILL, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, stageRestrict.piStageTime * 1000, runningCfg.preinfusionFlowPressureTarget, -1);
       setFlowPhase(phaseCount++, STAGE_PI_SOAK,0 , 0, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, -1);
     } else { // pressure based PI enabled
-      // float newTimeMs = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
       setPressurePhase(phaseCount++, STAGE_PI_FILL, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, stageRestrict.piStageTime * 1000, runningCfg.preinfusionBar, -1);
       setPressurePhase(phaseCount++, STAGE_PI_SOAK, 0, 0, -1, runningCfg.preinfusionSoak * 1000, -1, -1);
       preInfusionFinishBar = runningCfg.preinfusionBar;
@@ -553,6 +551,7 @@ void setPhase(int phaseIdx, PHASE_TYPE type, STAGE_TYPE stage, float startValue,
 }
 
 static void profiling(void) {
+  static bool pressureThresholdReached = false;
 
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     // long timeInPhase = millis() - brewingTimer;
@@ -580,8 +579,7 @@ static void profiling(void) {
     }
   } else {
     if (startupInitFinished) setPumpToRawValue(0);
-    if (runningCfg.preinfusionFlowState) stageRestrict.piStageTime = runningCfg.preinfusionFlowTime;
-    else stageRestrict.piStageTime = runningCfg.preinfusionSec;
+    pressureThresholdReached = false;
   }
   // Keep that water at temp
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
