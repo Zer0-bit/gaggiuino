@@ -572,7 +572,7 @@ static void profiling(void) {
 
       float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
-      setPumpPressure(newBarValue, flowRestriction, currentState, stageRestrict);
+      setPumpPressure(newBarValue, flowRestriction, currentState);
     } else {
       if (runningCfg.switchPhaseOnThreshold) {/* Switching to next logical stage when the pressurethreshold has been reached*/
         stageRestrict.piStageTime = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
@@ -580,7 +580,7 @@ static void profiling(void) {
 
       float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
-      setPumpFlow(newFlowValue, pressureRestriction, currentState, stageRestrict);
+      setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   } else {
     if (startupInitFinished) setPumpToRawValue(0);
@@ -592,7 +592,7 @@ static void profiling(void) {
 
 static void manualFlowControl(void) {
   float flow_reading = lcdGetManualFlowVol() / 10 ;
-  setPumpFlow(flow_reading, 0.f, currentState, stageRestrict);
+  setPumpFlow(flow_reading, 0.f, currentState);
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
