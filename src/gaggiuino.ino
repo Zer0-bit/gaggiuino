@@ -580,6 +580,8 @@ static void profiling(void) {
     }
   } else {
     if (startupInitFinished) setPumpToRawValue(0);
+    if (runningCfg.preinfusionFlowState) stageRestrict.piStageTime = runningCfg.preinfusionFlowTime;
+    else stageRestrict.piStageTime = runningCfg.preinfusionSec;
   }
   // Keep that water at temp
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
