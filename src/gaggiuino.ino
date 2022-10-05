@@ -100,7 +100,7 @@ static void sensorsRead(void) {
   sensorsReadWeight();
   sensorsReadPressure();
   calculateWeightAndFlow();
-  // monitorDripTrayState();
+  brewTimeConditionsRefresh();
   fillBoiler(2.3f);
 }
 
@@ -273,6 +273,11 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
   }
 }
 
+static void brewTimeConditionsRefresh(void) {
+  if (brewActive) {
+    if (runningCfg.switchPhaseOnThreshold) updatePressureProfilePhases();
+  }
+}
 //#############################################################################################
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
