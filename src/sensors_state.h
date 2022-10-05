@@ -4,6 +4,7 @@
 struct SensorState {
   float temperature;
   float pressure;
+  float smoothedPressure;
   float puckResistance;
   bool isPressureFalling;
   bool isPressureFallingFast;
@@ -14,6 +15,7 @@ struct SensorState {
   bool isHeadSpaceFilled;
   bool isPredictiveWeightForceStarted;
   float pumpFlow;
+  float smoothedPumpFlow;
   float liquidPumped;
   float weightFlow;
   float weight;

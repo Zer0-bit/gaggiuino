@@ -11,6 +11,7 @@
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
 #include "sensors_state.h"
+#include "restrictors.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 
@@ -76,9 +77,7 @@ bool preinfusionFinished = false;
 bool homeScreenScalesEnabled = false;
 
 // Other util vars
-float smoothedPressure;
 float previousSmoothedPressure;
-float smoothedPumpFlow;
 float previousSmoothedPumpFlow;
 bool startupInitFinished;
 
