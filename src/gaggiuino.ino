@@ -504,11 +504,11 @@ static void updatePressureProfilePhases(void) {
 
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
       // float newTimeMs = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
-      setFlowPhase(phaseCount++, STAGE_PI_FILL, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, stageRestrict.piPhaseTime * 1000, runningCfg.preinfusionFlowPressureTarget, -1);
+      setFlowPhase(phaseCount++, STAGE_PI_FILL, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, stageRestrict.piStageTime * 1000, runningCfg.preinfusionFlowPressureTarget, -1);
       setFlowPhase(phaseCount++, STAGE_PI_SOAK,0 , 0, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, -1);
     } else { // pressure based PI enabled
       // float newTimeMs = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
-      setPressurePhase(phaseCount++, STAGE_PI_FILL, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, stageRestrict.piPhaseTime * 1000, runningCfg.preinfusionBar, -1);
+      setPressurePhase(phaseCount++, STAGE_PI_FILL, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, stageRestrict.piStageTime * 1000, runningCfg.preinfusionBar, -1);
       setPressurePhase(phaseCount++, STAGE_PI_SOAK, 0, 0, -1, runningCfg.preinfusionSoak * 1000, -1, -1);
       preInfusionFinishBar = runningCfg.preinfusionBar;
     }
@@ -563,16 +563,16 @@ static void profiling(void) {
 
     if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
       if (runningCfg.switchPhaseOnThreshold) {/* Switching to next logical stage when the pressurethreshold has been reached*/
-        stageRestrict.piPhaseTime = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
-      } else stageRestrict.piPhaseTime = runningCfg.preinfusionSec;
+        stageRestrict.piStageTime = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
+      } else stageRestrict.piStageTime = runningCfg.preinfusionSec;
 
       float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
       setPumpPressure(newBarValue, flowRestriction, currentState);
     } else {
       if (runningCfg.switchPhaseOnThreshold) {/* Switching to next logical stage when the pressurethreshold has been reached*/
-        stageRestrict.piPhaseTime = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
-      } else stageRestrict.piPhaseTime = runningCfg.preinfusionFlowTime;
+        stageRestrict.piStageTime = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
+      } else stageRestrict.piStageTime = runningCfg.preinfusionFlowTime;
 
       float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
       float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);

@@ -4,7 +4,7 @@
 struct StageRestrict {
     float overallPhasePressure;
     float overallPhaseflow;
-    float piPhaseTime;
+    float piStageTime;
 };
 
 #endif
