@@ -46,10 +46,11 @@ int getPumpPct(float targetPressure, float flowRestriction, SensorState &current
 // - expected target
 // - flow
 // - pressure direction
-void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState) {
+void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState, StageRestrict &stageRestrict) {
     int pumpPct = fmin(100.f, getPumpPct(targetPressure, flowRestriction, currentState));
 
-    pump.set(pumpPct * PUMP_RANGE / 100);
+    if (stageRestrict.piStageTime <= 0.5f) setPumpOff();
+    else pump.set(pumpPct * PUMP_RANGE / 100);
 }
 
 void setPumpOff(void) {
@@ -98,11 +99,11 @@ float getClicksPerSecondForFlow(float flow, float pressure) {
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value
-void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState) {
+void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState, StageRestrict &stageRestrict) {
     // If a pressure restriction exists then the we go into pressure profile with a flowRestriction
     // which is equivalent but will achieve smoother pressure management
     if (pressureRestriction > 0) {
-        setPumpPressure(pressureRestriction, targetFlow, currentState);
+        setPumpPressure(pressureRestriction, targetFlow, currentState, stageRestrict);
     } else {
         float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.pressure) / (float)maxPumpClicksPerSecond;
         setPumpToRawValue(pumpPct * PUMP_RANGE);
