@@ -9,8 +9,8 @@ SimpleKalmanFilter smoothPumpFlow(2, 2, 1.00);
 SimpleKalmanFilter smoothScalesFlow(2, 2, 1.00);
 
 //default phases. Updated in updatePressureProfilePhases.
-Phase phaseArray[9];
-Phases phases {9,  phaseArray};
+Phase phaseArray[6];
+Phases phases {6,  phaseArray};
 
 // SensorState currentState;
 SensorState currentState;

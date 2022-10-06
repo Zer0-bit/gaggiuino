@@ -57,7 +57,6 @@ struct Phase {
 struct CurrentPhase {
     short phaseIndex;
     unsigned long timeInPhase;
-    bool isRestrictionHit;
 };
 
 struct PhaseConditions {
