@@ -41,13 +41,13 @@ struct Phase {
     float getTimeRestriction(SensorState& currentState, eepromValues_t& runningCfg) {
       float timeMs;
       if (runningCfg.flowProfileState) {
-        timeMs = mapRange(currentState.smoothedPressure, 0, runningCfg.preinfusionFlowPressureTarget-0.05f, runningCfg.preinfusionFlowTime, 0, 1);
-        timeMs = constrain(timeMs, 0, runningCfg.preinfusionFlowTime-0.5f);
+        timeMs = mapRange(currentState.smoothedPressure, 0, runningCfg.preinfusionFlowPressureTarget+1.5f, runningCfg.preinfusionFlowTime, 0, 1);
+        timeMs = constrain(timeMs, 0, runningCfg.preinfusionFlowTime);
         return timeMs;
       }
       else {
-        timeMs = mapRange(currentState.smoothedPressure, 0, runningCfg.preinfusionBar ,runningCfg.preinfusionFlowTime-0.05f, 0, 1);
-        timeMs = constrain(timeMs, 0, runningCfg.preinfusionFlowTime-0.5f);
+        timeMs = mapRange(currentState.smoothedPressure, 0, runningCfg.preinfusionBar+1.5f ,runningCfg.preinfusionFlowTime, 0, 1);
+        timeMs = constrain(timeMs, 0, runningCfg.preinfusionFlowTime);
         return timeMs;
       }
       return 0.f;
