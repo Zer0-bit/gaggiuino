@@ -12,9 +12,9 @@ HX711 LoadCell_2; //HX711 2
 
 bool scalesPresent;
 
-#ifdef SINGLE_BOARD
+#if defined SINGLE_BOARD
   unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
-#elif defined(SINGLE_BOARD) && defined(SINGLE_HX711_BOARD)
+#elif defined SINGLE_BOARD && defined SINGLE_HX711_BOARD
   unsigned char scale_clk = OUTPUT;
 #else
   unsigned char scale_clk = OUTPUT_OPEN_DRAIN;

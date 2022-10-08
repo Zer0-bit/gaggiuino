@@ -19,7 +19,7 @@
 #include <SimpleKalmanFilter.h>
 
 // Define some const values
-#ifdef SINGLE_BOARD
+#if defined SINGLE_BOARD
     #define GET_KTYPE_READ_EVERY    70 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #else
     #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)

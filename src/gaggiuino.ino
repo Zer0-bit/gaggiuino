@@ -626,14 +626,14 @@ static void brewParamsReset(void) {
 
 
 static void flushActivated(void) {
-  #if defined(SINGLE_BOARD) || defined(LEGO_VALVE_RELAY)
+  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
       openValve();
   #endif
   setPumpFullOn();
 }
 
 static void flushDeactivated(void) {
-  #if defined(SINGLE_BOARD) || defined(LEGO_VALVE_RELAY)
+  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
       closeValve();
   #endif
   setPumpOff();
