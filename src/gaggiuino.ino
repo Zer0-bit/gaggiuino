@@ -88,6 +88,7 @@ void loop(void) {
   brewDetect();
   modeSelect();
   lcdRefresh();
+  systemHealthCheck(0.8f);
 }
 
 //##############################################################################################################################
@@ -107,21 +108,6 @@ static void sensorsRead(void) {
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
     currentState.temperature = thermocouple.readCelsius();
-    /*
-    This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
-    If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating
-    */
-    while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
-      /* In the event of the temp failing to read while the SSR is HIGH
-      we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
-      setBoilerOff();
-      if (millis() > thermoTimer) {
-        LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
-        lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
-        currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
-        thermoTimer = millis() + GET_KTYPE_READ_EVERY;
-      }
-    }
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }
@@ -620,7 +606,6 @@ static void brewDetect(void) {
       brewParamsReset();
       paramsReset = false;
     }
-    systemHealthCheck(0.8f);
   }
 }
 
@@ -678,6 +663,20 @@ static void systemHealthCheck(float pressureThreshold) {
       }
       closeValve();
       systemHealthTimer = millis() + HEALTHCHECK_EVERY;
+    }
+  }
+
+  /* This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
+  If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating */
+  while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
+    /* In the event of the temp failing to read while the SSR is HIGH
+    we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
+    setBoilerOff();
+    if (millis() > thermoTimer) {
+      LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
+      lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
+      currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
+      thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }
 }
