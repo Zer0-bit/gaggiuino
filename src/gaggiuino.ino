@@ -88,6 +88,7 @@ void loop(void) {
   brewDetect();
   modeSelect();
   lcdRefresh();
+  systemHealthCheck(0.8f);
 }
 
 //##############################################################################################################################
@@ -101,7 +102,6 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   brewTimeConditionsRefresh();
-  systemHealthCheck(0.8f);
   fillBoiler(2.3f);
 }
 
