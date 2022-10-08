@@ -92,7 +92,7 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
     setBoilerOn();
     if (currentState.pressure < 1.5f) {
-      #ifndef SINGLE_BOARD
+      #if not defined SINGLE_BOARD
         openValve();
       #endif
       setPumpToRawValue(5);

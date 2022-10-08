@@ -27,8 +27,8 @@ int getPumpPct(float targetPressure, float flowRestriction, SensorState &current
     }
 
     float diff = targetPressure - currentState.pressure;
-    float maxPumpPct = flowRestriction > 0 ? 100.f * getClicksPerSecondForFlow(flowRestriction, currentState.pressure) / maxPumpClicksPerSecond : 100.f;
-    float pumpPctToMaintainFlow = 100.f * getClicksPerSecondForFlow(currentState.pumpFlow, currentState.pressure) / maxPumpClicksPerSecond;
+    float maxPumpPct = flowRestriction > 0 ? 100.f * getClicksPerSecondForFlow(flowRestriction, currentState.smoothedPressure) / maxPumpClicksPerSecond : 100.f;
+    float pumpPctToMaintainFlow = 100.f * getClicksPerSecondForFlow(currentState.pumpFlow, currentState.smoothedPressure) / maxPumpClicksPerSecond;
 
     if (diff > 0.f) {
         return fminf(maxPumpPct, pumpPctToMaintainFlow + fmin(100.f, 25 + 20 * diff));

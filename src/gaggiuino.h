@@ -11,6 +11,7 @@
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
 #include "sensors_state.h"
+#include "restrictors.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 
@@ -18,10 +19,10 @@
 #include <SimpleKalmanFilter.h>
 
 // Define some const values
-#ifdef SINGLE_BOARD
-#define GET_KTYPE_READ_EVERY    70 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+#if defined SINGLE_BOARD
+    #define GET_KTYPE_READ_EVERY    70 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #else
-#define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
+    #define GET_KTYPE_READ_EVERY    250 // thermocouple data read interval not recommended to be changed to lower than 250 (ms)
 #endif
 #define GET_PRESSURE_READ_EVERY 10
 #define GET_SCALES_READ_EVERY   100
@@ -30,6 +31,7 @@
 #define READ_TRAY_OFFSET_EVERY  1000
 #define EMPTY_TRAY_WEIGHT       23456.f
 #define TRAY_FULL_THRESHOLD     700.f
+#define HEALTHCHECK_EVERY       120000 // system checks happen every 2 mins
 
 
 
@@ -58,6 +60,7 @@ unsigned long thermoTimer = 0;
 unsigned long scalesTimer = 0;
 unsigned long flowTimer = 0;
 unsigned long trayTimer = millis();
+unsigned long systemHealthTimer = 0;
 
 //scales vars
 float previousWeight  = 0;
@@ -76,11 +79,10 @@ bool preinfusionFinished = false;
 bool homeScreenScalesEnabled = false;
 
 // Other util vars
-float smoothedPressure;
 float previousSmoothedPressure;
-float smoothedPumpFlow;
 float previousSmoothedPumpFlow;
 bool startupInitFinished;
 
+static void systemHealthCheck(float pressureThreshold);
 
 #endif

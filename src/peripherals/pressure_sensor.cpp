@@ -4,7 +4,7 @@
 
 float previousPressure;
 float currentPressure;
-#ifdef SINGLE_BOARD
+#if defined SINGLE_BOARD
   ADS1015 ADS(0x48);
 #else
   ADS1115 ADS(0x48);
@@ -26,10 +26,10 @@ float getPressure() {  //returns sensor pressure data
   // 1 bar = 17.1 or 68.27 or 1777.8
 
   previousPressure = currentPressure;
-  #ifndef SINGLE_BOARD
-    currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
-  #else
+  #if defined SINGLE_BOARD
     currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
+  #else
+    currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
   #endif
   return currentPressure;
 }
