@@ -88,7 +88,6 @@ void loop(void) {
   brewDetect();
   modeSelect();
   lcdRefresh();
-  systemHealthCheck(0.8f);
 }
 
 //##############################################################################################################################
@@ -102,6 +101,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   brewTimeConditionsRefresh();
+  systemHealthCheck(0.8f);
   fillBoiler(2.3f);
 }
 
@@ -626,7 +626,7 @@ static void brewParamsReset(void) {
 
 
 static void flushActivated(void) {
-  #if defined(SINGLE_BOARD) || defined(LEGO_VALVE_RELAY) 
+  #if defined(SINGLE_BOARD) || defined(LEGO_VALVE_RELAY)
       openValve();
   #endif
   setPumpFullOn();
