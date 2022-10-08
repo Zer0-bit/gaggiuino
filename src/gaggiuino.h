@@ -31,6 +31,7 @@
 #define READ_TRAY_OFFSET_EVERY  1000
 #define EMPTY_TRAY_WEIGHT       23456.f
 #define TRAY_FULL_THRESHOLD     700.f
+#define HEALTHCHECK_EVERY       120000 // system checks happen every 2 mins
 
 
 
@@ -59,6 +60,7 @@ unsigned long thermoTimer = 0;
 unsigned long scalesTimer = 0;
 unsigned long flowTimer = 0;
 unsigned long trayTimer = millis();
+unsigned long systemHealthTimer = 0;
 
 //scales vars
 float previousWeight  = 0;
@@ -81,5 +83,6 @@ float previousSmoothedPressure;
 float previousSmoothedPumpFlow;
 bool startupInitFinished;
 
+static void systemHealthCheck(float pressureThreshold);
 
 #endif

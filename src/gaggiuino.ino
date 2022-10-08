@@ -604,22 +604,23 @@ static void brewDetect(void) {
   static bool paramsReset = true;
 
   if (brewState() && !stopOnWeight()) {
+    openValve();
     if(!paramsReset) {
       brewParamsReset();
       paramsReset = true;
     }
-    openValve();
     brewActive = true;
   } else {
     brewActive = false;
     if (startupInitFinished) {
-      closeValve();
       setPumpOff();
+      closeValve();
     }
     if(!brewState() && paramsReset) {
       brewParamsReset();
       paramsReset = false;
     }
+    systemHealthCheck(0.8f);
   }
 }
 
@@ -634,22 +635,23 @@ static void brewParamsReset(void) {
   currentState.isPredictiveWeightForceStarted = false;
   preinfusionFinished                         = false;
   brewingTimer                                = millis();
+  systemHealthTimer                           = millis() + HEALTHCHECK_EVERY;
   lcdSendFakeTouch();
 }
 
 
 static void flushActivated(void) {
-  setPumpFullOn();
-  #ifdef SINGLE_BOARD
+  #if defined(SINGLE_BOARD) || defined(LEGO_VALVE_RELAY) 
       openValve();
   #endif
+  setPumpFullOn();
 }
 
 static void flushDeactivated(void) {
-  setPumpOff();
-  #ifdef SINGLE_BOARD
+  #if defined(SINGLE_BOARD) || defined(LEGO_VALVE_RELAY)
       closeValve();
   #endif
+  setPumpOff();
 }
 
 static void fillBoiler(float targetBoilerFullPressure) {
@@ -660,6 +662,24 @@ static void fillBoiler(float targetBoilerFullPressure) {
     setPumpToRawValue(80);
     if (millis() - timePassed > 5000UL) startupInitFinished = true;
   } else startupInitFinished = true;
+}
+
+static void systemHealthCheck(float pressureThreshold) {
+  static int safetyTimer;
+  if (!brewState() && !steamState()) {
+    if (millis() >= systemHealthTimer) {
+      safetyTimer = millis();
+      while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < STEAM_WAND_HOT_WATER_TEMP)
+      {
+        setBoilerOff();
+        openValve();
+        sensorsRead();
+        if (millis() > safetyTimer + 1000) return;
+      }
+      closeValve();
+      systemHealthTimer = millis() + HEALTHCHECK_EVERY;
+    }
+  }
 }
 
 // static void monitorDripTrayState(void) {
