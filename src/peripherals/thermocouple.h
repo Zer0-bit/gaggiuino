@@ -3,7 +3,7 @@
 
 #include "pindef.h"
 
-#ifdef SINGLE_BOARD
+#if defined SINGLE_BOARD
   #include <Adafruit_MAX31855.h>
   Adafruit_MAX31855 thermocouple(thermoCLK, thermoCS, thermoDO);
 #else
@@ -12,7 +12,7 @@
 #endif
 
 static inline void thermocoupleInit(void) {
-#if defined(MAX31855_ENABLED)
+#if defined SINGLE_BOARD
   thermocouple.begin();
 #endif
 }

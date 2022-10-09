@@ -14,7 +14,7 @@ void lcdListen(void);
 eepromValues_t lcdDownloadCfg(void);
 int lcdGetHomeScreenScalesEnabled(void);
 int lcdGetSelectedOperationalMode(void);
-int lcdGetManualPressurePower(void);
+int lcdGetManualFlowVol(void);
 int lcdGetDescaleCycle(void);
 
 void lcdSetDescaleCycle(int cycle);

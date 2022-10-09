@@ -122,6 +122,9 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
   myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
 
+  myNex.writeNum("switchPhaseOnThreshold", eepromCurrentValues.switchPhaseOnThreshold);
+  myNex.writeNum("brewSettings.btPhaseSwitch.val", eepromCurrentValues.switchPhaseOnThreshold);
+
   myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
   myNex.writeNum("shotDose", eepromCurrentValues.shotDose * 10.f);
   myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
@@ -159,7 +162,6 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotCustomVal") / 10.f;
   lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
 
-  lcdCfg.brewDeltaState                 = myNex.readNumber("deltaState");
   lcdCfg.setpoint                       = myNex.readNumber("setPoint");
   lcdCfg.offsetTemp                     = myNex.readNumber("offSet");
   lcdCfg.hpwr                           = myNex.readNumber("hpwr");
@@ -171,6 +173,8 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
   lcdCfg.graphBrew                      = myNex.readNumber("graphEnabled");
   lcdCfg.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
+  lcdCfg.brewDeltaState                 = myNex.readNumber("deltaState");
+  lcdCfg.switchPhaseOnThreshold         = myNex.readNumber("switchPhaseOnThreshold");
 
   lcdCfg.scalesF1                       = myNex.readNumber("morePower.lc1.val");
   lcdCfg.scalesF2                       = myNex.readNumber("morePower.lc2.val");
@@ -179,7 +183,7 @@ eepromValues_t lcdDownloadCfg(void) {
   return lcdCfg;
 }
 
-int lcdGetManualPressurePower(void) {
+int lcdGetManualFlowVol(void) {
   return myNex.readNumber("h0.val");
 }
 
