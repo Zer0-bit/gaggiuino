@@ -102,7 +102,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   brewTimeConditionsRefresh();
-  fillBoiler(2.3f);
+  fillBoiler(2.2f);
 }
 
 static void sensorsReadTemperature(void) {
