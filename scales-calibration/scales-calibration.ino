@@ -35,6 +35,10 @@ EasyNex myNex(UART_LCD);
 
 void setup() {
   myNex.begin(115200);
+
+  #if defined(SINGLE_BOARD)
+    pinMode(relayPin, OUTPUT);
+  #endif
   digitalWrite(relayPin, LOW);
 
   while (myNex.readNumber("initCheck") != 100 )
