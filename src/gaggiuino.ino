@@ -116,7 +116,7 @@ static void sensorsReadWeight(void) {
   if (scalesIsPresent() && millis() > scalesTimer) {
     if(!tareDone) {
       scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewModeActive && (scalesGetWeight() < -0.1f || scalesGetWeight() > 0.1f)) tareDone = false;
+      if (!nonBrewModeActive && (scalesGetWeight() < -0.3f || scalesGetWeight() > 0.3f)) tareDone = false;
       else tareDone = true;
     }
     currentState.weight = scalesGetWeight();
