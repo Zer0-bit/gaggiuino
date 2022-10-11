@@ -348,12 +348,10 @@ static void lcdRefresh(void) {
             ? currentState.weight
             : brewStopWeight
         );
-      } else if (shotWeight || brewStopWeight) {
-        lcdSetWeight(
-          stopOnWeight()
-          ? brewStopWeight
-          : shotWeight
-        );
+      } else {
+        if (shotWeight || brewStopWeight) {
+          lcdSetWeight(!stopOnWeight() ? shotWeight : brewStopWeight);
+        }
       }
     }
 
@@ -650,17 +648,14 @@ static void fillBoiler(float targetBoilerFullPressure) {
 }
 
 static void systemHealthCheck(float pressureThreshold) {
-  static int safetyTimer;
   if (!brewState() && !steamState()) {
     if (millis() >= systemHealthTimer) {
-      safetyTimer = millis();
-      lcdShowPopup("Releasing pressure!");
       while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < STEAM_WAND_HOT_WATER_TEMP)
       {
+        lcdShowPopup("Releasing pressure!");
         setBoilerOff();
         openValve();
         sensorsRead();
-        if (millis() > safetyTimer + 1000) return;
       }
       closeValve();
       systemHealthTimer = millis() + HEALTHCHECK_EVERY;

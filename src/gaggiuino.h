@@ -31,7 +31,7 @@
 #define READ_TRAY_OFFSET_EVERY  1000
 #define EMPTY_TRAY_WEIGHT       23456.f
 #define TRAY_FULL_THRESHOLD     700.f
-#define HEALTHCHECK_EVERY       120000 // system checks happen every 2 mins
+#define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
 
 
 
