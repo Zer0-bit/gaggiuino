@@ -648,6 +648,7 @@ static void fillBoiler(float targetBoilerFullPressure) {
 }
 
 static void systemHealthCheck(float pressureThreshold) {
+  #if defined LEGO_RELAY || defined SINGLE_BOARD
   if (!brewState() && !steamState()) {
     if (millis() >= systemHealthTimer) {
       while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < STEAM_WAND_HOT_WATER_TEMP)
@@ -661,6 +662,7 @@ static void systemHealthCheck(float pressureThreshold) {
       systemHealthTimer = millis() + HEALTHCHECK_EVERY;
     }
   }
+  #endif
 
   /* This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
   If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating */
