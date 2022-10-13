@@ -2,17 +2,12 @@
 #include "pindef.h"
 #include <PSM.h>
 
-#if defined SINGLE_BOARD
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 4);
-#else
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
-#endif
-
 
 float pressureInefficiencyConstant1 = 0.1224f;
 float pressureInefficiencyConstant2 = 0.01052f;
 float pressureInefficiencyConstant3 = 0.00421f;
-float pressureInefficiencyConstant4 = 0.0007f;
+float pressureInefficiencyConstant4 = 0.0014f;
 float pressureInefficiencyConstant5 = 0.00002916f;
 float flowPerClickAtZeroBar = 0.275f;
 short maxPumpClicksPerSecond = 50;
