@@ -7,7 +7,7 @@ PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float pressureInefficiencyConstant1 = 0.1224f;
 float pressureInefficiencyConstant2 = 0.01052f;
 float pressureInefficiencyConstant3 = 0.00421f;
-float pressureInefficiencyConstant4 = 0.00074f;
+float pressureInefficiencyConstant4 = 0.0007f;
 float pressureInefficiencyConstant5 = 0.00002916f;
 float flowPerClickAtZeroBar = 0.275f;
 short maxPumpClicksPerSecond = 50;
