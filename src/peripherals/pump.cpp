@@ -2,7 +2,12 @@
 #include "pindef.h"
 #include <PSM.h>
 
+#if defined SINGLE_BOARD
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 4);
+#else
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
+#endif
+
 
 float pressureInefficiencyConstant1 = 0.1224f;
 float pressureInefficiencyConstant2 = 0.01052f;
