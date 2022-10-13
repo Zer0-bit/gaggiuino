@@ -202,8 +202,9 @@ bool checkForOutputFlow(long elapsedTime) {
     }
   }
 
- else if (resistanceDelta > 500.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
- else return false;
+//  else if (resistanceDelta > 500.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
+  else return false;
+  return false;
 }
 
 // Stops the pump if setting active and dose/weight conditions met
