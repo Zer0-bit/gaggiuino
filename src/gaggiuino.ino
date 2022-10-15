@@ -194,16 +194,15 @@ bool checkForOutputFlow(long elapsedTime) {
         && currentState.puckResistance > 1500) currentState.isHeadSpaceFilled = true;
       else currentState.isHeadSpaceFilled = false;
     } else {
-      if (resistanceDelta < 500 && currentState.puckResistance >= 1500
-          && currentState.smoothedPressure > runningCfg.flowProfileState
-            ? runningCfg.flowProfilePressureTarget / 2.f
-            : runningCfg.pressureProfilingStart / 2.f) currentState.isHeadSpaceFilled = true;
-      else currentState.isHeadSpaceFilled = false;
+      if (resistanceDelta < 500 && currentState.puckResistance >= 1500) {
+        if (currentState.smoothedPressure > (runningCfg.flowProfileState ? runningCfg.flowProfilePressureTarget / 2.f : runningCfg.pressureProfilingStart / 2.f)) {
+          if (!currentState.isPressureRisingFast && !currentState.isPumpFlowRisingFast) currentState.isHeadSpaceFilled = true;
+          else currentState.isHeadSpaceFilled = false;
+        }
+      } else currentState.isHeadSpaceFilled = false;
     }
-  }
-
-//  else if (resistanceDelta > 500.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
-  else return false;
+  } else return false;
+  //  else if (resistanceDelta > 500.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
   return false;
 }
 
