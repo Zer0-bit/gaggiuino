@@ -165,6 +165,7 @@ static void calculateWeightAndFlow(void) {
 }
 
 bool checkForOutputFlow(long elapsedTime) {
+  // static unsigned int soakTimer;
   long pumpClicks = getAndResetClickCounter();
   float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
 
@@ -184,44 +185,35 @@ bool checkForOutputFlow(long elapsedTime) {
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
   if (currentState.liquidPumped > 60.f || currentState.isHeadSpaceFilled) return true;
   else if (currentState.liquidPumped <= 60.f) {
-    if (preinfusionFinished && (!currentState.isPumpFlowRisingFast || !currentState.isPressureRisingFast)) {
-      (pumpClicks < 70 && currentState.puckResistance > 1500) ? currentState.isHeadSpaceFilled = true : currentState.isHeadSpaceFilled = false; /*false*/
-    }
-    else if (!runningCfg.preinfusionState) {
-      if (resistanceDelta < 200 && currentState.puckResistance >= 1500) return true;
-      else return false;
-    }
-    else if (currentState.puckResistance > 1500) {
-      currentState.isHeadSpaceFilled = true;
-    } else currentState.isHeadSpaceFilled = false;
-  }
-
-  if (!preinfusionFinished) {
-    // If it's still in the preinfusion phase but didn't reach pressure nor pumped 45ml
-    // it must have been a short ass preinfusion and it's blooming for some time
-    if (currentState.liquidPumped < 45.f
-      && ((
-          currentState.smoothedPressure < (runningCfg.flowProfileState)
-            ? runningCfg.preinfusionFlowPressureTarget - 0.6f
-            : runningCfg.preinfusionBar - 0.6f
+    if (runningCfg.preinfusionState) {
+      if (preinfusionFinished &&
+          (
+            currentState.smoothedPressure > runningCfg.flowProfileState
+              ? runningCfg.preinfusionFlowPressureTarget
+              : runningCfg.preinfusionBar
           )
-      || currentState.isPressureFalling
-      || currentState.smoothedPumpFlow < 0.2f)) {
-      currentState.isHeadSpaceFilled = false;
-      return false;
+        && currentState.puckResistance > 1500) currentState.isHeadSpaceFilled = true;
+      // else if (!preinfusionFinished && (runningCfg.preinfusionFlowState ? runningCfg.preinfusionFlowSoakTime : runningCfg.preinfusionSoak) >= 15000) {
+      //   /* Initial rough assumption based on observations, will surely need to be rewritten
+      //   to account for the total vol of liquid that was already pumped versus the puck resistance behaviour
+      //   along the time soak is engaged. */
+      //   if (currentState.smoothedPressure < 1.f && currentState.isPressureFalling) {
+      //     if (millis() > soakTimer) {
+      //       shotWeight = 0.175f;
+      //       soakTimer = millis() + 550;
+      //     }
+      //   }
+      // }
+      else currentState.isHeadSpaceFilled = false;
+    } else {
+      if (resistanceDelta < 500 && currentState.puckResistance >= 1500) {
+        if (currentState.smoothedPressure > (runningCfg.flowProfileState ? runningCfg.flowProfilePressureTarget / 2.f : runningCfg.pressureProfilingStart / 2.f)) {
+          if (!currentState.isPressureRisingFast && !currentState.isPumpFlowRisingFast) currentState.isHeadSpaceFilled = true;
+          else currentState.isHeadSpaceFilled = false;
+        }
+      } else currentState.isHeadSpaceFilled = false;
     }
-
-    // If a certain amount of water has been pumped but no resistance is built up, there has to be output flow
-    if (currentState.liquidPumped > 45.f && currentState.puckResistance <= 500.f) {
-        currentState.isHeadSpaceFilled = true;
-        return true;
-      }
-  // Theoretically, if resistance is still rising (resistanceDelta > 0), headspace should not be filled yet, hence no output flow.
-  // Noisy readings make it impossible to use flat out, but it should at least somewhat work
-  // Although a good threshold is very much experimental and not determined
-  } else if (resistanceDelta > 600.f || currentState.isPumpFlowRisingFast || !currentState.isHeadSpaceFilled) return false;
-  else return true;
-
+  } else return false;
   return false;
 }
 
