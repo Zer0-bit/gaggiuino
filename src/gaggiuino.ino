@@ -186,7 +186,7 @@ bool checkForOutputFlow(long elapsedTime) {
   if (currentState.liquidPumped > 60.f || currentState.isHeadSpaceFilled) return true;
   else if (currentState.liquidPumped <= 60.f) {
     if (runningCfg.preinfusionState) {
-      if (preinfusionFinished && 
+      if (preinfusionFinished &&
           (
             currentState.smoothedPressure > runningCfg.flowProfileState
               ? runningCfg.preinfusionFlowPressureTarget
@@ -195,7 +195,7 @@ bool checkForOutputFlow(long elapsedTime) {
         && currentState.puckResistance > 1500) currentState.isHeadSpaceFilled = true;
       // else if (!preinfusionFinished && (runningCfg.preinfusionFlowState ? runningCfg.preinfusionFlowSoakTime : runningCfg.preinfusionSoak) >= 15000) {
       //   /* Initial rough assumption based on observations, will surely need to be rewritten
-      //   to account for the total vol of liquid that was already pumped versus the puck resistance behaviour 
+      //   to account for the total vol of liquid that was already pumped versus the puck resistance behaviour
       //   along the time soak is engaged. */
       //   if (currentState.smoothedPressure < 1.f && currentState.isPressureFalling) {
       //     if (millis() > soakTimer) {
