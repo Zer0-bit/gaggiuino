@@ -624,7 +624,9 @@ static void fillBoiler(float targetBoilerFullPressure) {
       startupInitFinished = true;
     }
   }
-  #endif
+#else
+  startupInitFinished = true;
+#endif
 }
 
 static void systemHealthCheck(float pressureThreshold) {
