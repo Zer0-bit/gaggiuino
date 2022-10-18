@@ -30,12 +30,12 @@ struct StopConditions {
   bool isReached(SensorState& state, long timeInPhase, long timeInShot) {
     float stopWeight = weight + state.weightFlow / 2.f;
 
-    return (weight > 0.f && state.shotWeight >= stopWeight) ||
-      (pressureAbove > 0 && state.pressure >= pressureAbove) ||
-      (pressureBelow > 0 && state.pressure <= pressureBelow) ||
-      (waterVolume > 0 && state.liquidPumped >= waterVolume) ||
-      (shotTime > 0 && timeInShot >= shotTime) ||
-      (phaseDuration >= 0 && timeInPhase >= phaseDuration) ;
+    return (weight > 0.f && state.shotWeight > stopWeight) ||
+      (pressureAbove > 0 && state.pressure > pressureAbove) ||
+      (pressureBelow > 0 && state.pressure < pressureBelow) ||
+      (waterVolume > 0 && state.liquidPumped > waterVolume) ||
+      (shotTime > 0 && timeInShot > shotTime) ||
+      (phaseDuration >= 0 && timeInPhase > phaseDuration) ;
   }
 };
 

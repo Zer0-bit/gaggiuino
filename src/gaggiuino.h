@@ -11,7 +11,6 @@
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
 #include "sensors_state.h"
-#include "restrictors.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 

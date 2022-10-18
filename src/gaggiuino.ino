@@ -20,8 +20,6 @@ OPERATION_MODES selectedOperationalMode;
 
 eepromValues_t runningCfg;
 
-StageRestrict stageRestrict;
-
 void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
@@ -246,6 +244,7 @@ static void brewTimeConditionsRefresh(void) {
 //#############################################################################################
 static void modeSelect(void) {
   if (!startupInitFinished) return;
+
   switch (selectedOperationalMode) {
     //REPLACE ALL THE BELOW WITH OPMODE_auto_profiling
     case OPMODE_straight9Bar:
@@ -467,10 +466,10 @@ static void updatePressureProfilePhases(void) {
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
-      setFlowPhase(phaseCount++, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, stageRestrict.piStageTime * 1000, runningCfg.preinfusionFlowPressureTarget, -1);
+      setFlowPhase(phaseCount++, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, runningCfg.preinfusionFlowPressureTarget, -1);
       setFlowPhase(phaseCount++,0 , 0, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, -1);
     } else { // pressure based PI enabled
-      setPressurePhase(phaseCount++, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, stageRestrict.piStageTime * 1000, runningCfg.preinfusionBar, -1);
+      setPressurePhase(phaseCount++, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, runningCfg.preinfusionSec * 1000, runningCfg.preinfusionBar, -1);
       setPressurePhase(phaseCount++, 0, 0, -1, runningCfg.preinfusionSoak * 1000, -1, -1);
       preInfusionFinishBar = runningCfg.preinfusionBar;
     }
