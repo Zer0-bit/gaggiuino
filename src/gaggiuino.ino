@@ -11,6 +11,7 @@ SimpleKalmanFilter smoothScalesFlow(2.f, 2.f, 1.5f);
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
 Phases phases {6,  phaseArray};
+PhaseProfiler phaseProfiler{phases};
 
 // SensorState currentState;
 SensorState currentState;
@@ -140,7 +141,7 @@ static void sensorsReadPressure(void) {
 static void calculateWeightAndFlow(void) {
   if (brewActive) {
     if (scalesIsPresent()) {
-      shotWeight = currentState.weight;
+      currentState.shotWeight = currentState.weight;
     }
 
     long elapsedTime = millis() - flowTimer;
@@ -151,13 +152,13 @@ static void calculateWeightAndFlow(void) {
       currentState.isOutputFlow = checkForOutputFlow(elapsedTime);
 
       if (scalesIsPresent()) {
-        currentState.weightFlow = fmaxf(0.f, (shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
+        currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
         currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
-        previousWeight = shotWeight;
+        previousWeight = currentState.shotWeight;
       } else if (currentState.isOutputFlow) {
-        previousWeight = shotWeight; // temporary measure to avoid those 30 -45 grams sudden jumps
-        shotWeight += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
-        if (shotWeight > previousWeight + 5.f) shotWeight = 0.f; // temporary measure to avoid those 30 -45 grams sudden jumps
+        previousWeight = currentState.shotWeight; // temporary measure to avoid those 30 -45 grams sudden jumps
+        currentState.shotWeight += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
+        if (currentState.shotWeight > previousWeight + 5.f) currentState.shotWeight = 0.f; // temporary measure to avoid those 30 -45 grams sudden jumps
       }
       currentState.liquidPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
@@ -169,7 +170,6 @@ bool checkForOutputFlow(long elapsedTime) {
   long pumpClicks = getAndResetClickCounter();
   float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
 
-  float previousPumpFlow = currentState.pumpFlow;
   previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
   currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
   currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
@@ -217,21 +217,6 @@ bool checkForOutputFlow(long elapsedTime) {
   return false;
 }
 
-// Stops the pump if setting active and dose/weight conditions met
-bool stopOnWeight() {
-  if (!nonBrewModeActive && runningCfg.stopOnWeightState) {
-    if (runningCfg.shotStopOnCustomWeight < 1.f)
-      shotTarget = runningCfg.shotDose * runningCfg.shotPreset;
-    else
-      shotTarget = runningCfg.shotStopOnCustomWeight;
-    if (shotWeight > (shotTarget - 0.5f) || brewStopWeight) {
-      if (scalesIsPresent() && preinfusionFinished) brewStopWeight = shotWeight + currentState.weightFlow / 2.f;
-      else brewStopWeight = shotWeight + currentState.smoothedPumpFlow / 2.f;
-      return true;
-    }
-  }
-  return false;
-}
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
@@ -332,18 +317,11 @@ static void lcdRefresh(void) {
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
-      // lcdSetWeight(scalesDripTrayWeight());
     } else {
       if (scalesIsPresent()) {
-        lcdSetWeight(
-          (shotWeight > 0.1f && !stopOnWeight())
-            ? currentState.weight
-            : brewStopWeight
-        );
-      } else {
-        if (shotWeight || brewStopWeight) {
-          lcdSetWeight(!stopOnWeight() ? shotWeight : brewStopWeight);
-        }
+        lcdSetWeight(currentState.weight);
+      } else if (currentState.shotWeight) {
+        lcdSetWeight(currentState.shotWeight);
       }
     }
 
@@ -464,8 +442,8 @@ void lcdTrigger3(void) {
 void lcdTrigger4(void) {
   LOG_VERBOSE("Predictive scales tare action completed!");
   if (!scalesIsPresent()) {
-    if (shotWeight > 0.f) {
-      shotWeight = 0.f;
+    if (currentState.shotWeight > 0.f) {
+      currentState.shotWeight = 0.f;
       currentState.isPredictiveWeightForceStarted = true;
     } else currentState.isPredictiveWeightForceStarted = true;
   } else scalesTare();
@@ -477,18 +455,22 @@ void lcdTrigger4(void) {
 static void updatePressureProfilePhases(void) {
   int phaseCount             = 0;
   float preInfusionFinishBar = 0.f;
+  float shotTarget = -1.f;
+
+  if (runningCfg.stopOnWeightState) {
+    shotTarget = (runningCfg.shotStopOnCustomWeight < 1.f)
+      ? runningCfg.shotDose * runningCfg.shotPreset
+      : runningCfg.shotStopOnCustomWeight;
+  }
 
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
-    PhaseConditions phaseConditions = { millis() - brewingTimer};
-    CurrentPhase currentPhase = phases.getCurrentPhase(phaseConditions);
-
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
-      setFlowPhase(phaseCount++, STAGE_PI_FILL, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, stageRestrict.piStageTime * 1000, runningCfg.preinfusionFlowPressureTarget, -1);
-      setFlowPhase(phaseCount++, STAGE_PI_SOAK,0 , 0, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, -1);
+      setFlowPhase(phaseCount++, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowVol, runningCfg.preinfusionFlowPressureTarget, stageRestrict.piStageTime * 1000, runningCfg.preinfusionFlowPressureTarget, -1);
+      setFlowPhase(phaseCount++,0 , 0, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, -1);
     } else { // pressure based PI enabled
-      setPressurePhase(phaseCount++, STAGE_PI_FILL, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, stageRestrict.piStageTime * 1000, runningCfg.preinfusionBar, -1);
-      setPressurePhase(phaseCount++, STAGE_PI_SOAK, 0, 0, -1, runningCfg.preinfusionSoak * 1000, -1, -1);
+      setPressurePhase(phaseCount++, runningCfg.preinfusionBar, runningCfg.preinfusionBar, 4.f, stageRestrict.piStageTime * 1000, runningCfg.preinfusionBar, -1);
+      setPressurePhase(phaseCount++, 0, 0, -1, runningCfg.preinfusionSoak * 1000, -1, -1);
       preInfusionFinishBar = runningCfg.preinfusionBar;
     }
   }
@@ -497,70 +479,71 @@ static void updatePressureProfilePhases(void) {
   // Setup shot profiling
   if (runningCfg.pressureProfilingState) {
     if (runningCfg.flowProfileState) { // flow based profiling enabled
-      setFlowPhase(phaseCount++, STAGE_FP_MAIN, runningCfg.flowProfileStart, runningCfg.flowProfileEnd, runningCfg.flowProfilePressureTarget, runningCfg.flowProfileCurveSpeed * 1000, -1, shotTarget);
+      setFlowPhase(phaseCount++, runningCfg.flowProfileStart, runningCfg.flowProfileEnd, runningCfg.flowProfilePressureTarget, runningCfg.flowProfileCurveSpeed * 1000, -1, shotTarget);
+      setFlowPhase(phaseCount++, runningCfg.flowProfileEnd, runningCfg.flowProfileEnd, runningCfg.flowProfilePressureTarget, -1, -1, shotTarget);
     } else { // pressure based profiling enabled
-      setPressurePhase(phaseCount++, STAGE_PI_RAMP, preInfusionFinishBar, runningCfg.pressureProfilingStart, -1, runningCfg.preinfusionRamp * 1000, -1, -1);
-      setPressurePhase(phaseCount++, STAGE_PP_HOLD, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingStart, -1, runningCfg.pressureProfilingHold * 1000, -1, shotTarget);
-      setPressurePhase(phaseCount++, STAGE_PP_MAIN, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, -1, runningCfg.pressureProfilingLength * 1000, -1, shotTarget);
+      setPressurePhase(phaseCount++, preInfusionFinishBar, runningCfg.pressureProfilingStart, -1, runningCfg.preinfusionRamp * 1000, -1, -1);
+      setPressurePhase(phaseCount++, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingStart, -1, runningCfg.pressureProfilingHold * 1000, -1, shotTarget);
+      setPressurePhase(phaseCount++, runningCfg.pressureProfilingStart, runningCfg.pressureProfilingFinish, -1, runningCfg.pressureProfilingLength * 1000, -1, shotTarget);
+      setPressurePhase(phaseCount++, runningCfg.pressureProfilingFinish, runningCfg.pressureProfilingFinish, -1, -1, -1, shotTarget);
     }
   } else { // Shot profiling disabled. Default to 9 bars
-    setPressurePhase(phaseCount++, STAGE_PI_RAMP, preInfusionFinishBar, 9, -1, runningCfg.preinfusionRamp * 1000, -1, shotTarget);
-    setPressurePhase(phaseCount++, STAGE_PP_MAIN, 9, 9, -1, 1000, -1, shotTarget);
+    setPressurePhase(phaseCount++, preInfusionFinishBar, 9, -1, runningCfg.preinfusionRamp * 1000, -1, shotTarget);
+    setPressurePhase(phaseCount++, 9, 9, -1, -1, -1, shotTarget);
   }
 
   phases.count = phaseCount;
 }
 
-void setPressurePhase(int phaseIdx, STAGE_TYPE stage, float startBar, float endBar, float flowRestriction, int timeMs, float pressureTarget, float weightTarget) {
-  setPhase(phaseIdx, PHASE_TYPE_PRESSURE, stage, startBar, endBar, flowRestriction, flowRestriction, timeMs, pressureTarget, weightTarget);
+void setPressurePhase(int phaseIdx, float startBar, float endBar, float flowRestriction, int timeMs, float pressureTarget, float weightTarget) {
+  setPhase(phaseIdx, PHASE_TYPE_PRESSURE, startBar, endBar, flowRestriction, flowRestriction, timeMs, pressureTarget, weightTarget);
 }
 
-void setFlowPhase(int phaseIdx, STAGE_TYPE stage, float startFlow, float endFlow, float pressureRestriction, int timeMs, float pressureTarget, float weightTarget) {
-  setPhase(phaseIdx, PHASE_TYPE_FLOW, stage, startFlow, endFlow, pressureRestriction, pressureRestriction, timeMs, pressureTarget, weightTarget);
+void setFlowPhase(int phaseIdx, float startFlow, float endFlow, float pressureRestriction, int timeMs, float pressureTarget, float weightTarget) {
+  setPhase(phaseIdx, PHASE_TYPE_FLOW, startFlow, endFlow, pressureRestriction, pressureRestriction, timeMs, pressureTarget, weightTarget);
 }
 
-void setPhase(int phaseIdx, PHASE_TYPE type, STAGE_TYPE stage, float startValue, float endValue, float startRestriction, float endRestriction, int timeMs, float pressureTarget, float weightTarget) {
-    phases.phases[phaseIdx].type              = type;
-    phases.phases[phaseIdx].stage             = stage;
-    phases.phases[phaseIdx].startValue        = startValue;
-    phases.phases[phaseIdx].endValue          = endValue;
-    phases.phases[phaseIdx].startRestriction  = startRestriction;
-    phases.phases[phaseIdx].endRestriction    = endRestriction;
-    phases.phases[phaseIdx].durationMs        = timeMs;
-    phases.phases[phaseIdx].pressureTarget    = pressureTarget;
-    phases.phases[phaseIdx].shotTarget        = weightTarget;
+void setPhase(int phaseIdx, PHASE_TYPE type, float startValue, float endValue, float startRestriction, float endRestriction, int timeMs, float pressureTarget, float weightTarget) {
+  StopConditions stopConditions = StopConditions{
+    timeMs,
+    weightTarget,
+    (runningCfg.switchPhaseOnThreshold) ? pressureTarget : -1,
+    -1,
+    -1,
+    -1
+  };
+
+  phases.phases[phaseIdx].type              = type;
+  phases.phases[phaseIdx].startValue        = startValue;
+  phases.phases[phaseIdx].endValue          = endValue;
+  phases.phases[phaseIdx].startRestriction  = startRestriction;
+  phases.phases[phaseIdx].endRestriction    = endRestriction;
+  phases.phases[phaseIdx].stopConditions    = stopConditions;
 }
 
 static void profiling(void) {
-  static bool pressureThresholdReached = false;
-
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
-    // long timeInPhase = millis() - brewingTimer;
-    PhaseConditions phaseConditions = { millis() - brewingTimer };
-    CurrentPhase currentPhase = phases.getCurrentPhase(phaseConditions);
+    long timeInShot = millis() - brewingTimer;
+    CurrentPhase currentPhase = phaseProfiler.getCurrentPhase(timeInShot, currentState);
+    preinfusionFinished = currentPhase.getIndex() >= preInfusionFinishedPhaseIdx;
 
-    preinfusionFinished = currentPhase.phaseIndex >= preInfusionFinishedPhaseIdx;
-
-    if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
-      if (runningCfg.switchPhaseOnThreshold) {/* Switching to next logical stage when the pressurethreshold has been reached*/
-        stageRestrict.piStageTime = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
-      } else stageRestrict.piStageTime = runningCfg.preinfusionSec;
-
-      float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
-      float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+    if (phaseProfiler.isFinished()) {
+      closeValve();
+      setPumpOff();
+    } else if (currentPhase.getType() == PHASE_TYPE_PRESSURE) {
+      float newBarValue = currentPhase.getTarget();
+      float flowRestriction =  currentPhase.getRestriction();
+      openValve();
       setPumpPressure(newBarValue, flowRestriction, currentState);
     } else {
-      if (runningCfg.switchPhaseOnThreshold) {/* Switching to next logical stage when the pressurethreshold has been reached*/
-        stageRestrict.piStageTime = phases.phases[currentPhase.phaseIndex].getTimeRestriction(currentState, runningCfg);
-      } else stageRestrict.piStageTime = runningCfg.preinfusionFlowTime;
-
-      float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
-      float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+      float newFlowValue = currentPhase.getTarget();
+      float pressureRestriction =  currentPhase.getRestriction();
+      openValve();
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   } else {
-    if (startupInitFinished) setPumpToRawValue(0);
-    pressureThresholdReached = false;
+    closeValve();
+    setPumpOff();
   }
   // Keep that water at temp
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
@@ -579,8 +562,7 @@ static void manualFlowControl(void) {
 static void brewDetect(void) {
   static bool paramsReset = true;
 
-  if (brewState() && !stopOnWeight()) {
-    openValve();
+  if (brewState()) {
     if(!paramsReset) {
       brewParamsReset();
       paramsReset = true;
@@ -588,10 +570,6 @@ static void brewDetect(void) {
     brewActive = true;
   } else {
     brewActive = false;
-    if (startupInitFinished) {
-      setPumpOff();
-      closeValve();
-    }
     if(!brewState() && paramsReset) {
       brewParamsReset();
       paramsReset = false;
@@ -601,8 +579,7 @@ static void brewDetect(void) {
 
 static void brewParamsReset(void) {
   tareDone                                    = false;
-  shotWeight                                  = 0.f;
-  brewStopWeight                              = 0.f;
+  currentState.shotWeight                     = 0.f;
   previousWeight                              = 0.f;
   currentState.weight                         = 0.f;
   currentState.liquidPumped                   = 0.f;
@@ -611,6 +588,8 @@ static void brewParamsReset(void) {
   preinfusionFinished                         = false;
   brewingTimer                                = millis();
   systemHealthTimer                           = millis() + HEALTHCHECK_EVERY;
+
+  phaseProfiler.reset();
   lcdSendFakeTouch();
 }
 
@@ -630,13 +609,18 @@ static void flushDeactivated(void) {
 }
 
 static void fillBoiler(float targetBoilerFullPressure) {
-  static unsigned long timePassed = millis();
-  if (currentState.pressure < targetBoilerFullPressure && !startupInitFinished ) {
+  static unsigned long fillStartedTime = millis();
+  unsigned long timePassed = millis() - fillStartedTime;
+
+  if (currentState.pressure < targetBoilerFullPressure && timePassed <= 5000UL && !startupInitFinished) {
     lcdShowPopup("Filling boiler!");
     openValve();
     setPumpToRawValue(80);
-    if (millis() - timePassed > 5000UL) startupInitFinished = true;
-  } else startupInitFinished = true;
+  } else if (!startupInitFinished) {
+    closeValve();
+    setPumpToRawValue(0);
+    startupInitFinished = true;
+  }
 }
 
 static void systemHealthCheck(float pressureThreshold) {

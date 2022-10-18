@@ -64,9 +64,6 @@ unsigned long systemHealthTimer = 0;
 
 //scales vars
 float previousWeight  = 0;
-float brewStopWeight  = 0;
-float shotWeight      = 0;
-float shotTarget      = 0;
 bool tareDone         = false;
 
 // brew detection vars
