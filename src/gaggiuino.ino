@@ -156,9 +156,9 @@ static void calculateWeightAndFlow(void) {
         currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
       } else if (currentState.isOutputFlow) {
-        previousWeight = currentState.shotWeight; // temporary measure to avoid those 30 -45 grams sudden jumps
+        // previousWeight = currentState.shotWeight; // temporary measure to avoid those 30 -45 grams sudden jumps
         currentState.shotWeight += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
-        if (currentState.shotWeight > previousWeight + 5.f) currentState.shotWeight = 0.f; // temporary measure to avoid those 30 -45 grams sudden jumps
+        // if (currentState.shotWeight > previousWeight + 5.f) currentState.shotWeight = 0.f; // temporary measure to avoid those 30 -45 grams sudden jumps
       }
       currentState.liquidPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
@@ -542,8 +542,10 @@ static void profiling(void) {
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   } else {
-    closeValve();
-    setPumpOff();
+    if (startupInitFinished) {
+      setPumpOff();
+      closeValve();
+    }
   }
   // Keep that water at temp
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
