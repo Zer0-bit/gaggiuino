@@ -245,6 +245,7 @@ static void brewTimeConditionsRefresh(void) {
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
 static void modeSelect(void) {
+  if (!startupInitFinished) return;
   switch (selectedOperationalMode) {
     //REPLACE ALL THE BELOW WITH OPMODE_auto_profiling
     case OPMODE_straight9Bar:
@@ -542,10 +543,10 @@ static void profiling(void) {
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   } else {
-    if (startupInitFinished) {
+    // if (startupInitFinished) {
       setPumpOff();
       closeValve();
-    }
+    // }
   }
   // Keep that water at temp
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
@@ -611,17 +612,19 @@ static void flushDeactivated(void) {
 }
 
 static void fillBoiler(float targetBoilerFullPressure) {
-  static unsigned long fillStartedTime = millis();
-  unsigned long timePassed = millis() - fillStartedTime;
+  if (lcdCurrentPageId == 0) {
+    static unsigned long fillStartedTime = millis();
+    unsigned long timePassed = millis() - fillStartedTime;
 
-  if (currentState.pressure < targetBoilerFullPressure && timePassed <= 5000UL && !startupInitFinished) {
-    lcdShowPopup("Filling boiler!");
-    openValve();
-    setPumpToRawValue(80);
-  } else if (!startupInitFinished) {
-    closeValve();
-    setPumpToRawValue(0);
-    startupInitFinished = true;
+    if (currentState.pressure < targetBoilerFullPressure && timePassed <= 5000UL && !startupInitFinished) {
+      lcdShowPopup("Filling boiler!");
+      openValve();
+      setPumpToRawValue(80);
+    } else if (!startupInitFinished) {
+      closeValve();
+      setPumpToRawValue(0);
+      startupInitFinished = true;
+    }
   }
 }
 
