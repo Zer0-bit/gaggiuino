@@ -609,6 +609,7 @@ static void flushDeactivated(void) {
 }
 
 static void fillBoiler(float targetBoilerFullPressure) {
+#if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   if (lcdCurrentPageId == 0) {
     static unsigned long fillStartedTime = millis();
     unsigned long timePassed = millis() - fillStartedTime;
@@ -623,6 +624,7 @@ static void fillBoiler(float targetBoilerFullPressure) {
       startupInitFinished = true;
     }
   }
+  #endif
 }
 
 static void systemHealthCheck(float pressureThreshold) {
