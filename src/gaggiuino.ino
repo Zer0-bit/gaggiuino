@@ -100,7 +100,6 @@ static void sensorsRead(void) {
   sensorsReadWeight();
   sensorsReadPressure();
   calculateWeightAndFlow();
-  brewTimeConditionsRefresh();
   fillBoiler(2.2f);
 }
 
@@ -234,11 +233,6 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
   }
 }
 
-static void brewTimeConditionsRefresh(void) {
-  if (brewActive) {
-    if (runningCfg.switchPhaseOnThreshold) updatePressureProfilePhases();
-  }
-}
 //#############################################################################################
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
@@ -530,6 +524,7 @@ static void profiling(void) {
     if (phaseProfiler.isFinished()) {
       closeValve();
       setPumpOff();
+      brewActive = false;
     } else if (currentPhase.getType() == PHASE_TYPE_PRESSURE) {
       float newBarValue = currentPhase.getTarget();
       float flowRestriction =  currentPhase.getRestriction();
@@ -566,11 +561,11 @@ static void brewDetect(void) {
     if(!paramsReset) {
       brewParamsReset();
       paramsReset = true;
+      brewActive = true;
     }
-    brewActive = true;
   } else {
     brewActive = false;
-    if(!brewState() && paramsReset) {
+    if(paramsReset) {
       brewParamsReset();
       paramsReset = false;
     }
