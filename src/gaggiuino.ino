@@ -543,10 +543,8 @@ static void profiling(void) {
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   } else {
-    // if (startupInitFinished) {
-      setPumpOff();
-      closeValve();
-    // }
+    setPumpOff();
+    closeValve();
   }
   // Keep that water at temp
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
