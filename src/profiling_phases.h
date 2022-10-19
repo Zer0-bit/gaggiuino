@@ -31,8 +31,8 @@ struct StopConditions {
     float stopWeight = weight + state.weightFlow / 2.f;
 
     return (weight > 0.f && state.shotWeight > stopWeight) ||
-      (pressureAbove > 0 && state.pressure > pressureAbove) ||
-      (pressureBelow > 0 && state.pressure < pressureBelow) ||
+      (pressureAbove > 0 && state.smoothedPressure > pressureAbove) ||
+      (pressureBelow > 0 && state.smoothedPressure < pressureBelow) ||
       (waterVolume > 0 && state.liquidPumped > waterVolume) ||
       (shotTime > 0 && timeInShot > shotTime) ||
       (phaseDuration >= 0 && timeInPhase > phaseDuration) ;

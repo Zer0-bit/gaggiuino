@@ -163,7 +163,7 @@ static void calculateWeightAndFlow(void) {
 }
 
 bool checkForOutputFlow(long elapsedTime) {
-  static unsigned int soakTimer;
+  long timeInShot = millis() - brewingTimer;
   long pumpClicks = getAndResetClickCounter();
   float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
 
@@ -182,6 +182,8 @@ bool checkForOutputFlow(long elapsedTime) {
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
   if (currentState.liquidPumped > 60.f || currentState.isHeadSpaceFilled) return true;
   else if (currentState.liquidPumped <= 60.f) {
+    CurrentPhase currentPhase = phaseProfiler.getCurrentPhase(timeInShot, currentState);
+
     if (runningCfg.preinfusionState) {
       if (preinfusionFinished) {
         if ( runningCfg.flowProfileState) {
@@ -193,7 +195,7 @@ bool checkForOutputFlow(long elapsedTime) {
             currentState.isHeadSpaceFilled = true;
           } else currentState.isHeadSpaceFilled = false;
         }
-      }
+      } else currentState.isHeadSpaceFilled = false;
       // else if (!preinfusionFinished && (runningCfg.preinfusionFlowState ? runningCfg.preinfusionFlowSoakTime : runningCfg.preinfusionSoak) >= 10) {
       //   /* Initial rough assumption based on observations, will surely need to be rewritten
       //   to account for the total vol of liquid that was already pumped versus the puck resistance behaviour
@@ -205,13 +207,12 @@ bool checkForOutputFlow(long elapsedTime) {
       //     }
       //   }
       // }
-      else currentState.isHeadSpaceFilled = false;
     } else {
       if (resistanceDelta < 500 && currentState.puckResistance >= 1500) {
         if (currentState.smoothedPressure > (runningCfg.flowProfileState ? runningCfg.flowProfilePressureTarget / 2.f : runningCfg.pressureProfilingStart / 2.f)) {
           if (!currentState.isPressureRisingFast && !currentState.isPumpFlowRisingFast) currentState.isHeadSpaceFilled = true;
           else currentState.isHeadSpaceFilled = false;
-        }
+        } else currentState.isHeadSpaceFilled = false;
       } else currentState.isHeadSpaceFilled = false;
     }
   } else return false;
