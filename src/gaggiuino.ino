@@ -163,7 +163,7 @@ static void calculateWeightAndFlow(void) {
 }
 
 bool checkForOutputFlow(long elapsedTime) {
-  // static unsigned int soakTimer;
+  static unsigned int soakTimer;
   long pumpClicks = getAndResetClickCounter();
   float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
 
@@ -183,20 +183,24 @@ bool checkForOutputFlow(long elapsedTime) {
   if (currentState.liquidPumped > 60.f || currentState.isHeadSpaceFilled) return true;
   else if (currentState.liquidPumped <= 60.f) {
     if (runningCfg.preinfusionState) {
-      if (preinfusionFinished &&
-          (
-            currentState.smoothedPressure > runningCfg.flowProfileState
-              ? runningCfg.preinfusionFlowPressureTarget
-              : runningCfg.preinfusionBar
-          )
-        && currentState.puckResistance > 1500) currentState.isHeadSpaceFilled = true;
-      // else if (!preinfusionFinished && (runningCfg.preinfusionFlowState ? runningCfg.preinfusionFlowSoakTime : runningCfg.preinfusionSoak) >= 15000) {
+      if (preinfusionFinished) {
+        if ( runningCfg.flowProfileState) {
+          if (currentState.smoothedPressure > runningCfg.preinfusionFlowPressureTarget && currentState.puckResistance > 1500) {
+            currentState.isHeadSpaceFilled = true;
+          } else currentState.isHeadSpaceFilled = false;
+        } else {
+          if (currentState.smoothedPressure > runningCfg.preinfusionBar && currentState.puckResistance > 1500) {
+            currentState.isHeadSpaceFilled = true;
+          } else currentState.isHeadSpaceFilled = false;
+        }
+      }
+      // else if (!preinfusionFinished && (runningCfg.preinfusionFlowState ? runningCfg.preinfusionFlowSoakTime : runningCfg.preinfusionSoak) >= 10) {
       //   /* Initial rough assumption based on observations, will surely need to be rewritten
       //   to account for the total vol of liquid that was already pumped versus the puck resistance behaviour
       //   along the time soak is engaged. */
       //   if (currentState.smoothedPressure < 1.f && currentState.isPressureFalling) {
       //     if (millis() > soakTimer) {
-      //       shotWeight = 0.175f;
+      //       currentState.shotWeight = 0.175f;
       //       soakTimer = millis() + 550;
       //     }
       //   }
