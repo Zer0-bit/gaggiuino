@@ -9,10 +9,11 @@ float pressureInefficiencyConstant1 = 0.1224f;
 // float pressureInefficiencyConstant3 = 0.00401f;
 // float pressureInefficiencyConstant4 = 0.000705f;
 // float pressureInefficiencyConstant5 = 0.00002916f;
+// float pressureInefficiencyConstant5 = 0.00003099f;
 float pressureInefficiencyConstant2 = 0.0107f;
 float pressureInefficiencyConstant3 = 0.0046f;
 float pressureInefficiencyConstant4 = 0.000705f;
-float pressureInefficiencyConstant5 = 0.0000296f;
+float pressureInefficiencyConstant5 = 0.00002916f;
 float flowPerClickAtZeroBar = 0.275f;
 short maxPumpClicksPerSecond = 50;
 
@@ -30,9 +31,9 @@ int getPumpPct(float targetPressure, float flowRestriction, SensorState &current
         return 0;
     }
 
-    float diff = targetPressure - currentState.pressure;
+    float diff = targetPressure - currentState.smoothedPressure;
     float maxPumpPct = flowRestriction > 0 ? 100.f * getClicksPerSecondForFlow(flowRestriction, currentState.smoothedPressure) / maxPumpClicksPerSecond : 100.f;
-    float pumpPctToMaintainFlow = 100.f * getClicksPerSecondForFlow(currentState.pumpFlow, currentState.smoothedPressure) / maxPumpClicksPerSecond;
+    float pumpPctToMaintainFlow = 100.f * getClicksPerSecondForFlow(currentState.smoothedPumpFlow, currentState.smoothedPressure) / maxPumpClicksPerSecond;
 
     if (diff > 0.f) {
         return fminf(maxPumpPct, pumpPctToMaintainFlow + fmin(100.f, 25 + 20 * diff));
@@ -108,7 +109,7 @@ void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &curre
     if (pressureRestriction > 0) {
         setPumpPressure(pressureRestriction, targetFlow, currentState);
     } else {
-        float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.pressure) / (float)maxPumpClicksPerSecond;
+        float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.smoothedPressure) / (float)maxPumpClicksPerSecond;
         setPumpToRawValue(pumpPct * PUMP_RANGE);
     }
 }
