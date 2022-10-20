@@ -163,7 +163,6 @@ static void calculateWeightAndFlow(void) {
 }
 
 bool checkForOutputFlow(long elapsedTime) {
-  long timeInShot = millis() - brewingTimer;
   long pumpClicks = getAndResetClickCounter();
   float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
 
@@ -182,8 +181,6 @@ bool checkForOutputFlow(long elapsedTime) {
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
   if (currentState.liquidPumped > 60.f || currentState.isHeadSpaceFilled) return true;
   else if (currentState.liquidPumped <= 60.f) {
-    CurrentPhase currentPhase = phaseProfiler.getCurrentPhase(timeInShot, currentState);
-
     if (runningCfg.preinfusionState) {
       if (preinfusionFinished) {
         if ( runningCfg.flowProfileState) {
