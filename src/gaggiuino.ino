@@ -565,6 +565,9 @@ static void brewDetect(void) {
       paramsReset = true;
       brewActive = true;
     }
+    // needs to be here as it creates a locking state soemtimes if not kept up to date during brew
+    // mainly when shotWeight restriction kick in.
+    systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   } else {
     brewActive = false;
     if(paramsReset) {
