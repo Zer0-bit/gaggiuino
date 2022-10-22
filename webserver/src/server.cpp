@@ -108,11 +108,11 @@ void loop(){
 }
 
 long getSeconds() {
-    return millis() % 60;
+    return millis() / 1000;
 }
 
 long getMinutes() {
-    return millis() / 6000;
+    return millis() / 60000;
 }
 
 void loadFSJavaScript() {
