@@ -35,7 +35,7 @@ struct StopConditions {
       (pressureBelow > 0 && state.smoothedPressure < pressureBelow) ||
       (waterVolume > 0 && state.liquidPumped > waterVolume) ||
       (shotTime > 0 && timeInShot > shotTime) ||
-      (phaseDuration >= 0 && timeInPhase > phaseDuration) ;
+      (phaseDuration >= 0 && timeInPhase >= phaseDuration) ;
   }
 };
 

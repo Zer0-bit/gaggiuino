@@ -110,7 +110,7 @@ void test_phases_with_weight_stop_condition(void) {
   TEST_ASSERT_EQUAL(0, profiler.getCurrentPhase(3000, mockedState).getIndex());
   TEST_ASSERT_FALSE(profiler.isFinished());
 
-  mockedState.shotWeight = 0.4f;
+  mockedState.shotWeight = 0.5f;
   TEST_ASSERT_EQUAL(1, profiler.getCurrentPhase(3000, mockedState).getIndex());
   TEST_ASSERT_FALSE(profiler.isFinished());
 

@@ -178,6 +178,10 @@ bool checkForOutputFlow(long elapsedTime) {
   currentState.puckResistance = currentState.smoothedPressure * 1000.f / currentState.smoothedPumpFlow; // Resistance in mBar * s / g
   float resistanceDelta = currentState.puckResistance - lastResistance;
 
+  // Weight at least 1.2sec before attempting to predict the start of the output flow.
+  // This hopefully gives enough time to KalmanFilters and pressure/flow values and deltas to stabilise
+  if (millis() - brewingTimer < 1200) return false;
+
   // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
   if (currentState.liquidPumped > 60.f || currentState.isHeadSpaceFilled) return true;
   else if (currentState.liquidPumped <= 60.f) {
