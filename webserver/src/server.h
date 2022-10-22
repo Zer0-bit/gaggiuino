@@ -4,6 +4,7 @@
 #include <LittleFS.h>
 #include "ESPAsyncWebServer.h"
 #include "AsyncTCP.h"
+#include "secrets.h"
 
 void loadFSJavaScript();
 void loadFSCSS();

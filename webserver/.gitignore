@@ -4,5 +4,6 @@ dist
 demo.d.ts
 *.d.ts
 .pio
-.vscode
+.
+webserver/secrets.h
 

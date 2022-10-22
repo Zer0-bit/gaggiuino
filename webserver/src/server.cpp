@@ -1,7 +1,7 @@
 #include "server.h"
 
-const char* ssid = "MI5";
-const char* password =  "a86831e510";
+const char* ssid = "SSID";
+const char* password =  "WIFI_PASSWORD";
 
 #define FORMAT_LITTLEFS_IF_FAILED   true
 
