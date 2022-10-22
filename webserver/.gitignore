@@ -5,5 +5,5 @@ demo.d.ts
 *.d.ts
 .pio
 .
-webserver/secrets.h
+src/secrets.h
 
