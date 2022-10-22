@@ -31,7 +31,6 @@ void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);
 void lcdSetBrewTimer(int seconds);
 void lcdWarmupStateStop(void);
-void lcdSendFakeTouch(void);
 
 /* Triggers */
 void lcdTrigger1(void);

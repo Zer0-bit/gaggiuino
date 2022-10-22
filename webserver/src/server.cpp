@@ -147,5 +147,3 @@ void loadFSStatic() {
             request->send(LittleFS, "/assets/img/uiui-dark.png", "text/plain");
     });
 }
-
- 

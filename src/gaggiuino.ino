@@ -594,7 +594,6 @@ static void brewParamsReset(void) {
   systemHealthTimer                           = millis() + HEALTHCHECK_EVERY;
 
   phaseProfiler.reset();
-  lcdSendFakeTouch();
 }
 
 
