@@ -9,25 +9,25 @@ AsyncWebServer server(80);
 // Create an Event Source on /events
 AsyncEventSource events("/");
 // Web sockets
-AsyncWebSocket ws("/ws"); // access at ws://[esp ip]/ws
+// AsyncWebSocket ws("/ws"); // access at ws://[esp ip]/ws
 
 
-void onRequest(AsyncWebServerRequest *request){
-  //Handle Unknown Request
-  request->send(404);
-}
+// void onRequest(AsyncWebServerRequest *request){
+//   //Handle Unknown Request
+//   request->send(404);
+// }
 
-void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-  //Handle body
-}
+// void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+//   //Handle body
+// }
 
-void onUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
-  //Handle upload
-}
+// void onUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+//   //Handle upload
+// }
 
-void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
-  //Handle WebSocket event
-}
+// void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
+//   //Handle WebSocket event
+// }
 
 void setup(){
     Serial.begin(115200);
@@ -50,9 +50,9 @@ void setup(){
     server.addHandler(&events);
 
     // upload a file to /upload
-    server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request){
-        request->send(200);
-    }, onUpload);
+    // server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request){
+    //     request->send(200);
+    // }, onUpload);
     loadFSHTML();
     loadFSCSS();
     loadFSJavaScript();
@@ -66,8 +66,8 @@ void setup(){
     }
 
     // attach AsyncWebSocket
-    ws.onEvent(onEvent);
-    server.addHandler(&ws);
+    // ws.onEvent(onEvent);
+    // server.addHandler(&ws);
 
     // send event with message "hello!", id current millis
     // and set reconnect delay to 200ms
@@ -76,16 +76,16 @@ void setup(){
 
        // Simple Firmware Update Form
     
-    server.onNotFound(onRequest);
-    server.onFileUpload(onUpload);
-    server.onRequestBody(onBody);
+    // server.onNotFound(onRequest);
+    // server.onFileUpload(onUpload);
+    // server.onRequestBody(onBody);
 
     server.begin();
 }
 
 void loop(){
     static long timer;
-    if ((millis() - timer) > 160) {
+    if ((millis() - timer) > 200) {
         int temp = random(90,93);
         int press = random(1,10);
         int flow = random(1,3);
@@ -104,7 +104,7 @@ void loop(){
         
         timer = millis();
     }
-    espReboot();
+    // espReboot();
 }
 
 long getSeconds() {
