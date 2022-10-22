@@ -228,7 +228,7 @@ void lcdShowDebug(int val1, int val2) {
 
 void lcdShowPopup(const char *msg) {
   static unsigned int timer;
-  if(millis() > timer + 5000) {
+  if(millis() > timer + 1000) {
     myNex.writeStr("popupMSG.t0.txt", msg);
     myNex.writeStr("page popupMSG");
     timer = millis();
@@ -253,15 +253,6 @@ void lcdSetBrewTimer(int seconds) {
 
 void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
-}
-
-/*
-Sends a fake touch event to the component with id=0 on nextion
-to reset the nextion touch events timer hence the screen wouldn't
-go into sleep mode if machine is being actively used
-*/
-void lcdSendFakeTouch(void) {
-  myNex.writeStr("click 0,1");
 }
 
 void trigger1(void) { lcdTrigger1(); }

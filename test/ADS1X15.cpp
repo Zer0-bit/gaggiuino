@@ -32,3 +32,7 @@ ADS1115::ADS1115(int address) {
   void ADS1115::setDataRate(int x) {
 
   }
+
+  bool ADS1115::isReady(void) {
+    return false;
+  }

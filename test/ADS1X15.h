@@ -9,4 +9,5 @@ public:
   void readADC(int);
   void setMode(int);
   void setDataRate(int);
+  bool isReady(void);
 };

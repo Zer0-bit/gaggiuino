@@ -11,7 +11,6 @@
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
 #include "sensors_state.h"
-#include "restrictors.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 
@@ -64,9 +63,6 @@ unsigned long systemHealthTimer = 0;
 
 //scales vars
 float previousWeight  = 0;
-float brewStopWeight  = 0;
-float shotWeight      = 0;
-float shotTarget      = 0;
 bool tareDone         = false;
 
 // brew detection vars

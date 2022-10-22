@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "sensors_state.h"
-#include "restrictors.h"
 
 #define PUMP_RANGE 100
 #define ZC_MODE    RISING
