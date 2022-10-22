@@ -6,28 +6,9 @@ const char* password =  WIFI_PASSWORD;
 #define FORMAT_LITTLEFS_IF_FAILED   true
 
 AsyncWebServer server(80);
-// Create an Event Source on /events
+// Create an Event Source on /
 AsyncEventSource events("/");
-// Web sockets
-// AsyncWebSocket ws("/ws"); // access at ws://[esp ip]/ws
 
-
-// void onRequest(AsyncWebServerRequest *request){
-//   //Handle Unknown Request
-//   request->send(404);
-// }
-
-// void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-//   //Handle body
-// }
-
-// void onUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
-//   //Handle upload
-// }
-
-// void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
-//   //Handle WebSocket event
-// }
 
 void setup(){
     Serial.begin(115200);
@@ -49,10 +30,6 @@ void setup(){
 
     server.addHandler(&events);
 
-    // upload a file to /upload
-    // server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request){
-    //     request->send(200);
-    // }, onUpload);
     loadFSHTML();
     loadFSCSS();
     loadFSJavaScript();
@@ -65,20 +42,10 @@ void setup(){
         Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
     }
 
-    // attach AsyncWebSocket
-    // ws.onEvent(onEvent);
-    // server.addHandler(&ws);
-
     // send event with message "hello!", id current millis
     // and set reconnect delay to 200ms
     client->send("hello!", NULL, millis(), 200);
     });
-
-       // Simple Firmware Update Form
-    
-    // server.onNotFound(onRequest);
-    // server.onFileUpload(onUpload);
-    // server.onRequestBody(onBody);
 
     server.begin();
 }
@@ -112,7 +79,7 @@ long getSeconds() {
 }
 
 long getMinutes() {
-    return millis() / 60000;
+    return millis() / 1000 / 60;
 }
 
 void loadFSJavaScript() {
@@ -181,50 +148,10 @@ void loadFSStatic() {
     });
 }
 
-void espReboot() {
-    if(shouldReboot){
-        Serial.println("Rebooting...");
-        delay(100);
-        ESP.restart();
-    }
-    static char temp[128];
-    sprintf(temp, "Seconds since boot: %u", millis()/1000);
-    events.send(temp, "time"); //send event "time"
-}
-
 void firmwareUpdate() {
     server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request)
         {
             request->send(200, "text/html", "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>");
         }
     );
-    // server.on("/update", HTTP_POST, [](AsyncWebServerRequest *request) 
-    //     {
-    //         shouldReboot = !Update.hasError();
-    //         AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", shouldReboot?"OK":"FAIL");
-    //         response->addHeader("Connection", "close");
-    //         request->send(response);
-    //     },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
-    //     {
-    //         if(!index){
-    //             Serial.printf("Update Start: %s\n", filename.c_str());
-    //             Update.runAsync(true);
-    //             if(!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)){
-    //             Update.printError(Serial);
-    //             }
-    //         }
-    //         if(!Update.hasError()){
-    //             if(Update.write(data, len) != len){
-    //             Update.printError(Serial);
-    //             }
-    //         }
-    //         if(final){
-    //             if(Update.end(true)){
-    //             Serial.printf("Update Success: %uB\n", index+len);
-    //             } else {
-    //             Update.printError(Serial);
-    //             }
-    //         }
-    //     }
-    // );
-}
+ 

@@ -10,8 +10,6 @@ void loadFSJavaScript();
 void loadFSCSS();
 void loadFSHTML();
 void loadFSStatic();
-void firmwareUpdate();
-void espReboot();
 long getSeconds();
 long getMinutes();
 
