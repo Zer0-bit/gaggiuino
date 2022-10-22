@@ -636,6 +636,7 @@ static void systemHealthCheck(float pressureThreshold) {
       while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < STEAM_WAND_HOT_WATER_TEMP)
       {
         lcdShowPopup("Releasing pressure!");
+        setPumpOff();
         setBoilerOff();
         openValve();
         sensorsRead();
@@ -651,6 +652,7 @@ static void systemHealthCheck(float pressureThreshold) {
   while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
     /* In the event of the temp failing to read while the SSR is HIGH
     we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
+    setPumpOff();
     setBoilerOff();
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
