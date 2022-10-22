@@ -13,6 +13,11 @@ indent_style = space
 trim_trailing_whitespace = unset
 insert_final_newline = unset
 
+[**.{html,css,js}]
+indent_style = unset
+trim_trailing_whitespace = unset
+insert_final_newline = unset
+
 [platformio.ini]
 indent_style = tab
 
