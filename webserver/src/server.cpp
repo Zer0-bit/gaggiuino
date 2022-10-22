@@ -68,7 +68,7 @@ void loop(){
         events.send(String(press).c_str(),"press",millis());
         events.send(String(flow).c_str(),"flow",millis());
         events.send(String(weight).c_str(),"weight",millis());
-        
+
         timer = millis();
     }
     // espReboot();
@@ -139,7 +139,7 @@ void loadFSHTML() {
 void loadFSStatic() {
     server.on("/assets/img/GAGGIUINO_ICON_transp.png", HTTP_GET, [](AsyncWebServerRequest *request){
             request->send(LittleFS, "/assets/img/GAGGIUINO_ICON_transp.png", "text/plain");
-    }); 
+    });
     server.on("/assets/img/uiui-light.png", HTTP_GET, [](AsyncWebServerRequest *request){
             request->send(LittleFS, "/assets/img/uiui-light.png", "text/plain");
     });
