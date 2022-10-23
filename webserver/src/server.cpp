@@ -1,8 +1,6 @@
 #include <WiFi.h>
 #include "server.h"
 
-
-
 void setup(){
     Serial.begin(115200);
 
@@ -29,7 +27,6 @@ void setup(){
     loadFSJavaScript();
     loadFSStatic();
 
-    // firmwareUpdate();
     // Handle Web server Events
     sseHandleEvents();
     serverBeginServe();
@@ -44,23 +41,22 @@ void loop(){
         static int weight;
         if (weight<=45) weight += flow;
         else weight = 0;
-
+         
         // Send Events to the Web server with the Sensor Readings
         sseSend("ping",NULL);
-        sseSend(String(getSeconds()).c_str(),"seconds");
-        sseSend(String(getMinutes()).c_str(),"minutes");
-        sseSend(String(temp).c_str(),"temp");
-        sseSend(String(press).c_str(),"press");
-        sseSend(String(flow).c_str(),"flow");
-        sseSend(String(weight).c_str(),"weight");
-
+        sseSend(String(getSeconds()),"seconds");
+        sseSend(String(getMinutes()),"minutes");
+        sseSend(String(temp),"temp");
+        sseSend(String(press),"press");
+        sseSend(String(flow),"flow");
+        sseSend(String(weight),"weight");
         timer = millis();
     }
     // espReboot();
 }
 
 long getSeconds() {
-    return millis() / 1000;
+    return millis() /1000;
 }
 
 long getMinutes() {
