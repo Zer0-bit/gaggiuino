@@ -1,10 +1,5 @@
 #include "server.h"
 
-const char* ssid = WIFI_SSID;
-const char* password =  WIFI_PASSWORD;
-
-#define FORMAT_LITTLEFS_IF_FAILED   true
-
 AsyncWebServer server(80);
 // Create an Event Source on /
 AsyncEventSource events("/");
