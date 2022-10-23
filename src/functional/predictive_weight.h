@@ -4,19 +4,21 @@
 #include "../profiling_phases.h"
 #include "../sensors_state.h"
 
-struct PredictiveWeight {
-  bool isOutputFlow;
+class PredictiveWeight {
+private:
+  bool outputFlowStarted;
   bool isForceStarted;
   float puckResistance;
   float resistanceDelta;
 
-  void update(SensorState& state, CurrentPhase& phase) {
-    if (isForceStarted || isOutputFlow) {
-      return;
-    }
+public:
+  bool isOutputFlow() {
+    return outputFlowStarted;
+  }
 
-    if (state.liquidPumped >= 60.f) {
-      isOutputFlow = true;
+  void update(SensorState& state, CurrentPhase& phase) {
+    if (isForceStarted || outputFlowStarted || state.liquidPumped >= 60.f) {
+      outputFlowStarted = true;
       return;
     }
 
@@ -45,11 +47,15 @@ struct PredictiveWeight {
     }
 
     // We're there!
-    isOutputFlow = true;
+    outputFlowStarted = true;
+  }
+
+  void setIsForceStarted(bool value) {
+    isForceStarted = value;
   }
 
   void reset() {
-    isOutputFlow = false;
+    outputFlowStarted = false;
     isForceStarted = false;
     puckResistance = 0.f;
     resistanceDelta = 0.f;

@@ -163,7 +163,7 @@ static void calculateWeightAndFlow(void) {
         currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
         currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
-      } else if (predictiveWeight.isOutputFlow) {
+      } else if (predictiveWeight.isOutputFlow()) {
         // previousWeight = currentState.shotWeight; // temporary measure to avoid those 30 -45 grams sudden jumps
         currentState.shotWeight += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
         // if (currentState.shotWeight > previousWeight + 5.f) currentState.shotWeight = 0.f; // temporary measure to avoid those 30 -45 grams sudden jumps
@@ -397,8 +397,8 @@ void lcdTrigger4(void) {
   if (!scalesIsPresent()) {
     if (currentState.shotWeight > 0.f) {
       currentState.shotWeight = 0.f;
-      predictiveWeight.isForceStarted = true;
-    } else predictiveWeight.isForceStarted = true;
+      predictiveWeight.setIsForceStarted(true);
+    } else predictiveWeight.setIsForceStarted(true);
   } else scalesTare();
 }
 
