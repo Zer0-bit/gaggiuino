@@ -542,6 +542,7 @@ static void brewParamsReset(void) {
   currentState.liquidPumped                   = 0.f;
   preinfusionFinished                         = false;
   brewingTimer                                = millis();
+  flowTimer                                   = millis() + REFRESH_FLOW_EVERY;
   systemHealthTimer                           = millis() + HEALTHCHECK_EVERY;
 
   predictiveWeight.reset();
