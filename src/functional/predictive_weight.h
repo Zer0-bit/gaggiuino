@@ -43,8 +43,13 @@ public:
       return;
     }
 
-    // If the pressure hasn't reached its target we're not there yet
-    if (pressureTarget - pressure > 0.5f) {
+    // If the pressure hasn't reached its target when target <= 3bar we're not there yet
+    if (pressureTarget <= 3.f &&  pressure < pressureTarget - 0.05f) {
+      return;
+    }
+
+    // Pressure has to reach at least half way to pressureTarget
+    if (pressure < pressureTarget / 2.f) {
       return;
     }
 
