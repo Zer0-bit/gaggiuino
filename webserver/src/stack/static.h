@@ -5,6 +5,9 @@
 #include "ESPAsyncWebServer.h"
 #include "AsyncTCP.h"
 
+#define FORMAT_LITTLEFS_IF_FAILED   true
+
+void fsMount(void);
 void serverAddSseHandler(void);
 void sseHandleEvents(void);
 void serverBeginServe(void);

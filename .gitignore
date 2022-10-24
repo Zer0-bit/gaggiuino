@@ -5,5 +5,5 @@ src/.theia/
 src/build
 webserver/src/.theia/
 webserver/src/build
-webserver/src/secrets.h
+webserver/src/stack/secrets.h
 

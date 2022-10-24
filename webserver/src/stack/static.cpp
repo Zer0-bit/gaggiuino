@@ -22,6 +22,15 @@ void sseHandleEvents() {
 void serverBeginServe() {
     server.begin();
 }
+
+// Checking wether the filesystem can be mounted
+void fsMount() {
+    if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
+        Serial.println("LITTLEFS Mount Failed");
+        return;
+    }
+}
+
 // Might return to this lambda later bu it's possibly making things unecessary abstract
 // void loadFSFile(String filePath, String fileType) {
 //     server.on([=](char& filePath){return filePath;}, HTTP_GET, [](AsyncWebServerRequest *request)
