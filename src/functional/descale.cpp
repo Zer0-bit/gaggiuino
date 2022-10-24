@@ -44,14 +44,16 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
       }
     }
   } else if (brewState() && descaleFinished == true){
-    closeValve();
     setPumpOff();
+    closeValve();
     if ((millis() - timer) > 1000) {
       lcdBrewTimerStop();
       lcdShowDescaleFinished();
       timer=millis();
     }
   } else {
+    setPumpOff();
+    closeValve();
     currentCycleRead = 0;
     lastCycleRead = 10;
     descaleFinished = false;
