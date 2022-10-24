@@ -39,7 +39,7 @@ public:
     }
 
     // If pressure or flow is changing quickly we're not there yet
-    if (state.isPressureRisingFast || state.isPumpFlowRisingFast) {
+    if (state.isPressureRisingFast || state.isPumpFlowRisingFast || state.isPumpFlowFallingFast) {
       return;
     }
 

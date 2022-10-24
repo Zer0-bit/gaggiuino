@@ -155,6 +155,7 @@ static void calculateWeightAndFlow(void) {
       previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
       currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
       currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
+      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.45f;
 
       CurrentPhase phase = phaseProfiler.getCurrentPhase(millis() - brewingTimer, currentState);
       predictiveWeight.update(currentState, phase);
