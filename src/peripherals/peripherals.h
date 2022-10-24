@@ -40,7 +40,7 @@ static inline bool steamState(void) {
 }
 
 static inline void openValve(void) {
-  #if defined(LEGO_VALVE_RELAY)
+  #if defined LEGO_VALVE_RELAY
     digitalWrite(valvePin, LOW);
   #else
     digitalWrite(valvePin, HIGH);
@@ -48,7 +48,7 @@ static inline void openValve(void) {
 }
 
 static inline void closeValve(void) {
-  #if defined(LEGO_VALVE_RELAY)
+  #if defined LEGO_VALVE_RELAY
     digitalWrite(valvePin, HIGH);
   #else
     digitalWrite(valvePin, LOW);

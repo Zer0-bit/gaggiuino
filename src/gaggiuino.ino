@@ -505,9 +505,15 @@ static void profiling(void) {
 }
 
 static void manualFlowControl(void) {
-  float flow_reading = lcdGetManualFlowVol() / 10 ;
-  setPumpFlow(flow_reading, 0.f, currentState);
-  justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+  if (brewActive) {
+    openValve();
+    float flow_reading = lcdGetManualFlowVol() / 10 ;
+    setPumpFlow(flow_reading, 0.f, currentState);
+    justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+  } else {
+    closeValve();
+    setPumpOff();
+  }
 }
 
 //#############################################################################################
