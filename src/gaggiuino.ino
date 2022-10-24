@@ -13,6 +13,8 @@ Phase phaseArray[6];
 Phases phases {6,  phaseArray};
 PhaseProfiler phaseProfiler{phases};
 
+PredictiveWeight predictiveWeight;
+
 // SensorState currentState;
 SensorState currentState;
 
@@ -144,15 +146,25 @@ static void calculateWeightAndFlow(void) {
     long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
-      // if(elapsedTime > 200) return;
 
-      currentState.isOutputFlow = checkForOutputFlow(elapsedTime);
+
+      long pumpClicks = getAndResetClickCounter();
+      float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
+      currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+
+      previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
+      currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
+      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.45f;
+
+      CurrentPhase phase = phaseProfiler.getCurrentPhase(millis() - brewingTimer, currentState);
+      predictiveWeight.update(currentState, phase);
 
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
         currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
-      } else if (currentState.isOutputFlow) {
+      } else if (predictiveWeight.isOutputFlow()) {
         // previousWeight = currentState.shotWeight; // temporary measure to avoid those 30 -45 grams sudden jumps
         currentState.shotWeight += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
         // if (currentState.shotWeight > previousWeight + 5.f) currentState.shotWeight = 0.f; // temporary measure to avoid those 30 -45 grams sudden jumps
@@ -160,64 +172,6 @@ static void calculateWeightAndFlow(void) {
       currentState.liquidPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
   }
-}
-
-bool checkForOutputFlow(long elapsedTime) {
-  long pumpClicks = getAndResetClickCounter();
-  float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
-
-  previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
-  currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
-  currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-  currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
-
-  // No point going through all the below logic if we hardsetting the predictive scales to start counting
-  if (currentState.isPredictiveWeightForceStarted) return true;
-
-  float lastResistance = currentState.puckResistance;
-  currentState.puckResistance = currentState.smoothedPressure * 1000.f / currentState.smoothedPumpFlow; // Resistance in mBar * s / g
-  float resistanceDelta = currentState.puckResistance - lastResistance;
-
-  // Weight at least 1.2sec before attempting to predict the start of the output flow.
-  // This hopefully gives enough time to KalmanFilters and pressure/flow values and deltas to stabilise
-  if (millis() - brewingTimer < 1200) return false;
-
-  // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
-  if (currentState.liquidPumped > 60.f || currentState.isHeadSpaceFilled) return true;
-  else if (currentState.liquidPumped <= 60.f) {
-    if (runningCfg.preinfusionState) {
-      if (preinfusionFinished) {
-        if ( runningCfg.flowProfileState) {
-          if (currentState.smoothedPressure > runningCfg.preinfusionFlowPressureTarget && currentState.puckResistance > 1500) {
-            currentState.isHeadSpaceFilled = true;
-          } else currentState.isHeadSpaceFilled = false;
-        } else {
-          if (currentState.smoothedPressure > runningCfg.preinfusionBar && currentState.puckResistance > 1500) {
-            currentState.isHeadSpaceFilled = true;
-          } else currentState.isHeadSpaceFilled = false;
-        }
-      } else currentState.isHeadSpaceFilled = false;
-      // else if (!preinfusionFinished && (runningCfg.preinfusionFlowState ? runningCfg.preinfusionFlowSoakTime : runningCfg.preinfusionSoak) >= 10) {
-      //   /* Initial rough assumption based on observations, will surely need to be rewritten
-      //   to account for the total vol of liquid that was already pumped versus the puck resistance behaviour
-      //   along the time soak is engaged. */
-      //   if (currentState.smoothedPressure < 1.f && currentState.isPressureFalling) {
-      //     if (millis() > soakTimer) {
-      //       currentState.shotWeight = 0.175f;
-      //       soakTimer = millis() + 550;
-      //     }
-      //   }
-      // }
-    } else {
-      if (resistanceDelta < 500 && currentState.puckResistance >= 1500) {
-        if (currentState.smoothedPressure > (runningCfg.flowProfileState ? runningCfg.flowProfilePressureTarget / 2.f : runningCfg.pressureProfilingStart / 2.f)) {
-          if (!currentState.isPressureRisingFast && !currentState.isPumpFlowRisingFast) currentState.isHeadSpaceFilled = true;
-          else currentState.isHeadSpaceFilled = false;
-        } else currentState.isHeadSpaceFilled = false;
-      } else currentState.isHeadSpaceFilled = false;
-    }
-  } else return false;
-  return false;
 }
 
 //##############################################################################################################################
@@ -444,8 +398,8 @@ void lcdTrigger4(void) {
   if (!scalesIsPresent()) {
     if (currentState.shotWeight > 0.f) {
       currentState.shotWeight = 0.f;
-      currentState.isPredictiveWeightForceStarted = true;
-    } else currentState.isPredictiveWeightForceStarted = true;
+      predictiveWeight.setIsForceStarted(true);
+    } else predictiveWeight.setIsForceStarted(true);
   } else scalesTare();
 }
 
@@ -551,9 +505,15 @@ static void profiling(void) {
 }
 
 static void manualFlowControl(void) {
-  float flow_reading = lcdGetManualFlowVol() / 10 ;
-  setPumpFlow(flow_reading, 0.f, currentState);
-  justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+  if (brewActive) {
+    openValve();
+    float flow_reading = lcdGetManualFlowVol() / 10 ;
+    setPumpFlow(flow_reading, 0.f, currentState);
+    justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+  } else {
+    closeValve();
+    setPumpOff();
+  }
 }
 
 //#############################################################################################
@@ -587,12 +547,12 @@ static void brewParamsReset(void) {
   previousWeight                              = 0.f;
   currentState.weight                         = 0.f;
   currentState.liquidPumped                   = 0.f;
-  currentState.isHeadSpaceFilled              = false;
-  currentState.isPredictiveWeightForceStarted = false;
   preinfusionFinished                         = false;
   brewingTimer                                = millis();
+  flowTimer                                   = millis() + REFRESH_FLOW_EVERY;
   systemHealthTimer                           = millis() + HEALTHCHECK_EVERY;
 
+  predictiveWeight.reset();
   phaseProfiler.reset();
 }
 

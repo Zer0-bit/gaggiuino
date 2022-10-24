@@ -13,6 +13,7 @@
 #include "sensors_state.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
+#include "functional/predictive_weight.h"
 
 #include <Arduino.h>
 #include <SimpleKalmanFilter.h>
