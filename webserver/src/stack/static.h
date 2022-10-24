@@ -13,10 +13,11 @@ void sseHandleEvents(void);
 void serverBeginServe(void);
 void sseSend(String evnt, char* variable);
 
-// void loadFSFile(String path, String type);
-void loadFSHTML(void);
-void loadFSCSS(void);
-void loadFSJavaScript(void);
-void loadFSStatic(void);
+void loadFSFiles();
+
+// void loadFSHTML(void);
+// void loadFSCSS(void);
+// void loadFSJavaScript(void);
+// void loadFSStatic(void);
 
 #endif

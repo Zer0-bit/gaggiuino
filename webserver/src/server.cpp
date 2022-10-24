@@ -11,10 +11,8 @@ void setup(){
     serverAddSseHandler();
 
     //loading webserver frontend assets
-    loadFSHTML();
-    loadFSCSS();
-    loadFSJavaScript();
-    loadFSStatic();
+    loadFSFiles();
+
 
     // Handle Web server Events
     sseHandleEvents();
