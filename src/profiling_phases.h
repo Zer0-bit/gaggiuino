@@ -28,7 +28,8 @@ struct StopConditions {
   long shotTime = -1;
 
   bool isReached(SensorState& state, long timeInPhase, long timeInShot) {
-    float stopWeight = weight + state.weightFlow / 2.f;
+    float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
+    float stopWeight = weight + flow / 2.f;
 
     return (weight > 0.f && state.shotWeight > stopWeight) ||
       (pressureAbove > 0 && state.smoothedPressure > pressureAbove) ||

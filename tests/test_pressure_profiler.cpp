@@ -98,6 +98,10 @@ void test_phases_with_zero_duration_are_skipped(void) {
 
 void test_phases_with_weight_stop_condition(void) {
   SensorState mockedState;
+  mockedState.shotWeight = 0.f;
+  mockedState.smoothedPumpFlow = 0.f;
+  mockedState.weightFlow = 0.f;
+
   float weightTarget = 0.4f;
   Phase array[] = {
     presurePhaseWithWeightTarget(2, 2, -1, weightTarget),

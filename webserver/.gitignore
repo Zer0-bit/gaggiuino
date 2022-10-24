@@ -1,8 +1,0 @@
-dist
-.cache
-.rpt2_cache
-demo.d.ts
-*.d.ts
-.pio
-.
-src/secrets.h

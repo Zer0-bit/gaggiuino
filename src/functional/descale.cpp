@@ -8,6 +8,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   static bool descaleFinished = false;
 
   if (brewState() && !descaleFinished) {
+    openValve();
     if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
       if (blink == true) { // Logic that switches between modes depending on the $blink value
         setPumpToRawValue(10);
@@ -44,12 +45,15 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
     }
   } else if (brewState() && descaleFinished == true){
     setPumpOff();
+    closeValve();
     if ((millis() - timer) > 1000) {
       lcdBrewTimerStop();
       lcdShowDescaleFinished();
       timer=millis();
     }
   } else {
+    setPumpOff();
+    closeValve();
     currentCycleRead = 0;
     lastCycleRead = 10;
     descaleFinished = false;
@@ -62,15 +66,15 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
 void solenoidBeat() {
   setPumpFullOn();
   closeValve();
-  delay(200);
+  delay(1000);
   openValve();
   delay(200);
   closeValve();
-  delay(200);
+  delay(1000);
   openValve();
   delay(200);
   closeValve();
-  delay(200);
+  delay(1000);
   openValve();
   setPumpOff();
 }
