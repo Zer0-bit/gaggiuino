@@ -6,4 +6,4 @@ src/build
 webserver/src/.theia/
 webserver/src/build
 webserver/src/stack/secrets.h
-
+webserver/data
