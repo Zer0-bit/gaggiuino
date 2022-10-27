@@ -9,7 +9,7 @@
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.11",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
-    "@svgr/webpack": "^5.5.0",
+    "@svgr/webpack": "^6.5.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
@@ -62,8 +62,8 @@
     "tailwindcss": "^3.0.2",
     "terser-webpack-plugin": "^5.2.5",
     "web-vitals": "^2.1.4",
-    "webpack": "^5.64.4",
-    "webpack-dev-server": "^4.6.0",
+    "webpack": "^5.74.0",
+    "webpack-dev-server": "^4.11.1",
     "webpack-manifest-plugin": "^4.0.2",
     "websocket": "^1.0.34",
     "workbox-webpack-plugin": "^6.4.1"
@@ -153,7 +153,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.30.0",
-    "eslint-plugin-react-hooks": "^4.5.0"
-  },
-  "proxy": "http://192.168.18.44"
+    "eslint-plugin-react-hooks": "^4.5.0",
+    "http-proxy-middleware": "^2.0.6"
+  }
 }

@@ -10,13 +10,14 @@
 There's a very convenient way to develop the app. 
 
 1. Connect your ESP to the WiFi. 
-2. Update `package.json` `proxy` property to point to the IP of your ESP i.e.
-
+2. Update `src/setupProxy.js` `target` to point to the IP of your ESP in your network i.e.
 ```
-  "proxy": "http://192.168.18.44"
+  const target = 'http://192.168.18.44';
 ```
-
-3. IN `Home.jsx` update the `const [socketUrl] = useState('ws://<ESP_IP>/ws');` line to point to the correct socket address. 
+3. During development also upgrade the websocket path in `Home.jsx` (replace `${window.location.host}` with the IP of ESP32)
+```
+  const [socketUrl] = useState(`ws://${window.location.host}/ws`);
+```
 4. Run `npm start`. 
 5. Go to `http://localhost:3000`
 6. Start changing stuff. Your app will update automatically.
