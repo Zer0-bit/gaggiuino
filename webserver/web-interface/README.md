@@ -1,10 +1,10 @@
 # Web Interface for Gaggiuino
 
-## Deployment
+## Deployment of the WebInterface to ESP
 
-### `npm run build`
-### Copy the `/build` directory to `../data`
-### Use the `Upload Filesystem Image` action on PIO
+1. Run `npm run build`
+2. Copy the `/build` directory to `../data`
+3.  Use the `Upload Filesystem Image` action on PIO
 
 ## Development
 There's a very convenient way to develop the app. 

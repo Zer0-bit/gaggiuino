@@ -1,19 +1,13 @@
-To flash:
+## To flash:
 
+1. Upload Filesystem Image
+2. Upload 
 
-1. Create a secrets storing header file under **src/stack/secrets.h** with the below content:
-```
-#ifndef SECRETS_H
-#define SECRETS_H
+## To connect to WiFi
+1. Connect to Gaggiuino AP
+2. Go http://192.168.4.1 in your browser
+3. Go to Settings and select your network / enter passowrd
 
-#define wifi_ssid "home-router-ssid"
-#define wifi_password "home-router-ssid-password"
-#define BASIC_AUTH_USERNAME "gaggiuino"
-#define BASIC_AUTH_PASSWORD "oniuiggag"
+## To develop the web-interface
 
-#endif
-```
-Make sure to change the values for **wifi_ssid** and **wifi_password** to reflect your settings.
-
-2. Upload Filesystem Image
-3. Upload 
+Follow the readme in `web-interface`
