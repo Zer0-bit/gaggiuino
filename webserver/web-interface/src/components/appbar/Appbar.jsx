@@ -11,7 +11,7 @@ function ResponsiveAppBar() {
   const navigate = useNavigate();
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" color="appbar">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' } }}>

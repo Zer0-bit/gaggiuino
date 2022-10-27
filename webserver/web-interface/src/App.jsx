@@ -13,9 +13,15 @@ import AppBar from './components/appbar/Appbar';
 
 const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
       main: '#ef4e2b',
+    },
+    secondary: {
+      main: '#0288d1',
+    },
+    appbar: {
+      main: '#272727',
     },
   },
 });
