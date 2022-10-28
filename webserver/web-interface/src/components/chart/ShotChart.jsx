@@ -41,39 +41,39 @@ function getDataset(input, key) {
   return input.map((dp) => dp[key]);
 }
 
-function mapToChartData(input) {
+function mapToChartData(input, theme) {
   return {
     labels: getLabels(input),
     datasets: [
       {
         label: 'Temperature',
         data: getDataset(input, 'temp'),
-        backgroundColor: '#ef4040',
-        borderColor: '#ef4040',
+        backgroundColor: theme.palette.temperature.main,
+        borderColor: theme.palette.temperature.main,
         tension: 0.3,
         yAxisID: 'y1',
       },
       {
         label: 'Pressure',
         data: getDataset(input, 'pressure'),
-        backgroundColor: '#6296C5',
-        borderColor: '#6296C5',
+        backgroundColor: theme.palette.pressure.main,
+        borderColor: theme.palette.pressure.main,
         tension: 0.3,
         yAxisID: 'y2',
       },
       {
         label: 'Flow',
         data: getDataset(input, 'flow'),
-        backgroundColor: '#844B48',
-        borderColor: '#844B48',
+        backgroundColor: theme.palette.flow.main,
+        borderColor: theme.palette.flow.main,
         tension: 0.3,
         yAxisID: 'y2',
       },
       {
         label: 'Weight',
         data: getDataset(input, 'weight'),
-        backgroundColor: '#ffb53e',
-        borderColor: '#ffb53e',
+        backgroundColor: theme.palette.weight.main,
+        borderColor: theme.palette.weight.main,
         tension: 0.3,
         yAxisID: 'y1',
       },
@@ -82,10 +82,10 @@ function mapToChartData(input) {
 }
 
 function Chart({ data }) {
-  const [chartData, setChartData] = useState(mapToChartData([]));
   const chartRef = useRef(null);
   const theme = useTheme();
   const config = useMemo(() => getShotChartConfig(theme), [theme]);
+  const [chartData, setChartData] = useState(mapToChartData([], theme));
 
   useEffect(() => {
     setChartData(mapToChartData(data, theme));

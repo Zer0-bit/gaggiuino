@@ -48,16 +48,16 @@ function Home() {
     <Container className="Home" sx={{ mt: '16px' }}>
       <Grid container columns={16} spacing={2} sx={{ mb: '16px' }}>
         <Grid item xs={8} sm={4}>
-          {boxedComponent(<GaugeChart value={lastSensorData.temp} primaryColor="#ef4040" title="Temperature" unit="°C" />)}
+          {boxedComponent(<GaugeChart value={lastSensorData.temp} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
         </Grid>
         <Grid item xs={8} sm={4}>
-          {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor="#6296C5" title="Pressure" unit="bar" />)}
+          {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" />)}
         </Grid>
         <Grid item xs={8} sm={4}>
-          {boxedComponent(<GaugeChart value={lastSensorData.flow} primaryColor="#844B48" title="Flow" unit="ml/s" />)}
+          {boxedComponent(<GaugeChart value={lastSensorData.flow} primaryColor={theme.palette.flow.main} title="Flow" unit="ml/s" />)}
         </Grid>
         <Grid item xs={8} sm={4}>
-          {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor="#ffb53e" title="Weight" unit="g" />)}
+          {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="g" />)}
         </Grid>
       </Grid>
       {boxedComponent(<div><Chart data={sensorData} /></div>)}

@@ -15,6 +15,19 @@ const lightTheme = createTheme({
     background: {
       default: '#F5F5F5',
     },
+    temperature: {
+      main: '#ef4040',
+    },
+    flow: {
+      main: '#844B48',
+    },
+    pressure: {
+      main: '#6296C5',
+    },
+    weight: {
+      main: '#ffb53e',
+    },
+
   },
 });
 
@@ -26,6 +39,18 @@ const darkTheme = createTheme({
     },
     secondary: {
       main: '#0288d1',
+    },
+    temperature: {
+      main: '#ef4040',
+    },
+    flow: {
+      main: '#844B48',
+    },
+    pressure: {
+      main: '#6296C5',
+    },
+    weight: {
+      main: '#ffb53e',
     },
   },
 });
