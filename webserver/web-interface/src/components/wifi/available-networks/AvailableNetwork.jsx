@@ -41,13 +41,15 @@ export default function AvailableNetwork({
         aria-controls="panel1a-content"
         id="panel1a-header"
       >
-        <SignalWifi3BarIcon />
-        <Typography>{network.ssid}</Typography>
+        <Stack direction="row" spacing={1}>
+          <SignalWifi3BarIcon />
+          <Typography>{network.ssid}</Typography>
+        </Stack>
       </AccordionSummary>
       <AccordionDetails>
         {connectionError && <Alert severity="error">Failed to connect to WiFi</Alert>}
         <form>
-          <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} alignItems="stretch">
+          <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }}>
             <TextField
               id={`pwd-${network.ssid}`}
               size="small"

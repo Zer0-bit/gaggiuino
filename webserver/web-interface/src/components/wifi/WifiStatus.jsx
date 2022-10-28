@@ -1,53 +1,33 @@
 import React from 'react';
 import SignalWifi3BarIcon from '@mui/icons-material/SignalWifi3Bar';
 import SignalWifiOffIcon from '@mui/icons-material/SignalWifiOff';
-import { Button } from '@mui/material';
-import PropTypes from 'prop-types';
+import { Stack, Typography } from '@mui/material';
 import { WifiStatusPropType } from './NetworkPropTypes';
-import { disconnectFromWifi } from '../client/WifiClient';
 
-export default function WifiStatus({ status, onDisconnected }) {
+export default function WifiStatus({ status }) {
   function isConnected() {
-    return status.status === 'connected';
+    return status && status.status === 'connected';
   }
 
-  async function disconnect() {
-    await disconnectFromWifi();
-    onDisconnected();
-  }
-
-  function wifiActions() {
-    return (
-      <div className="WiFiActions">
-        {isConnected() && <Button variant="outlined" onClick={() => disconnect()}>Disconnect</Button>}
-      </div>
-    );
-  }
-
-  return (
-    <div className="Wifi">
-      {!isConnected() && (
-      <div className="Inline-Icon">
+  return isConnected()
+    ? (
+      <Stack spacing={1} direction="row" alignItems="center">
+        <SignalWifi3BarIcon color="success" />
+        <Typography>{`${status.ssid} (${status.ip})`}</Typography>
+      </Stack>
+    )
+    : (
+      <Stack spacing={1} direction="row" alignItems="center">
         <SignalWifiOffIcon />
-        Not connected
-      </div>
-      )}
-      {isConnected() && (
-      <div className="Inline-Icon">
-        <SignalWifi3BarIcon />
-        {`${status.ssid} (${status.ip})`}
-      </div>
-      )}
-      {wifiActions()}
-    </div>
-  );
+        <Typography>Not connected</Typography>
+      </Stack>
+    );
 }
 
 WifiStatus.propTypes = {
-  status: WifiStatusPropType.isRequired,
-  onDisconnected: PropTypes.func,
+  status: WifiStatusPropType,
 };
 
 WifiStatus.defaultProps = {
-  onDisconnected: () => {},
+  status: null,
 };

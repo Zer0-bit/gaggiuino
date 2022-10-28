@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import Home from './pages/home/Home';
-import WifiPage from './components/wifi/WifiPage';
+import Settings from './pages/home/Settings';
 import AppBar from './components/appbar/Appbar';
 import getAppTheme from './components/theme/AppTheme';
 import { ThemeModeContext } from './components/theme/ThemeModeToggle';
@@ -43,7 +43,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route index element={<Home />} />
-      <Route path="/settings" element={<WifiPage />} />
+      <Route path="/settings" element={<Settings />} />
     </Route>,
   ),
 );

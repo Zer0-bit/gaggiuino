@@ -33,7 +33,7 @@ export default function AvailableNetworks({ onConnected }) {
   return networks === null
     ? <Loader />
     : (
-      <div className="NetworkList">
+      <div>
         {networks.map((network) => (
           <AvailableNetwork
             key={network.ssid}
