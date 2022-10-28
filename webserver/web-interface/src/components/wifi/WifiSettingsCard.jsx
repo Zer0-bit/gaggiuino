@@ -13,6 +13,10 @@ export default function WifiSettingsCard() {
   const [wifiStatusLoading, setWifiStatusLoading] = useState(true);
   const [wifiDrawerOpen, setWiFiDrawerOpen] = useState(false);
 
+  function isConnected() {
+    return wifiStatus && wifiStatus.status === 'connected';
+  }
+
   async function loadWiFiStatus() {
     try {
       setWifiStatusLoading(true);
@@ -52,9 +56,10 @@ export default function WifiSettingsCard() {
           {wifiStatusLoading ? <Loader /> : <WifiStatus status={wifiStatus} />}
         </CardContent>
         <CardActions>
-          <Button size="small" onClick={() => disconnect()}>Disconnect</Button>
-          <Button size="small" onClick={() => setWiFiDrawerOpen(true)}>Connect</Button>
-          <Button size="small" onClick={() => loadWiFiStatus()}>Refresh</Button>
+          {isConnected() && <Button variant="outlined" size="small" color="secondary" onClick={() => disconnect()}>Disconnect</Button>}
+          {isConnected() && <Button variant="outlined" size="small" color="secondary" onClick={() => setWiFiDrawerOpen(true)}>Change</Button>}
+          {!isConnected() && <Button variant="outlined" size="small" onClick={() => setWiFiDrawerOpen(true)}>Connect</Button>}
+          <Button variant="outlined" size="small" color="secondary" onClick={() => loadWiFiStatus()}>Refresh</Button>
         </CardActions>
       </Card>
       <Drawer

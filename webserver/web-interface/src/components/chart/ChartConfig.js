@@ -2,6 +2,7 @@ export default function getShotChartConfig(theme) {
   return {
     animation: false,
     responsive: true,
+    maintainAspectRatio: false,
     interaction: {
       mode: 'index',
       intersect: false,

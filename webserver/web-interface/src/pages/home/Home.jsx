@@ -51,16 +51,16 @@ function Home() {
           {boxedComponent(<GaugeChart value={lastSensorData.temp} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
         </Grid>
         <Grid item xs={8} sm={4}>
-          {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" />)}
+          {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
         </Grid>
         <Grid item xs={8} sm={4}>
-          {boxedComponent(<GaugeChart value={lastSensorData.flow} primaryColor={theme.palette.flow.main} title="Flow" unit="ml/s" />)}
+          {boxedComponent(<GaugeChart value={lastSensorData.flow} primaryColor={theme.palette.flow.main} title="Flow" unit="ml/s" maxValue={15} />)}
         </Grid>
         <Grid item xs={8} sm={4}>
           {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="g" />)}
         </Grid>
       </Grid>
-      {boxedComponent(<div><Chart data={sensorData} /></div>)}
+      {boxedComponent(<div style={{ position: 'relative', height: '50vh' }}><Chart data={sensorData} /></div>)}
     </Container>
   );
 }
