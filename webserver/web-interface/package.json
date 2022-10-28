@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@anatoliygatt/dark-mode-toggle": "^1.0.0",
     "@babel/core": "^7.16.0",
-    "@emotion/react": "^11.9.0",
-    "@emotion/styled": "^11.8.1",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.11",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",

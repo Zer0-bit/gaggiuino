@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -6,33 +6,36 @@ import {
   Route,
   Outlet,
 } from 'react-router-dom';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import Home from './pages/home/Home';
 import WifiPage from './components/wifi/WifiPage';
 import AppBar from './components/appbar/Appbar';
-
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#ef4e2b',
-    },
-    secondary: {
-      main: '#0288d1',
-    },
-    appbar: {
-      main: '#272727',
-    },
-  },
-});
+import getAppTheme from './components/theme/AppTheme';
+import { ThemeModeContext } from './components/theme/ThemeModeToggle';
 
 function Layout() {
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const [themeMode, setThemeMode] = useState(prefersDarkMode ? 'dark' : 'light');
+  const modeContext = useMemo(
+    () => ({
+      themeMode,
+      changeThemeMode: (mode) => {
+        setThemeMode(mode);
+      },
+    }),
+    [themeMode],
+  );
+
+  const theme = useMemo(() => getAppTheme(themeMode), [themeMode]);
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AppBar />
-      <Outlet />
-    </ThemeProvider>
+    <ThemeModeContext.Provider value={modeContext}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AppBar />
+        <Outlet />
+      </ThemeProvider>
+    </ThemeModeContext.Provider>
   );
 }
 
