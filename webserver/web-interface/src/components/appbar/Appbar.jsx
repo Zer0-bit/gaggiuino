@@ -5,9 +5,9 @@ import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '@mui/material';
+import { Stack, useTheme } from '@mui/material';
 import ThemeModeToggle from '../theme/ThemeModeToggle';
-import Logo from '../log/Logo';
+import Logo from '../icons/Logo';
 
 function ResponsiveAppBar() {
   const navigate = useNavigate();
@@ -19,13 +19,13 @@ function ResponsiveAppBar() {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box sx={{ display: 'flex', color: iconColor }}>
-            <Logo size={40} />
-          </Box>
-          <Box sx={{ flexGrow: 1, display: 'flex' }}>
+          <Stack sx={{ flexGrow: 1, display: 'flex' }} direction="row" spacing={2} justifyItems="center" alignContent="flex-start">
+            <Box sx={{ display: 'flex', color: iconColor }}>
+              <Logo size={40} />
+            </Box>
             <Button onClick={() => navigate('/')} sx={{ my: 2, color: 'white', display: 'block' }}>Home</Button>
             <Button onClick={() => navigate('/settings')} sx={{ my: 2, color: 'white', display: 'block' }}>Settings</Button>
-          </Box>
+          </Stack>
           <Box sx={{ flexgrow: 0, display: 'flex' }}>
             <ThemeModeToggle />
           </Box>
