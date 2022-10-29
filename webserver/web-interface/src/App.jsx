@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -6,36 +6,17 @@ import {
   Route,
   Outlet,
 } from 'react-router-dom';
-import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import Home from './pages/home/Home';
 import Settings from './pages/home/Settings';
 import AppBar from './components/appbar/Appbar';
-import getAppTheme from './components/theme/AppTheme';
-import { ThemeModeContext } from './components/theme/ThemeModeToggle';
+import ThemeWrapper from './components/theme/ThemeWrapper';
 
 function Layout() {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const [themeMode, setThemeMode] = useState(prefersDarkMode ? 'dark' : 'light');
-  const modeContext = useMemo(
-    () => ({
-      themeMode,
-      changeThemeMode: (mode) => {
-        setThemeMode(mode);
-      },
-    }),
-    [themeMode],
-  );
-
-  const theme = useMemo(() => getAppTheme(themeMode), [themeMode]);
-
   return (
-    <ThemeModeContext.Provider value={modeContext}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AppBar />
-        <Outlet />
-      </ThemeProvider>
-    </ThemeModeContext.Provider>
+    <ThemeWrapper>
+      <AppBar />
+      <Outlet />
+    </ThemeWrapper>
   );
 }
 
