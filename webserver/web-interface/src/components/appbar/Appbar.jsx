@@ -6,19 +6,21 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material';
-import logo from '../../logo.png';
 import ThemeModeToggle from '../theme/ThemeModeToggle';
+import Logo from '../log/Logo';
 
 function ResponsiveAppBar() {
   const navigate = useNavigate();
   const theme = useTheme();
 
+  const iconColor = theme.palette.mode === 'light' ? theme.palette.primary.contrastText : theme.palette.primary.main;
+
   return (
-    <AppBar position="static" color={theme.palette.mode === 'light' ? 'appbar' : 'primary'}>
+    <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box sx={{ display: 'flex' }}>
-            <img src={logo} alt="logo" style={{ maxWidth: '60px' }} />
+          <Box sx={{ display: 'flex', color: iconColor }}>
+            <Logo size={40} />
           </Box>
           <Box sx={{ flexGrow: 1, display: 'flex' }}>
             <Button onClick={() => navigate('/')} sx={{ my: 2, color: 'white', display: 'block' }}>Home</Button>
