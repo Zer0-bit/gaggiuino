@@ -10,15 +10,6 @@ enum PHASE_TYPE {
   PHASE_TYPE_PRESSURE
 };
 
-enum STAGE_TYPE {
-  STAGE_PI_FILL,
-  STAGE_PI_SOAK,
-  STAGE_PI_RAMP,
-  STAGE_PP_HOLD,
-  STAGE_PP_MAIN,
-  STAGE_FP_MAIN,
-};
-
 struct StopConditions {
   long phaseDuration = -1;
   float weight = -1; //example: when weight >0 stop this phase)
@@ -97,6 +88,12 @@ public:
   float getRestriction() {
     return phase.getRestriction(timeInPhase);
   }
+
+  void update(int index, Phase& phase, unsigned long timeInPhase) {
+    CurrentPhase::index = index;
+    CurrentPhase::phase = phase;
+    CurrentPhase::timeInPhase = timeInPhase;
+  }
 };
 
 struct Phases {
@@ -109,25 +106,28 @@ private:
   Phases& phases;
   short currentPhaseIdx = 0; // The index at which the profiler currently is.
   long phaseChangedTime = 0; // When did the profiler move to this currentPhaseIdx (in milliseconds since the shot started)
+  CurrentPhase currentPhase = CurrentPhase(0, phases.phases[0], 0);
 
 public:
   PhaseProfiler(Phases& phases): phases(phases) {}
 
   // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
-  CurrentPhase getCurrentPhase(long timeInShot, SensorState& state) {
+  CurrentPhase& getCurrentPhase(long timeInShot, SensorState& state) {
     short phaseIdx = currentPhaseIdx;
     unsigned long timeInPhase = timeInShot - phaseChangedTime;
 
     if (phaseIdx >= phases.count) {
       phaseIdx = phases.count - 1;
-      return CurrentPhase(phaseIdx, phases.phases[phaseIdx],  timeInPhase);
+      currentPhase.update(phaseIdx, phases.phases[phaseIdx], timeInPhase);
+      return currentPhase;
     }
 
     if (!phases.phases[phaseIdx].isStopConditionReached(state, timeInPhase, timeInShot)) {
-      return CurrentPhase(phaseIdx, phases.phases[phaseIdx],  timeInPhase);
+      currentPhase.update(phaseIdx, phases.phases[phaseIdx], timeInPhase);
+      return currentPhase;
     }
 
-    Phase phase = phases.phases[phaseIdx];
+    Phase& phase = phases.phases[phaseIdx];
     long maxTimeAdvancement = (phase.stopConditions.phaseDuration > 0) ? phase.stopConditions.phaseDuration : timeInPhase;
 
     currentPhaseIdx += 1;
