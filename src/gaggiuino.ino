@@ -157,7 +157,7 @@ static void calculateWeightAndFlow(void) {
       currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
       currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.45f;
 
-      CurrentPhase phase = phaseProfiler.getCurrentPhase(millis() - brewingTimer, currentState);
+      CurrentPhase& phase = phaseProfiler.getCurrentPhase(millis() - brewingTimer, currentState);
       predictiveWeight.update(currentState, phase);
 
       if (scalesIsPresent()) {
@@ -478,7 +478,7 @@ void setPhase(int phaseIdx, PHASE_TYPE type, float startValue, float endValue, f
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     long timeInShot = millis() - brewingTimer;
-    CurrentPhase currentPhase = phaseProfiler.getCurrentPhase(timeInShot, currentState);
+    CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase(timeInShot, currentState);
     preinfusionFinished = currentPhase.getIndex() >= preInfusionFinishedPhaseIdx;
 
     if (phaseProfiler.isFinished()) {
