@@ -31,7 +31,7 @@ public:
     resistanceDelta = puckResistance - previousPuckResistance;
 
     float pressureTarget = phase.getType() == PHASE_TYPE_PRESSURE ? phase.getTarget() : phase.getRestriction();
-    pressureTarget = (pressureTarget > 0.f) ? pressureTarget : 12.f;
+    pressureTarget = (pressureTarget > 0.f) ? pressureTarget : 8.f;
 
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
     if (resistanceDelta > 500.f || puckResistance < 1500.f) {

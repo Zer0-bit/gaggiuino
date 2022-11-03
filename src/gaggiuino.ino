@@ -137,6 +137,15 @@ static void sensorsReadPressure(void) {
   }
 }
 
+static void sensorsReadFlow(float elapsedTime) {
+    long pumpClicks = getAndResetClickCounter();
+    float cps = 1000.f * (float)pumpClicks / elapsedTime;
+    currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+
+    previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
+    currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+}
+
 static void calculateWeightAndFlow(void) {
   if (brewActive) {
     if (scalesIsPresent()) {
@@ -146,14 +155,7 @@ static void calculateWeightAndFlow(void) {
     long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
-
-
-      long pumpClicks = getAndResetClickCounter();
-      float cps = 1000.f * (float)pumpClicks / (float)elapsedTime;
-      currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
-
-      previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
-      currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+      sensorsReadFlow(elapsedTime);
       currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
       currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.45f;
 
@@ -165,11 +167,15 @@ static void calculateWeightAndFlow(void) {
         currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
-        // previousWeight = currentState.shotWeight; // temporary measure to avoid those 30 -45 grams sudden jumps
         currentState.shotWeight += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
-        // if (currentState.shotWeight > previousWeight + 5.f) currentState.shotWeight = 0.f; // temporary measure to avoid those 30 -45 grams sudden jumps
       }
       currentState.liquidPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
+    }
+  } else {
+    long elapsedTime = millis() - flowTimer;
+    if (elapsedTime > REFRESH_FLOW_EVERY) {
+      flowTimer = millis();
+      sensorsReadFlow(elapsedTime);
     }
   }
 }
@@ -544,6 +550,8 @@ static void brewDetect(void) {
 static void brewParamsReset(void) {
   tareDone                                    = false;
   currentState.shotWeight                     = 0.f;
+  currentState.pumpFlow                       = 0.f;
+  currentState.smoothedPumpFlow               = 0.f;
   previousWeight                              = 0.f;
   currentState.weight                         = 0.f;
   currentState.liquidPumped                   = 0.f;
