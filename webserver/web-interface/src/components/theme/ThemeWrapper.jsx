@@ -5,7 +5,8 @@ import getAppTheme from './AppTheme';
 import { ThemeModeContext } from './ThemeModeToggle';
 
 export default function ThemeWrapper({ children }) {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const themeSelection = localStorage.getItem('savedTheme');
+  const prefersDarkMode = useMediaQuery(`(prefers-color-scheme: ${themeSelection})`);
   const [themeMode, setThemeMode] = useState(prefersDarkMode ? 'dark' : 'light');
   const modeContext = useMemo(
     () => ({
@@ -16,7 +17,7 @@ export default function ThemeWrapper({ children }) {
     }),
     [themeMode],
   );
-
+  localStorage.setItem('savedTheme', themeMode);
   const theme = useMemo(() => getAppTheme(themeMode), [themeMode]);
 
   return (

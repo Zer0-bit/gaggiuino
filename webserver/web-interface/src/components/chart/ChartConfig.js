@@ -25,14 +25,25 @@ export default function getShotChartConfig(theme) {
       },
     },
     scales: {
+      x: {
+        ticks: {
+          color: '#6a6464',
+        },
+        grid: {
+          color: '#6a6464',
+        },
+      },
       y1: {
         type: 'linear',
         display: true,
         position: 'left',
         suggestedMin: 0,
-        suggestedMax: 100,
+        suggestedMax: 160,
+        grid: {
+          color: '#ff5c33',
+        },
         ticks: {
-          fontColor: '#fff',
+          color: '#ff5c33',
         },
       },
       y2: {
@@ -40,9 +51,12 @@ export default function getShotChartConfig(theme) {
         display: true,
         position: 'right',
         suggestedMin: 0,
-        suggestedMax: 12,
+        suggestedMax: 16,
+        grid: {
+          color: '#337AB7',
+        },
         ticks: {
-          fontColor: theme.palette.text.primary,
+          color: '#337AB7',
         },
       },
     },

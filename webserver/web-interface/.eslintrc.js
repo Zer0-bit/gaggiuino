@@ -18,6 +18,16 @@ module.exports = {
     'react',
   ],
   rules: {
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": [
+          "**/*.stories.*",
+          "**/.storybook/**/*.*"
+        ],
+        "peerDependencies": true
+      }
+    ]
   },
   ignorePatterns: ['build/*.js', 'scripts/*.js', 'config/*.js'],
 
