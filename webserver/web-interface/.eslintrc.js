@@ -18,6 +18,8 @@ module.exports = {
     'react',
   ],
   rules: {
+    "react/jsx-props-no-spreading": "off",
+    "react/self-closing-comp": "off",
     "import/no-extraneous-dependencies": [
       "error",
       {
