@@ -12,6 +12,9 @@ export default function getShotChartConfig(theme) {
       legend: {
         display: true,
         position: 'bottom',
+        labels: {
+          color: theme.palette.text.secondary,
+        },
       },
     },
     datasets: {
@@ -19,18 +22,13 @@ export default function getShotChartConfig(theme) {
         pointRadius: 0,
       },
     },
-    legend: {
-      labels: {
-        fontColor: theme.palette.text.primary,
-      },
-    },
     scales: {
       x: {
         ticks: {
-          color: '#6a6464',
+          color: theme.palette.text.secondary,
         },
         grid: {
-          color: '#6a6464',
+          color: theme.palette.divider,
         },
       },
       y1: {
@@ -40,10 +38,10 @@ export default function getShotChartConfig(theme) {
         suggestedMin: 0,
         suggestedMax: 160,
         grid: {
-          color: '#ff5c33',
+          color: theme.palette.temperature.main,
         },
         ticks: {
-          color: '#ff5c33',
+          color: theme.palette.temperature.main,
         },
       },
       y2: {
@@ -53,10 +51,10 @@ export default function getShotChartConfig(theme) {
         suggestedMin: 0,
         suggestedMax: 16,
         grid: {
-          color: '#337AB7',
+          color: theme.palette.pressure.main,
         },
         ticks: {
-          color: '#337AB7',
+          color: theme.palette.pressure.main,
         },
       },
     },

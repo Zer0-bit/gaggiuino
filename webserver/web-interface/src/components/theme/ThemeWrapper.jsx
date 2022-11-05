@@ -4,20 +4,20 @@ import PropTypes from 'prop-types';
 import getAppTheme from './AppTheme';
 import { ThemeModeContext } from './ThemeModeToggle';
 
+const SAVED_THEME_MODE_KEY = 'savedTheme';
+
 export default function ThemeWrapper({ children }) {
-  const themeSelection = localStorage.getItem('savedTheme');
-  const prefersDarkMode = useMediaQuery(`(prefers-color-scheme: ${themeSelection})`);
-  const [themeMode, setThemeMode] = useState(prefersDarkMode ? 'dark' : 'light');
-  const modeContext = useMemo(
-    () => ({
-      themeMode,
-      changeThemeMode: (mode) => {
-        setThemeMode(mode);
-      },
-    }),
-    [themeMode],
-  );
-  localStorage.setItem('savedTheme', themeMode);
+  const themeModeBrowserPreference = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
+  const savedThemeMode = localStorage.getItem(SAVED_THEME_MODE_KEY);
+
+  const [themeMode, setThemeMode] = useState(savedThemeMode || themeModeBrowserPreference);
+
+  const changeThemeMode = (newMode) => {
+    localStorage.setItem(SAVED_THEME_MODE_KEY, newMode);
+    setThemeMode(newMode);
+  };
+
+  const modeContext = useMemo(() => ({ themeMode, changeThemeMode }), [themeMode]);
   const theme = useMemo(() => getAppTheme(themeMode), [themeMode]);
 
   return (
