@@ -147,12 +147,13 @@ static void sensorsReadFlow(float elapsedTime) {
 }
 
 static void calculateWeightAndFlow(void) {
+  long elapsedTime = millis() - flowTimer;
+
   if (brewActive) {
     if (scalesIsPresent()) {
       currentState.shotWeight = currentState.weight;
     }
 
-    long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
       sensorsReadFlow(elapsedTime);
@@ -172,7 +173,6 @@ static void calculateWeightAndFlow(void) {
       currentState.liquidPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
   } else {
-    long elapsedTime = millis() - flowTimer;
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
       sensorsReadFlow(elapsedTime);
