@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import {
-  Box, Container, useTheme,
+  Box, Container, useTheme, Popover, Button,
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import Chart from '../../components/chart/ShotChart';
@@ -19,6 +19,20 @@ function Home() {
     temp: 0, pressure: 0, timeInShot: 0, flow: 0, weight: 0,
   });
 
+  // popover handling start
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
+  // popover handling end
   useEffect(() => {
     if (lastJsonMessage !== null && lastJsonMessage.action === 'sensor_data_update') {
       setSensorData((prev) => {
@@ -60,7 +74,14 @@ function Home() {
           {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="g" />)}
         </Grid>
       </Grid>
-      {boxedComponent(<div style={{ position: 'relative', height: '50vh' }}><Chart data={sensorData} /></div>)}
+      <div style={{ position: 'absolute', height: '50%' }}>
+        <Button aria-describedby={id} variant="contained" onClick={handleClick}>
+          Start Brew
+        </Button>
+        <Popover id={id} open={open} anchorEl={anchorEl} onClose={handleClose} anchorOrigin={{ vertical: 'center', horizontal: 'left' }} transformOrigin={{ vertical: 'center', horizontal: 'left' }}>
+          {boxedComponent(<div style={{ position: 'abolute', height: '80vh', width: '129vh' }}><Chart data={sensorData} /></div>)}
+        </Popover>
+      </div>
     </Container>
   );
 }
