@@ -8,8 +8,7 @@ import Chart from '../../components/chart/ShotChart';
 import GaugeChart from '../../components/chart/GaugeChart';
 
 function Home() {
-  const [socketUrl] = useState('ws://192.168.2.10/ws');
-  // const [socketUrl] = useState(`ws://${window.location.host}/ws`);
+  const [socketUrl] = useState(`ws://${window.location.host}/ws`);
   const { lastJsonMessage } = useWebSocket(socketUrl, {
     share: true,
   });
