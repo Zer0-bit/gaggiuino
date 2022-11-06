@@ -19,23 +19,21 @@ export default function Settings() {
           </Grid>
         </Grid>
         <Card sx={{ mt: theme.spacing(2) }}>
-          <Container>
-            <Grid container columns={{ xs: 1, sm: 2 }}>
-              <Grid item xs={1}>
-                <CardContent>
-                  <Typography gutterBottom variant="h5">
-                    OTA Update
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <IconButton color="primary" aria-label="upload picture" component="label">
-                    <input hidden accept="file/*.bin" type="file" />
-                    <UploadFileIcon />
-                  </IconButton>
-                </CardActions>
-              </Grid>
+          <Grid container columns={{ xs: 1, sm: 2 }}>
+            <Grid item xs={1}>
+              <CardContent>
+                <Typography gutterBottom variant="h5">
+                  OTA Update
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <IconButton color="primary" aria-label="upload picture" component="label">
+                  <input hidden accept="file/*.bin" type="file" />
+                  <UploadFileIcon />
+                </IconButton>
+              </CardActions>
             </Grid>
-          </Container>
+          </Grid>
         </Card>
       </Container>
     </div>
