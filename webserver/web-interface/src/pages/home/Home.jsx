@@ -1,46 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import {
-  Box, Container, useTheme, Popover, Button,
+  Box, Container, useTheme, Button,
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import Chart from '../../components/chart/ShotChart';
 import GaugeChart from '../../components/chart/GaugeChart';
+import ShotDialog from './ShotDialog';
 
 function Home() {
-  const [socketUrl] = useState(`ws://${window.location.host}/ws`);
-  const { lastJsonMessage } = useWebSocket(socketUrl, {
+  const { lastJsonMessage } = useWebSocket(`ws://${window.location.host}/ws`, {
     share: true,
   });
   const theme = useTheme();
 
-  const [sensorData, setSensorData] = useState([]);
   const [lastSensorData, setLastSensorData] = useState({
     temp: 0, pressure: 0, timeInShot: 0, flow: 0, weight: 0,
   });
 
-  // popover handling start
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [shotDialogOpen, setShotDialogOpen] = useState(false);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
-  // popover handling end
   useEffect(() => {
     if (lastJsonMessage !== null && lastJsonMessage.action === 'sensor_data_update') {
-      setSensorData((prev) => {
-        if (prev.length >= 400) {
-          prev.shift();
-        }
-        return prev.concat(lastJsonMessage.data);
-      });
       setLastSensorData(lastJsonMessage.data);
     }
   }, [lastJsonMessage]);
@@ -74,14 +54,11 @@ function Home() {
           {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="g" />)}
         </Grid>
       </Grid>
-      <div style={{ position: 'absolute', height: '50%' }}>
-        <Button aria-describedby={id} variant="contained" onClick={handleClick}>
-          Start Brew
-        </Button>
-        <Popover id={id} open={open} anchorEl={anchorEl} onClose={handleClose} anchorOrigin={{ vertical: 'center', horizontal: 'left' }} transformOrigin={{ vertical: 'center', horizontal: 'left' }}>
-          {boxedComponent(<div style={{ position: 'abolute', height: '80vh', width: '129vh' }}><Chart data={sensorData} /></div>)}
-        </Popover>
-      </div>
+      <Button variant="contained" onClick={() => setShotDialogOpen(true)}>
+        Start Brew
+      </Button>
+      <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />
+
     </Container>
   );
 }

@@ -10,6 +10,7 @@ import Home from './pages/home/Home';
 import Settings from './pages/home/Settings';
 import TabsBar from './components/appbar/TabsBar';
 import ThemeWrapper from './components/theme/ThemeWrapper';
+import Profiles from './pages/home/Profiles';
 
 function Layout() {
   return (
@@ -24,7 +25,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route index element={<Home />} />
-      <Route path="/profiles" element={<Settings />} />
+      <Route path="/profiles" element={<Profiles />} />
       <Route path="/settings" element={<Settings />} />
     </Route>,
   ),
