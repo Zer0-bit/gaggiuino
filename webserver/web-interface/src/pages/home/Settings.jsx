@@ -13,14 +13,12 @@ export default function Settings() {
   return (
     <div>
       <Container sx={{ mt: theme.spacing(2) }}>
-        <Grid container columns={{ xs: 1, sm: 2 }}>
+        <Grid container columns={{ xs: 1, sm: 2 }} spacing={2}>
           <Grid item xs={1}>
             <WifiSettingsCard />
           </Grid>
-        </Grid>
-        <Card sx={{ mt: theme.spacing(2) }}>
-          <Grid container columns={{ xs: 1, sm: 2 }}>
-            <Grid item xs={1}>
+          <Grid item xs={1}>
+            <Card>
               <CardContent>
                 <Typography gutterBottom variant="h5">
                   OTA Update
@@ -32,9 +30,9 @@ export default function Settings() {
                   <UploadFileIcon />
                 </IconButton>
               </CardActions>
-            </Grid>
+            </Card>
           </Grid>
-        </Card>
+        </Grid>
       </Container>
     </div>
   );

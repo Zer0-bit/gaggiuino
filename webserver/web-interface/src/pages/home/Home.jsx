@@ -39,7 +39,7 @@ function Home() {
   }
 
   return (
-    <Container sx={{ pt: theme.spacing(0) }}>
+    <Container sx={{ pt: theme.spacing(2) }}>
       <Grid container columns={16} spacing={1} sx={{ mb: theme.spacing(2) }}>
         <Grid item xs={8} sm={4}>
           {boxedComponent(<GaugeChart value={lastSensorData.temp} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
