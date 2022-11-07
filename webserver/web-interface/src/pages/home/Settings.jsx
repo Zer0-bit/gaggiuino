@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Grid from '@mui/material/Unstable_Grid2';
 import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
+import ProgressBar from '../../components/inputs/ProgressBar';
 
 export default function Settings() {
   const theme = useTheme();
@@ -24,9 +25,10 @@ export default function Settings() {
                   OTA Update
                 </Typography>
               </CardContent>
+              <CardActions><ProgressBar /></CardActions>
               <CardActions>
-                <IconButton color="primary" aria-label="upload picture" component="label">
-                  <input hidden accept="file/*.bin" type="file" />
+                <IconButton color="primary" aria-label="upload" component="label">
+                  <input hidden accept=".bin" type="file" />
                   <UploadFileIcon />
                 </IconButton>
               </CardActions>

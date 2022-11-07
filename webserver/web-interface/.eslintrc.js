@@ -20,6 +20,7 @@ module.exports = {
   rules: {
     "react/jsx-props-no-spreading": "off",
     "react/self-closing-comp": "off",
+    "react/destructuring-assignment": "off",
     "import/no-extraneous-dependencies": [
       "error",
       {

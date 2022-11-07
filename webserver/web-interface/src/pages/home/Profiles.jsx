@@ -43,12 +43,21 @@ export default function Settings() {
               <CardActions>
                 <Grid container columns={{ xs: 1, sm: 3 }}>
                   <Grid item xs={2}>
+                    <Typography gutterBottom variant="h8">
+                      Preinfusion
+                    </Typography>
                     <RangeSlider />
                   </Grid>
                   <Grid item xs={3}>
+                    <Typography gutterBottom variant="h8">
+                      Blooming
+                    </Typography>
                     <RangeSlider />
                   </Grid>
                   <Grid item xs={4}>
+                    <Typography gutterBottom variant="h8">
+                      Raise
+                    </Typography>
                     <RangeSlider />
                   </Grid>
                 </Grid>
