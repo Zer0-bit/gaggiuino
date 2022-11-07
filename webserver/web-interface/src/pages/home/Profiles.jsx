@@ -1,13 +1,62 @@
 import React from 'react';
 import {
-  Container, useTheme,
+  Card, Container, useTheme, Typography, CardContent, CardActions,
 } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import Grid from '@mui/material/Unstable_Grid2';
+import RangeSlider from '../../components/inputs/RangeSlider';
 
-export default function Profiles() {
+export default function Settings() {
   const theme = useTheme();
 
   return (
-    <Container sx={{ mt: theme.spacing(2) }}>
-    </Container>
+    <div>
+      <Container sx={{ mt: theme.spacing(2) }}>
+        <Card sx={{ mt: theme.spacing(2) }}>
+          <Grid container columns={{ xs: 1, sm: 2 }}>
+            <Grid item xs={1}>
+              <CardContent>
+                <Typography gutterBottom variant="h5">
+                  Load Profile
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <IconButton color="primary" aria-label="upload picture" component="label">
+                  <input hidden accept="file/*.bin" type="file" />
+                  <UploadFileIcon />
+                </IconButton>
+              </CardActions>
+            </Grid>
+          </Grid>
+        </Card>
+      </Container>
+      <Container sx={{ mt: theme.spacing(2) }}>
+        <Card sx={{ mt: theme.spacing(2) }}>
+          <Grid container columns={{ xs: 1, sm: 2 }}>
+            <Grid item xs={1}>
+              <CardContent>
+                <Typography gutterBottom variant="h5">
+                  Create Profile
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <Grid container columns={{ xs: 1, sm: 3 }}>
+                  <Grid item xs={2}>
+                    <RangeSlider />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <RangeSlider />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <RangeSlider />
+                  </Grid>
+                </Grid>
+              </CardActions>
+            </Grid>
+          </Grid>
+        </Card>
+      </Container>
+    </div>
   );
 }

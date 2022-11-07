@@ -7,10 +7,10 @@ import {
   Outlet,
 } from 'react-router-dom';
 import Home from './pages/home/Home';
+import Profiles from './pages/home/Profiles';
 import Settings from './pages/home/Settings';
 import TabsBar from './components/appbar/TabsBar';
 import ThemeWrapper from './components/theme/ThemeWrapper';
-import Profiles from './pages/home/Profiles';
 
 function Layout() {
   return (
