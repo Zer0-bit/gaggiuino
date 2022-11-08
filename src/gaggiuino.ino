@@ -626,7 +626,7 @@ static void systemHealthCheck(float pressureThreshold) {
     setPumpOff();
     setBoilerOff();
     if (millis() > thermoTimer) {
-      LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
+      LOG_ERROR("Cannot read temp from thermocouple (last read: %.1f)!", static_cast<double>(currentState.temperature));
       lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
       currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
