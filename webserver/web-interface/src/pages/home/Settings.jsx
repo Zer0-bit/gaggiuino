@@ -1,9 +1,9 @@
 import React from 'react';
 import {
-  Card, Container, useTheme, Typography, CardContent, CardActions,
+  Card, Container, useTheme, Typography, CardContent, CardActions, Button,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
+import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
 import Grid from '@mui/material/Unstable_Grid2';
 import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
 import ProgressBar from '../../components/inputs/ProgressBar';
@@ -27,10 +27,13 @@ export default function Settings() {
               </CardContent>
               <CardActions><ProgressBar /></CardActions>
               <CardActions>
-                <IconButton color="primary" aria-label="upload" component="label">
+                <IconButton color="primary" aria-label="download  " component="label">
                   <input hidden accept=".bin" type="file" />
-                  <UploadFileIcon />
+                  <AttachFileOutlinedIcon />
                 </IconButton>
+                <Button variant="contained" component="label">
+                  Upload
+                </Button>
               </CardActions>
             </Card>
           </Grid>
