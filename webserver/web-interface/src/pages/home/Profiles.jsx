@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card, Container, useTheme, Typography, CardContent, CardActions,
 } from '@mui/material';
+import useWebSocket from 'react-use-websocket';
 import IconButton from '@mui/material/IconButton';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Grid from '@mui/material/Unstable_Grid2';
-import RangeSlider from '../../components/inputs/RangeSlider';
+import Chart from '../../components/chart/ShotChart';
 
 export default function Settings() {
   const theme = useTheme();
+  const { lastJsonMessage } = useWebSocket(`ws://${window.location.host}/ws`, {
+    share: true,
+  });
+
+  const [sensorData, setSensorData] = useState([]);
+
+  useEffect(() => {
+    if (lastJsonMessage !== null && lastJsonMessage.action === 'sensor_data_update') {
+      setSensorData((prev) => {
+        if (prev.length >= 400) {
+          prev.shift();
+        }
+        return prev.concat(lastJsonMessage.data);
+      });
+    }
+  }, [lastJsonMessage]);
 
   return (
     <div>
@@ -33,7 +50,7 @@ export default function Settings() {
       </Container>
       <Container sx={{ mt: theme.spacing(2) }}>
         <Card sx={{ mt: theme.spacing(2) }}>
-          <Grid container columns={{ xs: 1, sm: 2 }}>
+          <Grid container columns={{ xs: 1, sm: 1 }}>
             <Grid item xs={1}>
               <CardContent>
                 <Typography gutterBottom variant="h5">
@@ -41,25 +58,8 @@ export default function Settings() {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Grid container columns={{ xs: 1, sm: 3 }}>
-                  <Grid item xs={2}>
-                    <Typography gutterBottom variant="h8">
-                      Preinfusion
-                    </Typography>
-                    <RangeSlider />
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Typography gutterBottom variant="h8">
-                      Blooming
-                    </Typography>
-                    <RangeSlider />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography gutterBottom variant="h8">
-                      Raise
-                    </Typography>
-                    <RangeSlider />
-                  </Grid>
+                <Grid container columns={{ xs: 1, sm: 1 }} position="relative" width="1550px" height={400}>
+                  <Chart data={sensorData} />
                 </Grid>
               </CardActions>
             </Grid>

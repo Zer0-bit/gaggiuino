@@ -21,6 +21,8 @@ module.exports = {
     "react/jsx-props-no-spreading": "off",
     "react/self-closing-comp": "off",
     "react/destructuring-assignment": "off",
+    "react/jsx-no-bind": "off",
+    "react/prop-types": "off",
     "import/no-extraneous-dependencies": [
       "error",
       {

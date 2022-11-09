@@ -4,9 +4,9 @@
 
 #include "gaggiuino.h"
 
-SimpleKalmanFilter smoothPressure(1.f, 1.f, 1.f);
-SimpleKalmanFilter smoothPumpFlow(2.f, 2.f, 1.5f);
-SimpleKalmanFilter smoothScalesFlow(2.f, 2.f, 1.5f);
+SimpleKalmanFilter smoothPressure(2.f, 2.f, 0.1f);
+SimpleKalmanFilter smoothPumpFlow(2.f, 2.f, 0.5f);
+SimpleKalmanFilter smoothScalesFlow(2.f, 2.f, 0.5f);
 
 //default phases. Updated in updatePressureProfilePhases.
 Phase phaseArray[6];
@@ -294,9 +294,9 @@ static void lcdRefresh(void) {
       );
     }
 
-#if defined(DEBUG_ENABLED)
+  #if defined DEBUG_ENABLED && defined stm32f411xx
     lcdShowDebug(readTempSensor(), getAdsError());
-#endif
+  #endif
 
     /*LCD timer and warmup*/
     if (brewActive) {
@@ -626,29 +626,10 @@ static void systemHealthCheck(float pressureThreshold) {
     setPumpOff();
     setBoilerOff();
     if (millis() > thermoTimer) {
-      LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", currentState.temperature);
+      LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
       lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
       currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }
 }
-
-// static void monitorDripTrayState(void) {
-//   static bool dripTrayFull = false;
-//   float currentTotalTrayWeight = scalesDripTrayWeight();
-//   float actualTrayWeight  = currentTotalTrayWeight - EMPTY_TRAY_WEIGHT;
-
-//   if ( !brewActive && !steamState() ) {
-//     if (actualTrayWeight > TRAY_FULL_THRESHOLD) {
-//       if (millis() > trayTimer) {
-//         dripTrayFull = true;
-//         trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
-//       }
-//     } else {
-//       trayTimer = millis() + READ_TRAY_OFFSET_EVERY;
-//       dripTrayFull = false;
-//     }
-//     if (dripTrayFull) lcdShowPopup("DRIP TRAY FULL");
-//   }
-// }
