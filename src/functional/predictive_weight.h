@@ -20,7 +20,7 @@ public:
   void update(SensorState& state, CurrentPhase& phase, eepromValues_t cfg) {
     // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
-    if (isForceStarted || outputFlowStarted || state.liquidPumped >= 60.f) {
+    if (isForceStarted || outputFlowStarted || state.liquidPumped >= 50.f) {
       outputFlowStarted = true;
       return;
     }
@@ -32,12 +32,12 @@ public:
     resistanceDelta = puckResistance - previousPuckResistance;
 
     float pressureTarget = phase.getType() == PHASE_TYPE_PRESSURE ? phase.getTarget() : phase.getRestriction();
-    pressureTarget = (pressureTarget > 0.f) ? pressureTarget : 8.f;
+    pressureTarget = (pressureTarget > 2.f) ? 2.f : pressureTarget;
     // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
-    float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
+    // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
-    if (resistanceDelta > 500.f || puckResistance < 1500.f) {
+    if (resistanceDelta > 500.f || puckResistance < 1300.f) {
       return;
     }
 
@@ -46,13 +46,8 @@ public:
       return;
     }
 
-    // If the pressure hasn't reached its target when target <= 3bar we're not there yet
-    if (pressureTarget <= 2.f &&  pressure < pressureTarget - 0.05f) {
-      return;
-    }
-
     // Pressure has to reach at least half way to pressureTarget
-    if (pressure < preinfusionPressure) {
+    if (pressure < pressureTarget) {
       return;
     }
 
