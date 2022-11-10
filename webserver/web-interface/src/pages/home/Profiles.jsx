@@ -4,7 +4,10 @@ import {
 } from '@mui/material';
 import useWebSocket from 'react-use-websocket';
 import IconButton from '@mui/material/IconButton';
+import QrCodeIcon from '@mui/icons-material/QrCode';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import AddIcon from '@mui/icons-material/Add';
+import Fab from '@mui/material/Fab';
 import Grid from '@mui/material/Unstable_Grid2';
 import Chart from '../../components/chart/ShotChart';
 
@@ -39,9 +42,13 @@ export default function Settings() {
                 </Typography>
               </CardContent>
               <CardActions>
+                <IconButton color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                  <input hidden accept=".bin" type="file" />
+                  <UploadFileIcon fontSize="large" />
+                </IconButton>
                 <IconButton color="primary" aria-label="upload picture" component="label">
-                  <input hidden accept="file/*.bin" type="file" />
-                  <UploadFileIcon />
+                  <input hidden accept=".png" type="file" />
+                  <QrCodeIcon fontSize="large" />
                 </IconButton>
               </CardActions>
             </Grid>
@@ -54,7 +61,10 @@ export default function Settings() {
             <Grid item xs={1}>
               <CardContent>
                 <Typography gutterBottom variant="h5">
-                  Create Profile
+                  Profile preview
+                  <Fab color="primary" aria-label="add" style={{ float: 'right' }} sx={{ ml: theme.spacing(2) }}>
+                    <AddIcon align="left" />
+                  </Fab>
                 </Typography>
               </CardContent>
               <CardActions>
