@@ -32,7 +32,7 @@ public:
     resistanceDelta = puckResistance - previousPuckResistance;
 
     float pressureTarget = phase.getType() == PHASE_TYPE_PRESSURE ? phase.getTarget() : phase.getRestriction();
-    pressureTarget = (pressureTarget > 2.f) ? 2.f : pressureTarget;
+    pressureTarget = (pressureTarget == 0.f || pressureTarget > 2.f) ? 2.f : pressureTarget;
     // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 

@@ -62,8 +62,8 @@ export default function Settings() {
               <CardContent>
                 <Typography gutterBottom variant="h5">
                   Profile preview
-                  <Fab color="primary" aria-label="add" style={{ float: 'right' }} sx={{ ml: theme.spacing(2) }}>
-                    <AddIcon align="left" />
+                  <Fab color="primary" aria-label="add" position="relative" style={{ float: 'right' }} sx={{ ml: theme.spacing(2) }}>
+                    <AddIcon />
                   </Fab>
                 </Typography>
               </CardContent>

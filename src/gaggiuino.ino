@@ -551,7 +551,6 @@ static void brewParamsReset(void) {
   tareDone                                    = false;
   currentState.shotWeight                     = 0.f;
   currentState.pumpFlow                       = 0.f;
-  currentState.smoothedPumpFlow               = 0.f;
   previousWeight                              = 0.f;
   currentState.weight                         = 0.f;
   currentState.liquidPumped                   = 0.f;
