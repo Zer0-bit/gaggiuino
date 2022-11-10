@@ -23,6 +23,7 @@ module.exports = {
     "react/destructuring-assignment": "off",
     "react/jsx-no-bind": "off",
     "react/prop-types": "off",
+    "react/jsx-fragments": "off",
     "import/no-extraneous-dependencies": [
       "error",
       {

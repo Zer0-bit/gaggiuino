@@ -6,10 +6,10 @@ import useWebSocket from 'react-use-websocket';
 import IconButton from '@mui/material/IconButton';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import AddIcon from '@mui/icons-material/Add';
-import Fab from '@mui/material/Fab';
+import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Unstable_Grid2';
 import Chart from '../../components/chart/ShotChart';
+import AddPhaseButton from '../../components/inputs/AddPhase';
 
 export default function Settings() {
   const theme = useTheme();
@@ -42,11 +42,11 @@ export default function Settings() {
                 </Typography>
               </CardContent>
               <CardActions>
-                <IconButton color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                <IconButton style={{ float: 'right' }} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
                   <input hidden accept=".bin" type="file" />
                   <UploadFileIcon fontSize="large" />
                 </IconButton>
-                <IconButton color="primary" aria-label="upload picture" component="label">
+                <IconButton style={{ float: 'right' }} color="primary" aria-label="upload picture" component="label">
                   <input hidden accept=".png" type="file" />
                   <QrCodeIcon fontSize="large" />
                 </IconButton>
@@ -62,9 +62,11 @@ export default function Settings() {
               <CardContent>
                 <Typography gutterBottom variant="h5">
                   Profile preview
-                  <Fab color="primary" aria-label="add" position="relative" style={{ float: 'right' }} sx={{ ml: theme.spacing(2) }}>
-                    <AddIcon />
-                  </Fab>
+                  <div style={{ float: 'right' }}>
+                    <TextField id="outlined-basic" size="small" label="Time" variant="outlined" sx={{ mr: theme.spacing(4) }} />
+                    <TextField id="outlined-basic" size="small" label="Value" variant="outlined" sx={{ mr: theme.spacing(4) }} />
+                    <AddPhaseButton style={{ float: 'right' }} sx={{ ml: theme.spacing(2) }} />
+                  </div>
                 </Typography>
               </CardContent>
               <CardActions>

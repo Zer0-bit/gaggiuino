@@ -37,7 +37,7 @@ public:
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
-    if (resistanceDelta > 500.f || puckResistance < 1300.f) {
+    if (resistanceDelta > 500.f || puckResistance < 1200.f) {
       return;
     }
 
