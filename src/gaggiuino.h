@@ -32,6 +32,7 @@
 #define EMPTY_TRAY_WEIGHT       23456.f
 #define TRAY_FULL_THRESHOLD     700.f
 #define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
+#define BOILER_FILL_TIMEOUT     5000UL
 
 
 

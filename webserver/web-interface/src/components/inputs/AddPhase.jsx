@@ -9,7 +9,7 @@ import Popper from '@mui/material/Popper';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 
-const options = ['Time', 'Pressure', 'Flow'];
+const options = ['Restriction', 'Pressure', 'Flow'];
 
 export default function SplitButton() {
   const [open, setOpen] = React.useState(false);
@@ -37,7 +37,7 @@ export default function SplitButton() {
   return (
     <React.Fragment>
       <ButtonGroup variant="contained" ref={anchorRef} aria-label="split button">
-        <Button onClick={handleClick}>{options[selectedIndex]}</Button>
+        <Button onClick={handleClick}>ADD</Button>
         <Button
           size="small"
           aria-controls={open ? 'split-button-menu' : undefined}

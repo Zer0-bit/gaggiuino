@@ -584,7 +584,7 @@ static void fillBoiler(float targetBoilerFullPressure) {
     static unsigned long fillStartedTime = millis();
     unsigned long timePassed = millis() - fillStartedTime;
 
-    if (currentState.pressure < targetBoilerFullPressure && timePassed <= 5000UL && !startupInitFinished) {
+    if (currentState.pressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT && !startupInitFinished) {
       lcdShowPopup("Filling boiler!");
       openValve();
       setPumpToRawValue(80);
