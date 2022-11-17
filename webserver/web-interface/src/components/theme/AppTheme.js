@@ -27,7 +27,6 @@ const lightTheme = createTheme({
     weight: {
       main: '#ffb53e',
     },
-
   },
 });
 
