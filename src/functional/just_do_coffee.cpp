@@ -95,10 +95,15 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
       #if not defined SINGLE_BOARD
         openValve();
       #endif
-      setPumpToRawValue(5);
+
+      #ifndef DREAM_STEAM_DISABLED
+        setPumpToRawValue(5);
+      #endif
     }
   } else {
     setBoilerOff();
-    (currentState.pressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
+    #ifndef DREAM_STEAM_DISABLED
+      (currentState.pressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
+    #endif
   }
 }
