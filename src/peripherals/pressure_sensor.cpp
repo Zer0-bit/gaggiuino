@@ -59,7 +59,7 @@ int8_t getAdsError() {
 }
 
 void checkAdsState() {
-  if (adsCounter >= 10000) {
+  if (adsCounter >= 1000) {
     if (resetComparator/adsCounter == currentPressure) {
       ADS.reset();
       adsInit();
