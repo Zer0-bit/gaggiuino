@@ -61,7 +61,7 @@ void setup(void) {
   lcdUploadCfg(eepromCurrentValues);
   LOG_INFO("LCD cfg uploaded");
 
-  pressureSensorInit();
+  adsInit();
   LOG_INFO("Pressure sensor init");
 
   // Scales handling

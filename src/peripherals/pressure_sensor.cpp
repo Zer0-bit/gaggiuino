@@ -2,15 +2,18 @@
 #include "pindef.h"
 #include "ADS1X15.h"
 
-float previousPressure;
-float currentPressure;
 #if defined SINGLE_BOARD
   ADS1015 ADS(0x48);
 #else
   ADS1115 ADS(0x48);
 #endif
 
-void pressureSensorInit() {
+float previousPressure;
+float currentPressure;
+float resetComparator;
+unsigned long adsCounter;
+
+void adsInit() {
   ADS.begin();
   ADS.setGain(0);      // 6.144 volt
   ADS.setDataRate(7);  // fast
@@ -24,6 +27,7 @@ float getPressure() {  //returns sensor pressure data
   // range 921.6 - 102.4 = 204.8 or 819.2 or 21333.3
   // pressure gauge range 0-1.2MPa - 0-12 bar
   // 1 bar = 17.1 or 68.27 or 1777.8
+  checkAdsState();
 
   previousPressure = currentPressure;
   #if defined SINGLE_BOARD
@@ -31,6 +35,10 @@ float getPressure() {  //returns sensor pressure data
   #else
     currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
   #endif
+  if (currentPressure == previousPressure) {
+    resetComparator += currentPressure;
+    adsCounter++;
+  }
   return currentPressure;
 }
 
@@ -48,4 +56,13 @@ bool isPressureFallingFast() {
 
 int8_t getAdsError() {
   return ADS.getError();
+}
+
+void checkAdsState() {
+  if (adsCounter >= 10000) {
+    if (resetComparator/adsCounter == currentPressure) {
+      ADS.reset();
+      adsInit();
+    } else adsCounter = 0;
+  }
 }
