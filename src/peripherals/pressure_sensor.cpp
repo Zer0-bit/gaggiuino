@@ -38,6 +38,9 @@ float getPressure() {  //returns sensor pressure data
   if (currentPressure == previousPressure) {
     resetComparator += currentPressure;
     adsCounter++;
+  } else {
+    resetComparator = 0.f;
+    adsCounter = 0;
   }
   return currentPressure;
 }
