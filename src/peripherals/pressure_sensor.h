@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 void    adsInit(void);
-void    checkAdsState(void);
+void    i2cResetState(void);
 float   getPressure(void);
 bool    isPressureFalling(void);
 bool    isPressureFallingFast(void);

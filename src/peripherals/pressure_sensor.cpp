@@ -10,8 +10,6 @@
 
 float previousPressure;
 float currentPressure;
-float resetComparator;
-unsigned long adsCounter;
 
 void adsInit() {
   ADS.begin();
@@ -27,21 +25,16 @@ float getPressure() {  //returns sensor pressure data
   // range 921.6 - 102.4 = 204.8 or 819.2 or 21333.3
   // pressure gauge range 0-1.2MPa - 0-12 bar
   // 1 bar = 17.1 or 68.27 or 1777.8
-  checkAdsState();
 
-  previousPressure = currentPressure;
-  #if defined SINGLE_BOARD
-    currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
-  #else
-    currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
-  #endif
-  if (currentPressure == previousPressure) {
-    resetComparator += currentPressure;
-    adsCounter++;
-  } else {
-    resetComparator = 0.f;
-    adsCounter = 0;
-  }
+  if (Wire.available() || Wire.read() != -1) {
+    previousPressure = currentPressure;
+    #if defined SINGLE_BOARD
+      currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
+    #else
+      currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
+    #endif
+  } else i2cResetState();
+
   return currentPressure;
 }
 
@@ -61,11 +54,8 @@ int8_t getAdsError() {
   return ADS.getError();
 }
 
-void checkAdsState() {
-  if (adsCounter >= 1000) {
-    if (resetComparator/adsCounter == currentPressure) {
-      ADS.reset();
-      adsInit();
-    } else adsCounter = 0;
-  }
+void i2cResetState() {
+  Wire.flush();
+  ADS.reset();
+  adsInit();
 }
