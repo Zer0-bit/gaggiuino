@@ -61,10 +61,11 @@ int8_t getAdsError() {
 
 void i2cResetState() {
   char tmp[25];
-  if(digitalRead(hw_SCL) != HIGH || digitalRead(hw_SDA) != HIGH) {
+  if(digitalRead(hw_SCL) != HIGH || digitalRead(hw_SDA) != HIGH || !ADS.isConnected()) {
     lcdShowPopup("Reset I2C pins");
     short result = I2C_ClearBus(hw_SDA, hw_SCL);
     snprintf(tmp, sizeof(tmp), "I2C error code: %i", result);
     result == 0 ? adsInit() : lcdShowPopup(tmp);
+    delay(1000);
   }
 }
