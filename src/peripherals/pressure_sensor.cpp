@@ -55,7 +55,6 @@ int8_t getAdsError() {
 }
 
 void i2cResetState() {
-  Wire.flush();
   adsInit();
   delay(100);
 }
