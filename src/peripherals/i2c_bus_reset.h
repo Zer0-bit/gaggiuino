@@ -22,14 +22,6 @@ int I2C_ClearBus(int sdaPin, int sclPin) {
 #endif
   pinMode(sdaPin, INPUT_PULLUP); // Make sdaPin (data) and sclPin (clock) pins Inputs with pullup.
   pinMode(sclPin, INPUT_PULLUP);
-#ifndef ARDUINO_nRF52832_BARE_MODULE
-  delay(2500);  // Wait 2.5 secs. This is strictly only necessary on the first power
-  // skip this delay for bare module NRF5 chips as it will cause high power and prevent monitoring current consumption
-#endif
-  // up of the DS3231 module to allow it to initialize properly,
-  // but is also assists in reliable programming of FioV3 boards as it gives the
-  // IDE a chance to start uploaded the program
-  // before existing sketch confuses the IDE by sending Serial data.
 
   bool SCL_LOW = (digitalRead(sclPin) == LOW); // Check is sclPin is Low.
   if (SCL_LOW) { //If it is held low Arduno cannot become the I2C master.
