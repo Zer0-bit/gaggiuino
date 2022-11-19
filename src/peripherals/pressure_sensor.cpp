@@ -14,7 +14,7 @@ float currentPressure;
 void adsInit() {
   ADS.begin();
   ADS.setGain(0);      // 6.144 volt
-  ADS.setDataRate(7);  // fast
+  ADS.setDataRate(4);  // fast
   ADS.setMode(0);      // continuous mode
   ADS.readADC(0);      // first read to trigger
 }
@@ -26,7 +26,7 @@ float getPressure() {  //returns sensor pressure data
   // pressure gauge range 0-1.2MPa - 0-12 bar
   // 1 bar = 17.1 or 68.27 or 1777.8
 
-  if (Wire.read() == -1 || !Wire.available()) i2cResetState();
+  if (!ADS.isReady() || !Wire.available() || Wire.read() == -1) i2cResetState();
 
   previousPressure = currentPressure;
   #if defined SINGLE_BOARD
