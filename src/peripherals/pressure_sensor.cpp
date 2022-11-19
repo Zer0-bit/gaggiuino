@@ -2,6 +2,7 @@
 #include "pindef.h"
 #include "ADS1X15.h"
 #include "../lcd/lcd.h"
+#include "peripherals/i2c_bus_reset.h"
 
 #if defined SINGLE_BOARD
   ADS1015 ADS(0x48);
@@ -59,13 +60,11 @@ int8_t getAdsError() {
 //Serial.println(digitalRead(PIN_SDA));   //should be HIGH, is LOW on stuck I2C bus
 
 void i2cResetState() {
-  if(digitalRead(PB6) == HIGH && digitalRead(PB7) == LOW) {
+  char tmp[5];
+  if(digitalRead(hw_SCL) != HIGH || digitalRead(hw_SDA) != HIGH) {
     lcdShowPopup("Reset I2C pins");
-    pinMode(PB7, OUTPUT);      // is connected to SDA
-    digitalWrite(PB7, LOW);
-    delay(100);              //maybe too long
-    pinMode(PB7, INPUT);       // reset pin
-    delay(100);
-    adsInit();
+    short result = I2C_ClearBus(hw_SDA, hw_SCL);
+    snprintf(tmp, sizeof(tmp), "%.1f", static_cast<double>(result));
+    result == 0 ? adsInit() : lcdShowPopup(tmp);
   }
 }

@@ -21,4 +21,7 @@
 #define USART_LCD     Serial2 // PA2 & PA3
 #define USART_DEBUG   Serial  // USB-CDC
 
+#define hw_SCL        PB6
+#define hw_SDA        PB7
+
 #endif
