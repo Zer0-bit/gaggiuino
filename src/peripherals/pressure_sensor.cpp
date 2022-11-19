@@ -26,14 +26,14 @@ float getPressure() {  //returns sensor pressure data
   // pressure gauge range 0-1.2MPa - 0-12 bar
   // 1 bar = 17.1 or 68.27 or 1777.8
 
-  if (Wire.available() || Wire.read() != -1) {
-    previousPressure = currentPressure;
-    #if defined SINGLE_BOARD
-      currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
-    #else
-      currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
-    #endif
-  } else i2cResetState();
+  if (Wire.read() == -1 || !Wire.available()) i2cResetState();
+
+  previousPressure = currentPressure;
+  #if defined SINGLE_BOARD
+    currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
+  #else
+    currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
+  #endif
 
   return currentPressure;
 }
@@ -56,6 +56,6 @@ int8_t getAdsError() {
 
 void i2cResetState() {
   Wire.flush();
-  ADS.reset();
   adsInit();
+  delay(100);
 }
