@@ -1,6 +1,7 @@
 #include "pressure_sensor.h"
 #include "pindef.h"
 #include "ADS1X15.h"
+#include "../lcd/lcd.h"
 
 #if defined SINGLE_BOARD
   ADS1015 ADS(0x48);
@@ -26,7 +27,7 @@ float getPressure() {  //returns sensor pressure data
   // pressure gauge range 0-1.2MPa - 0-12 bar
   // 1 bar = 17.1 or 68.27 or 1777.8
 
-  // if (!ADS.isReady() || !Wire.available() || Wire.read() == -1) i2cResetState();
+  i2cResetState();
 
   previousPressure = currentPressure;
   #if defined SINGLE_BOARD
@@ -54,7 +55,17 @@ int8_t getAdsError() {
   return ADS.getError();
 }
 
+//Serial.print(digitalRead(PIN_SCL));    //should be HIGH
+//Serial.println(digitalRead(PIN_SDA));   //should be HIGH, is LOW on stuck I2C bus
+
 void i2cResetState() {
-  adsInit();
-  delay(100);
+  if(digitalRead(PB6) == HIGH && digitalRead(PB7) == LOW) {
+    lcdShowPopup("Reset I2C pins");
+    pinMode(PB7, OUTPUT);      // is connected to SDA
+    digitalWrite(PB7, LOW);
+    delay(100);              //maybe too long
+    pinMode(PB7, INPUT);       // reset pin
+    delay(100);
+    adsInit();
+  }
 }
