@@ -60,12 +60,12 @@ int8_t getAdsError() {
 //Serial.println(digitalRead(PIN_SDA));   //should be HIGH, is LOW on stuck I2C bus
 
 void i2cResetState() {
-  char tmp[25];
   if(digitalRead(hw_SCL) != HIGH || digitalRead(hw_SDA) != HIGH || !ADS.isConnected()) {
-    lcdShowPopup("Reset I2C pins");
+    LOG_INFO("Reset I2C pins");
     short result = I2C_ClearBus(hw_SDA, hw_SCL);
+    char tmp[25];
     snprintf(tmp, sizeof(tmp), "I2C error code: %i", result);
     result == 0 ? adsInit() : lcdShowPopup(tmp);
-    delay(1000);
+    delay(50);
   }
 }

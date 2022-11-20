@@ -92,14 +92,16 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
     setBoilerOn();
     if (currentState.pressure < 1.5f) {
-      #if not defined SINGLE_BOARD
+      #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB
+        #if not defined (DREAM_STEAM_DISABLED) // disabled for bigger boilers which have no  need of adjusting the pressure
         openValve();
+        #endif
       #endif
 
       #ifndef DREAM_STEAM_DISABLED
         setPumpToRawValue(5);
       #endif
-    }
+    } else setPumpOff();
   } else {
     setBoilerOff();
     #ifndef DREAM_STEAM_DISABLED
