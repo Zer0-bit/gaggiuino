@@ -1,6 +1,6 @@
 
-#ifndef I2C_CLEARBUSS_H
-#define I2C_CLEARBUSS_H
+#ifndef I2C_BUS_RESET_H
+#define I2C_BUS_RESET_H
 
 #include <Arduino.h>
 #include <Wire.h>
