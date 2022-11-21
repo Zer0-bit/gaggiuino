@@ -2,7 +2,7 @@
 #include "pindef.h"
 #include "ADS1X15.h"
 #include "../lcd/lcd.h"
-#include "peripherals/i2c_bus_reset.h"
+#include "i2c_bus_reset.h"
 
 #if defined SINGLE_BOARD
   ADS1015 ADS(0x48);
