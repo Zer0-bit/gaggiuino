@@ -6,16 +6,16 @@
 #include <Wire.h>
 
 /**
- * This routine turns off the I2C bus and clears it
- * on return scaPin and sclPin pins are tri-state inputs with PULLUPS
- * You need to call Wire.begin() after this to re-enable I2C
- * This routine does NOT use the Wire library at all.
- *
- * returns 0 if bus cleared
- *         1 if sclPin held low.
- *         2 if sdaPin held low by slave clock stretch for > 2sec
- *         3 if sdaPin held low after 20 clocks.
- */
+* This routine turns off the I2C bus and clears it
+* on return scaPin and sclPin pins are tri-state inputs with PULLUPS
+* You need to call Wire.begin() after this to re-enable I2C
+* This routine does NOT use the Wire library at all.
+*
+* returns 0 if bus cleared
+*         1 if sclPin held low.
+*         2 if sdaPin held low by slave clock stretch for > 2sec
+*         3 if sdaPin held low after 20 clocks.
+*/
 int I2C_ClearBus(int sdaPin, int sclPin) {
 #if defined(TWCR) && defined(TWEN)
   TWCR &= ~(_BV(TWEN)); //Disable the Atmel 2-Wire interface so we can control the sdaPin and sclPin pins directly
