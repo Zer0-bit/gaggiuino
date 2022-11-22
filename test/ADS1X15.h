@@ -10,4 +10,5 @@ public:
   void setMode(int);
   void setDataRate(int);
   bool isReady(void);
+  bool isConnected(void);
 };
