@@ -41,15 +41,15 @@ float getPressure() {  //returns sensor pressure data
 }
 
 bool isPressureRaising() {
-  return currentPressure > previousPressure + 0.3f;
+  return currentPressure > previousPressure + 0.05f;
 }
 
 bool isPressureFalling() {
-  return previousPressure >= currentPressure + 0.03f;
+  return currentPressure < previousPressure - 0.05f;
 }
 
 bool isPressureFallingFast() {
-  return previousPressure >= currentPressure + 0.1f;
+  return currentPressure < previousPressure - 0.1f;
 }
 
 int8_t getAdsError() {
