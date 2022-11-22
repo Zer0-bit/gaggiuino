@@ -292,7 +292,7 @@ static void lcdRefresh(void) {
 
   #if defined DEBUG_ENABLED && defined stm32f411xx
     lcdShowDebug(readTempSensor(), getAdsError());
-#endif
+  #endif
 
     /*LCD timer and warmup*/
     if (brewActive) {
@@ -557,7 +557,7 @@ static void brewParamsReset(void) {
   tareDone                                    = false;
   currentState.pumpFlow                       = 0.f;
   previousWeight                              = 0.f;
-  currentState.weight                         = 0.f; 
+  currentState.weight                         = 0.f;
   currentState.liquidPumped                   = 0.f;
   preinfusionFinished                         = false;
   brewingTimer                                = millis();
