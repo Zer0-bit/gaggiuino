@@ -51,7 +51,7 @@ jobs:
 
       - name: Build scales
         run: |
-          ~/.platformio/penv/bin/platformio run -e scales-dfu
+          ~/.platformio/penv/bin/platformio run -e scales-calibration-dfu
 
       - name: Run tests
         run: |

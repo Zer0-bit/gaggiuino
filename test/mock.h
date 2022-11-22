@@ -18,6 +18,8 @@
 #define PB4   1
 #define PB8   1
 #define PB9   1
+#define PB6   1
+#define PB7   1
 
 #define Serial1   1
 #define Serial2   1

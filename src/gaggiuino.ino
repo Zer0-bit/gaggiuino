@@ -61,7 +61,7 @@ void setup(void) {
   lcdUploadCfg(eepromCurrentValues);
   LOG_INFO("LCD cfg uploaded");
 
-  pressureSensorInit();
+  adsInit();
   LOG_INFO("Pressure sensor init");
 
   // Scales handling
@@ -580,11 +580,11 @@ static void flushDeactivated(void) {
 
 static void fillBoiler(float targetBoilerFullPressure) {
 #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-  if (lcdCurrentPageId == 0) {
-    static unsigned long fillStartedTime = millis();
-    unsigned long timePassed = millis() - fillStartedTime;
+  static long elapsedTimeSinceStart = millis();
+  if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
+    unsigned long timePassed = millis() - elapsedTimeSinceStart;
 
-    if (currentState.pressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT && !startupInitFinished) {
+    if (currentState.pressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT) {
       lcdShowPopup("Filling boiler!");
       openValve();
       setPumpToRawValue(80);

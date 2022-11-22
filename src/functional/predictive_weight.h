@@ -18,7 +18,7 @@ public:
   }
 
   void update(SensorState& state, CurrentPhase& phase, eepromValues_t cfg) {
-    // If at least 60ml have been pumped, there has to be output (unless the water is going to the void)
+    // If at least 50ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
     if (isForceStarted || outputFlowStarted || state.liquidPumped >= 50.f) {
       outputFlowStarted = true;
@@ -37,7 +37,7 @@ public:
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
-    if (resistanceDelta > 500.f || puckResistance < 1200.f) {
+    if (resistanceDelta > 500.f || puckResistance < 1100.f) {
       return;
     }
 
