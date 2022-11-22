@@ -3,6 +3,7 @@
 #define I2C_BUS_RESET_H
 
 #include <Arduino.h>
+#include <Wire.h>
 
 /**
 * This routine turns off the I2C bus and clears it
@@ -16,6 +17,9 @@
 *         3 if sdaPin held low after 20 clocks.
 */
 int I2C_ClearBus(int sdaPin, int sclPin) {
+#if defined(TWCR) && defined(TWEN)
+  TWCR &= ~(_BV(TWEN)); //Disable the Atmel 2-Wire interface so we can control the sdaPin and sclPin pins directly
+#endif
   pinMode(sdaPin, INPUT_PULLUP); // Make sdaPin (data) and sclPin (clock) pins Inputs with pullup.
   pinMode(sclPin, INPUT_PULLUP);
 
