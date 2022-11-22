@@ -33,7 +33,7 @@
 #define TRAY_FULL_THRESHOLD     700.f
 #define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
 #define BOILER_FILL_TIMEOUT     5000UL
-
+#define BREW_DETECT_DEBOUNCE    500
 
 
 typedef enum {
@@ -62,6 +62,7 @@ unsigned long scalesTimer = 0;
 unsigned long flowTimer = 0;
 unsigned long trayTimer = millis();
 unsigned long systemHealthTimer = 0;
+unsigned long brewDebounceTimer = 0;
 
 //scales vars
 float previousWeight  = 0;
@@ -70,6 +71,7 @@ bool tareDone         = false;
 // brew detection vars
 bool brewActive = false;
 bool nonBrewModeActive = false;
+bool stoppedOnWeight = false;
 
 //PP&PI variables
 int preInfusionFinishedPhaseIdx = 3;

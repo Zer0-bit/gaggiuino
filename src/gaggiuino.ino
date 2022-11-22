@@ -149,7 +149,7 @@ static void sensorsReadFlow(float elapsedTime) {
 static void calculateWeightAndFlow(void) {
   long elapsedTime = millis() - flowTimer;
 
-  if (brewActive) {
+  if (brewActive && !stoppedOnWeight) {
     if (scalesIsPresent()) {
       currentState.shotWeight = currentState.weight;
     }
@@ -278,12 +278,8 @@ static void lcdRefresh(void) {
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
     } else {
-      if (scalesIsPresent()) {
-        lcdSetWeight(currentState.weight);
-      } else if (currentState.shotWeight) {
         lcdSetWeight(currentState.shotWeight);
       }
-    }
 
     /*LCD flow output*/
     if (lcdCurrentPageId == 1 || lcdCurrentPageId == 2 || lcdCurrentPageId == 8 ) { // no point sending this continuously if on any other screens than brew related ones
@@ -296,7 +292,7 @@ static void lcdRefresh(void) {
 
   #if defined DEBUG_ENABLED && defined stm32f411xx
     lcdShowDebug(readTempSensor(), getAdsError());
-  #endif
+#endif
 
     /*LCD timer and warmup*/
     if (brewActive) {
@@ -491,6 +487,7 @@ static void profiling(void) {
       closeValve();
       setPumpOff();
       brewActive = false;
+      stoppedOnWeight = true;
     } else if (currentPhase.getType() == PHASE_TYPE_PRESSURE) {
       float newBarValue = currentPhase.getTarget();
       float flowRestriction =  currentPhase.getRestriction();
@@ -529,8 +526,9 @@ static void manualFlowControl(void) {
 static void brewDetect(void) {
   static bool paramsReset = true;
 
-  if (brewState()) {
+  if (brewState() && !stoppedOnWeight && millis() >= brewDebounceTimer) {
     if(!paramsReset) {
+      currentState.shotWeight = 0.f;
       brewParamsReset();
       paramsReset = true;
       brewActive = true;
@@ -540,19 +538,26 @@ static void brewDetect(void) {
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   } else {
     brewActive = false;
+
+    if (!brewState()) {
+      stoppedOnWeight = false;
+      brewDebounceTimer = millis() + BREW_DETECT_DEBOUNCE;
+    }
+
     if(paramsReset) {
       brewParamsReset();
       paramsReset = false;
+      if(scalesIsPresent) currentState.shotWeight = currentState.shotWeight + currentState.weightFlow / 2.f;
+      else currentState.shotWeight = currentState.shotWeight + currentState.smoothedPumpFlow / 2.f;
     }
   }
 }
 
 static void brewParamsReset(void) {
   tareDone                                    = false;
-  currentState.shotWeight                     = 0.f;
   currentState.pumpFlow                       = 0.f;
   previousWeight                              = 0.f;
-  currentState.weight                         = 0.f;
+  currentState.weight                         = 0.f; 
   currentState.liquidPumped                   = 0.f;
   preinfusionFinished                         = false;
   brewingTimer                                = millis();
@@ -601,7 +606,7 @@ static void fillBoiler(float targetBoilerFullPressure) {
 
 static void systemHealthCheck(float pressureThreshold) {
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-  if (!brewState() && !steamState()) {
+  if ((!brewState() || stoppedOnWeight) && !steamState()) {
     if (millis() >= systemHealthTimer) {
       while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < STEAM_WAND_HOT_WATER_TEMP)
       {
