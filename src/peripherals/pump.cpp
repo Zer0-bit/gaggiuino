@@ -13,7 +13,7 @@ float pressureInefficiencyConstant1 = 0.1224f;
 float pressureInefficiencyConstant2 = 0.0107f;
 float pressureInefficiencyConstant3 = 0.0046f;
 float pressureInefficiencyConstant4 = 0.000705f;
-float pressureInefficiencyConstant5 = 0.000035f;
+float pressureInefficiencyConstant5 = 0.000039f;
 float flowPerClickAtZeroBar = 0.275f;
 short maxPumpClicksPerSecond = 50;
 
