@@ -37,6 +37,6 @@ ADS1115::ADS1115(int address) {
     return false;
   }
 
-  bool isConnected(void) {
+  bool ADS1115::isConnected(void) {
     return false;
   }
