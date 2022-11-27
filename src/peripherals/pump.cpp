@@ -99,7 +99,7 @@ float getFlowPerClick(float pressure) {
     } else {
       fpc = mapRange(pressure, 12.f, 16.f, 105.f, 0.1f, 1) / 50 / maxPumpClicksPerSecond;
     }
-    fpc = constrain(fpc, 0.f, 0.215f);
+    fpc = constrain(fpc, 0.f, 0.25f);
     return fpc;
 }
 
