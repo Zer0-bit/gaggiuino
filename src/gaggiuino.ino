@@ -9,8 +9,8 @@ SimpleKalmanFilter smoothPumpFlow(2.f, 2.f, 0.5f);
 SimpleKalmanFilter smoothScalesFlow(2.f, 2.f, 0.5f);
 
 //default phases. Updated in updatePressureProfilePhases.
-Phase phaseArray[6];
-Phases phases {6,  phaseArray};
+Phase phaseArray[8];
+Phases phases {8,  phaseArray};
 PhaseProfiler phaseProfiler{phases};
 
 PredictiveWeight predictiveWeight;
@@ -419,6 +419,9 @@ static void updatePressureProfilePhases(void) {
       : runningCfg.shotStopOnCustomWeight;
   }
 
+  //Setup release pressure + fill@4ml/sec
+  setFillBasketPhase(phaseCount++, 6.f);
+
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
@@ -449,6 +452,11 @@ static void updatePressureProfilePhases(void) {
   }
 
   phases.count = phaseCount;
+}
+
+void setFillBasketPhase(int phaseIdx, float flowRate) {
+  float pressureAbove = 0.1f;
+  setFlowPhase(phaseIdx, flowRate, flowRate, -1, -1, pressureAbove, -1);
 }
 
 void setPressurePhase(int phaseIdx, float startBar, float endBar, float flowRestriction, int timeMs, float pressureTarget, float weightTarget) {
