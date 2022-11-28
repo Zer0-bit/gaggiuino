@@ -19,7 +19,7 @@ float pressureInefficiencyConstant2 = 0.0038f;
 float pressureInefficiencyConstant3 = 0.0015f;
 float pressureInefficiencyConstant4 = 0.001216f;
 float pressureInefficiencyConstant5 = 0.000087f;
-float flowPerClickAtZeroBar = 0.275f;
+float flowPerClickAtZeroBar = 0.152f;
 short maxPumpClicksPerSecond = 50;
 
 // Initialising some pump specific specs, mainly:
@@ -99,7 +99,7 @@ float getFlowPerClick(float pressure) {
     } else {
       fpc = mapRange(pressure, 12.f, 16.f, 105.f, 0.1f, 1) / 50 / maxPumpClicksPerSecond;
     }
-    fpc = constrain(fpc, 0.f, 0.3f);
+    fpc = constrain(fpc, 0.f, 0.22f);
     return (fpc + flowPerClickAtZeroBar) / 2.f;
 }
 
