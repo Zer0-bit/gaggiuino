@@ -140,7 +140,7 @@ static void sensorsReadPressure(void) {
 static void sensorsReadFlow(float elapsedTime) {
     long pumpClicks = getAndResetClickCounter();
     float cps = 1000.f * (float)pumpClicks / elapsedTime;
-    currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+    currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure);
 
     previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
     currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
