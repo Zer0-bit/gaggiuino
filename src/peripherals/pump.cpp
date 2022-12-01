@@ -99,8 +99,8 @@ float getFlowPerClick(float pressure) {
     } else {
       fpc = mapRange(pressure, 12.f, 16.f, 105.f, 0.1f, 1) / 50 / maxPumpClicksPerSecond;
     }
-    fpc = constrain(fpc, 0.f, 0.22f);
-    return (fpc + (pressure < 5.f ? flowPerClickAtZeroBar+flowPerClickAtZeroBar*0.3f : flowPerClickAtZeroBar*0.9f)) / 2.f;
+    fpc = constrain(fpc, 0.f, 0.24f);
+    return (fpc + (pressure < 5.f ? flowPerClickAtZeroBar+flowPerClickAtZeroBar*0.5f : flowPerClickAtZeroBar*0.9f)) / 2.f;
 }
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
