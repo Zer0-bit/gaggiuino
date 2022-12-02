@@ -91,11 +91,11 @@ long getAndResetClickCounter(void) {
 float getFlowPerClick(float pressure) {
     float fpc;
     if (pressure >= 0.f && pressure <= 6.f) {
-      fpc = mapRange(pressure, 0.f, 6.f, 640.f, 320.f, 1) / 50 / maxPumpClicksPerSecond;
+      fpc = mapRange(pressure, 0.f, 6.f, 640.f, 340.f, 1) / 50 / maxPumpClicksPerSecond;
     } else if (pressure > 6.f && pressure <= 8.f) {
-      fpc = mapRange(pressure, 6.f, 8.f, 320.f, 280.f, 1) / 50 / maxPumpClicksPerSecond;
+      fpc = mapRange(pressure, 6.f, 8.f, 341.f, 300.f, 1) / 50 / maxPumpClicksPerSecond;
     } else if (pressure > 8.f && pressure <= 12.f) {
-      fpc = mapRange(pressure, 8.f, 12.f, 280.f, 105.f, 1) / 50 / maxPumpClicksPerSecond;
+      fpc = mapRange(pressure, 8.f, 12.f, 301.f, 105.f, 1) / 50 / maxPumpClicksPerSecond;
     } else {
       fpc = mapRange(pressure, 12.f, 16.f, 105.f, 0.1f, 1) / 50 / maxPumpClicksPerSecond;
     }
