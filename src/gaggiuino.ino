@@ -258,11 +258,7 @@ static void lcdRefresh(void) {
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     #ifdef BEAUTIFY_GRAPH
-      lcdSetPressure(
-        brewActive
-          ? currentState.smoothedPressure * 10.f
-          : currentState.pressure * 10.f
-      );
+      lcdSetPressure(currentState.smoothedPressure * 10.f);
     #else
       lcdSetPressure(
         currentState.pressure > 0.f
@@ -584,7 +580,7 @@ static void fillBoiler(float targetBoilerFullPressure) {
   if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
     unsigned long timePassed = millis() - elapsedTimeSinceStart;
 
-    if (currentState.pressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT) {
+    if (currentState.smoothedPressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT) {
       lcdShowPopup("Filling boiler!");
       openValve();
       setPumpToRawValue(80);
