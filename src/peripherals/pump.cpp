@@ -10,7 +10,7 @@ float pressureInefficiencyConstant2 = 0.01052f;
 float pressureInefficiencyConstant3 = 0.00401f;
 float pressureInefficiencyConstant4 = 0.00066f;
 float pressureInefficiencyConstant5 = 0.0000305f;
-float flowPerClickAtZeroBar = 0.29f;
+float flowPerClickAtZeroBar = 0.355f;
 short maxPumpClicksPerSecond = 50;
 
 // Initialising some pump specific specs, mainly:
