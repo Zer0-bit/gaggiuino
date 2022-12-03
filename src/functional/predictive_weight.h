@@ -39,7 +39,7 @@ public:
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
     // If the pressure or flow are raising too fast dismiss the spike from the output.
-    if (state.isPressureRisingFast || state.isPumpFlowRisingFast) {
+    if (state.isPressureRisingFast || state.isPumpFlowRisingFast || state.isPumpFlowFallingFast) {
       return;
     }
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
