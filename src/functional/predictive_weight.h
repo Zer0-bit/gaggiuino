@@ -3,7 +3,7 @@
 
 #include "../profiling_phases.h"
 #include "../sensors_state.h"
-#include "../eeprom_data.h"
+#include "../eeprom_data/eeprom_data.h"
 
 class PredictiveWeight {
 private:

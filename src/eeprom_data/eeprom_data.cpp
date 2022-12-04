@@ -1,6 +1,8 @@
 #define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
 #include <FlashStorage_STM32.h>
 #include "eeprom_data.h"
+#include "eeprom_metadata.h"
+#include "legacy/eeprom_data_v4.h"
 
 static struct eepromMetadata_t eepromMetadata;
 
@@ -97,6 +99,11 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
+  if (eepromValuesNew.steamSetpoint < 1) {
+    LOG_ERROR(errMsg);
+    return false;
+  }
+
   if (eepromValuesNew.mainDivider < 1) {
     LOG_ERROR(errMsg);
     return false;
@@ -125,6 +132,7 @@ eepromValues_t getEepromDefaults(void) {
   eepromValues_t defaultData;
 
   defaultData.setpoint                       = 100;
+  defaultData.steamSetpoint                  = 162;
   defaultData.offsetTemp                     = 7;
   defaultData.hpwr                           = 550;
   defaultData.mainDivider                    = 5;
@@ -167,13 +175,40 @@ eepromValues_t getEepromDefaults(void) {
   return defaultData;
 }
 
-void eepromInit(void) {
-  EEPROM.get(0, eepromMetadata);
-  uint32_t XOR = eepromMetadata.timestamp ^ eepromMetadata.version;
+// kind of annoying, but allows reusing macro without messing up type safety
+template <typename T>
+static bool _copy(T &target, T &source)
+{
+  target = source;
+  return true;
+}
 
-  if (eepromMetadata.version != EEPROM_DATA_VERSION || eepromMetadata.versionTimestampXOR != XOR) {
-    LOG_ERROR("SECU_CHECK FAILED! Applying defaults!");
-    eepromWrite(getEepromDefaults());
+static bool loadCurrentEepromData EEPROM_METADATA_LOADER(EEPROM_DATA_VERSION, eepromMetadata_t, _copy);
+
+void eepromInit(void) {
+  // initialiaze defaults on memory
+  eepromMetadata.values = getEepromDefaults();
+
+  // read version
+  uint16_t version;
+  EEPROM.get(0, version);
+
+  // load appropriate version (including current)
+  bool readSuccess = false;
+
+  if (version < EEPROM_DATA_VERSION && legacyEepromDataLoaders[version] != NULL) {
+    readSuccess = (*legacyEepromDataLoaders[version])(eepromMetadata.values);
+  } else {
+    readSuccess = loadCurrentEepromData(eepromMetadata.values);
+  }
+
+  if (!readSuccess) {
+    LOG_ERROR("SECU_CHECK FAILED! Applying defaults! eepromMetadata.version=" + version);
+    eepromMetadata.values = getEepromDefaults();
+  }
+
+  if (!readSuccess || version != EEPROM_DATA_VERSION) {
+    eepromWrite(eepromMetadata.values);
   }
 }
 

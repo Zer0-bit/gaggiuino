@@ -2,7 +2,7 @@
 #define LCD_H
 
 #include <EasyNextionLibrary.h>
-#include "eeprom_data.h"
+#include "eeprom_data/eeprom_data.h"
 
 extern volatile int lcdCurrentPageId;
 extern volatile int lcdLastCurrentPageId;
