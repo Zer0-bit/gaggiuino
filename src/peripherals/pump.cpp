@@ -19,10 +19,10 @@ PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 
 //ATTEMPT2
 float pressureInefficiencyConstant1 = 0.11f;
-float pressureInefficiencyConstant2 = 0.000865f;
-float pressureInefficiencyConstant3 = -0.00254f;
-float pressureInefficiencyConstant4 = 0.000249f;
-float pressureInefficiencyConstant5 = -0.00000907f;
+float pressureInefficiencyConstant2 = -0.0166f;
+float pressureInefficiencyConstant3 = 0.0017f;
+float pressureInefficiencyConstant4 = -0.000146f;
+float pressureInefficiencyConstant5 = 0.00000316f;
 
 float flowPerClickAtZeroBar = 0.29f;
 short maxPumpClicksPerSecond = 50;
@@ -94,13 +94,7 @@ long getAndResetClickCounter(void) {
 //
 // The function is split to compensate for the rapid decline in fpc at low pressures
 float getFlowPerClick(float pressure) {
-    float fpc;
-    if (pressure <= 0.5f) {
-        fpc = flowPerClickAtZeroBar - pressureInefficiencyConstant1 * pressure - 0.061f;
-    } else {
-        fpc = (flowPerClickAtZeroBar - 0.116f) + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
-    }
-
+    float fpc = (flowPerClickAtZeroBar -0.094f) + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
     return 50.0f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 
