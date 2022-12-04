@@ -5,8 +5,8 @@
 #include "../eeprom_metadata.h"
 
 /**
- * Version 4:
- * - added switchPhaseOnThreshold
+* Version 4:
+* - added switchPhaseOnThreshold
 */
 struct eepromValues_t_v4 {
   uint16_t setpoint;
