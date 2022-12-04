@@ -22,6 +22,8 @@ void lcdSetPressure(float val);
 void lcdSetTemperature(int val);
 void lcdSetWeight(float val);
 void lcdSetFlow(int val);
+void lcdSetSteamEnabled(bool val);
+void lcdSetSetpoint(int val);
 
 void lcdShowDebug(int val1, int val2);
 void lcdShowPopup(const char *msg);

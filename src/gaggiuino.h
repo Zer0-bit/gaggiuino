@@ -71,6 +71,9 @@ bool tareDone         = false;
 bool brewActive = false;
 bool nonBrewModeActive = false;
 
+// steam switch transition tracking
+bool steamActive = false;
+
 //PP&PI variables
 int preInfusionFinishedPhaseIdx = 3;
 bool preinfusionFinished = false;

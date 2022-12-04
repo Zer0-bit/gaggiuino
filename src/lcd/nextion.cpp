@@ -28,6 +28,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("setPoint", eepromCurrentValues.setpoint);
   myNex.writeNum("moreTemp.n1.val", eepromCurrentValues.setpoint-eepromCurrentValues.offsetTemp);
 
+  myNex.writeNum("steamSetPoint", eepromCurrentValues.steamSetpoint);
+
   myNex.writeNum("offSet", eepromCurrentValues.offsetTemp);
   myNex.writeNum("moreTemp.n2.val", eepromCurrentValues.offsetTemp);
 
@@ -163,6 +165,7 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
 
   lcdCfg.setpoint                       = myNex.readNumber("setPoint");
+  lcdCfg.steamSetpoint                  = myNex.readNumber("steamSetPoint");
   lcdCfg.offsetTemp                     = myNex.readNumber("offSet");
   lcdCfg.hpwr                           = myNex.readNumber("hpwr");
   lcdCfg.mainDivider                    = myNex.readNumber("mDiv");
@@ -219,6 +222,14 @@ void lcdSetWeight(float val) {
 
 void lcdSetFlow(int val) {
   myNex.writeNum("flow.val", val);
+}
+
+void lcdSetSteamEnabled(bool val) {
+  myNex.writeNum("steamEnabled", val ? 1 : 0);
+}
+
+void lcdSetSetpoint(int val) {
+  myNex.writeNum("moreTemp.n1.val", val);
 }
 
 void lcdShowDebug(int val1, int val2) {

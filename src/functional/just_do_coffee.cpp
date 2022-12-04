@@ -89,7 +89,7 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
     setBoilerOn();
     brewActive ? setPumpFullOn() : setPumpOff();
-  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
+  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= runningCfg.steamSetpoint) && (currentState.temperature <= STEAM_MAX_TEMPERATURE)) {
     setBoilerOn();
     if (currentState.pressure < 1.5f) {
       #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB

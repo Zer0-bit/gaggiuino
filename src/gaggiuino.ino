@@ -303,6 +303,13 @@ static void lcdRefresh(void) {
       lcdBrewTimerStop(); // nextion timer stop
     }
 
+    /*LCD steam mode control on switch transition*/
+    if (steamActive != steamState()) {
+      steamActive = steamState();
+      lcdSetSteamEnabled(steamActive);
+      lcdSetSetpoint((steamActive ? runningCfg.steamSetpoint : runningCfg.setpoint) - runningCfg.offsetTemp);
+    }
+
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
 }
@@ -361,6 +368,7 @@ void lcdTrigger1(void) {
       break;
     case 6:
       eepromCurrentValues.setpoint                      = lcdValues.setpoint;
+      eepromCurrentValues.steamSetpoint                 = lcdValues.steamSetpoint;
       eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
       eepromCurrentValues.hpwr                          = lcdValues.hpwr;
       eepromCurrentValues.mainDivider                   = lcdValues.mainDivider;
