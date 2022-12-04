@@ -5,12 +5,26 @@
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 
-float pressureInefficiencyConstant1 = 0.1224f;
-float pressureInefficiencyConstant2 = 0.01052f;
-float pressureInefficiencyConstant3 = 0.00401f;
-float pressureInefficiencyConstant4 = 0.00066f;
-float pressureInefficiencyConstant5 = 0.0000305f;
-float flowPerClickAtZeroBar = 0.355f;
+// float pressureInefficiencyConstant1 = 0.1224f;
+// float pressureInefficiencyConstant2 = -0.01052f;
+// float pressureInefficiencyConstant3 = -0.00401f;
+// float pressureInefficiencyConstant4 = 0.00066f;
+// float pressureInefficiencyConstant5 = -0.0000305f;
+
+//ATTEMPT1
+// float pressureInefficiencyConstant2 = -0.00678f;
+// float pressureInefficiencyConstant3 = -0.00335f;
+// float pressureInefficiencyConstant4 = 0.000448f;
+// float pressureInefficiencyConstant5 = -0.0000173f;
+
+//ATTEMPT2
+float pressureInefficiencyConstant1 = 0.11f;
+float pressureInefficiencyConstant2 = 0.000865f;
+float pressureInefficiencyConstant3 = -0.00254f;
+float pressureInefficiencyConstant4 = 0.000249f;
+float pressureInefficiencyConstant5 = -0.00000907f;
+
+float flowPerClickAtZeroBar = 0.29f;
 short maxPumpClicksPerSecond = 50;
 
 // Initialising some pump specific specs, mainly:
@@ -82,9 +96,9 @@ long getAndResetClickCounter(void) {
 float getFlowPerClick(float pressure) {
     float fpc;
     if (pressure <= 0.5f) {
-        fpc = flowPerClickAtZeroBar - pressureInefficiencyConstant1 * pressure;
+        fpc = flowPerClickAtZeroBar - pressureInefficiencyConstant1 * pressure - 0.061f;
     } else {
-        fpc = (flowPerClickAtZeroBar - 0.055f) - (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 - (pressureInefficiencyConstant4 - pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
+        fpc = (flowPerClickAtZeroBar - 0.116f) + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
     }
 
     return 50.0f * fpc / (float)maxPumpClicksPerSecond;
