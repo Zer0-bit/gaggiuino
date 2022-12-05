@@ -427,7 +427,9 @@ static void updatePressureProfilePhases(void) {
   }
 
   //Setup release pressure + fill@4ml/sec
-  setFillBasketPhase(phaseCount++, 6.f);
+  if (runningCfg.basketPrefill) {
+    setFillBasketPhase(phaseCount++, 4.5f);
+  }
 
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
