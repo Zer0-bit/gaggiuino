@@ -99,7 +99,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
-  if (eepromValuesNew.steamSetpoint < 1) {
+  if (eepromValuesNew.steamSetPoint < 1) {
     LOG_ERROR(errMsg);
     return false;
   }
@@ -132,7 +132,7 @@ eepromValues_t getEepromDefaults(void) {
   eepromValues_t defaultData;
 
   defaultData.setpoint                       = 100;
-  defaultData.steamSetpoint                  = 162;
+  defaultData.steamSetPoint                  = 162;
   defaultData.offsetTemp                     = 7;
   defaultData.hpwr                           = 550;
   defaultData.mainDivider                    = 5;

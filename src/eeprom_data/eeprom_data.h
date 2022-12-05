@@ -29,7 +29,7 @@
 */
 struct eepromValues_t {
   uint16_t setpoint;
-  uint16_t steamSetpoint;
+  uint16_t steamSetPoint;
   uint16_t offsetTemp;
   uint16_t hpwr;
   uint16_t mainDivider;

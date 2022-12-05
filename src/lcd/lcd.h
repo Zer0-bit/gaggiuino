@@ -20,8 +20,10 @@ int lcdGetDescaleCycle(void);
 void lcdSetDescaleCycle(int cycle);
 void lcdSetPressure(float val);
 void lcdSetTemperature(int val);
+void lcdTargetState(int val);
 void lcdSetWeight(float val);
 void lcdSetFlow(int val);
+void lcdSetUpTime(float val);
 
 void lcdShowDebug(int val1, int val2);
 void lcdShowPopup(const char *msg);
