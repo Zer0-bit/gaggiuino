@@ -137,13 +137,14 @@ static void sensorsReadPressure(void) {
   }
 }
 
-static void sensorsReadFlow(float elapsedTime) {
+static long sensorsReadFlow(float elapsedTime) {
     long pumpClicks = getAndResetClickCounter();
     float cps = 1000.f * (float)pumpClicks / elapsedTime;
     currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure);
 
     previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
     currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+    return pumpClicks;
 }
 
 static void calculateWeightAndFlow(void) {
@@ -156,9 +157,11 @@ static void calculateWeightAndFlow(void) {
 
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
-      sensorsReadFlow(elapsedTime);
+      long pumpClicks = sensorsReadFlow(elapsedTime);
       currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
       currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.45f;
+
+      bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
 
       CurrentPhase& phase = phaseProfiler.getCurrentPhase(millis() - brewingTimer, currentState);
       predictiveWeight.update(currentState, phase, runningCfg);
@@ -168,7 +171,10 @@ static void calculateWeightAndFlow(void) {
         currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
-        currentState.shotWeight += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
+        float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
+        // if the output flow just started, consider only 50% of the clicks (probabilistically).
+        long consideredClicks = previousIsOutputFlow ? pumpClicks : pumpClicks * 0.5f;
+        currentState.shotWeight += consideredClicks * flowPerClick;
       }
       currentState.liquidPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
