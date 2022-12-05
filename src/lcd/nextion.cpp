@@ -175,7 +175,7 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.warmupState                    = myNex.readNumber("warmupState");
 
   lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
-  lcdCfg.graphBrew                      = myNex.readNumber("graphEnabled");
+  lcdCfg.basketPrefill                  = myNex.readNumber("basketPrefill");
   lcdCfg.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
   lcdCfg.brewDeltaState                 = myNex.readNumber("deltaState");
   lcdCfg.switchPhaseOnThreshold         = myNex.readNumber("switchPhaseOnThreshold");

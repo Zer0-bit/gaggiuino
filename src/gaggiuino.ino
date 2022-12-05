@@ -348,7 +348,7 @@ void lcdTrigger1(void) {
       break;
     case 4:
       eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
-      eepromCurrentValues.graphBrew                     = lcdValues.graphBrew;
+      eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
       eepromCurrentValues.warmupState                   = lcdValues.warmupState;
       eepromCurrentValues.switchPhaseOnThreshold        = lcdValues.switchPhaseOnThreshold;
