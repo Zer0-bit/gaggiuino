@@ -231,7 +231,7 @@ static void modeSelect(void) {
       break;
     case OPMODE_flush:
       nonBrewModeActive = true;
-      brewActive ? flushActivated() : flushDeactivated();
+      backFlush();
       justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPMODE_steam:
@@ -574,21 +574,6 @@ static void brewParamsReset(void) {
 
   predictiveWeight.reset();
   phaseProfiler.reset();
-}
-
-
-static void flushActivated(void) {
-  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
-      openValve();
-  #endif
-  setPumpFullOn();
-}
-
-static void flushDeactivated(void) {
-  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
-      closeValve();
-  #endif
-  setPumpOff();
 }
 
 static void fillBoiler(float targetBoilerFullPressure) {
