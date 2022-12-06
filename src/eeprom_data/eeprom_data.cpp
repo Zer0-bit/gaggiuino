@@ -99,7 +99,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
-  if (eepromValuesNew.steamSetPoint < 1) {
+  if (eepromValuesNew.steamSetPoint < 1 || eepromValuesNew.steamSetPoint > 165) {
     LOG_ERROR(errMsg);
     return false;
   }

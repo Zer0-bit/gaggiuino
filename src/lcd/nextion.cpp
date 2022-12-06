@@ -116,8 +116,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
   myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
 
-  myNex.writeNum("graphEnabled", eepromCurrentValues.graphBrew);
-  myNex.writeNum("brewSettings.btGraph.val", eepromCurrentValues.graphBrew);
+  myNex.writeNum("basketPrefill", eepromCurrentValues.basketPrefill);
+  myNex.writeNum("brewSettings.btPrefill.val", eepromCurrentValues.basketPrefill);
 
   myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
   myNex.writeNum("brewSettings.btWarmup.val", eepromCurrentValues.warmupState);
