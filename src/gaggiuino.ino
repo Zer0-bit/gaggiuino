@@ -8,7 +8,7 @@ SimpleKalmanFilter smoothPressure(2.f, 2.f, 0.5f);
 SimpleKalmanFilter smoothPumpFlow(2.f, 2.f, 0.5f);
 SimpleKalmanFilter smoothScalesFlow(2.f, 2.f, 0.5f);
 
-//default phases. Updated in updatePressureProfilePhases.
+//default phases. Updated in updateProfilerPhases.
 Phase phaseArray[8];
 Phases phases {8,  phaseArray};
 PhaseProfiler phaseProfiler{phases};
@@ -198,7 +198,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
     selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode(); // MODE_SELECT should always be LAST
 
-    updatePressureProfilePhases();
+    updateProfilerPhases();
 
     lcdLastCurrentPageId = lcdCurrentPageId;
   }
@@ -414,7 +414,7 @@ void lcdTrigger4(void) {
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
-static void updatePressureProfilePhases(void) {
+static void updateProfilerPhases(void) {
   int phaseCount             = 0;
   float preInfusionFinishBar = 0.f;
   float shotTarget = -1.f;
@@ -460,7 +460,7 @@ static void updatePressureProfilePhases(void) {
       setPressurePhase(phaseCount++, Transition{ppStart, ppEnd, EASE_IN_OUT, runningCfg.pressureProfilingLength * 1000}, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
-    setPressurePhase(phaseCount++, Transition{(float) preInfusionFinishBar, 9, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1);
+    setPressurePhase(phaseCount++, Transition{preInfusionFinishBar, 9, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1);
   }
 
   phases.count = phaseCount;
@@ -572,7 +572,7 @@ static void brewParamsReset(void) {
   currentState.pumpFlow                       = 0.f;
   previousWeight                              = 0.f;
   currentState.weight                         = 0.f;
-  currentState.waterPumped                   = 0.f;
+  currentState.waterPumped                    = 0.f;
   preinfusionFinished                         = false;
   brewingTimer                                = millis();
   flowTimer                                   = millis() + REFRESH_FLOW_EVERY;
