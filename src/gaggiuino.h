@@ -1,7 +1,6 @@
 #ifndef GAGGIUINO_H
 #define GAGGIUINO_H
 
-#include "profiling_phases.h"
 #include "log.h"
 #include "eeprom_data/eeprom_data.h"
 #include "lcd/lcd.h"
@@ -14,6 +13,7 @@
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 #include "functional/predictive_weight.h"
+#include "functional/profiling_phases.h"
 
 #include <Arduino.h>
 #include <SimpleKalmanFilter.h>
