@@ -9,8 +9,8 @@ SimpleKalmanFilter smoothPumpFlow(2.f, 2.f, 0.5f);
 SimpleKalmanFilter smoothScalesFlow(2.f, 2.f, 0.5f);
 
 //default phases. Updated in updatePressureProfilePhases.
-Phase phaseArray[6];
-Phases phases {6,  phaseArray};
+Phase phaseArray[8];
+Phases phases {8,  phaseArray};
 PhaseProfiler phaseProfiler{phases};
 
 PredictiveWeight predictiveWeight;
@@ -102,7 +102,7 @@ static void sensorsRead(void) {
   sensorsReadWeight();
   sensorsReadPressure();
   calculateWeightAndFlow();
-  fillBoiler(2.2f);
+  fillBoiler(2.0f);
 }
 
 static void sensorsReadTemperature(void) {
@@ -137,13 +137,14 @@ static void sensorsReadPressure(void) {
   }
 }
 
-static void sensorsReadFlow(float elapsedTime) {
+static long sensorsReadFlow(float elapsedTime) {
     long pumpClicks = getAndResetClickCounter();
     float cps = 1000.f * (float)pumpClicks / elapsedTime;
-    currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
+    currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure);
 
     previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
     currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+    return pumpClicks;
 }
 
 static void calculateWeightAndFlow(void) {
@@ -156,9 +157,11 @@ static void calculateWeightAndFlow(void) {
 
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
-      sensorsReadFlow(elapsedTime);
+      long pumpClicks = sensorsReadFlow(elapsedTime);
       currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
       currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.45f;
+
+      bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
 
       CurrentPhase& phase = phaseProfiler.getCurrentPhase(millis() - brewingTimer, currentState);
       predictiveWeight.update(currentState, phase, runningCfg);
@@ -168,7 +171,10 @@ static void calculateWeightAndFlow(void) {
         currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
-        currentState.shotWeight += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
+        float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
+        // if the output flow just started, consider only 50% of the clicks (probabilistically).
+        long consideredClicks = previousIsOutputFlow ? pumpClicks : pumpClicks * 0.5f;
+        currentState.shotWeight += consideredClicks * flowPerClick;
       }
       currentState.liquidPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
@@ -258,11 +264,7 @@ static void lcdRefresh(void) {
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
     #ifdef BEAUTIFY_GRAPH
-      lcdSetPressure(
-        brewActive
-          ? currentState.smoothedPressure * 10.f
-          : currentState.pressure * 10.f
-      );
+      lcdSetPressure(currentState.smoothedPressure * 10.f);
     #else
       lcdSetPressure(
         currentState.pressure > 0.f
@@ -352,7 +354,7 @@ void lcdTrigger1(void) {
       break;
     case 4:
       eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
-      eepromCurrentValues.graphBrew                     = lcdValues.graphBrew;
+      eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
       eepromCurrentValues.warmupState                   = lcdValues.warmupState;
       eepromCurrentValues.switchPhaseOnThreshold        = lcdValues.switchPhaseOnThreshold;
@@ -365,6 +367,7 @@ void lcdTrigger1(void) {
       break;
     case 6:
       eepromCurrentValues.setpoint                      = lcdValues.setpoint;
+      eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
       eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
       eepromCurrentValues.hpwr                          = lcdValues.hpwr;
       eepromCurrentValues.mainDivider                   = lcdValues.mainDivider;
@@ -423,6 +426,11 @@ static void updatePressureProfilePhases(void) {
       : runningCfg.shotStopOnCustomWeight;
   }
 
+  //Setup release pressure + fill@4ml/sec
+  if (runningCfg.basketPrefill) {
+    setFillBasketPhase(phaseCount++, 4.5f);
+  }
+
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
@@ -453,6 +461,11 @@ static void updatePressureProfilePhases(void) {
   }
 
   phases.count = phaseCount;
+}
+
+void setFillBasketPhase(int phaseIdx, float flowRate) {
+  float pressureAbove = 0.1f;
+  setFlowPhase(phaseIdx, flowRate, flowRate, -1, -1, pressureAbove, -1);
 }
 
 void setPressurePhase(int phaseIdx, float startBar, float endBar, float flowRestriction, int timeMs, float pressureTarget, float weightTarget) {
@@ -581,10 +594,11 @@ static void flushDeactivated(void) {
 static void fillBoiler(float targetBoilerFullPressure) {
 #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   static long elapsedTimeSinceStart = millis();
+  lcdSetUpTime((millis() > elapsedTimeSinceStart) ? (int)((millis() - elapsedTimeSinceStart) / 1000) : 0);
   if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
     unsigned long timePassed = millis() - elapsedTimeSinceStart;
 
-    if (currentState.pressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT) {
+    if (currentState.smoothedPressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT) {
       lcdShowPopup("Filling boiler!");
       openValve();
       setPumpToRawValue(80);

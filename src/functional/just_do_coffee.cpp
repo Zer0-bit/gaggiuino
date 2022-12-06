@@ -1,4 +1,5 @@
 #include "just_do_coffee.h"
+#include "../lcd/lcd.h"
 
 //delta stuff
 inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
@@ -13,9 +14,10 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
   BREW_TEMP_DELTA = mapRange(currentState.temperature, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
   BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(runningCfg.setpoint));
+  lcdTargetState(0); // setting the target mode to "brew temp"
 
   if (brewActive) {
-  // Applying the HPWR_OUT variable as part of the relay switching logic
+    // Applying the HPWR_OUT variable as part of the relay switching logic
     if (currentState.temperature > runningCfg.setpoint && currentState.temperature < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
       if (millis() - heaterWave > HPWR_OUT * runningCfg.brewDivider && !heaterState ) {
         setBoilerOff();
@@ -85,11 +87,12 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
 //#############################################################################################
 
 void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
+  lcdTargetState(1); // setting the target mode to "steam temp"
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
   if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
     setBoilerOn();
     brewActive ? setPumpFullOn() : setPumpOff();
-  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
+  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= runningCfg.steamSetPoint)) {
     setBoilerOn();
     if (currentState.pressure < 1.5f) {
       #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB
