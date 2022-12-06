@@ -10,16 +10,34 @@ enum PHASE_TYPE {
   PHASE_TYPE_PRESSURE
 };
 
-struct StopConditions {
-  float weight = -1; //example: when weight >0 stop this phase)
-  float waterVolume = -1;
+struct ShotSnapshot {
+  long timeInShot;
+  float pressure;
+  float flow;
+  float temperature;
+  float shotWeight;
+  float waterPumped;
+};
+
+struct PhaseStopConditions {
+  long time = -1;
   float pressureAbove = -1;
   float pressureBelow = -1;
   float flowAbove = -1;
   float flowBelow = -1;
-  long phaseDuration = -1;
+  float weight = -1; //example: when pushed weight >0 stop this phase)
+  float waterPumpedInPhase = -1;
+  float flowInPhase = -1;
 
-  bool isReached(SensorState& state, long timeInPhase, long timeInShot);
+  bool isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart);
+};
+
+struct GlobalStopConditions {
+  long time = -1;
+  float weight = -1;
+  float waterPumped = -1;
+
+  bool isReached(SensorState& state, long timeInShot);
 };
 
 struct Transition {
@@ -37,11 +55,11 @@ struct Phase {
   PHASE_TYPE type;
   Transition target;
   float restriction;
-  StopConditions stopConditions;
+  PhaseStopConditions stopConditions;
 
   float getTarget(unsigned long timeInPhase);
   float getRestriction();
-  bool isStopConditionReached(SensorState& currentState, unsigned long timeInPhase, unsigned long timeInShot);
+  bool isStopConditionReached(SensorState& currentState, unsigned long timeInShot, ShotSnapshot stateAtPhaseStart);
 };
 
 class CurrentPhase {
@@ -72,8 +90,9 @@ class PhaseProfiler {
 private:
   Phases& phases;
   short currentPhaseIdx = 0; // The index at which the profiler currently is.
-  long phaseChangedTime = 0; // When did the profiler move to this currentPhaseIdx (in milliseconds since the shot started)
+  ShotSnapshot phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0}; // State when the profiler move to this currentPhaseIdx
   CurrentPhase currentPhase = CurrentPhase(0, phases.phases[0], 0);
+  GlobalStopConditions globalStopConditions;
 
 public:
   PhaseProfiler(Phases& phases);
@@ -82,6 +101,7 @@ public:
   CurrentPhase& getCurrentPhase();
   bool isFinished();
   void reset();
+  void updateGlobalStopConditions(float weight, long time = -1, float waterVolume = -1);
 };
 
 #endif

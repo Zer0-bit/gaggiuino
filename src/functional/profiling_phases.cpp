@@ -4,7 +4,7 @@
 //------------------------------ Phase ---------------------------------//
 //----------------------------------------------------------------------//
 float Phase::getTarget(unsigned long timeInPhase) {
-  long transitionTime = max(0L, target.time > 0 ? target.time : stopConditions.phaseDuration);
+  long transitionTime = max(0L, target.time > 0 ? target.time : stopConditions.time);
   return mapRange(timeInPhase, 0, transitionTime, target.start, target.end, 1, target.curve);
 }
 
@@ -12,24 +12,33 @@ float Phase::getRestriction() {
   return restriction;
 }
 
-bool Phase::isStopConditionReached(SensorState& currentState, unsigned long timeInPhase, unsigned long timeInShot) {
-  return stopConditions.isReached(currentState, timeInPhase, timeInShot);
+bool Phase::isStopConditionReached(SensorState& currentState, unsigned long timeInShot, ShotSnapshot stateAtPhaseStart) {
+  return stopConditions.isReached(currentState, timeInShot, stateAtPhaseStart);
 }
 
 //----------------------------------------------------------------------//
 //-------------------------- StopConditions ----------------------------//
 //----------------------------------------------------------------------//
-bool StopConditions::isReached(SensorState& state, long timeInPhase, long timeInShot) {
+bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) {
   float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
-  float stopWeight = weight + flow / 2.f;
+  float stopDelta = flow / 2.f;
 
-  return (weight > 0 && state.shotWeight > stopWeight) ||
+  return (time >= 0 && timeInShot - stateAtPhaseStart.timeInShot >= time) ||
+    (weight > 0 && state.shotWeight > weight - stopDelta) ||
     (pressureAbove > 0 && state.pressure > pressureAbove) ||
     (pressureBelow > 0 && state.pressure < pressureBelow) ||
-    (waterVolume > 0 && state.liquidPumped > waterVolume) ||
+    (waterPumpedInPhase > 0 && state.waterPumped - stateAtPhaseStart.waterPumped > waterPumpedInPhase - stopDelta) ||
     (flowAbove > 0 && state.smoothedPumpFlow > flowAbove) ||
-    (flowBelow > 0 && state.smoothedPumpFlow < flowBelow) ||
-    (phaseDuration >= 0 && timeInPhase >= phaseDuration);
+    (flowBelow > 0 && state.smoothedPumpFlow < flowBelow);
+}
+
+bool GlobalStopConditions::isReached(SensorState& state, long timeInShot) {
+  float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
+  float stopDelta = flow / 2.f;
+
+  return (weight > 0 && state.shotWeight > weight - stopDelta) ||
+    (waterPumped > 0 && state.waterPumped > waterPumped) ||
+    (time >= 0 && timeInShot >= time);
 }
 
 //----------------------------------------------------------------------//
@@ -64,24 +73,25 @@ PhaseProfiler::PhaseProfiler(Phases& phases) : phases(phases) {}
 
 void PhaseProfiler::updatePhase(long timeInShot, SensorState& state) {
   short phaseIdx = currentPhaseIdx;
-  unsigned long timeInPhase = timeInShot - phaseChangedTime;
+  unsigned long timeInPhase = timeInShot - phaseChangedSnapshot.timeInShot;
 
-  if (phaseIdx >= phases.count) {
+  if (phaseIdx >= phases.count || globalStopConditions.isReached(state, timeInShot)) {
+    currentPhaseIdx = phases.count;
     phaseIdx = phases.count - 1;
     currentPhase.update(phaseIdx, phases.phases[phaseIdx], timeInPhase);
     return;
   }
 
-  if (!phases.phases[phaseIdx].isStopConditionReached(state, timeInPhase, timeInShot)) {
+  if (!phases.phases[phaseIdx].isStopConditionReached(state, timeInShot, phaseChangedSnapshot)) {
     currentPhase.update(phaseIdx, phases.phases[phaseIdx], timeInPhase);
     return;
   }
 
-  Phase& phase = phases.phases[phaseIdx];
-  long maxTimeAdvancement = (phase.stopConditions.phaseDuration > 0) ? phase.stopConditions.phaseDuration : timeInPhase;
+  // Phase& phase = phases.phases[phaseIdx];
+  // long maxTimeAdvancement = (phase.stopConditions.time > 0) ? phase.stopConditions.phaseDuration : timeInPhase;
 
   currentPhaseIdx += 1;
-  phaseChangedTime += fmin(maxTimeAdvancement, timeInPhase);
+  phaseChangedSnapshot = ShotSnapshot{timeInShot, state.pressure, state.pumpFlow, state.temperature, state.shotWeight, state.waterPumped};
   updatePhase(timeInShot, state);
 }
 
@@ -96,5 +106,9 @@ bool PhaseProfiler::isFinished() {
 
 void PhaseProfiler::reset() {
   currentPhaseIdx = 0;
-  phaseChangedTime = 0;
+  phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0};
+}
+
+void PhaseProfiler::updateGlobalStopConditions(float weight, long time, float waterVolume) {
+  globalStopConditions = GlobalStopConditions{time, weight, waterVolume};
 }
