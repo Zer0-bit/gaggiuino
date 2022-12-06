@@ -1,20 +1,17 @@
 #include "pump.h"
 #include "pindef.h"
 #include <PSM.h>
+#include "../utils.h"
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 
-float pressureInefficiencyConstant1 = 0.1224f;
-// float pressureInefficiencyConstant2 = 0.01052f;
-// float pressureInefficiencyConstant3 = 0.00401f;
-// float pressureInefficiencyConstant4 = 0.000705f;
-// float pressureInefficiencyConstant5 = 0.00002916f;
+float pressureInefficiencyConstant1 = -0.106f;
+float pressureInefficiencyConstant2 = -0.00785f;
+float pressureInefficiencyConstant3 = -0.000521f;
+float pressureInefficiencyConstant4 =  0.0000832f;
+float pressureInefficiencyConstant5 = -0.00000466f;
 
-float pressureInefficiencyConstant2 = 0.0107f;
-float pressureInefficiencyConstant3 = 0.0046f;
-float pressureInefficiencyConstant4 = 0.000705f;
-float pressureInefficiencyConstant5 = 0.000039f;
-float flowPerClickAtZeroBar = 0.275f;
+float flowPerClickAtZeroBar = 0.29f;
 short maxPumpClicksPerSecond = 50;
 
 // Initialising some pump specific specs, mainly:
@@ -83,25 +80,19 @@ long getAndResetClickCounter(void) {
 // Follows a compromise between the schematic and recorded findings
 //
 // The function is split to compensate for the rapid decline in fpc at low pressures
-float getFlowPerClick(float pressure) {
-    float fpc;
-    if (pressure <= 0.5f) {
-        fpc = flowPerClickAtZeroBar - pressureInefficiencyConstant1 * pressure;
-    } else {
-        fpc = (flowPerClickAtZeroBar - 0.055f) - (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 - (pressureInefficiencyConstant4 - pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
-    }
-
-    return 50.0f * fpc / (float)maxPumpClicksPerSecond;
+float getPumpFlowPerClick(float pressure) {
+    float fpc = (flowPerClickAtZeroBar + pressureInefficiencyConstant1) + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
+    return 50.0f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
 float getPumpFlow(float cps, float pressure) {
-    return cps * getFlowPerClick(pressure);
+    return cps * getPumpFlowPerClick(pressure);
 }
 
 // Currently there is no compensation for pressure measured at the puck, resulting in incorrect estimates
 float getClicksPerSecondForFlow(float flow, float pressure) {
-    float flowPerClick = getFlowPerClick(pressure);
+    float flowPerClick = getPumpFlowPerClick(pressure);
     float cps = flow / flowPerClick;
     return fminf(cps, maxPumpClicksPerSecond);
 }

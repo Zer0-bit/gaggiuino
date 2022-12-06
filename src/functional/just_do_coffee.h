@@ -4,7 +4,7 @@
 #include "../utils.h"
 #include "../peripherals/peripherals.h"
 #include "../peripherals/pump.h"
-#include "../eeprom_data.h"
+#include "../eeprom_data/eeprom_data.h"
 #include "../sensors_state.h"
 #include <Arduino.h>
 

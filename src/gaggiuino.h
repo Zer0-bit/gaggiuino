@@ -3,7 +3,7 @@
 
 #include "profiling_phases.h"
 #include "log.h"
-#include "eeprom_data.h"
+#include "eeprom_data/eeprom_data.h"
 #include "lcd/lcd.h"
 #include "peripherals/pump.h"
 #include "peripherals/pressure_sensor.h"
