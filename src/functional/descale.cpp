@@ -1,5 +1,7 @@
 #include "descale.h"
 
+short flushCounter;
+
 void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   static bool blink = true;
   static long timer = millis();
@@ -77,4 +79,60 @@ void solenoidBeat() {
   delay(1000);
   openValve();
   setPumpOff();
+}
+
+void backFlush(void) {
+  static unsigned long backflushTimer = millis();
+  if (brewState()) {
+    if (flushCounter >= 11) {
+      flushDeactivated();
+    }
+    else if (lcdCurrentPageId == 4 && millis() - backflushTimer <= 7000UL) {
+      flushActivated();
+    } else {
+      flushPhases();
+    }
+  } else {
+    flushDeactivated();
+    flushCounter = 0;
+  }
+}
+
+
+void flushActivated(void) {
+  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
+      openValve();
+  #endif
+  setPumpFullOn();
+}
+
+void flushDeactivated(void) {
+  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
+      closeValve();
+  #endif
+  setPumpOff();
+}
+
+void flushPhases(void) {
+  static long timer = millis();
+  if (flushCounter <= 10) {
+    if ((flushCounter % 2)) {
+      if (millis() - timer >= 5000) {
+        flushCounter++;
+        timer = millis();
+      }
+      openValve();
+      setPumpFullOn();
+    } else {
+      if (millis() - timer >= 5000) {
+        flushCounter++;
+        timer = millis();
+      }
+      closeValve();
+      setPumpOff();
+    }
+  } else {
+    flushDeactivated();
+    timer = millis();
+  }
 }
