@@ -13,7 +13,7 @@ struct SensorState {
   bool isPumpFlowFallingFast;
   float pumpFlow;
   float smoothedPumpFlow;
-  float liquidPumped;
+  float waterPumped;
   float weightFlow;
   float weight;
   float shotWeight;
