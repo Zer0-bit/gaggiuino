@@ -4,7 +4,7 @@
 //------------------------------ Phase ---------------------------------//
 //----------------------------------------------------------------------//
 float Phase::getTarget(unsigned long timeInPhase) {
-  long transitionTime = max(0L, target.time > 0 ? target.time : stopConditions.time);
+  long transitionTime = fmax(0L, target.time > 0 ? target.time : stopConditions.time);
   return mapRange(timeInPhase, 0, transitionTime, target.start, target.end, 1, target.curve);
 }
 
@@ -88,7 +88,8 @@ void PhaseProfiler::updatePhase(long timeInShot, SensorState& state) {
   }
 
   currentPhaseIdx += 1;
-  phaseChangedSnapshot = ShotSnapshot{timeInShot, state.pressure, state.pumpFlow, state.temperature, state.shotWeight, state.waterPumped};
+  long maxTimeAdvancement = (phases.phases[phaseIdx].stopConditions.time > 0) ? phases.phases[phaseIdx].stopConditions.time : timeInPhase;
+  phaseChangedSnapshot = ShotSnapshot{phaseChangedSnapshot.timeInShot + maxTimeAdvancement, state.pressure, state.pumpFlow, state.temperature, state.shotWeight, state.waterPumped};
   updatePhase(timeInShot, state);
 }
 
@@ -107,5 +108,7 @@ void PhaseProfiler::reset() {
 }
 
 void PhaseProfiler::updateGlobalStopConditions(float weight, long time, float waterVolume) {
-  globalStopConditions = GlobalStopConditions{time, weight, waterVolume};
+  globalStopConditions.weight = weight;
+  globalStopConditions.time = time;
+  globalStopConditions.waterPumped = waterVolume;
 }
