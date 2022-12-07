@@ -4,8 +4,8 @@
 //------------------------------ Phase ---------------------------------//
 //----------------------------------------------------------------------//
 float Phase::getTarget(unsigned long timeInPhase) {
-  long transitionTime = fmax(0L, target.time > 0 ? target.time : stopConditions.time);
-  return mapRange(timeInPhase, 0, transitionTime, target.start, target.end, 1, target.curve);
+  long transitionTime = fmax(0L, target.time > 0L ? target.time : stopConditions.time);
+  return mapRange(timeInPhase, 0.f, transitionTime, target.start, target.end, 1, target.curve);
 }
 
 float Phase::getRestriction() {
@@ -23,22 +23,22 @@ bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSna
   float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
   float stopDelta = flow / 2.f;
 
-  return (time >= 0 && timeInShot - stateAtPhaseStart.timeInShot >= time) ||
-    (weight > 0 && state.shotWeight > weight - stopDelta) ||
-    (pressureAbove > 0 && state.pressure > pressureAbove) ||
-    (pressureBelow > 0 && state.pressure < pressureBelow) ||
-    (waterPumpedInPhase > 0 && state.waterPumped - stateAtPhaseStart.waterPumped > waterPumpedInPhase - stopDelta) ||
-    (flowAbove > 0 && state.smoothedPumpFlow > flowAbove) ||
-    (flowBelow > 0 && state.smoothedPumpFlow < flowBelow);
+  return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= time) ||
+    (weight > 0.f && state.shotWeight > weight - stopDelta) ||
+    (pressureAbove > 0.f && state.pressure > pressureAbove) ||
+    (pressureBelow > 0.f && state.pressure < pressureBelow) ||
+    (waterPumpedInPhase > 0.f && state.waterPumped - stateAtPhaseStart.waterPumped > waterPumpedInPhase - stopDelta) ||
+    (flowAbove > 0.f && state.smoothedPumpFlow > flowAbove) ||
+    (flowBelow > 0.f && state.smoothedPumpFlow < flowBelow);
 }
 
 bool GlobalStopConditions::isReached(SensorState& state, long timeInShot) {
   float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
   float stopDelta = flow / 2.f;
 
-  return (weight > 0 && state.shotWeight > weight - stopDelta) ||
-    (waterPumped > 0 && state.waterPumped > waterPumped) ||
-    (time >= 0 && timeInShot >= time);
+  return (weight > 0.f && state.shotWeight > weight - stopDelta) ||
+    (waterPumped > 0.f && state.waterPumped > waterPumped) ||
+    (time >= 0L && timeInShot >= time);
 }
 
 //----------------------------------------------------------------------//

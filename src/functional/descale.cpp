@@ -81,13 +81,14 @@ void solenoidBeat() {
   setPumpOff();
 }
 
-void backFlush(void) {
+void backFlush(SensorState &currentState) {
   static unsigned long backflushTimer = millis();
+  unsigned long elapsedTime = millis() - backflushTimer;
   if (brewState()) {
     if (flushCounter >= 11) {
       flushDeactivated();
     }
-    else if (lcdCurrentPageId == 4 && millis() - backflushTimer <= 7000UL) {
+    else if (lcdCurrentPageId == 4 && elapsedTime <= 7000UL && currentState.smoothedPressure < 5.f) {
       flushActivated();
     } else {
       flushPhases();
@@ -95,6 +96,7 @@ void backFlush(void) {
   } else {
     flushDeactivated();
     flushCounter = 0;
+    backflushTimer = millis();
   }
 }
 

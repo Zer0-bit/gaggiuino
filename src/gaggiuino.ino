@@ -230,7 +230,7 @@ static void modeSelect(void) {
       break;
     case OPMODE_flush:
       nonBrewModeActive = true;
-      backFlush();
+      backFlush(currentState);
       justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPMODE_steam:
