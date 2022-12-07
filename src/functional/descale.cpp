@@ -50,7 +50,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
     closeValve();
     if ((millis() - timer) > 1000) {
       lcdBrewTimerStop();
-      lcdShowDescaleFinished();
+      lcdShowPopup("FINISHED");
       timer=millis();
     }
   } else {
