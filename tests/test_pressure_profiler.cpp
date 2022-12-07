@@ -48,9 +48,20 @@ void test_current_phase_calculation(void)
     TEST_ASSERT_EQUAL(1, phaseProfiler.getCurrentPhase().getIndex());
     TEST_ASSERT_EQUAL(4000, phaseProfiler.getCurrentPhase().getTimeInPhase());
 
-    phaseProfiler.updatePhase(30000, state);
-    TEST_ASSERT_EQUAL(4, phaseProfiler.getCurrentPhase().getIndex());
-    TEST_ASSERT_EQUAL(8000, phaseProfiler.getCurrentPhase().getTimeInPhase());
+    // phase switch triggered on 11.5sec
+    phaseProfiler.updatePhase(11500, state);
+    TEST_ASSERT_EQUAL(2, phaseProfiler.getCurrentPhase().getIndex());
+    TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getTimeInPhase());
+
+    // still in the same phase as it should last 1000msec
+    phaseProfiler.updatePhase(12499, state);
+    TEST_ASSERT_EQUAL(2, phaseProfiler.getCurrentPhase().getIndex());
+    TEST_ASSERT_EQUAL(999, phaseProfiler.getCurrentPhase().getTimeInPhase());
+
+    // still in the same phase as it should last 1000msec
+    phaseProfiler.updatePhase(12500, state);
+    TEST_ASSERT_EQUAL(3, phaseProfiler.getCurrentPhase().getIndex());
+    TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getTimeInPhase());
 }
 
 void test_get_pressure_for_phase(void)
@@ -125,8 +136,29 @@ void test_phases_with_weight_stop_condition(void) {
   TEST_ASSERT_FALSE(profiler.isFinished());
 
   profiler.updatePhase(4100, mockedState);
-  TEST_ASSERT_EQUAL(100, profiler.getCurrentPhase().getTimeInPhase());
+  TEST_ASSERT_EQUAL(0, profiler.getCurrentPhase().getTimeInPhase());
   TEST_ASSERT_TRUE(profiler.isFinished());
+}
+
+void test_phases_with_stop_conditions_and_skipped_phases() {
+  SensorState mockedState;
+  mockedState.shotWeight = 0.f;
+  mockedState.smoothedPumpFlow = 0.f;
+  mockedState.weightFlow = 0.f;
+
+  float weightTarget = 0.4f;
+  Phase array[] = {
+    presurePhaseWithWeightTarget(2, 2, 30000, weightTarget),
+    pressurePhase(0, 0, 0), // should be skipped
+    pressurePhase(5, 5, 1000)
+  };
+  Phases phases = Phases {3, array};
+  PhaseProfiler profiler = PhaseProfiler{phases};
+
+  mockedState.shotWeight = 0.5f;
+  profiler.updatePhase(2000, mockedState);
+  TEST_ASSERT_FALSE(profiler.isFinished());
+  TEST_ASSERT_EQUAL(2, profiler.getCurrentPhase().getIndex());
 }
 
 void runAllPressureProfilerTests() {
@@ -136,4 +168,5 @@ void runAllPressureProfilerTests() {
   RUN_TEST(test_get_pressure_for_phase_with_time_larger_than_duration);
   RUN_TEST(test_phases_with_zero_duration_are_skipped);
   RUN_TEST(test_phases_with_weight_stop_condition);
+  RUN_TEST(test_phases_with_stop_conditions_and_skipped_phases);
 }
