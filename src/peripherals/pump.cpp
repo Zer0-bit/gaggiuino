@@ -82,6 +82,7 @@ long getAndResetClickCounter(void) {
 // The function is split to compensate for the rapid decline in fpc at low pressures
 float getPumpFlowPerClick(float pressure) {
     float fpc = (flowPerClickAtZeroBar + pressureInefficiencyConstant1) + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
+    if (pressure <= 2.f) fpc = mapRange(pressure,0.f, 2.f, 0.275f, 0.215f, 3, EASE_IN_OUT);
     return 50.0f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 
