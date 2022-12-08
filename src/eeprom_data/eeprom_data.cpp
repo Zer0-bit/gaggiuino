@@ -204,7 +204,7 @@ void eepromInit(void) {
   }
 
   if (!readSuccess) {
-    LOG_ERROR("SECU_CHECK FAILED! Applying defaults! eepromMetadata.version=" + version);
+    LOG_ERROR("SECU_CHECK FAILED! Applying defaults! eepromMetadata.version=%d", version);
     eepromMetadata.values = getEepromDefaults();
   }
 
