@@ -87,12 +87,11 @@ void backFlush(SensorState &currentState) {
   if (brewState()) {
     if (flushCounter >= 11) {
       flushDeactivated();
+      return;
     }
-    else if (lcdCurrentPageId == 4 && elapsedTime <= 7000UL && currentState.smoothedPressure < 5.f) {
-      flushActivated();
-    } else {
+    else if (elapsedTime > 7000UL && currentState.smoothedPressure > 5.f) {
       flushPhases();
-    }
+    } else flushActivated();
   } else {
     flushDeactivated();
     flushCounter = 0;
