@@ -47,14 +47,6 @@ public:
       return;
     }
 
-    // If pressure or flow is changing quickly we're not there yet
-    // float piPressureTarget = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
-    // if (pressure < piPressureTarget) {
-    //   if (state.isPressureRisingFast || state.isPumpFlowRisingFast) {
-    //     return;
-    //   }
-    // }
-
     // Pressure has to reach at least half way to pressureTarget
     if (pressure < pressureTarget) {
       return;
