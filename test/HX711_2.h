@@ -1,11 +1,11 @@
 #include <Arduino.h>
 
-class HX711
+class HX711_2
 {
   public:
 
-    HX711();
-    virtual ~HX711();
+    HX711_2();
+    virtual ~HX711_2();
     // Initialize library with data output pin, clock input pin and gain factor.
     // Channel selection is made by passing the appropriate gain:
     // - With a gain factor of 64 or 128, channel A is selected
