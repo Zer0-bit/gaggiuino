@@ -58,3 +58,10 @@ void HX711_2::set_scale(float scale, float scale2) {
 
 }
 
+void HX711_2::power_down() {
+
+};
+
+void HX711_2::power_up() {
+
+};
