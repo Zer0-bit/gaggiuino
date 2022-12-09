@@ -1,4 +1,4 @@
-#include "HX711.h"
+#include "HX711_2.h"
 
 
 
