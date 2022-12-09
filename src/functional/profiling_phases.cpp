@@ -88,7 +88,6 @@ void PhaseProfiler::updatePhase(long timeInShot, SensorState& state) {
   }
 
   currentPhaseIdx += 1;
-  long maxTimeAdvancement = (phases.phases[phaseIdx].stopConditions.time > 0) ? phases.phases[phaseIdx].stopConditions.time : timeInPhase;
   phaseChangedSnapshot = ShotSnapshot{timeInShot, state.pressure, state.pumpFlow, state.temperature, state.shotWeight, state.waterPumped};
   updatePhase(timeInShot, state);
 }
