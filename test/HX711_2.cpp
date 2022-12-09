@@ -11,7 +11,7 @@ HX711_2::~HX711_2() {
 }
 
 
-void HX711_2::begin(byte dout, byte pd_sck, byte gain) {
+void HX711_2::begin(byte dout, byte dout2, byte pd_sck, byte pd_sck2, byte gain, unsigned char sck_mode) {
 
 }
 
@@ -40,23 +40,21 @@ long HX711_2::read(unsigned long timeout) {
   return 0;
 }
 
-long HX711_2::read_average(byte times) {
-  return 0;
+void HX711_2::read_average(long *readValues, byte times) {
 }
 
 long HX711_2::get_value(byte times) {
   return 0;
 }
 
-float HX711_2::get_units(byte times) {
-  return 0;
+void HX711_2::get_units(float *readValues, byte times) {
 }
 
 void HX711_2::tare(byte times) {
 
 }
 
-void HX711_2::set_scale(float scale) {
+void HX711_2::set_scale(float scale, float scale2) {
 
 }
 

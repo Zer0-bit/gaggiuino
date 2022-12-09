@@ -11,7 +11,7 @@ class HX711_2
     // - With a gain factor of 64 or 128, channel A is selected
     // - With a gain factor of 32, channel B is selected
     // The library default is "128" (Channel A).
-    void begin(byte dout, byte pd_sck, byte gain = 128);
+    void HX711_2::begin(byte dout, byte dout2, byte pd_sck, byte pd_sck2, byte gain, unsigned char sck_mode);
     // Check if HX711 is ready
     // from the datasheet: When output data is not ready for retrieval, digital output pin DOUT is high. Serial clock
     // input PD_SCK should be low. When DOUT goes to low, it indicates data is ready for retrieval.
@@ -27,16 +27,16 @@ class HX711_2
     // waits for the chip to be ready and returns a reading
     long read(unsigned long timeout = 1000);
     // returns an average reading; times = how many times to read
-    long read_average(byte times = 10);
+    void read_average(long *readValues, byte times  = 10);
     // returns (read_average() - OFFSET), that is the current value without the tare weight; times = how many readings to do
     long get_value(byte times = 1);
     // returns get_value() divided by SCALE, that is the raw value divided by a value obtained via calibration
     // times = how many readings to do
-    float get_units(byte times = 1);
+    void get_units(float *readValues, byte times = 1);
     // set the OFFSET value for tare weight; times = how many times to read the tare value
     void tare(byte times = 10);
     // set the SCALE value; this value is used to convert the raw data to "human readable" data (measure units)
-    void set_scale(float scale = 1.f);
+    void set_scale(float scale = 1.f, float scale2 = 1.f);
     // get the current SCALE
     float get_scale();
     // set OFFSET, the value that's subtracted from the actual reading (tare weight)
