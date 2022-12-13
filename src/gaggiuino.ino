@@ -583,8 +583,8 @@ static void brewParamsReset(void) {
 }
 
 static void fillBoiler(float targetBoilerFullPressure) {
-#if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   static long elapsedTimeSinceStart = millis();
+#if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   lcdSetUpTime((millis() > elapsedTimeSinceStart) ? (int)((millis() - elapsedTimeSinceStart) / 1000) : 0);
   if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
     unsigned long timePassed = millis() - elapsedTimeSinceStart;
