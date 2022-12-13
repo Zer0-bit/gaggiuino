@@ -28,7 +28,7 @@ struct PhaseStopConditions {
   float weight = -1; //example: when pushed weight >0 stop this phase)
   float waterPumpedInPhase = -1;
 
-  bool isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart);
+  bool isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
 struct GlobalStopConditions {
@@ -56,19 +56,19 @@ struct Phase {
   float restriction;
   PhaseStopConditions stopConditions;
 
-  float getTarget(unsigned long timeInPhase);
-  float getRestriction();
-  bool isStopConditionReached(SensorState& currentState, unsigned long timeInShot, ShotSnapshot stateAtPhaseStart);
+  float getTarget(unsigned long timeInPhase) const;
+  float getRestriction() const;
+  bool isStopConditionReached(SensorState& currentState, unsigned long timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
 class CurrentPhase {
 private:
   int index;
-  Phase& phase;
+  const Phase* phase;
   unsigned long timeInPhase;
 
 public:
-  CurrentPhase(int index, Phase& phase, unsigned long timeInPhase);
+  CurrentPhase(int index, const Phase& phase, unsigned long timeInPhase);
   CurrentPhase(const CurrentPhase& currentPhase);
 
   Phase getPhase();
@@ -77,7 +77,7 @@ public:
   long getTimeInPhase();
   float getTarget();
   float getRestriction();
-  void update(int index, Phase& phase, unsigned long timeInPhase);
+  void update(int index, const Phase& phase, unsigned long timeInPhase);
 };
 
 struct Phases {

@@ -3,23 +3,23 @@
 //----------------------------------------------------------------------//
 //------------------------------ Phase ---------------------------------//
 //----------------------------------------------------------------------//
-float Phase::getTarget(unsigned long timeInPhase) {
+float Phase::getTarget(unsigned long timeInPhase) const {
   long transitionTime = fmax(0L, target.time > 0L ? target.time : stopConditions.time);
   return mapRange(timeInPhase, 0.f, transitionTime, target.start, target.end, 1, target.curve);
 }
 
-float Phase::getRestriction() {
+float Phase::getRestriction() const {
   return restriction;
 }
 
-bool Phase::isStopConditionReached(SensorState& currentState, unsigned long timeInShot, ShotSnapshot stateAtPhaseStart) {
+bool Phase::isStopConditionReached(SensorState& currentState, unsigned long timeInShot, ShotSnapshot stateAtPhaseStart) const {
   return stopConditions.isReached(currentState, timeInShot, stateAtPhaseStart);
 }
 
 //----------------------------------------------------------------------//
 //-------------------------- StopConditions ----------------------------//
 //----------------------------------------------------------------------//
-bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) {
+bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
   float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
   float stopDelta = flow / 2.f;
 
@@ -44,24 +44,24 @@ bool GlobalStopConditions::isReached(SensorState& state, long timeInShot) {
 //----------------------------------------------------------------------//
 //--------------------------- CurrentPhase -----------------------------//
 //----------------------------------------------------------------------//
-CurrentPhase::CurrentPhase(int index, Phase& phase, unsigned long timeInPhase) : index(index), phase{ phase }, timeInPhase(timeInPhase) {}
+CurrentPhase::CurrentPhase(int index, const Phase& phase, unsigned long timeInPhase) : index(index), phase{ &phase }, timeInPhase(timeInPhase) {}
 CurrentPhase::CurrentPhase(const CurrentPhase& currentPhase) : index(currentPhase.index), phase{ currentPhase.phase }, timeInPhase(currentPhase.timeInPhase) {}
 
-Phase CurrentPhase::getPhase() { return phase; }
+Phase CurrentPhase::getPhase() { return *phase; }
 
-PHASE_TYPE CurrentPhase::getType() { return phase.type; }
+PHASE_TYPE CurrentPhase::getType() { return phase->type; }
 
 int CurrentPhase::getIndex() { return index; }
 
 long CurrentPhase::getTimeInPhase() { return timeInPhase; }
 
-float CurrentPhase::getTarget() { return phase.getTarget(timeInPhase); }
+float CurrentPhase::getTarget() { return phase->getTarget(timeInPhase); }
 
-float CurrentPhase::getRestriction() { return phase.getRestriction(); }
+float CurrentPhase::getRestriction() { return phase->getRestriction(); }
 
-void CurrentPhase::update(int index, Phase& phase, unsigned long timeInPhase) {
+void CurrentPhase::update(int index, const Phase& phase, unsigned long timeInPhase) {
   CurrentPhase::index = index;
-  CurrentPhase::phase = phase;
+  CurrentPhase::phase = &phase;
   CurrentPhase::timeInPhase = timeInPhase;
 }
 
