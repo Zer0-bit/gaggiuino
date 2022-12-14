@@ -161,6 +161,28 @@ void test_phases_with_stop_conditions_and_skipped_phases() {
   TEST_ASSERT_EQUAL(2, profiler.getCurrentPhase().getIndex());
 }
 
+void test_phases_stay_constant() {
+  // Check that the phases stay constant after updating and resetting
+
+  phaseProfiler.reset();
+  phaseProfiler.updatePhase(0, state);
+  phaseProfiler.updatePhase(550, state);
+  phaseProfiler.updatePhase(1000, state);
+  phaseProfiler.updatePhase(12500, state);
+  phaseProfiler.reset();
+
+  TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getIndex());
+  TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getTimeInPhase());
+
+  TEST_ASSERT_EQUAL(1000, phases.phases[0].stopConditions.time);
+  TEST_ASSERT_EQUAL(0, phases.phases[0].target.start);
+  TEST_ASSERT_EQUAL(2, phases.phases[0].target.end);
+
+  TEST_ASSERT_EQUAL(10000, phases.phases[1].stopConditions.time);
+  TEST_ASSERT_EQUAL(2, phases.phases[1].target.start);
+  TEST_ASSERT_EQUAL(2, phases.phases[1].target.end);
+}
+
 void runAllPressureProfilerTests() {
   RUN_TEST(test_current_phase_calculation);
   RUN_TEST(test_get_pressure_for_phase);
@@ -169,4 +191,5 @@ void runAllPressureProfilerTests() {
   RUN_TEST(test_phases_with_zero_duration_are_skipped);
   RUN_TEST(test_phases_with_weight_stop_condition);
   RUN_TEST(test_phases_with_stop_conditions_and_skipped_phases);
+  RUN_TEST(test_phases_stay_constant);
 }
