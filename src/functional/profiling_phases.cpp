@@ -104,6 +104,7 @@ bool PhaseProfiler::isFinished() {
 void PhaseProfiler::reset() {
   currentPhaseIdx = 0;
   phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0};
+  currentPhase.update(0, phases.phases[0], 0);
 }
 
 void PhaseProfiler::updateGlobalStopConditions(float weight, long time, float waterVolume) {
