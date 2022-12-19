@@ -33,6 +33,7 @@
 #define TRAY_FULL_THRESHOLD     700.f
 #define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
 #define BOILER_FILL_TIMEOUT     8000UL
+#define BOILER_FILL_PRESSURE    1.f
 
 
 
