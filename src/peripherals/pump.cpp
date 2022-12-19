@@ -4,12 +4,13 @@
 #include "../utils.h"
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
-
-float pressureInefficiencyConstant1 = -0.106f;
-float pressureInefficiencyConstant2 = -0.00785f;
-float pressureInefficiencyConstant3 = -0.000521f;
-float pressureInefficiencyConstant4 =  0.0000832f;
-float pressureInefficiencyConstant5 = -0.00000466f;
+float pressureInefficiencyConstant0 = -0.128f;
+float pressureInefficiencyConstant1 =  0.00222;
+float pressureInefficiencyConstant2 = -0.00184f;
+float pressureInefficiencyConstant3 =  0.0000915f;
+float pressureInefficiencyConstant4 =  0.00000594f;
+float pressureInefficiencyConstant5 = -0.000000798f;
+float pressureInefficiencyConstant6 =  0.0000000186f;
 
 float flowPerClickAtZeroBar = 0.29f;
 short maxPumpClicksPerSecond = 50;
@@ -81,7 +82,7 @@ long getAndResetClickCounter(void) {
 //
 // The function is split to compensate for the rapid decline in fpc at low pressures
 float getPumpFlowPerClick(float pressure) {
-    float fpc = (flowPerClickAtZeroBar + pressureInefficiencyConstant1) + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + pressureInefficiencyConstant5 * pressure) * pressure) * pressure) * pressure;
+    float fpc = (flowPerClickAtZeroBar + pressureInefficiencyConstant0) + (pressureInefficiencyConstant1 + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + (pressureInefficiencyConstant5 + pressureInefficiencyConstant6 * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
     return 50.0f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 

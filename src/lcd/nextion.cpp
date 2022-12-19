@@ -243,10 +243,6 @@ void lcdShowPopup(const char *msg) {
   }
 }
 
-void lcdShowDescaleFinished(void) {
-  myNex.writeStr("t14.txt", "FINISHED!");
-}
-
 void lcdTargetState(int val) {
   myNex.writeNum("targetState", val);
 }

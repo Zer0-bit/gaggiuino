@@ -7,7 +7,7 @@ void TEST_ASSERT_EQUAL_FLOAT_ACCURACY(float expected, float actual, int digits) 
 }
 
 void test_pump_clicks_for_flow_correct_binary_search(void) {
-    TEST_ASSERT_EQUAL_FLOAT_ACCURACY(30, getClicksPerSecondForFlow(5, 2), 0);
+    TEST_ASSERT_EQUAL_FLOAT_ACCURACY(31, getClicksPerSecondForFlow(5, 2), 0);
     TEST_ASSERT_EQUAL_FLOAT_ACCURACY(50, getClicksPerSecondForFlow(10, 9), 0);
     TEST_ASSERT_EQUAL_FLOAT_ACCURACY(0, getClicksPerSecondForFlow(0, 0), 0);
 }
@@ -18,6 +18,6 @@ void test_pump_get_flow(void) {
 }
 
 void runAllPumpTests() {
-    RUN_TEST(test_pump_clicks_for_flow_correct_binary_search);
-    RUN_TEST(test_pump_get_flow);
+  RUN_TEST(test_pump_clicks_for_flow_correct_binary_search);
+  RUN_TEST(test_pump_get_flow);
 }

@@ -1,7 +1,7 @@
 #ifndef PREDICTIVE_WEIGHT_H
 #define PREDICTIVE_WEIGHT_H
 
-#include "../profiling_phases.h"
+#include "profiling_phases.h"
 #include "../sensors_state.h"
 #include "../eeprom_data/eeprom_data.h"
 
@@ -20,7 +20,7 @@ public:
   void update(SensorState& state, CurrentPhase& phase, eepromValues_t cfg) {
     // If at least 50ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
-    if (isForceStarted || outputFlowStarted || state.liquidPumped >= 55.f) {
+    if (isForceStarted || outputFlowStarted || state.waterPumped >= 55.f) {
       outputFlowStarted = true;
       return;
     }
@@ -39,21 +39,13 @@ public:
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
     // If the pressure or flow are raising too fast dismiss the spike from the output.
-    if (state.isPressureRisingFast || state.isPumpFlowRisingFast || state.isPumpFlowFallingFast) {
+    if (state.isPressureRisingFast || state.isPumpFlowRisingFast || state.isPumpFlowFallingFast || state.pumpFlow >= 10.f) {
       return;
     }
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
     if (resistanceDelta > 500.f || puckResistance < 1100.f) {
       return;
     }
-
-    // If pressure or flow is changing quickly we're not there yet
-    // float piPressureTarget = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
-    // if (pressure < piPressureTarget) {
-    //   if (state.isPressureRisingFast || state.isPumpFlowRisingFast) {
-    //     return;
-    //   }
-    // }
 
     // Pressure has to reach at least half way to pressureTarget
     if (pressure < pressureTarget) {

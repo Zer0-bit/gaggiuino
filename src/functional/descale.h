@@ -18,7 +18,7 @@
 
 void deScale(eepromValues_t &runningCfg, SensorState &currentState);
 void solenoidBeat(void);
-void backFlush(void);
+void backFlush(SensorState &currentState);
 void flushActivated(void);
 void flushDeactivated(void);
 void flushPhases(void);

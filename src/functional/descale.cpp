@@ -50,7 +50,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
     closeValve();
     if ((millis() - timer) > 1000) {
       lcdBrewTimerStop();
-      lcdShowDescaleFinished();
+      lcdShowPopup("FINISHED");
       timer=millis();
     }
   } else {
@@ -81,20 +81,21 @@ void solenoidBeat() {
   setPumpOff();
 }
 
-void backFlush(void) {
+void backFlush(SensorState &currentState) {
   static unsigned long backflushTimer = millis();
+  unsigned long elapsedTime = millis() - backflushTimer;
   if (brewState()) {
     if (flushCounter >= 11) {
       flushDeactivated();
+      return;
     }
-    else if (lcdCurrentPageId == 4 && millis() - backflushTimer <= 7000UL) {
-      flushActivated();
-    } else {
+    else if (elapsedTime > 7000UL && currentState.smoothedPressure > 5.f) {
       flushPhases();
-    }
+    } else flushActivated();
   } else {
     flushDeactivated();
     flushCounter = 0;
+    backflushTimer = millis();
   }
 }
 
