@@ -74,7 +74,7 @@ void setup(void) {
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
 
-  //
+  // IWDC init
   IWatchdog.begin(3000000);
   LOG_INFO("Internal watchdog Init");
 }
