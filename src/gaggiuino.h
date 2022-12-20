@@ -16,6 +16,7 @@
 #include "functional/profiling_phases.h"
 
 #include <Arduino.h>
+#include <IWatchdog.h>
 #include <SimpleKalmanFilter.h>
 
 // Define some const values

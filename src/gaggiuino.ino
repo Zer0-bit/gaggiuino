@@ -73,6 +73,10 @@ void setup(void) {
 
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
+
+  //
+  IWatchdog.begin(3000000);
+  LOG_INFO("Internal watchdog Init");
 }
 
 //##############################################################################################################################
@@ -605,6 +609,10 @@ static void fillBoiler(float targetBoilerFullPressure) {
 }
 
 static void systemHealthCheck(float pressureThreshold) {
+  //Reloading the watchdog timer, if this function fails to run MCU is rebooted
+  IWatchdog.reload();
+
+  //Releasing the excess pressure after steaming or brewing if necessary
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   if (!brewState() && !steamState()) {
     if (millis() >= systemHealthTimer) {
