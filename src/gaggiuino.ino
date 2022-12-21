@@ -618,6 +618,8 @@ static void systemHealthCheck(float pressureThreshold) {
     if (millis() >= systemHealthTimer) {
       while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < STEAM_WAND_HOT_WATER_TEMP)
       {
+        //Reloading the watchdog timer, if this function fails to run MCU is rebooted
+        IWatchdog.reload();
         lcdShowPopup("Releasing pressure!");
         setPumpOff();
         setBoilerOff();
@@ -633,6 +635,8 @@ static void systemHealthCheck(float pressureThreshold) {
   /* This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
   If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating */
   while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
+    //Reloading the watchdog timer, if this function fails to run MCU is rebooted
+    IWatchdog.reload();
     /* In the event of the temp failing to read while the SSR is HIGH
     we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
     setPumpOff();
