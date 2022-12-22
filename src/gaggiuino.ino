@@ -125,6 +125,7 @@ static void sensorsReadWeight(void) {
 }
 
 static void sensorsReadPressure(void) {
+  pressureReadSensors();
   if (millis() > pressureTimer) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
