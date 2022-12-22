@@ -10,8 +10,8 @@ SimpleKalmanFilter predictTempVariation(1.f, 1.f, 1.f);
 
 //default phases. Updated in updateProfilerPhases.
 Phase phaseArray[8];
-Phases phases {8,  phaseArray};
-PhaseProfiler phaseProfiler{phases};
+Profile profile {8,  phaseArray};
+PhaseProfiler phaseProfiler{profile};
 
 PredictiveWeight predictiveWeight;
 
@@ -472,7 +472,7 @@ static void updateProfilerPhases(void) {
     setPressurePhase(phaseCount++, Transition{preInfusionFinishBar, 9, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1);
   }
 
-  phases.count = phaseCount;
+  profile.count = phaseCount;
 }
 
 void setFillBasketPhase(int phaseIdx, float flowRate) {
@@ -495,10 +495,10 @@ void setPhase(
   int timeMs,
   float pressureAbove
 ) {
-  phases.phases[phaseIdx].type              = type;
-  phases.phases[phaseIdx].target            = target;
-  phases.phases[phaseIdx].restriction       = restriction;
-  phases.phases[phaseIdx].stopConditions    = PhaseStopConditions{
+  profile.phases[phaseIdx].type              = type;
+  profile.phases[phaseIdx].target            = target;
+  profile.phases[phaseIdx].restriction       = restriction;
+  profile.phases[phaseIdx].stopConditions    = PhaseStopConditions{
     timeMs,
     pressureAbove,
     -1, // pressureBelow

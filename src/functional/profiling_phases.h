@@ -11,7 +11,7 @@ enum PHASE_TYPE {
 };
 
 struct ShotSnapshot {
-  long timeInShot;
+  uint32_t timeInShot;
   float pressure;
   float flow;
   float temperature;
@@ -56,9 +56,9 @@ struct Phase {
   float restriction;
   PhaseStopConditions stopConditions;
 
-  float getTarget(unsigned long timeInPhase) const;
+  float getTarget(uint32_t timeInPhase) const;
   float getRestriction() const;
-  bool isStopConditionReached(SensorState& currentState, unsigned long timeInShot, ShotSnapshot stateAtPhaseStart) const;
+  bool isStopConditionReached(SensorState& currentState, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
 class CurrentPhase {
@@ -68,7 +68,7 @@ private:
   unsigned long timeInPhase;
 
 public:
-  CurrentPhase(int index, const Phase& phase, unsigned long timeInPhase);
+  CurrentPhase(int index, const Phase& phase, uint32_t timeInPhase);
   CurrentPhase(const CurrentPhase& currentPhase);
 
   Phase getPhase();
@@ -77,26 +77,26 @@ public:
   long getTimeInPhase();
   float getTarget();
   float getRestriction();
-  void update(int index, const Phase& phase, unsigned long timeInPhase);
+  void update(int index, const Phase& phase, uint32_t timeInPhase);
 };
 
-struct Phases {
+struct Profile {
   short count;
   Phase* phases;
 };
 
 class PhaseProfiler {
 private:
-  Phases& phases;
+  Profile& profile;
   short currentPhaseIdx = 0; // The index at which the profiler currently is.
   ShotSnapshot phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0}; // State when the profiler move to this currentPhaseIdx
-  CurrentPhase currentPhase = CurrentPhase(0, phases.phases[0], 0);
+  CurrentPhase currentPhase = CurrentPhase(0, profile.phases[0], 0);
   GlobalStopConditions globalStopConditions;
 
 public:
-  PhaseProfiler(Phases& phases);
+  PhaseProfiler(Profile& profile);
   // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
-  void updatePhase(long timeInShot, SensorState& state);
+  void updatePhase(uint32_t timeInShot, SensorState& state);
   CurrentPhase& getCurrentPhase();
   bool isFinished();
   void reset();
