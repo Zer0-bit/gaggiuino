@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+void    pressureReadSensors(void);
 void    adsInit(void);
 void    i2cResetState(void);
 float   getPressure(void);
