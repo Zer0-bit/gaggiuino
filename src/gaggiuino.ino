@@ -74,9 +74,7 @@ void setup(void) {
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
 
-  // IWDC init
-  IWatchdog.begin(3000000);
-  LOG_INFO("Internal watchdog Init");
+  iwdcInit();
 }
 
 //##############################################################################################################################
@@ -648,4 +646,15 @@ static void systemHealthCheck(float pressureThreshold) {
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }
+}
+
+/*Checking whether system is booting after a hard reset initiated by the internal watchdog.*/
+void iwdcInit(void) {
+  // IWDC init
+  if(IWatchdog.isReset()) {
+    lcdShowPopup("WATCHDOG RESTARTED");
+    IWatchdog.clearReset();
+  }
+  IWatchdog.begin(3000000);
+  LOG_INFO("Internal watchdog Init");
 }
