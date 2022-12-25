@@ -1,10 +1,7 @@
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
 #endif
-
 #include "gaggiuino.h"
-
-extern long steamTime;
 
 SimpleKalmanFilter smoothPressure(2.f, 2.f, 0.5f);
 SimpleKalmanFilter smoothPumpFlow(2.f, 2.f, 0.5f);

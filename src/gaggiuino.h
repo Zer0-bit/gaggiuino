@@ -62,6 +62,7 @@ unsigned long brewingTimer = 0;
 unsigned long thermoTimer = 0;
 unsigned long scalesTimer = 0;
 unsigned long flowTimer = 0;
+unsigned long steamTime = millis();
 unsigned long trayTimer = millis();
 unsigned long systemHealthTimer = 0;
 

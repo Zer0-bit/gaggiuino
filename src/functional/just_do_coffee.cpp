@@ -1,8 +1,6 @@
 #include "just_do_coffee.h"
 #include "../lcd/lcd.h"
 
-// Steam global timer
-long steamTime = millis();
 //delta stuff
 inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
 
