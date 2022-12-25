@@ -88,10 +88,9 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
 
 void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
   static long steamTime = millis();
-  long steamTimeout;
   /*In case steam is forgotten ON for more than 15 min*/
   if (currentState.smoothedPressure > 3.f) {
-    steamTimeout = millis() - steamTime;
+    long steamTimeout = millis() - steamTime;
     steamTimeout >= STEAM_TIMEOUT ? currentState.isSteamForgottenON = true : currentState.isSteamForgottenON = false;
   } else steamTime = millis();
 
