@@ -14,11 +14,8 @@
 #define STEAM_TIMEOUT           900000
 #define DELTA_RANGE             0.25f // % to apply as delta
 
-// Steam global timer
-extern unsigned long steamTime;
-
 void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, bool preinfusionFinished);
-void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive);
+void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, unsigned long steamTime);
 
 #endif
 

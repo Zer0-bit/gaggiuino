@@ -226,7 +226,7 @@ static void modeSelect(void) {
         profiling();
         steamTime = millis();
       }
-      else steamCtrl(runningCfg, currentState, brewActive);
+      else steamCtrl(runningCfg, currentState, brewActive, steamTime);
       break;
     case OPMODE_manual:
       nonBrewModeActive = false;
@@ -246,7 +246,7 @@ static void modeSelect(void) {
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
         steamTime = millis();
       } else {
-        steamCtrl(runningCfg, currentState, brewActive);
+        steamCtrl(runningCfg, currentState, brewActive, steamTime);
       }
       break;
     case OPMODE_descale:
