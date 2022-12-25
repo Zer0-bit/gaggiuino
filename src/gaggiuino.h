@@ -82,7 +82,6 @@ bool homeScreenScalesEnabled = false;
 float previousSmoothedPressure;
 float previousSmoothedPumpFlow;
 bool startupInitFinished;
-extern long steamTime;
 
 static void systemHealthCheck(float pressureThreshold);
 
