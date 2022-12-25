@@ -1,6 +1,8 @@
 #include "just_do_coffee.h"
 #include "../lcd/lcd.h"
 
+// Steam global timer
+long steamTime = millis();
 //delta stuff
 inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
 
@@ -87,21 +89,14 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
 //#############################################################################################
 
 void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
-  static long steamTime = millis();
-  /*In case steam is forgotten ON for more than 15 min*/
-  if (currentState.smoothedPressure > 3.f) {
-    long steamTimeout = millis() - steamTime;
-    steamTimeout >= STEAM_TIMEOUT ? currentState.isSteamForgottenON = true : currentState.isSteamForgottenON = false;
-  } else steamTime = millis();
-
   lcdTargetState(1); // setting the target mode to "steam temp"
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
   if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
     setBoilerOn();
     brewActive ? setPumpFullOn() : setPumpOff();
-  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= runningCfg.steamSetPoint)) {
+  }else if ((currentState.smoothedPressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= runningCfg.steamSetPoint)) {
     setBoilerOn();
-    if (currentState.pressure < 1.5f) {
+    if (currentState.smoothedPressure < 1.5f) {
       #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB
         #if not defined (DREAM_STEAM_DISABLED) // disabled for bigger boilers which have no  need of adjusting the pressure
         openValve();
@@ -115,7 +110,13 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   } else {
     setBoilerOff();
     #ifndef DREAM_STEAM_DISABLED
-      (currentState.pressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
+      (currentState.smoothedPressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
     #endif
   }
+
+  /*In case steam is forgotten ON for more than 15 min*/
+  if (currentState.smoothedPressure > 3.f) {
+    long steamTimeout = millis() - steamTime;
+    steamTimeout >= STEAM_TIMEOUT ? currentState.isSteamForgottenON = true : currentState.isSteamForgottenON = false;
+  } else steamTime = millis();
 }
