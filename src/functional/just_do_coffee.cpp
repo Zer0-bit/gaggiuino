@@ -93,7 +93,7 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   if (currentState.smoothedPressure > 3.f) {
     steamTimeout = millis() - steamTime;
     steamTimeout >= STEAM_TIMEOUT ? currentState.isSteamForgottenON = true : currentState.isSteamForgottenON = false;
-  }
+  } else steamTime = millis();
 
   lcdTargetState(1); // setting the target mode to "steam temp"
     // steam temp control, needs to be aggressive to keep steam pressure acceptable
