@@ -62,6 +62,7 @@ unsigned long brewingTimer = 0;
 unsigned long thermoTimer = 0;
 unsigned long scalesTimer = 0;
 unsigned long flowTimer = 0;
+unsigned long steamTime = millis();
 unsigned long trayTimer = millis();
 unsigned long systemHealthTimer = 0;
 
@@ -82,7 +83,6 @@ bool homeScreenScalesEnabled = false;
 float previousSmoothedPressure;
 float previousSmoothedPumpFlow;
 bool startupInitFinished;
-extern long steamTime;
 
 static void systemHealthCheck(float pressureThreshold);
 
