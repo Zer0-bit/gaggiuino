@@ -620,7 +620,7 @@ static void systemHealthCheck(float pressureThreshold) {
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   if (!brewState() && !steamState()) {
     if (millis() >= systemHealthTimer) {
-      while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < STEAM_WAND_HOT_WATER_TEMP)
+      while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
       {
         //Reloading the watchdog timer, if this function fails to run MCU is rebooted
         IWatchdog.reload();
