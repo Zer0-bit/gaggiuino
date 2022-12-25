@@ -223,15 +223,20 @@ static void modeSelect(void) {
     case OPMODE_everythingFlowProfiled:
     case OPMODE_pressureBasedPreinfusionAndFlowProfile:
       nonBrewModeActive = false;
-      if (!steamState()) profiling();
+      if (!steamState()) {
+        profiling();
+        steamTime = millis();
+      }
       else steamCtrl(runningCfg, currentState, brewActive);
       break;
     case OPMODE_manual:
       nonBrewModeActive = false;
+      if (!steamState()) steamTime = millis();
       manualFlowControl();
       break;
     case OPMODE_flush:
       nonBrewModeActive = true;
+      if (!steamState()) steamTime = millis();
       backFlush(currentState);
       justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
@@ -240,12 +245,14 @@ static void modeSelect(void) {
       if (!steamState()) {
         brewActive ? flushActivated() : flushDeactivated();
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+        steamTime = millis();
       } else {
         steamCtrl(runningCfg, currentState, brewActive);
       }
       break;
     case OPMODE_descale:
       nonBrewModeActive = true;
+      if (!steamState()) steamTime = millis();
       deScale(runningCfg, currentState);
       break;
     case OPMODE_empty:
