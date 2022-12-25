@@ -641,10 +641,20 @@ static void systemHealthCheck(float pressureThreshold) {
     setBoilerOff();
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
-      lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
+      steamState() ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
       currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
+  }
+
+  /*Shut down heaters if steam has been ON and unused fpr more than 10 minutes.*/
+  while (currentState.isSteamForgottenON) {
+    //Reloading the watchdog timer, if this function fails to run MCU is rebooted
+    IWatchdog.reload();
+    lcdShowPopup("TURN STEAM OFF NOW!");
+    setPumpOff();
+    setBoilerOff();
+    currentState.isSteamForgottenON = steamState();
   }
 }
 
