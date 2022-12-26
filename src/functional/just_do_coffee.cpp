@@ -88,11 +88,15 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
 
 void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, unsigned long steamTime) {
   lcdTargetState(1); // setting the target mode to "steam temp"
-    // steam temp control, needs to be aggressive to keep steam pressure acceptable
-  if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
+  // steam temp control, needs to be aggressive to keep steam pressure acceptable
+  if (steamState() && brewState()) {
+    closeValve();
+    setPumpToRawValue(80);
     setBoilerOn();
-    brewActive ? setPumpFullOn() : setPumpOff();
-  }else if ((currentState.smoothedPressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= runningCfg.steamSetPoint)) {
+  } else if ((currentState.smoothedPressure <= 9.f)
+  && (currentState.temperature > runningCfg.setpoint - 10.f)
+  && (currentState.temperature <= runningCfg.steamSetPoint))
+  {
     setBoilerOn();
     if (currentState.smoothedPressure < 1.5f) {
       #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB
