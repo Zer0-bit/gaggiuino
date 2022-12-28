@@ -158,8 +158,8 @@ static void calculateWeightAndFlow(void) {
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
       long pumpClicks = sensorsReadFlow(elapsedTime);
-      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.15f;
-      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.15f;
+      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
+      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.45f;
 
       bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
 
