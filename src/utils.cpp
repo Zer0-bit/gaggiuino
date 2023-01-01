@@ -15,7 +15,7 @@ float mapRange(float refNumber, float refStart, float refEnd, float targetStart,
 
   float finalNumber = targetStart + deltaTarget * percentageWithTransition(pct, transition);
 
-  int calcScale = (int) pow(10, decimalPrecision);
+  int calcScale = (int) pow(10, decimalPrecision >= 0 ? decimalPrecision : 1);
   return (float) round(finalNumber * calcScale) / calcScale;
 }
 
