@@ -47,7 +47,7 @@ jobs:
 
       - name: Build the main project
         run: |
-          ~/.platformio/penv/bin/platformio run -e blackpill-dfu
+          ~/.platformio/penv/bin/platformio run -e opto-dfu
 
       - name: Build scales
         run: |
