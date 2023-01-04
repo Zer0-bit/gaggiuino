@@ -4,3 +4,4 @@ void IWatchdogClass::reload(void) {
 
 }
 
+IWatchdogClass IWatchdog;
