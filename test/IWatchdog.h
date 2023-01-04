@@ -11,6 +11,9 @@ class IWatchdogClass {
     };
     bool isReset(bool clear = false);
     void clearReset(void);
+
+  private:
+    static bool _enabled;
 };
 
 extern IWatchdogClass IWatchdog;
