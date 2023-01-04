@@ -1,5 +1,6 @@
 #ifndef INTERNALWATCHDOG_H
 #define INTERNALWATCHDOG_H
+#include <Arduino.h>
 #include <IWatchdog.h>
 #include "../lcd/lcd.h"
 
