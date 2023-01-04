@@ -4,6 +4,7 @@
 #include "log.h"
 #include "eeprom_data/eeprom_data.h"
 #include "lcd/lcd.h"
+#include "peripherals/internal_watchdog.h"
 #include "peripherals/pump.h"
 #include "peripherals/pressure_sensor.h"
 #include "peripherals/scales.h"
@@ -16,7 +17,6 @@
 #include "functional/profiling_phases.h"
 
 #include <Arduino.h>
-#include <IWatchdog.h>
 #include <SimpleKalmanFilter.h>
 
 // Define some const values

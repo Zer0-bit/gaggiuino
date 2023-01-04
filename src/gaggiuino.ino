@@ -614,7 +614,7 @@ static void fillBoiler(float targetBoilerFullPressure) {
 
 static void systemHealthCheck(float pressureThreshold) {
   //Reloading the watchdog timer, if this function fails to run MCU is rebooted
-  IWatchdog.reload();
+  watchdogReload();
 
   //Releasing the excess pressure after steaming or brewing if necessary
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
@@ -623,7 +623,7 @@ static void systemHealthCheck(float pressureThreshold) {
       while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
       {
         //Reloading the watchdog timer, if this function fails to run MCU is rebooted
-        IWatchdog.reload();
+        watchdogReload();
         lcdShowPopup("Releasing pressure!");
         setPumpOff();
         setBoilerOff();
@@ -640,7 +640,7 @@ static void systemHealthCheck(float pressureThreshold) {
   If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating */
   while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
     //Reloading the watchdog timer, if this function fails to run MCU is rebooted
-    IWatchdog.reload();
+    watchdogReload();
     /* In the event of the temp failing to read while the SSR is HIGH
     we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
     setPumpOff();
@@ -656,21 +656,10 @@ static void systemHealthCheck(float pressureThreshold) {
   /*Shut down heaters if steam has been ON and unused fpr more than 10 minutes.*/
   while (currentState.isSteamForgottenON) {
     //Reloading the watchdog timer, if this function fails to run MCU is rebooted
-    IWatchdog.reload();
+    watchdogReload();
     lcdShowPopup("TURN STEAM OFF NOW!");
     setPumpOff();
     setBoilerOff();
     currentState.isSteamForgottenON = steamState();
   }
-}
-
-/*Checking whether system is booting after a hard reset initiated by the internal watchdog.*/
-void iwdcInit(void) {
-  // IWDC init
-  if(IWatchdog.isReset()) {
-    lcdShowPopup("WATCHDOG RESTARTED");
-    IWatchdog.clearReset();
-  }
-  IWatchdog.begin(3000000);
-  LOG_INFO("Internal watchdog Init");
 }

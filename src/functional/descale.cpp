@@ -1,3 +1,4 @@
+#include "../peripherals/internal_watchdog.h"
 #include "descale.h"
 
 short flushCounter;
@@ -69,14 +70,17 @@ void solenoidBeat() {
   setPumpFullOn();
   closeValve();
   delay(1000);
+  watchdogReload();
   openValve();
   delay(200);
   closeValve();
   delay(1000);
+  watchdogReload();
   openValve();
   delay(200);
   closeValve();
   delay(1000);
+  watchdogReload();
   openValve();
   setPumpOff();
 }
