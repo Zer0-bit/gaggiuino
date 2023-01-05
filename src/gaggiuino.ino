@@ -433,7 +433,8 @@ static void updateProfilerPhases(void) {
       : runningCfg.shotStopOnCustomWeight;
   }
 
-  phaseProfiler.updateGlobalStopConditions(shotTarget);
+  //update global stop conditions (currently only stopOnWeight is configured in nextion)
+  profile.globalStopConditions = GlobalStopConditions{ .weight=shotTarget };
 
   //Setup release pressure + fill@4ml/sec
   if (runningCfg.basketPrefill) {
@@ -497,14 +498,7 @@ void setPhase(
   profile.phases[phaseIdx].type              = type;
   profile.phases[phaseIdx].target            = target;
   profile.phases[phaseIdx].restriction       = restriction;
-  profile.phases[phaseIdx].stopConditions    = PhaseStopConditions{
-    timeMs,
-    pressureAbove,
-    -1, // pressureBelow
-    -1, // flowAbove
-    -1, // flowBelow
-    -1, // weight
-  };
+  profile.phases[phaseIdx].stopConditions    = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove };
 }
 
 static void profiling(void) {

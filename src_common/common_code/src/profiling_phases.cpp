@@ -75,7 +75,7 @@ void PhaseProfiler::updatePhase(uint32_t timeInShot, SensorState& state) {
   short phaseIdx = currentPhaseIdx;
   uint32_t timeInPhase = timeInShot - phaseChangedSnapshot.timeInShot;
 
-  if (phaseIdx >= profile.count || globalStopConditions.isReached(state, timeInShot)) {
+  if (phaseIdx >= profile.count || profile.globalStopConditions.isReached(state, timeInShot)) {
     currentPhaseIdx = profile.count;
     phaseIdx = profile.count - 1;
     currentPhase.update(phaseIdx, profile.phases[phaseIdx], timeInPhase);
@@ -105,10 +105,4 @@ void PhaseProfiler::reset() {
   currentPhaseIdx = 0;
   phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0};
   currentPhase.update(0, profile.phases[0], 0);
-}
-
-void PhaseProfiler::updateGlobalStopConditions(float weight, long time, float waterVolume) {
-  globalStopConditions.weight = weight;
-  globalStopConditions.time = time;
-  globalStopConditions.waterPumped = waterVolume;
 }
