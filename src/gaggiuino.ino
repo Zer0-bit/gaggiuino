@@ -3,9 +3,10 @@
 #endif
 #include "gaggiuino.h"
 
-SimpleKalmanFilter smoothPressure(1.f, 1.f, 1.f);
-SimpleKalmanFilter smoothPumpFlow(0.5f, 0.3f, 0.1f);
-SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.2f);
+SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.1f);
+SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.1f);
+SimpleKalmanFilter smoothScalesFlow(0.1f, 0.1f, 0.1f);
+SimpleKalmanFilter predictTempVariation(1.f, 1.f, 1.f);
 
 //default phases. Updated in updateProfilerPhases.
 Phase phaseArray[8];
@@ -107,7 +108,7 @@ static void sensorsRead(void) {
 
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
-    currentState.temperature = thermocouple.readCelsius();
+    currentState.temperature = predictTempVariation.updateEstimate(thermocouple.readCelsius());
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }

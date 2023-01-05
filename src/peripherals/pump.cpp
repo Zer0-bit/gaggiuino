@@ -4,13 +4,13 @@
 #include "../utils.h"
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
-float pressureInefficiencyConstant0 = -0.128f;
-float pressureInefficiencyConstant1 =  0.00222;
-float pressureInefficiencyConstant2 = -0.00184f;
-float pressureInefficiencyConstant3 =  0.0000915f;
-float pressureInefficiencyConstant4 =  0.00000594f;
-float pressureInefficiencyConstant5 = -0.000000798f;
-float pressureInefficiencyConstant6 =  0.0000000186f;
+const float pressureInefficiencyConstant0 = -0.128f;
+const float pressureInefficiencyConstant1 =  0.00222;
+const float pressureInefficiencyConstant2 = -0.00184f;
+const float pressureInefficiencyConstant3 =  0.0000915f;
+const float pressureInefficiencyConstant4 =  0.00000594f;
+const float pressureInefficiencyConstant5 = -0.000000798f;
+const float pressureInefficiencyConstant6 =  0.0000000186f;
 
 float flowPerClickAtZeroBar = 0.29f;
 short maxPumpClicksPerSecond = 50;

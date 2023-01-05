@@ -35,7 +35,7 @@ int I2C_ClearBus(int sdaPin, int sclPin) {
 
   while (SDA_LOW && (clockCount > 0)) { //  vii. If sdaPin is Low,
     clockCount--;
-  // Note: I2C bus is open collector so do NOT drive sclPin or sdaPin high.
+    // Note: I2C bus is open collector so do NOT drive sclPin or sdaPin high.
     pinMode(sclPin, INPUT); // release sclPin pullup so that when made output it will be LOW
     pinMode(sclPin, OUTPUT); // then clock sclPin Low
     delayMicroseconds(10); //  for >5us
