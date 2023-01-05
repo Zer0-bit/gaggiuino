@@ -52,7 +52,7 @@ uint8_t* McuComms::receiveMultiPacket() {
   uint8_t lastPacket = transfer.packet.rxBuff[0]; // Get index of last packet
   uint8_t currentPacket = transfer.packet.rxBuff[1]; // Get index of current packet
   uint8_t bytesRead = transfer.bytesRead; // Bytes read in current packet
-  uint8_t dataPerPacket = packetSize - 2;
+  uint8_t dataPerPacket = bytesRead - 2; // First 2 bytes of each packet are used as indexes and are not put in the buffer
   size_t  totalBytes = 0;
 
   uint8_t* buffer = new uint8_t[(lastPacket + 1) * dataPerPacket];
