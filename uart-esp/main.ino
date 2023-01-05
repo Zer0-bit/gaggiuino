@@ -17,7 +17,7 @@ void setup(void) {
   UART_MCU.setRxBufferSize(256);
   UART_MCU.setTxBufferSize(256);
   UART_MCU.begin(115200);
-  comms.setDebugPort(&Serial);
+  // comms.setDebugPort(&Serial);
   comms.begin(UART_MCU);
 
   comms.setShotSnapshotCallback([](ShotSnapshot& snapshot) {
