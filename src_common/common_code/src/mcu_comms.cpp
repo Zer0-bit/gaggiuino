@@ -1,7 +1,7 @@
 #include "mcu_comms.h"
 
 size_t ProfileSerializer::neededBufferSize(Profile& profile) {
-  return sizeof(profile.count) + profile.count * sizeof(Phase);
+  return sizeof(profile.count) + profile.count * sizeof(Phase) + sizeof(profile.globalStopConditions);
 }
 
 uint8_t* ProfileSerializer::serializeProfile(Profile& profile) {
@@ -10,6 +10,7 @@ uint8_t* ProfileSerializer::serializeProfile(Profile& profile) {
 
   memcpy(buffer, &profile.count, sizeof(profile.count));
   memcpy(buffer + sizeof(profile.count), profile.phases, profile.count * sizeof(Phase));
+  memcpy(buffer + sizeof(profile.count) + profile.count * sizeof(Phase), &profile.globalStopConditions, sizeof(profile.globalStopConditions));
 
   return buffer;
 }
@@ -18,6 +19,7 @@ void ProfileSerializer::deserializeProfile(const uint8_t* data, Profile& profile
   memcpy(&profile.count, data, sizeof(profile.count));
   profile.phases = new Phase[profile.count];
   memcpy(profile.phases, data + sizeof(profile.count), profile.count * sizeof(Phase));
+  memcpy(&profile.globalStopConditions, data + sizeof(profile.count) + profile.count * sizeof(Phase), sizeof(profile.globalStopConditions));
 }
 
 //---------------------------------------------------------------------------------
