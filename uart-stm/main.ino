@@ -14,6 +14,7 @@ Profile profile{ 6,  phaseArray };
 void setup(void) {
   Serial.begin(115200);
 
+  // comms.setDebugPort(&Serial);
   UART_MCU.begin(115200);
   comms.begin(UART_MCU);
 
@@ -26,8 +27,21 @@ void setup(void) {
       Serial.print(newProfile.phases[i].target.end);
       Serial.print("} restriction:");
       Serial.print(newProfile.phases[i].restriction);
-      Serial.println("}");
+      Serial.print(", stopConditions: {");
+      Serial.print("time:"); Serial.print(newProfile.phases[i].stopConditions.time);
+      Serial.print(", pressureAbove:"); Serial.print(newProfile.phases[i].stopConditions.pressureAbove);
+      Serial.print(", pressureBelow:"); Serial.print(newProfile.phases[i].stopConditions.pressureBelow);
+      Serial.print(", weight:"); Serial.print(newProfile.phases[i].stopConditions.weight);
+      Serial.print(", flowAbove:"); Serial.print(newProfile.phases[i].stopConditions.flowAbove);
+      Serial.print(", flowBelow:"); Serial.print(newProfile.phases[i].stopConditions.flowBelow);
+      Serial.print(", waterPumpedInPhase:"); Serial.print(newProfile.phases[i].stopConditions.waterPumpedInPhase);
+      Serial.println("}}");
     }
+    Serial.print("globalStopConditions: {");
+    Serial.print("time:"); Serial.print(newProfile.globalStopConditions.time);
+    Serial.print(", weight:"); Serial.print(newProfile.globalStopConditions.weight);
+    Serial.print(", waterPumped:"); Serial.print(newProfile.globalStopConditions.waterPumped);
+    Serial.println("}");
     delete[] newProfile.phases;
   });
 }
@@ -48,7 +62,6 @@ void loop(void) {
       };
 
     comms.sendShotData(snapshot);
-    Serial.println("Sent snapshot data");
     snapshotTimer = millis();
   }
 }
