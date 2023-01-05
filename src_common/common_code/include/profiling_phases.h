@@ -53,17 +53,18 @@ struct Phase {
   bool isStopConditionReached(SensorState& currentState, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
-struct Profile {
-  short count;
-  Phase* phases;
-};
-
 struct GlobalStopConditions {
   long time = -1;
   float weight = -1;
   float waterPumped = -1;
 
   bool isReached(SensorState& state, long timeInShot);
+};
+
+struct Profile {
+  short count;
+  Phase* phases;
+  GlobalStopConditions globalStopConditions;
 };
 
 class CurrentPhase {
@@ -91,7 +92,6 @@ private:
   short currentPhaseIdx = 0; // The index at which the profiler currently is.
   ShotSnapshot phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0}; // State when the profiler move to this currentPhaseIdx
   CurrentPhase currentPhase = CurrentPhase(0, profile.phases[0], 0);
-  GlobalStopConditions globalStopConditions;
 
 public:
   PhaseProfiler(Profile& profile);
@@ -100,7 +100,6 @@ public:
   CurrentPhase& getCurrentPhase();
   bool isFinished();
   void reset();
-  void updateGlobalStopConditions(float weight, long time = -1, float waterVolume = -1);
 };
 
 #endif
