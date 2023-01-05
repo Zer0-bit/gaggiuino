@@ -6,9 +6,7 @@
 
 McuComms comms;
 
-Phase phaseArray[8] = {
-  Phase{}, Phase{}, Phase{}, Phase{}, Phase{}, Phase{}, Phase{}, Phase{}
-};
+Phase phaseArray[12];
 Profile profile{ 6,  phaseArray };
 
 void setup(void) {
@@ -38,14 +36,22 @@ long snapshotTimer = 400;
 
 void loop(void) {
   comms.readData();
-  if (millis() - profileTimer > 8000) {
-    profile.count = 5;
+  if (millis() - profileTimer > 100) {
+    profile.count = 12;
     profile.globalStopConditions = GlobalStopConditions { .time=1923, .weight=37.f, .waterPumped=60.f};
     profile.phases[0] = Phase{ PHASE_TYPE_FLOW, Transition(4.5f), 2.f, PhaseStopConditions{ .pressureBelow=2.f } };
     profile.phases[1] = Phase{ PHASE_TYPE_FLOW, Transition(0.f), 2.f, PhaseStopConditions{ .time=3000 } };
     profile.phases[2] = Phase{ PHASE_TYPE_PRESSURE, Transition(9.f), -1, PhaseStopConditions{ .time=30000 } };
     profile.phases[3] = Phase{ PHASE_TYPE_PRESSURE, Transition(9.f, 7.f), 2.f, PhaseStopConditions{ .weight=35.f } };
     profile.phases[4] = Phase{ PHASE_TYPE_PRESSURE, Transition(7.f), 2.f, PhaseStopConditions{ .weight=35.f } };
+    profile.phases[5] = Phase{ PHASE_TYPE_PRESSURE, Transition(7.f), 2.f, PhaseStopConditions{ .weight=36.f } };
+    profile.phases[6] = Phase{ PHASE_TYPE_PRESSURE, Transition(7.f), 2.f, PhaseStopConditions{ .weight=37.f } };
+    profile.phases[7] = Phase{ PHASE_TYPE_PRESSURE, Transition(7.f), 2.f, PhaseStopConditions{ .weight=38.f } };
+    profile.phases[8] = Phase{ PHASE_TYPE_PRESSURE, Transition(7.f), 2.f, PhaseStopConditions{ .weight=39.f } };
+    profile.phases[9] = Phase{ PHASE_TYPE_PRESSURE, Transition(7.f), 2.f, PhaseStopConditions{ .weight=40.f } };
+    profile.phases[10] = Phase{ PHASE_TYPE_PRESSURE, Transition(7.f), 2.f, PhaseStopConditions{ .weight=41.f } };
+    profile.phases[11] = Phase{ PHASE_TYPE_PRESSURE, Transition(7.f), 2.f, PhaseStopConditions{ .weight=42.f } };
+
     comms.sendProfile(profile);
 
     profileTimer = millis();
