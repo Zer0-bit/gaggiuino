@@ -3,7 +3,6 @@
 
 #include "utils.h"
 #include "sensors_state.h"
-#include "../eeprom_data/eeprom_data.h"
 
 enum PHASE_TYPE {
   PHASE_TYPE_FLOW,
@@ -31,13 +30,6 @@ struct PhaseStopConditions {
   bool isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
-struct GlobalStopConditions {
-  long time = -1;
-  float weight = -1;
-  float waterPumped = -1;
-
-  bool isReached(SensorState& state, long timeInShot);
-};
 
 struct Transition {
   float start;
@@ -61,6 +53,19 @@ struct Phase {
   bool isStopConditionReached(SensorState& currentState, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
+struct Profile {
+  short count;
+  Phase* phases;
+};
+
+struct GlobalStopConditions {
+  long time = -1;
+  float weight = -1;
+  float waterPumped = -1;
+
+  bool isReached(SensorState& state, long timeInShot);
+};
+
 class CurrentPhase {
 private:
   int index;
@@ -78,11 +83,6 @@ public:
   float getTarget();
   float getRestriction();
   void update(int index, const Phase& phase, uint32_t timeInPhase);
-};
-
-struct Profile {
-  short count;
-  Phase* phases;
 };
 
 class PhaseProfiler {
