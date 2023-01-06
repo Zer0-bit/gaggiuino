@@ -1,10 +1,16 @@
+from sys import platform
 import os
-
 Import("env")
 
 custom_src = env.GetProjectOption("custom_src_dir")
-full_path = os.path.join("$PROJECT_DIR", custom_src)
-full_data_path = os.path.join("$PROJECT_DIR", full_path + "//data")
+
+project_dir = "$PROJECT_DIR"
+
+if platform == "linux" or platform == "linux2" or platform == "darwin":
+  project_dir = os.path.join("//", project_dir)
+
+full_path = os.path.join(project_dir, custom_src)
+full_data_path = os.path.join(project_dir, full_path, "data")
 
 print("\nPROJECT SOURCE DIR: " + full_path)
 print("\nPROJECT DATA DIR: " + full_data_path)
