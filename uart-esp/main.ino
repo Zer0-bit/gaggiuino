@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "SerialTransfer.h"
 #include "mcu_comms.h"
 
