@@ -4,6 +4,9 @@
 
 #define UART_MCU Serial1
 
+TaskHandle_t Task1;
+TaskHandle_t Task2;
+
 McuComms comms;
 
 Phase phaseArray[12];
@@ -11,6 +14,26 @@ Profile profile{ 6,  phaseArray };
 
 void setup(void) {
   Serial.begin(115200);
+
+  xTaskCreatePinnedToCore(
+    Task1code,   /* Task function. */
+    "Task1",     /* name of task. */
+    10000,       /* Stack size of task */
+    NULL,        /* parameter of the task */
+    1,           /* priority of the task */
+    &Task1,      /* Task handle to keep track of created task */
+    0
+  );
+
+  xTaskCreatePinnedToCore(
+    Task2code,   /* Task function. */
+    "Task2",     /* name of task. */
+    10000,       /* Stack size of task */
+    NULL,        /* parameter of the task */
+    1,           /* priority of the task */
+    &Task2,      /* Task handle to keep track of created task */
+    1
+  );
 
   UART_MCU.setRxBufferSize(256);
   UART_MCU.setTxBufferSize(256);
@@ -39,6 +62,11 @@ long profileTimer = -4000;
 long snapshotTimer = 400;
 
 void loop(void) {
+}
+
+
+//Task1code: runs a core 0 bound task
+void Task1code( void * pvParameters ){
   comms.readData();
   if (millis() - profileTimer > 100) {
     profile.count = 12;
@@ -59,5 +87,12 @@ void loop(void) {
     comms.sendProfile(profile);
 
     profileTimer = millis();
+  }
+}
+//Task1code: runs a core 0 bound task
+void Task2code( void * pvParameters ){
+  for(;;){
+    delay(700);
+    Serial.print("Task2 running on core ");
   }
 }
