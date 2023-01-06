@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "profiling_phases.h"
 #include "SerialTransfer.h"
+#include <vector>
 
 #ifdef ESP32
 #include "esp_task_wdt.h"
@@ -43,7 +44,7 @@ private:
    * |______|_____________________________________________________________________ index of last packet
    */
   void sendMultiPacket(uint8_t* buffer, size_t dataSize, uint8_t packetID);
-  uint8_t* receiveMultiPacket();
+  // uint8_t receiveMultiPacket();
   void log(const char* format, ...);
   void logBufferHex(uint8_t* buffer, size_t dataSize);
 
@@ -51,6 +52,7 @@ private:
   void profileReceived(Profile& profile);
 
 public:
+  std::vector<uint8_t> receiveMultiPacket();
   McuComms(): shotSnapshotCallback(nullptr), profileCallback(nullptr), debugPort(nullptr) {};
 
   void begin(Stream& serial, size_t packetSize = MAX_DATA_PER_PACKET_DEFAULT);

@@ -1,7 +1,7 @@
 #include "mcu_comms.h"
 
 size_t ProfileSerializer::neededBufferSize(Profile& profile) {
-  return sizeof(profile.count) + profile.count * sizeof(Phase) + sizeof(profile.globalStopConditions);
+  return sizeof(profile.count) + profile.count * (1 << 7) + sizeof(profile.globalStopConditions);
 }
 
 uint8_t* ProfileSerializer::serializeProfile(Profile& profile) {
@@ -9,8 +9,8 @@ uint8_t* ProfileSerializer::serializeProfile(Profile& profile) {
   uint8_t* buffer = new uint8_t[size];
 
   memcpy(buffer, &profile.count, sizeof(profile.count));
-  memcpy(buffer + sizeof(profile.count), profile.phases, profile.count * sizeof(Phase));
-  memcpy(buffer + sizeof(profile.count) + profile.count * sizeof(Phase), &profile.globalStopConditions, sizeof(profile.globalStopConditions));
+  memcpy(buffer + sizeof(profile.count), profile.phases, profile.count * (1 << 7));
+  memcpy(buffer + sizeof(profile.count) + profile.count * (1 << 7), &profile.globalStopConditions, sizeof(profile.globalStopConditions));
 
   return buffer;
 }
@@ -18,12 +18,12 @@ uint8_t* ProfileSerializer::serializeProfile(Profile& profile) {
 void ProfileSerializer::deserializeProfile(const uint8_t* data, Profile& profile) {
   memcpy(&profile.count, data, sizeof(profile.count));
   profile.phases = new Phase[profile.count];
-  memcpy(profile.phases, data + sizeof(profile.count), profile.count * sizeof(Phase));
-  memcpy(&profile.globalStopConditions, data + sizeof(profile.count) + profile.count * sizeof(Phase), sizeof(profile.globalStopConditions));
+  memcpy(profile.phases, data + sizeof(profile.count), profile.count * (1 << 7));
+  memcpy(&profile.globalStopConditions, data + sizeof(profile.count) + profile.count * (1 << 7), sizeof(profile.globalStopConditions));
 }
 
 //---------------------------------------------------------------------------------
-//---------------------------    PRIVATE METHODS       ----------------------------
+//--------------------------- PRIVATE METHODS ----------------------------
 //---------------------------------------------------------------------------------
 void McuComms::sendMultiPacket(uint8_t* buffer, size_t dataSize, uint8_t packetID) {
   log("Sending buffer[%d]: ", dataSize);
@@ -33,9 +33,13 @@ void McuComms::sendMultiPacket(uint8_t* buffer, size_t dataSize, uint8_t packetI
   uint8_t numPackets = dataSize / dataPerPacket;
 
   if (dataSize % dataPerPacket > 0) // Add an extra transmission if needed
-    numPackets++;
+  numPackets++;
 
-  for (uint8_t currentPacket = 0; currentPacket < numPackets; currentPacket++) {
+  uint8_t currentPacket = 0;
+  while (currentPacket < numPackets) {
+    #ifdef ESP32
+    esp_task_wdt_reset();
+    #endif
     uint8_t dataLen = dataPerPacket;
 
     if (((currentPacket + 1) * dataPerPacket) > dataSize) // Determine data length for the last packet if file length is not an exact multiple of `dataPerPacket`
@@ -46,63 +50,45 @@ void McuComms::sendMultiPacket(uint8_t* buffer, size_t dataSize, uint8_t packetI
     sendSize = transfer.txObj(buffer[currentPacket * dataPerPacket], 2, dataLen); // packet payload
 
     transfer.sendData(sendSize, packetID); // Send the current file index and data
+    currentPacket++;
   }
   log("Data sent.\n");
 }
 
-uint8_t* McuComms::receiveMultiPacket() {
-  uint8_t lastPacket = transfer.packet.rxBuff[0]; // Get index of last packet
-  uint8_t currentPacket = transfer.packet.rxBuff[1]; // Get index of current packet
+std::vector<uint8_t> McuComms::receiveMultiPacket() {
+  uint8_t lastPacket = transfer.rxObj<uint8_t>(0); // Get index of last packet
+  uint8_t currentPacket = transfer.rxObj<uint8_t>(1); // Get index of current packet
   uint8_t bytesRead = transfer.bytesRead; // Bytes read in current packet
   uint8_t dataPerPacket = bytesRead - 2; // First 2 bytes of each packet are used as indexes and are not put in the buffer
-  size_t  totalBytes = 0;
+  size_t totalBytes = 0;
 
-  uint8_t* buffer = new uint8_t[(lastPacket + 1) * dataPerPacket];
+  std::vector<uint8_t> buffer;
+  buffer.reserve((lastPacket + 1) * dataPerPacket);
 
   while (currentPacket <= lastPacket) {
-#ifdef ESP32
+    #ifdef ESP32
     esp_task_wdt_reset();
-#endif
-
+    #endif
     log("Handling packet %d\n", currentPacket);
     totalBytes += bytesRead - 2;
 
     // First 2 bytes are not added to the buffer because they represent the index of current and last packet
     for (int i = 0; i < bytesRead - 2; i++) {
-      buffer[currentPacket * dataPerPacket + i] = transfer.packet.rxBuff[i + 2];
+      buffer.push_back(transfer.packet.rxBuff[i + 2]);
     }
     if (currentPacket == lastPacket) break;
 
-    // wait for more data to become available for up to 20 milliseconds
-    uint8_t dataAvailable = transfer.available();
-
-    uint32_t waitStartedAt = millis();
-    while (millis() - waitStartedAt < 50 && !dataAvailable) {
-#ifdef ESP32
-      esp_task_wdt_reset();
-#endif
-      dataAvailable = transfer.available();
+    if (!transfer.currentPacketID()) {
+      log("Error getting data.\n");
+      return {};
     }
-
-    // if data is not available exit the loop
-    if (!dataAvailable) {
-      log("ERROR: esp_stm_comms read timeout error\n");
-      break;
-    }
-
-    // if data is available parse the current packet and number of packets and put data in the buffer
-    lastPacket = transfer.packet.rxBuff[0];
-    currentPacket = transfer.packet.rxBuff[1];
+    lastPacket = transfer.rxObj<uint8_t>(0);
+    currentPacket = transfer.rxObj<uint8_t>(1);
     bytesRead = transfer.bytesRead;
   }
-
-  // LOG_INFO("Finished handling packets");
-  log("Received buffer[%d]: ", totalBytes);
-  logBufferHex(buffer, totalBytes);
-
+  log("Total bytes received: %d\n", totalBytes);
   return buffer;
 }
-
 
 void McuComms::shotSnapshotReceived(ShotSnapshot& snapshot) {
   if (shotSnapshotCallback) {
@@ -188,7 +174,8 @@ void McuComms::readData() {
       break;
     } case PACKET_PROFILE: {
       log("Received a profile packet\n");
-      uint8_t* data = receiveMultiPacket();
+      std::vector<uint8_t> vec = McuComms::receiveMultiPacket();
+      uint8_t * data = vec.data();
       Profile profile;
       profileSerializer.deserializeProfile(data, profile);
       delete[] data;
