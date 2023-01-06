@@ -1,6 +1,6 @@
 #include "websocket.h"
 
-AsyncWebSocket ws("/ws");
+AsyncWebSocket wsServer("/ws");
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
 void onEvent(
@@ -13,12 +13,12 @@ void onEvent(
 );
 
 void setupWebSocket(AsyncWebServer& server) {
-  ws.onEvent(onEvent);
-  server.addHandler(&ws);
+  wsServer.onEvent(onEvent);
+  server.addHandler(&wsServer);
 }
 
 void wsCleanup() {
-  ws.cleanupClients();
+  wsServer.cleanupClients();
 }
 
 void onEvent(
@@ -67,26 +67,45 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
 //-------------------------------------------------------------//
 //--------------------------OUTGOING---------------------------//
 //-------------------------------------------------------------//
-void wsSendSensorStatesToClients(
-  long timeInShot,
-  float temp,
-  float pressure,
-  float flow,
-  float weight
-) {
+void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
     DynamicJsonDocument doc(200); // fixed size
     JsonObject          root = doc.to<JsonObject>();
 
     root["action"] = "sensor_data_update";
 
     JsonObject data = root.createNestedObject("data");
-    data["timeInShot"] = timeInShot;
-    data["temp"] = temp;
-    data["pressure"] = pressure;
-    data["flow"] = flow;
-    data["weight"] = weight;
+    data["brewActive"] = snapshot.brewActive;
+    data["steamActive"] = snapshot.steamActive;
+    data["temperature"] = snapshot.temperature;
+    data["pressure"] = snapshot.pressure;
+    data["pumpFlow"] = snapshot.pumpFlow;
+    data["weightFlow"] = snapshot.weightFlow;
+    data["weight"] = snapshot.weight;
 
     char   buffer[200]; // create temp buffer
     size_t len = serializeJson(root, buffer);  // serialize to buffer
-    ws.textAll(buffer, len); // send buffer to web socket
+    wsServer.textAll(buffer, len); // send buffer to web socket
+}
+
+void wsSendShotSnapshotToClients(ShotSnapshot& snapshot) {
+    DynamicJsonDocument doc(300); // fixed size
+    JsonObject          root = doc.to<JsonObject>();
+
+    root["action"] = "shot_data_update";
+
+    JsonObject data = root.createNestedObject("data");
+    data["timeInShot"] = snapshot.timeInShot;
+    data["pressure"] = snapshot.pressure;
+    data["pumpFlow"] = snapshot.pumpFlow;
+    data["weightFlow"] = snapshot.weightFlow;
+    data["temperature"] = snapshot.temperature;
+    data["shotWeight"] = snapshot.shotWeight;
+    data["waterPumped"] = snapshot.waterPumped;
+    data["targetTemperature"] = snapshot.targetTemperature;
+    data["targetPumpFlow"] = snapshot.targetPumpFlow;
+    data["targetPressure"] = snapshot.targetPressure;
+
+    char   buffer[300]; // create temp buffer
+    size_t len = serializeJson(root, buffer);  // serialize to buffer
+    wsServer.textAll(buffer, len); // send buffer to web socket
 }

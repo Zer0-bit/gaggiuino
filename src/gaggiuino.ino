@@ -49,6 +49,9 @@ void setup(void) {
   LOG_INFO("DBG init");
 #endif
 
+  // Initialise comms library for talking to the ESP mcu
+  espCommsInit();
+
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
@@ -90,6 +93,7 @@ void loop(void) {
   brewDetect();
   modeSelect();
   lcdRefresh();
+  espCommsSendSensorData(currentState, brewActive, steamState());
   systemHealthCheck(0.8f);
 }
 
@@ -99,6 +103,7 @@ void loop(void) {
 
 
 static void sensorsRead(void) {
+  espCommsReadData();
   sensorsReadTemperature();
   sensorsReadWeight();
   sensorsReadPressure();
@@ -505,10 +510,12 @@ void setPhase(
 
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
-    long timeInShot = millis() - brewingTimer;
+    uint32_t timeInShot = millis() - brewingTimer;
     phaseProfiler.updatePhase(timeInShot, currentState);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
     preinfusionFinished = currentPhase.getIndex() >= preInfusionFinishedPhaseIdx;
+    ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
+    espCommsSendShotData(shotSnapshot, 100);
 
     if (phaseProfiler.isFinished()) {
       closeValve();

@@ -49,12 +49,13 @@ void setup(void) {
   });
 }
 
-long snapshotTimer = 400;
+long stateTimer = 400;
+long shotTimer = 100;
 
 void loop(void) {
   comms.readData();
-  if (millis() - snapshotTimer > 100) {
-      ShotSnapshot snapshot = ShotSnapshot{
+  if (millis() - shotTimer > 200) {
+      ShotSnapshot shotData = ShotSnapshot{
         .timeInShot=millis(),
         .pressure=7.f + random(0, 2) / 10.f,
         .pumpFlow=2.f + random(0, 5) / 10.f,
@@ -67,9 +68,11 @@ void loop(void) {
         .targetPressure=9.f
       };
 
-    comms.sendShotData(snapshot);
-
-    SensorStateSnapshot stateSnapshot = SensorStateSnapshot{
+    comms.sendShotData(shotData);
+    shotTimer = millis();
+  }
+  if (millis() - stateTimer > 1000) {
+    SensorStateSnapshot stateData = SensorStateSnapshot{
       .brewActive=false,
       .steamActive=false,
       .temperature=90.f + random(20, 30) / 10.f,
@@ -78,7 +81,7 @@ void loop(void) {
       .weightFlow=-1,
       .weight=0.f
     };
-    comms.sendSensorStateSnapshot(stateSnapshot);
-    snapshotTimer = millis();
+    comms.sendSensorStateSnapshot(stateData);
+    stateTimer = millis();
   }
 }

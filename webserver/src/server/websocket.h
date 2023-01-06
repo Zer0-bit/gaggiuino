@@ -4,15 +4,11 @@
 #include "ESPAsyncWebServer.h"
 #include "AsyncTCP.h"
 #include <ArduinoJson.h>
+#include "mcu_comms.h"
 
 void setupWebSocket(AsyncWebServer& server);
 void wsCleanup();
-void wsSendSensorStatesToClients(
-  long timeInShot,
-  float temp,
-  float pressure,
-  float flow,
-  float weight
-);
+void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot);
+void wsSendShotSnapshotToClients(ShotSnapshot& snapshot);
 
 #endif
