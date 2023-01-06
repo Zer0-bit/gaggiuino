@@ -1,31 +1,33 @@
 #include "mcu_comms.h"
 
+using namespace std;
+
 size_t ProfileSerializer::neededBufferSize(Profile& profile) {
   return sizeof(profile.count) + profile.count * sizeof(Phase) + sizeof(profile.globalStopConditions);
 }
 
-uint8_t* ProfileSerializer::serializeProfile(Profile& profile) {
-  size_t size = neededBufferSize(profile);
-  uint8_t* buffer = new uint8_t[size];
+vector<uint8_t> ProfileSerializer::serializeProfile(Profile& profile) {
+  vector<uint8_t> buffer;
+  buffer.reserve(neededBufferSize(profile));
 
-  memcpy(buffer, &profile.count, sizeof(profile.count));
-  memcpy(buffer + sizeof(profile.count), profile.phases, profile.count * sizeof(Phase));
-  memcpy(buffer + sizeof(profile.count) + profile.count * sizeof(Phase), &profile.globalStopConditions, sizeof(profile.globalStopConditions));
+  memcpy(buffer.data(), &profile.count, sizeof(profile.count));
+  memcpy(buffer.data() + sizeof(profile.count), profile.phases, profile.count * sizeof(Phase));
+  memcpy(buffer.data() + sizeof(profile.count) + profile.count * sizeof(Phase), &profile.globalStopConditions, sizeof(profile.globalStopConditions));
 
   return buffer;
 }
 
-void ProfileSerializer::deserializeProfile(const uint8_t* data, Profile& profile) {
-  memcpy(&profile.count, data, sizeof(profile.count));
+void ProfileSerializer::deserializeProfile(vector<uint8_t>& buffer, Profile& profile) {
+  memcpy(&profile.count, buffer.data(), sizeof(profile.count));
   profile.phases = new Phase[profile.count];
-  memcpy(profile.phases, data + sizeof(profile.count), profile.count * sizeof(Phase));
-  memcpy(&profile.globalStopConditions, data + sizeof(profile.count) + profile.count * sizeof(Phase), sizeof(profile.globalStopConditions));
+  memcpy(profile.phases, buffer.data() + sizeof(profile.count), profile.count * sizeof(Phase));
+  memcpy(&profile.globalStopConditions, buffer.data() + sizeof(profile.count) + profile.count * sizeof(Phase), sizeof(profile.globalStopConditions));
 }
 
 //---------------------------------------------------------------------------------
 //---------------------------    PRIVATE METHODS       ----------------------------
 //---------------------------------------------------------------------------------
-void McuComms::sendMultiPacket(uint8_t* buffer, size_t dataSize, uint8_t packetID) {
+void McuComms::sendMultiPacket(vector<uint8_t>& buffer, size_t dataSize, uint8_t packetID) {
   log("Sending buffer[%d]: ", dataSize);
   logBufferHex(buffer, dataSize);
 
@@ -38,7 +40,8 @@ void McuComms::sendMultiPacket(uint8_t* buffer, size_t dataSize, uint8_t packetI
   for (uint8_t currentPacket = 0; currentPacket < numPackets; currentPacket++) {
     uint8_t dataLen = dataPerPacket;
 
-    if (((currentPacket + 1) * dataPerPacket) > dataSize) // Determine data length for the last packet if file length is not an exact multiple of `dataPerPacket`
+
+    if ((size_t)((currentPacket + 1) * dataPerPacket) > dataSize) // Determine data length for the last packet if file length is not an exact multiple of `dataPerPacket`
       dataLen = dataSize - currentPacket * dataPerPacket;
 
     uint8_t sendSize = transfer.txObj(numPackets - 1, 0); // index of last packet
@@ -50,14 +53,15 @@ void McuComms::sendMultiPacket(uint8_t* buffer, size_t dataSize, uint8_t packetI
   log("Data sent.\n");
 }
 
-uint8_t* McuComms::receiveMultiPacket() {
+vector<uint8_t> McuComms::receiveMultiPacket() {
   uint8_t lastPacket = transfer.packet.rxBuff[0]; // Get index of last packet
   uint8_t currentPacket = transfer.packet.rxBuff[1]; // Get index of current packet
   uint8_t bytesRead = transfer.bytesRead; // Bytes read in current packet
   uint8_t dataPerPacket = bytesRead - 2; // First 2 bytes of each packet are used as indexes and are not put in the buffer
   size_t  totalBytes = 0;
 
-  uint8_t* buffer = new uint8_t[(lastPacket + 1) * dataPerPacket];
+  vector<uint8_t> buffer;
+  buffer.reserve((lastPacket + 1) * dataPerPacket);
 
   while (currentPacket <= lastPacket) {
 #ifdef ESP32
@@ -69,7 +73,7 @@ uint8_t* McuComms::receiveMultiPacket() {
 
     // First 2 bytes are not added to the buffer because they represent the index of current and last packet
     for (int i = 0; i < bytesRead - 2; i++) {
-      buffer[currentPacket * dataPerPacket + i] = transfer.packet.rxBuff[i + 2];
+      buffer.push_back(transfer.packet.rxBuff[i + 2]);
     }
     if (currentPacket == lastPacket) break;
 
@@ -116,6 +120,12 @@ void McuComms::profileReceived(Profile& profile) {
   }
 }
 
+void McuComms::sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) {
+  if (sensorStateSnapshotCallback) {
+    sensorStateSnapshotCallback(snapshot);
+  }
+}
+
 void McuComms::log(const char* format, ...) {
   if (!debugPort) return;
 
@@ -128,7 +138,7 @@ void McuComms::log(const char* format, ...) {
   debugPort->print(buffer);
 }
 
-void McuComms::logBufferHex(uint8_t* buffer, size_t dataSize) {
+void McuComms::logBufferHex(vector<uint8_t>& buffer, size_t dataSize) {
   if (!debugPort) return;
 
   for (size_t i = 0; i < dataSize; i++) {
@@ -161,6 +171,9 @@ void McuComms::setProfileReceivedCallback(ProfileReceivedCallback callback) {
   profileCallback = callback;
 }
 
+void McuComms::setSensorStateSnapshotCallback(SensorStateSnapshotReceivedCallback callback) {
+  sensorStateSnapshotCallback = callback;
+}
 
 void McuComms::sendShotData(ShotSnapshot& snapshot) {
   uint16_t messageSize = transfer.txObj(snapshot);
@@ -169,8 +182,13 @@ void McuComms::sendShotData(ShotSnapshot& snapshot) {
 
 void McuComms::sendProfile(Profile& profile) {
   size_t dataSize = profileSerializer.neededBufferSize(profile);
-  uint8_t* buffer = profileSerializer.serializeProfile(profile);
+  vector<uint8_t> buffer = profileSerializer.serializeProfile(profile);
   sendMultiPacket(buffer, dataSize, PACKET_PROFILE);
+}
+
+void McuComms::sendSensorStateSnapshot(SensorStateSnapshot& snapshot) {
+  uint16_t messageSize = transfer.txObj(snapshot);
+  transfer.sendData(messageSize, PACKET_SENSOR_STATE_SNAPSHOT);
 }
 
 void McuComms::readData() {
@@ -188,11 +206,16 @@ void McuComms::readData() {
       break;
     } case PACKET_PROFILE: {
       log("Received a profile packet\n");
-      uint8_t* data = receiveMultiPacket();
+      vector<uint8_t> data = receiveMultiPacket();
       Profile profile;
       profileSerializer.deserializeProfile(data, profile);
-      delete[] data;
       profileReceived(profile);
+      break;
+    } case PACKET_SENSOR_STATE_SNAPSHOT: {
+      log("Received a sensor state snapshot packet\n");
+      SensorStateSnapshot snapshot;
+      transfer.rxObj(snapshot);
+      sensorStateSnapshotReceived(snapshot);
       break;
     }
     default:

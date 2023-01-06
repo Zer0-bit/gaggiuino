@@ -12,10 +12,15 @@ enum PHASE_TYPE {
 struct ShotSnapshot {
   uint32_t timeInShot;
   float pressure;
-  float flow;
+  float pumpFlow;
+  float weightFlow;
   float temperature;
   float shotWeight;
   float waterPumped;
+
+  float targetTemperature;
+  float targetPumpFlow;
+  float targetPressure;
 };
 
 struct PhaseStopConditions {
@@ -29,7 +34,6 @@ struct PhaseStopConditions {
 
   bool isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
-
 
 struct Transition {
   float start;
@@ -101,5 +105,9 @@ public:
   bool isFinished();
   void reset();
 };
+
+// Helper functions
+
+ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentPhase& phase);
 
 #endif

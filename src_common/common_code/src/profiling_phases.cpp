@@ -1,6 +1,21 @@
 #include "profiling_phases.h"
 
 //----------------------------------------------------------------------//
+//------------------------- ShotSnapshot -------------------------------//
+//----------------------------------------------------------------------//
+
+ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentPhase& phase) {
+  float targetFlow = (phase.getType() == PHASE_TYPE_FLOW) ? phase.getTarget() : phase.getRestriction();
+  float targetPressure = (phase.getType() == PHASE_TYPE_PRESSURE) ? phase.getTarget() : phase.getRestriction();
+
+  return ShotSnapshot{
+    timeInShot, state.smoothedPressure,
+    state.smoothedPumpFlow, state.weightFlow, state.temperature, state.shotWeight, state.waterPumped,
+    -1, targetFlow, targetPressure
+  };
+};
+
+//----------------------------------------------------------------------//
 //------------------------------ Phase ---------------------------------//
 //----------------------------------------------------------------------//
 float Phase::getTarget(uint32_t timeInPhase) const {
@@ -87,8 +102,9 @@ void PhaseProfiler::updatePhase(uint32_t timeInShot, SensorState& state) {
     return;
   }
 
+  currentPhase.update(phaseIdx, profile.phases[phaseIdx], timeInPhase);
+  phaseChangedSnapshot = buildShotSnapshot(timeInShot, state, currentPhase);
   currentPhaseIdx += 1;
-  phaseChangedSnapshot = ShotSnapshot{timeInShot, state.pressure, state.pumpFlow, state.temperature, state.shotWeight, state.waterPumped};
   updatePhase(timeInShot, state);
 }
 
@@ -103,6 +119,6 @@ bool PhaseProfiler::isFinished() {
 
 void PhaseProfiler::reset() {
   currentPhaseIdx = 0;
-  phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0};
+  phaseChangedSnapshot = ShotSnapshot{};
   currentPhase.update(0, profile.phases[0], 0);
 }

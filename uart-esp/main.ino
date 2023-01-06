@@ -22,10 +22,14 @@ void setup(void) {
       Serial.print("Received shot snapshot {");
       Serial.print("time:"); Serial.print(snapshot.timeInShot);
       Serial.print(", pressure:"); Serial.print(snapshot.pressure);
-      Serial.print(", flow:"); Serial.print(snapshot.flow);
+      Serial.print(", pumpFlow:"); Serial.print(snapshot.pumpFlow);
+      Serial.print(", weightFlow:"); Serial.print(snapshot.weightFlow);
       Serial.print(", temp:"); Serial.print(snapshot.temperature);
       Serial.print(", shotWeight:"); Serial.print(snapshot.shotWeight);
       Serial.print(", waterPumped:"); Serial.print(snapshot.waterPumped);
+      Serial.print(", targetPressure:"); Serial.print(snapshot.targetPressure);
+      Serial.print(", targetPumpFlow:"); Serial.print(snapshot.targetPumpFlow);
+      Serial.print(", targetTemperature:"); Serial.print(snapshot.targetTemperature);
       Serial.println("}");
     }
   );

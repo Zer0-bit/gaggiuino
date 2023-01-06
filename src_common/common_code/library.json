@@ -2,5 +2,8 @@
   "name": "common_code",
   "version": "0.0.1",
   "keywords": "",
-  "description": "Contains common structures and comms code for UART comms of Gaggiuino data"
+  "description": "Contains common structures and comms code for UART comms of Gaggiuino data",
+  "architectures": "*",
+  "frameworks": "arduino"
+
   }

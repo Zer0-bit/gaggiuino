@@ -55,15 +55,30 @@ void loop(void) {
   comms.readData();
   if (millis() - snapshotTimer > 100) {
       ShotSnapshot snapshot = ShotSnapshot{
-        millis(),
-        7.f + random(0, 2) / 10.f,
-        2.f + random(0, 5) / 10.f,
-        90.f + random(20, 30) / 10.f,
-        millis() / 100000.f,
-        0.f
+        .timeInShot=millis(),
+        .pressure=7.f + random(0, 2) / 10.f,
+        .pumpFlow=2.f + random(0, 5) / 10.f,
+        .weightFlow=-1,
+        .temperature=90.f + random(20, 30) / 10.f,
+        .shotWeight=millis() / 100000.f,
+        .waterPumped=0.f,
+        .targetTemperature=93.f,
+        .targetPumpFlow=2.f,
+        .targetPressure=9.f
       };
 
     comms.sendShotData(snapshot);
+
+    SensorStateSnapshot stateSnapshot = SensorStateSnapshot{
+      .brewActive=false,
+      .steamActive=false,
+      .temperature=90.f + random(20, 30) / 10.f,
+      .pressure=7.f + random(0, 2) / 10.f,
+      .pumpFlow=2.f + random(0, 5) / 10.f,
+      .weightFlow=-1,
+      .weight=0.f
+    };
+    comms.sendSensorStateSnapshot(stateSnapshot);
     snapshotTimer = millis();
   }
 }

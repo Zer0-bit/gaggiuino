@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "profiling_phases.h"
 #include "SerialTransfer.h"
+#include <vector>
 
 #ifdef ESP32
 #include "esp_task_wdt.h"
@@ -11,24 +12,29 @@
 
 #define PACKET_SHOT_SNAPSHOT         1
 #define PACKET_PROFILE               2
-#define MAX_DATA_PER_PACKET_DEFAULT  50
+#define PACKET_SENSOR_STATE_SNAPSHOT 3
+#define MAX_DATA_PER_PACKET_DEFAULT  58
+
+using namespace std;
 
 class ProfileSerializer {
 public:
   size_t neededBufferSize(Profile& profile);
-  uint8_t* serializeProfile(Profile& profile);
-  void deserializeProfile(const uint8_t* data, Profile& profile);
+  vector<uint8_t> serializeProfile(Profile& profile);
+  void deserializeProfile(vector<uint8_t>& data, Profile& profile);
 };
 
 class McuComms {
 private:
   typedef void (*ShotSnapshotReceivedCallback)(ShotSnapshot&);
   typedef void (*ProfileReceivedCallback)(Profile&);
+  typedef void (*SensorStateSnapshotReceivedCallback)(SensorStateSnapshot&);
 
   ProfileSerializer profileSerializer;
   SerialTransfer transfer;
   ShotSnapshotReceivedCallback shotSnapshotCallback;
   ProfileReceivedCallback profileCallback;
+  SensorStateSnapshotReceivedCallback sensorStateSnapshotCallback;
   size_t packetSize;
   Stream* debugPort;
 
@@ -42,24 +48,27 @@ private:
    * |      | |______|____________________________________________________________ index of current packet
    * |______|_____________________________________________________________________ index of last packet
    */
-  void sendMultiPacket(uint8_t* buffer, size_t dataSize, uint8_t packetID);
-  uint8_t* receiveMultiPacket();
+  void sendMultiPacket(vector<uint8_t>& buffer, size_t dataSize, uint8_t packetID);
+  vector<uint8_t> receiveMultiPacket();
   void log(const char* format, ...);
-  void logBufferHex(uint8_t* buffer, size_t dataSize);
+  void logBufferHex(vector<uint8_t>& buffer, size_t dataSize);
 
   void shotSnapshotReceived(ShotSnapshot& snapshot);
   void profileReceived(Profile& profile);
+  void sensorStateSnapshotReceived(SensorStateSnapshot& snapshot);
 
 public:
-  McuComms(): shotSnapshotCallback(nullptr), profileCallback(nullptr), debugPort(nullptr) {};
+  McuComms(): shotSnapshotCallback(nullptr), profileCallback(nullptr), sensorStateSnapshotCallback(nullptr), debugPort(nullptr) {};
 
   void begin(Stream& serial, size_t packetSize = MAX_DATA_PER_PACKET_DEFAULT);
   void setDebugPort(Stream* debugPort);
   void setShotSnapshotCallback(ShotSnapshotReceivedCallback callback);
   void setProfileReceivedCallback(ProfileReceivedCallback callback);
+  void setSensorStateSnapshotCallback(SensorStateSnapshotReceivedCallback callback);
 
   void sendShotData(ShotSnapshot& snapshot);
   void sendProfile(Profile& profile);
+  void sendSensorStateSnapshot(SensorStateSnapshot& snapshot);
 
   void readData();
 };
