@@ -15,7 +15,7 @@ export default function ShotDialog({ open, setOpen }) {
   const [sensorData, setSensorData] = useState([]);
 
   useEffect(() => {
-    if (lastJsonMessage !== null && lastJsonMessage.action === 'sensor_data_update') {
+    if (lastJsonMessage !== null && lastJsonMessage.action === 'shot_data_update') {
       setSensorData((prev) => {
         if (prev.length >= 400) {
           prev.shift();

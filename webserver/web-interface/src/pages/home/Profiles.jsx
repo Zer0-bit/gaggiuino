@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Card, Container, useTheme, Typography, CardContent, CardActions,
 } from '@mui/material';
-import useWebSocket from 'react-use-websocket';
 import IconButton from '@mui/material/IconButton';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -11,24 +10,8 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Chart from '../../components/chart/ShotChart';
 import AddPhaseButton from '../../components/inputs/AddPhase';
 
-export default function Settings() {
+export default function Profiles() {
   const theme = useTheme();
-  const { lastJsonMessage } = useWebSocket(`ws://${window.location.host}/ws`, {
-    share: true,
-  });
-
-  const [sensorData, setSensorData] = useState([]);
-
-  useEffect(() => {
-    if (lastJsonMessage !== null && lastJsonMessage.action === 'sensor_data_update') {
-      setSensorData((prev) => {
-        if (prev.length >= 400) {
-          prev.shift();
-        }
-        return prev.concat(lastJsonMessage.data);
-      });
-    }
-  }, [lastJsonMessage]);
 
   return (
     <div>
@@ -71,7 +54,7 @@ export default function Settings() {
               </CardContent>
               <CardActions>
                 <Grid container columns={{ xs: 1, sm: 1 }} position="relative" width="1550px" height={400}>
-                  <Chart data={sensorData} />
+                  <Chart data={[]} />
                 </Grid>
               </CardActions>
             </Grid>

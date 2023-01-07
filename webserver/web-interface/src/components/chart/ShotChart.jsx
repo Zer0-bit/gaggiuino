@@ -47,7 +47,7 @@ function mapToChartData(input, theme) {
     datasets: [
       {
         label: 'Temperature',
-        data: getDataset(input, 'temp'),
+        data: getDataset(input, 'temperature'),
         backgroundColor: theme.palette.temperature.main,
         borderColor: theme.palette.temperature.main,
         tension: 0.3,
@@ -63,7 +63,7 @@ function mapToChartData(input, theme) {
       },
       {
         label: 'Flow',
-        data: getDataset(input, 'flow'),
+        data: getDataset(input, 'pumpFlow'),
         backgroundColor: theme.palette.flow.main,
         borderColor: theme.palette.flow.main,
         tension: 0.3,
@@ -71,7 +71,7 @@ function mapToChartData(input, theme) {
       },
       {
         label: 'Weight',
-        data: getDataset(input, 'weight'),
+        data: getDataset(input, 'shotWeight'),
         backgroundColor: theme.palette.weight.main,
         borderColor: theme.palette.weight.main,
         tension: 0.3,
@@ -105,7 +105,8 @@ export default Chart;
 Chart.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({
     timeInShot: PropTypes.number,
-    temp: PropTypes.number,
+    temperature: PropTypes.number,
     pressure: PropTypes.number,
+    pumpFlow: PropTypes.number,
   })).isRequired,
 };
