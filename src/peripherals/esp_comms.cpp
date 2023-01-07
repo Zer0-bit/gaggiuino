@@ -43,5 +43,3 @@ void espCommsSendShotData(ShotSnapshot& shotData, uint32_t frequency) {
     shotDataTimer = now;
   }
 }
-
-void onProfileReceived(Profile& profile) {};

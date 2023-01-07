@@ -507,6 +507,9 @@ void setPhase(
   profile.phases[phaseIdx].stopConditions    = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove };
 }
 
+void onProfileReceived(Profile& newProfile) {
+}
+
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     uint32_t timeInShot = millis() - brewingTimer;
