@@ -113,7 +113,7 @@ static void sensorsRead(void) {
 
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
-    currentState.temperature = thermocouple.readCelsius();
+    currentState.temperature = thermocouple.readCelsius() - runningCfg.offsetTemp;
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }
@@ -287,7 +287,7 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    lcdSetTemperature(currentState.temperature - runningCfg.offsetTemp);
+    lcdSetTemperature(currentState.temperature);
 
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
@@ -650,7 +650,7 @@ void systemHealthCheck(float pressureThreshold) {
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
       steamState() ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
-      currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
+      currentState.temperature  = thermocouple.readCelsius() - runningCfg.offsetTemp;  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }

@@ -9,9 +9,16 @@ ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentP
   float targetPressure = (phase.getType() == PHASE_TYPE_PRESSURE) ? phase.getTarget() : phase.getRestriction();
 
   return ShotSnapshot{
-    timeInShot, state.smoothedPressure,
-    state.smoothedPumpFlow, state.weightFlow, state.temperature, state.shotWeight, state.waterPumped,
-    -1, targetFlow, targetPressure
+    .timeInShot=timeInShot,
+    .pressure=state.smoothedPressure,
+    .pumpFlow=state.smoothedPumpFlow,
+    .weightFlow=state.weightFlow,
+    .temperature=state.temperature,
+    .shotWeight=state.shotWeight,
+    .waterPumped=state.waterPumped,
+    .targetTemperature=-1,
+    .targetPumpFlow=targetFlow,
+    .targetPressure=targetPressure
   };
 };
 
