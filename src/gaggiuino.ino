@@ -130,7 +130,7 @@ static void sensorsReadPressure(void) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
     currentState.isPressureRising = isPressureRaising();
-    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 0.25f;
+    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 0.55f;
     currentState.isPressureFalling = isPressureFalling();
     currentState.isPressureFallingFast = isPressureFallingFast();
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
@@ -159,8 +159,8 @@ static void calculateWeightAndFlow(void) {
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
       long pumpClicks = sensorsReadFlow(elapsedTime);
-      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.45f;
-      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.45f;
+      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 2.5f;
+      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.55f;
 
       bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
 
@@ -591,7 +591,7 @@ static void brewParamsReset(void) {
   phaseProfiler.reset();
 }
 
-static void fillBoiler(float targetBoilerFullPressure) {
+void fillBoiler(float targetBoilerFullPressure) {
   static long elapsedTimeSinceStart = millis();
 #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   lcdSetUpTime((millis() > elapsedTimeSinceStart) ? (int)((millis() - elapsedTimeSinceStart) / 1000) : 0);
@@ -613,7 +613,7 @@ static void fillBoiler(float targetBoilerFullPressure) {
 #endif
 }
 
-static void systemHealthCheck(float pressureThreshold) {
+void systemHealthCheck(float pressureThreshold) {
   //Reloading the watchdog timer, if this function fails to run MCU is rebooted
   watchdogReload();
 
