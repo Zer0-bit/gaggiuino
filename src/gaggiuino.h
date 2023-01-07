@@ -56,15 +56,14 @@ typedef enum {
 
 
 //Timers
-unsigned long pageRefreshTimer = 0;
-unsigned long pressureTimer = 0;
-unsigned long brewingTimer = 0;
-unsigned long thermoTimer = 0;
-unsigned long scalesTimer = 0;
-unsigned long flowTimer = 0;
-unsigned long steamTime = millis();
-unsigned long trayTimer = millis();
-unsigned long systemHealthTimer = 0;
+unsigned long systemHealthTimer;
+unsigned long pageRefreshTimer;
+unsigned long pressureTimer;
+unsigned long brewingTimer;
+unsigned long thermoTimer;
+unsigned long scalesTimer;
+unsigned long flowTimer;
+unsigned long steamTime;
 
 //scales vars
 float previousWeight  = 0;
