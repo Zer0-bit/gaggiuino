@@ -12,21 +12,13 @@
 
 float previousPressure;
 float currentPressure;
-long adcValue;
 
 void adsInit() {
   ADS.begin();
   ADS.setGain(0);      // 6.144 volt
   ADS.setDataRate(4);  // fast
-  ADS.setMode(1);      // single mode
+  ADS.setMode(0);      // continuous mode
   ADS.readADC(0);      // first read to trigger
-}
-
-void pressureReadSensors() {
-  if (ADS.isReady()) {
-    adcValue = ADS.getValue();
-    ADS.readADC(0);
-  }
 }
 
 float getPressure() {  //returns sensor pressure data
@@ -36,13 +28,13 @@ float getPressure() {  //returns sensor pressure data
   // pressure gauge range 0-1.2MPa - 0-12 bar
   // 1 bar = 17.1 or 68.27 or 1777.8
 
-  // i2cResetState();
+  i2cResetState();
 
   previousPressure = currentPressure;
   #if defined SINGLE_BOARD
-    currentPressure = (adcValue - 166) / 111.11f; // 12bit
+    currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
   #else
-    currentPressure = (adcValue - 2666) / 1777.8f; // 16bit
+    currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
   #endif
 
   return currentPressure;
