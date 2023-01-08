@@ -11,7 +11,7 @@
 
 HX711_2 loadcell;
 
-#if defined SINGLE_BOARD
+#if defined SINGLE_HX711_BOARD
   unsigned char scale_clk = OUTPUT;
 #else
   unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
