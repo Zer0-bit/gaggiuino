@@ -1,3 +1,5 @@
+import { alpha } from '@mui/material';
+
 export default function getShotChartConfig(theme) {
   return {
     animation: false,
@@ -35,10 +37,11 @@ export default function getShotChartConfig(theme) {
         type: 'linear',
         display: true,
         position: 'left',
-        suggestedMin: 0,
-        suggestedMax: 160,
+        min: 0,
+        suggestedMax: 100,
         grid: {
-          color: theme.palette.temperature.main,
+          color: alpha(theme.palette.temperature.main, 0.5),
+          borderDash: [3, 3],
         },
         ticks: {
           color: theme.palette.temperature.main,
@@ -48,10 +51,11 @@ export default function getShotChartConfig(theme) {
         type: 'linear',
         display: true,
         position: 'right',
-        suggestedMin: 0,
+        min: 0,
         suggestedMax: 16,
         grid: {
-          color: theme.palette.pressure.main,
+          color: alpha(theme.palette.pressure.main, 0.5),
+          borderDash: [3, 3],
         },
         ticks: {
           color: theme.palette.pressure.main,

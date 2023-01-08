@@ -7,7 +7,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import GaugeChart from '../../components/chart/GaugeChart';
 import {
   filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA, MSG_TYPE_SHOT_DATA,
-} from '../../models/websocket';
+} from '../../models/api';
 import ShotDialog from './ShotDialog';
 
 function Home() {

@@ -14,7 +14,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { useTheme } from '@mui/material';
+import { useTheme, alpha } from '@mui/material';
 import getShotChartConfig from './ChartConfig';
 
 ChartJS.register(
@@ -52,7 +52,7 @@ function mapToChartData(input, theme) {
       {
         label: 'Temperature',
         data: getDataset(input, 'temperature'),
-        backgroundColor: theme.palette.temperature.main,
+        backgroundColor: alpha(theme.palette.temperature.main, 0.8),
         borderColor: theme.palette.temperature.main,
         tension: 0.3,
         yAxisID: 'y1',
@@ -60,7 +60,7 @@ function mapToChartData(input, theme) {
       {
         label: 'Pressure',
         data: getDataset(input, 'pressure'),
-        backgroundColor: theme.palette.pressure.main,
+        backgroundColor: alpha(theme.palette.pressure.main, 0.8),
         borderColor: theme.palette.pressure.main,
         tension: 0.3,
         yAxisID: 'y2',
@@ -68,7 +68,7 @@ function mapToChartData(input, theme) {
       {
         label: 'Flow',
         data: getDataset(input, 'pumpFlow'),
-        backgroundColor: theme.palette.flow.main,
+        backgroundColor: alpha(theme.palette.flow.main, 0.8),
         borderColor: theme.palette.flow.main,
         tension: 0.3,
         yAxisID: 'y2',
@@ -76,10 +76,28 @@ function mapToChartData(input, theme) {
       {
         label: 'Weight',
         data: getDataset(input, 'shotWeight'),
-        backgroundColor: theme.palette.weight.main,
+        backgroundColor: alpha(theme.palette.weight.main, 0.8),
         borderColor: theme.palette.weight.main,
         tension: 0.3,
         yAxisID: 'y1',
+      },
+      {
+        label: 'Target Pressure',
+        data: getDataset(input, 'targetPressure'),
+        backgroundColor: alpha(theme.palette.pressure.main, 0.3),
+        borderColor: alpha(theme.palette.pressure.main, 0.6),
+        tension: 0.3,
+        borderDash: [8, 4],
+        yAxisID: 'y2',
+      },
+      {
+        label: 'Target Flow',
+        data: getDataset(input, 'targetPumpFlow'),
+        backgroundColor: alpha(theme.palette.flow.main, 0.3),
+        borderColor: alpha(theme.palette.flow.main, 0.6),
+        tension: 0.3,
+        borderDash: [8, 4],
+        yAxisID: 'y2',
       },
     ],
   };
@@ -102,6 +120,8 @@ function addDataPointToChartData(chartData, dataPoint, maxLength) {
   chartData.datasets[1].data.push(dataPoint.pressure);
   chartData.datasets[2].data.push(dataPoint.pumpFlow);
   chartData.datasets[3].data.push(dataPoint.shotWeight);
+  chartData.datasets[4].data.push(dataPoint.targetPumpFlow);
+  chartData.datasets[5].data.push(dataPoint.targetPressure);
 }
 
 function Chart({ data, newDataPoint, maxLength }) {
@@ -119,7 +139,10 @@ function Chart({ data, newDataPoint, maxLength }) {
 
   useEffect(() => {
     addDataPointToChartData(chartData, newDataPoint, maxLength);
-    chartRef.current.data = chartData;
+    chartRef.current.data.labels = chartData.labels;
+    chartData.datasets.forEach((dataset, index) => {
+      chartRef.current.data.datasets[index].data = dataset.data;
+    });
     chartRef.current.update();
   }, [newDataPoint]);
 
@@ -140,6 +163,9 @@ export const ShotChartDataPointType = PropTypes.shape({
   pressure: PropTypes.number,
   pumpFlow: PropTypes.number,
   shotWeight: PropTypes.number,
+  targetTemperature: PropTypes.number,
+  targetPumpFlow: PropTypes.number,
+  targetPressure: PropTypes.number,
 });
 
 Chart.propTypes = {

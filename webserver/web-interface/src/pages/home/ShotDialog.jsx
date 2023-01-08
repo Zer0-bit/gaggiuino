@@ -5,7 +5,7 @@ import {
 import PropTypes from 'prop-types';
 import useWebSocket from 'react-use-websocket';
 import CloseIcon from '@mui/icons-material/Close';
-import { filterSocketMessage, MSG_TYPE_SHOT_DATA } from '../../models/websocket';
+import { filterSocketMessage, MSG_TYPE_SHOT_DATA } from '../../models/api';
 import Chart from '../../components/chart/ShotChart';
 
 export default function ShotDialog({ open, setOpen }) {
