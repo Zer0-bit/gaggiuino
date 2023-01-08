@@ -7,11 +7,12 @@ import TuneIcon from '@mui/icons-material/Tune';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Box from '@mui/material/Box';
 import {
-  useTheme, Stack, AppBar, Toolbar,
+  useTheme, Stack, AppBar, Toolbar, Fab,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import Logo from '../icons/Logo';
 import ThemeModeToggle from '../theme/ThemeModeToggle';
+import ShotDialog from '../../pages/home/ShotDialog';
 
 function LinkTab(props) {
   const { value: path } = props;
@@ -43,6 +44,7 @@ function TabsBar() {
   const theme = useTheme();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(location.pathname || '/');
+  const [shotDialogOpen, setShotDialogOpen] = useState(false);
 
   const activeColor = theme.palette.mode === 'light' ? theme.palette.primary.contrastText : theme.palette.primary.main;
 
@@ -50,11 +52,15 @@ function TabsBar() {
     <AppBar sx={{ position: 'static' }} elevation={1}>
       <Toolbar>
         <Stack sx={{ display: 'flex', flexGrow: 1 }} direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-          <Box sx={{
-            display: 'flex', color: activeColor, alignContent: 'center',
-          }}
+          <Box
+            sx={{
+              display: 'flex', color: activeColor, alignContent: 'center',
+            }}
           >
-            <Logo size={40} />
+            <Fab onClick={() => setShotDialogOpen(true)} sx={{ color: 'primary.main' }}>
+              <Logo size={40} />
+            </Fab>
+            {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
           </Box>
           <Tabs
             value={activeTab}
