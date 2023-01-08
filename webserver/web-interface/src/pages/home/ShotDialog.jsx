@@ -13,16 +13,17 @@ export default function ShotDialog({ open, setOpen }) {
     retryOnError: true,
     shouldReconnect: () => true,
     reconnectAttempts: 1000,
-    filter: (message) => message.data.includes('sensor_data_update'),
+    filter: (message) => message.data.includes('shot_data_update'),
   });
 
   const [sensorData, setSensorData] = useState([]);
+  const [latestSensorData, setLatestSensorData] = useState(undefined);
 
   useEffect(() => {
     if (lastJsonMessage === null) {
       return;
     }
-
+    setLatestSensorData(lastJsonMessage.data);
     setSensorData((prev) => {
       if (prev.length >= 400) {
         prev.shift();
@@ -52,7 +53,7 @@ export default function ShotDialog({ open, setOpen }) {
           </Toolbar>
         </AppBar>
         <div style={{ position: 'relative', flexGrow: 1 }}>
-          <Chart data={sensorData} />
+          <Chart data={sensorData} newDataPoint={latestSensorData} maxLength={50} />
         </div>
       </Stack>
     </Dialog>
