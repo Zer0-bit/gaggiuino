@@ -30,10 +30,12 @@ ChartJS.register(
 
 function getLabels(input) {
   return input.map((dp) => {
-    const millisecons = dp.timeInShot % 1000;
+    if (!dp.timeInShot) {
+      return '00:00';
+    }
     const seconds = Math.floor(dp.timeInShot / 1000);
     const minutes = Math.floor(seconds / 60);
-    return `${minutes}:${seconds % 60}:${millisecons}`;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0') % 60}`;
   });
 }
 
@@ -108,5 +110,6 @@ Chart.propTypes = {
     temperature: PropTypes.number,
     pressure: PropTypes.number,
     pumpFlow: PropTypes.number,
+    shotWeight: PropTypes.number,
   })).isRequired,
 };

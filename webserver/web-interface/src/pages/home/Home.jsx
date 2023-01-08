@@ -10,19 +10,25 @@ import ShotDialog from './ShotDialog';
 function Home() {
   const { lastJsonMessage } = useWebSocket(`ws://${window.location.host}/ws`, {
     share: true,
+    retryOnError: true,
+    shouldReconnect: () => true,
+    reconnectAttempts: 1000,
+    onError: (error) => console.log(error),
+    filter: (message) => message.data.includes('sensor_data_update'),
   });
   const theme = useTheme();
 
   const [lastSensorData, setLastSensorData] = useState({
-    temp: 0, pressure: 0, timeInShot: 0, flow: 0, weight: 0,
+    temperature: 0, pressure: 0, pumpFlow: 0, weight: 0,
   });
 
   const [shotDialogOpen, setShotDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (lastJsonMessage !== null && lastJsonMessage.action === 'sensor_data_update') {
-      setLastSensorData(lastJsonMessage.data);
+    if (lastJsonMessage === null) {
+      return;
     }
+    setLastSensorData(lastJsonMessage.data);
   }, [lastJsonMessage]);
 
   function boxedComponent(component) {
@@ -57,7 +63,7 @@ function Home() {
       <Button variant="contained" onClick={() => setShotDialogOpen(true)}>
         Start Brew
       </Button>
-      <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />
+      {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
 
     </Container>
   );

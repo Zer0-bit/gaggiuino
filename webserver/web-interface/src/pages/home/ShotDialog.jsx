@@ -10,19 +10,25 @@ import Chart from '../../components/chart/ShotChart';
 export default function ShotDialog({ open, setOpen }) {
   const { lastJsonMessage } = useWebSocket(`ws://${window.location.host}/ws`, {
     share: true,
+    retryOnError: true,
+    shouldReconnect: () => true,
+    reconnectAttempts: 1000,
+    filter: (message) => message.data.includes('sensor_data_update'),
   });
 
   const [sensorData, setSensorData] = useState([]);
 
   useEffect(() => {
-    if (lastJsonMessage !== null && lastJsonMessage.action === 'shot_data_update') {
-      setSensorData((prev) => {
-        if (prev.length >= 400) {
-          prev.shift();
-        }
-        return prev.concat(lastJsonMessage.data);
-      });
+    if (lastJsonMessage === null) {
+      return;
     }
+
+    setSensorData((prev) => {
+      if (prev.length >= 400) {
+        prev.shift();
+      }
+      return prev.concat(lastJsonMessage.data);
+    });
   }, [lastJsonMessage]);
 
   return (
