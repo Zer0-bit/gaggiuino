@@ -54,7 +54,7 @@ function TabsBar() {
         <Stack sx={{ display: 'flex', flexGrow: 1 }} direction="row" spacing={2} justifyContent="space-between" alignItems="center">
           <Box
             sx={{
-              display: 'flex', color: activeColor, alignContent: 'center',
+              color: activeColor, alignContent: 'center',
             }}
           >
             <Fab onClick={() => setShotDialogOpen(true)} sx={{ color: 'primary.main' }}>
