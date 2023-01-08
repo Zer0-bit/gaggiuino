@@ -8,6 +8,7 @@ import GaugeChart from '../../components/chart/GaugeChart';
 import {
   filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA, MSG_TYPE_SHOT_DATA,
 } from '../../models/api';
+import ProfilesTable from '../../components/table/table';
 import ShotDialog from './ShotDialog';
 
 function Home() {
@@ -54,17 +55,14 @@ function Home() {
   return (
     <Container sx={{ pt: theme.spacing(2) }}>
       <Grid container columns={16} spacing={1} sx={{ mb: theme.spacing(2) }}>
+        <Grid item xs={8} sm={8}>
+          <ProfilesTable />
+        </Grid>
         <Grid item xs={8} sm={4}>
           {boxedComponent(<GaugeChart value={lastSensorData.temperature} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
         </Grid>
         <Grid item xs={8} sm={4}>
           {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
-        </Grid>
-        <Grid item xs={8} sm={4}>
-          {boxedComponent(<GaugeChart value={lastSensorData.pumpFlow} primaryColor={theme.palette.flow.main} title="Flow" unit="ml/s" maxValue={15} />)}
-        </Grid>
-        <Grid item xs={8} sm={4}>
-          {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="g" />)}
         </Grid>
       </Grid>
       <Button variant="contained" onClick={() => setShotDialogOpen(true)}>
