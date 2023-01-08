@@ -1,16 +1,16 @@
 export const tableColumns = [
-  { field: 'id', headerName: 'ID', width: 70 },
-  { field: 'profile', headerName: 'Profile', width: 130 },
-  { field: 'score', headerName: 'Score', width: 130 },
+  { field: 'id', headerName: 'ID', minWidth: 70 },
+  { field: 'profile', headerName: 'Profile', minWidth: 150 },
+  { field: 'score', headerName: 'Score', minWidth: 130 },
   {
-    field: 'time', headerName: 'Time', type: 'number', width: 90,
+    field: 'time', headerName: 'Time', type: 'number', minWidth: 90,
   },
   {
     field: 'description',
     headerName: 'Description',
     description: 'This column has a value getter and is not sortable.',
     sortable: false,
-    width: 600,
+    minWidth: 100,
     valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
   },
 ];

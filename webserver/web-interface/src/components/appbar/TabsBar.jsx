@@ -57,7 +57,7 @@ function TabsBar() {
               color: activeColor, alignContent: 'center',
             }}
           >
-            <Fab onClick={() => setShotDialogOpen(true)} sx={{ color: 'primary.main' }}>
+            <Fab onClick={() => setShotDialogOpen(true)} sx={{ color: ['primary.main'], backgroundColor: ['theme.main'] }}>
               <Logo size={40} />
             </Fab>
             {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
