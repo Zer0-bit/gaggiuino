@@ -5,6 +5,9 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import GaugeChart from '../../components/chart/GaugeChart';
+import {
+  filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA, MSG_TYPE_SHOT_DATA,
+} from '../../models/websocket';
 import ShotDialog from './ShotDialog';
 
 function Home() {
@@ -13,8 +16,7 @@ function Home() {
     retryOnError: true,
     shouldReconnect: () => true,
     reconnectAttempts: 1000,
-    onError: (error) => console.log(error),
-    filter: (message) => message.data.includes('sensor_data_update'),
+    filter: (message) => filterSocketMessage(message, MSG_TYPE_SHOT_DATA, MSG_TYPE_SENSOR_DATA),
   });
   const theme = useTheme();
 
@@ -28,7 +30,12 @@ function Home() {
     if (lastJsonMessage === null) {
       return;
     }
-    setLastSensorData(lastJsonMessage.data);
+    if (filterJsonMessage(lastJsonMessage, MSG_TYPE_SENSOR_DATA)) {
+      setLastSensorData(lastJsonMessage.data);
+    }
+    if (filterJsonMessage(lastJsonMessage, MSG_TYPE_SHOT_DATA)) {
+      setShotDialogOpen(true);
+    }
   }, [lastJsonMessage]);
 
   function boxedComponent(component) {
