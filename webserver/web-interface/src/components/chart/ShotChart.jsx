@@ -120,8 +120,8 @@ function addDataPointToChartData(chartData, dataPoint, maxLength) {
   chartData.datasets[1].data.push(dataPoint.pressure);
   chartData.datasets[2].data.push(dataPoint.pumpFlow);
   chartData.datasets[3].data.push(dataPoint.shotWeight);
-  chartData.datasets[4].data.push(dataPoint.targetPumpFlow);
   chartData.datasets[5].data.push(dataPoint.targetPressure);
+  chartData.datasets[4].data.push(dataPoint.targetPumpFlow);
 }
 
 function Chart({ data, newDataPoint, maxLength }) {
