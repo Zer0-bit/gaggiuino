@@ -57,20 +57,8 @@ function TabsBar() {
               color: activeColor, alignContent: 'center',
             }}
           >
-            <Fab
-              onClick={() => setShotDialogOpen(true)}
-              sx={{
-                color: ['primary.main'],
-                height: '180%',
-                width: '9%',
-                position: 'absolute',
-                float: 'top-right',
-              }}
-              display="flex"
-              justifyContent="flex-start"
-              alignItem="flex-start"
-            >
-              <Logo size={70} />
+            <Fab onClick={() => setShotDialogOpen(true)} sx={{ color: ['primary.main'], backgroundColor: ['theme.main'] }}>
+              <Logo size={40} />
             </Fab>
             {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
           </Box>
