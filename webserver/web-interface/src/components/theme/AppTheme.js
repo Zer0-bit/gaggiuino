@@ -14,6 +14,7 @@ const lightTheme = createTheme({
     },
     background: {
       default: '#F5F5F5',
+      paper: '#FFF',
     },
     temperature: {
       main: '#ef4040',
@@ -50,6 +51,10 @@ const darkTheme = createTheme({
     },
     weight: {
       main: '#ffb53e',
+    },
+    background: {
+      default: '#111',
+      paper: '#111',
     },
   },
 });

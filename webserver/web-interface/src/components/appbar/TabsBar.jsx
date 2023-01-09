@@ -59,10 +59,13 @@ function TabsBar() {
           >
             <Fab
               onClick={() => setShotDialogOpen(true)}
+              size="medium"
               sx={{
-                color: 'primary.main', backgroundColor: 'theme.main', boxShadow: 0, '&:focus': { boxShadow: 0 },
+                color: 'primary.main',
+                backgroundColor: 'background.default',
+                boxShadow: 0,
+                '&:hover': { boxShadow: 0, backgroundColor: 'background.default' },
               }}
-              disableRipple
             >
               <Box height={30} sx={{ ml: '-4px' }}><Logo size={30} sx={{}} /></Box>
             </Fab>
