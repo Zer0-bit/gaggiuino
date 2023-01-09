@@ -57,10 +57,15 @@ function TabsBar() {
               color: activeColor, alignContent: 'center',
             }}
           >
-            <Fab onClick={() => setShotDialogOpen(true)} sx={{ color: ['primary.main'], backgroundColor: ['theme.main'] }}>
-              <Logo size={40} />
+            <Fab
+              onClick={() => setShotDialogOpen(true)}
+              sx={{
+                color: 'primary.main', backgroundColor: 'theme.main', boxShadow: 0, '&:focus': { boxShadow: 0 },
+              }}
+              disableRipple
+            >
+              <Box height={30} sx={{ ml: '-4px' }}><Logo size={30} sx={{}} /></Box>
             </Fab>
-            {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
           </Box>
           <Tabs
             value={activeTab}
@@ -81,6 +86,7 @@ function TabsBar() {
         </Stack>
       </Toolbar>
       <Box />
+      {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
     </AppBar>
   );
 }
