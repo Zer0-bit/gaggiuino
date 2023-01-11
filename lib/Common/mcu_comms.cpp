@@ -143,7 +143,10 @@ void McuComms::logBufferHex(vector<uint8_t>& buffer, size_t dataSize) {
 
   char hex[3];
   for (size_t i = 0; i < dataSize; i++) {
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wformat-truncation"
     snprintf(hex, 3, "%02x ", buffer[i]);
+    #pragma GCC diagnostic pop
     debugPort->print(hex);
   }
   debugPort->println();
