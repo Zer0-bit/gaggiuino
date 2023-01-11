@@ -1,7 +1,7 @@
 #include <unity.h>
-#include "profiling_phases.h"
-#include "sensors_state.h"
-#include "utils.h"
+#include <profiling_phases.h>
+#include <sensors_state.h>
+#include <utils.h>
 
 Phase pressurePhase(float start, float end, long time) {
   Phase phase = Phase{PHASE_TYPE_PRESSURE, Transition{start, end}, 0.f, PhaseStopConditions{}};

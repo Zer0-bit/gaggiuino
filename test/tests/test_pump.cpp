@@ -1,4 +1,5 @@
-#include "peripherals/pump.h"
+#include "mock.h"
+#include "../src/peripherals/pump.cpp"
 #include <unity.h>
 
 void TEST_ASSERT_EQUAL_FLOAT_ACCURACY(float expected, float actual, int digits) {

@@ -141,10 +141,12 @@ void McuComms::log(const char* format, ...) {
 void McuComms::logBufferHex(vector<uint8_t>& buffer, size_t dataSize) {
   if (!debugPort) return;
 
+  char hex[3];
   for (size_t i = 0; i < dataSize; i++) {
-    debugPort->printf("%02x ", buffer[i]);
+    snprintf(hex, 3, "%02x ", buffer[i]);
+    debugPort->print(hex);
   }
-  debugPort->printf("\n");
+  debugPort->println();
 }
 
 //---------------------------------------------------------------------------------
