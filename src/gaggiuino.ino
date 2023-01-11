@@ -10,8 +10,8 @@ SimpleKalmanFilter predictTempVariation(1.f, 1.f, 1.f);
 
 //default phases. Updated in updateProfilerPhases.
 Phase phaseArray[8];
-Phases phases {8,  phaseArray};
-PhaseProfiler phaseProfiler{phases};
+Profile profile {8,  phaseArray};
+PhaseProfiler phaseProfiler{profile};
 
 PredictiveWeight predictiveWeight;
 
@@ -48,6 +48,9 @@ void setup(void) {
   dbgInit();
   LOG_INFO("DBG init");
 #endif
+
+  // Initialise comms library for talking to the ESP mcu
+  espCommsInit();
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -90,6 +93,7 @@ void loop(void) {
   brewDetect();
   modeSelect();
   lcdRefresh();
+  espCommsSendSensorData(currentState, brewActive, steamState());
   systemHealthCheck(0.8f);
 }
 
@@ -99,6 +103,7 @@ void loop(void) {
 
 
 static void sensorsRead(void) {
+  espCommsReadData();
   sensorsReadTemperature();
   sensorsReadWeight();
   sensorsReadPressure();
@@ -108,7 +113,7 @@ static void sensorsRead(void) {
 
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
-    currentState.temperature = thermocouple.readCelsius();
+    currentState.temperature = thermocouple.readCelsius() - runningCfg.offsetTemp;
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }
@@ -282,7 +287,7 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    lcdSetTemperature(currentState.temperature - runningCfg.offsetTemp);
+    lcdSetTemperature(currentState.temperature);
 
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
@@ -434,7 +439,8 @@ static void updateProfilerPhases(void) {
       : runningCfg.shotStopOnCustomWeight;
   }
 
-  phaseProfiler.updateGlobalStopConditions(shotTarget);
+  //update global stop conditions (currently only stopOnWeight is configured in nextion)
+  profile.globalStopConditions = GlobalStopConditions{ .weight=shotTarget };
 
   //Setup release pressure + fill@4ml/sec
   if (runningCfg.basketPrefill) {
@@ -472,7 +478,7 @@ static void updateProfilerPhases(void) {
     setPressurePhase(phaseCount++, Transition{preInfusionFinishBar, 9, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1);
   }
 
-  phases.count = phaseCount;
+  profile.count = phaseCount;
 }
 
 void setFillBasketPhase(int phaseIdx, float flowRate) {
@@ -495,25 +501,23 @@ void setPhase(
   int timeMs,
   float pressureAbove
 ) {
-  phases.phases[phaseIdx].type              = type;
-  phases.phases[phaseIdx].target            = target;
-  phases.phases[phaseIdx].restriction       = restriction;
-  phases.phases[phaseIdx].stopConditions    = PhaseStopConditions{
-    timeMs,
-    pressureAbove,
-    -1, // pressureBelow
-    -1, // flowAbove
-    -1, // flowBelow
-    -1, // weight
-  };
+  profile.phases[phaseIdx].type              = type;
+  profile.phases[phaseIdx].target            = target;
+  profile.phases[phaseIdx].restriction       = restriction;
+  profile.phases[phaseIdx].stopConditions    = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove };
+}
+
+void onProfileReceived(Profile& newProfile) {
 }
 
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
-    long timeInShot = millis() - brewingTimer;
+    uint32_t timeInShot = millis() - brewingTimer;
     phaseProfiler.updatePhase(timeInShot, currentState);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
     preinfusionFinished = currentPhase.getIndex() >= preInfusionFinishedPhaseIdx;
+    ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
+    espCommsSendShotData(shotSnapshot, 100);
 
     if (phaseProfiler.isFinished()) {
       closeValve();
@@ -592,8 +596,8 @@ static void brewParamsReset(void) {
 }
 
 void fillBoiler(float targetBoilerFullPressure) {
-  static long elapsedTimeSinceStart = millis();
 #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
+  static long elapsedTimeSinceStart = millis();
   lcdSetUpTime((millis() > elapsedTimeSinceStart) ? (int)((millis() - elapsedTimeSinceStart) / 1000) : 0);
   if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
     unsigned long timePassed = millis() - elapsedTimeSinceStart;
@@ -649,7 +653,7 @@ void systemHealthCheck(float pressureThreshold) {
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
       steamState() ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
-      currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
+      currentState.temperature  = thermocouple.readCelsius() - runningCfg.offsetTemp;  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }

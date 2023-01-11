@@ -2,7 +2,7 @@
 #define PREDICTIVE_WEIGHT_H
 
 #include "profiling_phases.h"
-#include "../sensors_state.h"
+#include "sensors_state.h"
 #include "../eeprom_data/eeprom_data.h"
 
 class PredictiveWeight {

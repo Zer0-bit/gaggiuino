@@ -15,7 +15,7 @@ void wifiInit();
 
 void wifiSetup() {
   WiFi.mode(WIFI_AP_STA);
-  wifiParams.preferences.begin("gagguino_wifi");
+  wifiParams.preferences.begin("gaggiuino_wifi");
   wifiInit();
   setupWiFiAccessPoint();
 }
@@ -81,7 +81,7 @@ int wifiNetworkCount() {
 
 void setupWiFiAccessPoint() {
   // Connect to Wi-Fi network with SSID and password
-  WiFi.softAP("Gagguino AP", NULL);
+  WiFi.softAP("Gaggiuino AP", NULL);
   Serial.printf("AP (Access Point) IP address: %s\n", WiFi.softAPIP().toString().c_str());
   wifiScanNetworks();
 }

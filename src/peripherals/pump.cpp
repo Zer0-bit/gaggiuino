@@ -1,7 +1,7 @@
 #include "pump.h"
 #include "pindef.h"
 #include <PSM.h>
-#include "../utils.h"
+#include "utils.h"
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 const float pressureInefficiencyConstant0 = -0.128f;

@@ -1,8 +1,7 @@
 #include <unity.h>
-#include "functional/profiling_phases.h"
-#include "sensors_state.h"
-#include "utils.h"
-
+#include <profiling_phases.h>
+#include <sensors_state.h>
+#include <utils.h>
 
 Phase pressurePhase(float start, float end, long time) {
   Phase phase = Phase{PHASE_TYPE_PRESSURE, Transition{start, end}, 0.f, PhaseStopConditions{}};
@@ -25,8 +24,8 @@ Phase phaseArray[] = {
     pressurePhase(9, 6, 30000),
 };
 
-Phases phases = {5, phaseArray};
-PhaseProfiler phaseProfiler = PhaseProfiler(phases);
+Profile profile = {5, phaseArray};
+PhaseProfiler phaseProfiler = PhaseProfiler(profile);
 SensorState state;
 
 void test_current_phase_calculation(void)
@@ -100,8 +99,8 @@ void test_phases_with_zero_duration_are_skipped(void) {
       pressurePhase(2, 5, 0),
       pressurePhase(5, 5, 1000)
     };
-    Phases phases = Phases {4, array};
-    PhaseProfiler profiler = PhaseProfiler{phases};
+    Profile profile = Profile {4, array};
+    PhaseProfiler profiler = PhaseProfiler{profile};
 
     profiler.updatePhase(0, state);
     TEST_ASSERT_EQUAL(3, profiler.getCurrentPhase().getIndex());
@@ -119,8 +118,8 @@ void test_phases_with_weight_stop_condition(void) {
     presurePhaseWithWeightTarget(2, 2, -1, weightTarget),
     pressurePhase(5, 5, 1000)
   };
-  Phases phases = Phases {2, array};
-  PhaseProfiler profiler = PhaseProfiler{phases};
+  Profile profile = Profile {2, array};
+  PhaseProfiler profiler = PhaseProfiler{profile};
 
   mockedState.shotWeight = 0.2f;
   profiler.updatePhase(3000, mockedState);
@@ -152,8 +151,8 @@ void test_phases_with_stop_conditions_and_skipped_phases() {
     pressurePhase(0, 0, 0), // should be skipped
     pressurePhase(5, 5, 1000)
   };
-  Phases phases = Phases {3, array};
-  PhaseProfiler profiler = PhaseProfiler{phases};
+  Profile profile = Profile {3, array};
+  PhaseProfiler profiler = PhaseProfiler{profile};
 
   mockedState.shotWeight = 0.5f;
   profiler.updatePhase(2000, mockedState);
@@ -174,13 +173,13 @@ void test_phases_stay_constant() {
   TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getIndex());
   TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getTimeInPhase());
 
-  TEST_ASSERT_EQUAL(1000, phases.phases[0].stopConditions.time);
-  TEST_ASSERT_EQUAL(0, phases.phases[0].target.start);
-  TEST_ASSERT_EQUAL(2, phases.phases[0].target.end);
+  TEST_ASSERT_EQUAL(1000, profile.phases[0].stopConditions.time);
+  TEST_ASSERT_EQUAL(0, profile.phases[0].target.start);
+  TEST_ASSERT_EQUAL(2, profile.phases[0].target.end);
 
-  TEST_ASSERT_EQUAL(10000, phases.phases[1].stopConditions.time);
-  TEST_ASSERT_EQUAL(2, phases.phases[1].target.start);
-  TEST_ASSERT_EQUAL(2, phases.phases[1].target.end);
+  TEST_ASSERT_EQUAL(10000, profile.phases[1].stopConditions.time);
+  TEST_ASSERT_EQUAL(2, profile.phases[1].target.start);
+  TEST_ASSERT_EQUAL(2, profile.phases[1].target.end);
 }
 
 void runAllPressureProfilerTests() {

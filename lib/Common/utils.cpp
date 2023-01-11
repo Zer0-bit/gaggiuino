@@ -1,6 +1,10 @@
 #include "utils.h"
 #include "math.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265359
+#endif
+
 float percentageWithTransition(float pct, TransitionCurve transition);
 
 float mapRange(float refNumber, float refStart, float refEnd, float targetStart, float targetEnd, int decimalPrecision, TransitionCurve transition) {

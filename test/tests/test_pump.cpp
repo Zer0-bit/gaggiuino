@@ -1,10 +1,6 @@
-#include "peripherals/pump.h"
-#include <unity.h>
-
-void TEST_ASSERT_EQUAL_FLOAT_ACCURACY(float expected, float actual, int digits) {
-    float mult = pow(10, digits);
-    TEST_ASSERT_EQUAL_FLOAT(roundf(expected * mult) / mult, roundf(actual * mult) / mult);
-}
+#include "mock.h"
+#include "../src/peripherals/pump.cpp"
+#include "utils/test-utils.h"
 
 void test_pump_clicks_for_flow_correct_binary_search(void) {
     TEST_ASSERT_EQUAL_FLOAT_ACCURACY(31, getClicksPerSecondForFlow(5, 2), 0);

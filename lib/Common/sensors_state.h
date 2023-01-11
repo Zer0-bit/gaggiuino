@@ -20,4 +20,14 @@ struct SensorState {
   float shotWeight;
 };
 
+struct SensorStateSnapshot {
+  bool brewActive;
+  bool steamActive;
+  float temperature;
+  float pressure;
+  float pumpFlow;
+  float weightFlow;
+  float weight;
+};
+
 #endif
