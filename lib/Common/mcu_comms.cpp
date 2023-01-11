@@ -1,4 +1,5 @@
 #include "mcu_comms.h"
+#include <stdarg.h>
 
 using namespace std;
 
