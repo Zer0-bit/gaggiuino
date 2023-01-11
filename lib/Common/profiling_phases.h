@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include "sensors_state.h"
+#include <vector>
 
 enum PHASE_TYPE {
   PHASE_TYPE_FLOW,
@@ -66,9 +67,20 @@ struct GlobalStopConditions {
 };
 
 struct Profile {
-  short count;
-  Phase* phases;
+  std::vector<Phase> phases;
   GlobalStopConditions globalStopConditions;
+
+  size_t phaseCount() {
+    return phases.size();
+  }
+
+  void addPhase(Phase phase) {
+    phases.push_back(phase);
+  }
+
+  void clear() {
+    phases.clear();
+  }
 };
 
 class CurrentPhase {
@@ -93,7 +105,7 @@ public:
 class PhaseProfiler {
 private:
   Profile& profile;
-  short currentPhaseIdx = 0; // The index at which the profiler currently is.
+  size_t currentPhaseIdx = 0; // The index at which the profiler currently is.
   ShotSnapshot phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0}; // State when the profiler move to this currentPhaseIdx
   CurrentPhase currentPhase = CurrentPhase(0, profile.phases[0], 0);
 

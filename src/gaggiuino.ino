@@ -9,8 +9,7 @@ SimpleKalmanFilter smoothScalesFlow(0.1f, 0.1f, 0.1f);
 SimpleKalmanFilter predictTempVariation(1.f, 1.f, 1.f);
 
 //default phases. Updated in updateProfilerPhases.
-Phase phaseArray[8];
-Profile profile {8,  phaseArray};
+Profile profile;
 PhaseProfiler phaseProfiler{profile};
 
 PredictiveWeight predictiveWeight;
@@ -429,7 +428,6 @@ void lcdTrigger4(void) {
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
 static void updateProfilerPhases(void) {
-  int phaseCount             = 0;
   float preInfusionFinishBar = 0.f;
   float shotTarget = -1.f;
 
@@ -439,72 +437,73 @@ static void updateProfilerPhases(void) {
       : runningCfg.shotStopOnCustomWeight;
   }
 
+
   //update global stop conditions (currently only stopOnWeight is configured in nextion)
   profile.globalStopConditions = GlobalStopConditions{ .weight=shotTarget };
 
+  profile.clear();
   //Setup release pressure + fill@4ml/sec
   if (runningCfg.basketPrefill) {
-    setFillBasketPhase(phaseCount++, 4.5f);
+    addFillBasketPhase(4.5f);
   }
 
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
       float stopOnPressureAbove = (runningCfg.switchPhaseOnThreshold) ? runningCfg.preinfusionFlowPressureTarget : -1;
-      setFlowPhase(phaseCount++, Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, stopOnPressureAbove);
-      setFlowPhase(phaseCount++, Transition{0.f}, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1);
+      addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, stopOnPressureAbove);
+      addFlowPhase(Transition{0.f}, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1);
       preInfusionFinishBar = fmaxf(0.f, runningCfg.preinfusionFlowPressureTarget);
     } else { // pressure based PI enabled
       float stopOnPressureAbove = (runningCfg.switchPhaseOnThreshold) ? runningCfg.preinfusionBar : -1;
-      setPressurePhase(phaseCount++, Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, stopOnPressureAbove);
-      setPressurePhase(phaseCount++, Transition{0.f}, -1, runningCfg.preinfusionSoak * 1000, -1);
+      addPressurePhase(Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, stopOnPressureAbove);
+      addPressurePhase(Transition{0.f}, -1, runningCfg.preinfusionSoak * 1000, -1);
       preInfusionFinishBar = runningCfg.preinfusionBar;
     }
   }
-  preInfusionFinishedPhaseIdx = phaseCount;
+  preInfusionFinishedPhaseIdx = profile.phaseCount();
 
   // Setup shot profiling
   if (runningCfg.pressureProfilingState) {
     if (runningCfg.flowProfileState) { // flow based profiling enabled
-      setFlowPhase(phaseCount++, Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, LINEAR, runningCfg.flowProfileCurveSpeed * 1000}, runningCfg.flowProfilePressureTarget, -1, -1);
+      addFlowPhase(Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, LINEAR, runningCfg.flowProfileCurveSpeed * 1000}, runningCfg.flowProfilePressureTarget, -1, -1);
     } else { // pressure based profiling enabled
       float ppStart = runningCfg.pressureProfilingStart;
       float ppEnd = runningCfg.pressureProfilingFinish;
       uint16_t rampAndHold = runningCfg.preinfusionRamp + runningCfg.pressureProfilingHold;
-      setPressurePhase(phaseCount++, Transition{preInfusionFinishBar, ppStart, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, rampAndHold * 1000, -1);
-      setPressurePhase(phaseCount++, Transition{ppStart, ppEnd, EASE_IN_OUT, runningCfg.pressureProfilingLength * 1000}, -1, -1, -1);
+      addPressurePhase(Transition{preInfusionFinishBar, ppStart, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, rampAndHold * 1000, -1);
+      addPressurePhase(Transition{ppStart, ppEnd, EASE_IN_OUT, runningCfg.pressureProfilingLength * 1000}, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
-    setPressurePhase(phaseCount++, Transition{preInfusionFinishBar, 9, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1);
+    addPressurePhase(Transition{preInfusionFinishBar, 9, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1);
   }
-
-  profile.count = phaseCount;
 }
 
-void setFillBasketPhase(int phaseIdx, float flowRate) {
-  setFlowPhase(phaseIdx, Transition(flowRate), -1, -1, 0.1f);
+void addFillBasketPhase(float flowRate) {
+  addFlowPhase(Transition(flowRate), -1, -1, 0.1f);
 }
 
-void setPressurePhase(int phaseIdx, Transition pressure, float flowRestriction, int timeMs, float pressureAbove) {
-  setPhase(phaseIdx, PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove);
+void addPressurePhase(Transition pressure, float flowRestriction, int timeMs, float pressureAbove) {
+  addPhase(PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove);
 }
 
-void setFlowPhase(int phaseIdx, Transition flow, float pressureRestriction, int timeMs, float pressureAbove) {
-  setPhase(phaseIdx, PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove);
+void addFlowPhase(Transition flow, float pressureRestriction, int timeMs, float pressureAbove) {
+  addPhase(PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove);
 }
 
-void setPhase(
-  int phaseIdx,
+void addPhase(
   PHASE_TYPE type,
   Transition target,
   float restriction,
   int timeMs,
   float pressureAbove
 ) {
-  profile.phases[phaseIdx].type              = type;
-  profile.phases[phaseIdx].target            = target;
-  profile.phases[phaseIdx].restriction       = restriction;
-  profile.phases[phaseIdx].stopConditions    = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove };
+  profile.addPhase(Phase {
+    .type           = type,
+    .target         = target,
+    .restriction    = restriction,
+    .stopConditions = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove }
+  });
 }
 
 void onProfileReceived(Profile& newProfile) {
