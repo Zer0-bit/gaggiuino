@@ -1,5 +1,5 @@
 #include <unity.h>
-#include "functional/profiling_phases.h"
+#include "profiling_phases.h"
 #include "sensors_state.h"
 #include "utils.h"
 
