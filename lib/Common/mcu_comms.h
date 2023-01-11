@@ -39,15 +39,15 @@ private:
   Stream* debugPort;
 
   /**
-   * Structure inside each packet. We are adding the current packet sequence number and last packet sequence
-   * number which greatly help in serialisation/deserialisation of large payloads
-   *
-   *   0x02     0x01     0x00     0x00   ....
-   * |      | |      | |      | |______|__________________________________________ 2nd packet byte
-   * |      | |      | |______|___________________________________________________ 1st packet byte
-   * |      | |______|____________________________________________________________ index of current packet
-   * |______|_____________________________________________________________________ index of last packet
-   */
+  * Structure inside each packet. We are adding the current packet sequence number and last packet sequence
+  * number which greatly help in serialisation/deserialisation of large payloads
+  *
+  *   0x02     0x01     0x00     0x00   ....
+  * |      | |      | |      | |______|__________________________________________ 2nd packet byte
+  * |      | |      | |______|___________________________________________________ 1st packet byte
+  * |      | |______|____________________________________________________________ index of current packet
+  * |______|_____________________________________________________________________ index of last packet
+  */
   void sendMultiPacket(vector<uint8_t>& buffer, size_t dataSize, uint8_t packetID);
   vector<uint8_t> receiveMultiPacket();
   void log(const char* format, ...);
