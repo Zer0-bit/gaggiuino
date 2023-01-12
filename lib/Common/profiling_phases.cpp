@@ -94,12 +94,12 @@ void CurrentPhase::update(int index, const Phase& phase, uint32_t timeInPhase) {
 PhaseProfiler::PhaseProfiler(Profile& profile) : profile(profile) {}
 
 void PhaseProfiler::updatePhase(uint32_t timeInShot, SensorState& state) {
-  short phaseIdx = currentPhaseIdx;
+  size_t phaseIdx = currentPhaseIdx;
   uint32_t timeInPhase = timeInShot - phaseChangedSnapshot.timeInShot;
 
-  if (phaseIdx >= profile.count || profile.globalStopConditions.isReached(state, timeInShot)) {
-    currentPhaseIdx = profile.count;
-    phaseIdx = profile.count - 1;
+  if (phaseIdx >= profile.phaseCount() || profile.globalStopConditions.isReached(state, timeInShot)) {
+    currentPhaseIdx = profile.phaseCount();
+    phaseIdx = profile.phaseCount() - 1;
     currentPhase.update(phaseIdx, profile.phases[phaseIdx], timeInPhase);
     return;
   }
@@ -121,7 +121,7 @@ CurrentPhase& PhaseProfiler::getCurrentPhase() {
 }
 
 bool PhaseProfiler::isFinished() {
-  return currentPhaseIdx >= profile.count;
+  return currentPhaseIdx >= profile.phaseCount();
 }
 
 void PhaseProfiler::reset() {

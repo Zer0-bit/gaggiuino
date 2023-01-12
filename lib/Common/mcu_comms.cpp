@@ -4,25 +4,28 @@
 using namespace std;
 
 size_t ProfileSerializer::neededBufferSize(Profile& profile) {
-  return sizeof(profile.count) + profile.count * sizeof(Phase) + sizeof(profile.globalStopConditions);
+  return sizeof(profile.phaseCount()) + profile.phaseCount() * sizeof(Phase) + sizeof(profile.globalStopConditions);
 }
 
 vector<uint8_t> ProfileSerializer::serializeProfile(Profile& profile) {
   vector<uint8_t> buffer;
   buffer.reserve(neededBufferSize(profile));
+  size_t phaseCount = profile.phaseCount();
 
-  memcpy(buffer.data(), &profile.count, sizeof(profile.count));
-  memcpy(buffer.data() + sizeof(profile.count), profile.phases, profile.count * sizeof(Phase));
-  memcpy(buffer.data() + sizeof(profile.count) + profile.count * sizeof(Phase), &profile.globalStopConditions, sizeof(profile.globalStopConditions));
+  memcpy(buffer.data(), &phaseCount, sizeof(phaseCount));
+  memcpy(buffer.data() + sizeof(phaseCount), profile.phases.data(), phaseCount * sizeof(Phase));
+  memcpy(buffer.data() + sizeof(phaseCount) + phaseCount * sizeof(Phase), &profile.globalStopConditions, sizeof(profile.globalStopConditions));
 
   return buffer;
 }
 
 void ProfileSerializer::deserializeProfile(vector<uint8_t>& buffer, Profile& profile) {
-  memcpy(&profile.count, buffer.data(), sizeof(profile.count));
-  profile.phases = new Phase[profile.count];
-  memcpy(profile.phases, buffer.data() + sizeof(profile.count), profile.count * sizeof(Phase));
-  memcpy(&profile.globalStopConditions, buffer.data() + sizeof(profile.count) + profile.count * sizeof(Phase), sizeof(profile.globalStopConditions));
+  size_t phaseCount;
+  memcpy(&phaseCount, buffer.data(), sizeof(profile.phaseCount()));
+  profile.phases.clear();
+  profile.phases.reserve(phaseCount);
+  memcpy(profile.phases.data(), buffer.data() + sizeof(profile.phaseCount()), phaseCount * sizeof(Phase));
+  memcpy(&profile.globalStopConditions, buffer.data() + sizeof(profile.phaseCount()) + phaseCount * sizeof(Phase), sizeof(profile.globalStopConditions));
 }
 
 //---------------------------------------------------------------------------------
