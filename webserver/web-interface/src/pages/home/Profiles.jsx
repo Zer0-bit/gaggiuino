@@ -10,8 +10,10 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import DeleteIcon from '@mui/icons-material/Delete';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Unstable_Grid2';
 
@@ -24,6 +26,17 @@ export default function Profiles() {
 
   const addProfileStep = (event) => {
     setProfile(event.target.value);
+    setInputList([...inputList, event.target.value]);
+  };
+
+  const remProfileStep = () => {
+    setInputList(inputList.slice(0, -5));
+    setProfile('');
+  };
+
+  const remProfile = () => {
+    setInputList(inputList.slice(-1, -1));
+    setProfile('');
   };
 
   const handleButtonClick = () => {
@@ -82,8 +95,14 @@ export default function Profiles() {
               <CardContent>
                 <Typography gutterBottom variant="h5">
                   Build Profile
+                  <IconButton style={{ float: 'right' }} onClick={remProfile} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                    <DeleteIcon fontSize="large" />
+                  </IconButton>
+                  <IconButton style={{ float: 'right' }} onClick={remProfileStep} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                    <RemoveIcon fontSize="large" />
+                  </IconButton>
                   <IconButton style={{ float: 'right' }} onClick={handleButtonClick} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
-                    <LibraryAddIcon fontSize="large" />
+                    <AddIcon fontSize="large" />
                   </IconButton>
                   <IconButton style={{ float: 'right' }} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
                     <AutoGraphIcon fontSize="large" />
