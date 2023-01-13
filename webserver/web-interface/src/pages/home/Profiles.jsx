@@ -28,8 +28,14 @@ export default function Profiles() {
   const handleButtonClick = () => {
     setInputList([...inputList,
       <br></br>,
-      <Box sx={{ minWidth: 120, mr: theme.spacing(2), mt: theme.spacing() }}>
-        <FormControl focused>
+      <Box
+        sx={{
+          // minWidth: 120,
+          mr: theme.spacing(2),
+          mt: theme.spacing(2),
+        }}
+      >
+        <FormControl focused size>
           <InputLabel id="demo-simple-select-label">Type</InputLabel>
           <Select labelId="phase-select" key={inputList.length} size="small" id="phase-type-select" value={profile} label="Type" variant="outlined" onChange={handleChange}>
             <MenuItem value={1}>Pressure</MenuItem>
@@ -37,9 +43,9 @@ export default function Profiles() {
           </Select>
         </FormControl>
       </Box>,
-      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Bar" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(2) }} />,
-      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Flow" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(2) }} />,
-      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Time" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(2) }} />,
+      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Bar" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(1) }} />,
+      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Flow" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(1) }} />,
+      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Time" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(1) }} />,
     ]);
   };
 
