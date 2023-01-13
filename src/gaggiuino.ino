@@ -134,7 +134,7 @@ static void sensorsReadPressure(void) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
     currentState.isPressureRising = isPressureRaising();
-    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 2.55f;
+    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 3.55f;
     currentState.isPressureFalling = isPressureFalling();
     currentState.isPressureFallingFast = isPressureFallingFast();
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
@@ -628,10 +628,12 @@ void systemHealthCheck(float pressureThreshold) {
       {
         //Reloading the watchdog timer, if this function fails to run MCU is rebooted
         watchdogReload();
-        lcdShowPopup("Releasing pressure!");
-        setPumpOff();
-        setBoilerOff();
-        openValve();
+        if (lcdCurrentPageId != 2 || lcdCurrentPageId != 8) {
+          lcdShowPopup("Releasing pressure!");
+          setPumpOff();
+          setBoilerOff();
+          openValve();
+        }
         sensorsRead();
       }
       closeValve();
