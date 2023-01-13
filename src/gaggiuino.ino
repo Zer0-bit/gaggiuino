@@ -93,7 +93,7 @@ void loop(void) {
   modeSelect();
   lcdRefresh();
   espCommsSendSensorData(currentState, brewActive, steamState());
-  systemHealthCheck(0.8f);
+  systemHealthCheck(0.4f);
 }
 
 //##############################################################################################################################

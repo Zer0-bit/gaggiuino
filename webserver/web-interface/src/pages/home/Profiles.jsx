@@ -3,8 +3,11 @@ import {
   Card, Container, useTheme, Typography, CardContent, CardActions,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import Select from '@mui/material/Select';
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
@@ -25,10 +28,15 @@ export default function Profiles() {
   const handleButtonClick = () => {
     setInputList([...inputList,
       <br></br>,
-      <Select labelId="phase-select" key={inputList.length} size="small" id="phase-type-select" value={profile} label="Type" variant="outlined" onChange={handleChange} sx={{ mr: theme.spacing(2), mt: theme.spacing(2) }}>
-        <MenuItem value={1}>Pressure</MenuItem>
-        <MenuItem value={2}>Flow</MenuItem>
-      </Select>,
+      <Box sx={{ minWidth: 120, mr: theme.spacing(2), mt: theme.spacing() }}>
+        <FormControl focused>
+          <InputLabel id="demo-simple-select-label">Type</InputLabel>
+          <Select labelId="phase-select" key={inputList.length} size="small" id="phase-type-select" value={profile} label="Type" variant="outlined" onChange={handleChange}>
+            <MenuItem value={1}>Pressure</MenuItem>
+            <MenuItem value={2}>Flow</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>,
       <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Bar" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(2) }} />,
       <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Flow" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(2) }} />,
       <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Time" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(2) }} />,
