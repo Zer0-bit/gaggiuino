@@ -22,11 +22,10 @@ export default function Profiles() {
 
   const [inputList, setInputList] = useState([]);
 
-  const [profile, setProfile] = React.useState('');
+  const [profile, setProfile] = useState([]);
 
   const addProfileStep = (event) => {
     setProfile(event.target.value);
-    setInputList([...inputList, event.target.value]);
   };
 
   const remProfileStep = () => {
@@ -51,7 +50,7 @@ export default function Profiles() {
       >
         <FormControl focused size>
           <InputLabel id="demo-simple-select-label">Type</InputLabel>
-          <Select labelId="phase-select" key={inputList.length} size="small" id="phase-type-select" value={profile} label="Type" variant="outlined" onChange={addProfileStep}>
+          <Select onChange={addProfileStep} labelId="phase-select" key={inputList.length} size="small" id="phase-type-select" value={profile} label="Type" variant="outlined">
             <MenuItem value={1}>Pressure</MenuItem>
             <MenuItem value={2}>Flow</MenuItem>
           </Select>
