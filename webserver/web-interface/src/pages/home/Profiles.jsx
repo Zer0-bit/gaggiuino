@@ -11,6 +11,7 @@ import Select from '@mui/material/Select';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Unstable_Grid2';
 
@@ -21,7 +22,7 @@ export default function Profiles() {
 
   const [profile, setProfile] = React.useState('');
 
-  const handleChange = (event) => {
+  const addProfileStep = (event) => {
     setProfile(event.target.value);
   };
 
@@ -37,7 +38,7 @@ export default function Profiles() {
       >
         <FormControl focused size>
           <InputLabel id="demo-simple-select-label">Type</InputLabel>
-          <Select labelId="phase-select" key={inputList.length} size="small" id="phase-type-select" value={profile} label="Type" variant="outlined" onChange={handleChange}>
+          <Select labelId="phase-select" key={inputList.length} size="small" id="phase-type-select" value={profile} label="Type" variant="outlined" onChange={addProfileStep}>
             <MenuItem value={1}>Pressure</MenuItem>
             <MenuItem value={2}>Flow</MenuItem>
           </Select>
@@ -83,6 +84,9 @@ export default function Profiles() {
                   Build Profile
                   <IconButton style={{ float: 'right' }} onClick={handleButtonClick} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
                     <LibraryAddIcon fontSize="large" />
+                  </IconButton>
+                  <IconButton style={{ float: 'right' }} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                    <AutoGraphIcon fontSize="large" />
                   </IconButton>
                   {inputList}
                 </Typography>
