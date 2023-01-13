@@ -22,5 +22,5 @@ Download and unpack: http://dfu-util.sourceforge.net/releases/dfu-util-0.11-bina
 ### Linux and Mac OS
 `dfu-util -d 0x0483:0xDF11 -a 0 -s 0x08000000:leave -D firmware.bin`
 
-### Linux 
+### Windows 
 `dfu-util-0.11-binaries/win64/dfu-util-static.exe -d 0x0483:0xDF11 -a 0 -s 0x08000000:leave -D firmware.bin`
