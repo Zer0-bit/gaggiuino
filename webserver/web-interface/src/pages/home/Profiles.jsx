@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Card, Container, useTheme, Typography, CardContent, CardActions,
 } from '@mui/material';
@@ -15,28 +15,32 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 import Grid from '@mui/material/Unstable_Grid2';
 
 export default function Profiles() {
   const theme = useTheme();
 
-  const [inputList, setInputList] = useState([]);
+  const [inputList, setInputList] = useState('');
 
-  const [profile, setProfile] = useState([]);
+  const [profile, setProfile] = useState('Fill');
+  const [profileType, setProfileType] = useState('Pressure');
 
-  const addProfileStep = (event) => {
+  const addProfileStep = useCallback((event) => {
     setProfile(event.target.value);
-  };
+  }, [inputList]);
 
-  const remProfileStep = () => {
-    setInputList(inputList.slice(0, -5));
-    setProfile('');
-  };
+  const addProfileType = useCallback((event) => {
+    setProfileType(event.target.value);
+  }, [inputList]);
 
-  const remProfile = () => {
-    setInputList(inputList.slice(-1, -1));
-    setProfile('');
-  };
+  const remProfileStep = useCallback(() => {
+    setInputList(inputList.slice(0, -7));
+  }, [inputList]);
+
+  const remProfile = useCallback(() => {
+    setInputList(inputList.slice(0, 0));
+  }, [inputList]);
 
   const handleButtonClick = () => {
     setInputList([...inputList,
@@ -48,17 +52,81 @@ export default function Profiles() {
           mt: theme.spacing(2),
         }}
       >
-        <FormControl focused size>
-          <InputLabel id="demo-simple-select-label">Type</InputLabel>
-          <Select onChange={addProfileStep} labelId="phase-select" key={inputList.length} size="small" id="phase-type-select" value={profile} label="Type" variant="outlined">
+        <FormControl focused sx={{ mr: theme.spacing(2), minWidth: '9ch' }}>
+          <InputLabel id="phase-step">Stage</InputLabel>
+          <Select onChange={addProfileStep} labelId="phase-profile-select" key={inputList.length + 1} size="small" id="phase-profile-select" value={profile} label="Profile" variant="outlined">
+            <MenuItem value={1}>Fill</MenuItem>
+            <MenuItem value={2}>Infusion</MenuItem>
+            <MenuItem value={3}>Soak</MenuItem>
+            <MenuItem value={4}>Ramp</MenuItem>
+            <MenuItem value={5}>Profiling</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl focused sx={{ mr: theme.spacing(2), minWidth: '9ch' }}>
+          <InputLabel id="phase-type">Type</InputLabel>
+          <Select onChange={addProfileType} labelId="phase-type-select" key={inputList.length + 1} size="small" id="phase-type-select" value={profileType} label="Type" variant="outlined">
             <MenuItem value={1}>Pressure</MenuItem>
             <MenuItem value={2}>Flow</MenuItem>
+            <MenuItem value={3}>Adaptive</MenuItem>
+            <MenuItem value={4}>Semi-auto</MenuItem>
           </Select>
         </FormControl>
       </Box>,
-      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Bar" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(1) }} />,
-      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Flow" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(1) }} />,
-      <TextField id="outlined-basic" key={inputList.length + 1} size="small" label="Time" variant="outlined" sx={{ mr: theme.spacing(2), mt: theme.spacing(1) }} />,
+      <TextField
+        id="outlined-basic"
+        key={inputList.length + 1}
+        size="small"
+        label="Pressure"
+        variant="outlined"
+        sx={{ mr: theme.spacing(2), mt: theme.spacing(1), width: '9ch' }}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">bar</InputAdornment>,
+        }}
+      />,
+      <TextField
+        id="outlined-basic"
+        key={inputList.length + 1}
+        size="small"
+        label="Flow"
+        variant="outlined"
+        sx={{ mr: theme.spacing(2), mt: theme.spacing(1), width: '9ch' }}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">ml/s</InputAdornment>,
+        }}
+      />,
+      <TextField
+        id="outlined-basic"
+        key={inputList.length + 1}
+        size="small"
+        label="Time"
+        variant="outlined"
+        sx={{ mr: theme.spacing(2), mt: theme.spacing(1), width: '9ch' }}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">sec</InputAdornment>,
+        }}
+      />,
+      <TextField
+        id="outlined-basic"
+        key={inputList.length + 1}
+        size="small"
+        label="Slope"
+        variant="outlined"
+        sx={{ mr: theme.spacing(2), mt: theme.spacing(1), width: '9ch' }}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">sec</InputAdornment>,
+        }}
+      />,
+      <TextField
+        id="outlined-basic"
+        key={inputList.length + 1}
+        size="small"
+        label="Weight"
+        variant="outlined"
+        sx={{ mr: theme.spacing(2), mt: theme.spacing(1), width: '9ch' }}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">gram</InputAdornment>,
+        }}
+      />,
     ]);
   };
 
