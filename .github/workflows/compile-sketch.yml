@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: "14"
 
       - name: Install eclint
         run: |
@@ -49,10 +49,22 @@ jobs:
         run: |
           ~/.platformio/penv/bin/platformio run -e opto-dfu
 
+      - name: Run check on main project
+        run: |
+          ~/.platformio/penv/bin/platformio check -e opto-dfu
+
       - name: Build scales
         run: |
           ~/.platformio/penv/bin/platformio run -e scales-calibration-dfu
 
+      - name: Run check on scales
+        run: |
+          ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu
+
       - name: Run tests
         run: |
           ~/.platformio/penv/bin/platformio test -e test
+
+      - name: Run check on tests
+        run: |
+          ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu
