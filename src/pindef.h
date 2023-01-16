@@ -5,6 +5,7 @@
 #define thermoDO      PB4
 #define thermoCS      PA6
 #define thermoCLK     PA5
+#define tempsensorPin PB4 // used only if TEMP_SENSOR_TSIC_30x is defined
 
 #define zcPin         PA0
 #define brewPin       PC14

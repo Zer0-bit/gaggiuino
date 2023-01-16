@@ -54,7 +54,7 @@ void setup(void) {
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   LOG_INFO("EEPROM Init");
 
-  thermocoupleInit();
+  tempsensorInit();
   LOG_INFO("Thermocouple Init");
 
   lcdUploadCfg(eepromCurrentValues);
@@ -108,7 +108,7 @@ static void sensorsRead(void) {
 
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
-    currentState.temperature = thermocouple.readCelsius();
+    currentState.temperature = readCelsius();
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }
@@ -649,7 +649,7 @@ void systemHealthCheck(float pressureThreshold) {
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
       steamState() ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
-      currentState.temperature  = thermocouple.readCelsius();  // Making sure we're getting a value
+      currentState.temperature  = readCelsius();  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }
