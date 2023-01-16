@@ -9,7 +9,7 @@
 #include "peripherals/pressure_sensor.h"
 #include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
-#include "peripherals/thermocouple.h"
+#include "peripherals/temperature_sensor.h"
 #include "sensors_state.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
