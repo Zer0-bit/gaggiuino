@@ -107,7 +107,7 @@ static void sensorsRead(void) {
   sensorsReadWeight();
   sensorsReadPressure();
   calculateWeightAndFlow();
-  fillBoiler(BOILER_FILL_PRESSURE);
+  fillBoiler(BOILER_FILL_PRESSURE, BOILER_FILL_WEIGHT);
 }
 
 static void sensorsReadTemperature(void) {
@@ -594,14 +594,14 @@ static void brewParamsReset(void) {
   phaseProfiler.reset();
 }
 
-void fillBoiler(float targetBoilerFullPressure) {
+void fillBoiler(float targetBoilerFullPressure, float outputWeightThreshold) {
 #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   static long elapsedTimeSinceStart = millis();
   lcdSetUpTime((millis() > elapsedTimeSinceStart) ? (int)((millis() - elapsedTimeSinceStart) / 1000) : 0);
   if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
     unsigned long timePassed = millis() - elapsedTimeSinceStart;
 
-    if (currentState.smoothedPressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT) {
+    if (currentState.smoothedPressure < targetBoilerFullPressure && currentState.weight < outputWeightThreshold && timePassed <= BOILER_FILL_TIMEOUT) {
       lcdShowPopup("Filling boiler!");
       openValve();
       setPumpToRawValue(80);
