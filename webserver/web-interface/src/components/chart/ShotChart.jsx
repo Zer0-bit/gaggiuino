@@ -30,11 +30,10 @@ ChartJS.register(
 
 function mapDataPointToLabel(dataPoint) {
   if (!dataPoint.timeInShot) {
-    return '00:00';
+    return 0;
   }
-  const seconds = Math.floor(dataPoint.timeInShot / 1000);
-  const minutes = Math.floor(seconds / 60);
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0') % 60}`;
+
+  return dataPoint.timeInShot / 1000;
 }
 
 function getLabels(input) {
