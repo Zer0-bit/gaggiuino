@@ -628,11 +628,16 @@ void systemHealthCheck(float pressureThreshold) {
       {
         //Reloading the watchdog timer, if this function fails to run MCU is rebooted
         watchdogReload();
-        if (lcdCurrentPageId != 2 || lcdCurrentPageId != 8) {
-          lcdShowPopup("Releasing pressure!");
-          setPumpOff();
-          setBoilerOff();
-          openValve();
+        switch (lcdCurrentPageId) {
+          case 2:
+          case 8:
+            break;
+          default:
+            lcdShowPopup("Releasing pressure!");
+            setPumpOff();
+            setBoilerOff();
+            openValve();
+            break;
         }
         sensorsRead();
       }
