@@ -9,16 +9,17 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
   static double heaterWave;
   static bool heaterState;
   float BREW_TEMP_DELTA;
+  float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
   // Calculating the boiler heating power range based on the below input values
-  int HPWR_OUT = mapRange(currentState.temperature, runningCfg.setpoint - 10, runningCfg.setpoint, runningCfg.hpwr, HPWR_LOW, 0);
+  int HPWR_OUT = mapRange(sensorTemperature, runningCfg.setpoint - 10, runningCfg.setpoint, runningCfg.hpwr, HPWR_LOW, 0);
   HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
-  BREW_TEMP_DELTA = mapRange(currentState.temperature, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
+  BREW_TEMP_DELTA = mapRange(sensorTemperature, runningCfg.setpoint, runningCfg.setpoint + TEMP_DELTA(runningCfg.setpoint), TEMP_DELTA(runningCfg.setpoint), 0, 0);
   BREW_TEMP_DELTA = constrain(BREW_TEMP_DELTA, 0, TEMP_DELTA(runningCfg.setpoint));
   lcdTargetState(0); // setting the target mode to "brew temp"
 
   if (brewActive) {
     // Applying the HPWR_OUT variable as part of the relay switching logic
-    if (currentState.temperature > runningCfg.setpoint && currentState.temperature < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
+    if (sensorTemperature > runningCfg.setpoint && sensorTemperature < runningCfg.setpoint + 0.25f && !preinfusionFinished ) {
       if (millis() - heaterWave > HPWR_OUT * runningCfg.brewDivider && !heaterState ) {
         setBoilerOff();
         heaterState=true;
@@ -28,7 +29,7 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
         heaterState=false;
         heaterWave=millis();
       }
-    } else if (currentState.temperature > runningCfg.setpoint - 1.5f && currentState.temperature < runningCfg.setpoint + (runningCfg.brewDeltaState ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
+    } else if (sensorTemperature > runningCfg.setpoint - 1.5f && sensorTemperature < runningCfg.setpoint + (runningCfg.brewDeltaState ? BREW_TEMP_DELTA : 0.f) && preinfusionFinished ) {
       if (millis() - heaterWave > runningCfg.hpwr * runningCfg.brewDivider && !heaterState ) {
         setBoilerOn();
         heaterState=true;
@@ -38,7 +39,7 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
         heaterState=false;
         heaterWave=millis();
       }
-    } else if (runningCfg.brewDeltaState && currentState.temperature >= (runningCfg.setpoint + BREW_TEMP_DELTA) && currentState.temperature <= (runningCfg.setpoint + BREW_TEMP_DELTA + 2.5f)  && preinfusionFinished ) {
+    } else if (runningCfg.brewDeltaState && sensorTemperature >= (runningCfg.setpoint + BREW_TEMP_DELTA) && sensorTemperature <= (runningCfg.setpoint + BREW_TEMP_DELTA + 2.5f)  && preinfusionFinished ) {
       if (millis() - heaterWave > runningCfg.hpwr * runningCfg.mainDivider && !heaterState ) {
         setBoilerOn();
         heaterState=true;
@@ -48,15 +49,15 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
         heaterState=false;
         heaterWave=millis();
       }
-    } else if(currentState.temperature <= runningCfg.setpoint - 1.5f) {
+    } else if(sensorTemperature <= runningCfg.setpoint - 1.5f) {
       setBoilerOn();
     } else {
       setBoilerOff();
     }
   } else { //if brewState == 0
-    if (currentState.temperature < ((float)runningCfg.setpoint - 10.00f)) {
+    if (sensorTemperature < ((float)runningCfg.setpoint - 10.00f)) {
       setBoilerOn();
-    } else if (currentState.temperature >= ((float)runningCfg.setpoint - 10.f) && currentState.temperature < ((float)runningCfg.setpoint - 5.f)) {
+    } else if (sensorTemperature >= ((float)runningCfg.setpoint - 10.f) && sensorTemperature < ((float)runningCfg.setpoint - 5.f)) {
       if (millis() - heaterWave > HPWR_OUT && !heaterState) {
         setBoilerOn();
         heaterState=true;
@@ -66,7 +67,7 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
         heaterState=false;
         heaterWave=millis();
       }
-    } else if ((currentState.temperature >= ((float)runningCfg.setpoint - 5.f)) && (currentState.temperature <= ((float)runningCfg.setpoint - 0.25f))) {
+    } else if ((sensorTemperature >= ((float)runningCfg.setpoint - 5.f)) && (sensorTemperature <= ((float)runningCfg.setpoint - 0.25f))) {
       if (millis() - heaterWave > HPWR_OUT * runningCfg.brewDivider && !heaterState) {
         setBoilerOn();
         heaterState=!heaterState;
@@ -89,16 +90,17 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
 void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, unsigned long steamTime) {
   lcdTargetState(1); // setting the target mode to "steam temp"
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
+  float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
   if (steamState() && brewState()) {
     closeValve();
     setPumpToRawValue(80);
     setBoilerOn();
   } else if ((currentState.smoothedPressure <= 9.f)
-  && (currentState.temperature > runningCfg.setpoint - 10.f)
-  && (currentState.temperature <= runningCfg.steamSetPoint))
+  && (sensorTemperature > runningCfg.setpoint - 10.f)
+  && (sensorTemperature <= runningCfg.steamSetPoint))
   {
     setBoilerOn();
-    if (currentState.smoothedPressure < 1.5f) {
+    if (currentState.smoothedPressure < 1.8f) {
       #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB
         #if not defined (DREAM_STEAM_DISABLED) // disabled for bigger boilers which have no  need of adjusting the pressure
         openValve();
@@ -106,19 +108,21 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
       #endif
 
       #ifndef DREAM_STEAM_DISABLED
-        setPumpToRawValue(5);
+        setPumpToRawValue(3);
       #endif
     } else setPumpOff();
   } else {
     setBoilerOff();
     #ifndef DREAM_STEAM_DISABLED
-      (currentState.smoothedPressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
+      (currentState.smoothedPressure < 1.8f) ? setPumpToRawValue(3) : setPumpOff();
     #endif
   }
 
   /*In case steam is forgotten ON for more than 15 min*/
   if (currentState.smoothedPressure > 3.f) {
     long steamTimeout = millis() - steamTime;
-    steamTimeout >= STEAM_TIMEOUT ? currentState.isSteamForgottenON = true : currentState.isSteamForgottenON = false;
+    (steamTimeout >= STEAM_TIMEOUT)
+      ? currentState.isSteamForgottenON = true
+      : currentState.isSteamForgottenON = false;
   } else steamTime = millis();
 }

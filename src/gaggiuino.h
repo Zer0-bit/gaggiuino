@@ -14,7 +14,8 @@
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 #include "functional/predictive_weight.h"
-#include "functional/profiling_phases.h"
+#include "profiling_phases.h"
+#include "peripherals/esp_comms.h"
 
 #include <Arduino.h>
 #include <SimpleKalmanFilter.h>
@@ -34,7 +35,7 @@
 #define TRAY_FULL_THRESHOLD     700.f
 #define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
 #define BOILER_FILL_TIMEOUT     8000UL
-#define BOILER_FILL_PRESSURE    1.f
+#define BOILER_FILL_PRESSURE    1.75f
 
 
 

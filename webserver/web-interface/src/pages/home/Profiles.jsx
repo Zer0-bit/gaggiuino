@@ -1,34 +1,75 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Card, Container, useTheme, Typography, CardContent, CardActions,
 } from '@mui/material';
-import useWebSocket from 'react-use-websocket';
 import IconButton from '@mui/material/IconButton';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import DeleteIcon from '@mui/icons-material/Delete';
 import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+// import InputAdornment from '@mui/material/InputAdornment';
 import Grid from '@mui/material/Unstable_Grid2';
-import Chart from '../../components/chart/ShotChart';
-import AddPhaseButton from '../../components/inputs/AddPhase';
 
-export default function Settings() {
+export default function Profiles() {
   const theme = useTheme();
-  const { lastJsonMessage } = useWebSocket(`ws://${window.location.host}/ws`, {
-    share: true,
-  });
+  // here
+  const [elements, setElements] = useState([
+    { id: 1, type: 'select', value: '' },
+    { id: 2, type: 'select', value: '' },
+    { id: 3, type: 'text', value: '' },
+    { id: 4, type: 'text', value: '' },
+    { id: 5, type: 'text', value: '' },
+    { id: 6, type: 'text', value: '' },
+  ]);
+  const [nextId, setNextId] = useState(7);
 
-  const [sensorData, setSensorData] = useState([]);
+  const handleAddRow = () => {
+    const newElements = [
+      ...elements,
+      { id: nextId, type: 'select', value: '' },
+      { id: nextId + 1, type: 'select', value: '' },
+      { id: nextId + 2, type: 'text', value: '' },
+      { id: nextId + 3, type: 'text', value: '' },
+      { id: nextId + 4, type: 'text', value: '' },
+      { id: nextId + 5, type: 'text', value: '' },
+    ];
+    setElements(newElements);
+    setNextId(nextId + 6);
+  };
 
-  useEffect(() => {
-    if (lastJsonMessage !== null && lastJsonMessage.action === 'sensor_data_update') {
-      setSensorData((prev) => {
-        if (prev.length >= 400) {
-          prev.shift();
-        }
-        return prev.concat(lastJsonMessage.data);
-      });
+  const handleRemoveRow = () => {
+    const newElements = [...elements];
+    for (let i = 0; i < 6; i++) {
+      newElements.pop();
     }
-  }, [lastJsonMessage]);
+    setElements(newElements);
+  };
+
+  const handleRemoveAll = () => {
+    setElements([
+      { id: 1, type: 'select', value: '' },
+      { id: 2, type: 'select', value: '' },
+      { id: 3, type: 'text', value: '' },
+      { id: 4, type: 'text', value: '' },
+      { id: 5, type: 'text', value: '' },
+      { id: 6, type: 'text', value: '' },
+    ]);
+    setNextId(7);
+  };
+
+  const handleSelectChange = (event, id) => {
+    const updatedElements = elements.map((element) => {
+      if (element.id === id) {
+        return { ...element, value: event.target.value };
+      }
+      return element;
+    });
+    setElements(updatedElements);
+  };
 
   return (
     <div>
@@ -61,19 +102,50 @@ export default function Settings() {
             <Grid item xs={1}>
               <CardContent>
                 <Typography gutterBottom variant="h5">
-                  Profile preview
-                  <div style={{ float: 'right' }}>
-                    <TextField id="outlined-basic" size="small" label="Time" variant="outlined" sx={{ mr: theme.spacing(4) }} />
-                    <TextField id="outlined-basic" size="small" label="Value" variant="outlined" sx={{ mr: theme.spacing(4) }} />
-                    <AddPhaseButton style={{ float: 'right' }} sx={{ ml: theme.spacing(2) }} />
+                  Build Profile
+                  <IconButton style={{ float: 'right' }} onClick={handleRemoveAll} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                    <DeleteIcon fontSize="large" />
+                  </IconButton>
+                  <IconButton style={{ float: 'right' }} onClick={handleRemoveRow} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                    <RemoveIcon fontSize="large" />
+                  </IconButton>
+                  <IconButton style={{ float: 'right' }} onClick={handleAddRow} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                    <AddIcon fontSize="large" />
+                  </IconButton>
+                  <IconButton style={{ float: 'right' }} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
+                    <AutoGraphIcon fontSize="large" />
+                  </IconButton>
+                  <div>
+                    <Grid container spacing={2}>
+                      {elements.map((element) => {
+                        if (element.type === 'select') {
+                          return (
+                            <Grid item xs={6} key={element.id}>
+                              <Select
+                                value={element.value}
+                                onChange={(event) => handleSelectChange(event, element.id)}
+                              >
+                                <option value="1">Option1</option>
+                                <option value="2">Option2</option>
+                                <option value="3">Option3</option>
+                              </Select>
+                            </Grid>
+                          );
+                        }
+                        if (element.type === 'text') {
+                          return (
+                            <Grid item xs={3} key={element.id}>
+                              <TextField value={element.value} />
+                            </Grid>
+                          );
+                        }
+                        return null;
+                      })}
+                    </Grid>
                   </div>
+                  {/* {inputList} */}
                 </Typography>
               </CardContent>
-              <CardActions>
-                <Grid container columns={{ xs: 1, sm: 1 }} position="relative" width="1550px" height={400}>
-                  <Chart data={sensorData} />
-                </Grid>
-              </CardActions>
             </Grid>
           </Grid>
         </Card>

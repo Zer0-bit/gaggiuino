@@ -1,3 +1,10 @@
+from sys import platform
+import os
 Import("env")
-print("Replace MKSPIFFSTOOL with mklittlefs.exe")
-env.Replace (MKSPIFFSTOOL = "mklittlefs.exe")
+
+if platform == "linux" or platform == "linux2" or platform == "darwin":
+    print("Replace MKSPIFFSTOOL with mklittlefs")
+    env['MKSPIFFSTOOL'] = "mklittlefs"
+else:
+    print("Replace MKSPIFFSTOOL with mklittlefs.exe")
+    env['MKSPIFFSTOOL'] = "mklittlefs.exe"
