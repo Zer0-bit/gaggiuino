@@ -93,7 +93,7 @@ void loop(void) {
   modeSelect();
   lcdRefresh();
   espCommsSendSensorData(currentState, brewActive, steamState());
-  systemHealthCheck(0.4f);
+  systemHealthCheck(0.7f);
 }
 
 //##############################################################################################################################
@@ -291,7 +291,7 @@ static void lcdRefresh(void) {
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
-    } else {
+    } else if (lcdCurrentPageId == 8 || lcdCurrentPageId == 2){
       if (scalesIsPresent()) {
         lcdSetWeight(currentState.weight);
       } else if (currentState.shotWeight) {
@@ -300,7 +300,8 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-    if (lcdCurrentPageId == 1 || lcdCurrentPageId == 2 || lcdCurrentPageId == 8 ) { // no point sending this continuously if on any other screens than brew related ones
+    // no point sending this continuously if on any other screens than brew related ones
+    if ( lcdCurrentPageId == 8 || lcdCurrentPageId == 2 ) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.weightFlow * 10.f
@@ -597,11 +598,13 @@ static void brewParamsReset(void) {
 void fillBoiler(float targetBoilerFullPressure) {
 #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   static unsigned long elapsedTimeSinceStart = millis();
-  lcdSetUpTime((millis() > elapsedTimeSinceStart) ? (millis() - elapsedTimeSinceStart) / 1000 : 0);
+  lcdSetUpTime((millis() > elapsedTimeSinceStart) ? ((millis() - elapsedTimeSinceStart) / 1000) : 0);
   if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
     unsigned long timePassed = millis() - elapsedTimeSinceStart;
 
-    if (currentState.smoothedPressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT) {
+    if (timePassed <= BOILER_FILL_TIMEOUT
+    &&  (currentState.smoothedPressure < targetBoilerFullPressure || currentState.weight > 2.f))
+    {
       lcdShowPopup("Filling boiler!");
       openValve();
       setPumpToRawValue(80);
