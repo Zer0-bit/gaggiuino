@@ -634,6 +634,8 @@ void systemHealthCheck(float pressureThreshold) {
         switch (lcdCurrentPageId) {
           case 2:
           case 8:
+            setPumpOff();
+            setBoilerOff();
             break;
           default:
             lcdShowPopup("Releasing pressure!");
