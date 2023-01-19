@@ -121,6 +121,8 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   /*In case steam is forgotten ON for more than 15 min*/
   if (currentState.smoothedPressure > 3.f) {
     long steamTimeout = millis() - steamTime;
-    steamTimeout >= STEAM_TIMEOUT ? currentState.isSteamForgottenON = true : currentState.isSteamForgottenON = false;
+    (steamTimeout >= STEAM_TIMEOUT)
+      ? currentState.isSteamForgottenON = true
+      : currentState.isSteamForgottenON = false;
   } else steamTime = millis();
 }
