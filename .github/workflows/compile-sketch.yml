@@ -51,7 +51,7 @@ jobs:
 
       - name: Run check on main project
         run: |
-          ~/.platformio/penv/bin/platformio check -e opto-dfu
+          ~/.platformio/penv/bin/platformio check -e opto-dfu --fail-on-defect medium --fail-on-defect high
 
       - name: Build scales
         run: |
@@ -60,7 +60,6 @@ jobs:
       - name: Run check on scales
         run: |
           ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu
-
       - name: Run tests
         run: |
-          ~/.platformio/penv/bin/platformio test -e test
+          ~/.platformio/penv/bin/platformio test -e test --fail-on-defect medium --fail-on-defect high
