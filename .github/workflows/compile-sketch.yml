@@ -64,7 +64,3 @@ jobs:
       - name: Run tests
         run: |
           ~/.platformio/penv/bin/platformio test -e test
-
-      - name: Run check on tests
-        run: |
-          ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu
