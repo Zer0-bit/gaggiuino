@@ -27,9 +27,9 @@ public:
 
     float pressure = fmax(state.smoothedPressure, 0.f);
 
-    // float previousPuckResistance = puckResistance;
-    // puckResistance = pressure * 1000.f / state.smoothedPumpFlow; // Resistance in mBar * s / g
-    // resistanceDelta = puckResistance - previousPuckResistance;
+    float previousPuckResistance = puckResistance;
+    puckResistance = pressure * 1000.f / state.smoothedPumpFlow; // Resistance in mBar * s / g
+    resistanceDelta = puckResistance - previousPuckResistance;
 
     // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
     // as well as there being enough pressure for water to wet the puck enough to start the output
@@ -44,9 +44,9 @@ public:
       return;
     }
     // // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
-    // if (phaseTypePressure && (resistanceDelta > 400.f || puckResistance < 1100.f)) {
-    //   return;
-    // }
+    if (phaseTypePressure && (resistanceDelta > 500.f || puckResistance < 1100.f)) {
+      return;
+    }
 
     // Pressure has to reach at least half way to pressureTarget
     if (pressure < pressureTarget) {
