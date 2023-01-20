@@ -4,7 +4,9 @@ void log_init() {
   USART_DEBUG.begin(115200);
 }
 
-void log(const char *prefix, const char *file, const int line, const char *msg, ...)
+// Unsure the consequences of swapping to parameter packing or currying since
+// this would then need to be moved to the header. So suppressing this for now.
+void log(const char* prefix, const char* file, const int line, const char* msg, ...) //NOLINT(cert-dcl50-cpp)
 {
   char msgBuf[LOG_MAX_STRING_LEN];
   va_list args;
