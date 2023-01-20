@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define EEPROM_DATA_VERSION 5
+#define EEPROM_DATA_VERSION 6
 
 #define EEPROM_METADATA_T(__eepromValues_tName) \
   {                                             \
