@@ -100,7 +100,7 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   && (sensorTemperature <= runningCfg.steamSetPoint))
   {
     setBoilerOn();
-    if (currentState.smoothedPressure < 1.5f) {
+    if (currentState.smoothedPressure < 1.8f) {
       #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB
         #if not defined (DREAM_STEAM_DISABLED) // disabled for bigger boilers which have no  need of adjusting the pressure
         openValve();
@@ -108,19 +108,21 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
       #endif
 
       #ifndef DREAM_STEAM_DISABLED
-        setPumpToRawValue(5);
+        setPumpToRawValue(3);
       #endif
     } else setPumpOff();
   } else {
     setBoilerOff();
     #ifndef DREAM_STEAM_DISABLED
-      (currentState.smoothedPressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
+      (currentState.smoothedPressure < 1.8f) ? setPumpToRawValue(3) : setPumpOff();
     #endif
   }
 
   /*In case steam is forgotten ON for more than 15 min*/
   if (currentState.smoothedPressure > 3.f) {
     long steamTimeout = millis() - steamTime;
-    steamTimeout >= STEAM_TIMEOUT ? currentState.isSteamForgottenON = true : currentState.isSteamForgottenON = false;
+    (steamTimeout >= STEAM_TIMEOUT)
+      ? currentState.isSteamForgottenON = true
+      : currentState.isSteamForgottenON = false;
   } else steamTime = millis();
 }

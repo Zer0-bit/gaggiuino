@@ -93,7 +93,7 @@ void loop(void) {
   modeSelect();
   lcdRefresh();
   espCommsSendSensorData(currentState, brewActive, steamState());
-  systemHealthCheck(0.4f);
+  systemHealthCheck(0.7f);
 }
 
 //##############################################################################################################################
@@ -166,7 +166,7 @@ static void calculateWeightAndFlow(void) {
       currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 2.5f;
       currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.55f;
 
-      bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
+      // bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
 
       CurrentPhase& phase = phaseProfiler.getCurrentPhase();
       predictiveWeight.update(currentState, phase, runningCfg);
@@ -178,8 +178,8 @@ static void calculateWeightAndFlow(void) {
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         // if the output flow just started, consider only 50% of the clicks (probabilistically).
-        long consideredClicks = previousIsOutputFlow ? pumpClicks : pumpClicks * 0.5f;
-        currentState.shotWeight += consideredClicks * flowPerClick;
+        // long consideredClicks = previousIsOutputFlow ? pumpClicks : pumpClicks * 0.5f;
+        currentState.shotWeight += pumpClicks * flowPerClick;
       }
       currentState.waterPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
@@ -291,7 +291,7 @@ static void lcdRefresh(void) {
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
-    } else {
+    } else if (lcdCurrentPageId == 8 || lcdCurrentPageId == 2){
       if (scalesIsPresent()) {
         lcdSetWeight(currentState.weight);
       } else if (currentState.shotWeight) {
@@ -300,7 +300,8 @@ static void lcdRefresh(void) {
     }
 
     /*LCD flow output*/
-    if (lcdCurrentPageId == 1 || lcdCurrentPageId == 2 || lcdCurrentPageId == 8 ) { // no point sending this continuously if on any other screens than brew related ones
+    // no point sending this continuously if on any other screens than brew related ones
+    if ( lcdCurrentPageId == 8 || lcdCurrentPageId == 2 ) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.weightFlow * 10.f
@@ -596,12 +597,14 @@ static void brewParamsReset(void) {
 
 void fillBoiler(float targetBoilerFullPressure) {
 #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-  static long elapsedTimeSinceStart = millis();
-  lcdSetUpTime((millis() > elapsedTimeSinceStart) ? (int)((millis() - elapsedTimeSinceStart) / 1000) : 0);
+  static unsigned long elapsedTimeSinceStart = millis();
+  lcdSetUpTime((millis() > elapsedTimeSinceStart) ? ((millis() - elapsedTimeSinceStart) / 1000) : 0);
   if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
     unsigned long timePassed = millis() - elapsedTimeSinceStart;
 
-    if (currentState.smoothedPressure < targetBoilerFullPressure && timePassed <= BOILER_FILL_TIMEOUT) {
+    if (timePassed <= BOILER_FILL_TIMEOUT
+    &&  (currentState.smoothedPressure < targetBoilerFullPressure || currentState.weight > 2.f))
+    {
       lcdShowPopup("Filling boiler!");
       openValve();
       setPumpToRawValue(80);
@@ -628,11 +631,18 @@ void systemHealthCheck(float pressureThreshold) {
       {
         //Reloading the watchdog timer, if this function fails to run MCU is rebooted
         watchdogReload();
-        if (lcdCurrentPageId != 2 || lcdCurrentPageId != 8) {
-          lcdShowPopup("Releasing pressure!");
-          setPumpOff();
-          setBoilerOff();
-          openValve();
+        switch (lcdCurrentPageId) {
+          case 2:
+          case 8:
+            setPumpOff();
+            setBoilerOff();
+            break;
+          default:
+            lcdShowPopup("Releasing pressure!");
+            setPumpOff();
+            setBoilerOff();
+            openValve();
+            break;
         }
         sensorsRead();
       }

@@ -24,8 +24,13 @@
 */
 
 /**
-* Version 5:
-* - Introduced steamSetpoint
+* Version 6:
+* - Pressure as float:
+*   - pressureProfilingStart
+*   - pressureProfilingFinish
+*   - preinfusionBar
+*   - preinfusionFlowPressureTarget
+*   - flowProfilePressureTarget
 */
 struct eepromValues_t {
   uint16_t setpoint;
@@ -34,25 +39,25 @@ struct eepromValues_t {
   uint16_t hpwr;
   uint16_t mainDivider;
   uint16_t brewDivider;
-  uint16_t pressureProfilingStart;
-  uint16_t pressureProfilingFinish;
+  float    pressureProfilingStart;
+  float    pressureProfilingFinish;
   uint16_t pressureProfilingHold;
   uint16_t pressureProfilingLength;
   bool     pressureProfilingState;
   bool     preinfusionState;
   uint16_t preinfusionSec;
-  uint16_t preinfusionBar;
+  float    preinfusionBar;
   uint16_t preinfusionSoak;
   uint16_t preinfusionRamp;
   bool     preinfusionFlowState;
   float    preinfusionFlowVol;
   uint16_t preinfusionFlowTime;
   uint16_t preinfusionFlowSoakTime;
-  uint16_t preinfusionFlowPressureTarget;
+  float    preinfusionFlowPressureTarget;
   bool     flowProfileState;
   float    flowProfileStart;
   float    flowProfileEnd;
-  uint16_t flowProfilePressureTarget;
+  float    flowProfilePressureTarget;
   uint16_t flowProfileCurveSpeed;
   uint16_t powerLineFrequency;
   uint16_t lcdSleep;

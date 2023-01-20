@@ -43,14 +43,14 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("bDiv", eepromCurrentValues.brewDivider);
   myNex.writeNum("moreTemp.n5.val", eepromCurrentValues.brewDivider);
 
-  myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart);
-  myNex.writeNum("brewAuto.n2.val", eepromCurrentValues.pressureProfilingStart);
+  myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart * 10.f);
+  myNex.writeNum("brewAuto.pStartBar.val", eepromCurrentValues.pressureProfilingStart * 10.f);
 
   myNex.writeNum("ppFlowStart", eepromCurrentValues.flowProfileStart * 10.f);
   myNex.writeNum("brewAuto.flowStartBox.val", eepromCurrentValues.flowProfileStart * 10.f);
 
-  myNex.writeNum("ppFin", eepromCurrentValues.pressureProfilingFinish);
-  myNex.writeNum("brewAuto.n3.val", eepromCurrentValues.pressureProfilingFinish);
+  myNex.writeNum("ppFin", eepromCurrentValues.pressureProfilingFinish * 10.f);
+  myNex.writeNum("brewAuto.pEndBar.val", eepromCurrentValues.pressureProfilingFinish * 10.f);
 
   myNex.writeNum("ppFlowFinish", eepromCurrentValues.flowProfileEnd * 10.f);
   myNex.writeNum("brewAuto.flowEndBox.val", eepromCurrentValues.flowProfileEnd * 10.f);
@@ -58,8 +58,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("ppHold", eepromCurrentValues.pressureProfilingHold);
   myNex.writeNum("brewAuto.n5.val", eepromCurrentValues.pressureProfilingHold);
 
-  myNex.writeNum("ppFlowPressure", eepromCurrentValues.flowProfilePressureTarget);
-  myNex.writeNum("brewAuto.flowBarBox.val", eepromCurrentValues.flowProfilePressureTarget);
+  myNex.writeNum("ppFlowPressure", eepromCurrentValues.flowProfilePressureTarget * 10.f);
+  myNex.writeNum("brewAuto.flowBarBox.val", eepromCurrentValues.flowProfilePressureTarget * 10.f);
 
   myNex.writeNum("ppLength", eepromCurrentValues.pressureProfilingLength);
   myNex.writeNum("brewAuto.n6.val", eepromCurrentValues.pressureProfilingLength);
@@ -86,8 +86,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("piFlow", eepromCurrentValues.preinfusionFlowVol * 10.f);
   myNex.writeNum("brewAuto.flowPIbox.val", eepromCurrentValues.preinfusionFlowVol * 10.f);
 
-  myNex.writeNum("piBar", eepromCurrentValues.preinfusionBar);
-  myNex.writeNum("brewAuto.n1.val", eepromCurrentValues.preinfusionBar);
+  myNex.writeNum("piBar", eepromCurrentValues.preinfusionBar * 10.f);
+  myNex.writeNum("brewAuto.piTargetBar.val", eepromCurrentValues.preinfusionBar * 10.f);
 
   myNex.writeNum("piFlowTime", eepromCurrentValues.preinfusionFlowTime);
   myNex.writeNum("brewAuto.flowPiSecBox.val", eepromCurrentValues.preinfusionFlowTime);
@@ -98,8 +98,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("piFlowSoak", eepromCurrentValues.preinfusionFlowSoakTime);
   myNex.writeNum("brewAuto.flowPiSoakBox.val", eepromCurrentValues.preinfusionFlowSoakTime);
 
-  myNex.writeNum("piFlowPressure", eepromCurrentValues.preinfusionFlowPressureTarget);
-  myNex.writeNum("brewAuto.flowPiBarBox.val", eepromCurrentValues.preinfusionFlowPressureTarget);
+  myNex.writeNum("piFlowPressure", eepromCurrentValues.preinfusionFlowPressureTarget * 10.f);
+  myNex.writeNum("brewAuto.flowPiBarBox.val", eepromCurrentValues.preinfusionFlowPressureTarget * 10.f);
 
   myNex.writeNum("piRamp", eepromCurrentValues.preinfusionRamp);
   myNex.writeNum("brewAuto.rampSpeed.val", eepromCurrentValues.preinfusionRamp);
@@ -139,13 +139,13 @@ eepromValues_t lcdDownloadCfg(void) {
 
   lcdCfg.preinfusionState               = myNex.readNumber("piState");
   lcdCfg.preinfusionSec                 = myNex.readNumber("piSec");
-  lcdCfg.preinfusionBar                 = myNex.readNumber("piBar");
+  lcdCfg.preinfusionBar                 = myNex.readNumber("piBar") / 10.f;
   lcdCfg.preinfusionSoak                = myNex.readNumber("piSoak");
   lcdCfg.preinfusionRamp                = myNex.readNumber("piRamp");
 
   lcdCfg.pressureProfilingState         = myNex.readNumber("ppState");
-  lcdCfg.pressureProfilingStart         = myNex.readNumber("ppStart");
-  lcdCfg.pressureProfilingFinish        = myNex.readNumber("ppFin");
+  lcdCfg.pressureProfilingStart         = myNex.readNumber("ppStart") / 10.f;
+  lcdCfg.pressureProfilingFinish        = myNex.readNumber("ppFin") / 10.f;
   lcdCfg.pressureProfilingHold          = myNex.readNumber("ppHold");
   lcdCfg.pressureProfilingLength        = myNex.readNumber("ppLength");
 
@@ -153,11 +153,11 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.preinfusionFlowVol             = myNex.readNumber("piFlow") / 10.f;
   lcdCfg.preinfusionFlowTime            = myNex.readNumber("piFlowTime" );
   lcdCfg.preinfusionFlowSoakTime        = myNex.readNumber("piFlowSoak");
-  lcdCfg.preinfusionFlowPressureTarget  = myNex.readNumber("piFlowPressure");
+  lcdCfg.preinfusionFlowPressureTarget  = myNex.readNumber("piFlowPressure") / 10.f;
   lcdCfg.flowProfileState               = myNex.readNumber("ppFlowState");
   lcdCfg.flowProfileStart               = myNex.readNumber("ppFlowStart") / 10.f;
   lcdCfg.flowProfileEnd                 = myNex.readNumber("ppFlowFinish") / 10.f;
-  lcdCfg.flowProfilePressureTarget      = myNex.readNumber("ppFlowPressure");
+  lcdCfg.flowProfilePressureTarget      = myNex.readNumber("ppFlowPressure") / 10.f;
   lcdCfg.flowProfileCurveSpeed          = myNex.readNumber("ppFlowCurveSpeed");
 
   lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");

@@ -3,6 +3,7 @@
 #include "eeprom_data.h"
 #include "eeprom_metadata.h"
 #include "legacy/eeprom_data_v4.h"
+#include "legacy/eeprom_data_v5.h"
 
 namespace {
 
