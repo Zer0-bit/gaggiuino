@@ -4,7 +4,7 @@ namespace {
   class McuCommsSingleton {
   public:
     static McuComms& getInstance() {
-      static McuComms instance;        // (1)
+      static McuComms instance;
       return instance;
     }
   private:
