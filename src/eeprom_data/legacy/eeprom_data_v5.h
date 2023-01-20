@@ -1,15 +1,17 @@
-#ifndef EEPROM_DATA_V4_H
-#define EEPROM_DATA_V4_H
+#ifndef EEPROM_DATA_V5_H
+#define EEPROM_DATA_V5_H
 
 #include "../eeprom_data.h"
 #include "../eeprom_metadata.h"
 
 /**
-* Version 4:
-* - added switchPhaseOnThreshold
+* Version 5:
+* - added steamSetPoint
+* - added basketPrefill
 */
-struct eepromValues_t_v4 {
+struct eepromValues_t_v5 {
   uint16_t setpoint;
+  uint16_t steamSetPoint;
   uint16_t offsetTemp;
   uint16_t hpwr;
   uint16_t mainDivider;
@@ -41,6 +43,7 @@ struct eepromValues_t_v4 {
   bool     graphBrew;
   bool     brewDeltaState;
   bool     switchPhaseOnThreshold;
+  bool     basketPrefill;
   int      scalesF1;
   int      scalesF2;
   float    pumpFlowAtZero;
@@ -50,8 +53,9 @@ struct eepromValues_t_v4 {
   uint16_t shotPreset;
 };
 
-static bool upgradeSchema_v4(eepromValues_t &targetValues, eepromValues_t_v4 &loadedValues) {
+static bool upgradeSchema_v5(eepromValues_t &targetValues, eepromValues_t_v5 &loadedValues) {
   targetValues.setpoint = loadedValues.setpoint;
+  targetValues.steamSetPoint = loadedValues.steamSetPoint;
   targetValues.offsetTemp = loadedValues.offsetTemp;
   targetValues.hpwr = loadedValues.hpwr;
   targetValues.mainDivider = loadedValues.mainDivider;
@@ -83,6 +87,7 @@ static bool upgradeSchema_v4(eepromValues_t &targetValues, eepromValues_t_v4 &lo
   targetValues.graphBrew = loadedValues.graphBrew;
   targetValues.brewDeltaState = loadedValues.brewDeltaState;
   targetValues.switchPhaseOnThreshold = loadedValues.switchPhaseOnThreshold;
+  targetValues.basketPrefill = loadedValues.basketPrefill;
   targetValues.scalesF1 = loadedValues.scalesF1;
   targetValues.scalesF2 = loadedValues.scalesF2;
   targetValues.pumpFlowAtZero = loadedValues.pumpFlowAtZero;
@@ -93,6 +98,6 @@ static bool upgradeSchema_v4(eepromValues_t &targetValues, eepromValues_t_v4 &lo
   return true;
 }
 
-REGISTER_LEGACY_EEPROM_DATA(4, eepromValues_t_v4, upgradeSchema_v4)
+REGISTER_LEGACY_EEPROM_DATA(5, eepromValues_t_v5, upgradeSchema_v5)
 
 #endif

@@ -24,8 +24,13 @@
 */
 
 /**
-* Version 5:
-* - Introduced steamSetpoint
+* Version 6:
+* - Pressure as float:
+*   - pressureProfilingStart
+*   - pressureProfilingFinish
+*   - preinfusionBar
+*   - preinfusionFlowPressureTarget
+*   - flowProfilePressureTarget
 */
 struct eepromValues_t {
   uint16_t setpoint;
