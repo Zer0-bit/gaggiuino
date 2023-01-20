@@ -57,37 +57,37 @@ jobs:
         run: |
           ~/.platformio/penv/bin/platformio test -e test
 
-    static-analysis:
-      runs-on: ubuntu-latest
-      timeout-minutes: 15
+  static-analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
-      steps:
-        - name: Checkout master
-          uses: actions/checkout@v2
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2
 
-        - name: Set up Python
-          uses: actions/setup-python@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
 
-        - name: Install Platformio
-          run: |
-            python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+      - name: Install Platformio
+        run: |
+          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
 
-        - name: Run static analysis on main project
-          if: success() || failure()
-          run: |
-            ~/.platformio/penv/bin/platformio check -e opto-dfu --fail-on-defect medium --fail-on-defect high
+      - name: Run static analysis on main project
+        if: success() || failure()
+        run: |
+          ~/.platformio/penv/bin/platformio check -e opto-dfu --fail-on-defect medium --fail-on-defect high
 
-        - name: Run static analysis on scales
-          if: success() || failure()
-          run: |
-            ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu --fail-on-defect medium --fail-on-defect high
+      - name: Run static analysis on scales
+        if: success() || failure()
+        run: |
+          ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu --fail-on-defect medium --fail-on-defect high
 
-        - name: Run static analysis on uart-stm
-          if: success() || failure()
-          run: |
-            ~/.platformio/penv/bin/platformio check -e uart-stm --fail-on-defect medium --fail-on-defect high
+      - name: Run static analysis on uart-stm
+        if: success() || failure()
+        run: |
+          ~/.platformio/penv/bin/platformio check -e uart-stm --fail-on-defect medium --fail-on-defect high
 
-        - name: Run static analysis on uart-esp
-          if: success() || failure()
-          run: |
-            ~/.platformio/penv/bin/platformio check -e uart-stm --fail-on-defect medium --fail-on-defect high
+      - name: Run static analysis on uart-esp
+        if: success() || failure()
+        run: |
+          ~/.platformio/penv/bin/platformio check -e uart-stm --fail-on-defect medium --fail-on-defect high
