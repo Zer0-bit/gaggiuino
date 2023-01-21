@@ -72,13 +72,10 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
   lcdTargetState(1); // setting the target mode to "steam temp"
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
-  if (steamState() && brewState()) {
-    hotWaterMode();
-  }
-  else if ((currentState.smoothedPressure <= 9.f)
-            && (sensorTemperature > runningCfg.setpoint - 10.f)
-            && (sensorTemperature <= runningCfg.steamSetPoint)
-          ) {
+  if ((currentState.smoothedPressure <= 9.f)
+       && (sensorTemperature > runningCfg.setpoint - 10.f)
+       && (sensorTemperature <= runningCfg.steamSetPoint)
+     ) {
     setBoilerOn();
     if (currentState.smoothedPressure < 1.8f) {
       #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB
@@ -105,8 +102,9 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
       : currentState.isSteamForgottenON = false;
   } else steamTime = millis();
 }
+
 /*Water mode and all that*/
-void hotWaterMode() {
+void hotWaterMode(SensorState &currentState) {
   #ifndef SINGLE_BOARD
   openValve();
   #else
@@ -114,5 +112,6 @@ void hotWaterMode() {
   #endif
   setPumpToRawValue(80);
   setBoilerOn();
+  if (currentState.temperature < MAX_WATER_TEMP) setBoilerOn();
+  else setBoilerOff();
 }
-

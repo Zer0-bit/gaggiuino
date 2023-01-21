@@ -227,11 +227,12 @@ static void modeSelect(void) {
     case OPERATION_MODES::OPMODE_everythingFlowProfiled:
     case OPERATION_MODES::OPMODE_pressureBasedPreinfusionAndFlowProfile:
       nonBrewModeActive = false;
-      if (!steamState()) {
+      if (waterState()) hotWaterMode(currentState);
+      else if (steamState()) steamCtrl(runningCfg, currentState, brewActive);
+      else {
         profiling();
         steamTime = millis();
       }
-      else steamCtrl(runningCfg, currentState, brewActive);
       break;
     case OPERATION_MODES::OPMODE_manual:
       nonBrewModeActive = false;
@@ -627,10 +628,7 @@ void systemHealthCheck(float pressureThreshold) {
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
 
   // No point going through the whole thing if this first condition isn't met.
-  if (brewState() && steamState()) {
-    return;
-  }
-
+  if (waterState()) return;
 
   // Should enter the block every "systemHealthTimer" seconds
   if (millis() >= systemHealthTimer) {
