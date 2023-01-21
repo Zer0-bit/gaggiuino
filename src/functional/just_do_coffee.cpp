@@ -115,6 +115,8 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
     setBoilerOff();
     #ifndef DREAM_STEAM_DISABLED
       (currentState.smoothedPressure < 1.8f) ? setPumpToRawValue(3) : setPumpOff();
+    #else
+      setPumpOff(); // pump can be on from hot water mode
     #endif
   }
 
