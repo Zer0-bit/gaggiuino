@@ -92,7 +92,11 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
   if (steamState() && brewState()) {
-    closeValve();
+    #ifndef SINGLE_BOARD
+      openValve();
+    #else
+      closeValve();
+    #endif
     setPumpToRawValue(80);
     setBoilerOn();
   } else if ((currentState.smoothedPressure <= 9.f)
