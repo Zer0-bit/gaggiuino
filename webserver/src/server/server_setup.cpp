@@ -1,6 +1,6 @@
 #include "server_setup.h"
-#include "wifi_api.h"
-#include "websocket.h"
+#include "api/api_wifi.h"
+#include "websocket/websocket.h"
 
 AsyncWebServer server(80);
 
