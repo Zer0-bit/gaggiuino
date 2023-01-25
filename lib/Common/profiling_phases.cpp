@@ -47,8 +47,8 @@ bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSna
 
   return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
     (weight > 0.f && state.shotWeight > weight - stopDelta) ||
-    (pressureAbove > 0.f && state.pressure > pressureAbove) ||
-    (pressureBelow > 0.f && state.pressure < pressureBelow) ||
+    (pressureAbove > 0.f && state.smoothedPressure > pressureAbove) ||
+    (pressureBelow > 0.f && state.smoothedPressure < pressureBelow) ||
     (waterPumpedInPhase > 0.f && state.waterPumped - stateAtPhaseStart.waterPumped > waterPumpedInPhase - stopDelta) ||
     (flowAbove > 0.f && state.smoothedPumpFlow > flowAbove) ||
     (flowBelow > 0.f && state.smoothedPumpFlow < flowBelow);
