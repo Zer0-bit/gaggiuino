@@ -603,7 +603,7 @@ void fillBoiler(float targetBoilerFullPressure) {
     unsigned long timePassed = millis() - elapsedTimeSinceStart;
 
     if (timePassed <= BOILER_FILL_TIMEOUT
-    &&  (currentState.smoothedPressure < targetBoilerFullPressure || currentState.weight > 2.f))
+    &&  (currentState.smoothedPressure < targetBoilerFullPressure || currentState.weight < 2.f))
     {
       lcdShowPopup("Filling boiler!");
       openValve();
