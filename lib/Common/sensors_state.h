@@ -17,6 +17,7 @@ struct SensorState {
   float waterPumped;
   float weightFlow;
   float weight;
+  float smoothedWeight;
   float shotWeight;
 };
 

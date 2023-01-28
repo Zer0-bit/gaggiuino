@@ -5,7 +5,7 @@
 
 SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.1f);
 SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.1f);
-SimpleKalmanFilter smoothScalesFlow(0.1f, 0.1f, 0.1f);
+SimpleKalmanFilter smoothWeight(0.1f, 0.1f, 0.1f);
 SimpleKalmanFilter predictTempVariation(1.f, 1.f, 1.f);
 
 //default phases. Updated in updateProfilerPhases.
@@ -125,6 +125,8 @@ static void sensorsReadWeight(void) {
       else tareDone = true;
     }
     currentState.weight = scalesGetWeight();
+    currentState.smoothedWeight = smoothWeight.updateEstimate(currentState.weight);
+
     scalesTimer = millis() + GET_SCALES_READ_EVERY;
   }
 }
@@ -157,7 +159,7 @@ static void calculateWeightAndFlow(void) {
 
   if (brewActive) {
     if (scalesIsPresent()) {
-      currentState.shotWeight = currentState.weight;
+      currentState.shotWeight = currentState.smoothedWeight;
     }
 
     if (elapsedTime > REFRESH_FLOW_EVERY) {
@@ -173,7 +175,6 @@ static void calculateWeightAndFlow(void) {
 
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
-        currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
@@ -290,10 +291,10 @@ static void lcdRefresh(void) {
 
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
-      lcdSetWeight(currentState.weight);
+      lcdSetWeight(currentState.smoothedWeight);
     } else if (lcdCurrentPageId == 8 || lcdCurrentPageId == 2){
       if (scalesIsPresent()) {
-        lcdSetWeight(currentState.weight);
+        lcdSetWeight(currentState.smoothedWeight);
       } else if (currentState.shotWeight) {
         lcdSetWeight(currentState.shotWeight);
       }
@@ -303,7 +304,7 @@ static void lcdRefresh(void) {
     // no point sending this continuously if on any other screens than brew related ones
     if ( lcdCurrentPageId == 8 || lcdCurrentPageId == 2 ) {
       lcdSetFlow(
-        currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
+        currentState.smoothedWeight > 0.4f // currentState.smoothedWeight is always zero if scales are not present
           ? currentState.weightFlow * 10.f
           : currentState.smoothedPumpFlow * 10.f
       );

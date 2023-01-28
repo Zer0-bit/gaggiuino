@@ -28,7 +28,7 @@ void espCommsSendSensorData(SensorState& state, bool brewActive, bool steamActiv
       .pressure=state.smoothedPressure,
       .pumpFlow=state.smoothedPumpFlow,
       .weightFlow=state.weightFlow,
-      .weight=state.weight,
+      .weight=state.smoothedWeight,
     };
     mcuComms.sendSensorStateSnapshot(sensorSnapshot);
     sensorDataTimer = now;
