@@ -13,7 +13,8 @@
 #define DELTA_RANGE             0.25f // % to apply as delta
 
 void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, bool preinfusionFinished);
+void pulseHeaters(uint32_t pulseLength, int factor_1, int factor_2, bool brewActive);
 void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, unsigned long steamTime);
-
+void hotWaterMode();
 #endif
 

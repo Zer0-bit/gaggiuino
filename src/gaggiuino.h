@@ -35,7 +35,8 @@
 #define TRAY_FULL_THRESHOLD     700.f
 #define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
 #define BOILER_FILL_TIMEOUT     8000UL
-#define BOILER_FILL_PRESSURE    1.75f
+#define BOILER_FILL_PRESSURE_C  1.75f // Fill pressure on cold start
+#define BOILER_FILL_PRESSURE_H  1.f // Fill pressure on hot (re)start
 
 
 
@@ -55,6 +56,19 @@ typedef enum {
     OPMODE_pressureBasedPreinfusionAndFlowProfile
 } OPERATION_MODES;
 
+typedef enum {
+    SCREEN_home,
+    SCREEN_brew_settings,
+    SCREEN_brew_manual,
+    SCREEN_profiles,
+    SCREEN_flush,
+    SCREEN_descale,
+    SCREEN_settings_boiler,
+    SCREEN_settings_system,
+    SCREEN_brew_graph,
+    SCREEN_shot_settings,
+    SCREEN_splash
+} SCREEN_MODES;
 
 //Timers
 unsigned long systemHealthTimer;

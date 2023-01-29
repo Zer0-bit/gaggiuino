@@ -34,8 +34,8 @@ public:
     // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
     // as well as there being enough pressure for water to wet the puck enough to start the output
     bool phaseTypePressure = phase.getType() == PHASE_TYPE_PRESSURE;
-    float pressureTarget = phaseTypePressure ? phase.getTarget() : phase.getRestriction();
-    pressureTarget = (pressureTarget == 0.f || pressureTarget > 1.2f) ? 1.2f : pressureTarget;
+    // float pressureTarget = phaseTypePressure ? phase.getTarget() : phase.getRestriction();
+    // pressureTarget = (pressureTarget == 0.f || pressureTarget > 2.f) ? 2.f : pressureTarget;
     // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
@@ -49,7 +49,7 @@ public:
     }
 
     // Pressure has to reach at least half way to pressureTarget
-    if (pressure < pressureTarget) {
+    if (pressure < 1.1f/*pressureTarget*/) {
       return;
     }
 
