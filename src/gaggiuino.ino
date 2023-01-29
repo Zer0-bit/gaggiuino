@@ -108,6 +108,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   fillBoiler();
+  updateStartupTimer();
 }
 
 static void sensorsReadTemperature(void) {
@@ -592,50 +593,16 @@ static void brewParamsReset(void) {
 }
 
 void fillBoiler() {
-  /* Catering for different pressure thresholds as water density lowers with temperature increase
-  hence if one is to restart with a heated up machine fill boiler needs to target a diff threshold */
-  float targetBoilerFullPressure = currentState.temperature < 65.f ? BOILER_FILL_PRESSURE_C : BOILER_FILL_PRESSURE_H;
-
-#if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-  static unsigned long elapsedTimeSinceStart = millis();
-  // System uptime timer update, part of the boiler fill until a better place is found.
-  lcdSetUpTime((millis() > elapsedTimeSinceStart) ? ((millis() - elapsedTimeSinceStart) / 1000) : 0);
-  // Don't check further if this is true.
+  #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
   if (startupInitFinished) {
     return;
   }
 
-  // Boiler fill phase.
-  if (lcdCurrentPageId == SCREEN_home && millis() - elapsedTimeSinceStart >= 3000) {
-    unsigned long timePassed = millis() - elapsedTimeSinceStart;
-
-    if (timePassed >= BOILER_FILL_TIMEOUT) {
-      return;
-    }
-
-    if (currentState.smoothedPressure >= targetBoilerFullPressure
-      || currentState.weight >= 2.f)
-    {
-      closeValve();
-      setPumpOff();
-      startupInitFinished = true;
-      return;
-    }
-
-    // If none of the above conditions are true boiler needs to be filled.
-    lcdShowPopup("Filling boiler!");
-    openValve();
-    setPumpToRawValue(80);
+  if (isBoilerFillPhase(getTimeSinceInit()) && !isSwitchOn()) {
+    fillBoilerUntilThreshod(getTimeSinceInit());
   }
-
-  // Will stop all operations if at startup brew switch is in ON position.
-  if (millis() - elapsedTimeSinceStart < 3000UL) {
-    while (brewState() && lcdCurrentPageId == SCREEN_home) {
-      watchdogReload();
-      setBoilerOff();
-      setPumpOff();
-      lcdShowPopup("Forgot switches ON!");
-    }
+  else if (isSwitchOn()) {
+    lcdShowPopup("Brew Switch ON!!");
   }
 #else
   startupInitFinished = true;
@@ -708,4 +675,46 @@ void systemHealthCheck(float pressureThreshold) {
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   }
   #endif
+}
+
+bool isBoilerFillPhase(unsigned long elapsedTime) {
+  return lcdCurrentPageId == SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
+}
+
+bool isBoilerFull() {
+  float targetPressure = currentState.temperature < 65.f ? BOILER_FILL_PRESSURE_C : BOILER_FILL_PRESSURE_H;
+  return currentState.smoothedPressure >= targetPressure || currentState.weight >= 2.f;
+}
+
+// Function to track time since system has started
+unsigned long getTimeSinceInit() {
+  static unsigned long startTime = millis();
+  return millis() - startTime;
+}
+
+// Checks if Brew switch is ON
+bool isSwitchOn() {
+  return brewState() && lcdCurrentPageId == SCREEN_home;
+}
+
+void fillBoilerUntilThreshod(unsigned long elapsedTime) {
+  if (elapsedTime >= BOILER_FILL_TIMEOUT) {
+    startupInitFinished = true;
+    return;
+  }
+
+  if (isBoilerFull()) {
+    closeValve();
+    setPumpOff();
+    startupInitFinished = true;
+    return;
+  }
+
+  lcdShowPopup("Filling boiler!");
+  openValve();
+  setPumpToRawValue(80);
+}
+
+void updateStartupTimer() {
+  lcdSetUpTime(getTimeSinceInit() / 1000);
 }
