@@ -58,10 +58,10 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
     case FINISHED: // Scale successufuly fucked
       setPumpOff();
       closeValve();
+      brewState() ? descalingState = FINISHED : descalingState = IDLE;
       if (millis() - descalingTimer > 1000) {
         lcdBrewTimerStop();
         lcdShowPopup("FINISHED");
-        brewState() ? descalingState = FINISHED : descalingState = IDLE;
         descalingTimer = millis();
       }
       break;
