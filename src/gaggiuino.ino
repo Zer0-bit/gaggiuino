@@ -629,8 +629,8 @@ void fillBoiler() {
   }
 
   // Will stop all operations if at startup brew switch is in ON position.
-  if (millis() - elapsedTimeSinceStart < 1000UL) {
-    while (brewState()) {
+  if (millis() - elapsedTimeSinceStart < 3000UL) {
+    while (brewState() && lcdCurrentPageId == SCREEN_home) {
       watchdogReload();
       setBoilerOff();
       setPumpOff();
