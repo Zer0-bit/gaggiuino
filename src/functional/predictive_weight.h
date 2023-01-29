@@ -13,6 +13,13 @@ private:
   float resistanceDelta;
 
 public:
+  PredictiveWeight() :
+    outputFlowStarted(false),
+    isForceStarted(false),
+    puckResistance(0.f),
+    resistanceDelta(0.f)
+  {}
+
   bool isOutputFlow() {
     return outputFlowStarted;
   }
