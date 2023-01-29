@@ -61,7 +61,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
       if (millis() - descalingTimer > 1000) {
         lcdBrewTimerStop();
         lcdShowPopup("FINISHED");
-        descalingState = IDLE;
+        brewState() ? descalingState = FINISHED : descalingState = IDLE;
         descalingTimer = millis();
       }
       break;
