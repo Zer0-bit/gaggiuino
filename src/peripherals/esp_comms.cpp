@@ -1,11 +1,8 @@
 #include "esp_comms.h"
 #include "pindef.h"
-
 namespace {
   class McuCommsSingleton {
   public:
-    McuCommsSingleton(const McuCommsSingleton&) = delete;
-
     static McuComms& getInstance() {
       static McuComms instance;
       return instance;
@@ -27,21 +24,21 @@ void espCommsInit() {
 }
 
 void espCommsReadData() {
-    McuCommsSingleton::getInstance().readData();
+  McuCommsSingleton::getInstance().readData();
 }
 
 volatile uint32_t sensorDataTimer = 0;
 void espCommsSendSensorData(SensorState& state, bool brewActive, bool steamActive, uint32_t frequency) {
   uint32_t now = millis();
   if (now - sensorDataTimer > frequency) {
-    SensorStateSnapshot sensorSnapshot = SensorStateSnapshot {
-      .brewActive   = brewActive,
-      .steamActive  = steamActive,
-      .temperature  = state.temperature,
-      .pressure     = state.smoothedPressure,
-      .pumpFlow     = state.smoothedPumpFlow,
-      .weightFlow   = state.weightFlow,
-      .weight       = state.weight,
+    SensorStateSnapshot sensorSnapshot = SensorStateSnapshot{
+      .brewActive = brewActive,
+      .steamActive = steamActive,
+      .temperature = state.temperature,
+      .pressure = state.smoothedPressure,
+      .pumpFlow = state.smoothedPumpFlow,
+      .weightFlow = state.weightFlow,
+      .weight = state.weight,
     };
     McuCommsSingleton::getInstance().sendSensorStateSnapshot(sensorSnapshot);
     sensorDataTimer = now;
@@ -50,7 +47,7 @@ void espCommsSendSensorData(SensorState& state, bool brewActive, bool steamActiv
 
 volatile uint32_t shotDataTimer;
 void espCommsSendShotData(ShotSnapshot& shotData, uint32_t frequency) {
-    uint32_t now = millis();
+  uint32_t now = millis();
   if (now - shotDataTimer > frequency) {
     McuCommsSingleton::getInstance().sendShotData(shotData);
     shotDataTimer = now;

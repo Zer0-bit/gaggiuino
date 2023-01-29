@@ -135,7 +135,7 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 }
 
 eepromValues_t lcdDownloadCfg(void) {
-  eepromValues_t lcdCfg;
+  eepromValues_t lcdCfg = {};
 
   lcdCfg.preinfusionState               = myNex.readNumber("piState");
   lcdCfg.preinfusionSec                 = myNex.readNumber("piSec");
