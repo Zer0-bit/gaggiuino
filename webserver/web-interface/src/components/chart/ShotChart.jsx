@@ -114,13 +114,14 @@ function addDataPointToChartData(chartData, dataPoint, maxLength) {
   if (!dataPoint) {
     return;
   }
-  chartData.labels.push(mapDataPointToLabel(dataPoint));
+  const latestLabel = chartData.labels[chartData.labels.length - 1] || 0;
+  chartData.labels.push(latestLabel + mapDataPointToLabel(dataPoint));
   chartData.datasets[0].data.push(dataPoint.temperature);
   chartData.datasets[1].data.push(dataPoint.pressure);
   chartData.datasets[2].data.push(dataPoint.pumpFlow);
   chartData.datasets[3].data.push(dataPoint.shotWeight);
-  chartData.datasets[5].data.push(dataPoint.targetPressure);
-  chartData.datasets[4].data.push(dataPoint.targetPumpFlow);
+  chartData.datasets[4].data.push(dataPoint.targetPressure);
+  chartData.datasets[5].data.push(dataPoint.targetPumpFlow);
 }
 
 function Chart({ data, newDataPoint, maxLength }) {

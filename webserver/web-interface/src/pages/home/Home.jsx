@@ -6,13 +6,14 @@ import {
 import Grid from '@mui/material/Unstable_Grid2';
 import GaugeChart from '../../components/chart/GaugeChart';
 import {
+  apiHost,
   filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA, MSG_TYPE_SHOT_DATA,
 } from '../../models/api';
 import ProfilesTable from '../../components/table/table';
 import ShotDialog from './ShotDialog';
 
 function Home() {
-  const { lastJsonMessage } = useWebSocket(`ws://${window.location.host}/ws`, {
+  const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
     share: true,
     retryOnError: true,
     shouldReconnect: () => true,
