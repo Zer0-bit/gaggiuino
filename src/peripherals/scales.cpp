@@ -35,7 +35,7 @@ void scalesInit(float scalesF1, float scalesF2) {
     scalesPresent = true;
   }
 #ifdef FORCE_PREDICTIVE_SCALES
-  scalesPresent = false;
+  scalesPresent;
 #endif
 }
 
