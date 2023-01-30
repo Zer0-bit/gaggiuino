@@ -12,7 +12,7 @@ void log(const char* prefix, const char* file, const int line, const char* msg, 
   va_list args;
   va_start(args, msg);
   int check = vsnprintf(msgBuf, LOG_MAX_STRING_LEN, msg, args);
-  if (check > 0 && check <= sizeof(LOG_MAX_STRING_LEN))
+  if (check > 0 && check <= sizeof(msgBuf))
     va_end(args);
 
   char logLineBuf[LOG_MAX_PREFIX_LEN + LOG_MAX_STRING_LEN];
