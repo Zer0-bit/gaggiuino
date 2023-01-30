@@ -26,7 +26,7 @@ typedef enum {
 
 void deScale(eepromValues_t &runningCfg, SensorState &currentState);
 void solenoidBeat(void);
-void backFlush(SensorState &currentState);
+void backFlush(const SensorState &currentState);
 void flushActivated(void);
 void flushDeactivated(void);
 void flushPhases(void);

@@ -88,7 +88,7 @@ void solenoidBeat() {
   setPumpOff();
 }
 
-void backFlush(SensorState &currentState) {
+void backFlush(const SensorState &currentState) {
   static unsigned long backflushTimer = millis();
   unsigned long elapsedTime = millis() - backflushTimer;
   if (brewState()) {

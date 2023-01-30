@@ -24,7 +24,7 @@ public:
     return outputFlowStarted;
   }
 
-  void update(SensorState& state, CurrentPhase& phase, eepromValues_t cfg) {
+  void update(const SensorState& state, CurrentPhase& phase, const eepromValues_t& cfg) {
     // If at least 50ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
     if (isForceStarted || outputFlowStarted || state.waterPumped >= 55.f) {

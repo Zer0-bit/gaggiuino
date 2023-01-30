@@ -3,7 +3,7 @@
 
 //delta stuff
 // inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
-inline static float TEMP_DELTA(float d, SensorState &currentState) {
+inline static float TEMP_DELTA(float d, const SensorState &currentState) {
   return (
     d * (currentState.pumpFlow < 1.f
       ? currentState.pumpFlow / 9.f
@@ -67,7 +67,7 @@ void pulseHeaters(uint32_t pulseLength, int factor_1, int factor_2, bool brewAct
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
-void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, unsigned long steamTime) {
+void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, unsigned long steamTime) {
   lcdTargetState(1); // setting the target mode to "steam temp"
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;

@@ -28,7 +28,7 @@ void espCommsReadData() {
 }
 
 volatile uint32_t sensorDataTimer = 0;
-void espCommsSendSensorData(SensorState& state, bool brewActive, bool steamActive, uint32_t frequency) {
+void espCommsSendSensorData(const SensorState& state, bool brewActive, bool steamActive, uint32_t frequency) {
   uint32_t now = millis();
   if (now - sensorDataTimer > frequency) {
     SensorStateSnapshot sensorSnapshot = SensorStateSnapshot{
