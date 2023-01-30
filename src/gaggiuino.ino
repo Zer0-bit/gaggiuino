@@ -3,10 +3,9 @@
 #endif
 #include "gaggiuino.h"
 
-SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.1f);
-SimpleKalmanFilter smoothScalesFlow(0.1f, 0.1f, 0.1f);
-SimpleKalmanFilter predictTempVariation(1.f, 1.f, 1.f);
+SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.01f);
+SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
+SimpleKalmanFilter smoothScalesFlow(1.f, 1.f, 0.01f);
 
 //default phases. Updated in updateProfilerPhases.
 Profile profile;
@@ -174,7 +173,7 @@ static void calculateWeightAndFlow(void) {
 
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
-        currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
+        currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
@@ -305,7 +304,7 @@ static void lcdRefresh(void) {
     if ( lcdCurrentPageId == SCREEN_brew_graph || lcdCurrentPageId == SCREEN_brew_manual ) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
-          ? currentState.weightFlow * 10.f
+          ? currentState.smoothedWeightFlow * 10.f
           : currentState.smoothedPumpFlow * 10.f
       );
     }
