@@ -134,10 +134,10 @@ static void sensorsReadPressure(void) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
-    currentState.isPressureRising = isPressureRaising();
+    currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
-    currentState.isPressureFalling = isPressureFalling();
-    currentState.isPressureFallingFast = isPressureFallingFast();
+    currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.05f;
+    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 1.f;
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -688,12 +688,12 @@ bool isBoilerFull(unsigned long elapsedTime) {
     return true;
   }
 
-  // Boiler isn't full if below targetPressure and we haven't run the pump yet.
-  if (elapsedTime <= BOILER_FILL_START_TIME + 100) {
+  // Boiler isn't full and the pressure hasn't started rising yet.
+  if (!boilerFillPressureStartedRising) {
+    boilerFillPressureStartedRising = currentState.isPressureRising;
     return false;
   }
-
-  // Boiler is full if we've run the pump and the pressure isn't rising.
+  // Boiler is full when the pressure has stopped rising.
   return !currentState.isPressureRising;
 }
 
