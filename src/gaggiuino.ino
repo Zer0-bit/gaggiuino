@@ -591,23 +591,6 @@ static void brewParamsReset(void) {
   phaseProfiler.reset();
 }
 
-void fillBoiler() {
-  #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-  if (startupInitFinished) {
-    return;
-  }
-
-  if (isBoilerFillPhase(getTimeSinceInit()) && !isSwitchOn()) {
-    fillBoilerUntilThreshod(getTimeSinceInit());
-  }
-  else if (isSwitchOn()) {
-    lcdShowPopup("Brew Switch ON!!");
-  }
-#else
-  startupInitFinished = true;
-#endif
-}
-
 void systemHealthCheck(float pressureThreshold) {
   //Reloading the watchdog timer, if this function fails to run MCU is rebooted
   watchdogReload();
@@ -676,13 +659,30 @@ void systemHealthCheck(float pressureThreshold) {
   #endif
 }
 
+void fillBoiler() {
+  #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
+  if (startupInitFinished) {
+    return;
+  }
+
+  if (isBoilerFillPhase(getTimeSinceInit()) && !isSwitchOn()) {
+    fillBoilerUntilThreshod(getTimeSinceInit());
+  }
+  else if (isSwitchOn()) {
+    lcdShowPopup("Brew Switch ON!!");
+  }
+#else
+  startupInitFinished = true;
+#endif
+}
+
 bool isBoilerFillPhase(unsigned long elapsedTime) {
   return lcdCurrentPageId == SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
 }
 
 bool isBoilerFull() {
   float targetPressure = currentState.temperature < 65.f ? BOILER_FILL_PRESSURE_C : BOILER_FILL_PRESSURE_H;
-  return currentState.smoothedPressure >= targetPressure || currentState.weight >= 2.f;
+  return (currentState.smoothedPressure >= targetPressure && !currentState.isPressureRising) || currentState.weight >= 2.f;
 }
 
 // Function to track time since system has started
