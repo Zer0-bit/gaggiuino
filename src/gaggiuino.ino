@@ -680,9 +680,20 @@ bool isBoilerFillPhase(unsigned long elapsedTime) {
   return lcdCurrentPageId == SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
 }
 
-bool isBoilerFull() {
+bool isBoilerFull(unsigned long elapsedTime) {
+  // Boiler is full already if above the pressure threshold.
   float targetPressure = currentState.temperature < 65.f ? BOILER_FILL_PRESSURE_C : BOILER_FILL_PRESSURE_H;
-  return (currentState.smoothedPressure >= targetPressure && !currentState.isPressureRising) || currentState.weight >= 2.f;
+  if (currentState.smoothedPressure >= targetPressure) {
+    return true;
+  }
+
+  // Boiler isn't full if below targetPressure and we haven't run the pump yet.
+  if (elapsedTime <= BOILER_FILL_START_TIME + 100) {
+    return false;
+  }
+
+  // Boiler is full if we've run the pump and the pressure isn't rising.
+  return !currentState.isPressureRising;
 }
 
 // Function to track time since system has started
@@ -702,7 +713,7 @@ void fillBoilerUntilThreshod(unsigned long elapsedTime) {
     return;
   }
 
-  if (isBoilerFull()) {
+  if (isBoilerFull(elapsedTime)) {
     closeValve();
     setPumpOff();
     startupInitFinished = true;
