@@ -684,7 +684,8 @@ bool isBoilerFillPhase(unsigned long elapsedTime) {
 bool isBoilerFull(unsigned long elapsedTime) {
   // Boiler isn't full and the pressure hasn't started rising yet.
   if (!boilerFillPressureStartedRising) {
-    boilerFillPressureStartedRising = currentState.isPressureRising;
+    // If the pressure hasn't started rising after 1 second it isn't going too...
+    boilerFillPressureStartedRising = currentState.isPressureRising || elapsedTime - BOILER_FILL_START_TIME >= 1000;
     return false;
   }
   // Boiler is full when the pressure has stopped rising.
