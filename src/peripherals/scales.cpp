@@ -34,9 +34,11 @@ void scalesInit(float scalesF1, float scalesF2) {
     loadCells.tare(4);
     scalesPresent = true;
   }
-#ifdef FORCE_PREDICTIVE_SCALES
-  scalesPresent = false;
-#endif
+
+  // Forced predicitve scales in case someone with actual hardware scales wants to use tehm.
+  if (FORCE_PREDICTIVE_SCALES) {
+    scalesPresent = false;
+  }
 }
 
 void scalesTare(void) {
