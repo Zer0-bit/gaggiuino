@@ -27,8 +27,8 @@ void espCommsReadData() {
   McuCommsSingleton::getInstance().readData();
 }
 
-uint32_t sensorDataTimer = 0;
-void espCommsSendSensorData(SensorState& state, bool brewActive, bool steamActive, uint32_t frequency) {
+volatile uint32_t sensorDataTimer = 0;
+void espCommsSendSensorData(const SensorState& state, bool brewActive, bool steamActive, uint32_t frequency) {
   uint32_t now = millis();
   if (now - sensorDataTimer > frequency) {
     SensorStateSnapshot sensorSnapshot = SensorStateSnapshot{
@@ -45,7 +45,7 @@ void espCommsSendSensorData(SensorState& state, bool brewActive, bool steamActiv
   }
 }
 
-uint32_t shotDataTimer;
+volatile uint32_t shotDataTimer;
 void espCommsSendShotData(ShotSnapshot& shotData, uint32_t frequency) {
   uint32_t now = millis();
   if (now - shotDataTimer > frequency) {

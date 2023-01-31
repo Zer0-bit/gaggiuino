@@ -47,7 +47,7 @@ jobs:
 
       - name: Build the main project
         run: |
-          ~/.platformio/penv/bin/platformio run -e opto-dfu
+          ~/.platformio/penv/bin/platformio run -e relay-stlink
 
       - name: Build scales
         run: |
@@ -75,7 +75,7 @@ jobs:
       - name: Run static analysis on main project
         if: success() || failure()
         run: |
-          ~/.platformio/penv/bin/platformio check -e opto-dfu --fail-on-defect medium --fail-on-defect high
+          ~/.platformio/penv/bin/platformio check -e relay-stlink --fail-on-defect medium --fail-on-defect high
 
       - name: Run static analysis on scales
         if: success() || failure()
@@ -90,4 +90,4 @@ jobs:
       - name: Run static analysis on uart-esp
         if: success() || failure()
         run: |
-          ~/.platformio/penv/bin/platformio check -e uart-stm --fail-on-defect medium --fail-on-defect high
+          ~/.platformio/penv/bin/platformio check -e uart-esp --fail-on-defect medium --fail-on-defect high

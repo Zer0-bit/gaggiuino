@@ -41,7 +41,7 @@ float getPumpPct(float targetPressure, float flowRestriction, SensorState &curre
         return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.95f + 0.1f + 0.2f * diff);
     }
 
-    if (diff <= 0.f && currentState.isPressureFalling) {
+    if (diff <= 0.01f && currentState.isPressureFalling) {
         return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.5f);
     }
 

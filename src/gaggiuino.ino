@@ -3,10 +3,9 @@
 #endif
 #include "gaggiuino.h"
 
-SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.1f);
-SimpleKalmanFilter smoothScalesFlow(0.1f, 0.1f, 0.1f);
-SimpleKalmanFilter predictTempVariation(1.f, 1.f, 1.f);
+SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.06f);
+SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.25f);
+SimpleKalmanFilter smoothScalesFlow(1.f, 1.f, 0.05f);
 
 //default phases. Updated in updateProfilerPhases.
 Profile profile;
@@ -107,7 +106,8 @@ static void sensorsRead(void) {
   sensorsReadWeight();
   sensorsReadPressure();
   calculateWeightAndFlow();
-  fillBoiler(BOILER_FILL_PRESSURE);
+  fillBoiler();
+  updateStartupTimer();
 }
 
 static void sensorsReadTemperature(void) {
@@ -134,7 +134,7 @@ static void sensorsReadPressure(void) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
     currentState.isPressureRising = isPressureRaising();
-    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 2.55f;
+    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
     currentState.isPressureFalling = isPressureFalling();
     currentState.isPressureFallingFast = isPressureFallingFast();
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
@@ -173,7 +173,7 @@ static void calculateWeightAndFlow(void) {
 
       if (scalesIsPresent()) {
         currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
-        currentState.weightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
+        currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
@@ -231,7 +231,7 @@ static void modeSelect(void) {
         profiling();
         steamTime = millis();
       }
-      else steamCtrl(runningCfg, currentState, brewActive, steamTime);
+      else steamCtrl(runningCfg, currentState, brewActive);
       break;
     case OPMODE_manual:
       nonBrewModeActive = false;
@@ -242,7 +242,7 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!steamState()) steamTime = millis();
       backFlush(currentState);
-      justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+      setBoilerOff();
       break;
     case OPMODE_steam:
       nonBrewModeActive = true;
@@ -251,7 +251,7 @@ static void modeSelect(void) {
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
         steamTime = millis();
       } else {
-        steamCtrl(runningCfg, currentState, brewActive, steamTime);
+        steamCtrl(runningCfg, currentState, brewActive);
       }
       break;
     case OPMODE_descale:
@@ -289,9 +289,9 @@ static void lcdRefresh(void) {
     lcdSetTemperature(currentState.temperature);
 
     /*LCD weight output*/
-    if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
+    if (lcdCurrentPageId == SCREEN_home && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
-    } else if (lcdCurrentPageId == 8 || lcdCurrentPageId == 2){
+    } else if (lcdCurrentPageId == SCREEN_brew_graph || lcdCurrentPageId == SCREEN_brew_manual){
       if (scalesIsPresent()) {
         lcdSetWeight(currentState.weight);
       } else if (currentState.shotWeight) {
@@ -301,10 +301,10 @@ static void lcdRefresh(void) {
 
     /*LCD flow output*/
     // no point sending this continuously if on any other screens than brew related ones
-    if ( lcdCurrentPageId == 8 || lcdCurrentPageId == 2 ) {
+    if ( lcdCurrentPageId == SCREEN_brew_graph || lcdCurrentPageId == SCREEN_brew_manual ) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
-          ? currentState.weightFlow * 10.f
+          ? currentState.smoothedWeightFlow * 10.f
           : currentState.smoothedPumpFlow * 10.f
       );
     }
@@ -336,11 +336,14 @@ void lcdTrigger1(void) {
   eepromValues_t lcdValues = lcdDownloadCfg();
 
   switch (lcdCurrentPageId){
-    case 1:
+    case SCREEN_brew_settings:
+      eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
+      eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
+      eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
+      eepromCurrentValues.warmupState                   = lcdValues.warmupState;
+      eepromCurrentValues.switchPhaseOnThreshold        = lcdValues.switchPhaseOnThreshold;
       break;
-    case 2:
-      break;
-    case 3:
+    case SCREEN_profiles:
       // PRESSURE PARAMS
       eepromCurrentValues.pressureProfilingStart        = lcdValues.pressureProfilingStart;
       eepromCurrentValues.pressureProfilingFinish       = lcdValues.pressureProfilingFinish;
@@ -365,20 +368,7 @@ void lcdTrigger1(void) {
       eepromCurrentValues.flowProfilePressureTarget     = lcdValues.flowProfilePressureTarget;
       eepromCurrentValues.flowProfileCurveSpeed         = lcdValues.flowProfileCurveSpeed;
       break;
-    case 4:
-      eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
-      eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
-      eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
-      eepromCurrentValues.warmupState                   = lcdValues.warmupState;
-      eepromCurrentValues.switchPhaseOnThreshold        = lcdValues.switchPhaseOnThreshold;
-      break;
-    case 5:
-      eepromCurrentValues.stopOnWeightState             = lcdValues.stopOnWeightState;
-      eepromCurrentValues.shotDose                      = lcdValues.shotDose;
-      eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
-      eepromCurrentValues.shotStopOnCustomWeight        = lcdValues.shotStopOnCustomWeight;
-      break;
-    case 6:
+    case SCREEN_settings_boiler:
       eepromCurrentValues.setpoint                      = lcdValues.setpoint;
       eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
       eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
@@ -386,12 +376,18 @@ void lcdTrigger1(void) {
       eepromCurrentValues.mainDivider                   = lcdValues.mainDivider;
       eepromCurrentValues.brewDivider                   = lcdValues.brewDivider;
       break;
-    case 7:
+    case SCREEN_settings_system:
       eepromCurrentValues.powerLineFrequency            = lcdValues.powerLineFrequency;
       eepromCurrentValues.lcdSleep                      = lcdValues.lcdSleep;
       eepromCurrentValues.scalesF1                      = lcdValues.scalesF1;
       eepromCurrentValues.scalesF2                      = lcdValues.scalesF2;
       eepromCurrentValues.pumpFlowAtZero                = lcdValues.pumpFlowAtZero;
+      break;
+    case SCREEN_shot_settings:
+      eepromCurrentValues.stopOnWeightState             = lcdValues.stopOnWeightState;
+      eepromCurrentValues.shotDose                      = lcdValues.shotDose;
+      eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
+      eepromCurrentValues.shotStopOnCustomWeight        = lcdValues.shotStopOnCustomWeight;
       break;
     default:
       break;
@@ -595,24 +591,17 @@ static void brewParamsReset(void) {
   phaseProfiler.reset();
 }
 
-void fillBoiler(float targetBoilerFullPressure) {
-#if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-  static unsigned long elapsedTimeSinceStart = millis();
-  lcdSetUpTime((millis() > elapsedTimeSinceStart) ? ((millis() - elapsedTimeSinceStart) / 1000) : 0);
-  if (!startupInitFinished && lcdCurrentPageId == 0 && millis() - elapsedTimeSinceStart >= 3000) {
-    unsigned long timePassed = millis() - elapsedTimeSinceStart;
+void fillBoiler() {
+  #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
+  if (startupInitFinished) {
+    return;
+  }
 
-    if (timePassed <= BOILER_FILL_TIMEOUT
-    &&  (currentState.smoothedPressure < targetBoilerFullPressure || currentState.weight > 2.f))
-    {
-      lcdShowPopup("Filling boiler!");
-      openValve();
-      setPumpToRawValue(80);
-    } else if (!startupInitFinished) {
-      closeValve();
-      setPumpToRawValue(0);
-      startupInitFinished = true;
-    }
+  if (isBoilerFillPhase(getTimeSinceInit()) && !isSwitchOn()) {
+    fillBoilerUntilThreshod(getTimeSinceInit());
+  }
+  else if (isSwitchOn()) {
+    lcdShowPopup("Brew Switch ON!!");
   }
 #else
   startupInitFinished = true;
@@ -622,35 +611,6 @@ void fillBoiler(float targetBoilerFullPressure) {
 void systemHealthCheck(float pressureThreshold) {
   //Reloading the watchdog timer, if this function fails to run MCU is rebooted
   watchdogReload();
-
-  //Releasing the excess pressure after steaming or brewing if necessary
-  #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-  if (!brewState() && !steamState()) {
-    if (millis() >= systemHealthTimer) {
-      while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
-      {
-        //Reloading the watchdog timer, if this function fails to run MCU is rebooted
-        watchdogReload();
-        switch (lcdCurrentPageId) {
-          case 2:
-          case 8:
-            setPumpOff();
-            setBoilerOff();
-            break;
-          default:
-            lcdShowPopup("Releasing pressure!");
-            setPumpOff();
-            setBoilerOff();
-            openValve();
-            break;
-        }
-        sensorsRead();
-      }
-      closeValve();
-      systemHealthTimer = millis() + HEALTHCHECK_EVERY;
-    }
-  }
-  #endif
 
   /* This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
   If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating */
@@ -678,4 +638,82 @@ void systemHealthCheck(float pressureThreshold) {
     setBoilerOff();
     currentState.isSteamForgottenON = steamState();
   }
+
+  //Releasing the excess pressure after steaming or brewing if necessary
+  #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
+
+  // No point going through the whole thing if this first condition isn't met.
+  if (brewState() && steamState()) {
+    return;
+  }
+
+
+  // Should enter the block every "systemHealthTimer" seconds
+  if (millis() >= systemHealthTimer) {
+    while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
+    {
+      //Reloading the watchdog timer, if this function fails to run MCU is rebooted
+      watchdogReload();
+      switch (lcdCurrentPageId) {
+        case 2:
+        case 8:
+          sensorsRead();
+          setPumpOff();
+          setBoilerOff();
+          break;
+        default:
+          sensorsRead();
+          lcdShowPopup("Releasing pressure!");
+          setPumpOff();
+          setBoilerOff();
+          openValve();
+          break;
+      }
+    }
+    closeValve();
+    systemHealthTimer = millis() + HEALTHCHECK_EVERY;
+  }
+  #endif
+}
+
+bool isBoilerFillPhase(unsigned long elapsedTime) {
+  return lcdCurrentPageId == SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
+}
+
+bool isBoilerFull() {
+  float targetPressure = currentState.temperature < 65.f ? BOILER_FILL_PRESSURE_C : BOILER_FILL_PRESSURE_H;
+  return currentState.smoothedPressure >= targetPressure || currentState.weight >= 2.f;
+}
+
+// Function to track time since system has started
+unsigned long getTimeSinceInit() {
+  static unsigned long startTime = millis();
+  return millis() - startTime;
+}
+
+// Checks if Brew switch is ON
+bool isSwitchOn() {
+  return brewState() && lcdCurrentPageId == SCREEN_home;
+}
+
+void fillBoilerUntilThreshod(unsigned long elapsedTime) {
+  if (elapsedTime >= BOILER_FILL_TIMEOUT) {
+    startupInitFinished = true;
+    return;
+  }
+
+  if (isBoilerFull()) {
+    closeValve();
+    setPumpOff();
+    startupInitFinished = true;
+    return;
+  }
+
+  lcdShowPopup("Filling boiler!");
+  openValve();
+  setPumpToRawValue(80);
+}
+
+void updateStartupTimer() {
+  lcdSetUpTime(getTimeSinceInit() / 1000);
 }
