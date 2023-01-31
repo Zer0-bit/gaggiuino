@@ -133,11 +133,11 @@ static void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
+    currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     currentState.isPressureRising = isPressureRaising();
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
     currentState.isPressureFalling = isPressureFalling();
     currentState.isPressureFallingFast = isPressureFallingFast();
-    currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -653,6 +653,7 @@ void systemHealthCheck(float pressureThreshold) {
           break;
       }
     }
+    sensorsRead();
     closeValve();
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   }
