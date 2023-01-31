@@ -136,8 +136,8 @@ static void sensorsReadPressure(void) {
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
-    currentState.isPressureFalling = currentState.smoothedPressure >= previousSmoothedPressure - 0.05f;
-    currentState.isPressureFallingFast = currentState.smoothedPressure >= previousSmoothedPressure - 0.1f;
+    currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.05f;
+    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.1f;
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
