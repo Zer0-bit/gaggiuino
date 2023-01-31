@@ -75,19 +75,19 @@ jobs:
       - name: Run static analysis on main project
         if: success() || failure()
         run: |
-          ~/.platformio/penv/bin/platformio check -e relay-stlink
+          ~/.platformio/penv/bin/platformio check -e relay-stlink --fail-on-defect medium --fail-on-defect high
 
       - name: Run static analysis on scales
         if: success() || failure()
         run: |
-          ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu
+          ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu --fail-on-defect medium --fail-on-defect high
 
       - name: Run static analysis on uart-stm
         if: success() || failure()
         run: |
-          ~/.platformio/penv/bin/platformio check -e uart-stm
+          ~/.platformio/penv/bin/platformio check -e uart-stm --fail-on-defect medium --fail-on-defect high
 
       - name: Run static analysis on uart-esp
         if: success() || failure()
         run: |
-          ~/.platformio/penv/bin/platformio check -e uart-esp
+          ~/.platformio/penv/bin/platformio check -e uart-esp --fail-on-defect medium --fail-on-defect high
