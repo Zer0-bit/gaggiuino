@@ -682,12 +682,6 @@ bool isBoilerFillPhase(unsigned long elapsedTime) {
 }
 
 bool isBoilerFull(unsigned long elapsedTime) {
-  // Boiler is full already if above the pressure threshold.
-  float targetPressure = currentState.temperature < 65.f ? BOILER_FILL_PRESSURE_C : BOILER_FILL_PRESSURE_H;
-  if (currentState.smoothedPressure >= targetPressure) {
-    return true;
-  }
-
   // Boiler isn't full and the pressure hasn't started rising yet.
   if (!boilerFillPressureStartedRising) {
     boilerFillPressureStartedRising = currentState.isPressureRising;

@@ -36,9 +36,6 @@
 #define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
 #define BOILER_FILL_START_TIME  3000UL //Start boiler fill after 3 seconds since startup, gives system time to fully init.
 #define BOILER_FILL_TIMEOUT     8000UL //Stop boiler fill if it's been 8 seconds since system init and fill conditions aren't still met.
-#define BOILER_FILL_PRESSURE_C  1.75f // Fill pressure on cold start
-#define BOILER_FILL_PRESSURE_H  1.f // Fill pressure on hot (re)start
-
 
 
 typedef enum {
