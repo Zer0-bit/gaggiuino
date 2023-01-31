@@ -35,7 +35,7 @@ void scalesInit(float scalesF1, float scalesF2) {
     scalesPresent = true;
   }
 
-  // Forced predicitve scales in case someone with actual hardware scales wants to use tehm.
+  // Forced predicitve scales in case someone with actual hardware scales wants to use them.
   if (FORCE_PREDICTIVE_SCALES) {
     scalesPresent = false;
   }
