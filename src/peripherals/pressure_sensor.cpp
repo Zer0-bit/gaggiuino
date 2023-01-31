@@ -40,18 +40,6 @@ float getPressure() {  //returns sensor pressure data
   return currentPressure;
 }
 
-bool isPressureRaising() {
-  return currentPressure > previousPressure + 0.05f;
-}
-
-bool isPressureFalling() {
-  return currentPressure < previousPressure - 0.05f;
-}
-
-bool isPressureFallingFast() {
-  return currentPressure < previousPressure - 0.1f;
-}
-
 int8_t getAdsError() {
   return ADS.getError();
 }
