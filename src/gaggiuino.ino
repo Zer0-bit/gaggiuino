@@ -681,9 +681,16 @@ bool isBoilerFillPhase(unsigned long elapsedTime) {
   return lcdCurrentPageId == SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
 }
 
-bool isBoilerFull() {
-  float targetPressure = currentState.temperature < 65.f ? BOILER_FILL_PRESSURE_C : BOILER_FILL_PRESSURE_H;
-  return (currentState.smoothedPressure >= targetPressure && !currentState.isPressureRising) || currentState.weight >= 2.f;
+bool isBoilerFull(unsigned long elapsedTime) {
+  bool boilerFull = false;
+  if (elapsedTime > BOILER_FILL_START_TIME + 1000) {
+    boilerFull =  (previousSmoothedPressure - currentState.smoothedPressure > -0.05f)
+                &&
+                  (previousSmoothedPressure - currentState.smoothedPressure < 0.05f);
+  }
+
+
+  return elapsedTime >= BOILER_FILL_TIMEOUT || boilerFull;
 }
 
 // Function to track time since system has started
@@ -703,7 +710,7 @@ void fillBoilerUntilThreshod(unsigned long elapsedTime) {
     return;
   }
 
-  if (isBoilerFull()) {
+  if (isBoilerFull(elapsedTime)) {
     closeValve();
     setPumpOff();
     startupInitFinished = true;
