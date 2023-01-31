@@ -134,10 +134,10 @@ static void sensorsReadPressure(void) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
-    currentState.isPressureRising = isPressureRaising();
+    currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
-    currentState.isPressureFalling = isPressureFalling();
-    currentState.isPressureFallingFast = isPressureFallingFast();
+    currentState.isPressureFalling = currentState.smoothedPressure >= previousSmoothedPressure - 0.05f;
+    currentState.isPressureFallingFast = currentState.smoothedPressure >= previousSmoothedPressure - 0.1f;
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -683,12 +683,11 @@ bool isBoilerFillPhase(unsigned long elapsedTime) {
 
 bool isBoilerFull(unsigned long elapsedTime) {
   bool boilerFull = false;
-  if (elapsedTime > BOILER_FILL_START_TIME + 1000) {
+  if (elapsedTime > BOILER_FILL_START_TIME + 1000UL) {
     boilerFull =  (previousSmoothedPressure - currentState.smoothedPressure > -0.05f)
                 &&
                   (previousSmoothedPressure - currentState.smoothedPressure < 0.05f);
   }
-
 
   return elapsedTime >= BOILER_FILL_TIMEOUT || boilerFull;
 }
