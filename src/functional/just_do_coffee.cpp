@@ -1,6 +1,7 @@
 #include "just_do_coffee.h"
 #include "../lcd/lcd.h"
 
+extern unsigned long steamTime;
 //delta stuff
 // inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
 inline static float TEMP_DELTA(float d, const SensorState &currentState) {
@@ -67,7 +68,7 @@ void pulseHeaters(uint32_t pulseLength, int factor_1, int factor_2, bool brewAct
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
-void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, unsigned long steamTime) {
+void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
   lcdTargetState(1); // setting the target mode to "steam temp"
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
