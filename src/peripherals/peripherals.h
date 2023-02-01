@@ -14,6 +14,7 @@ static inline void pinInit(void) {
   pinMode(relayPin, OUTPUT);
   pinMode(brewPin,  INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
+  pinMode(waterPin, INPUT_PULLUP);
   pinMode(HX711_dout_1, INPUT_PULLUP);
   pinMode(HX711_dout_2, INPUT_PULLUP);
 }
@@ -37,6 +38,14 @@ static inline bool brewState(void) {  //Monitors the current flowing through the
 // pin will be high when switch is ON.
 static inline bool steamState(void) {
   return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
+}
+
+static inline bool waterPinState(void) {
+  return digitalRead(waterPin) == LOW; // pin will be low when switch is ON.
+}
+
+static inline bool waterState(void) {
+  return waterPinState() || (steamState() && brewState()); // use either an actual switch, or the GC/GCP switch combo
 }
 
 static inline void openValve(void) {
