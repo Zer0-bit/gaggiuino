@@ -4,13 +4,13 @@
 #include <utils.h>
 
 Phase pressurePhase(float start, float end, long time) {
-  Phase phase = Phase{PHASE_TYPE_PRESSURE, Transition{start, end}, 0.f, PhaseStopConditions{}};
+  Phase phase = Phase{PHASE_TYPE::PHASE_TYPE_PRESSURE, Transition{start, end}, 0.f, PhaseStopConditions{}};
   phase.stopConditions.time = time;
   return phase;
 }
 
 Phase presurePhaseWithWeightTarget(float start, float end, long time, float weight) {
-  Phase phase = Phase{PHASE_TYPE_PRESSURE, Transition{start, end}, 0.f, PhaseStopConditions{}};
+  Phase phase = Phase{PHASE_TYPE::PHASE_TYPE_PRESSURE, Transition{start, end}, 0.f, PhaseStopConditions{}};
   phase.stopConditions.time = time;
   phase.stopConditions.weight = weight;
   return phase;
