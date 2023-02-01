@@ -7,7 +7,7 @@ void espCommsInit();
 
 void espCommsReadData();
 
-void espCommsSendSensorData(SensorState& state, bool brewActive, bool steamActive, uint32_t frequency = 1000);
+void espCommsSendSensorData(const SensorState& state, bool brewActive, bool steamActive, uint32_t frequency = 1000);
 void espCommsSendShotData(ShotSnapshot& shotData, uint32_t frequency = 100);
 
 void onProfileReceived(Profile& profile);

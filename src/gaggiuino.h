@@ -34,12 +34,10 @@
 #define EMPTY_TRAY_WEIGHT       23456.f
 #define TRAY_FULL_THRESHOLD     700.f
 #define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
-#define BOILER_FILL_TIMEOUT     8000UL
-#define BOILER_FILL_PRESSURE    1.75f
+#define BOILER_FILL_START_TIME  3000UL //Start boiler fill after 3 seconds since startup, gives system time to fully init.
+#define BOILER_FILL_TIMEOUT     8000UL //Stop boiler fill if it's been 8 seconds since system init and fill conditions aren't still met.
 
-
-
-typedef enum {
+enum class OPERATION_MODES {
     OPMODE_straight9Bar,
     OPMODE_justPreinfusion,
     OPMODE_justPressureProfile,
@@ -53,8 +51,7 @@ typedef enum {
     OPMODE_justFlowBasedPreinfusion,
     OPMODE_everythingFlowProfiled,
     OPMODE_pressureBasedPreinfusionAndFlowProfile
-} OPERATION_MODES;
-
+} ;
 
 //Timers
 unsigned long systemHealthTimer;

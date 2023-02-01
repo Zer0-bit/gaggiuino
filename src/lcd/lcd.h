@@ -7,6 +7,20 @@
 extern volatile int lcdCurrentPageId;
 extern volatile int lcdLastCurrentPageId;
 
+enum class SCREEN_MODES {
+    SCREEN_home,
+    SCREEN_brew_settings,
+    SCREEN_brew_manual,
+    SCREEN_profiles,
+    SCREEN_flush,
+    SCREEN_descale,
+    SCREEN_settings_boiler,
+    SCREEN_settings_system,
+    SCREEN_brew_graph,
+    SCREEN_shot_settings,
+    SCREEN_splash
+} ;
+
 void lcdInit(void);
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);

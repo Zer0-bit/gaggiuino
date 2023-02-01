@@ -40,18 +40,6 @@ float getPressure() {  //returns sensor pressure data
   return currentPressure;
 }
 
-bool isPressureRaising() {
-  return currentPressure > previousPressure + 0.05f;
-}
-
-bool isPressureFalling() {
-  return currentPressure < previousPressure - 0.05f;
-}
-
-bool isPressureFallingFast() {
-  return currentPressure < previousPressure - 0.1f;
-}
-
 int8_t getAdsError() {
   return ADS.getError();
 }
@@ -64,8 +52,10 @@ void i2cResetState() {
     LOG_INFO("Reset I2C pins");
     short result = I2C_ClearBus(hw_SDA, hw_SCL);
     char tmp[25];
-    snprintf(tmp, sizeof(tmp), "I2C error code: %i", result);
-    result == 0 ? adsInit() : lcdShowPopup(tmp);
+    int check = snprintf(tmp, sizeof(tmp), "I2C error code: %i", result);
+    if (check > 0 && check <= sizeof(tmp)) {
+      result == 0 ? adsInit() : lcdShowPopup(tmp);
+    }
     delay(50);
   }
 }

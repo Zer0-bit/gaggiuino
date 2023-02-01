@@ -1,68 +1,71 @@
 #include "../peripherals/internal_watchdog.h"
 #include "descale.h"
 
-short flushCounter;
+DescalingState descalingState = DescalingState::IDLE;
+
+short flushCounter = 0;
+uint8_t counter = 0;
+unsigned long descalingTimer = 0;
+int descalingCycle = 0;
 
 void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
-  static bool blink = true;
-  static long timer = millis();
-  static int currentCycleRead = 0;
-  static int lastCycleRead = 5;
-  static bool descaleFinished = false;
-
-  if (brewState() && !descaleFinished) {
-    openValve();
-    if (currentCycleRead < lastCycleRead) { // descale in cycles of 5 then wait according to the below conditions
-      if (blink == true) { // Logic that switches between modes depending on the $blink value
-        setPumpToRawValue(10);
-        if (millis() - timer > DESCALE_PHASE1_EVERY) { //set dimmer power to min descale value for 10 sec
-          if(currentCycleRead < 100) lcdSetDescaleCycle(currentCycleRead);
-          else descaleFinished = true;
-          blink = false;
-          timer = millis();
-        }
-      } else {
-        setPumpOff();
-        if ((millis() - timer) > DESCALE_PHASE2_EVERY) { //nothing for 5 minutes
-          currentCycleRead++;
-          if(currentCycleRead < 100) lcdSetDescaleCycle(currentCycleRead);
-          else descaleFinished = true;
-          blink = true;
-          timer = millis();
+  switch (descalingState) {
+    case DescalingState::IDLE:
+      if (brewState()) {
+        runningCfg.setpoint = 9;
+        openValve();
+        descalingState = DescalingState::DESCALING_PHASE1;
+        descalingCycle = 0;
+        descalingTimer = millis();
+      }
+      break;
+    case DescalingState::DESCALING_PHASE1: // Slowly penetrating that scale
+      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
+      setPumpToRawValue(10);
+      if (millis() - descalingTimer > DESCALE_PHASE1_EVERY) {
+        lcdSetDescaleCycle(descalingCycle++);
+        if (descalingCycle < 100) {
+          descalingTimer = millis();
+          descalingState = DescalingState::DESCALING_PHASE2;
+        } else {
+          descalingState = DescalingState::FINISHED;
         }
       }
-    } else {
+      break;
+    case DescalingState::DESCALING_PHASE2: // Softening the f outta that scale
+      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
+      setPumpOff();
+      if (millis() - descalingTimer > DESCALE_PHASE2_EVERY) {
+        descalingTimer = millis();
+        lcdSetDescaleCycle(descalingCycle++);
+        descalingState = DescalingState::DESCALING_PHASE3;
+      }
+      break;
+    case DescalingState::DESCALING_PHASE3: // Fucking up that scale big time
+      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpToRawValue(30);
-      if (millis() - timer > DESCALE_PHASE3_EVERY) { //set dimmer power to max descale value for 20 sec
+      if (millis() - descalingTimer > DESCALE_PHASE3_EVERY) {
         solenoidBeat();
-        blink = true;
-        currentCycleRead++;
-        lastCycleRead = currentCycleRead*3;
-        if (lastCycleRead < 100) lcdSetDescaleCycle(currentCycleRead);
-        else {
-          lcdSetDescaleCycle(100);
-          descaleFinished = true;
+        lcdSetDescaleCycle(descalingCycle++);
+        if (descalingCycle < 100) {
+          descalingTimer = millis();
+          descalingState = DescalingState::DESCALING_PHASE1;
+        } else {
+          descalingState = DescalingState::FINISHED;
         }
-        timer = millis();
       }
-    }
-  } else if (brewState() && descaleFinished == true){
-    setPumpOff();
-    closeValve();
-    if ((millis() - timer) > 1000) {
-      lcdBrewTimerStop();
-      lcdShowPopup("FINISHED");
-      timer=millis();
-    }
-  } else {
-    setPumpOff();
-    closeValve();
-    currentCycleRead = 0;
-    lastCycleRead = 10;
-    descaleFinished = false;
-    timer = millis();
+      break;
+    case DescalingState::FINISHED: // Scale successufuly fucked
+      setPumpOff();
+      closeValve();
+      brewState() ? descalingState = DescalingState::FINISHED : descalingState = DescalingState::IDLE;
+      if (millis() - descalingTimer > 1000) {
+        lcdBrewTimerStop();
+        lcdShowPopup("FINISHED");
+        descalingTimer = millis();
+      }
+      break;
   }
-  //keeping it at temp
   justDoCoffee(runningCfg, currentState, false, false);
 }
 
@@ -85,7 +88,7 @@ void solenoidBeat() {
   setPumpOff();
 }
 
-void backFlush(SensorState &currentState) {
+void backFlush(const SensorState &currentState) {
   static unsigned long backflushTimer = millis();
   unsigned long elapsedTime = millis() - backflushTimer;
   if (brewState()) {

@@ -8,9 +8,9 @@ void test_profile_serializer_works_correctly(void) {
   };
 
   Profile profile;
-  profile.phases.push_back({PHASE_TYPE_PRESSURE, Transition(0.f, 10.f, TransitionCurve::EASE_IN_OUT, 1000), -1,  PhaseStopConditions{.time = 1000} });
-  profile.phases.push_back({PHASE_TYPE_FLOW, Transition(10.f, 5.f, TransitionCurve::LINEAR), 2.f,  PhaseStopConditions{.weight = 10.f} });
-  profile.phases.push_back({PHASE_TYPE_FLOW, Transition(10.f, 5.f, TransitionCurve::LINEAR), 3.f,  PhaseStopConditions{.pressureAbove = 2.f} });
+  profile.phases.push_back({PHASE_TYPE::PHASE_TYPE_PRESSURE, Transition(0.f, 10.f, TransitionCurve::EASE_IN_OUT, 1000), -1,  PhaseStopConditions{.time = 1000} });
+  profile.phases.push_back({PHASE_TYPE::PHASE_TYPE_FLOW, Transition(10.f, 5.f, TransitionCurve::LINEAR), 2.f,  PhaseStopConditions{.weight = 10.f} });
+  profile.phases.push_back({PHASE_TYPE::PHASE_TYPE_FLOW, Transition(10.f, 5.f, TransitionCurve::LINEAR), 3.f,  PhaseStopConditions{.pressureAbove = 2.f} });
   ProfileSerializer serializer;
 
   vector<uint8_t> serializedProfile = serializer.serializeProfile(profile);

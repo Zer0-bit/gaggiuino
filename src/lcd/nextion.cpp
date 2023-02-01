@@ -135,7 +135,7 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 }
 
 eepromValues_t lcdDownloadCfg(void) {
-  eepromValues_t lcdCfg;
+  eepromValues_t lcdCfg = {};
 
   lcdCfg.preinfusionState               = myNex.readNumber("piState");
   lcdCfg.preinfusionSec                 = myNex.readNumber("piSec");
@@ -221,8 +221,9 @@ void lcdSetTemperature(int val) {
 
 void lcdSetWeight(float val) {
   char tmp[5];
-  snprintf(tmp, sizeof(tmp), "%.1f", static_cast<double>(val));
-  myNex.writeStr("weight.txt", tmp);
+  int check = snprintf(tmp, sizeof(tmp), "%.1f", static_cast<double>(val));
+  if (check > 0 && check <= sizeof(tmp))
+    myNex.writeStr("weight.txt", tmp);
 }
 
 void lcdSetFlow(int val) {

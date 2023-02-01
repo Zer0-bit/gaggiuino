@@ -5,8 +5,8 @@
 //----------------------------------------------------------------------//
 
 ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentPhase& phase) {
-  float targetFlow = (phase.getType() == PHASE_TYPE_FLOW) ? phase.getTarget() : phase.getRestriction();
-  float targetPressure = (phase.getType() == PHASE_TYPE_PRESSURE) ? phase.getTarget() : phase.getRestriction();
+  float targetFlow = (phase.getType() == PHASE_TYPE::PHASE_TYPE_FLOW) ? phase.getTarget() : phase.getRestriction();
+  float targetPressure = (phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE) ? phase.getTarget() : phase.getRestriction();
 
   return ShotSnapshot{
     .timeInShot=timeInShot,
@@ -43,12 +43,12 @@ bool Phase::isStopConditionReached(SensorState& currentState, uint32_t timeInSho
 //----------------------------------------------------------------------//
 bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
   float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
-  float stopDelta = flow / 2.f;
+  float stopDelta = flow * (state.shotWeight / 100.f);
 
   return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
     (weight > 0.f && state.shotWeight > weight - stopDelta) ||
-    (pressureAbove > 0.f && state.pressure > pressureAbove) ||
-    (pressureBelow > 0.f && state.pressure < pressureBelow) ||
+    (pressureAbove > 0.f && state.smoothedPressure > pressureAbove) ||
+    (pressureBelow > 0.f && state.smoothedPressure < pressureBelow) ||
     (waterPumpedInPhase > 0.f && state.waterPumped - stateAtPhaseStart.waterPumped > waterPumpedInPhase - stopDelta) ||
     (flowAbove > 0.f && state.smoothedPumpFlow > flowAbove) ||
     (flowBelow > 0.f && state.smoothedPumpFlow < flowBelow);
@@ -56,7 +56,7 @@ bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSna
 
 bool GlobalStopConditions::isReached(SensorState& state, long timeInShot) {
   float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
-  float stopDelta = flow / 2.f;
+  float stopDelta = flow * (state.shotWeight / 100.f);
 
   return (weight > 0.f && state.shotWeight > weight - stopDelta) ||
     (waterPumped > 0.f && state.waterPumped > waterPumped) ||

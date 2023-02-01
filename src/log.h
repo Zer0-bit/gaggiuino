@@ -3,8 +3,9 @@
 
 #include <Arduino.h>
 #include "pindef.h"
+#include <stdio.h>
 
-#define __FILENAME__ (__builtin_strrchr("/" __FILE__, '/') + 1)
+#define FILENAME (__builtin_strrchr("/" __FILE__, '/') + 1)
 #define LOG_MAX_STRING_LEN 64
 #define LOG_MAX_PREFIX_LEN 64
 
@@ -18,25 +19,25 @@
 #endif
 
 #if LOG_LEVEL > 0
-  #define LOG_ERROR(msg, ...)    do { log("E", __FILENAME__, __LINE__, msg, ##__VA_ARGS__); } while (0)
+  #define LOG_ERROR(msg, ...)    do { log("E", FILENAME, __LINE__, msg, ##__VA_ARGS__); } while (0)
 #else
   #define LOG_ERROR(msg, ...)
 #endif
 
 #if LOG_LEVEL > 1
-  #define LOG_INFO(msg, ...)     do { log("I", __FILENAME__, __LINE__, msg, ##__VA_ARGS__); } while (0)
+  #define LOG_INFO(msg, ...)     do { log("I", FILENAME, __LINE__, msg, ##__VA_ARGS__); } while (0)
 #else
   #define LOG_INFO(msg, ...)
 #endif
 
 #if LOG_LEVEL > 2
-  #define LOG_VERBOSE(msg, ...)  do { log("V", __FILENAME__, __LINE__, msg, ##__VA_ARGS__); } while (0)
+  #define LOG_VERBOSE(msg, ...)  do { log("V", FILENAME, __LINE__, msg, ##__VA_ARGS__); } while (0)
 #else
   #define LOG_VERBOSE(msg, ...)
 #endif
 
 #if LOG_LEVEL > 3
-  #define LOG_DEBUG(msg, ...)    do { log("D", __FILENAME__, __LINE__, msg, ##__VA_ARGS__); } while (0)
+  #define LOG_DEBUG(msg, ...)    do { log("D", FILENAME, __LINE__, msg, ##__VA_ARGS__); } while (0)
 #else
   #define LOG_DEBUG(msg, ...)
 #endif

@@ -1,45 +1,55 @@
 #include "esp_comms.h"
 #include "pindef.h"
-
-McuComms mcuComms;
+namespace {
+  class McuCommsSingleton {
+  public:
+    static McuComms& getInstance() {
+      static McuComms instance;
+      return instance;
+    }
+  private:
+    McuCommsSingleton() = default;
+    ~McuCommsSingleton() = default;
+  };
+}
 
 void espCommsInit() {
   USART_ESP.begin(115200);
 
   // mcuComms.setDebugPort(&USART_ESP);
-  mcuComms.begin(USART_ESP);
+  McuCommsSingleton::getInstance().begin(USART_ESP);
 
   // Set callbacks
-  mcuComms.setProfileReceivedCallback(onProfileReceived);
+  McuCommsSingleton::getInstance().setProfileReceivedCallback(onProfileReceived);
 }
 
 void espCommsReadData() {
-    mcuComms.readData();
+  McuCommsSingleton::getInstance().readData();
 }
 
-uint32_t sensorDataTimer = 0;
-void espCommsSendSensorData(SensorState& state, bool brewActive, bool steamActive, uint32_t frequency) {
+volatile uint32_t sensorDataTimer = 0;
+void espCommsSendSensorData(const SensorState& state, bool brewActive, bool steamActive, uint32_t frequency) {
   uint32_t now = millis();
   if (now - sensorDataTimer > frequency) {
-    SensorStateSnapshot sensorSnapshot = SensorStateSnapshot {
-      .brewActive=brewActive,
-      .steamActive=steamActive,
-      .temperature=state.temperature,
-      .pressure=state.smoothedPressure,
-      .pumpFlow=state.smoothedPumpFlow,
-      .weightFlow=state.weightFlow,
-      .weight=state.weight,
+    SensorStateSnapshot sensorSnapshot = SensorStateSnapshot{
+      .brewActive = brewActive,
+      .steamActive = steamActive,
+      .temperature = state.temperature,
+      .pressure = state.smoothedPressure,
+      .pumpFlow = state.smoothedPumpFlow,
+      .weightFlow = state.weightFlow,
+      .weight = state.weight,
     };
-    mcuComms.sendSensorStateSnapshot(sensorSnapshot);
+    McuCommsSingleton::getInstance().sendSensorStateSnapshot(sensorSnapshot);
     sensorDataTimer = now;
   }
 }
 
-uint32_t shotDataTimer;
+volatile uint32_t shotDataTimer;
 void espCommsSendShotData(ShotSnapshot& shotData, uint32_t frequency) {
-    uint32_t now = millis();
+  uint32_t now = millis();
   if (now - shotDataTimer > frequency) {
-    mcuComms.sendShotData(shotData);
+    McuCommsSingleton::getInstance().sendShotData(shotData);
     shotDataTimer = now;
   }
 }

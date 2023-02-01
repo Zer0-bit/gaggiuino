@@ -13,11 +13,18 @@ private:
   float resistanceDelta;
 
 public:
+  PredictiveWeight() :
+    outputFlowStarted(false),
+    isForceStarted(false),
+    puckResistance(0.f),
+    resistanceDelta(0.f)
+  {}
+
   bool isOutputFlow() {
     return outputFlowStarted;
   }
 
-  void update(SensorState& state, CurrentPhase& phase, eepromValues_t cfg) {
+  void update(const SensorState& state, CurrentPhase& phase, const eepromValues_t& cfg) {
     // If at least 50ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
     if (isForceStarted || outputFlowStarted || state.waterPumped >= 55.f) {
@@ -33,9 +40,9 @@ public:
 
     // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
     // as well as there being enough pressure for water to wet the puck enough to start the output
-    bool phaseTypePressure = phase.getType() == PHASE_TYPE_PRESSURE;
-    float pressureTarget = phaseTypePressure ? phase.getTarget() : phase.getRestriction();
-    pressureTarget = (pressureTarget == 0.f || pressureTarget > 1.2f) ? 1.2f : pressureTarget;
+    bool phaseTypePressure = phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE;
+    // float pressureTarget = phaseTypePressure ? phase.getTarget() : phase.getRestriction();
+    // pressureTarget = (pressureTarget == 0.f || pressureTarget > 2.f) ? 2.f : pressureTarget;
     // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
@@ -49,7 +56,7 @@ public:
     }
 
     // Pressure has to reach at least half way to pressureTarget
-    if (pressure < pressureTarget) {
+    if (pressure < 1.1f/*pressureTarget*/) {
       return;
     }
 
