@@ -47,7 +47,7 @@ jobs:
 
       - name: Build the main project
         run: |
-          ~/.platformio/penv/bin/platformio run -e relay-stlink
+          ~/.platformio/penv/bin/platformio run -e gc/gcp-stlink
 
       - name: Build scales
         run: |
@@ -75,7 +75,7 @@ jobs:
       - name: Run static analysis on main project
         if: success() || failure()
         run: |
-          ~/.platformio/penv/bin/platformio check -e relay-stlink --fail-on-defect medium --fail-on-defect high
+          ~/.platformio/penv/bin/platformio check -e gc/gcp-stlink --fail-on-defect medium --fail-on-defect high
 
       - name: Run static analysis on scales
         if: success() || failure()
