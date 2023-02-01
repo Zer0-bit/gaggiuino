@@ -1,7 +1,7 @@
 #include "../peripherals/internal_watchdog.h"
 #include "descale.h"
 
-DescalingState descalingState = IDLE;
+DescalingState descalingState = DescalingState::IDLE;
 
 short flushCounter = 0;
 uint8_t counter = 0;
@@ -10,55 +10,55 @@ int descalingCycle = 0;
 
 void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   switch (descalingState) {
-    case IDLE:
+    case DescalingState::IDLE:
       if (brewState()) {
         runningCfg.setpoint = 9;
         openValve();
-        descalingState = DESCALING_PHASE1;
+        descalingState = DescalingState::DESCALING_PHASE1;
         descalingCycle = 0;
         descalingTimer = millis();
       }
       break;
-    case DESCALING_PHASE1: // Slowly penetrating that scale
-      brewState() ? descalingState : descalingState = FINISHED;
+    case DescalingState::DESCALING_PHASE1: // Slowly penetrating that scale
+      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpToRawValue(10);
       if (millis() - descalingTimer > DESCALE_PHASE1_EVERY) {
         lcdSetDescaleCycle(descalingCycle++);
         if (descalingCycle < 100) {
           descalingTimer = millis();
-          descalingState = DESCALING_PHASE2;
+          descalingState = DescalingState::DESCALING_PHASE2;
         } else {
-          descalingState = FINISHED;
+          descalingState = DescalingState::FINISHED;
         }
       }
       break;
-    case DESCALING_PHASE2: // Softening the f outta that scale
-      brewState() ? descalingState : descalingState = FINISHED;
+    case DescalingState::DESCALING_PHASE2: // Softening the f outta that scale
+      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpOff();
       if (millis() - descalingTimer > DESCALE_PHASE2_EVERY) {
         descalingTimer = millis();
         lcdSetDescaleCycle(descalingCycle++);
-        descalingState = DESCALING_PHASE3;
+        descalingState = DescalingState::DESCALING_PHASE3;
       }
       break;
-    case DESCALING_PHASE3: // Fucking up that scale big time
-      brewState() ? descalingState : descalingState = FINISHED;
+    case DescalingState::DESCALING_PHASE3: // Fucking up that scale big time
+      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpToRawValue(30);
       if (millis() - descalingTimer > DESCALE_PHASE3_EVERY) {
         solenoidBeat();
         lcdSetDescaleCycle(descalingCycle++);
         if (descalingCycle < 100) {
           descalingTimer = millis();
-          descalingState = DESCALING_PHASE1;
+          descalingState = DescalingState::DESCALING_PHASE1;
         } else {
-          descalingState = FINISHED;
+          descalingState = DescalingState::FINISHED;
         }
       }
       break;
-    case FINISHED: // Scale successufuly fucked
+    case DescalingState::FINISHED: // Scale successufuly fucked
       setPumpOff();
       closeValve();
-      brewState() ? descalingState = FINISHED : descalingState = IDLE;
+      brewState() ? descalingState = DescalingState::FINISHED : descalingState = DescalingState::IDLE;
       if (millis() - descalingTimer > 1000) {
         lcdBrewTimerStop();
         lcdShowPopup("FINISHED");

@@ -37,7 +37,7 @@
 #define BOILER_FILL_START_TIME  3000UL //Start boiler fill after 3 seconds since startup, gives system time to fully init.
 #define BOILER_FILL_TIMEOUT     8000UL //Stop boiler fill if it's been 8 seconds since system init and fill conditions aren't still met.
 
-typedef enum {
+enum class OPERATION_MODES {
     OPMODE_straight9Bar,
     OPMODE_justPreinfusion,
     OPMODE_justPressureProfile,
@@ -51,21 +51,7 @@ typedef enum {
     OPMODE_justFlowBasedPreinfusion,
     OPMODE_everythingFlowProfiled,
     OPMODE_pressureBasedPreinfusionAndFlowProfile
-} OPERATION_MODES;
-
-typedef enum {
-    SCREEN_home,
-    SCREEN_brew_settings,
-    SCREEN_brew_manual,
-    SCREEN_profiles,
-    SCREEN_flush,
-    SCREEN_descale,
-    SCREEN_settings_boiler,
-    SCREEN_settings_system,
-    SCREEN_brew_graph,
-    SCREEN_shot_settings,
-    SCREEN_splash
-} SCREEN_MODES;
+} ;
 
 //Timers
 unsigned long systemHealthTimer;

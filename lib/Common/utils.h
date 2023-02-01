@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-enum TransitionCurve {
+enum class TransitionCurve {
   EASE_IN_OUT,
   EASE_IN,
   EASE_OUT,

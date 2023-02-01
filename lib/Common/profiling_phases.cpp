@@ -5,8 +5,8 @@
 //----------------------------------------------------------------------//
 
 ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentPhase& phase) {
-  float targetFlow = (phase.getType() == PHASE_TYPE_FLOW) ? phase.getTarget() : phase.getRestriction();
-  float targetPressure = (phase.getType() == PHASE_TYPE_PRESSURE) ? phase.getTarget() : phase.getRestriction();
+  float targetFlow = (phase.getType() == PHASE_TYPE::PHASE_TYPE_FLOW) ? phase.getTarget() : phase.getRestriction();
+  float targetPressure = (phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE) ? phase.getTarget() : phase.getRestriction();
 
   return ShotSnapshot{
     .timeInShot=timeInShot,

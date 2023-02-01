@@ -218,14 +218,14 @@ static void modeSelect(void) {
 
   switch (selectedOperationalMode) {
     //REPLACE ALL THE BELOW WITH OPMODE_auto_profiling
-    case OPMODE_straight9Bar:
-    case OPMODE_justPreinfusion:
-    case OPMODE_justPressureProfile:
-    case OPMODE_preinfusionAndPressureProfile:
-    case OPMODE_justFlowBasedProfiling:
-    case OPMODE_justFlowBasedPreinfusion:
-    case OPMODE_everythingFlowProfiled:
-    case OPMODE_pressureBasedPreinfusionAndFlowProfile:
+    case OPERATION_MODES::OPMODE_straight9Bar:
+    case OPERATION_MODES::OPMODE_justPreinfusion:
+    case OPERATION_MODES::OPMODE_justPressureProfile:
+    case OPERATION_MODES::OPMODE_preinfusionAndPressureProfile:
+    case OPERATION_MODES::OPMODE_justFlowBasedProfiling:
+    case OPERATION_MODES::OPMODE_justFlowBasedPreinfusion:
+    case OPERATION_MODES::OPMODE_everythingFlowProfiled:
+    case OPERATION_MODES::OPMODE_pressureBasedPreinfusionAndFlowProfile:
       nonBrewModeActive = false;
       if (!steamState()) {
         profiling();
@@ -233,18 +233,18 @@ static void modeSelect(void) {
       }
       else steamCtrl(runningCfg, currentState, brewActive);
       break;
-    case OPMODE_manual:
+    case OPERATION_MODES::OPMODE_manual:
       nonBrewModeActive = false;
       if (!steamState()) steamTime = millis();
       manualFlowControl();
       break;
-    case OPMODE_flush:
+    case OPERATION_MODES::OPMODE_flush:
       nonBrewModeActive = true;
       if (!steamState()) steamTime = millis();
       backFlush(currentState);
       setBoilerOff();
       break;
-    case OPMODE_steam:
+    case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
       if (!steamState()) {
         brewActive ? flushActivated() : flushDeactivated();
@@ -254,12 +254,12 @@ static void modeSelect(void) {
         steamCtrl(runningCfg, currentState, brewActive);
       }
       break;
-    case OPMODE_descale:
+    case OPERATION_MODES::OPMODE_descale:
       nonBrewModeActive = true;
       if (!steamState()) steamTime = millis();
       deScale(runningCfg, currentState);
       break;
-    case OPMODE_empty:
+    case OPERATION_MODES::OPMODE_empty:
       break;
     default:
       pageValuesRefresh(true);
@@ -289,9 +289,9 @@ static void lcdRefresh(void) {
     lcdSetTemperature(currentState.temperature);
 
     /*LCD weight output*/
-    if (lcdCurrentPageId == SCREEN_home && homeScreenScalesEnabled) {
+    if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
-    } else if (lcdCurrentPageId == SCREEN_brew_graph || lcdCurrentPageId == SCREEN_brew_manual){
+    } else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual){
       if (scalesIsPresent()) {
         lcdSetWeight(currentState.weight);
       } else if (currentState.shotWeight) {
@@ -301,7 +301,8 @@ static void lcdRefresh(void) {
 
     /*LCD flow output*/
     // no point sending this continuously if on any other screens than brew related ones
-    if ( lcdCurrentPageId == SCREEN_brew_graph || lcdCurrentPageId == SCREEN_brew_manual ) {
+    if ( static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
+      || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual ) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.smoothedWeightFlow * 10.f
@@ -335,15 +336,15 @@ void lcdTrigger1(void) {
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   eepromValues_t lcdValues = lcdDownloadCfg();
 
-  switch (lcdCurrentPageId){
-    case SCREEN_brew_settings:
+  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)){
+    case SCREEN_MODES::SCREEN_brew_settings:
       eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
       eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
       eepromCurrentValues.warmupState                   = lcdValues.warmupState;
       eepromCurrentValues.switchPhaseOnThreshold        = lcdValues.switchPhaseOnThreshold;
       break;
-    case SCREEN_profiles:
+    case SCREEN_MODES::SCREEN_profiles:
       // PRESSURE PARAMS
       eepromCurrentValues.pressureProfilingStart        = lcdValues.pressureProfilingStart;
       eepromCurrentValues.pressureProfilingFinish       = lcdValues.pressureProfilingFinish;
@@ -368,7 +369,7 @@ void lcdTrigger1(void) {
       eepromCurrentValues.flowProfilePressureTarget     = lcdValues.flowProfilePressureTarget;
       eepromCurrentValues.flowProfileCurveSpeed         = lcdValues.flowProfileCurveSpeed;
       break;
-    case SCREEN_settings_boiler:
+    case SCREEN_MODES::SCREEN_settings_boiler:
       eepromCurrentValues.setpoint                      = lcdValues.setpoint;
       eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
       eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
@@ -376,14 +377,14 @@ void lcdTrigger1(void) {
       eepromCurrentValues.mainDivider                   = lcdValues.mainDivider;
       eepromCurrentValues.brewDivider                   = lcdValues.brewDivider;
       break;
-    case SCREEN_settings_system:
+    case SCREEN_MODES::SCREEN_settings_system:
       eepromCurrentValues.powerLineFrequency            = lcdValues.powerLineFrequency;
       eepromCurrentValues.lcdSleep                      = lcdValues.lcdSleep;
       eepromCurrentValues.scalesF1                      = lcdValues.scalesF1;
       eepromCurrentValues.scalesF2                      = lcdValues.scalesF2;
       eepromCurrentValues.pumpFlowAtZero                = lcdValues.pumpFlowAtZero;
       break;
-    case SCREEN_shot_settings:
+    case SCREEN_MODES::SCREEN_shot_settings:
       eepromCurrentValues.stopOnWeightState             = lcdValues.stopOnWeightState;
       eepromCurrentValues.shotDose                      = lcdValues.shotDose;
       eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
@@ -463,16 +464,16 @@ static void updateProfilerPhases(void) {
   // Setup shot profiling
   if (runningCfg.pressureProfilingState) {
     if (runningCfg.flowProfileState) { // flow based profiling enabled
-      addFlowPhase(Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, LINEAR, runningCfg.flowProfileCurveSpeed * 1000}, runningCfg.flowProfilePressureTarget, -1, -1);
+      addFlowPhase(Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, TransitionCurve::LINEAR, runningCfg.flowProfileCurveSpeed * 1000}, runningCfg.flowProfilePressureTarget, -1, -1);
     } else { // pressure based profiling enabled
       float ppStart = runningCfg.pressureProfilingStart;
       float ppEnd = runningCfg.pressureProfilingFinish;
       uint16_t rampAndHold = runningCfg.preinfusionRamp + runningCfg.pressureProfilingHold;
-      addPressurePhase(Transition{preInfusionFinishBar, ppStart, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, rampAndHold * 1000, -1);
-      addPressurePhase(Transition{ppStart, ppEnd, EASE_IN_OUT, runningCfg.pressureProfilingLength * 1000}, -1, -1, -1);
+      addPressurePhase(Transition{preInfusionFinishBar, ppStart, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, rampAndHold * 1000, -1);
+      addPressurePhase(Transition{ppStart, ppEnd, TransitionCurve::EASE_IN_OUT, runningCfg.pressureProfilingLength * 1000}, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
-    addPressurePhase(Transition{preInfusionFinishBar, 9, EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1);
+    addPressurePhase(Transition{preInfusionFinishBar, 9, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1);
   }
 }
 
@@ -481,11 +482,11 @@ void addFillBasketPhase(float flowRate) {
 }
 
 void addPressurePhase(Transition pressure, float flowRestriction, int timeMs, float pressureAbove) {
-  addPhase(PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove);
+  addPhase(PHASE_TYPE::PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove);
 }
 
 void addFlowPhase(Transition flow, float pressureRestriction, int timeMs, float pressureAbove) {
-  addPhase(PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove);
+  addPhase(PHASE_TYPE::PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove);
 }
 
 void addPhase(
@@ -519,7 +520,7 @@ static void profiling(void) {
       closeValve();
       setPumpOff();
       brewActive = false;
-    } else if (currentPhase.getType() == PHASE_TYPE_PRESSURE) {
+    } else if (currentPhase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE) {
       float newBarValue = currentPhase.getTarget();
       float flowRestriction =  currentPhase.getRestriction();
       openValve();
@@ -678,7 +679,7 @@ void fillBoiler() {
 }
 
 bool isBoilerFillPhase(unsigned long elapsedTime) {
-  return lcdCurrentPageId == SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
+  return static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
 }
 
 bool isBoilerFull(unsigned long elapsedTime) {
@@ -700,7 +701,7 @@ unsigned long getTimeSinceInit() {
 
 // Checks if Brew switch is ON
 bool isSwitchOn() {
-  return brewState() && lcdCurrentPageId == SCREEN_home;
+  return brewState() && static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home;
 }
 
 void fillBoilerUntilThreshod(unsigned long elapsedTime) {

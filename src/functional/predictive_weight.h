@@ -40,7 +40,7 @@ public:
 
     // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
     // as well as there being enough pressure for water to wet the puck enough to start the output
-    bool phaseTypePressure = phase.getType() == PHASE_TYPE_PRESSURE;
+    bool phaseTypePressure = phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE;
     // float pressureTarget = phaseTypePressure ? phase.getTarget() : phase.getRestriction();
     // pressureTarget = (pressureTarget == 0.f || pressureTarget > 2.f) ? 2.f : pressureTarget;
     // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
