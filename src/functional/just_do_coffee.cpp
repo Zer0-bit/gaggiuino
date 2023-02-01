@@ -68,6 +68,10 @@ void pulseHeaters(uint32_t pulseLength, int factor_1, int factor_2, bool brewAct
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
+#if not defined SINGLE_BOARD && not defined INDEPENDENT_DIMMER
+#define PUMP_NEEDS_OPEN_VALVE  // not ENABLED if using the PCB or the dimmer wired separate from relay
+#endif
+
 void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
   lcdTargetState(1); // setting the target mode to "steam temp"
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
@@ -78,12 +82,10 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
      ) {
     setBoilerOn();
     if (currentState.smoothedPressure < 1.8f) {
-      #if not defined (SINGLE_BOARD) // not ENABLED if using the PCB
-        #if not defined (DREAM_STEAM_DISABLED) // disabled for bigger boilers which have no  need of adjusting the pressure
-        openValve();
+      #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adjusting the pressure
+        #ifdef PUMP_NEEDS_OPEN_VALVE
+          openValve();
         #endif
-      #endif
-      #ifndef DREAM_STEAM_DISABLED //
         setPumpToRawValue(3);
       #endif
     } else setPumpOff();
@@ -91,6 +93,8 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
     setBoilerOff();
     #ifndef DREAM_STEAM_DISABLED
       (currentState.smoothedPressure < 1.8f) ? setPumpToRawValue(3) : setPumpOff();
+    #else
+      setPumpOff();
     #endif
   }
 
@@ -105,7 +109,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
 
 /*Water mode and all that*/
 void hotWaterMode(SensorState &currentState) {
-  #ifndef SINGLE_BOARD
+  #ifdef PUMP_NEEDS_OPENVALVE
   openValve();
   #else
   closeValve();
