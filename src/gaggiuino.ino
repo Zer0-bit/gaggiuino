@@ -243,7 +243,7 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!steamState()) steamTime = millis();
       backFlush(currentState);
-      setBoilerOff();
+      brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
       break;
     case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
