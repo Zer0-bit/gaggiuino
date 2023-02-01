@@ -77,9 +77,9 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
   if ((currentState.smoothedPressure <= 9.f)
-       && (sensorTemperature > runningCfg.setpoint - 10.f)
-       && (sensorTemperature <= runningCfg.steamSetPoint)
-     ) {
+      && (sensorTemperature > runningCfg.setpoint - 10.f)
+      && (sensorTemperature <= runningCfg.steamSetPoint)
+    ) {
     setBoilerOn();
     if (currentState.smoothedPressure < 1.8f) {
       #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adjusting the pressure
