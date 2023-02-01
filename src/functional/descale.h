@@ -16,13 +16,13 @@
 //###############################____DESCALE__CONTROL____######################################
 //#############################################################################################
 
-typedef enum {
+enum class DescalingState {
   IDLE,
   DESCALING_PHASE1,
   DESCALING_PHASE2,
   DESCALING_PHASE3,
   FINISHED
-} DescalingState;
+};
 
 void deScale(eepromValues_t &runningCfg, SensorState &currentState);
 void solenoidBeat(void);
