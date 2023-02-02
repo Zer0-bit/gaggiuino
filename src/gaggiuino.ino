@@ -680,7 +680,7 @@ bool isBoilerFillPhase(unsigned long elapsedTime) {
 bool isBoilerFull(unsigned long elapsedTime) {
   bool boilerFull = false;
   if (elapsedTime > BOILER_FILL_START_TIME + 1000UL) {
-    boilerFull =  (previousSmoothedPressure - currentState.smoothedPressure > -0.01f)
+    boilerFull =  (previousSmoothedPressure - currentState.smoothedPressure > -0.03f)
                 &&
                   (previousSmoothedPressure - currentState.smoothedPressure < 0.001f);
   }
