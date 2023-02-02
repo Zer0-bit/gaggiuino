@@ -636,9 +636,9 @@ void systemHealthCheck(float pressureThreshold) {
     {
       //Reloading the watchdog timer, if this function fails to run MCU is rebooted
       watchdogReload();
-      switch (lcdCurrentPageId) {
-        case 2:
-        case 8:
+      switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
+        case SCREEN_MODES::SCREEN_brew_manual:
+        case SCREEN_MODES::SCREEN_brew_graph:
           sensorsRead();
           setPumpOff();
           setBoilerOff();
