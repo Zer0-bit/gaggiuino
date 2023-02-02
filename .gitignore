@@ -8,4 +8,4 @@ webserver/src/build
 webserver/src/stack/secrets.h
 webserver/data
 gaggiuino.ino.cpp
-# extra_*.ini
+extra_*.ini
