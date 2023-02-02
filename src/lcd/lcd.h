@@ -2,6 +2,7 @@
 #define LCD_H
 
 #include <EasyNextionLibrary.h>
+
 #include "eeprom_data/eeprom_data.h"
 
 extern volatile int lcdCurrentPageId;
@@ -19,10 +20,10 @@ enum class SCREEN_MODES {
     SCREEN_brew_graph,
     SCREEN_shot_settings,
     SCREEN_splash
-} ;
+};
 
 void lcdInit(void);
-void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
+void lcdUploadCfg(eepromValues_t& eepromCurrentValues);
 void lcdListen(void);
 
 eepromValues_t lcdDownloadCfg(void);
@@ -40,7 +41,7 @@ void lcdSetFlow(int val);
 void lcdSetUpTime(float val);
 
 void lcdShowDebug(int val1, int val2);
-void lcdShowPopup(const char *msg);
+void lcdShowPopup(const char* msg);
 
 void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);

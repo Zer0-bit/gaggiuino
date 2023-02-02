@@ -2,6 +2,7 @@
 #define EEPROM_DATA_H
 
 #include <Arduino.h>
+
 #include "log.h"
 
 /**
@@ -33,47 +34,47 @@
 *   - flowProfilePressureTarget
 */
 struct eepromValues_t {
-  uint16_t setpoint;
-  uint16_t steamSetPoint;
-  uint16_t offsetTemp;
-  uint16_t hpwr;
-  uint16_t mainDivider;
-  uint16_t brewDivider;
-  float    pressureProfilingStart;
-  float    pressureProfilingFinish;
-  uint16_t pressureProfilingHold;
-  uint16_t pressureProfilingLength;
-  bool     pressureProfilingState;
-  bool     preinfusionState;
-  uint16_t preinfusionSec;
-  float    preinfusionBar;
-  uint16_t preinfusionSoak;
-  uint16_t preinfusionRamp;
-  bool     preinfusionFlowState;
-  float    preinfusionFlowVol;
-  uint16_t preinfusionFlowTime;
-  uint16_t preinfusionFlowSoakTime;
-  float    preinfusionFlowPressureTarget;
-  bool     flowProfileState;
-  float    flowProfileStart;
-  float    flowProfileEnd;
-  float    flowProfilePressureTarget;
-  uint16_t flowProfileCurveSpeed;
-  uint16_t powerLineFrequency;
-  uint16_t lcdSleep;
-  bool     warmupState;
-  bool     homeOnShotFinish;
-  bool     graphBrew;
-  bool     brewDeltaState;
-  bool     switchPhaseOnThreshold;
-  bool     basketPrefill;
-  int      scalesF1;
-  int      scalesF2;
-  float    pumpFlowAtZero;
-  bool     stopOnWeightState;
-  float    shotDose;
-  float    shotStopOnCustomWeight;
-  uint16_t shotPreset;
+    uint16_t setpoint;
+    uint16_t steamSetPoint;
+    uint16_t offsetTemp;
+    uint16_t hpwr;
+    uint16_t mainDivider;
+    uint16_t brewDivider;
+    float pressureProfilingStart;
+    float pressureProfilingFinish;
+    uint16_t pressureProfilingHold;
+    uint16_t pressureProfilingLength;
+    bool pressureProfilingState;
+    bool preinfusionState;
+    uint16_t preinfusionSec;
+    float preinfusionBar;
+    uint16_t preinfusionSoak;
+    uint16_t preinfusionRamp;
+    bool preinfusionFlowState;
+    float preinfusionFlowVol;
+    uint16_t preinfusionFlowTime;
+    uint16_t preinfusionFlowSoakTime;
+    float preinfusionFlowPressureTarget;
+    bool flowProfileState;
+    float flowProfileStart;
+    float flowProfileEnd;
+    float flowProfilePressureTarget;
+    uint16_t flowProfileCurveSpeed;
+    uint16_t powerLineFrequency;
+    uint16_t lcdSleep;
+    bool warmupState;
+    bool homeOnShotFinish;
+    bool graphBrew;
+    bool brewDeltaState;
+    bool switchPhaseOnThreshold;
+    bool basketPrefill;
+    int scalesF1;
+    int scalesF2;
+    float pumpFlowAtZero;
+    bool stopOnWeightState;
+    float shotDose;
+    float shotStopOnCustomWeight;
+    uint16_t shotPreset;
 };
 
 void eepromInit(void);

@@ -2,8 +2,9 @@
 #define TEST_UTILS_H
 
 #include <unity.h>
-#include "profiling_phases.h"
+
 #include "./test-utils.cpp"
+#include "profiling_phases.h"
 
 void TEST_ASSERT_EQUAL_FLOAT_ACCURACY(float expected, float actual, int digits);
 

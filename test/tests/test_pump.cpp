@@ -1,5 +1,5 @@
-#include "mock.h"
 #include "../src/peripherals/pump.cpp"
+#include "mock.h"
 #include "utils/test-utils.h"
 
 void test_pump_clicks_for_flow_correct_binary_search(void) {
@@ -14,6 +14,6 @@ void test_pump_get_flow(void) {
 }
 
 void runAllPumpTests() {
-  RUN_TEST(test_pump_clicks_for_flow_correct_binary_search);
-  RUN_TEST(test_pump_get_flow);
+    RUN_TEST(test_pump_clicks_for_flow_correct_binary_search);
+    RUN_TEST(test_pump_get_flow);
 }

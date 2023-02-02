@@ -1,12 +1,11 @@
-class PSM
-{
-public:
-  PSM(unsigned char sensePin, unsigned char controlPin, unsigned int range, int mode, unsigned char divider, unsigned char interruptMinTimeDiff);
+class PSM {
+   public:
+    PSM(unsigned char sensePin, unsigned char controlPin, unsigned int range, int mode, unsigned char divider, unsigned char interruptMinTimeDiff);
 
-  void set(unsigned int value);
+    void set(unsigned int value);
 
-  long getCounter();
-  void resetCounter();
+    long getCounter();
+    void resetCounter();
 
-  void stopAfter(long counter);
+    void stopAfter(long counter);
 };

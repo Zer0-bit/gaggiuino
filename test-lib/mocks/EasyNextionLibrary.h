@@ -1,7 +1,7 @@
 #include "Arduino.h"
 
 class EasyNex {
-  public:
+   public:
     EasyNex(int serial);
     void begin(unsigned long baud = 9600);
     void writeNum(String, uint32_t);

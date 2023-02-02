@@ -4,11 +4,9 @@ PSM::PSM(unsigned char sensePin, unsigned char controlPin, unsigned int range, i
 void PSM::set(unsigned int value) {
 }
 long PSM::getCounter() {
-  return 1;
+    return 1;
 }
 void PSM::resetCounter() {
 }
 void PSM::stopAfter(long counter) {
 }
-
-

@@ -1,9 +1,12 @@
+# 1 "C:\\Users\\Arkwolf\\AppData\\Local\\Temp\\tmptgg8a5ji"
+#include <Arduino.h>
+# 1 "A:/Coding/gaggiuino/scales-calibration/scales-calibration.ino"
 #include <EasyNextionLibrary.h>
 #include <HX711_2.h>
 
 #include "ADS1X15.h"
 
-#define relayPin PA15// PB0
+#define relayPin PA15
 #define LOADCELL_1_DOUT_PIN PB8
 #define LOADCELL_2_DOUT_PIN PB9
 #define LOADCELL_1_SCK_PIN PB0
@@ -18,12 +21,19 @@ unsigned char scale_clk = OUTPUT;
 unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 #endif
 
-float calibration_factor_lc1 = 4000;//-7050 worked for my 440lb max scale setup
-float calibration_factor_lc2 = 4000;//-7050 worked for my 440lb max scale setup
+float calibration_factor_lc1 = 4000;
+float calibration_factor_lc2 = 4000;
 
-//Nextion object init
 EasyNex myNex(UART_LCD);
-
+void setup();
+void loop();
+void trigger0();
+void trigger1();
+void trigger2();
+void trigger3();
+void trigger4();
+void trigger5();
+#line 26 "A:/Coding/gaggiuino/scales-calibration/scales-calibration.ino"
 void setup() {
     myNex.begin(115200);
     pinMode(relayPin, OUTPUT);

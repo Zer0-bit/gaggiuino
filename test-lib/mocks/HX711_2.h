@@ -1,9 +1,7 @@
 #include <Arduino.h>
 
-class HX711_2
-{
-  public:
-
+class HX711_2 {
+   public:
     HX711_2();
     virtual ~HX711_2();
     // Initialize library with data output pin, clock input pin and gain factor.
@@ -27,12 +25,12 @@ class HX711_2
     // waits for the chip to be ready and returns a reading
     long read(unsigned long timeout = 1000);
     // returns an average reading; times = how many times to read
-    void read_average(long *readValues, byte times  = 10);
+    void read_average(long* readValues, byte times = 10);
     // returns (read_average() - OFFSET), that is the current value without the tare weight; times = how many readings to do
     long get_value(byte times = 1);
     // returns get_value() divided by SCALE, that is the raw value divided by a value obtained via calibration
     // times = how many readings to do
-    void get_units(float *readValues, byte times = 1);
+    void get_units(float* readValues, byte times = 1);
     // set the OFFSET value for tare weight; times = how many times to read the tare value
     void tare(byte times = 10);
     // set the SCALE value; this value is used to convert the raw data to "human readable" data (measure units)
