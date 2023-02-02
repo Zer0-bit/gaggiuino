@@ -292,12 +292,9 @@ static void lcdRefresh(void) {
     /*LCD weight output*/
     if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
-    } else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual){
-      if (scalesIsPresent()) {
-        lcdSetWeight(currentState.weight);
-      } else if (currentState.shotWeight) {
-        lcdSetWeight(currentState.shotWeight);
-      }
+    } else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
+      || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) {
+      lcdSetWeight(currentState.shotWeight);
     }
 
     /*LCD flow output*/
