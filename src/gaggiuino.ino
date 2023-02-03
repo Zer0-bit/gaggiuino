@@ -637,8 +637,6 @@ void systemHealthCheck(float pressureThreshold) {
         case SCREEN_MODES::SCREEN_brew_manual:
         case SCREEN_MODES::SCREEN_brew_graph:
           sensorsRead();
-          setPumpOff();
-          setBoilerOff();
           break;
         default:
           sensorsRead();
