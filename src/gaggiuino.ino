@@ -636,7 +636,11 @@ void systemHealthCheck(float pressureThreshold) {
       switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
         case SCREEN_MODES::SCREEN_brew_manual:
         case SCREEN_MODES::SCREEN_brew_graph:
+          brewDetect();
+          lcdRefresh();
+          lcdListen();
           sensorsRead();
+          justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
           break;
         default:
           sensorsRead();
@@ -647,6 +651,8 @@ void systemHealthCheck(float pressureThreshold) {
           break;
       }
     }
+    lcdRefresh();
+    lcdListen();
     sensorsRead();
     closeValve();
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
@@ -678,7 +684,7 @@ bool isBoilerFillPhase(unsigned long elapsedTime) {
 bool isBoilerFull(unsigned long elapsedTime) {
   bool boilerFull = false;
   if (elapsedTime > BOILER_FILL_START_TIME + 1000UL) {
-    boilerFull =  (previousSmoothedPressure - currentState.smoothedPressure > -0.03f)
+    boilerFull =  (previousSmoothedPressure - currentState.smoothedPressure > -0.02f)
                 &&
                   (previousSmoothedPressure - currentState.smoothedPressure < 0.001f);
   }
