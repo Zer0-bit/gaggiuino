@@ -34,7 +34,7 @@ AfterExternBlock: false
 BeforeCatch: false
 BeforeElse: false
 # BeforeLambdaBody: false
-IndentBraces: false
+# IndentBraces: false
 # SplitEmptyFunction: false
 SplitEmptyRecord: false
 SplitEmptyNamespace: false
