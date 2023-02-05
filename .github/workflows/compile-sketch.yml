@@ -9,6 +9,28 @@ on:
   workflow_dispatch:
 
 jobs:
+  formatting-check:
+    name: Formatting Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - "src"
+          - "lib"
+          - "scales-calibration"
+          - "test"
+          - "test-lib"
+          - "uart-esp"
+          - "uart-stm"
+          - "webserver"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run clang-format style check for C/C++/Protobuf programs.
+        uses: jidicula/clang-format-action@v4.10.2
+        with:
+          clang-format-version: "13"
+          check-path: ${{ matrix.path }}
+          fallback-style: "Google"
   coding-style:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -91,3 +113,21 @@ jobs:
         if: success() || failure()
         run: |
           ~/.platformio/penv/bin/platformio check -e uart-esp --fail-on-defect medium --fail-on-defect high
+  static-analysis2:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment:
+          - "gaggia-lego-stlink"
+          - "scales-calibration-dfu"
+          - "uart-stm"
+          - "uart-esp"
+      steps:
+        - uses: actions/checkout@v3
+        - name: Install Platformio
+          run: |
+            python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+        - name: Run static analysis on ${{ matrix.environment }}
+          run: |
+            ~/.platformio/penv/bin/platformio check -e ${{ matrix.environment }} --fail-on-defect medium --fail-on-defect high

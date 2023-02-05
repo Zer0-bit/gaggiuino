@@ -3,6 +3,6 @@
 WDIR=$(dirname "$0")
 
 find $WDIR -type f | \
-grep -vE "^\.$|\.git|\.pio|\.vscode|*tft$|*png$|*jfif$|*jpg$|*HMI$|*md$|*README*|*LICENSE*"
+grep -vE "^\.$|\.git|\.pio|\.vscode|*tft$|*png$|*jfif$|*jpg$|*HMI$|*md$|*README*|*LICENSE*|*.cpp$|*.h$|*.ino$"
 
 
