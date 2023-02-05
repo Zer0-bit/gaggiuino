@@ -1,5 +1,5 @@
-#include "../src/peripherals/pump.cpp"
 #include "mock.h"
+#include "../src/peripherals/pump.cpp"
 #include "utils/test-utils.h"
 
 void test_pump_clicks_for_flow_correct_binary_search(void) {
