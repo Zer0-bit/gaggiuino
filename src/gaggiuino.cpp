@@ -48,9 +48,11 @@ SimpleKalmanFilter* smoothScalesFlow = nullptr;
 
 //default phases. Updated in updateProfilerPhases.
 Profile profile;
-PhaseProfiler phaseProfiler{profile};
 
-PredictiveWeight predictiveWeight;
+/// @brief Both phaseProfiler and predictiveWeight have constructors that can throw
+/// these need to be addressed sometime into the future.
+PhaseProfiler phaseProfiler{profile};  //NOLINT(cert-err58-cpp)
+PredictiveWeight predictiveWeight;     //NOLINT(cert-err58-cpp)
 
 SensorState currentState;
 
