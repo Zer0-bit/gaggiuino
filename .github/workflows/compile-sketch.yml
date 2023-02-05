@@ -33,6 +33,7 @@ jobs:
           ~/.platformio/penv/bin/platformio run -e ${{ matrix.environment.command }}
 
   unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
