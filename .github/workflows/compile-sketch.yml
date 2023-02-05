@@ -59,10 +59,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        - name: Main
-          command: "gaggia-lego-stlink"
-        - name: Scales
-          command: "scales-calibration-dfu"
+        environment:
+          - name: Main
+            command: "gaggia-lego-stlink"
+          - name: Scales
+            command: "scales-calibration-dfu"
 
     steps:
       - uses: actions/checkout@v3
