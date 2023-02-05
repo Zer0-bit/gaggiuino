@@ -4,9 +4,12 @@
 
 #define UART_MCU Serial1
 
-McuComms comms;
+// Both comms and phaseArray can throw on construction, since both
+// have static storage the exception goes uncaught. See cert-err58-cpp
+// for more info
+McuComms comms;       //NOLINT(cert-err58-cpp)
+Phase phaseArray[8];  //NOLINT(cert-err58-cpp)
 
-Phase phaseArray[8];
 Profile profile{6, phaseArray};
 
 void logProfile(Profile& profile) {
