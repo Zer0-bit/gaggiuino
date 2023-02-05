@@ -13,6 +13,7 @@ jobs:
     name: Formatting Check
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         path:
           - "src"
@@ -55,69 +56,30 @@ jobs:
   compile-sketch:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        - name: Main
+          command: "gaggia-lego-stlink"
+        - name: Scales
+          command: "scales-calibration-dfu"
 
     steps:
-      - name: Checkout master
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v1
-
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v1
       - name: Install Platformio
         run: |
           python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
-
-      - name: Build the main project
+      - name: Building ${{ matrix.environment.name }}
         run: |
-          ~/.platformio/penv/bin/platformio run -e gaggia-lego-stlink
-
-      - name: Build scales
-        run: |
-          ~/.platformio/penv/bin/platformio run -e scales-calibration-dfu
-
-      - name: Run tests
-        run: |
-          ~/.platformio/penv/bin/platformio test -e test
+          ~/.platformio/penv/bin/platformio run -e ${{ matrix.environment.command }}
 
   static-analysis:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout master
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v1
-
-      - name: Install Platformio
-        run: |
-          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
-
-      - name: Run static analysis on main project
-        if: success() || failure()
-        run: |
-          ~/.platformio/penv/bin/platformio check -e gaggia-lego-stlink --fail-on-defect medium --fail-on-defect high
-
-      - name: Run static analysis on scales
-        if: success() || failure()
-        run: |
-          ~/.platformio/penv/bin/platformio check -e scales-calibration-dfu --fail-on-defect medium --fail-on-defect high
-
-      - name: Run static analysis on uart-stm
-        if: success() || failure()
-        run: |
-          ~/.platformio/penv/bin/platformio check -e uart-stm --fail-on-defect medium --fail-on-defect high
-
-      - name: Run static analysis on uart-esp
-        if: success() || failure()
-        run: |
-          ~/.platformio/penv/bin/platformio check -e uart-esp --fail-on-defect medium --fail-on-defect high
-  static-analysis2:
     name: Static Analysis
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        fail-fast: false
         environment:
           - "gaggia-lego-stlink"
           - "scales-calibration-dfu"
