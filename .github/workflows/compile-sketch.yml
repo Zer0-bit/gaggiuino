@@ -123,11 +123,11 @@ jobs:
           - "scales-calibration-dfu"
           - "uart-stm"
           - "uart-esp"
-      steps:
-        - uses: actions/checkout@v3
-        - name: Install Platformio
-          run: |
-            python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
-        - name: Run static analysis on ${{ matrix.environment }}
-          run: |
-            ~/.platformio/penv/bin/platformio check -e ${{ matrix.environment }} --fail-on-defect medium --fail-on-defect high
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Platformio
+        run: |
+          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+      - name: Run static analysis on ${{ matrix.environment }}
+        run: |
+          ~/.platformio/penv/bin/platformio check -e ${{ matrix.environment }} --fail-on-defect medium --fail-on-defect high
