@@ -79,8 +79,8 @@ jobs:
     name: Static Analysis
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         environment:
           - "gaggia-lego-stlink"
           - "scales-calibration-dfu"
