@@ -27,7 +27,8 @@ void wifiInit() {
     wifiParams.pass = wifiParams.preferences.getString(PARAM_INPUT_PASS);
   }
 
-  Serial.printf("initWifi: status=[%d], ssid=[%s], ip=[%s].\n", WiFi.status(), WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+  Serial.printf("initWifi: status=[%d], ssid=[%s], ip=[%s].\n", WiFi.status(),
+                WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
 
   if (wifiParams.ssid == "" && wifiParams.pass == "") {
     Serial.println("No ssid or password provided.");
@@ -57,7 +58,8 @@ bool wifiConnect(String ssid, String pass, const unsigned long timeout) {
     delay(200);
   }
 
-  Serial.printf("\nConnected to WiFi [%s] with IP:[%s]\n", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+  Serial.printf("\nConnected to WiFi [%s] with IP:[%s]\n", WiFi.SSID().c_str(),
+                WiFi.localIP().toString().c_str());
 
   wifiParams.ssid = ssid;
   wifiParams.pass = pass;
@@ -82,7 +84,8 @@ int wifiNetworkCount() {
 void setupWiFiAccessPoint() {
   // Connect to Wi-Fi network with SSID and password
   WiFi.softAP("Gaggiuino AP", NULL);
-  Serial.printf("AP (Access Point) IP address: %s\n", WiFi.softAPIP().toString().c_str());
+  Serial.printf("AP (Access Point) IP address: %s\n",
+                WiFi.softAPIP().toString().c_str());
   wifiScanNetworks();
 }
 

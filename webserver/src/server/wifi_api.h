@@ -1,10 +1,10 @@
 #ifndef WIFI_API_H
 #define WIFI_API_H
 
-#include "ESPAsyncWebServer.h"
-#include "AsyncTCP.h"
 #include <ArduinoJson.h>
 #include "../wifi/wifi_setup.h"
+#include "AsyncTCP.h"
+#include "ESPAsyncWebServer.h"
 
 void handlePostSelectedNetwork(AsyncWebServerRequest* request);
 void handleGetNetworks(AsyncWebServerRequest* request);
@@ -15,7 +15,8 @@ void setupWifiApi(AsyncWebServer& server) {
   server.on("/api/wifi/status", HTTP_GET, handleGetWifiStatus);
   server.on("/api/wifi/networks", HTTP_GET, handleGetNetworks);
   server.on("/api/wifi/selected-network", HTTP_PUT, handlePostSelectedNetwork);
-  server.on("/api/wifi/selected-network", HTTP_DELETE, handleDeleteSelectedNetwork);
+  server.on("/api/wifi/selected-network", HTTP_DELETE,
+            handleDeleteSelectedNetwork);
 }
 
 void handlePostSelectedNetwork(AsyncWebServerRequest* request) {
@@ -24,7 +25,7 @@ void handlePostSelectedNetwork(AsyncWebServerRequest* request) {
   String ssid;
   String pass;
 
-  for (int i = 0;i < params;i++) {
+  for (int i = 0; i < params; i++) {
     AsyncWebParameter* p = request->getParam(i);
     if (p->isPost()) {
       // HTTP POST ssid value
@@ -40,7 +41,8 @@ void handlePostSelectedNetwork(AsyncWebServerRequest* request) {
     }
   }
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
+  AsyncResponseStream* response =
+      request->beginResponseStream("application/json");
   DynamicJsonDocument json(256);
   if (wifiConnect(ssid, pass, 9000)) {
     json["result"] = "ok";
@@ -57,7 +59,8 @@ void handlePostSelectedNetwork(AsyncWebServerRequest* request) {
 
 void handleGetNetworks(AsyncWebServerRequest* request) {
   Serial.println("Got request get available WiFi networks");
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
+  AsyncResponseStream* response =
+      request->beginResponseStream("application/json");
   DynamicJsonDocument json(2048);
   JsonArray networksJson = json.to<JsonArray>();
 
@@ -65,7 +68,8 @@ void handleGetNetworks(AsyncWebServerRequest* request) {
     JsonObject network = networksJson.createNestedObject();
     network["ssid"] = WiFi.SSID(i);
     network["rssi"] = WiFi.RSSI(i);
-    network["secured"] = WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? false : true;
+    network["secured"] =
+        WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? false : true;
   }
 
   serializeJson(networksJson, *response);
@@ -80,7 +84,8 @@ void handleDeleteSelectedNetwork(AsyncWebServerRequest* request) {
 }
 
 void handleGetWifiStatus(AsyncWebServerRequest* request) {
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
+  AsyncResponseStream* response =
+      request->beginResponseStream("application/json");
   DynamicJsonDocument json(256);
   if (WiFi.isConnected()) {
     json["status"] = "connected";
@@ -95,6 +100,4 @@ void handleGetWifiStatus(AsyncWebServerRequest* request) {
   request->send(response);
 }
 
-
 #endif
-

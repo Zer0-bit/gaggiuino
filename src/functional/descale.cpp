@@ -1,5 +1,5 @@
-#include "../peripherals/internal_watchdog.h"
 #include "descale.h"
+#include "../peripherals/internal_watchdog.h"
 
 DescalingState descalingState = DescalingState::IDLE;
 
@@ -8,7 +8,7 @@ uint8_t counter = 0;
 unsigned long descalingTimer = 0;
 int descalingCycle = 0;
 
-void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
+void deScale(eepromValues_t& runningCfg, SensorState& currentState) {
   switch (descalingState) {
     case DescalingState::IDLE:
       if (brewState()) {
@@ -19,7 +19,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         descalingTimer = millis();
       }
       break;
-    case DescalingState::DESCALING_PHASE1: // Slowly penetrating that scale
+    case DescalingState::DESCALING_PHASE1:  // Slowly penetrating that scale
       brewState() ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpToRawValue(10);
       if (millis() - descalingTimer > DESCALE_PHASE1_EVERY) {
@@ -32,7 +32,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         }
       }
       break;
-    case DescalingState::DESCALING_PHASE2: // Softening the f outta that scale
+    case DescalingState::DESCALING_PHASE2:  // Softening the f outta that scale
       brewState() ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpOff();
       if (millis() - descalingTimer > DESCALE_PHASE2_EVERY) {
@@ -41,7 +41,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         descalingState = DescalingState::DESCALING_PHASE3;
       }
       break;
-    case DescalingState::DESCALING_PHASE3: // Fucking up that scale big time
+    case DescalingState::DESCALING_PHASE3:  // Fucking up that scale big time
       brewState() ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpToRawValue(30);
       if (millis() - descalingTimer > DESCALE_PHASE3_EVERY) {
@@ -55,10 +55,11 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
         }
       }
       break;
-    case DescalingState::FINISHED: // Scale successufuly fucked
+    case DescalingState::FINISHED:  // Scale successufuly fucked
       setPumpOff();
       closeValve();
-      brewState() ? descalingState = DescalingState::FINISHED : descalingState = DescalingState::IDLE;
+      brewState() ? descalingState = DescalingState::FINISHED
+                  : descalingState = DescalingState::IDLE;
       if (millis() - descalingTimer > 1000) {
         lcdBrewTimerStop();
         lcdShowPopup("FINISHED");
@@ -88,17 +89,17 @@ void solenoidBeat() {
   setPumpOff();
 }
 
-void backFlush(const SensorState &currentState) {
+void backFlush(const SensorState& currentState) {
   static unsigned long backflushTimer = millis();
   unsigned long elapsedTime = millis() - backflushTimer;
   if (brewState()) {
     if (flushCounter >= 11) {
       flushDeactivated();
       return;
-    }
-    else if (elapsedTime > 7000UL && currentState.smoothedPressure > 5.f) {
+    } else if (elapsedTime > 7000UL && currentState.smoothedPressure > 5.f) {
       flushPhases();
-    } else flushActivated();
+    } else
+      flushActivated();
   } else {
     flushDeactivated();
     flushCounter = 0;
@@ -106,18 +107,17 @@ void backFlush(const SensorState &currentState) {
   }
 }
 
-
 void flushActivated(void) {
-  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
-      openValve();
-  #endif
+#if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
+  openValve();
+#endif
   setPumpFullOn();
 }
 
 void flushDeactivated(void) {
-  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
-      closeValve();
-  #endif
+#if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
+  closeValve();
+#endif
   setPumpOff();
 }
 

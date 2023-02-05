@@ -1,8 +1,8 @@
 #ifndef WIFI_SETUP_H
 #define WIFI_SETUP_H
-#include <WiFi.h>
-#include <Preferences.h>
 #include <Arduino.h>
+#include <Preferences.h>
+#include <WiFi.h>
 
 // WiFi definitions
 struct WiFiParams_t {
@@ -19,7 +19,7 @@ void wifiSetup();
 bool wifiConnect(String ssid, String pass, const unsigned long timeout = 10000);
 void wifiDisconnect();
 void wiFiApSetup();
-int  wifiNetworkCount();
+int wifiNetworkCount();
 
 extern const char* PARAM_INPUT_SSID;
 extern const char* PARAM_INPUT_PASS;

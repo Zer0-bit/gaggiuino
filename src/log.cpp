@@ -6,7 +6,8 @@ void log_init() {
 
 // Unsure the consequences of swapping to parameter packing or currying since
 // this would then need to be moved to the header. So suppressing this for now.
-void log(const char* prefix, const char* file, const int line, const char* msg, ...) //NOLINT(cert-dcl50-cpp)
+void log(const char* prefix, const char* file, const int line, const char* msg,
+         ...)  //NOLINT(cert-dcl50-cpp)
 {
   char msgBuf[LOG_MAX_STRING_LEN];
   va_list args;
@@ -16,7 +17,8 @@ void log(const char* prefix, const char* file, const int line, const char* msg, 
     va_end(args);
 
   char logLineBuf[LOG_MAX_PREFIX_LEN + LOG_MAX_STRING_LEN];
-  check = snprintf(logLineBuf, sizeof(logLineBuf), "%s (%s:%i): %s", prefix, file, line, msgBuf);
+  check = snprintf(logLineBuf, sizeof(logLineBuf), "%s (%s:%i): %s", prefix,
+                   file, line, msgBuf);
   if (check > 0 && check <= sizeof(logLineBuf))
     USART_DEBUG.println(logLineBuf);
 }

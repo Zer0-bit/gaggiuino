@@ -8,21 +8,21 @@ extern volatile int lcdCurrentPageId;
 extern volatile int lcdLastCurrentPageId;
 
 enum class SCREEN_MODES {
-    SCREEN_home,
-    SCREEN_brew_settings,
-    SCREEN_brew_manual,
-    SCREEN_profiles,
-    SCREEN_flush,
-    SCREEN_descale,
-    SCREEN_settings_boiler,
-    SCREEN_settings_system,
-    SCREEN_brew_graph,
-    SCREEN_shot_settings,
-    SCREEN_splash
-} ;
+  SCREEN_home,
+  SCREEN_brew_settings,
+  SCREEN_brew_manual,
+  SCREEN_profiles,
+  SCREEN_flush,
+  SCREEN_descale,
+  SCREEN_settings_boiler,
+  SCREEN_settings_system,
+  SCREEN_brew_graph,
+  SCREEN_shot_settings,
+  SCREEN_splash
+};
 
 void lcdInit(void);
-void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
+void lcdUploadCfg(eepromValues_t& eepromCurrentValues);
 void lcdListen(void);
 
 eepromValues_t lcdDownloadCfg(void);
@@ -40,7 +40,7 @@ void lcdSetFlow(int val);
 void lcdSetUpTime(float val);
 
 void lcdShowDebug(int val1, int val2);
-void lcdShowPopup(const char *msg);
+void lcdShowPopup(const char* msg);
 
 void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);

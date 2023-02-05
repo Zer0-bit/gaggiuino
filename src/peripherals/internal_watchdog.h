@@ -7,7 +7,7 @@
 /*Checking whether system is booting after a hard reset initiated by the internal watchdog.*/
 static inline void iwdcInit(void) {
   // IWDC init
-  if(IWatchdog.isReset()) {
+  if (IWatchdog.isReset()) {
     lcdShowPopup("WATCHDOG RESTARTED");
     IWatchdog.clearReset();
   }

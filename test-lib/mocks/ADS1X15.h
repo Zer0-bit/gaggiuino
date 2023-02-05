@@ -1,6 +1,5 @@
-class ADS1115
-{
-public:
+class ADS1115 {
+ public:
   ADS1115(int);
   void begin();
   void setGain(int);

@@ -1,13 +1,13 @@
 #include "pressure_sensor.h"
-#include "pindef.h"
-#include "ADS1X15.h"
 #include "../lcd/lcd.h"
+#include "ADS1X15.h"
 #include "i2c_bus_reset.h"
+#include "pindef.h"
 
 #if defined SINGLE_BOARD
-  ADS1015 ADS(0x48);
+ADS1015 ADS(0x48);
 #else
-  ADS1115 ADS(0x48);
+ADS1115 ADS(0x48);
 #endif
 
 float previousPressure;
@@ -31,11 +31,11 @@ float getPressure() {  //returns sensor pressure data
   i2cResetState();
 
   previousPressure = currentPressure;
-  #if defined SINGLE_BOARD
-    currentPressure = (ADS.getValue() - 166) / 111.11f; // 12bit
-  #else
-    currentPressure = (ADS.getValue() - 2666) / 1777.8f; // 16bit
-  #endif
+#if defined SINGLE_BOARD
+  currentPressure = (ADS.getValue() - 166) / 111.11f;  // 12bit
+#else
+  currentPressure = (ADS.getValue() - 2666) / 1777.8f;  // 16bit
+#endif
 
   return currentPressure;
 }
@@ -48,7 +48,8 @@ int8_t getAdsError() {
 //Serial.println(digitalRead(PIN_SDA));   //should be HIGH, is LOW on stuck I2C bus
 
 void i2cResetState() {
-  if(digitalRead(hw_SCL) != HIGH || digitalRead(hw_SDA) != HIGH || !ADS.isConnected()) {
+  if (digitalRead(hw_SCL) != HIGH || digitalRead(hw_SDA) != HIGH ||
+      !ADS.isConnected()) {
     LOG_INFO("Reset I2C pins");
     short result = I2C_ClearBus(hw_SDA, hw_SCL);
     char tmp[25];

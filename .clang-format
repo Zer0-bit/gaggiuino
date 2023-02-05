@@ -23,7 +23,7 @@ BinPackArguments: true
 BreakBeforeBraces: Custom
 BraceWrapping:
 AfterCaseLabel: false
-AfterClass: false
+# AfterClass: false
 AfterStruct: false
 AfterControlStatement: Never
 AfterEnum: false
@@ -33,9 +33,9 @@ AfterUnion: false
 AfterExternBlock: false
 BeforeCatch: false
 BeforeElse: false
-BeforeLambdaBody: false
+# BeforeLambdaBody: false
 IndentBraces: false
-SplitEmptyFunction: false
+# SplitEmptyFunction: false
 SplitEmptyRecord: false
 SplitEmptyNamespace: false
 BreakBeforeBinaryOperators: None

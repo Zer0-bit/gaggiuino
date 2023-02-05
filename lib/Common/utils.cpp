@@ -7,7 +7,9 @@
 
 float percentageWithTransition(float pct, TransitionCurve transition);
 
-float mapRange(float refNumber, float refStart, float refEnd, float targetStart, float targetEnd, int decimalPrecision, TransitionCurve transition) {
+float mapRange(float refNumber, float refStart, float refEnd, float targetStart,
+               float targetEnd, int decimalPrecision,
+               TransitionCurve transition) {
   float deltaRef = refEnd - refStart;
   float deltaTarget = targetEnd - targetStart;
 
@@ -17,10 +19,11 @@ float mapRange(float refNumber, float refStart, float refEnd, float targetStart,
 
   float pct = fmax(0.0f, fmin(1.0f, abs((refNumber - refStart) / deltaRef)));
 
-  float finalNumber = targetStart + deltaTarget * percentageWithTransition(pct, transition);
+  float finalNumber =
+      targetStart + deltaTarget * percentageWithTransition(pct, transition);
 
-  int calcScale = (int) pow(10, decimalPrecision >= 0 ? decimalPrecision : 1);
-  return (float) round(finalNumber * calcScale) / calcScale;
+  int calcScale = (int)pow(10, decimalPrecision >= 0 ? decimalPrecision : 1);
+  return (float)round(finalNumber * calcScale) / calcScale;
 }
 
 float easeIn(float pct) {
@@ -32,7 +35,7 @@ float easeOut(float pct) {
 }
 
 float easeInOut(float pct) {
-  return 0.5f * (sinf((pct - 0.5f) * (float) M_PI) + 1.f);
+  return 0.5f * (sinf((pct - 0.5f) * (float)M_PI) + 1.f);
 }
 
 float percentageWithTransition(float pct, TransitionCurve transition) {

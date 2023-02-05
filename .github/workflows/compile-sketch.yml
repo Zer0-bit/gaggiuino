@@ -24,6 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-python@v1
       - name: Install Platformio
         run: |

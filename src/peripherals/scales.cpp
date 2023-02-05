@@ -3,18 +3,18 @@
 
 #include <HX711_2.h>
 namespace {
-  class LoadCellSingleton {
-  public:
-    static HX711_2& getInstance() {
-      static HX711_2 instance;
-      return instance;
-    }
-  private:
-    LoadCellSingleton() = default;
-    ~LoadCellSingleton() = default;
-  };
-}
+class LoadCellSingleton {
+ public:
+  static HX711_2& getInstance() {
+    static HX711_2 instance;
+    return instance;
+  }
 
+ private:
+  LoadCellSingleton() = default;
+  ~LoadCellSingleton() = default;
+};
+}  // namespace
 
 bool scalesPresent = {};
 
@@ -26,7 +26,8 @@ unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 
 void scalesInit(float scalesF1, float scalesF2) {
   auto& loadCells = LoadCellSingleton::getInstance();
-  loadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, HX711_sck_2, 128, scale_clk);
+  loadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, HX711_sck_2, 128,
+                  scale_clk);
   loadCells.set_scale(scalesF1, scalesF2);
   loadCells.power_up();
 
