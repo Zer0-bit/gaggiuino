@@ -31,7 +31,7 @@ AfterFunction: false
 AfterNamespace: false
 AfterUnion: false
 AfterExternBlock: false
-BeforeCatch: false
+# BeforeCatch: false
 BeforeElse: false
 # BeforeLambdaBody: false
 # IndentBraces: false
