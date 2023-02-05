@@ -6,9 +6,9 @@ void log_init() {
 
 // Unsure the consequences of swapping to parameter packing or currying since
 // this would then need to be moved to the header. So suppressing this for now.
+//NOLINTNEXTLINE(cert-dcl50-cpp)
 void log(const char* prefix, const char* file, const int line, const char* msg,
-         ...)  //NOLINT(cert-dcl50-cpp)
-{
+         ...) {
   char msgBuf[LOG_MAX_STRING_LEN];
   va_list args;
   va_start(args, msg);
