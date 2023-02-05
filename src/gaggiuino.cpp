@@ -42,9 +42,9 @@ void fillBoilerUntilThreshod(unsigned long elapsedTime);
 void updateStartupTimer();
 // End of Forward Declarations
 
-SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.06f);
-SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.20f);
-SimpleKalmanFilter smoothScalesFlow(1.f, 1.f, 0.05f);
+SimpleKalmanFilter* smoothPressure = nullptr;
+SimpleKalmanFilter* smoothPumpFlow = nullptr;
+SimpleKalmanFilter* smoothScalesFlow = nullptr;
 
 //default phases. Updated in updateProfilerPhases.
 Profile profile;
@@ -61,6 +61,10 @@ eepromValues_t runningCfg;
 void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
+
+  smoothPressure = new SimpleKalmanFilter(0.2f, 0.2f, 0.06f);
+  smoothPumpFlow = new SimpleKalmanFilter(0.1f, 0.1f, 0.20f);
+  smoothScalesFlow = new SimpleKalmanFilter(1.f, 1.f, 0.05f);
 
   // Various pins operation mode handling
   pinInit();
@@ -176,7 +180,7 @@ void sensorsReadPressure(void) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
     currentState.smoothedPressure =
-        smoothPressure.updateEstimate(currentState.pressure);
+        smoothPressure->updateEstimate(currentState.pressure);
     currentState.isPressureRising =
         currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureRisingFast =
@@ -196,7 +200,7 @@ long sensorsReadFlow(float elapsedTime) {
 
   previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
   currentState.smoothedPumpFlow =
-      smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+      smoothPumpFlow->updateEstimate(currentState.pumpFlow);
   return pumpClicks;
 }
 
@@ -226,7 +230,7 @@ void calculateWeightAndFlow() {
             fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f /
                            (float)elapsedTime);
         currentState.smoothedWeightFlow =
-            smoothScalesFlow.updateEstimate(currentState.weightFlow);
+            smoothScalesFlow->updateEstimate(currentState.weightFlow);
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
