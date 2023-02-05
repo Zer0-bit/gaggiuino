@@ -1,6 +1,6 @@
 #ifndef PINDEF_H
 #define PINDEF_H
-#include "variant_BLACKPILL_F411CE.h"
+
 // STM32F4 pins definitions
 #define thermoDO PB4
 #define thermoCS PA6

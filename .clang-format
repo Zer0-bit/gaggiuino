@@ -81,3 +81,4 @@ SpacesInSquareBrackets: false
 Standard: c++11
 TabWidth: 4
 UseTab: Never
+SortIncludes:false
