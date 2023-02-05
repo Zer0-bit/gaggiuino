@@ -20,7 +20,7 @@ jobs:
           - name: Main
             command: "gaggia-lego-stlink"
           - name: Scales
-            command: "scales-calibration-dfu"
+            command: "scales-calibration-stlink"
 
     steps:
       - uses: actions/checkout@v3
