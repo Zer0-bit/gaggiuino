@@ -9,7 +9,7 @@
 #define LOADCELL_2_SCK_PIN PB1
 #define UART_LCD Serial2
 
-HX711_2 loadcell;
+HX711_2* loadcell = nullptr;
 
 #if defined SINGLE_HX711_BOARD
 unsigned char scale_clk = OUTPUT;
@@ -26,6 +26,7 @@ float calibration_factor_lc2 =
 EasyNex myNex(UART_LCD);
 
 void setup() {
+  loadcell = new HX711_2();
   myNex.begin(115200);
   pinMode(relayPin, OUTPUT);
   digitalWrite(relayPin, LOW);
@@ -33,10 +34,10 @@ void setup() {
   while (myNex.readNumber("initCheck") != 100) {
     delay(600);
   }
-  loadcell.begin(LOADCELL_1_DOUT_PIN, LOADCELL_2_DOUT_PIN, LOADCELL_1_SCK_PIN,
-                 LOADCELL_2_SCK_PIN, 128, scale_clk);
-  loadcell.set_scale();
-  loadcell.tare();
+  loadcell->begin(LOADCELL_1_DOUT_PIN, LOADCELL_2_DOUT_PIN, LOADCELL_1_SCK_PIN,
+                  LOADCELL_2_SCK_PIN, 128, scale_clk);
+  loadcell->set_scale();
+  loadcell->tare();
 }
 
 void loop() {
@@ -48,14 +49,14 @@ void loop() {
 
   if (calibration_factor_lc1 != previousFactor1 ||
       calibration_factor_lc2 != previousFactor2) {
-    loadcell.set_scale(calibration_factor_lc1, calibration_factor_lc2);
+    loadcell->set_scale(calibration_factor_lc1, calibration_factor_lc2);
     previousFactor1 = calibration_factor_lc1;
     previousFactor2 = calibration_factor_lc2;
   }
 
   if (myNex.currentPageId == 0) {
     if (millis() > timer) {
-      loadcell.get_units(values);
+      loadcell->get_units(values);
       myNex.writeStr("t0.txt", String(values[0], 2));
       myNex.writeStr("t1.txt", String(values[1], 2));
 
