@@ -27,7 +27,7 @@ AfterCaseLabel: false
 AfterStruct: false
 AfterControlStatement: Never
 AfterEnum: false
-AfterFunction: false
+# AfterFunction: false
 AfterNamespace: false
 AfterUnion: false
 AfterExternBlock: false
