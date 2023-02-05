@@ -20,7 +20,7 @@ jobs:
           - name: Main
             command: "gaggia-lego-stlink"
           - name: Scales
-            command: "scales-calibration-stlink"
+            command: "scales-calibration-dfu"
 
     steps:
       - uses: actions/checkout@v3
@@ -54,7 +54,7 @@ jobs:
       matrix:
         environment:
           - "gaggia-lego-stlink"
-          - "scales-calibration-dfu"
+          - "scales-calibration-stlink"
           - "uart-stm"
           - "uart-esp"
     steps:
