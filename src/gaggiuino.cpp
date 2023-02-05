@@ -3,6 +3,45 @@
 #endif
 #include "gaggiuino.h"
 
+// Forward Declarations
+void sensorsReadTemperature();
+void pageValuesRefresh(bool forcedUpdate);
+void sensorsRead();
+void sensorsReadWeight();
+void sensorsReadPressure();
+long sensorsReadFlow(float elapsedTime);
+void calculateWeightAndFlow();
+void pageValuesRefresh(bool forcedUpdate);
+void modeSelect();
+void lcdRefresh();
+void lcdTrigger1();
+void lcdTrigger2();
+void lcdTrigger3();
+void lcdTrigger4();
+void updateProfilerPhases();
+void addFillBasketPhase(float flowRate);
+void addPressurePhase(Transition pressure, float flowRestriction, int timeMs,
+                      float pressureAbove);
+
+void addFlowPhase(Transition flow, float pressureRestriction, int timeMs,
+                  float pressureAbove);
+void addPhase(PHASE_TYPE type, Transition target, float restriction, int timeMs,
+              float pressureAbove);
+void onProfileReceived(Profile& newProfile);
+void profiling();
+void manualFlowControl();
+void brewDetect();
+void brewParamsReset();
+void systemHealthCheck(float pressureThreshold);
+void fillBoiler();
+bool isBoilerFillPhase(unsigned long elapsedTime);
+bool isBoilerFull(unsigned long elapsedTime);
+unsigned long getTimeSinceInit();
+bool isSwitchOn();
+void fillBoilerUntilThreshod(unsigned long elapsedTime);
+void updateStartupTimer();
+// End of Forward Declarations
+
 SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.06f);
 SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.20f);
 SimpleKalmanFilter smoothScalesFlow(1.f, 1.f, 0.05f);
@@ -99,7 +138,7 @@ void loop(void) {
 //#############################################___________SENSORS_READ________##################################################
 //##############################################################################################################################
 
-static void sensorsRead(void) {
+void sensorsRead() {
   espCommsReadData();
   sensorsReadTemperature();
   sensorsReadWeight();
@@ -109,7 +148,7 @@ static void sensorsRead(void) {
   updateStartupTimer();
 }
 
-static void sensorsReadTemperature(void) {
+void sensorsReadTemperature() {
   if (millis() > thermoTimer) {
     currentState.temperature =
         thermocouple.readCelsius() - runningCfg.offsetTemp;
@@ -117,7 +156,7 @@ static void sensorsReadTemperature(void) {
   }
 }
 
-static void sensorsReadWeight(void) {
+void sensorsReadWeight() {
   if (scalesIsPresent() && millis() > scalesTimer) {
     if (!tareDone) {
       scalesTare();  //Tare at the start of any weighing cycle
@@ -132,7 +171,7 @@ static void sensorsReadWeight(void) {
   }
 }
 
-static void sensorsReadPressure(void) {
+void sensorsReadPressure(void) {
   if (millis() > pressureTimer) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
@@ -150,7 +189,7 @@ static void sensorsReadPressure(void) {
   }
 }
 
-static long sensorsReadFlow(float elapsedTime) {
+long sensorsReadFlow(float elapsedTime) {
   long pumpClicks = getAndResetClickCounter();
   float cps = 1000.f * (float)pumpClicks / elapsedTime;
   currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure);
@@ -161,7 +200,7 @@ static long sensorsReadFlow(float elapsedTime) {
   return pumpClicks;
 }
 
-static void calculateWeightAndFlow(void) {
+void calculateWeightAndFlow() {
   long elapsedTime = millis() - flowTimer;
 
   if (brewActive) {
@@ -210,8 +249,8 @@ static void calculateWeightAndFlow(void) {
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 
-static void pageValuesRefresh(
-    bool forcedUpdate) {  // Refreshing our values on page changes
+void pageValuesRefresh(bool forcedUpdate) {
+  // Refreshing our values on page changes
 
   if (lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true) {
     runningCfg = lcdDownloadCfg();
@@ -229,7 +268,7 @@ static void pageValuesRefresh(
 //#############################################################################################
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
-static void modeSelect(void) {
+void modeSelect() {
   if (!startupInitFinished)
     return;
 
@@ -296,7 +335,7 @@ static void modeSelect(void) {
 //################################____LCD_REFRESH_CONTROL___###################################
 //#############################################################################################
 
-static void lcdRefresh(void) {
+void lcdRefresh() {
 
   if (millis() > pageRefreshTimer) {
 /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
@@ -440,18 +479,18 @@ void lcdTrigger1(void) {
   }
 }
 
-void lcdTrigger2(void) {
+void lcdTrigger2() {
   LOG_VERBOSE("Tare scales");
   if (scalesIsPresent())
     scalesTare();
 }
 
-void lcdTrigger3(void) {
+void lcdTrigger3() {
   LOG_VERBOSE("Scales enabled or disabled");
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
 }
 
-void lcdTrigger4(void) {
+void lcdTrigger4() {
   LOG_VERBOSE("Predictive scales tare action completed!");
   if (!scalesIsPresent()) {
     if (currentState.shotWeight > 0.f) {
@@ -466,7 +505,7 @@ void lcdTrigger4(void) {
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
-static void updateProfilerPhases(void) {
+void updateProfilerPhases() {
   float preInfusionFinishBar = 0.f;
   float shotTarget = -1.f;
 
@@ -566,7 +605,7 @@ void addPhase(PHASE_TYPE type, Transition target, float restriction, int timeMs,
 
 void onProfileReceived(Profile& newProfile) {}
 
-static void profiling(void) {
+void profiling() {
   if (brewActive) {  //runs this only when brew button activated and pressure profile selected
     uint32_t timeInShot = millis() - brewingTimer;
     phaseProfiler.updatePhase(timeInShot, currentState);
@@ -600,7 +639,7 @@ static void profiling(void) {
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
 
-static void manualFlowControl(void) {
+void manualFlowControl() {
   if (brewActive) {
     openValve();
     float flow_reading = lcdGetManualFlowVol() / 10;
@@ -616,7 +655,7 @@ static void manualFlowControl(void) {
 //###################################____BREW DETECT____#######################################
 //#############################################################################################
 
-static void brewDetect(void) {
+void brewDetect() {
   static bool paramsReset = true;
 
   if (brewState()) {
@@ -637,7 +676,7 @@ static void brewDetect(void) {
   }
 }
 
-static void brewParamsReset(void) {
+void brewParamsReset() {
   tareDone = false;
   currentState.shotWeight = 0.f;
   currentState.pumpFlow = 0.f;
