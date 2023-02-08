@@ -633,24 +633,27 @@ void systemHealthCheck(float pressureThreshold) {
     {
       //Reloading the watchdog timer, if this function fails to run MCU is rebooted
       watchdogReload();
+
+      // Only show pressure release pop-up if not on a brew screen
       switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
         case SCREEN_MODES::SCREEN_brew_manual:
         case SCREEN_MODES::SCREEN_brew_graph:
-          brewDetect();
-          lcdRefresh();
-          lcdListen();
-          sensorsRead();
-          justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
           break;
         default:
-          sensorsRead();
           lcdShowPopup("Releasing pressure!");
-          setPumpOff();
-          setBoilerOff();
-          openValve();
           break;
       }
+
+      brewDetect();
+      lcdRefresh();
+      lcdListen();
+      sensorsRead();
+      justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+      setPumpOff();
+      setBoilerOff();
+      openValve();
     }
+
     lcdRefresh();
     lcdListen();
     sensorsRead();
