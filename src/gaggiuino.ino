@@ -4,7 +4,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.2f, 0.2f, 0.06f);
-SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.20f);
+SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.09f);
 SimpleKalmanFilter smoothScalesFlow(1.f, 1.f, 0.05f);
 
 //default phases. Updated in updateProfilerPhases.
@@ -136,8 +136,8 @@ static void sensorsReadPressure(void) {
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
     currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
-    currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.05f;
-    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.1f;
+    currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
+    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.5f;
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -202,7 +202,8 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
 
 
     homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
-    selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode(); // MODE_SELECT should always be LAST
+    // MODE_SELECT should always be LAST
+    selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode();
 
     updateProfilerPhases();
 
@@ -243,7 +244,7 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!steamState()) steamTime = millis();
       backFlush(currentState);
-      brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+      brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, false, preinfusionFinished);
       break;
     case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
@@ -292,9 +293,11 @@ static void lcdRefresh(void) {
     /*LCD weight output*/
     if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && homeScreenScalesEnabled) {
       lcdSetWeight(currentState.weight);
-    } else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
-      || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) {
-      lcdSetWeight(currentState.shotWeight);
+    }
+    else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
+    || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) {
+      if (currentState.shotWeight)
+        lcdSetWeight(currentState.shotWeight);
     }
 
     /*LCD flow output*/
@@ -308,7 +311,7 @@ static void lcdRefresh(void) {
       );
     }
 
-  #if defined DEBUG_ENABLED && defined stm32f411xx
+  #ifdef DEBUG_ENABLED
     lcdShowDebug(readTempSensor(), getAdsError());
   #endif
 
@@ -575,16 +578,16 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset(void) {
-  tareDone                                    = false;
-  currentState.shotWeight                     = 0.f;
-  currentState.pumpFlow                       = 0.f;
-  previousWeight                              = 0.f;
-  currentState.weight                         = 0.f;
-  currentState.waterPumped                    = 0.f;
-  preinfusionFinished                         = false;
-  brewingTimer                                = millis();
-  flowTimer                                   = millis() + REFRESH_FLOW_EVERY;
-  systemHealthTimer                           = millis() + HEALTHCHECK_EVERY;
+  tareDone                 = false;
+  currentState.shotWeight  = 0.f;
+  currentState.pumpFlow    = 0.f;
+  previousWeight           = 0.f;
+  currentState.weight      = 0.f;
+  currentState.waterPumped = 0.f;
+  preinfusionFinished      = false;
+  brewingTimer             = millis();
+  flowTimer                = millis() + REFRESH_FLOW_EVERY;
+  systemHealthTimer        = millis() + HEALTHCHECK_EVERY;
 
   predictiveWeight.reset();
   phaseProfiler.reset();
@@ -596,7 +599,7 @@ void systemHealthCheck(float pressureThreshold) {
 
   /* This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
   If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating */
-  while (currentState.temperature <= 0.0f || currentState.temperature  == NAN || currentState.temperature  >= 170.0f) {
+  while (currentState.temperature <= 0.0f || currentState.temperature == NAN || currentState.temperature >= 170.0f) {
     //Reloading the watchdog timer, if this function fails to run MCU is rebooted
     watchdogReload();
     /* In the event of the temp failing to read while the SSR is HIGH
@@ -662,7 +665,13 @@ void systemHealthCheck(float pressureThreshold) {
 
 void fillBoiler() {
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
+
   if (startupInitFinished) {
+    return;
+  }
+
+  if (currentState.temperature > BOILER_FILL_SKIP_TEMP) {
+    startupInitFinished = true;
     return;
   }
 

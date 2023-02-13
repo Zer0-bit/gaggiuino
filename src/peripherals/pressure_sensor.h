@@ -3,9 +3,9 @@
 
 #include <Arduino.h>
 
-void    adsInit(void);
-void    i2cResetState(void);
-float   getPressure(void);
-int8_t  getAdsError(void);
+void adsInit(void);
+void i2cResetState(void);
+float getPressure(void);
+void getAdsError(void);
 
 #endif

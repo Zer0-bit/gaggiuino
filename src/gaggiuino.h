@@ -34,23 +34,24 @@
 #define EMPTY_TRAY_WEIGHT       23456.f
 #define TRAY_FULL_THRESHOLD     700.f
 #define HEALTHCHECK_EVERY       30000 // system checks happen every 30sec
-#define BOILER_FILL_START_TIME  3000UL //Start boiler fill after 3 seconds since startup, gives system time to fully init.
-#define BOILER_FILL_TIMEOUT     8000UL //Stop boiler fill if it's been 8 seconds since system init and fill conditions aren't still met.
+#define BOILER_FILL_START_TIME  3000UL // Boiler fill start time
+#define BOILER_FILL_TIMEOUT     8000UL // Boiler fill timeout
+#define BOILER_FILL_SKIP_TEMP   85.f // Boiler fill skip threshold
 
 enum class OPERATION_MODES {
-    OPMODE_straight9Bar,
-    OPMODE_justPreinfusion,
-    OPMODE_justPressureProfile,
-    OPMODE_manual,
-    OPMODE_preinfusionAndPressureProfile,
-    OPMODE_flush,
-    OPMODE_descale,
-    OPMODE_empty,
-    OPMODE_justFlowBasedProfiling,
-    OPMODE_steam,
-    OPMODE_justFlowBasedPreinfusion,
-    OPMODE_everythingFlowProfiled,
-    OPMODE_pressureBasedPreinfusionAndFlowProfile
+  OPMODE_straight9Bar,
+  OPMODE_justPreinfusion,
+  OPMODE_justPressureProfile,
+  OPMODE_manual,
+  OPMODE_preinfusionAndPressureProfile,
+  OPMODE_flush,
+  OPMODE_descale,
+  OPMODE_empty,
+  OPMODE_justFlowBasedProfiling,
+  OPMODE_steam,
+  OPMODE_justFlowBasedPreinfusion,
+  OPMODE_everythingFlowProfiled,
+  OPMODE_pressureBasedPreinfusionAndFlowProfile
 } ;
 
 //Timers
