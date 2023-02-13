@@ -108,7 +108,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
 }
 
 /*Water mode and all that*/
-void hotWaterMode(SensorState &currentState) {
+void hotWaterMode(const SensorState &currentState) {
   #ifdef PUMP_NEEDS_OPEN_VALVE
   openValve();
   #else

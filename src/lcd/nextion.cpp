@@ -13,7 +13,7 @@ void lcdInit(void) {
     LOG_VERBOSE("Connecting to Nextion LCD");
     delay(100);
   }
-  myNex.writeStr("splash.build_version.txt", AUTO_VERSION != "null" ? AUTO_VERSION : "git gud");
+  myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
   lcdCurrentPageId = myNex.currentPageId;
   lcdLastCurrentPageId = myNex.currentPageId;
 }

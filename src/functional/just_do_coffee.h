@@ -15,7 +15,7 @@
 void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, bool preinfusionFinished);
 void pulseHeaters(uint32_t pulseLength, int factor_1, int factor_2, bool brewActive);
 void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool brewActive);
-void hotWaterMode(SensorState &currentState);
+void hotWaterMode(const SensorState &currentState);
 
 #endif
 
