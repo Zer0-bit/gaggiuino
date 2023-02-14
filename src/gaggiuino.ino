@@ -91,7 +91,7 @@ void loop(void) {
   brewDetect();
   modeSelect();
   lcdRefresh();
-  espCommsSendSensorData(currentState, brewActive, steamState());
+  espCommsSendSensorData(currentState);
   systemHealthCheck(0.7f);
 }
 
@@ -101,6 +101,7 @@ void loop(void) {
 
 
 static void sensorsRead(void) {
+  sensorReadSwitches();
   espCommsReadData();
   sensorsReadTemperature();
   sensorsReadWeight();
@@ -108,6 +109,12 @@ static void sensorsRead(void) {
   calculateWeightAndFlow();
   fillBoiler();
   updateStartupTimer();
+}
+
+static void sensorReadSwitches(void) {
+  currentState.brewSwitchState = brewState();
+  currentState.steamSwitchState = steamState();
+  currentState.hotWaterSwitchState = waterPinState() || (currentState.brewSwitchState && currentState.steamSwitchState); // use either an actual switch, or the GC/GCP switch combo
 }
 
 static void sensorsReadTemperature(void) {
@@ -228,8 +235,8 @@ static void modeSelect(void) {
     case OPERATION_MODES::OPMODE_everythingFlowProfiled:
     case OPERATION_MODES::OPMODE_pressureBasedPreinfusionAndFlowProfile:
       nonBrewModeActive = false;
-      if (waterState()) hotWaterMode(currentState);
-      else if (steamState()) steamCtrl(runningCfg, currentState, brewActive);
+      if (currentState.hotWaterSwitchState) hotWaterMode(currentState);
+      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState, brewActive);
       else {
         profiling();
         steamTime = millis();
@@ -237,18 +244,18 @@ static void modeSelect(void) {
       break;
     case OPERATION_MODES::OPMODE_manual:
       nonBrewModeActive = false;
-      if (!steamState()) steamTime = millis();
+      if (!currentState.steamSwitchState) steamTime = millis();
       manualFlowControl();
       break;
     case OPERATION_MODES::OPMODE_flush:
       nonBrewModeActive = true;
-      if (!steamState()) steamTime = millis();
+      if (!currentState.steamSwitchState) steamTime = millis();
       backFlush(currentState);
       brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, false, preinfusionFinished);
       break;
     case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
-      if (!steamState()) {
+      if (!currentState.steamSwitchState) {
         brewActive ? flushActivated() : flushDeactivated();
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
         steamTime = millis();
@@ -258,7 +265,7 @@ static void modeSelect(void) {
       break;
     case OPERATION_MODES::OPMODE_descale:
       nonBrewModeActive = true;
-      if (!steamState()) steamTime = millis();
+      if (!currentState.steamSwitchState) steamTime = millis();
       deScale(runningCfg, currentState);
       break;
     case OPERATION_MODES::OPMODE_empty:
@@ -559,7 +566,7 @@ static void manualFlowControl(void) {
 static void brewDetect(void) {
   static bool paramsReset = true;
 
-  if (brewState()) {
+  if (currentState.brewSwitchState) {
     if(!paramsReset) {
       brewParamsReset();
       paramsReset = true;
@@ -608,7 +615,7 @@ void systemHealthCheck(float pressureThreshold) {
     setBoilerOff();
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
-      steamState() ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
+      currentState.steamSwitchState ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
       currentState.temperature  = thermocouple.readCelsius() - runningCfg.offsetTemp;  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
@@ -621,14 +628,14 @@ void systemHealthCheck(float pressureThreshold) {
     lcdShowPopup("TURN STEAM OFF NOW!");
     setPumpOff();
     setBoilerOff();
-    currentState.isSteamForgottenON = steamState();
+    currentState.isSteamForgottenON = currentState.steamSwitchState;
   }
 
   //Releasing the excess pressure after steaming or brewing if necessary
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
 
   // No point going through the whole thing if this first condition isn't met.
-  if (waterState()) return;
+  if (currentState.hotWaterSwitchState) return;
 
   // Should enter the block every "systemHealthTimer" seconds
   if (millis() >= systemHealthTimer) {
@@ -709,7 +716,7 @@ unsigned long getTimeSinceInit() {
 
 // Checks if Brew switch is ON
 bool isSwitchOn() {
-  return brewState() && static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home;
+  return currentState.brewSwitchState && static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home;
 }
 
 void fillBoilerUntilThreshod(unsigned long elapsedTime) {

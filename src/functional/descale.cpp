@@ -11,7 +11,7 @@ int descalingCycle = 0;
 void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   switch (descalingState) {
     case DescalingState::IDLE:
-      if (brewState()) {
+      if (currentState.brewSwitchState) {
         runningCfg.setpoint = 9;
         openValve();
         descalingState = DescalingState::DESCALING_PHASE1;
@@ -20,7 +20,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
       }
       break;
     case DescalingState::DESCALING_PHASE1: // Slowly penetrating that scale
-      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
+      currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpToRawValue(10);
       if (millis() - descalingTimer > DESCALE_PHASE1_EVERY) {
         lcdSetDescaleCycle(descalingCycle++);
@@ -33,7 +33,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
       }
       break;
     case DescalingState::DESCALING_PHASE2: // Softening the f outta that scale
-      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
+      currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpOff();
       if (millis() - descalingTimer > DESCALE_PHASE2_EVERY) {
         descalingTimer = millis();
@@ -42,7 +42,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
       }
       break;
     case DescalingState::DESCALING_PHASE3: // Fucking up that scale big time
-      brewState() ? descalingState : descalingState = DescalingState::FINISHED;
+      currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpToRawValue(30);
       if (millis() - descalingTimer > DESCALE_PHASE3_EVERY) {
         solenoidBeat();
@@ -58,7 +58,7 @@ void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
     case DescalingState::FINISHED: // Scale successufuly fucked
       setPumpOff();
       closeValve();
-      brewState() ? descalingState = DescalingState::FINISHED : descalingState = DescalingState::IDLE;
+      currentState.brewSwitchState ? descalingState = DescalingState::FINISHED : descalingState = DescalingState::IDLE;
       if (millis() - descalingTimer > 1000) {
         lcdBrewTimerStop();
         lcdShowPopup("FINISHED");
@@ -91,7 +91,7 @@ void solenoidBeat() {
 void backFlush(const SensorState &currentState) {
   static unsigned long backflushTimer = millis();
   unsigned long elapsedTime = millis() - backflushTimer;
-  if (brewState()) {
+  if (currentState.brewSwitchState) {
     if (flushCounter >= 11) {
       flushDeactivated();
       return;
