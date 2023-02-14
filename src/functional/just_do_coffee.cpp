@@ -18,7 +18,7 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
 
   if (brewActive) { //if brewState == true
-    if (sensorTemperature <= runningCfg.setpoint) {
+    if(sensorTemperature <= runningCfg.setpoint - 5.f) {
       setBoilerOn();
     } else {
       float deltaOffset = 0.f;
