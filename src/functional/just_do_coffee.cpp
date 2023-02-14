@@ -25,7 +25,7 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
   lcdTargetState(0); // setting the target mode to "brew temp"
 
   if (brewActive) { //if brewState == true
-    if(sensorTemperature <= runningCfg.setpoint) {
+    if(sensorTemperature <= runningCfg.setpoint - 5.f) {
       setBoilerOn();
     }
     else if (sensorTemperature <= runningCfg.setpoint + (runningCfg.brewDeltaState ? BREW_TEMP_DELTA : 0.f)) {
