@@ -42,10 +42,6 @@ static inline bool waterPinState(void) {
   return digitalRead(waterPin) == LOW; // pin will be low when switch is ON.
 }
 
-static inline bool waterState(void) {
-  return waterPinState() || (steamState() && brewState()); // use either an actual switch, or the GC/GCP switch combo
-}
-
 static inline void openValve(void) {
   #if defined LEGO_VALVE_RELAY
     digitalWrite(valvePin, LOW);
