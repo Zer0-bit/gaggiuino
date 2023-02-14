@@ -16,7 +16,7 @@ inline static float TEMP_DELTA(float d, const SensorState &currentState) {
 void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, bool preinfusionFinished) {
   lcdTargetState(0); // setting the target mode to "brew temp"
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
-  
+
   if (brewActive) { //if brewState == true
     if (sensorTemperature <= runningCfg.setpoint) {
       setBoilerOn();
@@ -41,7 +41,7 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
       // Calculating the boiler heating power range based on the below input values
       int HPWR_OUT = mapRange(sensorTemperature, runningCfg.setpoint - 10, runningCfg.setpoint, runningCfg.hpwr, HPWR_LOW, 0);
       HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
-      
+
       if (sensorTemperature <= ((float)runningCfg.setpoint - 5.f)) {
         pulseHeaters(HPWR_OUT, 1, runningCfg.mainDivider, brewActive);
       } else if (sensorTemperature < ((float)runningCfg.setpoint)) {
@@ -79,7 +79,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
   lcdTargetState(1); // setting the target mode to "steam temp"
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
-  
+
   if (currentState.smoothedPressure > 9.f || sensorTemperature < runningCfg.setpoint - 10.f) {
     setBoilerOff();
     #ifndef DREAM_STEAM_DISABLED
