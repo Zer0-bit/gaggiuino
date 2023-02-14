@@ -15,8 +15,6 @@ static inline void pinInit(void) {
   pinMode(brewPin,  INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(waterPin, INPUT_PULLUP);
-  pinMode(HX711_dout_1, INPUT_PULLUP);
-  pinMode(HX711_dout_2, INPUT_PULLUP);
 }
 
 // Actuating the heater element
