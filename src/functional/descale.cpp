@@ -10,7 +10,7 @@ int descalingCycle = 0;
 
 void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
   switch (descalingState) {
-    case DescalingState::IDLE:
+    case DescalingState::IDLE: // Waiting for fuckfest to begin
       if (currentState.brewSwitchState) {
         runningCfg.setpoint = 9;
         openValve();
