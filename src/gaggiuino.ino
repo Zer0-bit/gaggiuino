@@ -637,6 +637,11 @@ void systemHealthCheck(float pressureThreshold) {
   // No point going through the whole thing if this first condition isn't met.
   if (currentState.hotWaterSwitchState) return;
 
+  // No point going through the whole thing if this first condition isn't met.
+  if (currentState.brewSwitchState || currentState.steamSwitchState) {
+    systemHealthTimer = millis() + HEALTHCHECK_EVERY;
+    return;
+  }
   // Should enter the block every "systemHealthTimer" seconds
   if (millis() >= systemHealthTimer) {
     while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
@@ -661,9 +666,6 @@ void systemHealthCheck(float pressureThreshold) {
           break;
       }
     }
-    lcdRefresh();
-    lcdListen();
-    sensorsRead();
     closeValve();
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   }
