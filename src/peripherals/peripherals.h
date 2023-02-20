@@ -12,6 +12,8 @@ static inline void pinInit(void) {
     pinMode(valvePin, OUTPUT);
   #endif
   pinMode(relayPin, OUTPUT);
+  pinMode(mainBoilerRelayPin, OUTPUT);
+  pinMode(steamBoilerRelayPin, OUTPUT);
   pinMode(brewPin,  INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
   pinMode(waterPin, INPUT_PULLUP);
@@ -24,6 +26,22 @@ static inline void setBoilerOn(void) {
 
 static inline void setBoilerOff(void) {
   digitalWrite(relayPin, LOW);  // boilerPin -> LOW
+}
+
+static inline void setMainBoilerRelayOn(void) {
+  digitalWrite(mainBoilerRelayPin, HIGH);  // mainBoilerRelayPin -> HIGH
+}
+
+static inline void setMainBoilerRelayOff(void) {
+  digitalWrite(mainBoilerRelayPin, LOW);  // mainBoilerRelayPin -> LOW
+}
+
+static inline void setSteamBoilerRelayOn(void) {
+  digitalWrite(steamBoilerRelayPin, HIGH);  // steamBoilerRelayPin -> HIGH
+}
+
+static inline void setSteamBoilerRelayOff(void) {
+  digitalWrite(steamBoilerRelayPin, LOW);  // steamBoilerRelayPin -> LOW
 }
 
 //Function to get the state of the brew switch button

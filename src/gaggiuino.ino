@@ -28,6 +28,8 @@ void setup(void) {
   LOG_INFO("Pin init");
 
   setBoilerOff();  // relayPin LOW
+  setMainBoilerRelayOff();
+  setSteamBoilerRelayOff();
   LOG_INFO("Boiler turned off");
 
   //Pump
@@ -613,6 +615,8 @@ void systemHealthCheck(float pressureThreshold) {
     we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
     setPumpOff();
     setBoilerOff();
+    setMainBoilerRelayOff();
+    setSteamBoilerRelayOff();
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
       currentState.steamSwitchState ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
@@ -628,6 +632,8 @@ void systemHealthCheck(float pressureThreshold) {
     lcdShowPopup("TURN STEAM OFF NOW!");
     setPumpOff();
     setBoilerOff();
+    setMainBoilerRelayOff();
+    setSteamBoilerRelayOff();
     currentState.isSteamForgottenON = currentState.steamSwitchState;
   }
 
@@ -635,10 +641,7 @@ void systemHealthCheck(float pressureThreshold) {
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
 
   // No point going through the whole thing if this first condition isn't met.
-  if (currentState.hotWaterSwitchState) return;
-
-  // No point going through the whole thing if this first condition isn't met.
-  if (currentState.brewSwitchState || currentState.steamSwitchState) {
+  if (currentState.brewSwitchState || currentState.steamSwitchState || currentState.hotWaterSwitchState) {
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
     return;
   }
@@ -662,6 +665,8 @@ void systemHealthCheck(float pressureThreshold) {
           lcdShowPopup("Releasing pressure!");
           setPumpOff();
           setBoilerOff();
+          setMainBoilerRelayOff();
+          setSteamBoilerRelayOff();
           openValve();
           break;
       }
