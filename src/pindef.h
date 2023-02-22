@@ -14,9 +14,11 @@
 #define valvePin      PC13
 #define waterPin      PA12
 
+#ifdef PCBV2
 // PCB V2
 #define mainBoilerRelayPin  PB13
 #define steamBoilerRelayPin PB12
+#endif
 
 #define HX711_sck_1   PB0
 #define HX711_sck_2   PB1
