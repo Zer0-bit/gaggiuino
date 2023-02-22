@@ -33,8 +33,9 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
         setBoilerOff();
       }
     }
+    setMainBoilerRelayOff();
   } else { //if brewState == false
-    if (sensorTemperature <= ((float)runningCfg.setpoint - 10.00f)) {
+    if (sensorTemperature <= ((float)runningCfg.setpoint - 10.f)) {
       setBoilerOn();
     } else {
       int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
@@ -50,7 +51,13 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
         setBoilerOff();
       }
     }
+    if (sensorTemperature < ((float)runningCfg.setpoint - 15.f)) {
+      setMainBoilerRelayOn();
+    } else {
+      setMainBoilerRelayOff();
+    }
   }
+  setSteamBoilerRelayOff();
 }
 
 void pulseHeaters(uint32_t pulseLength, int factor_1, int factor_2, bool brewActive) {
@@ -82,15 +89,16 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
 
   if (currentState.smoothedPressure > 9.f || sensorTemperature < runningCfg.setpoint - 10.f) {
     setBoilerOff();
-    #ifndef DREAM_STEAM_DISABLED
-      setPumpOff();
-    #endif
+    setMainBoilerRelayOff();
+    setSteamBoilerRelayOff();
+    setPumpOff();
   } else {
     if (sensorTemperature < runningCfg.steamSetPoint) {
       setBoilerOn();
     } else {
       setBoilerOff();
     }
+    setSteamBoilerRelayOn();
     #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adjusting the pressure
       if (currentState.smoothedPressure < 1.8f) {
         #ifdef PUMP_NEEDS_OPEN_VALVE
@@ -108,10 +116,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
 
   /*In case steam is forgotten ON for more than 15 min*/
   if (currentState.smoothedPressure > 3.f) {
-    long steamTimeout = millis() - steamTime;
-    (steamTimeout >= STEAM_TIMEOUT)
-      ? currentState.isSteamForgottenON = true
-      : currentState.isSteamForgottenON = false;
+    currentState.isSteamForgottenON = millis() - steamTime >= STEAM_TIMEOUT;
   } else steamTime = millis();
 }
 
