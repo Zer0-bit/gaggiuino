@@ -17,7 +17,7 @@ namespace {
     defaultData.offsetTemp = 7;
     defaultData.hpwr = 550;
     defaultData.mainDivider = 5;
-    defaultData.brewDivider = 2;
+    defaultData.brewDivider = 3;
     defaultData.pressureProfilingStart = 9;
     defaultData.pressureProfilingFinish = 6;
     defaultData.pressureProfilingHold = 5;
