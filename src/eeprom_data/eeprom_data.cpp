@@ -181,7 +181,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
-  if (eepromValuesNew.pumpFlowAtZero < 21.f || eepromValuesNew.pumpFlowAtZero > 31.f) {
+  if (eepromValuesNew.pumpFlowAtZero < 0.210f || eepromValuesNew.pumpFlowAtZero > 0.310f) {
     LOG_ERROR(errMsg);
     return false;
   }
