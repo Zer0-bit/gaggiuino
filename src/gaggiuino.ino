@@ -4,7 +4,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(0.1f, 1.f, 0.09f);
+SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.2f);
 SimpleKalmanFilter smoothScalesFlow(0.1f, 1.f, 0.05f);
 
 //default phases. Updated in updateProfilerPhases.
@@ -193,10 +193,10 @@ static void calculateWeightAndFlow(void) {
       currentState.waterPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
   } else {
-    if (elapsedTime > REFRESH_FLOW_EVERY) {
-      flowTimer = millis();
-      sensorsReadFlow(elapsedTime);
-    }
+    // if (elapsedTime > REFRESH_FLOW_EVERY) {
+    flowTimer = millis();
+    //   sensorsReadFlow(elapsedTime);
+    // }
   }
 }
 
@@ -306,7 +306,7 @@ static void lcdRefresh(void) {
     else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
     || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) {
       if (currentState.shotWeight)
-        lcdSetWeight(currentState.shotWeight);
+        lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : 0.f);
     }
 
     /*LCD flow output*/
