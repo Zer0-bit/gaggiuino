@@ -24,10 +24,10 @@ int I2C_ClearBus(int sdaPin, int sclPin) {
   pinMode(sclPin, INPUT_PULLUP);
 
   bool SCL_LOW = (digitalRead(sclPin) == LOW); // Check is sclPin is Low.
-  if (SCL_LOW) { //If it is held low Arduno cannot become the I2C master.
+  if (SCL_LOW) { //If it is held low MCU cannot become the I2C master.
     pinMode(sdaPin, INPUT_PULLUP); // Make sdaPin (data) and sclPin (clock) pins Inputs with pullup.
     pinMode(sclPin, INPUT_PULLUP);
-    return 1; //I2C bus error. Could not clear sclPin clock line held low
+    return 1; // I2C bus error. Could not clear sclPin clock line held low
   }
 
   bool SDA_LOW = (digitalRead(sdaPin) == LOW);  // vi. Check sdaPin input.

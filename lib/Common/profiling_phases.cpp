@@ -43,7 +43,7 @@ bool Phase::isStopConditionReached(SensorState& currentState, uint32_t timeInSho
 //----------------------------------------------------------------------//
 bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
   float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
-  float stopDelta = flow * (state.shotWeight / 100.f);
+  float stopDelta = flow * state.shotWeight / 100.f;
 
   return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
     (weight > 0.f && state.shotWeight > weight - stopDelta) ||
