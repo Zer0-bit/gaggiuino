@@ -181,6 +181,21 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
+  if (eepromValuesNew.pumpFlowAtZero < 21.f || eepromValuesNew.pumpFlowAtZero > 31.f) {
+    LOG_ERROR(errMsg);
+    return false;
+  }
+
+  if (eepromValuesNew.scalesF1 < -20000.f || eepromValuesNew.scalesF1 > 20000.f) {
+    LOG_ERROR(errMsg);
+    return false;
+  }
+
+  if (eepromValuesNew.scalesF2 < -20000.f || eepromValuesNew.scalesF2 > 20000.f) {
+    LOG_ERROR(errMsg);
+    return false;
+  }
+
   eepromMetadata.timestamp = millis();
   eepromMetadata.version = EEPROM_DATA_VERSION;
   eepromMetadata.values = eepromValuesNew;

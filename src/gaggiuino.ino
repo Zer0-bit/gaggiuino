@@ -406,9 +406,9 @@ void lcdTrigger1(void) {
 
   rc = eepromWrite(eepromCurrentValues);
   if (rc == true) {
-    lcdShowPopup("UPDATE SUCCESSFUL!");
+    lcdShowPopup("Update successful!");
   } else {
-    lcdShowPopup("ERROR!");
+    lcdShowPopup("Data out of range!");
   }
 }
 
