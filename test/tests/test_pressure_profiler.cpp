@@ -108,7 +108,7 @@ void test_phases_with_weight_stop_condition(void) {
   SensorState mockedState;
   mockedState.shotWeight = 0.f;
   mockedState.smoothedPumpFlow = 0.f;
-  mockedState.weightFlow = 0.f;
+  mockedState.smoothedWeightFlow = 0.f;
 
   float weightTarget = 0.4f;
   Profile profile;
@@ -139,7 +139,7 @@ void test_phases_with_stop_conditions_and_skipped_phases() {
   SensorState mockedState;
   mockedState.shotWeight = 0.f;
   mockedState.smoothedPumpFlow = 0.f;
-  mockedState.weightFlow = 0.f;
+  mockedState.smoothedWeightFlow = 0.f;
 
   float weightTarget = 0.4f;
 
