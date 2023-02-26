@@ -37,7 +37,7 @@ void espCommsSendSensorData(const SensorState& state, uint32_t frequency) {
       .temperature = state.temperature,
       .pressure = state.smoothedPressure,
       .pumpFlow = state.smoothedPumpFlow,
-      .weightFlow = state.weightFlow,
+      .weightFlow = state.smoothedWeightFlow,
       .weight = state.weight,
     };
     McuCommsSingleton::getInstance().sendSensorStateSnapshot(sensorSnapshot);
