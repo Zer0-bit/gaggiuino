@@ -222,9 +222,10 @@ void lcdSetTemperature(int val) {
 void lcdSetWeight(float val) {
   char tmp[6];
   int check = snprintf(tmp, sizeof(tmp), "%.1f", static_cast<double>(val));
-  if (check > 0 && static_cast<unsigned int>(check) <= sizeof(tmp))
+  if (check > 0 && static_cast<unsigned int>(check) <= sizeof(tmp)) {
     strcat(tmp, "g");
     myNex.writeStr("weight.txt", tmp);
+  }
 }
 
 void lcdSetFlow(int val) {

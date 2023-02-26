@@ -306,7 +306,8 @@ static void lcdRefresh(void) {
     else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
     || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) {
       if (currentState.shotWeight)
-        lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : 0.f);
+        // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
+        lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
     }
 
     /*LCD flow output*/
