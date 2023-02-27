@@ -6,13 +6,13 @@
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.29f;
 short maxPumpClicksPerSecond = 50;
-float pressureInefficiencyCoefficient[7] = {
-  flowPerClickAtZeroBar + -0.128f,
+const float pressureInefficiencyCoefficient[7] = {
+  (-0.128f),
   0.00222f,
-  -0.00184f,
+  (-0.00184f),
   0.0000915f,
   0.00000594f,
-  -0.000000798f,
+  (-0.000000798f),
   0.0000000186f
 };
 
@@ -20,10 +20,8 @@ float pressureInefficiencyCoefficient[7] = {
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
-  maxPumpClicksPerSecond = powerLineFrequency;
+  maxPumpClicksPerSecond = pump.cps();
   flowPerClickAtZeroBar = pumpFlowAtZero;
-  // Set the new inneficiency coefficient 0.
-  pressureInefficiencyCoefficient[0] = flowPerClickAtZeroBar + -0.128f;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
@@ -87,11 +85,13 @@ long getAndResetClickCounter(void) {
 // float fpc = (flowPerClickAtZeroBar + pressureInefficiencyConstant0) + (pressureInefficiencyConstant1 + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + (pressureInefficiencyConstant5 + pressureInefficiencyConstant6 * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
 // Polinomyal func that should in theory calc fpc faster than the above.
 float getPumpFlowPerClick(float pressure) {
-  float fpc = 0.f;
-  for (int i = 6; i >= 0; i--) {
-    fpc = fpc * pressure + pressureInefficiencyCoefficient[i];
-  }
-  return 50.0f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
+    float fpc = flowPerClickAtZeroBar;
+    float pressurePower = pressure;
+    for (int i = 0; i < 7; i++) {
+        fpc += pressureInefficiencyCoefficient[i] * pressurePower;
+        pressurePower *= pressure;
+    }
+    return 50.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
