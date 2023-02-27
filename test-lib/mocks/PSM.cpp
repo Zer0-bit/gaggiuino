@@ -10,9 +10,9 @@ void PSM::resetCounter() {
 }
 void PSM::stopAfter(long counter) {
 }
-unsigned int cps() {
+unsigned int PSM::cps() {
   return 50u;
 }
-unsigned long getLastMillis() {
+unsigned long PSM::getLastMillis() {
   return 1ul;
 }
