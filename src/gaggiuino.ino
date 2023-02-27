@@ -4,7 +4,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.2f);
+SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.1f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 
 //default phases. Updated in updateProfilerPhases.
