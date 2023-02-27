@@ -80,6 +80,10 @@ long getAndResetClickCounter(void) {
   return counter;
 }
 
+int getCPS(void) {
+  return pump.cps();
+}
+
 // Models the flow per click
 // Follows a compromise between the schematic and recorded findings
 
