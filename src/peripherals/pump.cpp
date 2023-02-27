@@ -20,7 +20,7 @@ const float pressureInefficiencyCoefficient[7] = {
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
-  maxPumpClicksPerSecond = pump.cps();
+  maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
 }
 
