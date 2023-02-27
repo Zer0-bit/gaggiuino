@@ -11,5 +11,5 @@ public:
   void stopAfter(long counter);
 
   unsigned int cps();
-	unsigned long getLastMillis();
+  unsigned long getLastMillis();
 };
