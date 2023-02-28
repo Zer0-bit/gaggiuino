@@ -556,7 +556,7 @@ static void profiling(void) {
 static void manualFlowControl(void) {
   if (brewActive) {
     openValve();
-    float flow_reading = lcdGetManualFlowVol() / 10 ;
+    float flow_reading = lcdGetManualFlowVol() / 10.f ;
     setPumpFlow(flow_reading, 0.f, currentState);
   } else {
     closeValve();
@@ -677,6 +677,16 @@ void systemHealthCheck(float pressureThreshold) {
     }
     closeValve();
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
+  }
+  // Throwing a pressure release countodown.
+  if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
+    if (millis() >= systemHealthTimer - 3000ul) {
+      char tmp[25];
+      unsigned int check = snprintf(tmp, sizeof(tmp), "Pressure release in: %i", (int)(systemHealthTimer-millis())/1000);
+      if (check > 0 && check <= sizeof(tmp)) {
+        lcdShowPopup(tmp);
+      }
+    }
   }
   #endif
 }

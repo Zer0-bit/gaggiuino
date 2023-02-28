@@ -4,10 +4,10 @@
 #include "utils.h"
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
-float flowPerClickAtZeroBar = 0.29f;
+float flowPerClickAtZeroBar = 0.27f;
 short maxPumpClicksPerSecond = 50;
 constexpr float pressureInefficiencyCoefficient[7] = {
-  (-0.128f),
+  0.108f,
   0.00222f,
   (-0.00184f),
   0.0000915f,
@@ -56,8 +56,7 @@ float getPumpPct(float targetPressure, float flowRestriction, SensorState &curre
 // - pressure direction
 void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState) {
   float pumpPct = getPumpPct(targetPressure, flowRestriction, currentState);
-
-  pump.set(pumpPct * PUMP_RANGE);
+  setPumpToRawValue(pumpPct * PUMP_RANGE);
 }
 
 void setPumpOff(void) {
@@ -86,14 +85,14 @@ int getCPS(void) {
 // Follows a compromise between the schematic and recorded findings
 
 // The function is split to compensate for the rapid decline in fpc at low pressures
-// float fpc = (flowPerClickAtZeroBar + pressureInefficiencyConstant0) + (pressureInefficiencyConstant1 + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + (pressureInefficiencyConstant5 + pressureInefficiencyConstant6 * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
+// float fpc = (flowPerClickAtZeroBar - pressureInefficiencyConstant0) + (pressureInefficiencyConstant1 + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + (pressureInefficiencyConstant5 + pressureInefficiencyConstant6 * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
 // Polinomyal func that should in theory calc fpc faster than the above.
 float getPumpFlowPerClick(float pressure) {
-  float fpc = flowPerClickAtZeroBar + pressureInefficiencyCoefficient[0];
+  float fpc = flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0];
   for (int i = 7; i < 1; i--) {
       fpc += pressureInefficiencyCoefficient[i] * pressure;
   }
-  // float fpc = (flowPerClickAtZeroBar + pressureInefficiencyCoefficient[0]) + (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] + (pressureInefficiencyCoefficient[3] + (pressureInefficiencyCoefficient[4] + (pressureInefficiencyCoefficient[5] + pressureInefficiencyCoefficient[6] * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
+  // float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) + (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] + (pressureInefficiencyCoefficient[3] + (pressureInefficiencyCoefficient[4] + (pressureInefficiencyCoefficient[5] + pressureInefficiencyCoefficient[6] * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
   return 50.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 
@@ -115,7 +114,8 @@ void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &curre
   // which is equivalent but will achieve smoother pressure management
   if (pressureRestriction > 0) {
     setPumpPressure(pressureRestriction, targetFlow, currentState);
-  } else {
+  }
+  else {
     float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.smoothedPressure) / (float)maxPumpClicksPerSecond;
     setPumpToRawValue(pumpPct * PUMP_RANGE);
   }
