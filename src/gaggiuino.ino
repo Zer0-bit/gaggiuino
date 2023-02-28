@@ -679,10 +679,14 @@ void systemHealthCheck(float pressureThreshold) {
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   }
   // Throwing a pressure release countodown.
+  if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph) return;
+  if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) return;
+
   if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
-    if (millis() >= systemHealthTimer - 3000ul) {
+    if (millis() >= systemHealthTimer - 3500ul && millis() <= systemHealthTimer - 500ul) {
       char tmp[25];
-      unsigned int check = snprintf(tmp, sizeof(tmp), "Pressure release in: %i", (int)(systemHealthTimer-millis())/1000);
+      int countdown = (int)(systemHealthTimer-millis())/1000;
+      unsigned int check = snprintf(tmp, sizeof(tmp), "Dropping beats in: %i", countdown);
       if (check > 0 && check <= sizeof(tmp)) {
         lcdShowPopup(tmp);
       }
