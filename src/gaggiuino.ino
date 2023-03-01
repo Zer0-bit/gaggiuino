@@ -4,8 +4,8 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.2f);
-SimpleKalmanFilter smoothScalesFlow(0.1f, 1.f, 0.05f);
+SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.1f);
+SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 
 //default phases. Updated in updateProfilerPhases.
 Profile profile;
@@ -306,7 +306,8 @@ static void lcdRefresh(void) {
     else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
     || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) {
       if (currentState.shotWeight)
-        lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : 0.f);
+        // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
+        lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
     }
 
     /*LCD flow output*/
@@ -552,7 +553,7 @@ static void profiling(void) {
 static void manualFlowControl(void) {
   if (brewActive) {
     openValve();
-    float flow_reading = lcdGetManualFlowVol() / 10 ;
+    float flow_reading = lcdGetManualFlowVol() / 10.f ;
     setPumpFlow(flow_reading, 0.f, currentState);
   } else {
     closeValve();
@@ -673,6 +674,20 @@ void systemHealthCheck(float pressureThreshold) {
     }
     closeValve();
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
+  }
+  // Throwing a pressure release countodown.
+  if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph) return;
+  if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) return;
+
+  if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
+    if (millis() >= systemHealthTimer - 3500ul && millis() <= systemHealthTimer - 500ul) {
+      char tmp[25];
+      int countdown = (int)(systemHealthTimer-millis())/1000;
+      unsigned int check = snprintf(tmp, sizeof(tmp), "Dropping beats in: %i", countdown);
+      if (check > 0 && check <= sizeof(tmp)) {
+        lcdShowPopup(tmp);
+      }
+    }
   }
   #endif
 }

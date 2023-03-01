@@ -12,7 +12,7 @@ ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentP
     .timeInShot=timeInShot,
     .pressure=state.smoothedPressure,
     .pumpFlow=state.smoothedPumpFlow,
-    .weightFlow=state.weightFlow,
+    .weightFlow=state.smoothedWeightFlow,
     .temperature=state.temperature,
     .shotWeight=state.shotWeight,
     .waterPumped=state.waterPumped,
@@ -42,7 +42,7 @@ bool Phase::isStopConditionReached(SensorState& currentState, uint32_t timeInSho
 //-------------------------- StopConditions ----------------------------//
 //----------------------------------------------------------------------//
 bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
-  float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
+  float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * state.shotWeight / 100.f;
 
   return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
@@ -55,7 +55,7 @@ bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSna
 }
 
 bool GlobalStopConditions::isReached(SensorState& state, long timeInShot) {
-  float flow = state.weight > 0.4f ? state.weightFlow : state.smoothedPumpFlow;
+  float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * (state.shotWeight / 100.f);
 
   return (weight > 0.f && state.shotWeight > weight - stopDelta) ||
