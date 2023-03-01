@@ -9,4 +9,7 @@ public:
   void resetCounter();
 
   void stopAfter(long counter);
+
+  unsigned int cps();
+  unsigned long getLastMillis();
 };

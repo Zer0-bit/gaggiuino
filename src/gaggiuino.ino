@@ -57,6 +57,9 @@ void setup(void) {
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   LOG_INFO("EEPROM Init");
 
+  cpsInit(eepromCurrentValues);
+  LOG_INFO("CPS Init");
+
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
@@ -761,4 +764,17 @@ void fillBoilerUntilThreshod(unsigned long elapsedTime) {
 
 void updateStartupTimer() {
   lcdSetUpTime(getTimeSinceInit() / 1000);
+}
+
+void cpsInit(eepromValues_t &eepromValues) {
+  int cps = getCPS();
+  if (cps > 110) { // double 60 Hz
+    eepromValues.powerLineFrequency = 60u;
+  } else if (cps > 80) { // double 50 Hz
+    eepromValues.powerLineFrequency = 50u;
+  } else if (cps > 55) { // 60 Hz
+    eepromValues.powerLineFrequency = 60u;
+  } else if (cps > 0) { // 50 Hz
+    eepromValues.powerLineFrequency = 50u;
+  }
 }

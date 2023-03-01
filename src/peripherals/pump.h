@@ -13,6 +13,7 @@ void setPumpOff(void);
 void setPumpFullOn(void);
 void setPumpToRawValue(uint8_t val);
 long  getAndResetClickCounter(void);
+int getCPS(void);
 float getPumpFlow(float cps, float pressure);
 float getPumpFlowPerClick(float pressure);
 float getClicksPerSecondForFlow(float flow, float pressure);
