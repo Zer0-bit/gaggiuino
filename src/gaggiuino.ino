@@ -150,7 +150,8 @@ static void sensorsReadPressure(void) {
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
     currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
     currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.5f;
-    currentState.isPressureMaxed = currentState.smoothedPressure >= previousSmoothedPressure - 0.5f;
+    currentState.isPressureMaxed = currentState.smoothedPressure >= runningCfg.pressureProfilingState ? runningCfg.pressureProfilingStart - 0.5f : runningCfg.flowProfilePressureTarget - 0.5f;
+
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
