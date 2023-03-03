@@ -52,15 +52,9 @@ jobs:
       - name: Install Platformio
         run: |
           python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
-      - name: Building ${{ matrix.environment.name }}
-        run: |
-          ~/.platformio/penv/bin/platformio run -e ${{ matrix.environment.command }}
-        env:
-          PLATFORMIO_BUILD_SRC_FLAGS: -Wdouble-promotion -Wall -Werror
-
       - name: Install sonar-scanner
         uses: SonarSource/sonarcloud-github-c-cpp@v1
-      - name: Run build-wrapper
+      - name: Run build-wrapper on ${{ matrix.environment.name }}
         run: |
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} ~/.platformio/penv/bin/platformio run -e ${{ matrix.environment.command }}
         env:
