@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <HX711_2.h>
 #include <EasyNextionLibrary.h>
-#include "ADS1X15.h"
+#include <ADS1X15.h>
 
 #define relayPin PA15  // PB0
 #define LOADCELL_1_DOUT_PIN  PB8
