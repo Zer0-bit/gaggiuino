@@ -6,7 +6,7 @@
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.27f;
 short maxPumpClicksPerSecond = 50;
-constexpr float pressureInefficiencyCoefficient[7] = {
+const float pressureInefficiencyCoefficient[7] = {
   0.108f,
   0.00222f,
   (-0.00184f),
@@ -89,7 +89,7 @@ int getCPS(void) {
 // Polinomyal func that should in theory calc fpc faster than the above.
 float getPumpFlowPerClick(float pressure) {
   float fpc = flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0];
-  for (int i = 7; i >= 1; i--) {
+  for (int i = 6; i >= 1; i--) {
       fpc += pressureInefficiencyCoefficient[i] * pressure;
   }
   // float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) + (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] + (pressureInefficiencyCoefficient[3] + (pressureInefficiencyCoefficient[4] + (pressureInefficiencyCoefficient[5] + pressureInefficiencyCoefficient[6] * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
