@@ -89,7 +89,7 @@ int getCPS(void) {
 // Polinomyal func that should in theory calc fpc faster than the above.
 float getPumpFlowPerClick(float pressure) {
   float fpc = flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0];
-  for (int i = 7; i < 1; i--) {
+  for (int i = 7; i >= 1; i--) {
       fpc += pressureInefficiencyCoefficient[i] * pressure;
   }
   // float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) + (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] + (pressureInefficiencyCoefficient[3] + (pressureInefficiencyCoefficient[4] + (pressureInefficiencyCoefficient[5] + pressureInefficiencyCoefficient[6] * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
