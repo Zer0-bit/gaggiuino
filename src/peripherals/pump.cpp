@@ -6,15 +6,15 @@
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.27f;
 short maxPumpClicksPerSecond = 50;
-const float pressureInefficiencyCoefficient[7] = {
+std::array<float, 7> pressureInefficiencyCoefficient {{
   0.108f,
   0.00222f,
-  (-0.00184f),
+  -0.00184f,
   0.0000915f,
   0.00000594f,
-  (-0.000000798f),
+  -0.000000798f,
   0.0000000186f
-};
+}};
 
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
