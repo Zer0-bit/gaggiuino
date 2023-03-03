@@ -150,6 +150,7 @@ static void sensorsReadPressure(void) {
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
     currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
     currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.5f;
+    currentState.isPressureMaxed = currentState.smoothedPressure >= previousSmoothedPressure - 0.5f;
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
@@ -189,9 +190,8 @@ static void calculateWeightAndFlow(void) {
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
-        // if the output flow just started, consider only 50% of the clicks (probabilistically).
-        // long consideredClicks = previousIsOutputFlow ? pumpClicks : pumpClicks * 0.5f;
-        currentState.shotWeight += pumpClicks * flowPerClick;
+        //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
+        currentState.shotWeight += currentState.isPressureMaxed ? pumpClicks * flowPerClick * 1.4f : pumpClicks * flowPerClick;
       }
       currentState.waterPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
