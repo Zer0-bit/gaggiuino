@@ -30,7 +30,7 @@ void scalesInit(float scalesF1, float scalesF2) {
   loadCells.set_scale(scalesF1, scalesF2);
   loadCells.power_up();
 
-  if (loadCells.wait_ready_timeout(700, 20)) {
+  if (loadCells.wait_ready_timeout(1000, 10)) {
     loadCells.tare(4);
     scalesPresent = true;
   }
@@ -43,7 +43,7 @@ void scalesInit(float scalesF1, float scalesF2) {
 
 void scalesTare(void) {
   auto& loadCells = LoadCellSingleton::getInstance();
-  if (loadCells.wait_ready_timeout(100, 20)) {
+  if (loadCells.wait_ready_timeout(150, 10)) {
     loadCells.tare(4);
   }
 }
@@ -51,7 +51,7 @@ void scalesTare(void) {
 float scalesGetWeight(void) {
   float currentWeight = 0.f;
   auto& loadCells = LoadCellSingleton::getInstance();
-  if (loadCells.wait_ready_timeout(100, 20)) {
+  if (loadCells.wait_ready_timeout(150, 10)) {
     float values[2];
     loadCells.get_units(values);
     currentWeight = values[0] + values[1];

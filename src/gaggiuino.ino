@@ -712,7 +712,7 @@ void fillBoiler() {
     fillBoilerUntilThreshod(getTimeSinceInit());
   }
   else if (isSwitchOn()) {
-    lcdShowPopup("Brew Switch ON!!");
+    lcdShowPopup("Brew Switch ON!");
   }
 #else
   startupInitFinished = true;
