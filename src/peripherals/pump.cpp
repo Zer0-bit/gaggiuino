@@ -4,11 +4,11 @@
 #include "utils.h"
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
-float flowPerClickAtZeroBar = 0.27f;
+float flowPerClickAtZeroBar = 0.29f;
 short maxPumpClicksPerSecond = 50;
 
 std::array<float, 7> pressureInefficiencyCoefficient {{
-  0.108f,
+  0.128f,
   0.00222f,
   -0.00184f,
   0.0000915f,
@@ -23,7 +23,7 @@ std::array<float, 7> pressureInefficiencyCoefficient {{
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
-  pressureInefficiencyCoefficient[0] = flowPerClickAtZeroBar - 0.108f;
+  pressureInefficiencyCoefficient[0] = flowPerClickAtZeroBar - 0.128f;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
@@ -44,7 +44,7 @@ float getPumpPct(float targetPressure, float flowRestriction, SensorState &curre
     return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.95f + 0.1f + 0.2f * diff);
   }
 
-  if (diff <= 0.05f && currentState.isPressureFalling) {
+  if (diff <= 0.001f && currentState.isPressureFalling) {
     return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.5f);
   }
 
