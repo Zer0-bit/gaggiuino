@@ -7,7 +7,7 @@ PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.27f;
 short maxPumpClicksPerSecond = 50;
 
-const std::array<float, 7> pressureInefficiencyCoefficient {{
+std::array<float, 7> pressureInefficiencyCoefficient {{
   0.108f,
   0.00222f,
   -0.00184f,
@@ -23,6 +23,7 @@ const std::array<float, 7> pressureInefficiencyCoefficient {{
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
+  pressureInefficiencyCoefficient[0] = flowPerClickAtZeroBar - 0.108f;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
@@ -90,10 +91,14 @@ int getCPS(void) {
 // Polinomyal func that should in theory calc fpc faster than the above.
 float getPumpFlowPerClick(float pressure) {
   // float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) + (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] + (pressureInefficiencyCoefficient[3] + (pressureInefficiencyCoefficient[4] + (pressureInefficiencyCoefficient[5] + pressureInefficiencyCoefficient[6] * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
-  float fpc = pressureInefficiencyCoefficient[6] * pressure;
-  fpc = ((fpc + pressureInefficiencyCoefficient[5]) * pressure + pressureInefficiencyCoefficient[4]) * pressure;
-  fpc = ((fpc + pressureInefficiencyCoefficient[3]) * pressure + pressureInefficiencyCoefficient[2]) * pressure;
-  fpc = (fpc + pressureInefficiencyCoefficient[1]) * pressure + flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0];
+  float fpc = 0.f;
+  for (int i = 6; i >= 0; i--) {
+    fpc = fpc * pressure + pressureInefficiencyCoefficient[i];
+  }
+  // for (int i = 6; i > 0; i--) {
+  //     fpc = (fpc + pressureInefficiencyCoefficient[i]) * pressure;
+  // }
+  // fpc += flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0];
 
   return 50.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
