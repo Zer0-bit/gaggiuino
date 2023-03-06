@@ -192,7 +192,8 @@ static void calculateWeightAndFlow(void) {
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
-        currentState.shotWeight += currentState.isPressureMaxed ? pumpClicks * flowPerClick * 1.39f : pumpClicks * flowPerClick;
+        float consideredFlow = currentState.isPressureMaxed ? flowPerClick * 1.39f : flowPerClick;
+        currentState.shotWeight += pumpClicks * consideredFlow;
       }
       currentState.waterPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
