@@ -17,13 +17,23 @@ std::array<float, 7> pressureInefficiencyCoefficient {{
   0.0000000186f
 }};
 
+// Black curve https://www.desmos.com/calculator/ihe5krzf7s
+// std::array<float, 7> pressureInefficiencyCoefficient {{
+//   0.045f,
+//   0.0019f,
+//   -0.0019f,
+//   0.0000915f,
+//   0.00000694f,
+//   -0.000004898f,
+//   0.00000026f
+// }};
+
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
-  pressureInefficiencyCoefficient[0] = flowPerClickAtZeroBar - 0.128f;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
