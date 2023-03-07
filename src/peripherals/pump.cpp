@@ -92,13 +92,10 @@ int getCPS(void) {
 float getPumpFlowPerClick(float pressure) {
   // float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) + (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] + (pressureInefficiencyCoefficient[3] + (pressureInefficiencyCoefficient[4] + (pressureInefficiencyCoefficient[5] + pressureInefficiencyCoefficient[6] * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
   float fpc = 0.f;
-  for (int i = 6; i >= 0; i--) {
-    fpc = fpc * pressure + pressureInefficiencyCoefficient[i];
+  for (int i = 6; i > 0; i--) {
+      fpc = (fpc + pressureInefficiencyCoefficient[i]) * pressure;
   }
-  // for (int i = 6; i > 0; i--) {
-  //     fpc = (fpc + pressureInefficiencyCoefficient[i]) * pressure;
-  // }
-  // fpc += flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0];
+  fpc += flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0];
 
   return 50.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
