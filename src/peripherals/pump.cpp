@@ -7,26 +7,26 @@ PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.29f;
 short maxPumpClicksPerSecond = 50;
 
-std::array<float, 7> pressureInefficiencyCoefficient {{
-  0.128f,
-  0.00222f,
-  -0.00184f,
-  0.0000915f,
-  0.00000594f,
-  -0.000000798f,
-  0.0000000186f
-}};
+// std::array<float, 7> pressureInefficiencyCoefficient {{
+//   0.128f,
+//   0.00222f,
+//   -0.00184f,
+//   0.0000915f,
+//   0.00000594f,
+//   -0.000000798f,
+//   0.0000000186f
+// }};
 
 // Black curve https://www.desmos.com/calculator/ihe5krzf7s
-// std::array<float, 7> pressureInefficiencyCoefficient {{
-//   0.045f,
-//   0.0019f,
-//   -0.0019f,
-//   0.0000915f,
-//   0.00000694f,
-//   -0.000004898f,
-//   0.00000026f
-// }};
+std::array<float, 7> pressureInefficiencyCoefficient {{
+  0.045f,
+  0.0019f,
+  -0.0019f,
+  0.0000915f,
+  0.00000694f,
+  -0.000004898f,
+  0.00000026f
+}};
 
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
