@@ -193,7 +193,7 @@ static void calculateWeightAndFlow(void) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
         // float consideredFlow = currentState.isPressureMaxed ? flowPerClick * 1.52f : flowPerClick;
-        currentState.shotWeight += pumpClicks * flowPerClick;
+        currentState.shotWeight += fmaxf(pumpClicks * flowPerClick,currentState.smoothedPumpFlow);
       }
       currentState.waterPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
     }
