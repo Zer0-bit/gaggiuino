@@ -17,14 +17,14 @@ short maxPumpClicksPerSecond = 50;
 //   0.0000000186f
 // }};
 
-// Black curve https://www.desmos.com/calculator/ihe5krzf7s
+// Black curve https://www.desmos.com/calculator/u1esxbvkwc
 std::array<float, 7> pressureInefficiencyCoefficient {{
   0.045f,
   0.0019f,
   0.0019f,
-  0.0000915f,
-  0.00000694f,
-  0.000004898f,
+  0.0000415f,
+  0.00000594f,
+  0.000004598f,
   0.00000026f
 }};
 
