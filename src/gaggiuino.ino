@@ -159,7 +159,8 @@ static void sensorsReadPressure(void) {
 static long sensorsReadFlow(float elapsedTime) {
     long pumpClicks = getAndResetClickCounter();
     float cps = 1000.f * (float)pumpClicks / elapsedTime;
-    currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure);
+
+    brewActive ? currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure) : currentState.pumpFlow = 0.f;
 
     previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
     currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
@@ -199,9 +200,10 @@ static void calculateWeightAndFlow(void) {
     }
   } else {
     // if (elapsedTime > REFRESH_FLOW_EVERY) {
-    flowTimer = millis();
     //   sensorsReadFlow(elapsedTime);
+    //   flowTimer = millis();
     // }
+    flowTimer = millis();
   }
 }
 
