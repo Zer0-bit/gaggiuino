@@ -4,7 +4,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.1f);
+SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.04f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 
 //default phases. Updated in updateProfilerPhases.
@@ -177,6 +177,7 @@ static void calculateWeightAndFlow(void) {
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
       long pumpClicks = sensorsReadFlow(elapsedTime);
+      float consideredFlow = currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
       currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 2.5f;
       currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.55f;
 
@@ -192,16 +193,16 @@ static void calculateWeightAndFlow(void) {
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
-        // float consideredFlow = currentState.isPressureMaxed ? flowPerClick * 1.52f : flowPerClick;
-        currentState.shotWeight += pumpClicks * flowPerClick;
+        currentState.shotWeight += fmaxf(pumpClicks * flowPerClick,consideredFlow);
       }
-      currentState.waterPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
+      currentState.waterPumped += consideredFlow;
     }
   } else {
     // if (elapsedTime > REFRESH_FLOW_EVERY) {
-    flowTimer = millis();
     //   sensorsReadFlow(elapsedTime);
+    //   flowTimer = millis();
     // }
+    flowTimer = millis();
   }
 }
 
