@@ -18,7 +18,7 @@ short maxPumpClicksPerSecond = 50;
 // }};
 
 // Black curve https://www.desmos.com/calculator/u1esxbvkwc
-std::array<float, 7> pressureInefficiencyCoefficient {{
+std::array<float, 5> pressureInefficiencyCoefficient {{
   0.055f,
   0.0105f,
   0.00401f,
@@ -53,7 +53,7 @@ float getPumpPct(float targetPressure, float flowRestriction, SensorState &curre
   }
 
   if (currentState.isPressureFalling) {
-    return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.5f);
+    return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.2f);
   }
 
   return 0;
