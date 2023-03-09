@@ -100,7 +100,7 @@ int getCPS(void) {
 float getPumpFlowPerClick(float pressure) {
   float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
 
-  return 50.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
+  return 60.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
