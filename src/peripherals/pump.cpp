@@ -7,28 +7,8 @@ PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.27f;
 short maxPumpClicksPerSecond = 50;
 
-// https://www.desmos.com/calculator/u1esxbvkwc
-// std::array<float, 7> pressureInefficiencyCoefficient {{
-//   0.128f,
-//   0.00222f,
-//   -0.00184f,
-//   0.0000915f,
-//   0.00000594f,
-//   -0.000000798f,
-//   0.0000000186f
-// }};
-
-// https://www.desmos.com/calculator/uhgfwn5z9f  - red curve
-// std::array<float, 5> pressureInefficiencyCoefficient {{
-//   0.055f,
-//   0.0105f,
-//   0.00401f,
-//   0.00067f,
-//   0.000028f
-// }};
-
 //https://www.desmos.com/calculator/uhgfwn5z9f  - blue curve
-std::array<float, 5> pressureInefficiencyCoefficient {{
+const std::array<float, 5> pressureInefficiencyCoefficient {{
   0.055f,
   0.016f,
   0.0033f,
@@ -102,10 +82,6 @@ int getCPS(void) {
 
 // Models the flow per click
 // Follows a compromise between the schematic and recorded findings
-
-// The function is split to compensate for the rapid decline in fpc at low pressures
-// float fpc = (flowPerClickAtZeroBar - pressureInefficiencyConstant0) + (pressureInefficiencyConstant1 + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + (pressureInefficiencyConstant5 + pressureInefficiencyConstant6 * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
-// Polinomyal func that should in theory calc fpc faster than the above.
 float getPumpFlowPerClick(float pressure) {
   float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
 
