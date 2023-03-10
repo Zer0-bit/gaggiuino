@@ -33,7 +33,7 @@ std::array<float, 5> pressureInefficiencyCoefficient {{
   0.016f,
   0.0033f,
   0.00061f,
-  0.000025f
+  0.000026f
 }};
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
