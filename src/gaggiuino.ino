@@ -4,7 +4,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.04f);
+SimpleKalmanFilter smoothPumpFlow(1.f, 1.f, 0.04f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 
 //default phases. Updated in updateProfilerPhases.
@@ -159,7 +159,8 @@ static void sensorsReadPressure(void) {
 static long sensorsReadFlow(float elapsedTime) {
     long pumpClicks = getAndResetClickCounter();
     float cps = 1000.f * (float)pumpClicks / elapsedTime;
-    currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure);
+
+    brewActive ? currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure) : currentState.pumpFlow = 0.f;
 
     previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
     currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
