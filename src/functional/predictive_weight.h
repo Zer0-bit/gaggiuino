@@ -64,7 +64,7 @@ public:
 
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
     // if (resistanceDelta > -50.f) return;
-    if (truePuckResistance > 20) return;
+    if (truePuckResistance < 0.025f) return;
 
     // Pressure has to cross the 1 bar threshold.
     if (state.smoothedPressure < 2.1f) {
