@@ -54,10 +54,10 @@ public:
     }
 
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
-    if (resistanceDelta > -10.f) return;
+    if (resistanceDelta > -50.f) return;
 
     // Pressure has to cross the 1 bar threshold.
-    if (pressure < 1.1f) {
+    if (pressure < 2.1f) {
       return;
     }
 
