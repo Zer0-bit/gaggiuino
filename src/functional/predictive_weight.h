@@ -46,18 +46,18 @@ public:
     // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
-    // Pressure has to cross the 1 bar threshold.
-    if (pressure < 1.1f) {
-      return;
-    }
-
     if (phaseTypePressure) {
       // If the pressure or flow are raising too fast dismiss the spike from the output.
       if (state.isPressureRisingFast || state.isPumpFlowRisingFast) return;
     }
 
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
-    if (resistanceDelta > 500.f || puckResistance < 1100.f) return;
+    if (resistanceDelta > 10.f) return;
+
+    // Pressure has to cross the 1 bar threshold.
+    if (pressure < 1.1f) {
+      return;
+    }
 
     // We're there!
     outputFlowStarted = true;
