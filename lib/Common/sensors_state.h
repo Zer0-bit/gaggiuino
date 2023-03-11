@@ -23,6 +23,8 @@ struct SensorState {
   float smoothedPressure;
   float smoothedPumpFlow;
   float smoothedWeightFlow;
+  long pumpClicks;
+
 };
 
 struct SensorStateSnapshot {

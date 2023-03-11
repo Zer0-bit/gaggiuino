@@ -158,9 +158,9 @@ static void sensorsReadPressure(void) {
 
 static long sensorsReadFlow(float elapsedTime) {
     long pumpClicks = getAndResetClickCounter();
-    float cps = 1000.f * (float)pumpClicks / elapsedTime;
+    currentState.pumpClicks = 1000.f * (float)pumpClicks / elapsedTime;
 
-    brewActive ? currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure) : currentState.pumpFlow = 0.f;
+    brewActive ? currentState.pumpFlow = getPumpFlow(currentState.pumpClicks, currentState.smoothedPressure) : currentState.pumpFlow = 0.f;
 
     previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
     currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
