@@ -35,7 +35,8 @@ public:
   }
 
   void update(const SensorState& state, CurrentPhase& phase, const eepromValues_t& cfg) {
-    pressureDrop = pressureDrop > 0.f ? state.smoothedPressure * 10.f - (state.smoothedPressure * 10.f - state.pumpClicks) : 1.f;
+    pressureDrop = state.smoothedPressure * 10.f - (state.smoothedPressure * 10.f - state.pumpClicks);
+    pressureDrop = pressureDrop > 0.f ? pressureDrop : 1.f;
     truePuckResistance = calculatePuckResistance(state.smoothedPumpFlow, 0.0026f, 0.0002964f, pressureDrop);
     // If at least 50ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
@@ -63,13 +64,11 @@ public:
     }
 
     // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
-    // if (resistanceDelta > -50.f) return;
-    if (truePuckResistance > -0.025f) return;
+    // if (puckResistance < 1100.f) return;
+    if (truePuckResistance < -0.015f) return;
 
     // Pressure has to cross the 1 bar threshold.
-    if (state.smoothedPressure < 2.1f) {
-      return;
-    }
+    if (state.smoothedPressure < 2.1f) return;
 
     // We're there!
     outputFlowStarted = true;
