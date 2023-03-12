@@ -10,32 +10,42 @@ private:
   bool outputFlowStarted;
   bool isForceStarted;
   float puckResistance;
+  float truePuckResistance;
   float resistanceDelta;
+  float pressureDrop;
 
 public:
   PredictiveWeight() :
     outputFlowStarted(false),
     isForceStarted(false),
     puckResistance(0.f),
-    resistanceDelta(0.f)
+    truePuckResistance(0.f),
+    resistanceDelta(0.f),
+    pressureDrop(0.f)
   {}
 
   bool isOutputFlow() {
     return outputFlowStarted;
   }
 
+  inline float calculatePuckResistance(float waterFlowRate, float crossSectionalArea, float dynamicViscosity, float pressureDrop)
+  {
+    float resistance = -(dynamicViscosity * waterFlowRate) / (crossSectionalArea * pressureDrop);
+    return resistance;
+  }
+
   void update(const SensorState& state, CurrentPhase& phase, const eepromValues_t& cfg) {
+    pressureDrop = state.smoothedPressure * 10.f - (state.smoothedPressure * 10.f - state.pumpClicks);
+    pressureDrop = pressureDrop > 0.f ? pressureDrop : 1.f;
+    truePuckResistance = calculatePuckResistance(state.smoothedPumpFlow, 0.0026f, 0.0002964f, pressureDrop);
     // If at least 50ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
     if (isForceStarted || outputFlowStarted || state.waterPumped >= 55.f) {
       outputFlowStarted = true;
       return;
     }
-
-    float pressure = fmax(state.smoothedPressure, 0.f);
-
     float previousPuckResistance = puckResistance;
-    puckResistance = pressure * 1000.f / state.smoothedPumpFlow; // Resistance in mBar * s / g
+    puckResistance = state.smoothedPressure * 1000.f / state.smoothedPumpFlow; // Resistance in mBar * s / g
     resistanceDelta = puckResistance - previousPuckResistance;
 
     // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
@@ -46,17 +56,20 @@ public:
     // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
 
-    // Pressure has to cross the 1 bar threshold.
-    if (pressure < 1.1f) {
-      return;
-    }
-
     if (phaseTypePressure) {
       // If the pressure or flow are raising too fast dismiss the spike from the output.
       if (state.isPressureRisingFast || state.isPumpFlowRisingFast) return;
       // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
       if (resistanceDelta > 500.f || puckResistance < 1100.f) return;
     }
+
+    // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
+    // if (puckResistance < 1100.f) return;
+    if (truePuckResistance < -0.015f) return;
+
+    // Pressure has to cross the 1 bar threshold.
+    if (state.smoothedPressure < 2.1f) return;
+
     // We're there!
     outputFlowStarted = true;
   }

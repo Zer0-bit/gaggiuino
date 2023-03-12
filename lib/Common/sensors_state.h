@@ -11,6 +11,7 @@ struct SensorState {
   bool isPressureFallingFast;
   bool isPressureRising;
   bool isPressureRisingFast;
+  bool isPressureMaxed;
   bool isPumpFlowRisingFast;
   bool isPumpFlowFallingFast;
   bool isSteamForgottenON;
@@ -22,6 +23,8 @@ struct SensorState {
   float smoothedPressure;
   float smoothedPumpFlow;
   float smoothedWeightFlow;
+  long pumpClicks;
+
 };
 
 struct SensorStateSnapshot {

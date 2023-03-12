@@ -4,7 +4,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(0.5f, 0.5f, 0.1f);
+SimpleKalmanFilter smoothPumpFlow(1.f, 1.f, 0.04f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 
 //default phases. Updated in updateProfilerPhases.
@@ -56,6 +56,9 @@ void setup(void) {
   eepromInit();
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   LOG_INFO("EEPROM Init");
+
+  cpsInit(eepromCurrentValues);
+  LOG_INFO("CPS Init");
 
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
@@ -147,14 +150,17 @@ static void sensorsReadPressure(void) {
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
     currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
     currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.5f;
+    currentState.isPressureMaxed = currentState.smoothedPressure >= runningCfg.pressureProfilingState ? runningCfg.pressureProfilingStart - 0.5f : runningCfg.flowProfilePressureTarget - 0.5f;
+
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
 }
 
 static long sensorsReadFlow(float elapsedTime) {
     long pumpClicks = getAndResetClickCounter();
-    float cps = 1000.f * (float)pumpClicks / elapsedTime;
-    currentState.pumpFlow = getPumpFlow(cps, currentState.smoothedPressure);
+    currentState.pumpClicks = 1000.f * (float)pumpClicks / elapsedTime;
+
+    brewActive ? currentState.pumpFlow = getPumpFlow(currentState.pumpClicks, currentState.smoothedPressure) : currentState.pumpFlow = 0.f;
 
     previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
     currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
@@ -172,7 +178,8 @@ static void calculateWeightAndFlow(void) {
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
       long pumpClicks = sensorsReadFlow(elapsedTime);
-      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 2.5f;
+      float consideredFlow = currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
+      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.5f;
       currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.55f;
 
       // bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
@@ -186,17 +193,17 @@ static void calculateWeightAndFlow(void) {
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
-        // if the output flow just started, consider only 50% of the clicks (probabilistically).
-        // long consideredClicks = previousIsOutputFlow ? pumpClicks : pumpClicks * 0.5f;
-        currentState.shotWeight += pumpClicks * flowPerClick;
+        //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
+        currentState.shotWeight += fmaxf(pumpClicks * flowPerClick,consideredFlow);
       }
-      currentState.waterPumped += currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
+      currentState.waterPumped += consideredFlow;
     }
   } else {
     // if (elapsedTime > REFRESH_FLOW_EVERY) {
-    flowTimer = millis();
     //   sensorsReadFlow(elapsedTime);
+    //   flowTimer = millis();
     // }
+    flowTimer = millis();
   }
 }
 
@@ -708,7 +715,7 @@ void fillBoiler() {
     fillBoilerUntilThreshod(getTimeSinceInit());
   }
   else if (isSwitchOn()) {
-    lcdShowPopup("Brew Switch ON!!");
+    lcdShowPopup("Brew Switch ON!");
   }
 #else
   startupInitFinished = true;
@@ -761,4 +768,17 @@ void fillBoilerUntilThreshod(unsigned long elapsedTime) {
 
 void updateStartupTimer() {
   lcdSetUpTime(getTimeSinceInit() / 1000);
+}
+
+void cpsInit(eepromValues_t &eepromValues) {
+  int cps = getCPS();
+  if (cps > 110) { // double 60 Hz
+    eepromValues.powerLineFrequency = 60u;
+  } else if (cps > 80) { // double 50 Hz
+    eepromValues.powerLineFrequency = 50u;
+  } else if (cps > 55) { // 60 Hz
+    eepromValues.powerLineFrequency = 60u;
+  } else if (cps > 0) { // 50 Hz
+    eepromValues.powerLineFrequency = 50u;
+  }
 }

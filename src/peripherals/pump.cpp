@@ -6,16 +6,15 @@
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.27f;
 short maxPumpClicksPerSecond = 50;
-constexpr float pressureInefficiencyCoefficient[7] = {
-  0.108f,
-  0.00222f,
-  (-0.00184f),
-  0.0000915f,
-  0.00000594f,
-  (-0.000000798f),
-  0.0000000186f
-};
 
+//https://www.desmos.com/calculator/uhgfwn5z9f  - blue curve
+const std::array<float, 5> pressureInefficiencyCoefficient {{
+  0.055f,
+  0.016f,
+  0.0033f,
+  0.00061f,
+  0.000026f
+}};
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
@@ -42,8 +41,8 @@ float getPumpPct(float targetPressure, float flowRestriction, SensorState &curre
     return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.95f + 0.1f + 0.2f * diff);
   }
 
-  if (diff <= 0.001f && currentState.isPressureFalling) {
-    return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.5f);
+  if (currentState.isPressureFalling) {
+    return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.2f);
   }
 
   return 0;
@@ -77,19 +76,16 @@ long getAndResetClickCounter(void) {
   return counter;
 }
 
+int getCPS(void) {
+  return pump.cps();
+}
+
 // Models the flow per click
 // Follows a compromise between the schematic and recorded findings
-
-// The function is split to compensate for the rapid decline in fpc at low pressures
-// float fpc = (flowPerClickAtZeroBar - pressureInefficiencyConstant0) + (pressureInefficiencyConstant1 + (pressureInefficiencyConstant2 + (pressureInefficiencyConstant3 + (pressureInefficiencyConstant4 + (pressureInefficiencyConstant5 + pressureInefficiencyConstant6 * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
-// Polinomyal func that should in theory calc fpc faster than the above.
 float getPumpFlowPerClick(float pressure) {
-  float fpc = flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0];
-  for (int i = 7; i < 1; i--) {
-      fpc += pressureInefficiencyCoefficient[i] * pressure;
-  }
-  // float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) + (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] + (pressureInefficiencyCoefficient[3] + (pressureInefficiencyCoefficient[4] + (pressureInefficiencyCoefficient[5] + pressureInefficiencyCoefficient[6] * pressure) * pressure) * pressure) * pressure) * pressure) * pressure;
-  return 50.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
+  float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
+
+  return 60.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 
 // Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
@@ -108,7 +104,7 @@ float getClicksPerSecondForFlow(float flow, float pressure) {
 void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState) {
   // If a pressure restriction exists then the we go into pressure profile with a flowRestriction
   // which is equivalent but will achieve smoother pressure management
-  if (pressureRestriction > 0) {
+  if (pressureRestriction > 0.f && currentState.smoothedPressure > pressureRestriction * 0.5f) {
     setPumpPressure(pressureRestriction, targetFlow, currentState);
   }
   else {
