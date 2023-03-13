@@ -6,6 +6,7 @@
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.27f;
 short maxPumpClicksPerSecond = 50;
+float fpc_multiplier = 1.2f;
 
 //https://www.desmos.com/calculator/uhgfwn5z9f  - blue curve
 const std::array<float, 5> pressureInefficiencyCoefficient {{
@@ -21,6 +22,7 @@ const std::array<float, 5> pressureInefficiencyCoefficient {{
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
+  fpc_multiplier = 60.f / maxPumpClicksPerSecond;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
@@ -83,9 +85,10 @@ int getCPS(void) {
 // Models the flow per click, follows a compromise between the schematic and recorded findings
 // plotted: https://www.desmos.com/calculator/eqynzclagu
 float getPumpFlowPerClick(float pressure) {
-  float fpc = (pressureInefficiencyCoefficient[2] / pressure) + (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
-
-  return 60.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
+  float fpc = 0.f;
+  fpc = (pressureInefficiencyCoefficient[2] / pressure) + (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
+  fpc *= fpc_multiplier;
+  return fpc;
 }
 
 // Follows the schematic from https://www.cemegroup.com/solenoid-pump/e5-60 modified to per-click
