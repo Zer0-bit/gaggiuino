@@ -535,8 +535,8 @@ static void profiling(void) {
     espCommsSendShotData(shotSnapshot, 100);
 
     if (phaseProfiler.isFinished()) {
-      closeValve();
       setPumpOff();
+      closeValve();
       brewActive = false;
     } else if (currentPhase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE) {
       float newBarValue = currentPhase.getTarget();
@@ -563,8 +563,8 @@ static void manualFlowControl(void) {
     float flow_reading = lcdGetManualFlowVol() / 10.f ;
     setPumpFlow(flow_reading, 0.f, currentState);
   } else {
-    closeValve();
     setPumpOff();
+    closeValve();
   }
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }

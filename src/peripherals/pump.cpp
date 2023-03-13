@@ -80,15 +80,15 @@ int getCPS(void) {
   return pump.cps();
 }
 
-// Models the flow per click
-// Follows a compromise between the schematic and recorded findings
+// Models the flow per click, follows a compromise between the schematic and recorded findings
+// plotted: https://www.desmos.com/calculator/eqynzclagu
 float getPumpFlowPerClick(float pressure) {
-  float fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
+  float fpc = (pressureInefficiencyCoefficient[2] / pressure) + (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
 
   return 60.f * fmaxf(fpc, 0.f) / (float)maxPumpClicksPerSecond;
 }
 
-// Follows the schematic from http://ulka-ceme.co.uk/E_Models.html modified to per-click
+// Follows the schematic from https://www.cemegroup.com/solenoid-pump/e5-60 modified to per-click
 float getPumpFlow(float cps, float pressure) {
   return cps * getPumpFlowPerClick(pressure);
 }
