@@ -146,10 +146,10 @@ static void sensorsReadPressure(void) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
-    currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
-    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
+    currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.01f;
+    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
-    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.5f;
+    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.01f;
     currentState.isPressureMaxed = currentState.smoothedPressure >= runningCfg.pressureProfilingState ? runningCfg.pressureProfilingStart - 0.5f : runningCfg.flowProfilePressureTarget - 0.5f;
 
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
@@ -179,8 +179,8 @@ static void calculateWeightAndFlow(void) {
       flowTimer = millis();
       long pumpClicks = sensorsReadFlow(elapsedTime);
       float consideredFlow = currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
-      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.5f;
-      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.55f;
+      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.1f;
+      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.1f;
 
       // bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
 
