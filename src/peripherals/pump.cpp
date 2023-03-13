@@ -22,7 +22,7 @@ constexpr std::array<float, 5> pressureInefficiencyCoefficient {{
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
-  fpc_multiplier = 60.f / maxPumpClicksPerSecond;
+  fpc_multiplier = 60.f / (float)maxPumpClicksPerSecond;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
@@ -57,7 +57,7 @@ inline float getPumpPct(float targetPressure, float flowRestriction, const Senso
 // - pressure direction
 void setPumpPressure(float targetPressure, float flowRestriction, const SensorState &currentState) {
   float pumpPct = getPumpPct(targetPressure, flowRestriction, currentState);
-  setPumpToRawValue((int)pumpPct * PUMP_RANGE);
+  setPumpToRawValue((uint8_t)pumpPct * PUMP_RANGE);
 }
 
 void setPumpOff(void) {
@@ -100,7 +100,7 @@ float getPumpFlow(float cps, float pressure) {
 float getClicksPerSecondForFlow(float flow, float pressure) {
   float flowPerClick = getPumpFlowPerClick(pressure);
   float cps = flow / flowPerClick;
-  return fminf(cps, maxPumpClicksPerSecond);
+  return fminf(cps, (float)maxPumpClicksPerSecond);
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value
@@ -112,6 +112,6 @@ void setPumpFlow(float targetFlow, float pressureRestriction, const SensorState 
   }
   else {
     float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.smoothedPressure) / (float)maxPumpClicksPerSecond;
-    setPumpToRawValue((int)pumpPct * PUMP_RANGE);
+    setPumpToRawValue((uint8_t)pumpPct * PUMP_RANGE);
   }
 }
