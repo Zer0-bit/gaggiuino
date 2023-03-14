@@ -26,7 +26,7 @@ void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
-inline float getPumpPct(float targetPressure, float flowRestriction, const SensorState &currentState) {
+inline float getPumpPct(float targetPressure, float flowRestriction, SensorState &currentState) {
   if (targetPressure == 0.f) {
       return 0.f;
   }
@@ -55,7 +55,7 @@ inline float getPumpPct(float targetPressure, float flowRestriction, const Senso
 // - expected target
 // - flow
 // - pressure direction
-void setPumpPressure(float targetPressure, float flowRestriction, const SensorState &currentState) {
+void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState) {
   float pumpPct = getPumpPct(targetPressure, flowRestriction, currentState);
   setPumpToRawValue((uint8_t)(pumpPct * PUMP_RANGE));
 }
@@ -104,7 +104,7 @@ float getClicksPerSecondForFlow(float flow, float pressure) {
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value
-void setPumpFlow(float targetFlow, float pressureRestriction, const SensorState &currentState) {
+void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState) {
   // If a pressure restriction exists then the we go into pressure profile with a flowRestriction
   // which is equivalent but will achieve smoother pressure management
   if (pressureRestriction > 0.f && currentState.smoothedPressure > pressureRestriction * 0.5f) {
