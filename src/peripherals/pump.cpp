@@ -26,7 +26,7 @@ void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
-inline float getPumpPct(float targetPressure, float flowRestriction, const SensorState &currentState) {
+float getPumpPct(float targetPressure, float flowRestriction, const SensorState &currentState) {
   if (targetPressure == 0.f) {
       return 0.f;
   }
