@@ -100,7 +100,7 @@ float getPumpFlow(float cps, float pressure) {
 float getClicksPerSecondForFlow(float flow, float pressure) {
   float flowPerClick = getPumpFlowPerClick(pressure);
   float cps = flow / flowPerClick;
-  return fminf(cps, maxPumpClicksPerSecond);
+  return fminf(cps, (float)maxPumpClicksPerSecond);
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value

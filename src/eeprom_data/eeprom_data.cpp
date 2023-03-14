@@ -59,7 +59,7 @@ namespace {
 
   // kind of annoying, but allows reusing macro without messing up type safety
   template <typename T>
-  static bool copy_t(T& target, T& source) {
+  bool copy_t(T& target, T& source) {
     target = source;
     return true;
   }
