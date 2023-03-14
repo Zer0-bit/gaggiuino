@@ -5,7 +5,7 @@
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.27f;
-short maxPumpClicksPerSecond = 50;
+int maxPumpClicksPerSecond = 50;
 float fpc_multiplier = 1.2f;
 
 //https://www.desmos.com/calculator/uhgfwn5z9f  - blue curve
@@ -22,7 +22,7 @@ constexpr std::array<float, 5> pressureInefficiencyCoefficient {{
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
-  fpc_multiplier = 60.f / maxPumpClicksPerSecond;
+  fpc_multiplier = 60.f / (float)maxPumpClicksPerSecond;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase

@@ -7,7 +7,7 @@
 
 namespace {
 
-  static struct eepromMetadata_t eepromMetadata;
+  struct eepromMetadata_t eepromMetadata;
 
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
@@ -64,47 +64,12 @@ namespace {
     return true;
   }
 
-  static bool loadCurrentEepromData EEPROM_METADATA_LOADER(EEPROM_DATA_VERSION, eepromMetadata_t, copy_t);
+  bool loadCurrentEepromData EEPROM_METADATA_LOADER(EEPROM_DATA_VERSION, eepromMetadata_t, copy_t);
 
 }
 
 bool eepromWrite(eepromValues_t eepromValuesNew) {
-  /*
-    No need to do these check since it checks UNSIGNED integers
-
-    if (eepromValuesNew.pressureProfilingHold < 0)
-    if (eepromValuesNew.pressureProfilingLength < 0)
-    if (eepromValuesNew.preinfusionSec < 0)
-    if (eepromValuesNew.preinfusionSoak < 0)
-    if (eepromValuesNew.preinfusionRamp < 0)
-    if (eepromValuesNew.pressureProfilingLength < 0)
-    if (eepromValuesNew.offset < 0)
-    if (eepromValuesNew.hpwr < 0)
-    if (eepromValuesNew.lcdSleep < 0)
-  */
-
-  /* THIS IS STILL VERY MUCH UNPROVEN AND GUESSWORK DUE TO ABSENCE OF SOLID EVIDENCE
-  Due to flash memory access speeds varying for diffrent operations a theoretical delayMicroseconds(X)
-  might be needed in the future. For now this limitation was overcome by spending
-  time before a write needs to happen with some additional data integrity checks.
-  YOLO
-  */
   const char *errMsg = "Data out of range";
-
-  if (eepromValuesNew.preinfusionState != 0 && eepromValuesNew.preinfusionState != 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.pressureProfilingState != 0 && eepromValuesNew.pressureProfilingState != 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.preinfusionFlowState != 0 && eepromValuesNew.preinfusionFlowState != 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
 
   if (eepromValuesNew.preinfusionFlowVol < 0.f) {
     LOG_ERROR(errMsg);
@@ -121,37 +86,12 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
-  if (eepromValuesNew.flowProfileState != 0 && eepromValuesNew.flowProfileState != 1) {
+  if (eepromValuesNew.pressureProfilingStart < 0.f) {
     LOG_ERROR(errMsg);
     return false;
   }
 
-  if (eepromValuesNew.homeOnShotFinish != 0 && eepromValuesNew.homeOnShotFinish != 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.graphBrew != 0 && eepromValuesNew.graphBrew != 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.warmupState != 0 && eepromValuesNew.warmupState != 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.brewDeltaState != 0 && eepromValuesNew.brewDeltaState != 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.pressureProfilingStart < 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.pressureProfilingFinish < 1) {
+  if (eepromValuesNew.pressureProfilingFinish < 0.f) {
     LOG_ERROR(errMsg);
     return false;
   }
@@ -176,22 +116,17 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     return false;
   }
 
-  if (eepromValuesNew.powerLineFrequency != 50 && eepromValuesNew.powerLineFrequency != 60) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
   if (eepromValuesNew.pumpFlowAtZero < 0.210f || eepromValuesNew.pumpFlowAtZero > 0.310f) {
     LOG_ERROR(errMsg);
     return false;
   }
 
-  if (eepromValuesNew.scalesF1 < -20000.f || eepromValuesNew.scalesF1 > 20000.f) {
+  if (eepromValuesNew.scalesF1 < -20000 || eepromValuesNew.scalesF1 > 20000) {
     LOG_ERROR(errMsg);
     return false;
   }
 
-  if (eepromValuesNew.scalesF2 < -20000.f || eepromValuesNew.scalesF2 > 20000.f) {
+  if (eepromValuesNew.scalesF2 < -20000 || eepromValuesNew.scalesF2 > 20000) {
     LOG_ERROR(errMsg);
     return false;
   }
@@ -216,7 +151,7 @@ void eepromInit(void) {
   // load appropriate version (including current)
   bool readSuccess = false;
 
-  if (version < EEPROM_DATA_VERSION && legacyEepromDataLoaders[version] != NULL) {
+  if (version < EEPROM_DATA_VERSION && legacyEepromDataLoaders[version] != nullptr) {
     readSuccess = (*legacyEepromDataLoaders[version])(eepromMetadata.values);
   } else {
     readSuccess = loadCurrentEepromData(eepromMetadata.values);
