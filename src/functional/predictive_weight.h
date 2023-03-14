@@ -5,6 +5,9 @@
 #include "sensors_state.h"
 #include "../eeprom_data/eeprom_data.h"
 
+constexpr float crossSectionalArea = 0.0026f; // avg puck crossectional area.
+constexpr float dynamicViscosity = 0.0002964f; // avg water dynamic viscosity at 90-95 celsius.
+
 class PredictiveWeight {
 private:
   bool outputFlowStarted;
@@ -46,7 +49,7 @@ public:
     resistanceDelta = puckResistance - previousPuckResistance;
     pressureDrop = state.smoothedPressure * 10.f - (state.smoothedPressure * 10.f - state.pumpClicks);
     pressureDrop = pressureDrop > 0.f ? pressureDrop : 1.f;
-    truePuckResistance = calculatePuckResistance(state.smoothedPumpFlow, 0.0026f, 0.0002964f, pressureDrop);
+    truePuckResistance = calculatePuckResistance(state.smoothedPumpFlow, crossSectionalArea, dynamicViscosity, pressureDrop);
 
     // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
     // as well as there being enough pressure for water to wet the puck enough to start the output

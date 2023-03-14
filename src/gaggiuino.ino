@@ -158,14 +158,14 @@ static void sensorsReadPressure(void) {
 }
 
 static long sensorsReadFlow(float elapsedTime) {
-    long pumpClicks = getAndResetClickCounter();
-    currentState.pumpClicks = 1000.f * (float)pumpClicks / elapsedTime;
+  long pumpClicks = getAndResetClickCounter();
+  currentState.pumpClicks = 1000.f * (float)pumpClicks / elapsedTime;
 
-    brewActive ? currentState.pumpFlow = getPumpFlow(currentState.pumpClicks, currentState.smoothedPressure) : currentState.pumpFlow = 0.f;
+  currentState.pumpFlow = getPumpFlow(currentState.pumpClicks, currentState.smoothedPressure);
 
-    previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
-    currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-    return pumpClicks;
+  previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
+  currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+  return pumpClicks;
 }
 
 static void calculateWeightAndFlow(void) {
@@ -213,7 +213,6 @@ static void calculateWeightAndFlow(void) {
 //##############################################################################################################################
 
 static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
-
   if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) {
     runningCfg = lcdDownloadCfg();
 
