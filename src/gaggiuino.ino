@@ -5,7 +5,8 @@
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
 SimpleKalmanFilter smoothPumpFlow(1.f, 1.f, 0.04f);
-SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
+SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.5f);
+SimpleKalmanFilter smoothConsideredFlow(1.f, 1.f, 0.1f);
 
 //default phases. Updated in updateProfilerPhases.
 Profile profile;
@@ -193,16 +194,16 @@ static void calculateWeightAndFlow(void) {
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
+        float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
+        currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
         //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
-        currentState.shotWeight += fmaxf(pumpClicks * flowPerClick,consideredFlow);
+        currentState.shotWeight += actualFlow;
       }
       currentState.waterPumped += consideredFlow;
     }
   } else {
-    // if (elapsedTime > REFRESH_FLOW_EVERY) {
-    //   sensorsReadFlow(elapsedTime);
-    //   flowTimer = millis();
-    // }
+    currentState.consideredFlow = 0.f;
+
     flowTimer = millis();
   }
 }
@@ -324,7 +325,7 @@ static void lcdRefresh(void) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.smoothedWeightFlow * 10.f
-          : currentState.smoothedPumpFlow * 10.f
+          : currentState.consideredFlow ? currentState.consideredFlow * 100.f : currentState.smoothedPumpFlow * 10.f
       );
     }
 

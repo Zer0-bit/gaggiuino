@@ -4,11 +4,12 @@
 #include <Arduino.h>
 #include "sensors_state.h"
 
-#define PUMP_RANGE 100
 #define ZC_MODE    RISING
 
+constexpr uint8_t PUMP_RANGE = 100;
+
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero);
-void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState);
+void setPumpPressure(float targetPressure, float flowRestriction, const SensorState &currentState);
 void setPumpOff(void);
 void setPumpFullOn(void);
 void setPumpToRawValue(uint8_t val);
@@ -17,5 +18,5 @@ int getCPS(void);
 float getPumpFlow(float cps, float pressure);
 float getPumpFlowPerClick(float pressure);
 float getClicksPerSecondForFlow(float flow, float pressure);
-void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState);
+void setPumpFlow(float targetFlow, float pressureRestriction, const SensorState &currentState);
 #endif
