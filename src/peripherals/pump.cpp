@@ -5,11 +5,11 @@
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
 float flowPerClickAtZeroBar = 0.27f;
-int maxPumpClicksPerSecond = 50;
+short maxPumpClicksPerSecond = 50;
 float fpc_multiplier = 1.2f;
 
 //https://www.desmos.com/calculator/uhgfwn5z9f  - blue curve
-constexpr std::array<float, 5> pressureInefficiencyCoefficient {{
+const std::array<float, 5> pressureInefficiencyCoefficient {{
   0.055f,
   0.016f,
   0.0033f,
@@ -22,11 +22,11 @@ constexpr std::array<float, 5> pressureInefficiencyCoefficient {{
 void pumpInit(int powerLineFrequency, float pumpFlowAtZero) {
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
-  fpc_multiplier = 60.f / (float)maxPumpClicksPerSecond;
+  fpc_multiplier = 60.f / maxPumpClicksPerSecond;
 }
 
 // Function that returns the percentage of clicks the pump makes in it's current phase
-float getPumpPct(float targetPressure, float flowRestriction, const SensorState &currentState) {
+float getPumpPct(float targetPressure, float flowRestriction, SensorState &currentState) {
   if (targetPressure == 0.f) {
       return 0.f;
   }
@@ -55,9 +55,9 @@ float getPumpPct(float targetPressure, float flowRestriction, const SensorState 
 // - expected target
 // - flow
 // - pressure direction
-void setPumpPressure(float targetPressure, float flowRestriction, const SensorState &currentState) {
+void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState) {
   float pumpPct = getPumpPct(targetPressure, flowRestriction, currentState);
-  setPumpToRawValue((uint8_t)pumpPct * PUMP_RANGE);
+  setPumpToRawValue(pumpPct * PUMP_RANGE);
 }
 
 void setPumpOff(void) {
@@ -100,11 +100,11 @@ float getPumpFlow(float cps, float pressure) {
 float getClicksPerSecondForFlow(float flow, float pressure) {
   float flowPerClick = getPumpFlowPerClick(pressure);
   float cps = flow / flowPerClick;
-  return fminf(cps, (float)maxPumpClicksPerSecond);
+  return fminf(cps, maxPumpClicksPerSecond);
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value
-void setPumpFlow(float targetFlow, float pressureRestriction, const SensorState &currentState) {
+void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState) {
   // If a pressure restriction exists then the we go into pressure profile with a flowRestriction
   // which is equivalent but will achieve smoother pressure management
   if (pressureRestriction > 0.f && currentState.smoothedPressure > pressureRestriction * 0.5f) {
@@ -112,6 +112,6 @@ void setPumpFlow(float targetFlow, float pressureRestriction, const SensorState 
   }
   else {
     float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.smoothedPressure) / (float)maxPumpClicksPerSecond;
-    setPumpToRawValue((uint8_t)pumpPct * PUMP_RANGE);
+    setPumpToRawValue(pumpPct * PUMP_RANGE);
   }
 }
