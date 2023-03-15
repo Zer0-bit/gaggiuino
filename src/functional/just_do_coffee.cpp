@@ -3,7 +3,6 @@
 #include "../lcd/lcd.h"
 
 extern unsigned long steamTime;
-//delta stuff
 // inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
 inline static float TEMP_DELTA(float d, const SensorState &currentState) {
   return (
@@ -61,7 +60,7 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
   setSteamBoilerRelayOff();
 }
 
-void pulseHeaters(uint32_t pulseLength, int factor_1, int factor_2, bool brewActive) {
+void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int factor_2, const bool brewActive) {
   static uint32_t heaterWave;
   static bool heaterState;
   if (!heaterState && ((millis() - heaterWave) > (pulseLength * factor_1))) {
@@ -83,7 +82,7 @@ void pulseHeaters(uint32_t pulseLength, int factor_1, int factor_2, bool brewAct
 #define PUMP_NEEDS_OPEN_VALVE  // not ENABLED if using the PCB or the dimmer wired separate from relay
 #endif
 
-void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
+void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
   lcdTargetState(1); // setting the target mode to "steam temp"
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;

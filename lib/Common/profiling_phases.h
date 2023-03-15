@@ -121,6 +121,6 @@ public:
 
 // Helper functions
 
-ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentPhase& phase);
+ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, CurrentPhase& phase);
 
 #endif
