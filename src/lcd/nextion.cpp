@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #include "lcd.h"
 #include "pindef.h"
 #include "log.h"
