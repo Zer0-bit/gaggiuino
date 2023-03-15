@@ -29,7 +29,7 @@ void setup(void) {
   LOG_INFO("Pin init");
 
   setBoilerOff();  // relayPin LOW
-  setMainBoilerRelayOff();
+  setSteamValveRelayOff();
   setSteamBoilerRelayOff();
   LOG_INFO("Boiler turned off");
 
@@ -623,7 +623,6 @@ void systemHealthCheck(float pressureThreshold) {
     we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
     setPumpOff();
     setBoilerOff();
-    setMainBoilerRelayOff();
     setSteamBoilerRelayOff();
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
@@ -640,7 +639,6 @@ void systemHealthCheck(float pressureThreshold) {
     lcdShowPopup("TURN STEAM OFF NOW!");
     setPumpOff();
     setBoilerOff();
-    setMainBoilerRelayOff();
     setSteamBoilerRelayOff();
     currentState.isSteamForgottenON = currentState.steamSwitchState;
   }
@@ -673,7 +671,7 @@ void systemHealthCheck(float pressureThreshold) {
           lcdShowPopup("Releasing pressure!");
           setPumpOff();
           setBoilerOff();
-          setMainBoilerRelayOff();
+          setSteamValveRelayOff();
           setSteamBoilerRelayOff();
           openValve();
           break;

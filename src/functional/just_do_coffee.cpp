@@ -33,7 +33,7 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
         setBoilerOff();
       }
     }
-    setMainBoilerRelayOff();
+    setSteamValveRelayOff();
   } else { //if brewState == false
     if (sensorTemperature <= ((float)runningCfg.setpoint - 10.f)) {
       setBoilerOn();
@@ -50,11 +50,6 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
       } else {
         setBoilerOff();
       }
-    }
-    if (sensorTemperature < ((float)runningCfg.setpoint - 15.f)) {
-      setMainBoilerRelayOn();
-    } else {
-      setMainBoilerRelayOff();
     }
   }
   setSteamBoilerRelayOff();
@@ -89,8 +84,8 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
 
   if (currentState.smoothedPressure > 9.f || sensorTemperature < runningCfg.setpoint - 10.f) {
     setBoilerOff();
-    setMainBoilerRelayOff();
     setSteamBoilerRelayOff();
+    setSteamValveRelayOff();
     setPumpOff();
   } else {
     if (sensorTemperature < runningCfg.steamSetPoint) {
@@ -98,6 +93,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, bool
     } else {
       setBoilerOff();
     }
+    setSteamValveRelayOn();
     setSteamBoilerRelayOn();
     #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adjusting the pressure
       if (currentState.smoothedPressure < 1.8f) {
