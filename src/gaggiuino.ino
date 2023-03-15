@@ -305,7 +305,10 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    lcdSetTemperature(currentState.temperature);
+    float lcdTemp = currentState.temperature > (float)runningCfg.setpoint
+      ? runningCfg.setpoint + currentState.temperature / (float)runningCfg.setpoint
+      : currentState.temperature;
+    lcdSetTemperature(lcdTemp);
 
     /*LCD weight output*/
     if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && homeScreenScalesEnabled) {
