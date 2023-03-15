@@ -8,15 +8,15 @@
 
 constexpr uint8_t PUMP_RANGE = 100;
 
-void pumpInit(int powerLineFrequency, float pumpFlowAtZero);
-void setPumpPressure(float targetPressure, float flowRestriction, SensorState &currentState);
+void pumpInit(const int powerLineFrequency, const float pumpFlowAtZero);
+void setPumpPressure(const float targetPressure, const float flowRestriction, const SensorState &currentState);
 void setPumpOff(void);
 void setPumpFullOn(void);
-void setPumpToRawValue(uint8_t val);
+void setPumpToRawValue(const uint8_t val);
 long  getAndResetClickCounter(void);
 int getCPS(void);
-float getPumpFlow(float cps, float pressure);
-float getPumpFlowPerClick(float pressure);
-float getClicksPerSecondForFlow(float flow, float pressure);
-void setPumpFlow(float targetFlow, float pressureRestriction, SensorState &currentState);
+float getPumpFlow(const float cps, const float pressure);
+float getPumpFlowPerClick(const float pressure);
+float getClicksPerSecondForFlow(const float flow, const float pressure);
+void setPumpFlow(const float targetFlow, const float pressureRestriction, const SensorState &currentState);
 #endif
