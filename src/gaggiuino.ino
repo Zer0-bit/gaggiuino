@@ -53,6 +53,10 @@ void setup(void) {
   // Initialise comms library for talking to the ESP mcu
   espCommsInit();
 
+  // Initialize LED
+  ledInit();
+  ledColor(255, 255, 255); // WHITE
+
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
@@ -80,6 +84,8 @@ void setup(void) {
 
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
+
+  ledColor(255, 87, 95); // 64171
 
   iwdcInit();
 }
