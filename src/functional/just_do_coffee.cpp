@@ -13,7 +13,7 @@ inline static float TEMP_DELTA(float d, const SensorState &currentState) {
   );
 }
 
-void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, bool preinfusionFinished) {
+void justDoCoffee(const eepromValues_t &runningCfg, const SensorState &currentState, const bool brewActive, const bool preinfusionFinished) {
   lcdTargetState(0); // setting the target mode to "brew temp"
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
 

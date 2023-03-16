@@ -216,7 +216,7 @@ void lcdSetUpTime(float val) {
   myNex.writeNum("systemUpTime", val);
 }
 
-void lcdSetTemperature(int val) {
+void lcdSetTemperature(uint16_t val) {
   myNex.writeNum("currentTemp", val);
 }
 

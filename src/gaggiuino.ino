@@ -305,9 +305,9 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    float lcdTemp = currentState.temperature > (float)runningCfg.setpoint
-      ? runningCfg.setpoint + currentState.temperature / (float)runningCfg.setpoint
-      : currentState.temperature;
+    uint16_t lcdTemp = (uint16_t)currentState.temperature > runningCfg.setpoint - runningCfg.offsetTemp
+      ? (uint16_t)currentState.temperature / (runningCfg.setpoint - runningCfg.offsetTemp) + (runningCfg.setpoint - runningCfg.offsetTemp)
+      : (uint16_t)currentState.temperature;
     lcdSetTemperature(lcdTemp);
 
     /*LCD weight output*/
