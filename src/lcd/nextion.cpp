@@ -221,23 +221,10 @@ void lcdSetTemperature(uint16_t val) {
   myNex.writeNum("currentTemp", val);
 }
 
-// void lcdSetWeight(float val) {
-//   char tmp[6];
-//   int check = snprintf(tmp, sizeof(tmp), "%.1f", static_cast<double>(val));
-//   if (check > 0 && static_cast<unsigned int>(check) <= sizeof(tmp)) {
-//     strcat(tmp, "g");
-//     myNex.writeStr("weight.txt", tmp);
-//   }
-// }
 void lcdSetWeight(float val) {
   char tmp[6];
   int check = snprintf(tmp, sizeof(tmp), "%.1f", static_cast<double>(val));
   if (check > 0 && static_cast<unsigned int>(check) <= sizeof(tmp)) {
-    size_t length = strlen(tmp) + strlen("g") + 1;
-    if (length > sizeof(tmp)) {
-      // handle the error (e.g., return, throw an exception, etc.)
-      return;
-    }
     strcat(tmp, "g");
     myNex.writeStr("weight.txt", tmp);
   }
