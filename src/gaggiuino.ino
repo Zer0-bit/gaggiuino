@@ -30,7 +30,7 @@ void setup(void) {
   LOG_INFO("Pin init");
 
   setBoilerOff();  // relayPin LOW
-  setMainBoilerRelayOff();
+  setSteamValveRelayOff();
   setSteamBoilerRelayOff();
   LOG_INFO("Boiler turned off");
 
@@ -53,6 +53,10 @@ void setup(void) {
 
   // Initialise comms library for talking to the ESP mcu
   espCommsInit();
+
+  // Initialize LED
+  ledInit();
+  ledColor(255, 255, 255); // WHITE
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -81,6 +85,8 @@ void setup(void) {
 
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
+
+  ledColor(255, 87, 95); // 64171
 
   iwdcInit();
 }
@@ -627,7 +633,6 @@ void systemHealthCheck(float pressureThreshold) {
     we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
     setPumpOff();
     setBoilerOff();
-    setMainBoilerRelayOff();
     setSteamBoilerRelayOff();
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
@@ -644,7 +649,6 @@ void systemHealthCheck(float pressureThreshold) {
     lcdShowPopup("TURN STEAM OFF NOW!");
     setPumpOff();
     setBoilerOff();
-    setMainBoilerRelayOff();
     setSteamBoilerRelayOff();
     currentState.isSteamForgottenON = currentState.steamSwitchState;
   }
@@ -677,7 +681,7 @@ void systemHealthCheck(float pressureThreshold) {
           lcdShowPopup("Releasing pressure!");
           setPumpOff();
           setBoilerOff();
-          setMainBoilerRelayOff();
+          setSteamValveRelayOff();
           setSteamBoilerRelayOff();
           openValve();
           break;
