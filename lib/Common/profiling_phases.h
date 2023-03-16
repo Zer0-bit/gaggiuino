@@ -64,7 +64,7 @@ struct GlobalStopConditions {
   float weight = -1;
   float waterPumped = -1;
 
-  bool isReached(SensorState& state, long timeInShot);
+  bool isReached(const SensorState& state, long timeInShot);
 };
 
 struct Profile {
