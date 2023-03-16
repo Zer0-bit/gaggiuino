@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #include "../peripherals/internal_watchdog.h"
 #include "descale.h"
 
@@ -8,7 +9,7 @@ uint8_t counter = 0;
 unsigned long descalingTimer = 0;
 int descalingCycle = 0;
 
-void deScale(eepromValues_t &runningCfg, SensorState &currentState) {
+void deScale(eepromValues_t &runningCfg, const SensorState &currentState) {
   switch (descalingState) {
     case DescalingState::IDLE: // Waiting for fuckfest to begin
       if (currentState.brewSwitchState) {

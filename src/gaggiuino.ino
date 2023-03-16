@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
 #endif
@@ -245,7 +246,7 @@ static void modeSelect(void) {
     case OPERATION_MODES::OPMODE_pressureBasedPreinfusionAndFlowProfile:
       nonBrewModeActive = false;
       if (currentState.hotWaterSwitchState) hotWaterMode(currentState);
-      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState, brewActive);
+      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState);
       else {
         profiling();
         steamTime = millis();
@@ -269,7 +270,7 @@ static void modeSelect(void) {
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
         steamTime = millis();
       } else {
-        steamCtrl(runningCfg, currentState, brewActive);
+        steamCtrl(runningCfg, currentState);
       }
       break;
     case OPERATION_MODES::OPMODE_descale:
@@ -304,7 +305,10 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    lcdSetTemperature(currentState.temperature);
+    uint16_t lcdTemp = ((uint16_t)currentState.temperature > runningCfg.setpoint - runningCfg.offsetTemp && !currentState.steamSwitchState)
+      ? (uint16_t)currentState.temperature / (runningCfg.setpoint - runningCfg.offsetTemp) + (runningCfg.setpoint - runningCfg.offsetTemp)
+      : (uint16_t)currentState.temperature;
+    lcdSetTemperature(lcdTemp);
 
     /*LCD weight output*/
     if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && homeScreenScalesEnabled) {

@@ -1,6 +1,8 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #include "lcd.h"
 #include "pindef.h"
 #include "log.h"
+#include <Arduino.h>
 
 EasyNex myNex(USART_LCD);
 volatile int lcdCurrentPageId;
@@ -215,7 +217,7 @@ void lcdSetUpTime(float val) {
   myNex.writeNum("systemUpTime", val);
 }
 
-void lcdSetTemperature(int val) {
+void lcdSetTemperature(uint16_t val) {
   myNex.writeNum("currentTemp", val);
 }
 

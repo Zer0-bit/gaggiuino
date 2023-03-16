@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #ifndef SENSORS_STATE_H
 #define SENSORS_STATE_H
 

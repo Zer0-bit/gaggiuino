@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #include "pump.h"
 #include "pindef.h"
 #include <PSM.h>
@@ -12,9 +13,9 @@ float fpc_multiplier = 1.2f;
 constexpr std::array<float, 5> pressureInefficiencyCoefficient {{
   0.055f,
   0.016f,
-  0.0033f,
-  0.00061f,
-  0.000026f
+  0.00325f,
+  0.00068f,
+  0.0000326f
 }};
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
@@ -86,7 +87,7 @@ int getCPS(void) {
 // plotted: https://www.desmos.com/calculator/eqynzclagu
 float getPumpFlowPerClick(const float pressure) {
   float fpc = 0.f;
-  fpc = (pressureInefficiencyCoefficient[2] / pressure) + (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
+  fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
   fpc *= fpc_multiplier;
   return fpc;
 }

@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #ifndef PREDICTIVE_WEIGHT_H
 #define PREDICTIVE_WEIGHT_H
 
@@ -47,7 +48,8 @@ public:
     float previousPuckResistance = puckResistance;
     puckResistance = state.smoothedPressure * 1000.f / state.smoothedPumpFlow; // Resistance in mBar * s / g
     resistanceDelta = puckResistance - previousPuckResistance;
-    pressureDrop = state.smoothedPressure * 10.f - (state.smoothedPressure * 10.f - state.pumpClicks);
+    pressureDrop = state.smoothedPressure * 10.f;
+    pressureDrop -= pressureDrop - state.pumpClicks;
     pressureDrop = pressureDrop > 0.f ? pressureDrop : 1.f;
     truePuckResistance = calculatePuckResistance(state.smoothedPumpFlow, crossSectionalArea, dynamicViscosity, pressureDrop);
 
