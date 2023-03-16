@@ -87,7 +87,7 @@ int getCPS(void) {
 // plotted: https://www.desmos.com/calculator/eqynzclagu
 float getPumpFlowPerClick(const float pressure) {
   float fpc = 0.f;
-  fpc = /*(-pressureInefficiencyCoefficient[2] / pressure) + */(flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
+  fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
   fpc *= fpc_multiplier;
   return fpc;
 }
