@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #ifndef PROFILING_PHASES_H
 #define PROFILING_PHASES_H
 
@@ -63,7 +64,7 @@ struct GlobalStopConditions {
   float weight = -1;
   float waterPumped = -1;
 
-  bool isReached(SensorState& state, long timeInShot);
+  bool isReached(const SensorState& state, long timeInShot);
 };
 
 struct Profile {
@@ -120,6 +121,6 @@ public:
 
 // Helper functions
 
-ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentPhase& phase);
+ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, CurrentPhase& phase);
 
 #endif

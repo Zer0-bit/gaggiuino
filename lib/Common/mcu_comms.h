@@ -1,4 +1,5 @@
 #ifndef MCU_COMMS_H
+/* 09:32 15/03/2023 - change triggering comment */
 #define MCU_COMMS_H
 
 #include <Arduino.h>
@@ -10,10 +11,10 @@
 #include "esp_task_wdt.h"
 #endif
 
-#define PACKET_SHOT_SNAPSHOT         1
-#define PACKET_PROFILE               2
-#define PACKET_SENSOR_STATE_SNAPSHOT 3
-#define MAX_DATA_PER_PACKET_DEFAULT  58
+const uint8_t PACKET_SHOT_SNAPSHOT = 1;
+const uint8_t PACKET_PROFILE = 2;
+const uint8_t PACKET_SENSOR_STATE_SNAPSHOT = 3;
+const uint8_t MAX_DATA_PER_PACKET_DEFAULT = 58;
 
 using namespace std;
 
@@ -26,9 +27,12 @@ public:
 
 class McuComms {
 private:
-  typedef void (*ShotSnapshotReceivedCallback)(ShotSnapshot&);
-  typedef void (*ProfileReceivedCallback)(Profile&);
-  typedef void (*SensorStateSnapshotReceivedCallback)(SensorStateSnapshot&);
+  using ShotSnapshotReceivedCallback = void (*)(ShotSnapshot&);
+  using ProfileReceivedCallback = void (*)(Profile&);
+  using SensorStateSnapshotReceivedCallback = void (*)(SensorStateSnapshot&);
+  // typedef void (*ShotSnapshotReceivedCallback)(ShotSnapshot&);
+  // typedef void (*ProfileReceivedCallback)(Profile&);
+  // typedef void (*SensorStateSnapshotReceivedCallback)(SensorStateSnapshot&);
 
   ProfileSerializer profileSerializer;
   SerialTransfer transfer;
@@ -53,9 +57,9 @@ private:
   void log(const char* format, ...);
   void logBufferHex(vector<uint8_t>& buffer, size_t dataSize);
 
-  void shotSnapshotReceived(ShotSnapshot& snapshot);
-  void profileReceived(Profile& profile);
-  void sensorStateSnapshotReceived(SensorStateSnapshot& snapshot);
+  void shotSnapshotReceived(ShotSnapshot& snapshot) const;
+  void profileReceived(Profile& profile) const;
+  void sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) const;
 
 public:
   McuComms(): shotSnapshotCallback(nullptr), profileCallback(nullptr), sensorStateSnapshotCallback(nullptr), debugPort(nullptr) {};
@@ -66,7 +70,7 @@ public:
   void setProfileReceivedCallback(ProfileReceivedCallback callback);
   void setSensorStateSnapshotCallback(SensorStateSnapshotReceivedCallback callback);
 
-  void sendShotData(ShotSnapshot& snapshot);
+  void sendShotData(const ShotSnapshot& snapshot);
   void sendProfile(Profile& profile);
   void sendSensorStateSnapshot(SensorStateSnapshot& snapshot);
 

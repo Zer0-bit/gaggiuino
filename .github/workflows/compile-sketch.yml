@@ -2,9 +2,9 @@ name: Compile Sketch
 
 on:
   push:
-    branches: [dev, release/stm32-blackpill]
+    branches: [dev, release/stm32-blackpill, fix/*]
   pull_request:
-    branches: [dev, release/stm32-blackpill]
+    branches: [dev, release/stm32-blackpill, fix/*]
   # Manual trigger
   workflow_dispatch:
 

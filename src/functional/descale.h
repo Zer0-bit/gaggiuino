@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #ifndef DESCALE_H
 #define DESCALE_H
 
@@ -24,7 +25,7 @@ enum class DescalingState {
   FINISHED
 };
 
-void deScale(eepromValues_t &runningCfg, SensorState &currentState);
+void deScale(eepromValues_t &runningCfg, const SensorState &currentState);
 void solenoidBeat(void);
 void backFlush(const SensorState &currentState);
 void flushActivated(void);

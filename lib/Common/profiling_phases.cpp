@@ -1,10 +1,11 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #include "profiling_phases.h"
 
 //----------------------------------------------------------------------//
 //------------------------- ShotSnapshot -------------------------------//
 //----------------------------------------------------------------------//
 
-ShotSnapshot buildShotSnapshot(uint32_t timeInShot, SensorState& state, CurrentPhase& phase) {
+ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, CurrentPhase& phase) {
   float targetFlow = (phase.getType() == PHASE_TYPE::PHASE_TYPE_FLOW) ? phase.getTarget() : phase.getRestriction();
   float targetPressure = (phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE) ? phase.getTarget() : phase.getRestriction();
 
@@ -41,12 +42,20 @@ bool Phase::isStopConditionReached(SensorState& currentState, uint32_t timeInSho
 //----------------------------------------------------------------------//
 //-------------------------- StopConditions ----------------------------//
 //----------------------------------------------------------------------//
+inline bool predictShotCompletion(const float targetDose, const float currentDose, const float flowRate) {
+  const float remainingDose = targetDose - currentDose;
+  const float percentRemaining = remainingDose / flowRate;
+
+  return percentRemaining < 0.3f ? true : false;
+}
+
 bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
-  float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
+  const float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * state.shotWeight / 100.f;
+  const bool stopOnWeightReached = predictShotCompletion(weight, state.shotWeight, flow);
 
   return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
-    (weight > 0.f && state.shotWeight > weight - stopDelta) ||
+    (weight > 0.f && stopOnWeightReached) ||
     (pressureAbove > 0.f && state.smoothedPressure > pressureAbove) ||
     (pressureBelow > 0.f && state.smoothedPressure < pressureBelow) ||
     (waterPumpedInPhase > 0.f && state.waterPumped - stateAtPhaseStart.waterPumped > waterPumpedInPhase - stopDelta) ||
@@ -54,11 +63,12 @@ bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSna
     (flowBelow > 0.f && state.smoothedPumpFlow < flowBelow);
 }
 
-bool GlobalStopConditions::isReached(SensorState& state, long timeInShot) {
+bool GlobalStopConditions::isReached(const SensorState& state, long timeInShot) {
   float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * (state.shotWeight / 100.f);
+  const bool stopOnWeightReached = predictShotCompletion(weight, state.shotWeight, flow);
 
-  return (weight > 0.f && state.shotWeight > weight - stopDelta) ||
+  return (weight > 0.f && stopOnWeightReached) ||
     (waterPumped > 0.f && state.waterPumped > waterPumped) ||
     (time >= 0L && timeInShot >= time);
 }

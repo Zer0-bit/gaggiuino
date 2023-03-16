@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #include "mcu_comms.h"
 #include <stdarg.h>
 
@@ -35,20 +36,20 @@ void McuComms::sendMultiPacket(vector<uint8_t>& buffer, size_t dataSize, uint8_t
   log("Sending buffer[%d]: ", dataSize);
   logBufferHex(buffer, dataSize);
 
-  uint8_t dataPerPacket = packetSize - 2; // Two bytes are reserved for current index and last index
+  uint8_t dataPerPacket = packetSize - 2u; // Two bytes are reserved for current index and last index
   uint8_t numPackets = dataSize / dataPerPacket;
 
-  if (dataSize % dataPerPacket > 0) // Add an extra transmission if needed
+  if (dataSize % dataPerPacket > 0u) // Add an extra transmission if needed
     numPackets++;
 
-  for (uint8_t currentPacket = 0; currentPacket < numPackets; currentPacket++) {
+  for (uint8_t currentPacket = 0u; currentPacket < numPackets; currentPacket++) {
     uint8_t dataLen = dataPerPacket;
 
 
-    if ((size_t)((currentPacket + 1) * dataPerPacket) > dataSize) // Determine data length for the last packet if file length is not an exact multiple of `dataPerPacket`
+    if ((size_t)((currentPacket + 1u) * dataPerPacket) > dataSize) // Determine data length for the last packet if file length is not an exact multiple of `dataPerPacket`
       dataLen = dataSize - currentPacket * dataPerPacket;
 
-    uint8_t sendSize = transfer.txObj(numPackets - 1, 0); // index of last packet
+    uint8_t sendSize = transfer.txObj(numPackets - 1u, 0u); // index of last packet
     sendSize = transfer.txObj(currentPacket, 1); // index of current packet
     sendSize = transfer.txObj(buffer[currentPacket * dataPerPacket], 2, dataLen); // packet payload
 
@@ -61,11 +62,11 @@ vector<uint8_t> McuComms::receiveMultiPacket() {
   uint8_t lastPacket = transfer.packet.rxBuff[0]; // Get index of last packet
   uint8_t currentPacket = transfer.packet.rxBuff[1]; // Get index of current packet
   uint8_t bytesRead = transfer.bytesRead; // Bytes read in current packet
-  uint8_t dataPerPacket = bytesRead - 2; // First 2 bytes of each packet are used as indexes and are not put in the buffer
-  size_t  totalBytes = 0;
+  uint8_t dataPerPacket = bytesRead - 2u; // First 2 bytes of each packet are used as indexes and are not put in the buffer
+  size_t  totalBytes = 0u;
 
   vector<uint8_t> buffer;
-  buffer.reserve((lastPacket + 1) * dataPerPacket);
+  buffer.reserve((lastPacket + 1u) * dataPerPacket);
 
   while (currentPacket <= lastPacket) {
 #ifdef ESP32
@@ -73,11 +74,11 @@ vector<uint8_t> McuComms::receiveMultiPacket() {
 #endif
 
     log("Handling packet %d\n", currentPacket);
-    totalBytes += bytesRead - 2;
+    totalBytes += bytesRead - 2u;
 
     // First 2 bytes are not added to the buffer because they represent the index of current and last packet
-    for (int i = 0; i < bytesRead - 2; i++) {
-      buffer.push_back(transfer.packet.rxBuff[i + 2]);
+    for (uint8_t i = 0u; i < bytesRead - 2u; i++) {
+      buffer.push_back(transfer.packet.rxBuff[i + 2u]);
     }
     if (currentPacket == lastPacket) break;
 
@@ -85,7 +86,7 @@ vector<uint8_t> McuComms::receiveMultiPacket() {
     uint8_t dataAvailable = transfer.available();
 
     uint32_t waitStartedAt = millis();
-    while (millis() - waitStartedAt < 50 && !dataAvailable) {
+    while (millis() - waitStartedAt < 50u && !dataAvailable) {
 #ifdef ESP32
       esp_task_wdt_reset();
 #endif
@@ -104,7 +105,6 @@ vector<uint8_t> McuComms::receiveMultiPacket() {
     bytesRead = transfer.bytesRead;
   }
 
-  // LOG_INFO("Finished handling packets");
   log("Received buffer[%d]: ", totalBytes);
   logBufferHex(buffer, totalBytes);
 
@@ -112,19 +112,19 @@ vector<uint8_t> McuComms::receiveMultiPacket() {
 }
 
 
-void McuComms::shotSnapshotReceived(ShotSnapshot& snapshot) {
+void McuComms::shotSnapshotReceived(ShotSnapshot& snapshot) const {
   if (shotSnapshotCallback) {
     shotSnapshotCallback(snapshot);
   }
 }
 
-void McuComms::profileReceived(Profile& profile) {
+void McuComms::profileReceived(Profile& profile) const {
   if (profileCallback) {
     profileCallback(profile);
   }
 }
 
-void McuComms::sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) {
+void McuComms::sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) const {
   if (sensorStateSnapshotCallback) {
     sensorStateSnapshotCallback(snapshot);
   }
@@ -133,25 +133,25 @@ void McuComms::sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) {
 void McuComms::log(const char* format, ...) {
   if (!debugPort) return;
 
-  char buffer[128];
+  std::array<char,128>buffer;
   va_list args;
   va_start(args, format);
-  vsnprintf(buffer, sizeof(buffer), format, args);
+  vsnprintf(buffer.data(), buffer.size(), format, args);
   va_end(args);
   debugPort->print("McuComms: ");
-  debugPort->print(buffer);
+  debugPort->print(buffer.data());
 }
 
 void McuComms::logBufferHex(vector<uint8_t>& buffer, size_t dataSize) {
   if (!debugPort) return;
 
-  char hex[3];
-  for (size_t i = 0; i < dataSize; i++) {
+  std::array<char, 3>hex;
+  for (size_t i = 0u; i < dataSize; i++) {
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wformat-truncation"
-    snprintf(hex, 3, "%02x ", buffer[i]);
+    snprintf(hex.data(), hex.max_size(), "%02x ", buffer[i]);
     #pragma GCC diagnostic pop
-    debugPort->print(hex);
+    debugPort->print(hex.data());
   }
   debugPort->println();
 }
@@ -159,17 +159,17 @@ void McuComms::logBufferHex(vector<uint8_t>& buffer, size_t dataSize) {
 //---------------------------------------------------------------------------------
 //---------------------------    PUBLIC METHODS       ----------------------------
 //---------------------------------------------------------------------------------
-void McuComms::begin(Stream& serial, size_t packetSize) {
-  McuComms::packetSize = packetSize;
-  log("Staring with packetSize: %d\n", packetSize);
+void McuComms::begin(Stream& serial, size_t pcktSize) {
+  McuComms::packetSize = pcktSize;
+  log("Staring with packetSize: %d\n", pcktSize);
 #ifdef ESP32
   log("Starting for ESP32\n");
 #endif
   transfer.begin(serial, true);
 }
 
-void McuComms::setDebugPort(Stream* debugPort) {
-  McuComms::debugPort = debugPort;
+void McuComms::setDebugPort(Stream* dbgPort) {
+  McuComms::debugPort = dbgPort;
 }
 
 void McuComms::setShotSnapshotCallback(ShotSnapshotReceivedCallback callback) {
@@ -184,7 +184,7 @@ void McuComms::setSensorStateSnapshotCallback(SensorStateSnapshotReceivedCallbac
   sensorStateSnapshotCallback = callback;
 }
 
-void McuComms::sendShotData(ShotSnapshot& snapshot) {
+void McuComms::sendShotData(const ShotSnapshot& snapshot) {
   uint16_t messageSize = transfer.txObj(snapshot);
   transfer.sendData(messageSize, PACKET_SHOT_SNAPSHOT);
 }
