@@ -20,9 +20,9 @@ using namespace std;
 
 class ProfileSerializer {
 public:
-  size_t neededBufferSize(Profile& profile);
+  size_t neededBufferSize(Profile& profile) const;
   vector<uint8_t> serializeProfile(Profile& profile);
-  void deserializeProfile(vector<uint8_t>& data, Profile& profile);
+  void deserializeProfile(vector<uint8_t>& data, Profile& profile)const;
 };
 
 class McuComms {
@@ -30,9 +30,6 @@ private:
   using ShotSnapshotReceivedCallback = void (*)(ShotSnapshot&);
   using ProfileReceivedCallback = void (*)(Profile&);
   using SensorStateSnapshotReceivedCallback = void (*)(SensorStateSnapshot&);
-  // typedef void (*ShotSnapshotReceivedCallback)(ShotSnapshot&);
-  // typedef void (*ProfileReceivedCallback)(Profile&);
-  // typedef void (*SensorStateSnapshotReceivedCallback)(SensorStateSnapshot&);
 
   ProfileSerializer profileSerializer;
   SerialTransfer transfer;
@@ -72,7 +69,7 @@ public:
 
   void sendShotData(const ShotSnapshot& snapshot);
   void sendProfile(Profile& profile);
-  void sendSensorStateSnapshot(SensorStateSnapshot& snapshot);
+  void sendSensorStateSnapshot(const SensorStateSnapshot& snapshot);
 
   void readData();
 };
