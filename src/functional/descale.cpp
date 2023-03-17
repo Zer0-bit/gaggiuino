@@ -10,7 +10,9 @@ unsigned long descalingTimer = 0;
 int descalingCycle = 0;
 
 void deScale(eepromValues_t &runningCfg, const SensorState &currentState) {
-  setSteamValveRelayOn();
+  if (currentState.brewSwitchState) {
+    setSteamValveRelayOn();
+  }
   switch (descalingState) {
     case DescalingState::IDLE: // Waiting for fuckfest to begin
       if (currentState.brewSwitchState) {

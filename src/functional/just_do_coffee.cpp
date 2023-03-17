@@ -33,7 +33,6 @@ void justDoCoffee(const eepromValues_t &runningCfg, const SensorState &currentSt
         setBoilerOff();
       }
     }
-    setSteamValveRelayOff();
   } else { //if brewState == false
     if (sensorTemperature <= ((float)runningCfg.setpoint - 10.f)) {
       setBoilerOn();
@@ -51,6 +50,9 @@ void justDoCoffee(const eepromValues_t &runningCfg, const SensorState &currentSt
         setBoilerOff();
       }
     }
+  }
+  if (brewActive || !currentState.brewSwitchState) { // keep steam boiler supply valve open while steaming/descale only
+    setSteamValveRelayOff();
   }
   setSteamBoilerRelayOff();
 }
