@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #ifndef PINDEF_H
 #define PINDEF_H
 
@@ -16,8 +17,8 @@
 
 #ifdef PCBV2
 // PCB V2
-#define mainBoilerRelayPin  PB13
-#define steamBoilerRelayPin PB12
+#define steamValveRelayPin PB12
+#define steamBoilerRelayPin PB13
 #endif
 
 #define HX711_sck_1   PB0

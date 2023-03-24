@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #ifndef PERIPHERALS_H
 #define PERIPHERALS_H
 
@@ -12,8 +13,8 @@ static inline void pinInit(void) {
     pinMode(valvePin, OUTPUT);
   #endif
   pinMode(relayPin, OUTPUT);
-  #ifdef mainBoilerRelayPin
-  pinMode(mainBoilerRelayPin, OUTPUT);
+  #ifdef steamValveRelayPin
+  pinMode(steamValveRelayPin, OUTPUT);
   #endif
   #ifdef steamBoilerRelayPin
   pinMode(steamBoilerRelayPin, OUTPUT);
@@ -32,15 +33,15 @@ static inline void setBoilerOff(void) {
   digitalWrite(relayPin, LOW);  // boilerPin -> LOW
 }
 
-static inline void setMainBoilerRelayOn(void) {
-  #ifdef mainBoilerRelayPin
-  digitalWrite(mainBoilerRelayPin, HIGH);  // mainBoilerRelayPin -> HIGH
+static inline void setSteamValveRelayOn(void) {
+  #ifdef steamValveRelayPin
+  digitalWrite(steamValveRelayPin, HIGH);  // steamValveRelayPin -> HIGH
   #endif
 }
 
-static inline void setMainBoilerRelayOff(void) {
-  #ifdef mainBoilerRelayPin
-  digitalWrite(mainBoilerRelayPin, LOW);  // mainBoilerRelayPin -> LOW
+static inline void setSteamValveRelayOff(void) {
+  #ifdef steamValveRelayPin
+  digitalWrite(steamValveRelayPin, LOW);  // steamValveRelayPin -> LOW
   #endif
 }
 

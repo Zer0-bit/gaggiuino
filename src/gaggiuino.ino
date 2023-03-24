@@ -1,3 +1,4 @@
+/* 09:32 15/03/2023 - change triggering comment */
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
 #endif
@@ -6,6 +7,7 @@
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
 SimpleKalmanFilter smoothPumpFlow(1.f, 1.f, 0.04f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
+SimpleKalmanFilter smoothConsideredFlow(1.f, 1.f, 0.1f);
 
 //default phases. Updated in updateProfilerPhases.
 Profile profile;
@@ -28,7 +30,7 @@ void setup(void) {
   LOG_INFO("Pin init");
 
   setBoilerOff();  // relayPin LOW
-  setMainBoilerRelayOff();
+  setSteamValveRelayOff();
   setSteamBoilerRelayOff();
   LOG_INFO("Boiler turned off");
 
@@ -51,6 +53,10 @@ void setup(void) {
 
   // Initialise comms library for talking to the ESP mcu
   espCommsInit();
+
+  // Initialize LED
+  ledInit();
+  ledColor(255, 255, 255); // WHITE
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -79,6 +85,8 @@ void setup(void) {
 
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
+
+  ledColor(255, 87, 95); // 64171
 
   iwdcInit();
 }
@@ -146,10 +154,10 @@ static void sensorsReadPressure(void) {
     previousSmoothedPressure = currentState.smoothedPressure;
     currentState.pressure = getPressure();
     currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
-    currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
-    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 1.55f;
+    currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.01f;
+    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
-    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.5f;
+    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.01f;
     currentState.isPressureMaxed = currentState.smoothedPressure >= runningCfg.pressureProfilingState ? runningCfg.pressureProfilingStart - 0.5f : runningCfg.flowProfilePressureTarget - 0.5f;
 
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
@@ -157,14 +165,14 @@ static void sensorsReadPressure(void) {
 }
 
 static long sensorsReadFlow(float elapsedTime) {
-    long pumpClicks = getAndResetClickCounter();
-    currentState.pumpClicks = 1000.f * (float)pumpClicks / elapsedTime;
+  long pumpClicks = getAndResetClickCounter();
+  currentState.pumpClicks = 1000.f * (float)pumpClicks / elapsedTime;
 
-    brewActive ? currentState.pumpFlow = getPumpFlow(currentState.pumpClicks, currentState.smoothedPressure) : currentState.pumpFlow = 0.f;
+  currentState.pumpFlow = getPumpFlow(currentState.pumpClicks, currentState.smoothedPressure);
 
-    previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
-    currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-    return pumpClicks;
+  previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
+  currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+  return pumpClicks;
 }
 
 static void calculateWeightAndFlow(void) {
@@ -179,8 +187,8 @@ static void calculateWeightAndFlow(void) {
       flowTimer = millis();
       long pumpClicks = sensorsReadFlow(elapsedTime);
       float consideredFlow = currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
-      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.5f;
-      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.55f;
+      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.1f;
+      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.1f;
 
       // bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
 
@@ -193,16 +201,16 @@ static void calculateWeightAndFlow(void) {
         previousWeight = currentState.shotWeight;
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
+        float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
+        currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
         //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
-        currentState.shotWeight += fmaxf(pumpClicks * flowPerClick,consideredFlow);
+        currentState.shotWeight += actualFlow;
       }
       currentState.waterPumped += consideredFlow;
     }
   } else {
-    // if (elapsedTime > REFRESH_FLOW_EVERY) {
-    //   sensorsReadFlow(elapsedTime);
-    //   flowTimer = millis();
-    // }
+    currentState.consideredFlow = 0.f;
+
     flowTimer = millis();
   }
 }
@@ -212,7 +220,6 @@ static void calculateWeightAndFlow(void) {
 //##############################################################################################################################
 
 static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
-
   if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) {
     runningCfg = lcdDownloadCfg();
 
@@ -245,7 +252,7 @@ static void modeSelect(void) {
     case OPERATION_MODES::OPMODE_pressureBasedPreinfusionAndFlowProfile:
       nonBrewModeActive = false;
       if (currentState.hotWaterSwitchState) hotWaterMode(currentState);
-      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState, brewActive);
+      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState);
       else {
         profiling();
         steamTime = millis();
@@ -269,7 +276,7 @@ static void modeSelect(void) {
         justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
         steamTime = millis();
       } else {
-        steamCtrl(runningCfg, currentState, brewActive);
+        steamCtrl(runningCfg, currentState);
       }
       break;
     case OPERATION_MODES::OPMODE_descale:
@@ -304,7 +311,10 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    lcdSetTemperature(currentState.temperature);
+    uint16_t lcdTemp = ((uint16_t)currentState.temperature > runningCfg.setpoint - runningCfg.offsetTemp && currentState.brewSwitchState)
+      ? (uint16_t)currentState.temperature / (runningCfg.setpoint - runningCfg.offsetTemp) + (runningCfg.setpoint - runningCfg.offsetTemp)
+      : (uint16_t)currentState.temperature;
+    lcdSetTemperature(lcdTemp);
 
     /*LCD weight output*/
     if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && homeScreenScalesEnabled) {
@@ -324,7 +334,7 @@ static void lcdRefresh(void) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.smoothedWeightFlow * 10.f
-          : currentState.smoothedPumpFlow * 10.f
+          : currentState.consideredFlow ? currentState.consideredFlow * 100.f : currentState.smoothedPumpFlow * 10.f
       );
     }
 
@@ -535,8 +545,8 @@ static void profiling(void) {
     espCommsSendShotData(shotSnapshot, 100);
 
     if (phaseProfiler.isFinished()) {
-      closeValve();
       setPumpOff();
+      closeValve();
       brewActive = false;
     } else if (currentPhase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE) {
       float newBarValue = currentPhase.getTarget();
@@ -563,8 +573,8 @@ static void manualFlowControl(void) {
     float flow_reading = lcdGetManualFlowVol() / 10.f ;
     setPumpFlow(flow_reading, 0.f, currentState);
   } else {
-    closeValve();
     setPumpOff();
+    closeValve();
   }
   justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
 }
@@ -623,7 +633,6 @@ void systemHealthCheck(float pressureThreshold) {
     we force set it to LOW while trying to get a temp reading - IMPORTANT safety feature */
     setPumpOff();
     setBoilerOff();
-    setMainBoilerRelayOff();
     setSteamBoilerRelayOff();
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
@@ -640,7 +649,6 @@ void systemHealthCheck(float pressureThreshold) {
     lcdShowPopup("TURN STEAM OFF NOW!");
     setPumpOff();
     setBoilerOff();
-    setMainBoilerRelayOff();
     setSteamBoilerRelayOff();
     currentState.isSteamForgottenON = currentState.steamSwitchState;
   }
@@ -673,7 +681,7 @@ void systemHealthCheck(float pressureThreshold) {
           lcdShowPopup("Releasing pressure!");
           setPumpOff();
           setBoilerOff();
-          setMainBoilerRelayOff();
+          setSteamValveRelayOff();
           setSteamBoilerRelayOff();
           openValve();
           break;
