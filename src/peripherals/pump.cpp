@@ -9,15 +9,7 @@ float flowPerClickAtZeroBar = 0.27f;
 int maxPumpClicksPerSecond = 50;
 float fpc_multiplier = 1.2f;
 
-//https://www.desmos.com/calculator/uhgfwn5z9f  - blue curve
-// constexpr std::array<float, 5> pressureInefficiencyCoefficient {{
-//   0.055f,
-//   0.016f,
-//   0.00325f,
-//   0.00068f,
-//   0.0000326f
-// }};
-
+//https://www.desmos.com/calculator/axyl70gjae  - blue curve
 constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
   0.045f,
   0.015f,
@@ -28,15 +20,6 @@ constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
   -0.0018f
 }};
 
-// constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
-//   0.135f,
-//   -0.0026f,
-//   -0.00194f,
-//   0.000118f,
-//   0.00000594f,
-//   -0.000000798f,
-//   0.0000000186f
-// }};
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
@@ -108,9 +91,6 @@ int getCPS(void) {
 float getPumpFlowPerClick(const float pressure) {
   float fpc = 0.f;
   fpc = (pressureInefficiencyCoefficient[5] / pressure + pressureInefficiencyCoefficient[6]) * ( -pressure * pressure ) + ( flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
-  // fpc = (flowPerClickAtZeroBar-pressureInefficiencyCoefficient[0])+(pressureInefficiencyCoefficient[1]+(pressureInefficiencyCoefficient[2]+(pressureInefficiencyCoefficient[3]+(pressureInefficiencyCoefficient[04]+(pressureInefficiencyCoefficient[5] + pressureInefficiencyCoefficient[6] * pressure)*pressure)*pressure)*pressure)*pressure)*pressure;
-  // fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
-  // fpc *= fpc_multiplier;
   return fpc;
 }
 
