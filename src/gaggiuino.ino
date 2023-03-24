@@ -6,7 +6,7 @@
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
 SimpleKalmanFilter smoothPumpFlow(1.f, 1.f, 0.04f);
-SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.5f);
+SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(1.f, 1.f, 0.1f);
 
 //default phases. Updated in updateProfilerPhases.

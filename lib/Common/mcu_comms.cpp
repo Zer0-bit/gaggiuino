@@ -4,7 +4,7 @@
 
 using namespace std;
 
-size_t ProfileSerializer::neededBufferSize(Profile& profile) {
+size_t ProfileSerializer::neededBufferSize(Profile& profile) const {
   return sizeof(profile.phaseCount()) + profile.phaseCount() * sizeof(Phase) + sizeof(profile.globalStopConditions);
 }
 
@@ -20,7 +20,7 @@ vector<uint8_t> ProfileSerializer::serializeProfile(Profile& profile) {
   return buffer;
 }
 
-void ProfileSerializer::deserializeProfile(vector<uint8_t>& buffer, Profile& profile) {
+void ProfileSerializer::deserializeProfile(vector<uint8_t>& buffer, Profile& profile) const{
   size_t phaseCount;
   memcpy(&phaseCount, buffer.data(), sizeof(profile.phaseCount()));
   profile.phases.clear();
@@ -36,8 +36,8 @@ void McuComms::sendMultiPacket(vector<uint8_t>& buffer, size_t dataSize, uint8_t
   log("Sending buffer[%d]: ", dataSize);
   logBufferHex(buffer, dataSize);
 
-  uint8_t dataPerPacket = packetSize - 2u; // Two bytes are reserved for current index and last index
-  uint8_t numPackets = dataSize / dataPerPacket;
+  uint8_t dataPerPacket = static_cast<uint8_t>(packetSize - 2u); // Two bytes are reserved for current index and last index
+  uint8_t numPackets = static_cast<uint8_t>(dataSize / dataPerPacket);
 
   if (dataSize % dataPerPacket > 0u) // Add an extra transmission if needed
     numPackets++;
@@ -46,12 +46,12 @@ void McuComms::sendMultiPacket(vector<uint8_t>& buffer, size_t dataSize, uint8_t
     uint8_t dataLen = dataPerPacket;
 
 
-    if ((size_t)((currentPacket + 1u) * dataPerPacket) > dataSize) // Determine data length for the last packet if file length is not an exact multiple of `dataPerPacket`
-      dataLen = dataSize - currentPacket * dataPerPacket;
+    if (((currentPacket + 1u) * dataPerPacket) > dataSize) // Determine data length for the last packet if file length is not an exact multiple of `dataPerPacket`
+      dataLen = static_cast<uint8_t>(dataSize - currentPacket * dataPerPacket);
 
     uint8_t sendSize = transfer.txObj(numPackets - 1u, 0u); // index of last packet
-    sendSize = transfer.txObj(currentPacket, 1); // index of current packet
-    sendSize = transfer.txObj(buffer[currentPacket * dataPerPacket], 2, dataLen); // packet payload
+    sendSize = transfer.txObj(currentPacket, (uint8_t)1); // index of current packet
+    sendSize = transfer.txObj(buffer[currentPacket * dataPerPacket], (uint8_t)2, dataLen); // packet payload
 
     transfer.sendData(sendSize, packetID); // Send the current file index and data
   }
@@ -195,7 +195,7 @@ void McuComms::sendProfile(Profile& profile) {
   sendMultiPacket(buffer, dataSize, PACKET_PROFILE);
 }
 
-void McuComms::sendSensorStateSnapshot(SensorStateSnapshot& snapshot) {
+void McuComms::sendSensorStateSnapshot(const SensorStateSnapshot& snapshot) {
   uint16_t messageSize = transfer.txObj(snapshot);
   transfer.sendData(messageSize, PACKET_SENSOR_STATE_SNAPSHOT);
 }

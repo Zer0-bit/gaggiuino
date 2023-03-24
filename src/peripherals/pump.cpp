@@ -9,14 +9,17 @@ float flowPerClickAtZeroBar = 0.27f;
 int maxPumpClicksPerSecond = 50;
 float fpc_multiplier = 1.2f;
 
-//https://www.desmos.com/calculator/uhgfwn5z9f  - blue curve
-constexpr std::array<float, 5> pressureInefficiencyCoefficient {{
-  0.055f,
-  0.016f,
-  0.00325f,
-  0.00068f,
-  0.0000326f
+//https://www.desmos.com/calculator/axyl70gjae  - blue curve
+constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
+  0.045f,
+  0.015f,
+  0.0033f,
+  0.000685f,
+  0.000045f,
+  0.009f,
+  -0.0018f
 }};
+
 // Initialising some pump specific specs, mainly:
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
@@ -87,8 +90,7 @@ int getCPS(void) {
 // plotted: https://www.desmos.com/calculator/eqynzclagu
 float getPumpFlowPerClick(const float pressure) {
   float fpc = 0.f;
-  fpc = (flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
-  fpc *= fpc_multiplier;
+  fpc = (pressureInefficiencyCoefficient[5] / pressure + pressureInefficiencyCoefficient[6]) * ( -pressure * pressure ) + ( flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
   return fpc;
 }
 
@@ -99,6 +101,7 @@ float getPumpFlow(const float cps, const float pressure) {
 
 // Currently there is no compensation for pressure measured at the puck, resulting in incorrect estimates
 float getClicksPerSecondForFlow(const float flow, const float pressure) {
+  if (flow == 0.f) return 0;
   float flowPerClick = getPumpFlowPerClick(pressure);
   float cps = flow / flowPerClick;
   return fminf(cps, maxPumpClicksPerSecond);
