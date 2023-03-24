@@ -91,7 +91,6 @@ int getCPS(void) {
 float getPumpFlowPerClick(const float pressure) {
   float fpc = 0.f;
   fpc = (pressureInefficiencyCoefficient[5] / pressure + pressureInefficiencyCoefficient[6]) * ( -pressure * pressure ) + ( flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
-  if (fpc < 0.f || fpc > 0.4f || fpc == NAN) fpc = 0.f;
   return fpc;
 }
 
@@ -102,6 +101,7 @@ float getPumpFlow(const float cps, const float pressure) {
 
 // Currently there is no compensation for pressure measured at the puck, resulting in incorrect estimates
 float getClicksPerSecondForFlow(const float flow, const float pressure) {
+  if (flow == 0.f) return 0;
   float flowPerClick = getPumpFlowPerClick(pressure);
   float cps = flow / flowPerClick;
   return fminf(cps, maxPumpClicksPerSecond);
