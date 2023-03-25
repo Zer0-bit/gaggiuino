@@ -273,7 +273,7 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) {
         brewActive ? flushActivated() : flushDeactivated();
-        justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+        // justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
         steamTime = millis();
       } else {
         steamCtrl(runningCfg, currentState);
