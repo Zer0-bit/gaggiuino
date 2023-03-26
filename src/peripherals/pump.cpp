@@ -4,7 +4,8 @@
 #include <PSM.h>
 #include "utils.h"
 
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 4);
+
 float flowPerClickAtZeroBar = 0.27f;
 int maxPumpClicksPerSecond = 50;
 float fpc_multiplier = 1.2f;
@@ -83,7 +84,15 @@ long getAndResetClickCounter(void) {
 }
 
 int getCPS(void) {
-  return pump.cps();
+  unsigned int cps = pump.cps();
+  if (cps > 80u) {
+    pump.setDivider(2);
+  }
+  return cps;
+}
+
+void pumpPhaseShift(void) {
+  pump.shiftDividerCounter();
 }
 
 // Models the flow per click, follows a compromise between the schematic and recorded findings
