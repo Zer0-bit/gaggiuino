@@ -86,6 +86,8 @@ void setup(void) {
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
 
+  calibratePump();
+
   ledColor(255, 87, 95); // 64171
 
   iwdcInit();
@@ -789,4 +791,42 @@ void cpsInit(eepromValues_t &eepromValues) {
   } else if (cps > 0) { // 50 Hz
     eepromValues.powerLineFrequency = 50u;
   }
+}
+
+void calibratePump(void) {
+  openValve();
+  delay(1000);
+  closeValve();
+  setPumpToRawValue(50);
+  delay(1000);
+  setPumpToRawValue(0);
+  sensorsReadPressure();
+  float firstPressure = currentState.pressure;
+
+  lcdSetPressure(firstPressure);
+
+  delay(5000);
+
+  pumpPhaseShift();
+
+  openValve();
+  delay(1000);
+  closeValve();
+  setPumpToRawValue(50);
+  delay(1000);
+  setPumpToRawValue(0);
+  sensorsReadPressure();
+  float secondPressure = currentState.pressure;
+
+  lcdSetPressure(secondPressure);
+
+  if (secondPressure < firstPressure) {
+    pumpPhaseShift();
+  }
+
+  delay(5000);
+
+  openValve();
+  delay(1000);
+  closeValve();
 }
