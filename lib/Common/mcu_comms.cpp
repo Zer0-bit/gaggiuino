@@ -36,8 +36,8 @@ void McuComms::sendMultiPacket(vector<uint8_t>& buffer, size_t dataSize, uint8_t
   log("Sending buffer[%d]: ", dataSize);
   logBufferHex(buffer, dataSize);
 
-  uint8_t dataPerPacket = static_cast<uint8_t>(packetSize - 2u); // Two bytes are reserved for current index and last index
-  uint8_t numPackets = static_cast<uint8_t>(dataSize / dataPerPacket);
+  auto dataPerPacket = static_cast<uint8_t>(packetSize - 2u); // Two bytes are reserved for current index and last index
+  auto numPackets = static_cast<uint8_t>(dataSize / dataPerPacket);
 
   if (dataSize % dataPerPacket > 0u) // Add an extra transmission if needed
     numPackets++;
@@ -49,9 +49,9 @@ void McuComms::sendMultiPacket(vector<uint8_t>& buffer, size_t dataSize, uint8_t
     if (((currentPacket + 1u) * dataPerPacket) > dataSize) // Determine data length for the last packet if file length is not an exact multiple of `dataPerPacket`
       dataLen = static_cast<uint8_t>(dataSize - currentPacket * dataPerPacket);
 
-    uint8_t sendSize = transfer.txObj(numPackets - 1u, 0u); // index of last packet
-    sendSize = transfer.txObj(currentPacket, (uint8_t)1); // index of current packet
-    sendSize = transfer.txObj(buffer[currentPacket * dataPerPacket], (uint8_t)2, dataLen); // packet payload
+    uint16_t sendSize = transfer.txObj(numPackets - 1u, 0u); // index of last packet
+    sendSize = transfer.txObj(currentPacket, (uint16_t)1); // index of current packet
+    sendSize = transfer.txObj(buffer[currentPacket * dataPerPacket], (uint16_t)2, dataLen); // packet payload
 
     transfer.sendData(sendSize, packetID); // Send the current file index and data
   }
@@ -62,7 +62,7 @@ vector<uint8_t> McuComms::receiveMultiPacket() {
   uint8_t lastPacket = transfer.packet.rxBuff[0]; // Get index of last packet
   uint8_t currentPacket = transfer.packet.rxBuff[1]; // Get index of current packet
   uint8_t bytesRead = transfer.bytesRead; // Bytes read in current packet
-  uint8_t dataPerPacket = bytesRead - 2u; // First 2 bytes of each packet are used as indexes and are not put in the buffer
+  uint8_t dataPerPacket = bytesRead - (uint8_t)2; // First 2 bytes of each packet are used as indexes and are not put in the buffer
   size_t  totalBytes = 0u;
 
   vector<uint8_t> buffer;
