@@ -9,9 +9,9 @@
 #include "just_do_coffee.h"
 #include <Arduino.h>
 
-#define DESCALE_PHASE1_EVERY    30000UL //30000 // short pump pulses during descale
-#define DESCALE_PHASE2_EVERY    60000UL //60000 // long pause for scale softening
-#define DESCALE_PHASE3_EVERY    10000UL //10000 // short burst for descale efficiency
+const unsigned long DESCALE_PHASE1_EVERY = 30000UL; //30000 // short pump pulses during descale
+const unsigned long DESCALE_PHASE2_EVERY = 60000UL; //60000 // long pause for scale softening
+const unsigned long DESCALE_PHASE3_EVERY = 10000UL; //10000 // short burst for descale efficiency
 
 //#############################################################################################
 //###############################____DESCALE__CONTROL____######################################

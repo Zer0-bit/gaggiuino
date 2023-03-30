@@ -204,6 +204,11 @@ static void calculateWeightAndFlow(void) {
       } else if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
+        // Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling
+        if (runningCfg.flowProfileState && currentState.isPressureRising
+        && currentState.smoothedPressure < runningCfg.flowProfilePressureTarget * 0.9f) {
+          actualFlow *= 0.6f;
+        }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
         //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
         currentState.shotWeight += actualFlow;
