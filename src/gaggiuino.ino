@@ -798,50 +798,34 @@ void cpsInit(eepromValues_t &eepromValues) {
 }
 
 void calibratePump(void) {
-  bool selectedPhase = false;
+  long clicksPhase[2] = {0, 0};
+  short i = 0;
   lcdShowPopup("Phase selection..");
+  CALIBRATE_PUMP:
+  uint32_t timer = millis();
   openValve();
-  delay(3000);
-  closeValve();
-  setPumpToRawValue(50);
-  while (currentState.smoothedPressure < 6.f) {
-    if (currentState.smoothedPressure < 0.5f) getAndResetClickCounter();
-    sensorsReadPressure();
-  }
-  currentState.clicksPhase_1 = getAndResetClickCounter();
-  setPumpToRawValue(0);
-  sensorsReadPressure();
-  float firstPressure = currentState.smoothedPressure;
-  lcdSetPressure(firstPressure);
-
-  delay(2000);
-
-  pumpPhaseShift();
-  selectedPhase = !selectedPhase;
-
-  openValve();
-  delay(3000);
+  delay(1500);
   sensorsReadPressure();
   closeValve();
   setPumpToRawValue(50);
-  while (currentState.smoothedPressure < 6.f) {
+  while (currentState.smoothedPressure < 6.f || millis() - timer > 5000ul) {
     if (currentState.smoothedPressure < 0.5f) getAndResetClickCounter();
     sensorsReadPressure();
   }
-  currentState.clicksPhase_2 = getAndResetClickCounter();
+  clicksPhase[i] = getAndResetClickCounter();
   setPumpToRawValue(0);
   sensorsReadPressure();
-  float secondPressure = currentState.smoothedPressure;
+  lcdSetPressure(currentState.smoothedPressure);
 
-  lcdSetPressure(secondPressure);
-
-  // if (secondPressure > firstPressure) {
-  //   pumpPhaseShift();
-  //   selectedPhase = !selectedPhase;
-  // }
-  if (currentState.clicksPhase_2 < currentState.clicksPhase_1) {
+  // Run one more time in the opposite phase.
+  if (clicksPhase[1] == 0) {
     pumpPhaseShift();
-    selectedPhase = !selectedPhase;
+    i += 1;
+    goto CALIBRATE_PUMP;
+  }
+  // Adjust phase if necessary.
+  if (clicksPhase[1] < clicksPhase[0]) {
+    pumpPhaseShift();
     lcdShowPopup("Phase 1 selected");
   } else lcdShowPopup("Phase 2 selected");
 }
