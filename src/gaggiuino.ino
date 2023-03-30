@@ -100,6 +100,7 @@ void setup(void) {
 
 //Main loop where all the logic is continuously run
 void loop(void) {
+  fillBoiler();
   pageValuesRefresh(false);
   lcdListen();
   sensorsRead();
@@ -122,7 +123,6 @@ static void sensorsRead(void) {
   sensorsReadWeight();
   sensorsReadPressure();
   calculateWeightAndFlow();
-  fillBoiler();
   updateStartupTimer();
 }
 
@@ -212,7 +212,7 @@ static void calculateWeightAndFlow(void) {
     }
   } else {
     currentState.consideredFlow = 0.f;
-
+    currentState.pumpClicks = getAndResetClickCounter();
     flowTimer = millis();
   }
 }
@@ -275,7 +275,6 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) {
         brewActive ? flushActivated() : flushDeactivated();
-        justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
         steamTime = millis();
       } else {
         steamCtrl(runningCfg, currentState);
@@ -773,7 +772,7 @@ void fillBoilerUntilThreshod(unsigned long elapsedTime) {
 
   lcdShowPopup("Filling boiler!");
   openValve();
-  setPumpToRawValue(80);
+  setPumpToRawValue(35);
 }
 
 void updateStartupTimer() {
@@ -794,39 +793,50 @@ void cpsInit(eepromValues_t &eepromValues) {
 }
 
 void calibratePump(void) {
+  bool selectedPhase = false;
+  lcdShowPopup("Phase selection..");
   openValve();
-  delay(1000);
+  delay(3000);
   closeValve();
   setPumpToRawValue(50);
-  delay(1000);
+  while (currentState.smoothedPressure < 6.f) {
+    if (currentState.smoothedPressure < 0.5f) getAndResetClickCounter();
+    sensorsReadPressure();
+  }
+  currentState.clicksPhase_1 = getAndResetClickCounter();
   setPumpToRawValue(0);
   sensorsReadPressure();
-  float firstPressure = currentState.pressure;
-
+  float firstPressure = currentState.smoothedPressure;
   lcdSetPressure(firstPressure);
 
-  delay(5000);
+  delay(2000);
 
   pumpPhaseShift();
+  selectedPhase = !selectedPhase;
 
   openValve();
-  delay(1000);
+  delay(3000);
+  sensorsReadPressure();
   closeValve();
   setPumpToRawValue(50);
-  delay(1000);
+  while (currentState.smoothedPressure < 6.f) {
+    if (currentState.smoothedPressure < 0.5f) getAndResetClickCounter();
+    sensorsReadPressure();
+  }
+  currentState.clicksPhase_2 = getAndResetClickCounter();
   setPumpToRawValue(0);
   sensorsReadPressure();
-  float secondPressure = currentState.pressure;
+  float secondPressure = currentState.smoothedPressure;
 
   lcdSetPressure(secondPressure);
 
-  if (secondPressure < firstPressure) {
+  // if (secondPressure > firstPressure) {
+  //   pumpPhaseShift();
+  //   selectedPhase = !selectedPhase;
+  // }
+  if (currentState.clicksPhase_2 < currentState.clicksPhase_1) {
     pumpPhaseShift();
-  }
-
-  delay(5000);
-
-  openValve();
-  delay(1000);
-  closeValve();
+    selectedPhase = !selectedPhase;
+    lcdShowPopup("Phase 1 selected");
+  } else lcdShowPopup("Phase 2 selected");
 }

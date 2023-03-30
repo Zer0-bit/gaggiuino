@@ -100,7 +100,7 @@ void pumpPhaseShift(void) {
 float getPumpFlowPerClick(const float pressure) {
   float fpc = 0.f;
   fpc = (pressureInefficiencyCoefficient[5] / pressure + pressureInefficiencyCoefficient[6]) * ( -pressure * pressure ) + ( flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
-  return fpc;
+  return fpc * fpc_multiplier;
 }
 
 // Follows the schematic from https://www.cemegroup.com/solenoid-pump/e5-60 modified to per-click

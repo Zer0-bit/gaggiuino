@@ -16,3 +16,12 @@ unsigned int PSM::cps() {
 unsigned long PSM::getLastMillis() {
   return 1ul;
 }
+
+unsigned char PSM::getDivider(void) {
+}
+
+void PSM::setDivider(unsigned char divider) {
+}
+
+void PSM::shiftDividerCounter(char value) {
+}
