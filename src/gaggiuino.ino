@@ -808,10 +808,12 @@ static void calibratePump(void) {
   sensorsReadPressure();
   closeValve();
   setPumpToRawValue(50);
-  long loopTimeout = millis();
-  while (currentState.smoothedPressure < 6.f || millis() - loopTimeout > 5000l) {
+  long currentMillis;
+  long loopTimeout = millis() + 5000L;
+  while (currentState.smoothedPressure < 6.f || currentMillis > loopTimeout) {
     if (currentState.smoothedPressure < 0.5f) getAndResetClickCounter();
     sensorsReadPressure();
+    currentMillis = millis();
   }
   clicksPhase[i] = getAndResetClickCounter();
   setPumpToRawValue(0);
