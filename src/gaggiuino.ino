@@ -813,23 +813,20 @@ static void calibratePump(void) {
     // closeValve();
     setPumpToRawValue(20);
     delay(1000);
-    setPumpToRawValue(50);
 
-    long currentMillis = millis();
     long loopTimeout = millis() + 2000L;
-
     // Wait for pressure to reach desired level.
-    while (currentState.smoothedPressure < 0.8f) {
+    while (currentState.smoothedPressure < 1.f) {
       watchdogReload();
+      setPumpToRawValue(50);
       if (currentState.smoothedPressure < 0.1f) {
         getAndResetClickCounter();
       }
 
       sensorsReadPressure();
-      currentMillis = millis();
 
       // Exit loop if timeout is reached.
-      if (currentMillis > loopTimeout) {
+      if (millis() > loopTimeout) {
         break;
       }
     }
