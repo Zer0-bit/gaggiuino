@@ -1,4 +1,5 @@
 /* 09:32 15/03/2023 - change triggering comment */
+#pragma GCC optimize ("Ofast")
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
 #endif
