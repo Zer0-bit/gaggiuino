@@ -802,12 +802,12 @@ static void calibratePump(void) {
   short i = 0;
   lcdShowPopup("Phase selection..");
   CALIBRATE_PUMP:
-  uint32_t timer = millis();
   openValve();
   delay(1500);
   sensorsReadPressure();
   closeValve();
   setPumpToRawValue(50);
+  uint32_t timer = millis();
   while (currentState.smoothedPressure < 6.f || millis() - timer > 3000ul) {
     if (currentState.smoothedPressure < 0.5f) getAndResetClickCounter();
     sensorsReadPressure();
