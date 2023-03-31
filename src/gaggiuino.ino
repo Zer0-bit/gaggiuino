@@ -799,6 +799,7 @@ static void cpsInit(eepromValues_t &eepromValues) {
 }
 
 static void calibratePump(void) {
+  bool isWhichPhase = false;
   long clicksPhase[2] = {0, 0};
   short i = 0;
   lcdShowPopup("Phase selection..");
@@ -823,12 +824,14 @@ static void calibratePump(void) {
   // Run one more time in the opposite phase.
   if (i == 0) {
     pumpPhaseShift();
-    i ++;
+    i++;
     goto CALIBRATE_PUMP;
   }
   // Adjust phase if necessary.
   if (clicksPhase[1] < clicksPhase[0]) {
+    isWhichPhase = true;
     pumpPhaseShift();
-    lcdShowPopup("Phase 1 selected");
-  } else lcdShowPopup("Phase 2 selected");
+  }
+
+  lcdShowPopup(!isWhichPhase ? "Phase 2 selected" : "Phase 1 selected");
 }
