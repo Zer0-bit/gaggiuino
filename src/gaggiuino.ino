@@ -626,7 +626,7 @@ static void brewParamsReset(void) {
   phaseProfiler.reset();
 }
 
-static void systemHealthCheck(float pressureThreshold) {
+static inline void systemHealthCheck(float pressureThreshold) {
   //Reloading the watchdog timer, if this function fails to run MCU is rebooted
   watchdogReload();
 
@@ -801,17 +801,22 @@ static void calibratePump(void) {
   long clicksPhase[2] = {0, 0};
   short i = 0;
   lcdShowPopup("Phase selection..");
+  delay(500);
   CALIBRATE_PUMP:
   openValve();
+  lcdShowPopup("Open valve");
   delay(1500);
   sensorsReadPressure();
   closeValve();
+  lcdShowPopup("Close valve");
   setPumpToRawValue(50);
   uint32_t timer = millis();
   while (currentState.smoothedPressure < 6.f || millis() - timer > 3000ul) {
     if (currentState.smoothedPressure < 0.5f) getAndResetClickCounter();
     sensorsReadPressure();
   }
+  lcdShowPopup("Out of while!");
+  delay(500);
   clicksPhase[i] = getAndResetClickCounter();
   setPumpToRawValue(0);
   sensorsReadPressure();
