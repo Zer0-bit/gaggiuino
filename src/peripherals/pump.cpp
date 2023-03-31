@@ -125,6 +125,6 @@ void setPumpFlow(const float targetFlow, const float pressureRestriction, const 
   }
   else {
     float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.smoothedPressure) / (float)maxPumpClicksPerSecond;
-    setPumpToRawValue((uint8_t)pumpPct * PUMP_RANGE);
+    setPumpToRawValue(uint8_t(pumpPct * PUMP_RANGE));
   }
 }
