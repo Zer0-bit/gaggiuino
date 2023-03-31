@@ -818,9 +818,9 @@ static void calibratePump(void) {
   lcdSetPressure(currentState.smoothedPressure);
 
   // Run one more time in the opposite phase.
-  if (clicksPhase[1] == 0) {
+  if (i == 0) {
     pumpPhaseShift();
-    i += 1;
+    i ++;
     goto CALIBRATE_PUMP;
   }
   // Adjust phase if necessary.
