@@ -808,7 +808,7 @@ static void calibratePump(void) {
     closeValve();
     setPumpToRawValue(50);
 
-    long currentMillis = 0L;
+    long currentMillis = millis();
     long loopTimeout = millis() + 5000L;
 
     // Wait for pressure to reach desired level.
@@ -832,7 +832,7 @@ static void calibratePump(void) {
     lcdSetPressure(currentState.smoothedPressure);
 
     // Switch pump phase for next calibration.
-    pumpPhaseShift();
+    if (phase < 1) pumpPhaseShift();
   }
 
   // Determine which phase has fewer clicks.
