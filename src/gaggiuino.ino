@@ -87,7 +87,7 @@ void setup(void) {
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
 
-  calibratePump();
+  // calibratePump();
 
   ledColor(255, 87, 95); // 64171
 
@@ -101,6 +101,7 @@ void setup(void) {
 
 //Main loop where all the logic is continuously run
 void loop(void) {
+  calibratePump();
   fillBoiler();
   pageValuesRefresh(false);
   lcdListen();
@@ -799,21 +800,28 @@ static void cpsInit(eepromValues_t &eepromValues) {
 }
 
 static void calibratePump(void) {
+  if (pumpCalibrationFinished) {
+    return;
+  }
+
   long clicksPhase[2] = {0, 0};
    // Calibrate pump in both phases
   for (int phase = 0; phase < 2; phase++) {
     openValve();
-    delay(1500);
+    delay(500);
     sensorsReadPressure();
-    closeValve();
+    // closeValve();
+    setPumpToRawValue(20);
+    delay(1000);
     setPumpToRawValue(50);
 
     long currentMillis = millis();
-    long loopTimeout = millis() + 5000L;
+    long loopTimeout = millis() + 2000L;
 
     // Wait for pressure to reach desired level.
-    while (currentState.smoothedPressure < 7.f) {
-      if (currentState.smoothedPressure < 0.5f) {
+    while (currentState.smoothedPressure < 0.8f) {
+      watchdogReload();
+      if (currentState.smoothedPressure < 0.1f) {
         getAndResetClickCounter();
       }
 
@@ -840,4 +848,5 @@ static void calibratePump(void) {
     pumpPhaseShift();
     lcdShowPopup("Phase 2 selected");
   } else lcdShowPopup("Phase 1 selected");
+  pumpCalibrationFinished = true;
 }
