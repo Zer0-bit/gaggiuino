@@ -113,7 +113,7 @@ float getClicksPerSecondForFlow(const float flow, const float pressure) {
   if (flow == 0.f) return 0;
   float flowPerClick = getPumpFlowPerClick(pressure);
   float cps = flow / flowPerClick;
-  return fminf(cps, maxPumpClicksPerSecond);
+  return fminf(cps, (float)maxPumpClicksPerSecond);
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value
@@ -125,6 +125,6 @@ void setPumpFlow(const float targetFlow, const float pressureRestriction, const 
   }
   else {
     float pumpPct = getClicksPerSecondForFlow(targetFlow, currentState.smoothedPressure) / (float)maxPumpClicksPerSecond;
-    setPumpToRawValue(pumpPct * PUMP_RANGE);
+    setPumpToRawValue((uint8_t)pumpPct * PUMP_RANGE);
   }
 }
