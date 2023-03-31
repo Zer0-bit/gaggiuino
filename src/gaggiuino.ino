@@ -626,7 +626,7 @@ static void brewParamsReset(void) {
   phaseProfiler.reset();
 }
 
-void systemHealthCheck(float pressureThreshold) {
+static void systemHealthCheck(float pressureThreshold) {
   //Reloading the watchdog timer, if this function fails to run MCU is rebooted
   watchdogReload();
 
@@ -713,7 +713,13 @@ void systemHealthCheck(float pressureThreshold) {
   #endif
 }
 
-void fillBoiler() {
+// Function to track time since system has started
+static unsigned long getTimeSinceInit(void) {
+  static unsigned long startTime = millis();
+  return millis() - startTime;
+}
+
+static void fillBoiler(void) {
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
 
   if (startupInitFinished) {
@@ -736,11 +742,11 @@ void fillBoiler() {
 #endif
 }
 
-bool isBoilerFillPhase(unsigned long elapsedTime) {
+static bool isBoilerFillPhase(unsigned long elapsedTime) {
   return static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
 }
 
-bool isBoilerFull(unsigned long elapsedTime) {
+static bool isBoilerFull(unsigned long elapsedTime) {
   bool boilerFull = false;
   if (elapsedTime > BOILER_FILL_START_TIME + 1000UL) {
     boilerFull =  (previousSmoothedPressure - currentState.smoothedPressure > -0.02f)
@@ -751,18 +757,12 @@ bool isBoilerFull(unsigned long elapsedTime) {
   return elapsedTime >= BOILER_FILL_TIMEOUT || boilerFull;
 }
 
-// Function to track time since system has started
-unsigned long getTimeSinceInit() {
-  static unsigned long startTime = millis();
-  return millis() - startTime;
-}
-
 // Checks if Brew switch is ON
-bool isSwitchOn() {
+static bool isSwitchOn(void) {
   return currentState.brewSwitchState && static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home;
 }
 
-void fillBoilerUntilThreshod(unsigned long elapsedTime) {
+static void fillBoilerUntilThreshod(unsigned long elapsedTime) {
   if (elapsedTime >= BOILER_FILL_TIMEOUT) {
     startupInitFinished = true;
     return;
@@ -780,11 +780,11 @@ void fillBoilerUntilThreshod(unsigned long elapsedTime) {
   setPumpToRawValue(35);
 }
 
-void updateStartupTimer() {
+static void updateStartupTimer(void) {
   lcdSetUpTime(getTimeSinceInit() / 1000);
 }
 
-void cpsInit(eepromValues_t &eepromValues) {
+static void cpsInit(eepromValues_t &eepromValues) {
   int cps = getCPS();
   if (cps > 110) { // double 60 Hz
     eepromValues.powerLineFrequency = 60u;
@@ -797,7 +797,7 @@ void cpsInit(eepromValues_t &eepromValues) {
   }
 }
 
-void calibratePump(void) {
+static void calibratePump(void) {
   long clicksPhase[2] = {0, 0};
   short i = 0;
   lcdShowPopup("Phase selection..");
@@ -808,7 +808,7 @@ void calibratePump(void) {
   sensorsReadPressure();
   closeValve();
   setPumpToRawValue(50);
-  while (currentState.smoothedPressure < 6.f || millis() - timer > 5000ul) {
+  while (currentState.smoothedPressure < 6.f || millis() - timer > 3000ul) {
     if (currentState.smoothedPressure < 0.5f) getAndResetClickCounter();
     sensorsReadPressure();
   }
