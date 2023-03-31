@@ -805,7 +805,7 @@ static void calibratePump(void) {
   }
 
   long clicksPhase[2] = {0, 0};
-   // Calibrate pump in both phases
+  // Calibrate pump in both phases
   for (int phase = 0; phase < 2; phase++) {
     openValve();
     delay(500);
@@ -814,7 +814,7 @@ static void calibratePump(void) {
     setPumpToRawValue(20);
     delay(1000);
 
-    long loopTimeout = millis() + 2000L;
+    unsigned long loopTimeout = millis() + 2000L;
     // Wait for pressure to reach desired level.
     while (currentState.smoothedPressure < 1.f) {
       watchdogReload();
