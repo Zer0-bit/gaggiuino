@@ -810,7 +810,7 @@ static void calibratePump(void) {
   if (systemState.pumpCalibrationFinished) {
     return;
   }
-  bool recalibrating;
+  bool recalibrating = false;
   // Calibrate pump in both phases
   CALIBRATE_PHASES:
   lcdShowPopup(!recalibrating ? "Calibrating pump!" : "Re-calibrating!") ;
