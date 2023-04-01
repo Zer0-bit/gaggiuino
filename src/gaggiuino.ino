@@ -22,6 +22,8 @@ OPERATION_MODES selectedOperationalMode;
 
 eepromValues_t runningCfg;
 
+DebugState pumpPhases;
+
 void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
@@ -803,7 +805,6 @@ static void calibratePump(void) {
   if (pumpCalibrationFinished) {
     return;
   }
-
   long clicksPhase[2] = {0, 0};
   // Calibrate pump in both phases
   for (int phase = 0; phase < 2; phase++) {
@@ -814,9 +815,9 @@ static void calibratePump(void) {
     setPumpToRawValue(20);
     delay(1000);
 
-    unsigned long loopTimeout = millis() + 2000L;
+    unsigned long loopTimeout = millis() + 1500L;
     // Wait for pressure to reach desired level.
-    while (currentState.smoothedPressure < 1.f) {
+    while (currentState.smoothedPressure < 1.5f) {
       watchdogReload();
       setPumpToRawValue(50);
       if (currentState.smoothedPressure < 0.1f) {
@@ -832,6 +833,7 @@ static void calibratePump(void) {
     }
 
     clicksPhase[phase] = getAndResetClickCounter();
+    pumpPhases.pumpClicks[phase] = clicksPhase[phase];
     setPumpToRawValue(0);
     sensorsReadPressure();
     lcdSetPressure(currentState.smoothedPressure);

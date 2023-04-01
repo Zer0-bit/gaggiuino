@@ -15,6 +15,7 @@
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
 #include "sensors_state.h"
+#include "debug_state.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 #include "functional/predictive_weight.h"
