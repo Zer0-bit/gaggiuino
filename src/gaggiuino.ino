@@ -22,7 +22,7 @@ OPERATION_MODES selectedOperationalMode;
 
 eepromValues_t runningCfg;
 
-DebugState pumpPhases;
+SystemState systemState;
 
 void setup(void) {
   LOG_INIT();
@@ -249,7 +249,7 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
 static void modeSelect(void) {
-  if (!startupInitFinished) return;
+  if (!systemState.startupInitFinished) return;
 
   switch (selectedOperationalMode) {
     //REPLACE ALL THE BELOW WITH OPMODE_auto_profiling
@@ -594,6 +594,11 @@ static void manualFlowControl(void) {
 //#############################################################################################
 
 static void brewDetect(void) {
+  // Do not allow brew detection while system hasn't finished it's startup procedures.
+  if (!systemState.startupInitFinished || !systemState.pumpCalibrationFinished) {
+    return;
+  }
+
   static bool paramsReset = true;
 
   if (currentState.brewSwitchState) {
@@ -726,12 +731,12 @@ static unsigned long getTimeSinceInit(void) {
 static void fillBoiler(void) {
   #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
 
-  if (startupInitFinished) {
+  if (systemState.startupInitFinished) {
     return;
   }
 
   if (currentState.temperature > BOILER_FILL_SKIP_TEMP) {
-    startupInitFinished = true;
+    systemState.startupInitFinished = true;
     return;
   }
 
@@ -742,7 +747,7 @@ static void fillBoiler(void) {
     lcdShowPopup("Brew Switch ON!");
   }
 #else
-  startupInitFinished = true;
+  systemState.startupInitFinished = true;
 #endif
 }
 
@@ -768,14 +773,14 @@ static bool isSwitchOn(void) {
 
 static void fillBoilerUntilThreshod(unsigned long elapsedTime) {
   if (elapsedTime >= BOILER_FILL_TIMEOUT) {
-    startupInitFinished = true;
+    systemState.startupInitFinished = true;
     return;
   }
 
   if (isBoilerFull(elapsedTime)) {
     closeValve();
     setPumpOff();
-    startupInitFinished = true;
+    systemState.startupInitFinished = true;
     return;
   }
 
@@ -802,11 +807,11 @@ static void cpsInit(eepromValues_t &eepromValues) {
 }
 
 static void calibratePump(void) {
-  if (pumpCalibrationFinished) {
+  if (systemState.pumpCalibrationFinished) {
     return;
   }
-  long clicksPhase[2] = {0, 0};
   // Calibrate pump in both phases
+  CALIBRATE_PHASES:
   for (int phase = 0; phase < 2; phase++) {
     openValve();
     delay(500);
@@ -832,8 +837,7 @@ static void calibratePump(void) {
       }
     }
 
-    clicksPhase[phase] = getAndResetClickCounter();
-    pumpPhases.pumpClicks[phase] = clicksPhase[phase];
+    systemState.pumpClicks[phase] = getAndResetClickCounter();
     setPumpToRawValue(0);
     sensorsReadPressure();
     lcdSetPressure(currentState.smoothedPressure);
@@ -843,9 +847,14 @@ static void calibratePump(void) {
   }
 
   // Determine which phase has fewer clicks.
-  if (clicksPhase[1] < clicksPhase[0]) {
+  long phaseDiffSanityCheck = systemState.pumpClicks[1] - systemState.pumpClicks[0];
+  if (phaseDiffSanityCheck > -2 && phaseDiffSanityCheck < 2) goto CALIBRATE_PHASES;
+
+  if (systemState.pumpClicks[1] < systemState.pumpClicks[0]) {
     pumpPhaseShift();
     lcdShowPopup("Phase 2 selected");
   } else lcdShowPopup("Phase 1 selected");
-  pumpCalibrationFinished = true;
+
+  // Set this var to true so phase is never repeated.
+  systemState.pumpCalibrationFinished = true;
 }
