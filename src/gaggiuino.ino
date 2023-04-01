@@ -851,8 +851,8 @@ static void calibratePump(void) {
   // Determine which phase has fewer clicks.
   long phaseDiffSanityCheck = systemState.pumpClicks[1] - systemState.pumpClicks[0];
   if (phaseDiffSanityCheck > -2 && phaseDiffSanityCheck < 2) {
-    goto CALIBRATE_PHASES;
     recalibrating = true;
+    goto CALIBRATE_PHASES;
   }
 
   if (systemState.pumpClicks[1] < systemState.pumpClicks[0]) {
