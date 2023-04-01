@@ -810,8 +810,10 @@ static void calibratePump(void) {
   if (systemState.pumpCalibrationFinished) {
     return;
   }
+  bool recalibrating;
   // Calibrate pump in both phases
   CALIBRATE_PHASES:
+  lcdShowPopup(!recalibrating ? "Calibrating pump!" : "Re-calibrating!") ;
   for (int phase = 0; phase < 2; phase++) {
     openValve();
     delay(500);
@@ -848,7 +850,10 @@ static void calibratePump(void) {
 
   // Determine which phase has fewer clicks.
   long phaseDiffSanityCheck = systemState.pumpClicks[1] - systemState.pumpClicks[0];
-  if (phaseDiffSanityCheck > -2 && phaseDiffSanityCheck < 2) goto CALIBRATE_PHASES;
+  if (phaseDiffSanityCheck > -2 && phaseDiffSanityCheck < 2) {
+    goto CALIBRATE_PHASES;
+    recalibrating = true;
+  }
 
   if (systemState.pumpClicks[1] < systemState.pumpClicks[0]) {
     pumpPhaseShift();
