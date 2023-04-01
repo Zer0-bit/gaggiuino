@@ -84,10 +84,6 @@ bool homeScreenScalesEnabled = false;
 float previousSmoothedPressure;
 float previousSmoothedPumpFlow;
 
-//startup vars
-static bool startupInitFinished;
-static bool pumpCalibrationFinished;
-
 static void systemHealthCheck(float pressureThreshold);
 
 #endif
