@@ -825,6 +825,7 @@ static void calibratePump(void) {
     unsigned long loopTimeout = millis() + 1500L;
     // Wait for pressure to reach desired level.
     while (currentState.smoothedPressure < 1.5f) {
+      lcdRefresh();
       watchdogReload();
       setPumpToRawValue(50);
       if (currentState.smoothedPressure < 0.1f) {
@@ -843,6 +844,7 @@ static void calibratePump(void) {
     setPumpToRawValue(0);
     sensorsReadPressure();
     lcdSetPressure(currentState.smoothedPressure);
+    lcdRefresh();
 
     // Switch pump phase for next calibration.
     if (phase < 1) pumpPhaseShift();
