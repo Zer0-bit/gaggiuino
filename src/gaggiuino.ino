@@ -811,6 +811,7 @@ static void calibratePump(void) {
     return;
   }
   bool recalibrating = false;
+  short calibrationRetries = 0;
   // Calibrate pump in both phases
   CALIBRATE_PHASES:
   lcdShowPopup(!recalibrating ? "Calibrating pump!" : "Re-calibrating!") ;
@@ -850,15 +851,18 @@ static void calibratePump(void) {
 
   // Determine which phase has fewer clicks.
   long phaseDiffSanityCheck = systemState.pumpClicks[1] - systemState.pumpClicks[0];
-  if (phaseDiffSanityCheck > -2 && phaseDiffSanityCheck < 2) {
+  if (calibrationRetries < 4 || (phaseDiffSanityCheck > -2 && phaseDiffSanityCheck < 2)) {
     recalibrating = true;
+    calibrationRetries++;
     goto CALIBRATE_PHASES;
   }
 
   if (systemState.pumpClicks[1] < systemState.pumpClicks[0]) {
     pumpPhaseShift();
     lcdShowPopup("Phase 2 selected");
-  } else lcdShowPopup("Phase 1 selected");
+  }
+  else if (calibrationRetries >= 4) lcdShowPopup("Calibration unsuccessful!");
+  else lcdShowPopup("Phase 1 selected");
 
   // Set this var to true so phase is never repeated.
   systemState.pumpCalibrationFinished = true;
