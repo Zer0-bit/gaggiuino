@@ -6,6 +6,7 @@ struct SystemState {
   bool startupInitFinished;
   bool pumpCalibrationFinished;
   long pumpClicks[2];
+  short pumpCalibrationRetries;
 };
 
 #endif
