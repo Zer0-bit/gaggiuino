@@ -828,7 +828,7 @@ static void calibratePump(void) {
       lcdRefresh();
       watchdogReload();
       setPumpToRawValue(50);
-      if (currentState.smoothedPressure < 0.1f) {
+      if (currentState.smoothedPressure < 0.05f) {
         getAndResetClickCounter();
       }
 
