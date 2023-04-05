@@ -816,24 +816,22 @@ static void calibratePump(void) {
   lcdShowPopup(!recalibrating ? "Calibrating pump!" : "Re-calibrating!") ;
   for (int phase = 0; phase < 2; phase++) {
     openValve();
-    delay(500);
+    delay(1000);
     sensorsReadPressure();
     // closeValve();
-    setPumpToRawValue(20);
-    delay(1000);
+    // setPumpToRawValue(20);
+    // delay(500);
 
     unsigned long loopTimeout = millis() + 1500L;
     // Wait for pressure to reach desired level.
-    while (currentState.smoothedPressure < 1.5f) {
-      lcdRefresh();
+    while (currentState.smoothedPressure < 0.9f) {
       watchdogReload();
       setPumpToRawValue(50);
       if (currentState.smoothedPressure < 0.05f) {
         getAndResetClickCounter();
       }
-
       sensorsReadPressure();
-
+      lcdRefresh();
       // Exit loop if timeout is reached.
       if (millis() > loopTimeout) {
         break;
