@@ -818,7 +818,6 @@ static void calibratePump(void) {
     openValve();
     delay(1000);
     sensorsReadPressure();
-    closeValve();
 
     unsigned long loopTimeout = millis() + 1500L;
     // Wait for pressure to reach desired level.
