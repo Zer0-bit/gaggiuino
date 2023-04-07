@@ -815,13 +815,14 @@ static void calibratePump(void) {
   CALIBRATE_PHASES:
   lcdShowPopup(!recalibrating ? "Calibrating pump!" : "Re-calibrating!") ;
   for (int phase = 0; phase < 2; phase++) {
+    watchdogReload();
     openValve();
-    delay(1000);
+    delay(1500);
     sensorsReadPressure();
 
     unsigned long loopTimeout = millis() + 1500L;
     // Wait for pressure to reach desired level.
-    while (currentState.smoothedPressure < 0.3f) {
+    while (currentState.smoothedPressure < 0.5f) {
       watchdogReload();
       setPumpToRawValue(50);
       if (currentState.smoothedPressure < 0.05f) {
@@ -848,7 +849,10 @@ static void calibratePump(void) {
 
   // Determine which phase has fewer clicks.
   long phaseDiffSanityCheck = systemState.pumpClicks[1] - systemState.pumpClicks[0];
-  if (systemState.pumpCalibrationRetries < 4 && phaseDiffSanityCheck > -2 && phaseDiffSanityCheck < 2) {
+  if (
+      systemState.pumpCalibrationRetries < 4 && phaseDiffSanityCheck > -2 && phaseDiffSanityCheck < 2
+  &&  systemState.pumpClicks[0] <= 2 && systemState.pumpClicks[1] <= 2
+  ) {
     recalibrating = true;
     systemState.pumpCalibrationRetries++;
     goto CALIBRATE_PHASES;
@@ -856,13 +860,13 @@ static void calibratePump(void) {
 
   if (systemState.pumpClicks[1] < systemState.pumpClicks[0]) {
     pumpPhaseShift();
-    lcdShowPopup("Phase 2 selected");
+    lcdShowPopup("Pump phase [2]");
   }
   else if (systemState.pumpCalibrationRetries >= 4) {
-    lcdShowPopup("Calibration unsuccessful!");
+    lcdShowPopup("Calibration failed!");
     systemState.startupInitFinished = true;
   }
-  else lcdShowPopup("Phase 1 selected");
+  else lcdShowPopup("Pump phase [1]");
 
   // Set this var to true so phase is never repeated.
   systemState.pumpCalibrationFinished = true;
