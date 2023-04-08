@@ -822,7 +822,7 @@ static void calibratePump(void) {
 
     unsigned long loopTimeout = millis() + 1500L;
     // Wait for pressure to reach desired level.
-    while (currentState.smoothedPressure < 0.5f) {
+    while (currentState.smoothedPressure < 0.95f) {
       watchdogReload();
       setPumpToRawValue(50);
       if (currentState.smoothedPressure < 0.05f) {
