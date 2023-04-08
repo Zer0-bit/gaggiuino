@@ -26,7 +26,6 @@ struct SensorState {
   float smoothedWeightFlow;
   float consideredFlow;
   long pumpClicks;
-
 };
 
 struct SensorStateSnapshot {

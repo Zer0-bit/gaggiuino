@@ -15,6 +15,7 @@
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
 #include "sensors_state.h"
+#include "system_state.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 #include "functional/predictive_weight.h"
@@ -82,7 +83,6 @@ bool homeScreenScalesEnabled = false;
 // Other util vars
 float previousSmoothedPressure;
 float previousSmoothedPumpFlow;
-bool startupInitFinished;
 
 static void systemHealthCheck(float pressureThreshold);
 

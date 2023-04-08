@@ -4,7 +4,8 @@
 #include <PSM.h>
 #include "utils.h"
 
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 2, 4);
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 6);
+
 float flowPerClickAtZeroBar = 0.27f;
 int maxPumpClicksPerSecond = 50;
 float fpc_multiplier = 1.2f;
@@ -83,7 +84,15 @@ long getAndResetClickCounter(void) {
 }
 
 int getCPS(void) {
-  return pump.cps();
+  unsigned int cps = pump.cps();
+  if (cps > 80u) {
+    pump.setDivider(2);
+  }
+  return cps;
+}
+
+void pumpPhaseShift(void) {
+  pump.shiftDividerCounter();
 }
 
 // Models the flow per click, follows a compromise between the schematic and recorded findings
@@ -91,7 +100,7 @@ int getCPS(void) {
 float getPumpFlowPerClick(const float pressure) {
   float fpc = 0.f;
   fpc = (pressureInefficiencyCoefficient[5] / pressure + pressureInefficiencyCoefficient[6]) * ( -pressure * pressure ) + ( flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
-  return fpc;
+  return fpc * fpc_multiplier;
 }
 
 // Follows the schematic from https://www.cemegroup.com/solenoid-pump/e5-60 modified to per-click
@@ -104,7 +113,7 @@ float getClicksPerSecondForFlow(const float flow, const float pressure) {
   if (flow == 0.f) return 0;
   float flowPerClick = getPumpFlowPerClick(pressure);
   float cps = flow / flowPerClick;
-  return fminf(cps, maxPumpClicksPerSecond);
+  return fminf(cps, (float)maxPumpClicksPerSecond);
 }
 
 // Calculates pump percentage for the requested flow and updates the pump raw value
