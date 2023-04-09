@@ -8,7 +8,7 @@
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
 SimpleKalmanFilter smoothPumpFlow(1.f, 1.f, 0.04f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
-SimpleKalmanFilter smoothConsideredFlow(1.f, 1.f, 0.1f);
+SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
 //default phases. Updated in updateProfilerPhases.
 Profile profile;
@@ -344,7 +344,7 @@ static void lcdRefresh(void) {
       lcdSetFlow(
         currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
           ? currentState.smoothedWeightFlow * 10.f
-          : currentState.consideredFlow ? currentState.consideredFlow * 100.f : currentState.smoothedPumpFlow * 10.f
+          : fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f)
       );
     }
 
@@ -822,7 +822,7 @@ static void calibratePump(void) {
 
     unsigned long loopTimeout = millis() + 1500L;
     // Wait for pressure to reach desired level.
-    while (currentState.smoothedPressure < 0.95f) {
+    while (currentState.smoothedPressure < 0.65f) {
       watchdogReload();
       setPumpToRawValue(50);
       if (currentState.smoothedPressure < 0.05f) {
