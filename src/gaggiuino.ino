@@ -642,6 +642,7 @@ static void brewParamsReset(void) {
   flowTimer                = millis() + REFRESH_FLOW_EVERY;
   systemHealthTimer        = millis() + HEALTHCHECK_EVERY;
 
+  currentState.pumpClicks = getAndResetClickCounter();
   predictiveWeight.reset();
   phaseProfiler.reset();
 }

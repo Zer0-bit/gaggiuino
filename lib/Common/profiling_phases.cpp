@@ -43,19 +43,19 @@ bool Phase::isStopConditionReached(SensorState& currentState, uint32_t timeInSho
 //-------------------------- StopConditions ----------------------------//
 //----------------------------------------------------------------------//
 inline bool predictShotCompletion(const float targetDose, const float currentDose, const float flowRate) {
-  const float remainingDose = targetDose - currentDose;
-  const float percentRemaining = remainingDose / flowRate;
+  float remainingDose = targetDose - currentDose;
+  float percentRemaining = remainingDose / flowRate;
 
   return percentRemaining < 0.3f ? true : false;
 }
 
 bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
-  const float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
+  float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * state.shotWeight / 100.f;
-  const bool stopOnWeightReached = predictShotCompletion(weight, state.shotWeight, flow);
+  bool stopOnWeightReached = predictShotCompletion(weight, state.shotWeight, flow);
 
   return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
-    (weight > 0.4f) ||
+    (weight > 0.9f) ||
     (weight > 0.f && stopOnWeightReached) ||
     (pressureAbove > 0.f && state.smoothedPressure > pressureAbove) ||
     (pressureBelow > 0.f && state.smoothedPressure < pressureBelow) ||
@@ -67,7 +67,7 @@ bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSna
 bool GlobalStopConditions::isReached(const SensorState& state, long timeInShot) {
   float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * (state.shotWeight / 100.f);
-  const bool stopOnWeightReached = predictShotCompletion(weight, state.shotWeight, flow);
+  bool stopOnWeightReached = predictShotCompletion(weight, state.shotWeight, flow);
 
   return (weight > 0.f && stopOnWeightReached) ||
     (waterPumped > 0.f && state.waterPumped > waterPumped) ||
