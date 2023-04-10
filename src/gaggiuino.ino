@@ -613,6 +613,7 @@ static void brewDetect(void) {
 
   if (currentState.brewSwitchState) {
     if(!paramsReset) {
+      lcdWakeUp();
       brewParamsReset();
       paramsReset = true;
       brewActive = true;

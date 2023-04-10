@@ -25,6 +25,7 @@ enum class SCREEN_MODES {
 void lcdInit(void);
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);
+void lcdWakeUp(void);
 
 eepromValues_t lcdDownloadCfg(void);
 int lcdGetHomeScreenScalesEnabled(void);

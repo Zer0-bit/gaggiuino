@@ -25,6 +25,10 @@ void lcdListen(void) {
   lcdCurrentPageId = myNex.currentPageId;
 }
 
+void lcdWakeUp(void) {
+  myNex.writeNum("sleep", 0);
+}
+
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 
   myNex.writeNum("setPoint", eepromCurrentValues.setpoint);
