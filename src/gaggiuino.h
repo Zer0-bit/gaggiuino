@@ -57,6 +57,13 @@ enum class OPERATION_MODES {
   OPMODE_pressureBasedPreinfusionAndFlowProfile
 } ;
 
+//Some consts
+#ifndef LEGO_VALVE_RELAY
+const float calibrationPressure = 1.5f;
+#else
+const float calibrationPressure = 0.65f;
+#endif
+
 //Timers
 unsigned long systemHealthTimer;
 unsigned long pageRefreshTimer;
