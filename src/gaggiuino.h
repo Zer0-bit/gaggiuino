@@ -60,7 +60,7 @@ enum class OPERATION_MODES {
 //Some consts
 #ifndef LEGO_VALVE_RELAY
 const float calibrationPressure = 1.5f;
-#elif
+#else
 const float calibrationPressure = 0.65f;
 #endif
 
