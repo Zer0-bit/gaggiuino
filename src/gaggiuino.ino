@@ -177,7 +177,9 @@ static long sensorsReadFlow(float elapsedTime) {
   currentState.pumpFlow = getPumpFlow(currentState.pumpClicks, currentState.smoothedPressure);
 
   previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
+  // Some flow smoothing
   currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+  currentState.smoothedWeightFlow = currentState.smoothedPumpFlow; // use predicted flow as hw scales flow
   return pumpClicks;
 }
 
@@ -185,27 +187,22 @@ static void calculateWeightAndFlow(void) {
   long elapsedTime = millis() - flowTimer;
 
   if (brewActive) {
-    if (scalesIsPresent()) {
-      currentState.shotWeight = currentState.weight;
-    }
+    // Marking for tare in case smth has gone wrong and it has exited tare already.
+    if (currentState.weight < -0.3f) tareDone = false;
 
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
       long pumpClicks = sensorsReadFlow(elapsedTime);
       float consideredFlow = currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
+      // Some helper vars
       currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.1f;
       currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.1f;
-
-      // bool previousIsOutputFlow = predictiveWeight.isOutputFlow();
-
+      // Update predictive class with our current phase
       CurrentPhase& phase = phaseProfiler.getCurrentPhase();
       predictiveWeight.update(currentState, phase, runningCfg);
 
-      if (scalesIsPresent()) {
-        currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
-        currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
-        previousWeight = currentState.shotWeight;
-      } else if (predictiveWeight.isOutputFlow()) {
+      // Start the predictive weight calculations when conditions are true
+      if (predictiveWeight.isOutputFlow() || currentState.weight > 0.4f) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
         // Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling
@@ -213,9 +210,16 @@ static void calculateWeightAndFlow(void) {
         && currentState.smoothedPressure < runningCfg.flowProfilePressureTarget * 0.9f) {
           actualFlow *= 0.6f;
         }
+        // For cases where pump flow ends up being lower than hw scales flow.
+        // if (scalesIsPresent()) {
+        //   currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
+        //   // currentState.smoothedWeightFlow = fmaxf(smoothScalesFlow.updateEstimate(currentState.weightFlow), actualFlow);
+        //   currentState.smoothedWeightFlow = actualFlow;
+        //   previousWeight = currentState.shotWeight;
+        // }
+
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
-        //If the pressure is maxing out, consider only the flow is slightly higher than the sensor reports (probabilistically).
-        currentState.shotWeight += actualFlow;
+        currentState.shotWeight = scalesIsPresent() ? currentState.weight : currentState.shotWeight + actualFlow;
       }
       currentState.waterPumped += consideredFlow;
     }
