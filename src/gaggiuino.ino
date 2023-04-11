@@ -500,7 +500,7 @@ static void updateProfilerPhases(void) {
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
       if (runningCfg.switchPhaseOnThreshold) {
         stopOnPressureAbove = runningCfg.preinfusionFlowPressureTarget;
-        switchPhaseOnDrip = currentState.weight;
+        switchPhaseOnDrip = 0.9f;
       }
 
       addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, stopOnPressureAbove, switchPhaseOnDrip);
@@ -510,7 +510,7 @@ static void updateProfilerPhases(void) {
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
       if (runningCfg.switchPhaseOnThreshold) {
         stopOnPressureAbove = runningCfg.preinfusionBar;
-        switchPhaseOnDrip = currentState.weight;
+        switchPhaseOnDrip =  0.9f;
       }
 
       addPressurePhase(Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, stopOnPressureAbove, switchPhaseOnDrip);
