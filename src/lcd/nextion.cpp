@@ -276,3 +276,4 @@ void trigger1(void) { lcdTrigger1(); }
 void trigger2(void) { lcdTrigger2(); }
 void trigger3(void) { lcdTrigger3(); }
 void trigger4(void) { lcdTrigger4(); }
+void trigger5(void) { lcdTrigger5(); }
