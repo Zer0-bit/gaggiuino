@@ -55,7 +55,6 @@ bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSna
   bool stopOnWeightReached = predictShotCompletion(weight, state.shotWeight, flow);
 
   return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
-    (weight > 0.9f) ||
     (weight > 0.f && stopOnWeightReached) ||
     (pressureAbove > 0.f && state.smoothedPressure > pressureAbove) ||
     (pressureBelow > 0.f && state.smoothedPressure < pressureBelow) ||
