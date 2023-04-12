@@ -1,6 +1,7 @@
 #include <unity.h>
 #include <profiling_phases.h>
 #include <sensors_state.h>
+#include <../../src/eeprom_data/eeprom_data.h>
 #include <utils.h>
 
 Phase pressurePhase(float start, float end, long time) {
@@ -17,6 +18,7 @@ Phase presurePhaseWithWeightTarget(float start, float end, long time, float weig
 }
 
 SensorState state;
+eepromValues_t cfg;
 
 void test_current_phase_calculation(void)
 {
@@ -29,34 +31,34 @@ void test_current_phase_calculation(void)
 
     PhaseProfiler phaseProfiler = PhaseProfiler(profile);
     phaseProfiler.reset();
-    phaseProfiler.updatePhase(0, state);
+    phaseProfiler.updatePhase(0, state, cfg);
     TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getIndex());
     TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getTimeInPhase());
 
-    phaseProfiler.updatePhase(550, state);
+    phaseProfiler.updatePhase(550, state, cfg);
     TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getIndex());
     TEST_ASSERT_EQUAL(550, phaseProfiler.getCurrentPhase().getTimeInPhase());
 
-    phaseProfiler.updatePhase(1000, state);
+    phaseProfiler.updatePhase(1000, state, cfg);
     TEST_ASSERT_EQUAL(1, phaseProfiler.getCurrentPhase().getIndex());
     TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getTimeInPhase());
 
-    phaseProfiler.updatePhase(5000, state);
+    phaseProfiler.updatePhase(5000, state, cfg);
     TEST_ASSERT_EQUAL(1, phaseProfiler.getCurrentPhase().getIndex());
     TEST_ASSERT_EQUAL(4000, phaseProfiler.getCurrentPhase().getTimeInPhase());
 
     // phase switch triggered on 11.5sec
-    phaseProfiler.updatePhase(11500, state);
+    phaseProfiler.updatePhase(11500, state, cfg);
     TEST_ASSERT_EQUAL(2, phaseProfiler.getCurrentPhase().getIndex());
     TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getTimeInPhase());
 
     // still in the same phase as it should last 1000msec
-    phaseProfiler.updatePhase(12499, state);
+    phaseProfiler.updatePhase(12499, state, cfg);
     TEST_ASSERT_EQUAL(2, phaseProfiler.getCurrentPhase().getIndex());
     TEST_ASSERT_EQUAL(999, phaseProfiler.getCurrentPhase().getTimeInPhase());
 
     // still in the same phase as it should last 1000msec
-    phaseProfiler.updatePhase(12500, state);
+    phaseProfiler.updatePhase(12500, state, cfg);
     TEST_ASSERT_EQUAL(3, phaseProfiler.getCurrentPhase().getIndex());
     TEST_ASSERT_EQUAL(0, phaseProfiler.getCurrentPhase().getTimeInPhase());
 }
@@ -99,7 +101,7 @@ void test_phases_with_zero_duration_are_skipped(void) {
 
     PhaseProfiler profiler = PhaseProfiler(profile);
 
-    profiler.updatePhase(0, state);
+    profiler.updatePhase(0, state, cfg);
     TEST_ASSERT_EQUAL(3, profiler.getCurrentPhase().getIndex());
 }
 
@@ -118,19 +120,19 @@ void test_phases_with_weight_stop_condition(void) {
   PhaseProfiler profiler = PhaseProfiler(profile);
 
   mockedState.shotWeight = 0.2f;
-  profiler.updatePhase(3000, mockedState);
+  profiler.updatePhase(3000, mockedState, cfg);
   TEST_ASSERT_FALSE(profiler.isFinished());
 
   mockedState.shotWeight = 0.5f;
-  profiler.updatePhase(3000, mockedState);
+  profiler.updatePhase(3000, mockedState, cfg);
   TEST_ASSERT_FALSE(profiler.isFinished());
 
-  profiler.updatePhase(3500, mockedState);
+  profiler.updatePhase(3500, mockedState, cfg);
   TEST_ASSERT_EQUAL(1, profiler.getCurrentPhase().getIndex());
   TEST_ASSERT_EQUAL(500, profiler.getCurrentPhase().getTimeInPhase());
   TEST_ASSERT_FALSE(profiler.isFinished());
 
-  profiler.updatePhase(4100, mockedState);
+  profiler.updatePhase(4100, mockedState, cfg);
   TEST_ASSERT_EQUAL(0, profiler.getCurrentPhase().getTimeInPhase());
   TEST_ASSERT_TRUE(profiler.isFinished());
 }
@@ -151,7 +153,7 @@ void test_phases_with_stop_conditions_and_skipped_phases() {
   PhaseProfiler profiler = PhaseProfiler{profile};
 
   mockedState.shotWeight = 0.5f;
-  profiler.updatePhase(2000, mockedState);
+  profiler.updatePhase(2000, mockedState, cfg);
   TEST_ASSERT_FALSE(profiler.isFinished());
   TEST_ASSERT_EQUAL(2, profiler.getCurrentPhase().getIndex());
 }
@@ -167,10 +169,10 @@ void test_phases_stay_constant() {
   PhaseProfiler profiler(profile);
 
   profiler.reset();
-  profiler.updatePhase(0, state);
-  profiler.updatePhase(550, state);
-  profiler.updatePhase(1000, state);
-  profiler.updatePhase(12500, state);
+  profiler.updatePhase(0, state, cfg);
+  profiler.updatePhase(550, state, cfg);
+  profiler.updatePhase(1000, state, cfg);
+  profiler.updatePhase(12500, state, cfg);
   profiler.reset();
 
   TEST_ASSERT_EQUAL(0, profiler.getCurrentPhase().getIndex());
