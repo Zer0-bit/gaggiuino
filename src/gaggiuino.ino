@@ -838,7 +838,7 @@ static void calibratePump(void) {
     sensorsReadPressure();
 
 
-    unsigned long loopTimeout = millis() + 1500L;
+    unsigned long loopTimeout = millis() + 2500L;
     // Wait for pressure to reach desired level.
     while (currentState.smoothedPressure < calibrationPressure) {
       watchdogReload();

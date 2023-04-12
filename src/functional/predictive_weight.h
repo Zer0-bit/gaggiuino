@@ -6,8 +6,10 @@
 #include "sensors_state.h"
 #include "../eeprom_data/eeprom_data.h"
 
+extern int preInfusionFinishedPhaseIdx;
 constexpr float crossSectionalArea = 0.0026f; // avg puck crossectional area.
 constexpr float dynamicViscosity = 0.0002964f; // avg water dynamic viscosity at 90-95 celsius.
+bool predictiveTargetReached = false;
 
 class PredictiveWeight {
 private:
@@ -56,11 +58,28 @@ public:
     // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
     // as well as there being enough pressure for water to wet the puck enough to start the output
     bool phaseTypePressure = phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE;
-    // float pressureTarget = phaseTypePressure ? phase.getTarget() : phase.getRestriction();
+    bool preinfusionFinished = phase.getIndex() >= preInfusionFinishedPhaseIdx;
+    bool soakEnabled = phaseTypePressure ? cfg.preinfusionSoak > 0 : cfg.preinfusionFlowSoakTime > 0;
+    float pressureTarget = phaseTypePressure ? cfg.preinfusionBar : cfg.preinfusionFlowPressureTarget;
     // pressureTarget = (pressureTarget == 0.f || pressureTarget > 2.f) ? 2.f : pressureTarget;
     // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
     // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
-    // Pressure has to cross the 1 bar threshold.
+
+    // Pressure has to reach full pi target bar threshold.
+    if (!preinfusionFinished  && soakEnabled) {
+      if (predictiveTargetReached) {
+        // pressure drop needs to be around 1.5bar since target hit for output flow to be considered started.
+        if (pressureTarget - state.smoothedPressure > 1.5f) outputFlowStarted = true;
+        else return;
+      }
+      if (!predictiveTargetReached && state.smoothedPressure < pressureTarget) {
+        return;
+      } else {
+        predictiveTargetReached = true;
+        return;
+      }
+    }
+    // Pressure has to cross the 2 bar threshold.
     if (state.smoothedPressure < 2.1f) return;
 
     if (phaseTypePressure) {
