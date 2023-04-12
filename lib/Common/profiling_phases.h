@@ -4,6 +4,7 @@
 
 #include "utils.h"
 #include "sensors_state.h"
+#include "../../src/eeprom_data/eeprom_data.h"
 #include <vector>
 
 enum class PHASE_TYPE {
@@ -34,7 +35,7 @@ struct PhaseStopConditions {
   float weight = -1; //example: when pushed weight >0 stop this phase)
   float waterPumpedInPhase = -1;
 
-  bool isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const;
+  bool isReached(SensorState& state, const eepromValues_t currentConfig, long timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
 struct Transition {
@@ -56,7 +57,7 @@ struct Phase {
 
   float getTarget(uint32_t timeInPhase) const;
   float getRestriction() const;
-  bool isStopConditionReached(SensorState& currentState, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const;
+  bool isStopConditionReached(SensorState& currentState, const eepromValues_t currentConfig, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
 struct GlobalStopConditions {
@@ -64,7 +65,7 @@ struct GlobalStopConditions {
   float weight = -1;
   float waterPumped = -1;
 
-  bool isReached(const SensorState& state, long timeInShot);
+  bool isReached(const SensorState& state, const eepromValues_t currentConfig, long timeInShot);
 };
 
 struct Profile {
@@ -100,7 +101,7 @@ public:
   long getTimeInPhase();
   float getTarget();
   float getRestriction();
-  void update(int index, const Phase& phase, uint32_t timeInPhase);
+  void update(int index, Phase& phase, uint32_t timeInPhase);
 };
 
 class PhaseProfiler {
@@ -113,7 +114,7 @@ private:
 public:
   PhaseProfiler(Profile& profile);
   // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
-  void updatePhase(uint32_t timeInShot, SensorState& state);
+  void updatePhase(uint32_t timeInShot, SensorState& state, const eepromValues_t currentConfig);
   CurrentPhase& getCurrentPhase();
   bool isFinished();
   void reset();

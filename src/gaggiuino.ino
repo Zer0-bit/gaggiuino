@@ -563,7 +563,7 @@ void onProfileReceived(Profile& newProfile) {
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     uint32_t timeInShot = millis() - brewingTimer;
-    phaseProfiler.updatePhase(timeInShot, currentState);
+    phaseProfiler.updatePhase(timeInShot, currentState, runningCfg);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
     preinfusionFinished = currentPhase.getIndex() >= preInfusionFinishedPhaseIdx;
     ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
