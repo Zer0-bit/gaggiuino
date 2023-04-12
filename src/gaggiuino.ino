@@ -842,7 +842,7 @@ static void calibratePump(void) {
     // Wait for pressure to reach desired level.
     while (currentState.smoothedPressure < calibrationPressure) {
       watchdogReload();
-      #ifndef LEGO_VALVE_RELAY
+      #if defined(SINGLE_BOARD) || defined(INDEPENDENT_DIMMER)
       closeValve();
       #endif
       setPumpToRawValue(50);
