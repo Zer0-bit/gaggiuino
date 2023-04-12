@@ -69,7 +69,7 @@ public:
     if (!preinfusionFinished  && soakEnabled) {
       if (predictiveTargetReached) {
         // pressure drop needs to be around 1.5bar since target hit for output flow to be considered started.
-        if (pressureTarget - state.smoothedPressure > 1.5f) outputFlowStarted = true;
+        if (pressureTarget - state.smoothedPressure > 1.1f) outputFlowStarted = true;
         else return;
       }
       if (!predictiveTargetReached && state.smoothedPressure < pressureTarget) {
