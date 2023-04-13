@@ -866,6 +866,7 @@ static void calibratePump(void) {
 
     // Switch pump phase for next calibration.
     if (phase < 1) pumpPhaseShift();
+    // At the end of the loop we end up in Phase [2].
   }
 
   // Determine which phase has fewer clicks.
@@ -880,13 +881,13 @@ static void calibratePump(void) {
 
   if (systemState.pumpClicks[1] < systemState.pumpClicks[0]) {
     pumpPhaseShift();
-    lcdShowPopup("Pump phase [2]");
+    lcdShowPopup("Pump phase [1]");
   }
   else if (systemState.pumpCalibrationRetries >= 4) {
     lcdShowPopup("Calibration failed!");
     systemState.startupInitFinished = true;
   }
-  else lcdShowPopup("Pump phase [1]");
+  else lcdShowPopup("Pump phase [2]");
 
   // Set this var to true so phase is never repeated.
   systemState.pumpCalibrationFinished = true;
