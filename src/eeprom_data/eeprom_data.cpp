@@ -5,6 +5,7 @@
 #include "eeprom_metadata.h"
 #include "legacy/eeprom_data_v4.h"
 #include "legacy/eeprom_data_v5.h"
+#include "legacy/eeprom_data_v6.h"
 
 namespace {
 
@@ -46,6 +47,8 @@ namespace {
     defaultData.graphBrew = true;
     defaultData.brewDeltaState = true;
     defaultData.switchPhaseOnThreshold = false;
+    defaultData.switchPhaseOnPressureBelow = 0.5f;
+    defaultData.switchPhaseOnFirstDrops = true;
     defaultData.basketPrefill = false;
     defaultData.scalesF1 = 3920;
     defaultData.scalesF2 = 4210;
@@ -128,6 +131,11 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   }
 
   if (eepromValuesNew.scalesF2 < -20000 || eepromValuesNew.scalesF2 > 20000) {
+    LOG_ERROR(errMsg);
+    return false;
+  }
+
+  if (eepromValuesNew.switchPhaseOnPressureBelow < 0) {
     LOG_ERROR(errMsg);
     return false;
   }

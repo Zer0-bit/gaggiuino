@@ -25,13 +25,10 @@
 */
 
 /**
-* Version 6:
-* - Pressure as float:
-*   - pressureProfilingStart
-*   - pressureProfilingFinish
-*   - preinfusionBar
-*   - preinfusionFlowPressureTarget
-*   - flowProfilePressureTarget
+* Version 7:
+* - Add two more restrictions:
+*   - switchPhaseOnPressureBelow
+*   - switchPhaseOnFirstDrops
 */
 struct eepromValues_t {
   uint16_t setpoint;
@@ -67,6 +64,8 @@ struct eepromValues_t {
   bool     graphBrew;
   bool     brewDeltaState;
   bool     switchPhaseOnThreshold;
+  float    switchPhaseOnPressureBelow;
+  bool     switchPhaseOnFirstDrops;
   bool     basketPrefill;
   int      scalesF1;
   int      scalesF2;

@@ -431,6 +431,8 @@ void lcdTrigger1(void) {
       eepromCurrentValues.shotDose                      = lcdValues.shotDose;
       eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
       eepromCurrentValues.shotStopOnCustomWeight        = lcdValues.shotStopOnCustomWeight;
+      eepromCurrentValues.switchPhaseOnPressureBelow    = lcdValues.switchPhaseOnPressureBelow;
+      eepromCurrentValues.switchPhaseOnFirstDrops       = lcdValues.switchPhaseOnFirstDrops;
       break;
     default:
       break;
@@ -477,6 +479,7 @@ static void updateProfilerPhases(void) {
   float shotTarget = -1.f;
   float stopOnPressureAbove = -1;
   float switchPhaseOnDrip = -1;
+  float pressureBelowRestriction = -1;
 
   if (runningCfg.stopOnWeightState) {
     shotTarget = (runningCfg.shotStopOnCustomWeight < 1.f)
@@ -498,20 +501,18 @@ static void updateProfilerPhases(void) {
   if (runningCfg.preinfusionState) {
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
-      if (runningCfg.switchPhaseOnThreshold) {
-        stopOnPressureAbove = runningCfg.preinfusionFlowPressureTarget;
-        switchPhaseOnDrip = 0.9f;
-      }
+      stopOnPressureAbove = runningCfg.switchPhaseOnThreshold ? runningCfg.preinfusionFlowPressureTarget : -1;
+      switchPhaseOnDrip = runningCfg.switchPhaseOnFirstDrops ? firstDropsConstant : -1;
+      pressureBelowRestriction = runningCfg.switchPhaseOnPressureBelow > 0 ? runningCfg.switchPhaseOnPressureBelow : -1;
 
       addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, stopOnPressureAbove, switchPhaseOnDrip);
       addFlowPhase(Transition{0.f}, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, switchPhaseOnDrip);
       preInfusionFinishBar = fmaxf(0.f, runningCfg.preinfusionFlowPressureTarget);
     } else { // pressure based PI enabled
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
-      if (runningCfg.switchPhaseOnThreshold) {
-        stopOnPressureAbove = runningCfg.preinfusionBar;
-        switchPhaseOnDrip =  0.9f;
-      }
+      stopOnPressureAbove = runningCfg.switchPhaseOnThreshold ? runningCfg.preinfusionBar : -1;
+      switchPhaseOnDrip = runningCfg.switchPhaseOnFirstDrops ? firstDropsConstant : -1;
+      pressureBelowRestriction = runningCfg.switchPhaseOnPressureBelow > 0 ? runningCfg.switchPhaseOnPressureBelow : -1;
 
       addPressurePhase(Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, stopOnPressureAbove, switchPhaseOnDrip);
       addPressurePhase(Transition{0.f}, -1, runningCfg.preinfusionSoak * 1000, -1, switchPhaseOnDrip);

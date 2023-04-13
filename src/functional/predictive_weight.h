@@ -102,10 +102,12 @@ public:
   }
 
   void reset() {
-    outputFlowStarted = false;
-    isForceStarted = false;
     puckResistance = 0.f;
     resistanceDelta = 0.f;
+    isForceStarted = false;
+    outputFlowStarted = false;
+    predictiveTargetReached = false;
+
   }
 };
 
