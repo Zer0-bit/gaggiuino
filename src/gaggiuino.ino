@@ -505,8 +505,8 @@ static void updateProfilerPhases(void) {
       switchPhaseOnDrip = runningCfg.switchPhaseOnFirstDrops ? firstDropsConstant : -1;
       pressureBelowRestriction = runningCfg.switchPhaseOnPressureBelow > 0 ? runningCfg.switchPhaseOnPressureBelow : -1;
 
-      addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, stopOnPressureAbove, switchPhaseOnDrip);
-      addFlowPhase(Transition{0.f}, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, switchPhaseOnDrip);
+      addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, stopOnPressureAbove, -1, switchPhaseOnDrip);
+      addFlowPhase(Transition{0.f}, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, pressureBelowRestriction, switchPhaseOnDrip);
       preInfusionFinishBar = fmaxf(0.f, runningCfg.preinfusionFlowPressureTarget);
     } else { // pressure based PI enabled
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
@@ -514,8 +514,8 @@ static void updateProfilerPhases(void) {
       switchPhaseOnDrip = runningCfg.switchPhaseOnFirstDrops ? firstDropsConstant : -1;
       pressureBelowRestriction = runningCfg.switchPhaseOnPressureBelow > 0 ? runningCfg.switchPhaseOnPressureBelow : -1;
 
-      addPressurePhase(Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, stopOnPressureAbove, switchPhaseOnDrip);
-      addPressurePhase(Transition{0.f}, -1, runningCfg.preinfusionSoak * 1000, -1, switchPhaseOnDrip);
+      addPressurePhase(Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, stopOnPressureAbove, -1, switchPhaseOnDrip);
+      addPressurePhase(Transition{0.f}, -1, runningCfg.preinfusionSoak * 1000, -1, pressureBelowRestriction, switchPhaseOnDrip);
       preInfusionFinishBar = runningCfg.preinfusionBar;
     }
   }
@@ -524,37 +524,37 @@ static void updateProfilerPhases(void) {
   // Setup shot profiling
   if (runningCfg.pressureProfilingState) {
     if (runningCfg.flowProfileState) { // flow based profiling enabled
-      addFlowPhase(Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, TransitionCurve::LINEAR, runningCfg.flowProfileCurveSpeed * 1000}, runningCfg.flowProfilePressureTarget, -1, -1, -1);
+      addFlowPhase(Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, TransitionCurve::LINEAR, runningCfg.flowProfileCurveSpeed * 1000}, runningCfg.flowProfilePressureTarget, -1, -1, -1, -1);
     } else { // pressure based profiling enabled
       float ppStart = runningCfg.pressureProfilingStart;
       float ppEnd = runningCfg.pressureProfilingFinish;
       uint16_t rampAndHold = runningCfg.preinfusionRamp + runningCfg.pressureProfilingHold;
-      addPressurePhase(Transition{preInfusionFinishBar, ppStart, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, rampAndHold * 1000, -1, -1);
-      addPressurePhase(Transition{ppStart, ppEnd, TransitionCurve::EASE_IN_OUT, runningCfg.pressureProfilingLength * 1000}, -1, -1, -1, -1);
+      addPressurePhase(Transition{preInfusionFinishBar, ppStart, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, rampAndHold * 1000, -1, -1, -1);
+      addPressurePhase(Transition{ppStart, ppEnd, TransitionCurve::EASE_IN_OUT, runningCfg.pressureProfilingLength * 1000}, -1, -1, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
-    addPressurePhase(Transition{preInfusionFinishBar, 9, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1, -1);
+    addPressurePhase(Transition{preInfusionFinishBar, 9, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1, -1, -1);
   }
 }
 
 void addFillBasketPhase(float flowRate) {
-  addFlowPhase(Transition(flowRate), -1, -1, 0.1f, -1);
+  addFlowPhase(Transition(flowRate), -1, -1, 0.1f, -1, -1);
 }
 
-void addPressurePhase(Transition pressure, float flowRestriction, int timeMs, float pressureAbove, float shotWeight) {
-  addPhase(PHASE_TYPE::PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove, shotWeight);
+void addPressurePhase(Transition pressure, float flowRestriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight) {
+  addPhase(PHASE_TYPE::PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove, pressureBelow, shotWeight);
 }
 
-void addFlowPhase(Transition flow, float pressureRestriction, int timeMs, float pressureAbove, float shotWeight) {
-  addPhase(PHASE_TYPE::PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove, shotWeight);
+void addFlowPhase(Transition flow, float pressureRestriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight) {
+  addPhase(PHASE_TYPE::PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove, pressureBelow, shotWeight);
 }
 
-void addPhase(PHASE_TYPE type, Transition target, float restriction, int timeMs, float pressureAbove, float shotWeight) {
+void addPhase(PHASE_TYPE type, Transition target, float restriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight) {
   profile.addPhase(Phase {
     .type           = type,
     .target         = target,
     .restriction    = restriction,
-    .stopConditions = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove, .weight=shotWeight }
+    .stopConditions = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove, .pressureBelow=pressureBelow, .weight=shotWeight }
   });
 }
 
