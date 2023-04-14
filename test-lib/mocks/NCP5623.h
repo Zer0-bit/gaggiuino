@@ -1,5 +1,6 @@
 #ifndef NCP5623_H
 #define NCP5623_H
+#include <stdint.h> // for uint8_t
 
 class NCP5623
 {
