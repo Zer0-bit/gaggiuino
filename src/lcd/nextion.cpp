@@ -74,16 +74,16 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("brewAuto.flowRampBox.val", eepromCurrentValues.flowProfileCurveSpeed);
 
   myNex.writeNum("piState", eepromCurrentValues.preinfusionState);
-  myNex.writeNum("brewAuto.bt0.val", eepromCurrentValues.preinfusionState);
+  // myNex.writeNum("brewAuto.bt0.val", eepromCurrentValues.preinfusionState);
 
   myNex.writeNum("ppState", eepromCurrentValues.pressureProfilingState);
-  myNex.writeNum("brewAuto.bt1.val", eepromCurrentValues.pressureProfilingState);
+  // myNex.writeNum("brewAuto.bt1.val", eepromCurrentValues.pressureProfilingState);
 
   myNex.writeNum("ppFlowState", eepromCurrentValues.flowProfileState);
-  myNex.writeNum("brewAuto.bt2.val", eepromCurrentValues.flowProfileState);
+  // myNex.writeNum("brewAuto.bt2.val", eepromCurrentValues.flowProfileState);
 
   myNex.writeNum("piFlowState", eepromCurrentValues.preinfusionFlowState);
-  myNex.writeNum("brewAuto.bt3.val", eepromCurrentValues.preinfusionFlowState);
+  // myNex.writeNum("brewAuto.bt3.val", eepromCurrentValues.preinfusionFlowState);
 
 
   myNex.writeNum("piSec", eepromCurrentValues.preinfusionSec);
@@ -275,8 +275,8 @@ void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
 }
 
-void trigger1(void) { lcdTrigger1(); }
-void trigger2(void) { lcdTrigger2(); }
-void trigger3(void) { lcdTrigger3(); }
-void trigger4(void) { lcdTrigger4(); }
-void trigger5(void) { lcdTrigger5(); }
+void trigger1(void) { lcdSaveSettingsTrigger(); }
+void trigger2(void) { lcdScalesTareTrigger(); }
+void trigger3(void) { lcdHomeScreenScalesTrigger(); }
+void trigger4(void) { lcdBrewGraphScalesTareTrigger(); }
+void trigger5(void) { lcdPumpPhaseShitfTrigger(); }

@@ -50,10 +50,10 @@ void lcdSetBrewTimer(int seconds);
 void lcdWarmupStateStop(void);
 
 /* Triggers */
-void lcdTrigger1(void);
-void lcdTrigger2(void);
-void lcdTrigger3(void);
-void lcdTrigger4(void);
-void lcdTrigger5(void);
+void lcdSaveSettingsTrigger(void);
+void lcdScalesTareTrigger(void);
+void lcdHomeScreenScalesTrigger(void);
+void lcdBrewGraphScalesTareTrigger(void);
+void lcdPumpPhaseShitfTrigger(void);
 
 #endif

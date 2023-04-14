@@ -24,6 +24,8 @@ eepromValues_t runningCfg;
 
 SystemState systemState;
 
+TOFnLED tofnled;
+
 void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
@@ -58,8 +60,8 @@ void setup(void) {
   espCommsInit();
 
   // Initialize LED
-  ledInit();
-  ledColor(255, 255, 255); // WHITE
+  tofnled.begin();
+  tofnled.setColor(255, 255, 255); // WHITE
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -89,9 +91,8 @@ void setup(void) {
   pageValuesRefresh(true);
   LOG_INFO("Setup sequence finished");
 
-  // calibratePump();
-
-  ledColor(255, 87, 95); // 64171
+  // Change LED colour on setup exit.
+  tofnled.setColor(255, 87, 95); // 64171
 
   iwdcInit();
 }
@@ -372,7 +373,7 @@ static void lcdRefresh(void) {
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
 // Save the desired temp values to EEPROM
-void lcdTrigger1(void) {
+void lcdSaveSettingsTrigger(void) {
   LOG_VERBOSE("Saving values to EEPROM");
   bool rc;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
@@ -385,6 +386,8 @@ void lcdTrigger1(void) {
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
       eepromCurrentValues.warmupState                   = lcdValues.warmupState;
       eepromCurrentValues.switchPhaseOnThreshold        = lcdValues.switchPhaseOnThreshold;
+      eepromCurrentValues.switchPhaseOnPressureBelow    = lcdValues.switchPhaseOnPressureBelow;
+      eepromCurrentValues.switchPhaseOnFirstDrops       = lcdValues.switchPhaseOnFirstDrops;
       break;
     case SCREEN_MODES::SCREEN_profiles:
       // PRESSURE PARAMS
@@ -431,8 +434,6 @@ void lcdTrigger1(void) {
       eepromCurrentValues.shotDose                      = lcdValues.shotDose;
       eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
       eepromCurrentValues.shotStopOnCustomWeight        = lcdValues.shotStopOnCustomWeight;
-      eepromCurrentValues.switchPhaseOnPressureBelow    = lcdValues.switchPhaseOnPressureBelow;
-      eepromCurrentValues.switchPhaseOnFirstDrops       = lcdValues.switchPhaseOnFirstDrops;
       break;
     default:
       break;
@@ -446,17 +447,17 @@ void lcdTrigger1(void) {
   }
 }
 
-void lcdTrigger2(void) {
+void lcdScalesTareTrigger(void) {
   LOG_VERBOSE("Tare scales");
   if (scalesIsPresent()) scalesTare();
 }
 
-void lcdTrigger3(void) {
+void lcdHomeScreenScalesTrigger(void) {
   LOG_VERBOSE("Scales enabled or disabled");
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
 }
 
-void lcdTrigger4(void) {
+void lcdBrewGraphScalesTareTrigger(void) {
   LOG_VERBOSE("Predictive scales tare action completed!");
   if (!scalesIsPresent()) {
     if (currentState.shotWeight > 0.f) {
@@ -466,7 +467,7 @@ void lcdTrigger4(void) {
   } else scalesTare();
 }
 
-void lcdTrigger5(void) {
+void lcdPumpPhaseShitfTrigger(void) {
   pumpPhaseShift();
   lcdShowPopup("Phase switched!");
 }

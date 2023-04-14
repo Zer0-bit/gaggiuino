@@ -21,7 +21,7 @@
 #include "functional/predictive_weight.h"
 #include "profiling_phases.h"
 #include "peripherals/esp_comms.h"
-#include "peripherals/led.h"
+#include "peripherals/tofnled.h"
 
 // Define some const values
 #if defined SINGLE_BOARD
