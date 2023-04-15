@@ -65,7 +65,8 @@ struct eepromValues_t {
   bool     brewDeltaState;
   bool     switchPhaseOnThreshold;
   float    switchPhaseOnPressureBelow;
-  bool     switchPhaseOnFirstDrops;
+  float    switchOnWeightAbove;
+  float    switchOnWaterPumped;
   bool     basketPrefill;
   int      scalesF1;
   int      scalesF2;

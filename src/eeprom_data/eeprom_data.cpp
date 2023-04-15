@@ -6,6 +6,7 @@
 #include "legacy/eeprom_data_v4.h"
 #include "legacy/eeprom_data_v5.h"
 #include "legacy/eeprom_data_v6.h"
+#include "legacy/eeprom_data_v7.h"
 
 namespace {
 
@@ -48,7 +49,8 @@ namespace {
     defaultData.brewDeltaState = true;
     defaultData.switchPhaseOnThreshold = false;
     defaultData.switchPhaseOnPressureBelow = 0.5f;
-    defaultData.switchPhaseOnFirstDrops = true;
+    defaultData.switchOnWeightAbove = 1.f;
+    defaultData.switchOnWaterPumped = 0.f;
     defaultData.basketPrefill = false;
     defaultData.scalesF1 = 3920;
     defaultData.scalesF2 = 4210;

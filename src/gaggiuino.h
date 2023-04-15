@@ -63,7 +63,6 @@ const float calibrationPressure = 4.5f;
 #else
 const float calibrationPressure = 0.65f;
 #endif
-const float firstDropsConstant = 0.9f;
 
 //Timers
 unsigned long systemHealthTimer;

@@ -62,7 +62,7 @@ bool PhaseStopConditions::isReached(SensorState& state, const eepromValues_t cur
     (weight > 0.f && state.shotWeight > weight ) ||
     (pressureAbove > 0.f && state.smoothedPressure > pressureAbove) ||
     (pressureBelow > 0.f && state.smoothedPressure < pressureBelow) ||
-    (waterPumpedInPhase > 0.f && state.waterPumped - stateAtPhaseStart.waterPumped > waterPumpedInPhase - stopDelta) ||
+    (waterPumpedInPhase > 0.f &&  state.waterPumped - stateAtPhaseStart.waterPumped > waterPumpedInPhase - stopDelta) ||
     (flowAbove > 0.f && state.smoothedPumpFlow > flowAbove) ||
     (flowBelow > 0.f && state.smoothedPumpFlow < flowBelow);
 }
