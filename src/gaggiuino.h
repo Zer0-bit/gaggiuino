@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include <SimpleKalmanFilter.h>
+#include <ncp5623.h>
 
 #include "log.h"
 #include "eeprom_data/eeprom_data.h"
