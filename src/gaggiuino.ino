@@ -24,7 +24,7 @@ eepromValues_t runningCfg;
 
 SystemState systemState;
 
-TOFnLED tofnled;
+LED tofnled;
 
 void setup(void) {
   LOG_INIT();

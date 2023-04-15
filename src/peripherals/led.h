@@ -1,14 +1,12 @@
-#ifndef TOFNLED_H
-#define TOFNLED_H
+#ifndef LED_H
+#define LED_H
 
 #include <stdint.h> // for uint8_t
 #include <ncp5623.h>
 
-using namespace std;
-
-class TOFnLED {
+class LED {
   public:
-    TOFnLED();
+    LED();
     void begin();
     void setColor(uint8_t red, uint8_t green, uint8_t blue);
 
@@ -16,15 +14,15 @@ class TOFnLED {
     NCP5623 tankLED;
 };
 
-TOFnLED::TOFnLED(){};
+LED::LED(){};
 
-void TOFnLED::begin() {
+void LED::begin() {
   #ifdef LED_NCP5623
   tankLED.begin();
   #endif
 }
 
-void TOFnLED::setColor(uint8_t red, uint8_t green, uint8_t blue) {
+void LED::setColor(uint8_t red, uint8_t green, uint8_t blue) {
   #ifdef LED_NCP5623
   tankLED.setColor(red, green, blue);
   #endif
