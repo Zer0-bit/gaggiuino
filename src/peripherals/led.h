@@ -2,7 +2,7 @@
 #define LED_H
 
 #include <stdint.h> // for uint8_t
-#include <ncp5623.h>
+#include <NCP5623.h>
 
 class LED {
   public:
