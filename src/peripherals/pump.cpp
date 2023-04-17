@@ -4,12 +4,11 @@
 #include <PSM.h>
 #include "utils.h"
 
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 2);
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 6);
 
 float flowPerClickAtZeroBar = 0.27f;
 int maxPumpClicksPerSecond = 50;
 float fpc_multiplier = 1.2f;
-
 //https://www.desmos.com/calculator/axyl70gjae  - blue curve
 constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
   0.045f,
