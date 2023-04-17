@@ -104,9 +104,8 @@ void setup(void) {
 
 //Main loop where all the logic is continuously run
 void loop(void) {
-  calibratePump();
-  fillBoiler();
   pageValuesRefresh(false);
+  fillBoiler();
   lcdListen();
   sensorsRead();
   brewDetect();
