@@ -77,6 +77,10 @@ void setPumpToRawValue(const uint8_t val) {
   pump.set(val);
 }
 
+void pumpStopAfter(const uint8_t val) {
+  pump.stopAfter(val);
+}
+
 long getAndResetClickCounter(void) {
   long counter = pump.getCounter();
   pump.resetCounter();

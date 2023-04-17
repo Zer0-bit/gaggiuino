@@ -207,18 +207,11 @@ static void calculateWeightAndFlow(void) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
         // Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling
-        if (runningCfg.flowProfileState && currentState.isPressureRising
-        && currentState.smoothedPressure < runningCfg.flowProfilePressureTarget * 0.9f) {
-          actualFlow *= 0.6f;
-        }
-        // For cases where pump flow ends up being lower than hw scales flow.
-        // if (scalesIsPresent()) {
-        //   currentState.weightFlow = fmaxf(0.f, (currentState.shotWeight - previousWeight) * 1000.f / (float)elapsedTime);
-        //   // currentState.smoothedWeightFlow = fmaxf(smoothScalesFlow.updateEstimate(currentState.weightFlow), actualFlow);
-        //   currentState.smoothedWeightFlow = actualFlow;
-        //   previousWeight = currentState.shotWeight;
+        // if (runningCfg.flowProfileState && currentState.isPressureRising) {
+        //   if (currentState.smoothedPressure < runningCfg.flowProfilePressureTarget * 0.9f) {
+        //     actualFlow *= 0.6f;
+        //   }
         // }
-
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
         currentState.shotWeight = scalesIsPresent() ? currentState.weight : currentState.shotWeight + actualFlow;
       }
@@ -635,6 +628,7 @@ static void brewDetect(void) {
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   } else {
     brewActive = false;
+    currentState.pumpClicks = getAndResetClickCounter();
     if(paramsReset) {
       brewParamsReset();
       paramsReset = false;
@@ -654,7 +648,6 @@ static void brewParamsReset(void) {
   flowTimer                = millis() + REFRESH_FLOW_EVERY;
   systemHealthTimer        = millis() + HEALTHCHECK_EVERY;
 
-  currentState.pumpClicks = getAndResetClickCounter();
   predictiveWeight.reset();
   phaseProfiler.reset();
 }
@@ -831,10 +824,12 @@ static void cpsInit(eepromValues_t &eepromValues) {
 }
 
 static void calibratePump(void) {
+  systemState.pumpCalibrationFinished = true;
   if (systemState.pumpCalibrationFinished) {
     return;
   }
   bool recalibrating = false;
+  // preCalibrationTest();
   // Calibrate pump in both phases
   CALIBRATE_PHASES:
   lcdShowPopup(!recalibrating ? "Calibrating pump!" : "Re-calibrating!") ;
@@ -897,4 +892,50 @@ static void calibratePump(void) {
 
   // Set this var to true so phase is never repeated.
   systemState.pumpCalibrationFinished = true;
+}
+
+void preCalibrationTest(void) {
+  watchdogReload();
+  setPumpToRawValue(0);
+  openValve();
+  delay(1000);
+  closeValve();
+  while (currentState.pressure < 6.f) {
+    setPumpToRawValue(30);
+    watchdogReload();
+    sensorsReadPressure();
+  }
+  setPumpToRawValue(0);
+  delay(100);
+  pumpStopAfter(1);
+  setPumpToRawValue(100);
+
+  uint32_t readDelay = 2500U;
+  uint32_t nextRead = micros() + readDelay;
+
+  for (int8_t i = 0; i < 32; i++) {
+    sensorsReadPressure();
+    if (nextRead < micros()) {
+      nextRead += readDelay;
+      systemState.pumpPhase_1Samples[i] = currentState.pressure;
+    }
+    delay(0);
+  }
+  lcdShowPopup("shifting");
+  pumpPhaseShift();
+  delay(500);
+
+  watchdogReload();
+  setPumpToRawValue(0);
+  pumpStopAfter(1);
+  setPumpToRawValue(100);
+  nextRead = micros() + readDelay;
+  for (int8_t i = 0; i < 32; i++) {
+    sensorsReadPressure();
+    if (nextRead < micros()) {
+      nextRead += readDelay;
+      systemState.pumpPhase_2Samples[i] = currentState.pressure;
+    }
+    delay(0);
+  }
 }
