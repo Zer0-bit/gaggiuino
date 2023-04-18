@@ -104,9 +104,9 @@ void setup(void) {
 
 //Main loop where all the logic is continuously run
 void loop(void) {
-  pageValuesRefresh(false);
   calibratePump();
   fillBoiler();
+  pageValuesRefresh(false);
   lcdListen();
   sensorsRead();
   brewDetect();
@@ -319,9 +319,11 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    uint16_t lcdTemp = ((uint16_t)currentState.temperature > runningCfg.setpoint - runningCfg.offsetTemp && currentState.brewSwitchState)
-      ? (uint16_t)currentState.temperature / (runningCfg.setpoint - runningCfg.offsetTemp) + (runningCfg.setpoint - runningCfg.offsetTemp)
-      : (uint16_t)currentState.temperature;
+    uint16_t brewTempSetPoint = runningCfg.setpoint + runningCfg.offsetTemp;
+    // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
+    uint16_t lcdTemp = ((uint16_t)currentState.temperature > brewTempSetPoint && currentState.brewSwitchState)
+      ? (uint16_t)currentState.temperature / brewTempSetPoint + brewTempSetPoint
+      : (uint16_t)currentState.temperature-runningCfg.offsetTemp;
     lcdSetTemperature(lcdTemp);
 
     /*LCD weight output*/
@@ -377,7 +379,6 @@ void lcdSaveSettingsTrigger(void) {
       eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
       eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
-      eepromCurrentValues.warmupState                   = lcdValues.warmupState;
       eepromCurrentValues.switchPhaseOnThreshold        = lcdValues.switchPhaseOnThreshold;
       eepromCurrentValues.switchPhaseOnPressureBelow    = lcdValues.switchPhaseOnPressureBelow;
       eepromCurrentValues.switchOnWeightAbove           = lcdValues.switchOnWeightAbove;
@@ -417,7 +418,7 @@ void lcdSaveSettingsTrigger(void) {
       eepromCurrentValues.brewDivider                   = lcdValues.brewDivider;
       break;
     case SCREEN_MODES::SCREEN_settings_system:
-      eepromCurrentValues.powerLineFrequency            = lcdValues.powerLineFrequency;
+      eepromCurrentValues.warmupState                   = lcdValues.warmupState;
       eepromCurrentValues.lcdSleep                      = lcdValues.lcdSleep;
       eepromCurrentValues.scalesF1                      = lcdValues.scalesF1;
       eepromCurrentValues.scalesF2                      = lcdValues.scalesF2;

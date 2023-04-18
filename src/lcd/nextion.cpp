@@ -31,60 +31,34 @@ void lcdWakeUp(void) {
 
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 
-  myNex.writeNum("setPoint", eepromCurrentValues.setpoint);
-  myNex.writeNum("moreTemp.n1.val", eepromCurrentValues.setpoint-eepromCurrentValues.offsetTemp);
-
-  myNex.writeNum("steamSetPoint", eepromCurrentValues.steamSetPoint);
-  myNex.writeNum("moreTemp.n6.val", eepromCurrentValues.steamSetPoint-eepromCurrentValues.offsetTemp);
-
-  myNex.writeNum("offSet", eepromCurrentValues.offsetTemp);
-  myNex.writeNum("moreTemp.n2.val", eepromCurrentValues.offsetTemp);
-
-  myNex.writeNum("hpwr", eepromCurrentValues.hpwr);
-  myNex.writeNum("moreTemp.n3.val", eepromCurrentValues.hpwr);
-
-  myNex.writeNum("mDiv", eepromCurrentValues.mainDivider);
-  myNex.writeNum("moreTemp.n4.val", eepromCurrentValues.mainDivider);
-
-  myNex.writeNum("bDiv", eepromCurrentValues.brewDivider);
-  myNex.writeNum("moreTemp.n5.val", eepromCurrentValues.brewDivider);
+  myNex.writeNum("moreTemp.setPoint.val", eepromCurrentValues.setpoint);
+  myNex.writeNum("moreTemp.steamSetPoint.val", eepromCurrentValues.steamSetPoint);
+  myNex.writeNum("moreTemp.offSet.val", eepromCurrentValues.offsetTemp);
+  myNex.writeNum("moreTemp.hpwr.val", eepromCurrentValues.hpwr);
+  myNex.writeNum("moreTemp.mDiv.val", eepromCurrentValues.mainDivider);
+  myNex.writeNum("moreTemp.bDiv.val", eepromCurrentValues.brewDivider);
 
   myNex.writeNum("ppStart", eepromCurrentValues.pressureProfilingStart * 10.f);
   myNex.writeNum("brewAuto.pStartBar.val", eepromCurrentValues.pressureProfilingStart * 10.f);
-
   myNex.writeNum("ppFlowStart", eepromCurrentValues.flowProfileStart * 10.f);
   myNex.writeNum("brewAuto.flowStartBox.val", eepromCurrentValues.flowProfileStart * 10.f);
-
   myNex.writeNum("ppFin", eepromCurrentValues.pressureProfilingFinish * 10.f);
   myNex.writeNum("brewAuto.pEndBar.val", eepromCurrentValues.pressureProfilingFinish * 10.f);
-
   myNex.writeNum("ppFlowFinish", eepromCurrentValues.flowProfileEnd * 10.f);
   myNex.writeNum("brewAuto.flowEndBox.val", eepromCurrentValues.flowProfileEnd * 10.f);
-
   myNex.writeNum("ppHold", eepromCurrentValues.pressureProfilingHold);
   myNex.writeNum("brewAuto.n5.val", eepromCurrentValues.pressureProfilingHold);
-
   myNex.writeNum("ppFlowPressure", eepromCurrentValues.flowProfilePressureTarget * 10.f);
   myNex.writeNum("brewAuto.flowBarBox.val", eepromCurrentValues.flowProfilePressureTarget * 10.f);
-
   myNex.writeNum("ppLength", eepromCurrentValues.pressureProfilingLength);
   myNex.writeNum("brewAuto.n6.val", eepromCurrentValues.pressureProfilingLength);
-
   myNex.writeNum("ppFlowCurveSpeed", eepromCurrentValues.flowProfileCurveSpeed);
   myNex.writeNum("brewAuto.flowRampBox.val", eepromCurrentValues.flowProfileCurveSpeed);
 
   myNex.writeNum("piState", eepromCurrentValues.preinfusionState);
-  // myNex.writeNum("brewAuto.bt0.val", eepromCurrentValues.preinfusionState);
-
   myNex.writeNum("ppState", eepromCurrentValues.pressureProfilingState);
-  // myNex.writeNum("brewAuto.bt1.val", eepromCurrentValues.pressureProfilingState);
-
   myNex.writeNum("ppFlowState", eepromCurrentValues.flowProfileState);
-  // myNex.writeNum("brewAuto.bt2.val", eepromCurrentValues.flowProfileState);
-
   myNex.writeNum("piFlowState", eepromCurrentValues.preinfusionFlowState);
-  // myNex.writeNum("brewAuto.bt3.val", eepromCurrentValues.preinfusionFlowState);
-
 
   myNex.writeNum("piSec", eepromCurrentValues.preinfusionSec);
   myNex.writeNum("brewAuto.n0.val", eepromCurrentValues.preinfusionSec);
@@ -110,8 +84,6 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("piRamp", eepromCurrentValues.preinfusionRamp);
   myNex.writeNum("brewAuto.rampSpeed.val", eepromCurrentValues.preinfusionRamp);
 
-  myNex.writeNum("regHz", eepromCurrentValues.powerLineFrequency);
-
   myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
   myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
 
@@ -126,7 +98,6 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("brewSettings.btPrefill.val", eepromCurrentValues.basketPrefill);
 
   myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
-  myNex.writeNum("brewSettings.btWarmup.val", eepromCurrentValues.warmupState);
 
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
   myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
@@ -173,13 +144,12 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotSettings.numDoseForced.val") / 10.f;
   lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
 
-  lcdCfg.setpoint                       = myNex.readNumber("setPoint");
-  lcdCfg.steamSetPoint                  = myNex.readNumber("steamSetPoint");
-  lcdCfg.offsetTemp                     = myNex.readNumber("offSet");
-  lcdCfg.hpwr                           = myNex.readNumber("hpwr");
-  lcdCfg.mainDivider                    = myNex.readNumber("mDiv");
-  lcdCfg.brewDivider                    = myNex.readNumber("bDiv");
-  lcdCfg.powerLineFrequency             = myNex.readNumber("regHz");
+  lcdCfg.setpoint                       = myNex.readNumber("moreTemp.setPoint.val");
+  lcdCfg.steamSetPoint                  = myNex.readNumber("moreTemp.steamSetPoint.val");
+  lcdCfg.offsetTemp                     = myNex.readNumber("moreTemp.offSet.val");
+  lcdCfg.hpwr                           = myNex.readNumber("moreTemp.hpwr.val");
+  lcdCfg.mainDivider                    = myNex.readNumber("moreTemp.mDiv.val");
+  lcdCfg.brewDivider                    = myNex.readNumber("moreTemp.bDiv.val");
   lcdCfg.warmupState                    = myNex.readNumber("warmupState");
 
   lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
