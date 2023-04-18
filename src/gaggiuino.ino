@@ -105,6 +105,7 @@ void setup(void) {
 //Main loop where all the logic is continuously run
 void loop(void) {
   pageValuesRefresh(false);
+  calibratePump();
   fillBoiler();
   lcdListen();
   sensorsRead();
@@ -823,7 +824,6 @@ static void cpsInit(eepromValues_t &eepromValues) {
 }
 
 static void calibratePump(void) {
-  systemState.pumpCalibrationFinished = true;
   if (systemState.pumpCalibrationFinished) {
     return;
   }
@@ -871,7 +871,7 @@ static void calibratePump(void) {
 
   // Determine which phase has fewer clicks.
   long phaseDiffSanityCheck = systemState.pumpClicks[1] - systemState.pumpClicks[0];
-  if ( systemState.pumpCalibrationRetries < 4 ) {
+  if ( systemState.pumpCalibrationRetries < 2 ) {
       if ((phaseDiffSanityCheck >= -2 && phaseDiffSanityCheck <= 2) || systemState.pumpClicks[0] <= 2 || systemState.pumpClicks[1] <= 2) {
       recalibrating = true;
       systemState.pumpCalibrationRetries++;
