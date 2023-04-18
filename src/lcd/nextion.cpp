@@ -137,9 +137,9 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("brewSettings.wPmpd.val", eepromCurrentValues.switchOnWaterPumped * 10.f);
 
   myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
-  myNex.writeNum("shotDose", eepromCurrentValues.shotDose * 10.f);
+  myNex.writeNum("shotSettings.numDose.val", eepromCurrentValues.shotDose * 10.f);
   myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
-  myNex.writeNum("shotCustomVal", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
+  myNex.writeNum("shotSettings.numDoseForced.val", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
 }
 
 eepromValues_t lcdDownloadCfg(void) {
@@ -169,8 +169,8 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.flowProfileCurveSpeed          = myNex.readNumber("ppFlowCurveSpeed");
 
   lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");
-  lcdCfg.shotDose                       = myNex.readNumber("shotDose") / 10.f;
-  lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotCustomVal") / 10.f;
+  lcdCfg.shotDose                       = myNex.readNumber("shotSettings.numDose.val") / 10.f;
+  lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotSettings.numDoseForced.val") / 10.f;
   lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
 
   lcdCfg.setpoint                       = myNex.readNumber("setPoint");
