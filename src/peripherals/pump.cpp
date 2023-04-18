@@ -69,7 +69,7 @@ void setPumpOff(void) {
 }
 
 void setPumpFullOn(void) {
-  pump.set(PUMP_RANGE-5U);
+  pump.set(PUMP_RANGE);
 }
 
 void setPumpToRawValue(const uint8_t val) {
