@@ -24,6 +24,7 @@ constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
 void pumpInit(const int powerLineFrequency, const float pumpFlowAtZero) {
+  pump.freq = powerLineFrequency;
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
   fpc_multiplier = 60.f / (float)maxPumpClicksPerSecond;
