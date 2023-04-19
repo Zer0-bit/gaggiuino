@@ -322,8 +322,8 @@ static void lcdRefresh(void) {
     uint16_t brewTempSetPoint = runningCfg.setpoint + runningCfg.offsetTemp;
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
     uint16_t lcdTemp = ((uint16_t)currentState.temperature > brewTempSetPoint && currentState.brewSwitchState)
-      ? (uint16_t)currentState.temperature / brewTempSetPoint + brewTempSetPoint
-      : (uint16_t)currentState.temperature-runningCfg.offsetTemp;
+      ? (uint16_t)currentState.temperature / brewTempSetPoint + runningCfg.setpoint
+      : (uint16_t)currentState.temperature;
     lcdSetTemperature(lcdTemp);
 
     /*LCD weight output*/
