@@ -829,7 +829,6 @@ static void calibratePump(void) {
     return;
   }
   bool recalibrating = false;
-  // preCalibrationTest();
   // Calibrate pump in both phases
   CALIBRATE_PHASES:
   lcdShowPopup(!recalibrating ? "Calibrating pump!" : "Re-calibrating!") ;
@@ -840,7 +839,7 @@ static void calibratePump(void) {
     sensorsReadPressure();
 
 
-    unsigned long loopTimeout = millis() + 2500L;
+    unsigned long loopTimeout = millis() + 1500L;
     // Wait for pressure to reach desired level.
     while (currentState.smoothedPressure < calibrationPressure) {
       watchdogReload();
@@ -873,13 +872,12 @@ static void calibratePump(void) {
   // Determine which phase has fewer clicks.
   long phaseDiffSanityCheck = systemState.pumpClicks[1] - systemState.pumpClicks[0];
   if ( systemState.pumpCalibrationRetries < 2 ) {
-      if ((phaseDiffSanityCheck >= -2 && phaseDiffSanityCheck <= 2) || systemState.pumpClicks[0] <= 2 || systemState.pumpClicks[1] <= 2) {
+      if ((phaseDiffSanityCheck >= -1 && phaseDiffSanityCheck <= 1) || systemState.pumpClicks[0] <= 1 || systemState.pumpClicks[1] <= 1) {
       recalibrating = true;
       systemState.pumpCalibrationRetries++;
       goto CALIBRATE_PHASES;
     }
   }
-
   if (systemState.pumpClicks[1] < systemState.pumpClicks[0]) {
     pumpPhaseShift();
     lcdShowPopup("Pump phase [2]");
@@ -890,52 +888,6 @@ static void calibratePump(void) {
   }
   else lcdShowPopup("Pump phase [1]");
 
-  // Set this var to true so phase is never repeated.
+  // Set this var to true so boiler fill phase is never repeated.
   systemState.pumpCalibrationFinished = true;
-}
-
-void preCalibrationTest(void) {
-  watchdogReload();
-  setPumpToRawValue(0);
-  openValve();
-  delay(1000);
-  closeValve();
-  while (currentState.pressure < 6.f) {
-    setPumpToRawValue(30);
-    watchdogReload();
-    sensorsReadPressure();
-  }
-  setPumpToRawValue(0);
-  delay(100);
-  pumpStopAfter(1);
-  setPumpToRawValue(100);
-
-  uint32_t readDelay = 2500U;
-  uint32_t nextRead = micros() + readDelay;
-
-  for (int8_t i = 0; i < 32; i++) {
-    sensorsReadPressure();
-    if (nextRead < micros()) {
-      nextRead += readDelay;
-      systemState.pumpPhase_1Samples[i] = currentState.pressure;
-    }
-    delay(0);
-  }
-  lcdShowPopup("shifting");
-  pumpPhaseShift();
-  delay(500);
-
-  watchdogReload();
-  setPumpToRawValue(0);
-  pumpStopAfter(1);
-  setPumpToRawValue(100);
-  nextRead = micros() + readDelay;
-  for (int8_t i = 0; i < 32; i++) {
-    sensorsReadPressure();
-    if (nextRead < micros()) {
-      nextRead += readDelay;
-      systemState.pumpPhase_2Samples[i] = currentState.pressure;
-    }
-    delay(0);
-  }
 }
