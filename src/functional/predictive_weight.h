@@ -10,6 +10,7 @@ extern int preInfusionFinishedPhaseIdx;
 constexpr float crossSectionalArea = 0.0026f; // avg puck crossectional area.
 constexpr float dynamicViscosity = 0.0002964f; // avg water dynamic viscosity at 90-95 celsius.
 bool predictiveTargetReached = false;
+int predictivePreinfusionFinishedCheck = 0.f;
 
 class PredictiveWeight {
 private:
@@ -58,12 +59,17 @@ public:
     // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
     // as well as there being enough pressure for water to wet the puck enough to start the output
     bool phaseTypePressure = phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE;
-    bool preinfusionFinished = phase.getIndex() >= preInfusionFinishedPhaseIdx;
-    bool soakEnabled = phaseTypePressure ? cfg.preinfusionSoak > 0 : cfg.preinfusionFlowSoakTime > 0;
+    predictivePreinfusionFinishedCheck = phase.getIndex();
+    bool preinfusionFinished = predictivePreinfusionFinishedCheck >= preInfusionFinishedPhaseIdx;
+
+    bool soakEnabled = false;
+    soakEnabled = cfg.soakState
+                    ? phaseTypePressure
+                      ? cfg.soakTimePressure > 0
+                      : cfg.soakTimeFlow > 0
+                    : false;
     float pressureTarget = phaseTypePressure ? cfg.preinfusionBar : cfg.preinfusionFlowPressureTarget;
-    // pressureTarget = (pressureTarget == 0.f || pressureTarget > 2.f) ? 2.f : pressureTarget;
-    // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
-    // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
+
 
     // Pressure has to reach full pi target bar threshold.
     if (!preinfusionFinished  && soakEnabled) {

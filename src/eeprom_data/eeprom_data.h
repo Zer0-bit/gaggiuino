@@ -25,10 +25,8 @@
 */
 
 /**
-* Version 7:
-* - Add two more restrictions:
-*   - switchPhaseOnPressureBelow
-*   - switchPhaseOnFirstDrops
+* Version 8:
+* - Adding a lot of new stuff, there's no going back form this without a full reset.
 */
 struct eepromValues_t {
   uint16_t setpoint;
@@ -37,36 +35,53 @@ struct eepromValues_t {
   uint16_t hpwr;
   uint16_t mainDivider;
   uint16_t brewDivider;
+  // Preinfusion vars section
+  bool     preinfusionState;
+  bool     preinfusionFlowState;
+  uint16_t preinfusionSec;
+  float    preinfusionBar;
+  float    preinfusionFlowVol;
+  uint16_t preinfusionFlowTime;
+  float    preinfusionFlowPressureTarget;
+  float    preinfusionPressureFlowTarget;
+  float    preinfusionFilled;
+  bool     preinfusionPressureAbove;
+  float    preinfusionWeightAbove;
+  // Soak vars section
+  bool     soakState;
+  uint16_t soakTimePressure;
+  uint16_t soakTimeFlow;
+  float    soakKeepPressure;
+  float    soakKeepFlow;
+  float    soakBelowPressure;
+  float    soakAbovePressure;
+  float    soakAboveWeight;
+  // PI -> PF ramp settings
+  uint16_t preinfusionRamp;
+  uint16_t preinfusionRampSlope;
+  // Profiling vars section
+  bool     profilingState;
+  bool     flowProfileState;
   float    pressureProfilingStart;
   float    pressureProfilingFinish;
   uint16_t pressureProfilingHold;
-  uint16_t pressureProfilingLength;
-  bool     pressureProfilingState;
-  bool     preinfusionState;
-  uint16_t preinfusionSec;
-  float    preinfusionBar;
-  uint16_t preinfusionSoak;
-  uint16_t preinfusionRamp;
-  bool     preinfusionFlowState;
-  float    preinfusionFlowVol;
-  uint16_t preinfusionFlowTime;
-  uint16_t preinfusionFlowSoakTime;
-  float    preinfusionFlowPressureTarget;
-  bool     flowProfileState;
+  float    pressureProfilingHoldLimit;
+  uint16_t pressureProfilingSlope;
+  uint16_t pressureProfilingSlopeShape;
+  float    pressureProfilingFlowRestriction;
   float    flowProfileStart;
   float    flowProfileEnd;
-  float    flowProfilePressureTarget;
-  uint16_t flowProfileCurveSpeed;
+  uint16_t flowProfileHold;
+  float    flowProfileHoldLimit;
+  uint16_t flowProfileSlope;
+  uint16_t flowProfileSlopeShape;
+  float    flowProfilingPressureRestriction;
+  // Settings vars section
   uint16_t powerLineFrequency;
   uint16_t lcdSleep;
   bool     warmupState;
   bool     homeOnShotFinish;
-  bool     graphBrew;
   bool     brewDeltaState;
-  bool     switchPhaseOnThreshold;
-  float    switchPhaseOnPressureBelow;
-  float    switchOnWeightAbove;
-  float    switchOnWaterPumped;
   bool     basketPrefill;
   int      scalesF1;
   int      scalesF2;

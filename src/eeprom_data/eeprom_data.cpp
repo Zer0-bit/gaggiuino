@@ -7,6 +7,7 @@
 #include "legacy/eeprom_data_v5.h"
 #include "legacy/eeprom_data_v6.h"
 #include "legacy/eeprom_data_v7.h"
+#include "legacy/eeprom_data_v8.h"
 
 namespace {
 
@@ -14,47 +15,64 @@ namespace {
 
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
-
-    defaultData.setpoint = 100;
-    defaultData.steamSetPoint = 162;
-    defaultData.offsetTemp = 7;
-    defaultData.hpwr = 550;
-    defaultData.mainDivider = 5;
-    defaultData.brewDivider = 3;
-    defaultData.pressureProfilingStart = 9;
-    defaultData.pressureProfilingFinish = 6;
-    defaultData.pressureProfilingHold = 5;
-    defaultData.pressureProfilingLength = 15;
-    defaultData.pressureProfilingState = true;
+    // PI
     defaultData.preinfusionState = true;
     defaultData.preinfusionSec = 10;
     defaultData.preinfusionBar = 2;
-    defaultData.preinfusionSoak = 10;
     defaultData.preinfusionRamp = 0;
     defaultData.preinfusionFlowState = false;
     defaultData.preinfusionFlowVol = 3.5f;
     defaultData.preinfusionFlowTime = 10;
-    defaultData.preinfusionFlowSoakTime = 5;
-    defaultData.preinfusionFlowPressureTarget = 0;
+    defaultData.preinfusionFlowPressureTarget = 3.5f;
+    defaultData.preinfusionPressureFlowTarget = 3.5f;
+    defaultData.preinfusionFilled = 0;
+    defaultData.preinfusionPressureAbove = 0.f;
+    defaultData.preinfusionWeightAbove = 0.f;
+    // SOAK
+    defaultData.soakState = 1;
+    defaultData.soakTimePressure = 10;
+    defaultData.soakTimeFlow = 5;
+    defaultData.soakKeepPressure = 0.f;
+    defaultData.soakKeepFlow = 0.f;
+    defaultData.soakBelowPressure = 0.f;
+    defaultData.soakAbovePressure = 0.f;
+    defaultData.soakAboveWeight = 0.f;
+    // PI -> PF
+    defaultData.preinfusionRamp = 2;
+    defaultData.preinfusionRampSlope = 2;
+    // Profiling
+    defaultData.profilingState = true;
     defaultData.flowProfileState = false;
+    defaultData.pressureProfilingStart = 9;
+    defaultData.pressureProfilingFinish = 6;
+    defaultData.pressureProfilingHold = 5;
+    defaultData.pressureProfilingHoldLimit = 3.f;
+    defaultData.pressureProfilingSlope = 15;
+    defaultData.pressureProfilingFlowRestriction = 3.f;
     defaultData.flowProfileStart = 3.5f;
     defaultData.flowProfileEnd = 2.0f;
-    defaultData.flowProfilePressureTarget = 7;
-    defaultData.flowProfileCurveSpeed = 15;
+    defaultData.flowProfileHold = 3.f;
+    defaultData.flowProfileHoldLimit = 9.f;
+    defaultData.flowProfileSlope = 15;
+    defaultData.flowProfilingPressureRestriction = 7;
+    // General brew settings
+    defaultData.homeOnShotFinish = true;
+    defaultData.brewDeltaState = true;
+    defaultData.basketPrefill = false;
+    // System settings
+    defaultData.setpoint = 93;
+    defaultData.steamSetPoint = 155;
+    defaultData.offsetTemp = 7;
+    defaultData.hpwr = 550;
+    defaultData.mainDivider = 5;
+    defaultData.brewDivider = 3;
     defaultData.powerLineFrequency = 50;
     defaultData.lcdSleep = 16;
     defaultData.warmupState = false;
-    defaultData.homeOnShotFinish = true;
-    defaultData.graphBrew = true;
-    defaultData.brewDeltaState = true;
-    defaultData.switchPhaseOnThreshold = false;
-    defaultData.switchPhaseOnPressureBelow = 0.5f;
-    defaultData.switchOnWeightAbove = 1.f;
-    defaultData.switchOnWaterPumped = 0.f;
-    defaultData.basketPrefill = false;
     defaultData.scalesF1 = 3920;
     defaultData.scalesF2 = 4210;
     defaultData.pumpFlowAtZero = 0.2401f;
+    // Dose settings
     defaultData.stopOnWeightState = false;
     defaultData.shotDose = 18.0f;
     defaultData.shotStopOnCustomWeight = 0.f;
@@ -133,11 +151,6 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   }
 
   if (eepromValuesNew.scalesF2 < -20000 || eepromValuesNew.scalesF2 > 20000) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.switchPhaseOnPressureBelow < 0) {
     LOG_ERROR(errMsg);
     return false;
   }

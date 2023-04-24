@@ -165,7 +165,7 @@ static void sensorsReadPressure(void) {
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
     currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.01f;
-    currentState.isPressureMaxed = currentState.smoothedPressure >= runningCfg.pressureProfilingState ? runningCfg.pressureProfilingStart - 0.5f : runningCfg.flowProfilePressureTarget - 0.5f;
+    currentState.isPressureMaxed = currentState.smoothedPressure >= runningCfg.profilingState ? runningCfg.pressureProfilingStart - 0.5f : runningCfg.flowProfilingPressureRestriction - 0.5f;
 
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
@@ -255,8 +255,9 @@ static void modeSelect(void) {
     case OPERATION_MODES::OPMODE_justPreinfusion:
     case OPERATION_MODES::OPMODE_justPressureProfile:
     case OPERATION_MODES::OPMODE_preinfusionAndPressureProfile:
+    case OPERATION_MODES::OPMODE_flowPreinfusionStraight9BarProfiling:
     case OPERATION_MODES::OPMODE_justFlowBasedProfiling:
-    case OPERATION_MODES::OPMODE_justFlowBasedPreinfusion:
+    case OPERATION_MODES::OPMODE_FlowBasedPreinfusionPressureBasedProfiling:
     case OPERATION_MODES::OPMODE_everythingFlowProfiled:
     case OPERATION_MODES::OPMODE_pressureBasedPreinfusionAndFlowProfile:
       nonBrewModeActive = false;
@@ -291,8 +292,6 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) steamTime = millis();
       deScale(runningCfg, currentState);
-      break;
-    case OPERATION_MODES::OPMODE_empty:
       break;
     default:
       pageValuesRefresh(true);
@@ -375,39 +374,67 @@ void lcdSaveSettingsTrigger(void) {
   eepromValues_t lcdValues = lcdDownloadCfg();
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)){
-    case SCREEN_MODES::SCREEN_brew_settings:
+    case SCREEN_MODES::SCREEN_brew_more:
       eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
       eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
-      eepromCurrentValues.switchPhaseOnThreshold        = lcdValues.switchPhaseOnThreshold;
-      eepromCurrentValues.switchPhaseOnPressureBelow    = lcdValues.switchPhaseOnPressureBelow;
-      eepromCurrentValues.switchOnWeightAbove           = lcdValues.switchOnWeightAbove;
-      eepromCurrentValues.switchOnWaterPumped           = lcdValues.switchOnWaterPumped;
       break;
-    case SCREEN_MODES::SCREEN_profiles:
-      // PRESSURE PARAMS
-      eepromCurrentValues.pressureProfilingStart        = lcdValues.pressureProfilingStart;
-      eepromCurrentValues.pressureProfilingFinish       = lcdValues.pressureProfilingFinish;
-      eepromCurrentValues.pressureProfilingHold         = lcdValues.pressureProfilingHold;
-      eepromCurrentValues.pressureProfilingLength       = lcdValues.pressureProfilingLength;
-      eepromCurrentValues.pressureProfilingState        = lcdValues.pressureProfilingState;
-      eepromCurrentValues.preinfusionState              = lcdValues.preinfusionState;
-      eepromCurrentValues.preinfusionSec                = lcdValues.preinfusionSec;
-      eepromCurrentValues.preinfusionBar                = lcdValues.preinfusionBar;
-      eepromCurrentValues.preinfusionSoak               = lcdValues.preinfusionSoak;
-      eepromCurrentValues.preinfusionRamp               = lcdValues.preinfusionRamp;
+    case SCREEN_MODES::SCREEN_brew_preinfusion:
+      eepromCurrentValues.preinfusionState = lcdValues.preinfusionState;
+      eepromCurrentValues.preinfusionFlowState = lcdValues.preinfusionFlowState;
 
-      // FLOW PARAMS
-      eepromCurrentValues.preinfusionFlowState          = lcdValues.preinfusionFlowState;
-      eepromCurrentValues.preinfusionFlowVol            = lcdValues.preinfusionFlowVol;
-      eepromCurrentValues.preinfusionFlowTime           = lcdValues.preinfusionFlowTime;
-      eepromCurrentValues.preinfusionFlowSoakTime       = lcdValues.preinfusionFlowSoakTime;
-      eepromCurrentValues.preinfusionFlowPressureTarget = lcdValues.preinfusionFlowPressureTarget;
+      if(eepromCurrentValues.preinfusionFlowState == 0) {
+        eepromCurrentValues.preinfusionSec = lcdValues.preinfusionSec;
+        eepromCurrentValues.preinfusionPressureFlowTarget = lcdValues.preinfusionPressureFlowTarget;
+        eepromCurrentValues.preinfusionBar = lcdValues.preinfusionBar;
+      }
+      else {
+        eepromCurrentValues.preinfusionFlowTime = lcdValues.preinfusionFlowTime;
+        eepromCurrentValues.preinfusionFlowVol = lcdValues.preinfusionFlowVol;
+        eepromCurrentValues.preinfusionFlowPressureTarget = lcdValues.preinfusionFlowPressureTarget;
+      }
+      eepromCurrentValues.preinfusionFilled = lcdValues.preinfusionFilled;
+      eepromCurrentValues.preinfusionPressureAbove = lcdValues.preinfusionPressureAbove;
+      eepromCurrentValues.preinfusionWeightAbove = lcdValues.preinfusionWeightAbove;
+      break;
+    case SCREEN_MODES::SCREEN_brew_soak:
+      eepromCurrentValues.soakState = lcdValues.soakState;
+
+      if(eepromCurrentValues.preinfusionFlowState == 0)
+        eepromCurrentValues.soakTimePressure = lcdValues.soakTimePressure;
+      else
+        eepromCurrentValues.soakTimeFlow = lcdValues.soakTimeFlow;
+
+      eepromCurrentValues.soakKeepPressure = lcdValues.soakKeepPressure;
+      eepromCurrentValues.soakKeepFlow = lcdValues.soakKeepFlow;
+      eepromCurrentValues.soakBelowPressure = lcdValues.soakBelowPressure;
+      eepromCurrentValues.soakAbovePressure = lcdValues.soakAbovePressure;
+      eepromCurrentValues.soakAboveWeight = lcdValues.soakAboveWeight;
+      // PI -> PF
+      eepromCurrentValues.preinfusionRamp = lcdValues.preinfusionRamp;
+      eepromCurrentValues.preinfusionRampSlope = lcdValues.preinfusionRampSlope;
+      break;
+    case SCREEN_MODES::SCREEN_brew_profiling:
+      // PRESSURE PARAMS
+      eepromCurrentValues.profilingState                = lcdValues.profilingState;
       eepromCurrentValues.flowProfileState              = lcdValues.flowProfileState;
-      eepromCurrentValues.flowProfileStart              = lcdValues.flowProfileStart;
-      eepromCurrentValues.flowProfileEnd                = lcdValues.flowProfileEnd;
-      eepromCurrentValues.flowProfilePressureTarget     = lcdValues.flowProfilePressureTarget;
-      eepromCurrentValues.flowProfileCurveSpeed         = lcdValues.flowProfileCurveSpeed;
+      if(eepromCurrentValues.flowProfileState == 0) {
+        eepromCurrentValues.pressureProfilingStart            = lcdValues.pressureProfilingStart;
+        eepromCurrentValues.pressureProfilingFinish           = lcdValues.pressureProfilingFinish;
+        eepromCurrentValues.pressureProfilingHold             = lcdValues.pressureProfilingHold;
+        eepromCurrentValues.pressureProfilingHoldLimit        = lcdValues.pressureProfilingHoldLimit;
+        eepromCurrentValues.pressureProfilingSlope            = lcdValues.pressureProfilingSlope;
+        eepromCurrentValues.pressureProfilingSlopeShape       = lcdValues.pressureProfilingSlopeShape;
+        eepromCurrentValues.pressureProfilingFlowRestriction  = lcdValues.pressureProfilingFlowRestriction;
+      } else {
+        eepromCurrentValues.flowProfileStart                  = lcdValues.flowProfileStart;
+        eepromCurrentValues.flowProfileEnd                    = lcdValues.flowProfileEnd;
+        eepromCurrentValues.flowProfileHold                   = lcdValues.flowProfileHold;
+        eepromCurrentValues.flowProfileHoldLimit              = lcdValues.flowProfileHoldLimit;
+        eepromCurrentValues.flowProfileSlope                  = lcdValues.flowProfileSlope;
+        eepromCurrentValues.flowProfileSlopeShape             = lcdValues.flowProfileSlopeShape;
+        eepromCurrentValues.flowProfilingPressureRestriction  = lcdValues.flowProfilingPressureRestriction;
+      }
       break;
     case SCREEN_MODES::SCREEN_settings_boiler:
       eepromCurrentValues.setpoint                      = lcdValues.setpoint;
@@ -467,16 +494,25 @@ void lcdPumpPhaseShitfTrigger(void) {
   lcdShowPopup("Phase switched!");
 }
 
+void lcdRefreshElementsTrigger(void) {
+  eepromValues_t lcdValues = lcdDownloadCfg();
+  // Make the necessary changes
+  uploadPageCfg(lcdValues);
+  // refresh the screen elements
+  pageValuesRefresh(true);
+}
+
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
 static void updateProfilerPhases(void) {
   float preInfusionFinishBar = 0.f;
+  float preinfusionFinishFlow = 0.f;
   float shotTarget = -1.f;
-  float stopOnPressureAbove = -1;
-  float switchPhaseOnDrip = -1;
-  float pressureBelowRestriction = -1;
-  float waterPumpedInPhase = -1;
+  float isPressureAbove = -1;
+  float isWeightAbove = -1;
+  float isPressureBelow = -1;
+  float isWaterPumped = -1;
 
   if (runningCfg.stopOnWeightState) {
     shotTarget = (runningCfg.shotStopOnCustomWeight < 1.f)
@@ -497,40 +533,62 @@ static void updateProfilerPhases(void) {
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
-      // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
-      stopOnPressureAbove = runningCfg.switchPhaseOnThreshold ? runningCfg.preinfusionFlowPressureTarget : -1;
-      switchPhaseOnDrip = runningCfg.switchOnWeightAbove > 0.f ? runningCfg.switchOnWeightAbove : -1;
-      pressureBelowRestriction = runningCfg.switchPhaseOnPressureBelow > 0.f ? runningCfg.switchPhaseOnPressureBelow : -1;
-      waterPumpedInPhase = runningCfg.switchOnWaterPumped > 0.f ? runningCfg.switchOnWaterPumped : -1;
+      isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionFlowPressureTarget : -1;
+      isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1;
+      isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1;
 
-
-      addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, stopOnPressureAbove, -1, switchPhaseOnDrip, waterPumpedInPhase);
-      addFlowPhase(Transition{0.f}, 0, runningCfg.preinfusionFlowSoakTime * 1000, -1, pressureBelowRestriction, switchPhaseOnDrip, -1);
-      preInfusionFinishBar = fmaxf(0.f, runningCfg.preinfusionFlowPressureTarget);
+      addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
+      preInfusionFinishBar = runningCfg.preinfusionFlowPressureTarget;
+      preinfusionFinishFlow = runningCfg.preinfusionFlowVol;
     } else { // pressure based PI enabled
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
-      stopOnPressureAbove = runningCfg.switchPhaseOnThreshold ? runningCfg.preinfusionBar : -1;
-      switchPhaseOnDrip = runningCfg.switchOnWeightAbove > 0.f ? runningCfg.switchOnWeightAbove : -1;
-      pressureBelowRestriction = runningCfg.switchPhaseOnPressureBelow > 0 ? runningCfg.switchPhaseOnPressureBelow : -1;
-      waterPumpedInPhase = runningCfg.switchOnWaterPumped > 0.f ? runningCfg.switchOnWaterPumped : -1;
+      isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionBar : -1;
+      isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1;
+      isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1;
 
-      addPressurePhase(Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, stopOnPressureAbove, -1, switchPhaseOnDrip, waterPumpedInPhase);
-      addPressurePhase(Transition{0.f}, -1, runningCfg.preinfusionSoak * 1000, -1, pressureBelowRestriction, switchPhaseOnDrip, -1);
+      addPressurePhase(Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
       preInfusionFinishBar = runningCfg.preinfusionBar;
+      preinfusionFinishFlow = runningCfg.preinfusionPressureFlowTarget;
     }
+  }
+  // Setup the soak phase if neecessary
+  if (runningCfg.soakState) {
+    uint16_t phaseSoak = -1;
+    if(runningCfg.preinfusionFlowState) { // Sorting the phase values and restrictions
+      phaseSoak = runningCfg.soakTimeFlow;
+      isPressureBelow = runningCfg.soakBelowPressure > 0.f ? runningCfg.soakBelowPressure : -1;
+      isWeightAbove = runningCfg.soakAboveWeight > 0.f ? runningCfg.soakAboveWeight : -1;
+    } else {
+      phaseSoak = runningCfg.soakTimePressure;
+      isPressureBelow = runningCfg.soakBelowPressure > 0.f ? runningCfg.soakBelowPressure : -1;
+      isWeightAbove = runningCfg.soakAboveWeight > 0.f ? runningCfg.soakAboveWeight : -1;
+    }
+    addPressurePhase(Transition{0.f}, -1, phaseSoak * 1000, -1, isPressureBelow, isWeightAbove, -1);
   }
   preInfusionFinishedPhaseIdx = profile.phaseCount();
 
   // Setup shot profiling
-  if (runningCfg.pressureProfilingState) {
+  if (runningCfg.profilingState) {
     if (runningCfg.flowProfileState) { // flow based profiling enabled
-      addFlowPhase(Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, TransitionCurve::LINEAR, runningCfg.flowProfileCurveSpeed * 1000}, runningCfg.flowProfilePressureTarget, -1, -1, -1, -1, -1);
+    /* Setting the phase specific restrictions */
+    /* ------------------------------------------ */
+      uint16_t rampAndHold = runningCfg.preinfusionRamp + runningCfg.flowProfileHold;
+      float holdLimit = runningCfg.flowProfileHoldLimit > 0.f ? runningCfg.flowProfileHoldLimit : -1;
+    /* ------------------------------------------ */
+
+      addFlowPhase(Transition{preinfusionFinishFlow, runningCfg.flowProfileStart, (TransitionCurve)runningCfg.preinfusionRampSlope, runningCfg.preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
+      addFlowPhase(Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, (TransitionCurve)runningCfg.flowProfileSlopeShape, runningCfg.flowProfileSlope * 1000}, runningCfg.flowProfilingPressureRestriction, -1, -1, -1, -1, -1);
     } else { // pressure based profiling enabled
+    /* Setting the phase specific restrictions */
+    /* ------------------------------------------ */
       float ppStart = runningCfg.pressureProfilingStart;
       float ppEnd = runningCfg.pressureProfilingFinish;
       uint16_t rampAndHold = runningCfg.preinfusionRamp + runningCfg.pressureProfilingHold;
-      addPressurePhase(Transition{preInfusionFinishBar, ppStart, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, rampAndHold * 1000, -1, -1, -1, -1);
-      addPressurePhase(Transition{ppStart, ppEnd, TransitionCurve::EASE_IN_OUT, runningCfg.pressureProfilingLength * 1000}, -1, -1, -1, -1, -1, -1);
+      float holdLimit = runningCfg.pressureProfilingHoldLimit > 0.f ? runningCfg.pressureProfilingHoldLimit : -1;
+    /* ------------------------------------------ */
+
+      addPressurePhase(Transition{preInfusionFinishBar, ppStart, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
+      addPressurePhase(Transition{ppStart, ppEnd, TransitionCurve::EASE_IN_OUT, runningCfg.pressureProfilingSlope * 1000}, -1, -1, -1, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
     addPressurePhase(Transition{preInfusionFinishBar, 9, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
@@ -541,20 +599,20 @@ void addFillBasketPhase(float flowRate) {
   addFlowPhase(Transition(flowRate), -1, -1, 0.1f, -1, -1, -1);
 }
 
-void addPressurePhase(Transition pressure, float flowRestriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float waterPumpedInPhase) {
-  addPhase(PHASE_TYPE::PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove, pressureBelow, shotWeight, waterPumpedInPhase);
+void addPressurePhase(Transition pressure, float flowRestriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float isWaterPumped) {
+  addPhase(PHASE_TYPE::PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove, pressureBelow, shotWeight, isWaterPumped);
 }
 
-void addFlowPhase(Transition flow, float pressureRestriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float waterPumpedInPhase) {
-  addPhase(PHASE_TYPE::PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove, pressureBelow, shotWeight, waterPumpedInPhase);
+void addFlowPhase(Transition flow, float pressureRestriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float isWaterPumped) {
+  addPhase(PHASE_TYPE::PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove, pressureBelow, shotWeight, isWaterPumped);
 }
 
-void addPhase(PHASE_TYPE type, Transition target, float restriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float waterPumpedInPhase) {
+void addPhase(PHASE_TYPE type, Transition target, float restriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float isWaterPumped) {
   profile.addPhase(Phase {
     .type           = type,
     .target         = target,
     .restriction    = restriction,
-    .stopConditions = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove, .pressureBelow=pressureBelow, .weight=shotWeight, .waterPumpedInPhase=waterPumpedInPhase }
+    .stopConditions = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove, .pressureBelow=pressureBelow, .weight=shotWeight, .waterPumpedInPhase=isWaterPumped }
   });
 }
 

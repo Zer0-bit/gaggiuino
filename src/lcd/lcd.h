@@ -10,20 +10,23 @@ extern volatile int lcdLastCurrentPageId;
 
 enum class SCREEN_MODES {
     SCREEN_home,
-    SCREEN_brew_settings,
+    SCREEN_brew_preinfusion,
+    SCREEN_brew_soak,
+    SCREEN_brew_profiling,
     SCREEN_brew_manual,
-    SCREEN_profiles,
     SCREEN_flush,
     SCREEN_descale,
     SCREEN_settings_boiler,
     SCREEN_settings_system,
     SCREEN_brew_graph,
+    SCREEN_brew_more,
     SCREEN_shot_settings,
     SCREEN_splash
 } ;
 
 void lcdInit(void);
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
+void uploadPageCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);
 void lcdWakeUp(void);
 
@@ -55,5 +58,6 @@ void lcdScalesTareTrigger(void);
 void lcdHomeScreenScalesTrigger(void);
 void lcdBrewGraphScalesTareTrigger(void);
 void lcdPumpPhaseShitfTrigger(void);
+void lcdRefreshElementsTrigger(void);
 
 #endif

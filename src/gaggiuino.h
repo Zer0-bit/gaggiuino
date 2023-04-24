@@ -49,10 +49,10 @@ enum class OPERATION_MODES {
   OPMODE_preinfusionAndPressureProfile,
   OPMODE_flush,
   OPMODE_descale,
-  OPMODE_empty,
+  OPMODE_flowPreinfusionStraight9BarProfiling,
   OPMODE_justFlowBasedProfiling,
   OPMODE_steam,
-  OPMODE_justFlowBasedPreinfusion,
+  OPMODE_FlowBasedPreinfusionPressureBasedProfiling,
   OPMODE_everythingFlowProfiled,
   OPMODE_pressureBasedPreinfusionAndFlowProfile
 } ;
