@@ -495,9 +495,27 @@ void lcdPumpPhaseShitfTrigger(void) {
 }
 
 void lcdRefreshElementsTrigger(void) {
+
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   eepromValues_t lcdValues = lcdDownloadCfg();
+
+  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
+    case SCREEN_MODES::SCREEN_brew_preinfusion:
+      eepromCurrentValues.preinfusionFlowState = lcdValues.preinfusionFlowState;
+      break;
+    case SCREEN_MODES::SCREEN_brew_profiling:
+      eepromCurrentValues.flowProfileState = lcdValues.flowProfileState;
+      break;
+    default:
+      lcdShowPopup("Nope!");
+      break;
+  }
+  bool rc = eepromWrite(eepromCurrentValues);
+  (rc == true) ? lcdShowPopup("Update successful!") : lcdShowPopup("Data out of range!");
+
+  eepromCurrentValues = eepromGetCurrentValues();
   // Make the necessary changes
-  uploadPageCfg(lcdValues);
+  uploadPageCfg(eepromCurrentValues);
   // refresh the screen elements
   pageValuesRefresh(true);
 }
