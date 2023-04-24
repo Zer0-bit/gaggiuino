@@ -511,7 +511,7 @@ void lcdRefreshElementsTrigger(void) {
       break;
   }
   bool rc = eepromWrite(eepromCurrentValues);
-  (rc == true) ? lcdShowPopup("Update successful!") : lcdShowPopup("Data out of range!");
+  (rc == true) ? lcdShowPopup("Switched!") : lcdShowPopup("Fail!");
 
   eepromCurrentValues = eepromGetCurrentValues();
   // Make the necessary changes
