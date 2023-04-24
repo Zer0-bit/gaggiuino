@@ -520,6 +520,32 @@ void lcdRefreshElementsTrigger(void) {
   pageValuesRefresh(true);
 }
 
+void lcdQuickProfilesSwitchOrSave(void) {
+
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  eepromValues_t lcdValues = lcdDownloadCfg();
+
+  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
+    case SCREEN_MODES::SCREEN_brew_preinfusion:
+      eepromCurrentValues.preinfusionFlowState = lcdValues.preinfusionFlowState;
+      break;
+    case SCREEN_MODES::SCREEN_brew_profiling:
+      eepromCurrentValues.flowProfileState = lcdValues.flowProfileState;
+      break;
+    default:
+      lcdShowPopup("Nope!");
+      break;
+  }
+  bool rc = eepromWrite(eepromCurrentValues);
+  (rc == true) ? lcdShowPopup("Switched!") : lcdShowPopup("Fail!");
+
+  eepromCurrentValues = eepromGetCurrentValues();
+  // Make the necessary changes
+  uploadPageCfg(eepromCurrentValues);
+  // refresh the screen elements
+  pageValuesRefresh(true);
+}
+
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
@@ -564,7 +590,7 @@ static void updateProfilerPhases(void) {
       isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1;
       isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1;
 
-      addPressurePhase(Transition{(float) runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
+      addPressurePhase(Transition{runningCfg.preinfusionBar}, 4.5f, runningCfg.preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
       preInfusionFinishBar = runningCfg.preinfusionBar;
       preinfusionFinishFlow = runningCfg.preinfusionPressureFlowTarget;
     }
@@ -605,11 +631,11 @@ static void updateProfilerPhases(void) {
       float holdLimit = runningCfg.pressureProfilingHoldLimit > 0.f ? runningCfg.pressureProfilingHoldLimit : -1;
     /* ------------------------------------------ */
 
-      addPressurePhase(Transition{preInfusionFinishBar, ppStart, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
-      addPressurePhase(Transition{ppStart, ppEnd, TransitionCurve::EASE_IN_OUT, runningCfg.pressureProfilingSlope * 1000}, -1, -1, -1, -1, -1, -1);
+      addPressurePhase(Transition{preInfusionFinishBar, ppStart, (TransitionCurve)runningCfg.preinfusionRampSlope, runningCfg.preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
+      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)runningCfg.pressureProfilingSlopeShape, runningCfg.pressureProfilingSlope * 1000}, -1, -1, -1, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
-    addPressurePhase(Transition{preInfusionFinishBar, 9, TransitionCurve::EASE_OUT, runningCfg.preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
+    addPressurePhase(Transition{preInfusionFinishBar, 9, (TransitionCurve)runningCfg.pressureProfilingSlopeShape, runningCfg.preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
   }
 }
 
