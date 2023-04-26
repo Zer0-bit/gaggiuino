@@ -21,7 +21,8 @@ enum class SCREEN_MODES {
     SCREEN_brew_graph,
     SCREEN_brew_more,
     SCREEN_shot_settings,
-    SCREEN_splash
+    SCREEN_splash,
+    SCREEN_graph_preview
 } ;
 
 void lcdInit(void);

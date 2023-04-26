@@ -821,6 +821,7 @@ static inline void systemHealthCheck(float pressureThreshold) {
       switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
         case SCREEN_MODES::SCREEN_brew_manual:
         case SCREEN_MODES::SCREEN_brew_graph:
+        case SCREEN_MODES::SCREEN_graph_preview:
           brewDetect();
           lcdRefresh();
           lcdListen();
