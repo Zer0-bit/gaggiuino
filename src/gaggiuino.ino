@@ -616,9 +616,9 @@ static void updateProfilerPhases(void) {
       maintainFlow = runningCfg.soakKeepFlow > 0.f ? runningCfg.soakKeepFlow : -1.f;
       maintainPressure = runningCfg.soakKeepPressure > 0.f ? runningCfg.soakKeepPressure : -1.f;
     }
-    if (maintainPressure != -1.f)
-      addPressurePhase(Transition{maintainPressure}, 2.5f, phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
-    else if(maintainFlow != -1.f)
+    if (maintainPressure > 0.f)
+      addPressurePhase(Transition{maintainPressure}, (maintainFlow > 0.f ? maintainFlow : 2.5f), phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
+    else if(maintainFlow > 0.f)
       addFlowPhase(Transition{maintainFlow},  -1, phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
     else
       addPressurePhase(Transition{maintainPressure}, maintainFlow, phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
