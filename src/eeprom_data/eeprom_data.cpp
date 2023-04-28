@@ -8,6 +8,7 @@
 #include "legacy/eeprom_data_v6.h"
 #include "legacy/eeprom_data_v7.h"
 #include "legacy/eeprom_data_v8.h"
+#include "legacy/eeprom_data_v9.h"
 
 namespace {
 
@@ -15,6 +16,8 @@ namespace {
 
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
+    // Default profile
+    defaultData.idx = 0;
     // PI
     defaultData.preinfusionState = true;
     defaultData.preinfusionSec = 10;
@@ -92,7 +95,7 @@ namespace {
 
 }
 
-bool eepromWrite(eepromValues_t eepromValuesNew) {
+bool eepromWrite(eepromValues_t eepromValuesNew, uint8_t idx) {
   const char *errMsg = "Data out of range";
 
   if (eepromValuesNew.preinfusionFlowVol < 0.f) {
@@ -157,16 +160,20 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
 
   eepromMetadata.timestamp = millis();
   eepromMetadata.version = EEPROM_DATA_VERSION;
-  eepromMetadata.values = eepromValuesNew;
+  eepromMetadata.values[idx] = eepromValuesNew;
+  eepromMetadata.lastActiveprofileIdx = idx;
   eepromMetadata.versionTimestampXOR = eepromMetadata.timestamp ^ eepromMetadata.version;
   EEPROM.put(0, eepromMetadata);
 
   return true;
 }
 
-void eepromInit(void) {
+uint8_t eepromInit(void) {
+  uint8_t idx;
+  // selecting the last active profile
+  idx = eepromMetadata.lastActiveprofileIdx;
   // initialiaze defaults on memory
-  eepromMetadata.values = getEepromDefaults();
+  eepromMetadata.values[idx] = getEepromDefaults();
 
   // read version
   uint16_t version;
@@ -176,21 +183,22 @@ void eepromInit(void) {
   bool readSuccess = false;
 
   if (version < EEPROM_DATA_VERSION && legacyEepromDataLoaders[version] != nullptr) {
-    readSuccess = (*legacyEepromDataLoaders[version])(eepromMetadata.values);
+    readSuccess = (*legacyEepromDataLoaders[version])(eepromMetadata.values[idx]);
   } else {
-    readSuccess = loadCurrentEepromData(eepromMetadata.values);
+    readSuccess = loadCurrentEepromData(eepromMetadata.values[idx]);
   }
 
   if (!readSuccess) {
     LOG_ERROR("SECU_CHECK FAILED! Applying defaults! eepromMetadata.version=%d", version);
-    eepromMetadata.values = getEepromDefaults();
+    eepromMetadata.values[idx] = getEepromDefaults();
   }
 
   if (!readSuccess || version != EEPROM_DATA_VERSION) {
-    eepromWrite(eepromMetadata.values);
+    eepromWrite(eepromMetadata.values[idx], eepromMetadata.lastActiveprofileIdx);
   }
+  return eepromMetadata.lastActiveprofileIdx;
 }
 
-struct eepromValues_t eepromGetCurrentValues(void) {
-  return eepromMetadata.values;
+struct eepromValues_t eepromGetCurrentValues(uint8_t idx) {
+  return eepromMetadata.values[idx];
 }

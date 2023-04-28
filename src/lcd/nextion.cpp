@@ -30,7 +30,7 @@ void lcdWakeUp(void) {
 }
 
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
-  // bool profileType = false;
+  myNex.writeNum("pIdx", eepromCurrentValues.idx);
   // PI
   myNex.writeNum("piState", eepromCurrentValues.preinfusionState);
   myNex.writeNum("piFlowState", eepromCurrentValues.preinfusionFlowState);
@@ -187,6 +187,8 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 
 eepromValues_t lcdDownloadCfg(void) {
   eepromValues_t lcdCfg = {};
+  // Profile ID
+  lcdCfg.idx = myNex.readNumber("pIdx");
   // PI
   lcdCfg.preinfusionState = myNex.readNumber("piState");
   lcdCfg.preinfusionFlowState = myNex.readNumber("piFlowState");

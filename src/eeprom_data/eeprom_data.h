@@ -29,6 +29,9 @@
 * - Adding a lot of new stuff, there's no going back form this without a full reset.
 */
 struct eepromValues_t {
+  // profile version var
+  uint8_t idx;
+  // System settings
   uint16_t setpoint;
   uint16_t steamSetPoint;
   uint16_t offsetTemp;
@@ -92,8 +95,8 @@ struct eepromValues_t {
   uint16_t shotPreset;
 };
 
-void eepromInit(void);
-bool eepromWrite(eepromValues_t);
-struct eepromValues_t eepromGetCurrentValues(void);
+uint8_t eepromInit(void);
+bool eepromWrite(eepromValues_t, uint8_t);
+struct eepromValues_t eepromGetCurrentValues(uint8_t idx);
 
 #endif

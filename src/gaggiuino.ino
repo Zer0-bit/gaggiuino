@@ -64,8 +64,8 @@ void setup(void) {
   tofnled.setColor(255, 255, 255); // WHITE
 
   // Initialising the vsaved values or writing defaults if first start
-  eepromInit();
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  uint8_t idx = eepromInit();
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues(idx);
   LOG_INFO("EEPROM Init");
 
   cpsInit(eepromCurrentValues);
@@ -370,7 +370,7 @@ static void lcdRefresh(void) {
 void lcdSaveSettingsTrigger(void) {
   LOG_VERBOSE("Saving values to EEPROM");
   bool rc;
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues(runningCfg.idx);
   eepromValues_t lcdValues = lcdDownloadCfg();
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)){
@@ -461,7 +461,7 @@ void lcdSaveSettingsTrigger(void) {
       break;
   }
 
-  rc = eepromWrite(eepromCurrentValues);
+  rc = eepromWrite(eepromCurrentValues, eepromCurrentValues.idx);
   if (rc == true) {
     lcdShowPopup("Update successful!");
   } else {
@@ -496,7 +496,7 @@ void lcdPumpPhaseShitfTrigger(void) {
 
 void lcdRefreshElementsTrigger(void) {
 
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues(runningCfg.idx);
   eepromValues_t lcdValues = lcdDownloadCfg();
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
@@ -510,10 +510,10 @@ void lcdRefreshElementsTrigger(void) {
       lcdShowPopup("Nope!");
       break;
   }
-  bool rc = eepromWrite(eepromCurrentValues);
+  bool rc = eepromWrite(eepromCurrentValues, eepromCurrentValues.idx);
   (rc == true) ? lcdShowPopup("Switched!") : lcdShowPopup("Fail!");
 
-  eepromCurrentValues = eepromGetCurrentValues();
+  eepromCurrentValues = eepromGetCurrentValues(runningCfg.idx);
   // Make the necessary changes
   uploadPageCfg(eepromCurrentValues);
   // refresh the screen elements
@@ -522,7 +522,7 @@ void lcdRefreshElementsTrigger(void) {
 
 void lcdQuickProfilesSwitchOrSave(void) {
 
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues(runningCfg.idx);
   eepromValues_t lcdValues = lcdDownloadCfg();
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
@@ -536,10 +536,10 @@ void lcdQuickProfilesSwitchOrSave(void) {
       lcdShowPopup("Nope!");
       break;
   }
-  bool rc = eepromWrite(eepromCurrentValues);
+  bool rc = eepromWrite(eepromCurrentValues, eepromCurrentValues.idx);
   (rc == true) ? lcdShowPopup("Switched!") : lcdShowPopup("Fail!");
 
-  eepromCurrentValues = eepromGetCurrentValues();
+  eepromCurrentValues = eepromGetCurrentValues(runningCfg.idx);
   // Make the necessary changes
   uploadPageCfg(eepromCurrentValues);
   // refresh the screen elements

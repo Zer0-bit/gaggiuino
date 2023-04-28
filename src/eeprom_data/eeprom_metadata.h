@@ -4,13 +4,15 @@
 
 #include <Arduino.h>
 
-#define EEPROM_DATA_VERSION 9
+#define EEPROM_DATA_VERSION 10
+#define ACTIVE_PROFILES_TOTAL 7
 
 #define EEPROM_METADATA_T(__eepromValues_tName) \
   {                                             \
     uint16_t version;                           \
     unsigned long timestamp;                    \
-    struct __eepromValues_tName values;         \
+    struct __eepromValues_tName values[ACTIVE_PROFILES_TOTAL];\
+    uint8_t lastActiveprofileIdx;               \
     uint32_t versionTimestampXOR;               \
   }
 
@@ -26,7 +28,7 @@ struct eepromMetadata_t EEPROM_METADATA_T(eepromValues_t);
     {                                                                                               \
       return false;                                                                                 \
     }                                                                                               \
-    return __upgradeSchema_fName(targetValues, eepromMetadata.values);                              \
+    return __upgradeSchema_fName(targetValues, eepromMetadata.values[eepromMetadata.lastActiveprofileIdx]);             \
   }
 
 bool (*legacyEepromDataLoaders[EEPROM_DATA_VERSION])(eepromValues_t &);
