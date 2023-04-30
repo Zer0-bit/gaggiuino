@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include "sensors_state.h"
 
-#define ZC_MODE    RISING
+#define ZC_MODE    FALLING
 
 constexpr uint8_t PUMP_RANGE = 100;
 

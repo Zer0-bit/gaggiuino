@@ -86,7 +86,7 @@ void setup(void) {
 
   // Pump init
   pumpInit(eepromCurrentValues.powerLineFrequency, eepromCurrentValues.pumpFlowAtZero);
-  // systemState.pumpCalibrationFinished = true;
+  systemState.pumpCalibrationFinished = true;
   LOG_INFO("Pump init");
 
   pageValuesRefresh(true);
@@ -643,13 +643,13 @@ void lcdqPSaveTrigger(void) {
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
 static void updateProfilerPhases(void) {
-  float preInfusionFinishBar = 0.f;
-  float preinfusionFinishFlow = 0.f;
-  float shotTarget = -1.f;
-  float isPressureAbove = -1.f;
-  float isWeightAbove = -1.f;
-  float isPressureBelow = -1.f;
-  float isWaterPumped = -1.f;
+  float preInfusionFinishBar = 0;
+  float preinfusionFinishFlow = 0;
+  float shotTarget = -1;
+  float isPressureAbove = -1;
+  float isWeightAbove = -1;
+  float isPressureBelow = -1;
+  float isWaterPumped = -1;
 
   if (runningCfg.stopOnWeightState) {
     shotTarget = (runningCfg.shotStopOnCustomWeight < 1.f)
@@ -670,18 +670,18 @@ static void updateProfilerPhases(void) {
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
-      isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionFlowPressureTarget : -1.f;
-      isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1.f;
-      isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1.f;
+      isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionFlowPressureTarget : -1;
+      isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1;
+      isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1;
 
       addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
       preInfusionFinishBar = runningCfg.preinfusionFlowPressureTarget;
       preinfusionFinishFlow = runningCfg.preinfusionFlowVol;
     } else { // pressure based PI enabled
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
-      isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionBar : -1.f;
-      isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1.f;
-      isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1.f;
+      isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionBar : -1;
+      isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1;
+      isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1;
 
       addPressurePhase(Transition{runningCfg.preinfusionBar}, 4.f, runningCfg.preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
       preInfusionFinishBar = runningCfg.preinfusionBar;
@@ -691,23 +691,23 @@ static void updateProfilerPhases(void) {
   // Setup the soak phase if neecessary
   if (runningCfg.soakState) {
     uint16_t phaseSoak = -1;
-    float maintainFlow = -1.f;
-    float maintainPressure = -1.f;
+    float maintainFlow = -1;
+    float maintainPressure = -1;
     if(runningCfg.preinfusionFlowState) { // Sorting the phase values and restrictions
       phaseSoak = runningCfg.soakTimeFlow;
-      isPressureBelow = runningCfg.soakBelowPressure > 0.f ? runningCfg.soakBelowPressure : -1.f;
-      isPressureAbove = runningCfg.soakAbovePressure > 0.f ? runningCfg.soakAbovePressure : -1.f;
-      isWeightAbove = runningCfg.soakAboveWeight > 0.f ? runningCfg.soakAboveWeight : -1.f;
-      maintainFlow = runningCfg.soakKeepFlow > 0.f ? runningCfg.soakKeepFlow : -1.f;
-      maintainPressure = runningCfg.soakKeepPressure > 0.f ? runningCfg.soakKeepPressure : -1.f;
+      isPressureBelow = runningCfg.soakBelowPressure > 0.f ? runningCfg.soakBelowPressure : -1;
+      isPressureAbove = runningCfg.soakAbovePressure > 0.f ? runningCfg.soakAbovePressure : -1;
+      isWeightAbove = runningCfg.soakAboveWeight > 0.f ? runningCfg.soakAboveWeight : -1;
+      maintainFlow = runningCfg.soakKeepFlow > 0.f ? runningCfg.soakKeepFlow : -1;
+      maintainPressure = runningCfg.soakKeepPressure > 0.f ? runningCfg.soakKeepPressure : -1;
       // addFlowPhase(Transition{0.f},  -1, phaseSoak * 1000, -1, isPressureBelow, isWeightAbove, -1);
     } else {
       phaseSoak = runningCfg.soakTimePressure;
       isPressureBelow = runningCfg.soakBelowPressure > 0.f ? runningCfg.soakBelowPressure : -1;
-      isPressureAbove = runningCfg.soakAbovePressure > 0.f ? runningCfg.soakAbovePressure : -1.f;
+      isPressureAbove = runningCfg.soakAbovePressure > 0.f ? runningCfg.soakAbovePressure : -1;
       isWeightAbove = runningCfg.soakAboveWeight > 0.f ? runningCfg.soakAboveWeight : -1;
-      maintainFlow = runningCfg.soakKeepFlow > 0.f ? runningCfg.soakKeepFlow : -1.f;
-      maintainPressure = runningCfg.soakKeepPressure > 0.f ? runningCfg.soakKeepPressure : -1.f;
+      maintainFlow = runningCfg.soakKeepFlow > 0.f ? runningCfg.soakKeepFlow : -1;
+      maintainPressure = runningCfg.soakKeepPressure > 0.f ? runningCfg.soakKeepPressure : -1;
     }
     if (maintainPressure > 0.f)
       addPressurePhase(Transition{maintainPressure}, (maintainFlow > 0.f ? maintainFlow : 2.5f), phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
@@ -721,7 +721,7 @@ static void updateProfilerPhases(void) {
   // Setup shot profiling
   if (runningCfg.profilingState) {
     uint16_t rampAndHold = -1;
-    float holdLimit = -1.f;
+    float holdLimit = -1;
     if (runningCfg.flowProfileState) { // flow based profiling enabled
     /* Setting the phase specific restrictions */
     /* ------------------------------------------ */
@@ -736,9 +736,9 @@ static void updateProfilerPhases(void) {
     /* ------------------------------------------ */
       float ppStart = runningCfg.pressureProfilingStart;
       float ppEnd = runningCfg.pressureProfilingFinish;
-      float ppFlowLim = runningCfg.pressureProfilingFlowRestriction > 0.f ? runningCfg.pressureProfilingFlowRestriction : -1.f;
+      float ppFlowLim = runningCfg.pressureProfilingFlowRestriction > 0.f ? runningCfg.pressureProfilingFlowRestriction : -1;
       rampAndHold = runningCfg.preinfusionRamp + runningCfg.pressureProfilingHold;
-      holdLimit = runningCfg.pressureProfilingHoldLimit > 0.f ? runningCfg.pressureProfilingHoldLimit : -1.f;
+      holdLimit = runningCfg.pressureProfilingHoldLimit > 0.f ? runningCfg.pressureProfilingHoldLimit : -1;
     /* ------------------------------------------ */
 
       addPressurePhase(Transition{preInfusionFinishBar, ppStart, (TransitionCurve)runningCfg.preinfusionRampSlope, runningCfg.preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
