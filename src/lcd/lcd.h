@@ -60,5 +60,7 @@ void lcdHomeScreenScalesTrigger(void);
 void lcdBrewGraphScalesTareTrigger(void);
 void lcdPumpPhaseShitfTrigger(void);
 void lcdRefreshElementsTrigger(void);
+void lcdqPSelctTrigger(void);
+void lcdqPSaveTrigger(void);
 
 #endif

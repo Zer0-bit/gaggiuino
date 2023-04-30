@@ -352,3 +352,5 @@ void trigger3(void) { lcdHomeScreenScalesTrigger(); }
 void trigger4(void) { lcdBrewGraphScalesTareTrigger(); }
 void trigger5(void) { lcdPumpPhaseShitfTrigger(); }
 void trigger6(void) { lcdRefreshElementsTrigger(); }
+void trigger7(void) { lcdqPSelctTrigger(); }
+void trigger8(void) { lcdqPSaveTrigger(); }

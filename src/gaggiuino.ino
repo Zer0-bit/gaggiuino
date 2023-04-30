@@ -86,6 +86,7 @@ void setup(void) {
 
   // Pump init
   pumpInit(eepromCurrentValues.powerLineFrequency, eepromCurrentValues.pumpFlowAtZero);
+  // systemState.pumpCalibrationFinished = true;
   LOG_INFO("Pump init");
 
   pageValuesRefresh(true);
@@ -546,6 +547,98 @@ void lcdQuickProfilesSwitchOrSave(void) {
   pageValuesRefresh(true);
 }
 
+void lcdqPSelctTrigger(void) {
+
+}
+
+void lcdqPSaveTrigger(void) {
+  LOG_VERBOSE("Saving profile to EEPROM");
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues(runningCfg.idx);
+  eepromValues_t lcdValues = lcdDownloadCfg();
+
+  eepromCurrentValues.idx = lcdValues.idx;
+  eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
+  eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
+  eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
+
+  eepromCurrentValues.preinfusionState = lcdValues.preinfusionState;
+  eepromCurrentValues.preinfusionFlowState = lcdValues.preinfusionFlowState;
+
+  if(eepromCurrentValues.preinfusionFlowState == 0) {
+    eepromCurrentValues.preinfusionSec = lcdValues.preinfusionSec;
+    eepromCurrentValues.preinfusionPressureFlowTarget = lcdValues.preinfusionPressureFlowTarget;
+    eepromCurrentValues.preinfusionBar = lcdValues.preinfusionBar;
+  }
+  else {
+    eepromCurrentValues.preinfusionFlowTime = lcdValues.preinfusionFlowTime;
+    eepromCurrentValues.preinfusionFlowVol = lcdValues.preinfusionFlowVol;
+    eepromCurrentValues.preinfusionFlowPressureTarget = lcdValues.preinfusionFlowPressureTarget;
+  }
+  eepromCurrentValues.preinfusionFilled = lcdValues.preinfusionFilled;
+  eepromCurrentValues.preinfusionPressureAbove = lcdValues.preinfusionPressureAbove;
+  eepromCurrentValues.preinfusionWeightAbove = lcdValues.preinfusionWeightAbove;
+
+  eepromCurrentValues.soakState = lcdValues.soakState;
+
+  if(eepromCurrentValues.preinfusionFlowState == 0)
+    eepromCurrentValues.soakTimePressure = lcdValues.soakTimePressure;
+  else
+    eepromCurrentValues.soakTimeFlow = lcdValues.soakTimeFlow;
+
+  eepromCurrentValues.soakKeepPressure = lcdValues.soakKeepPressure;
+  eepromCurrentValues.soakKeepFlow = lcdValues.soakKeepFlow;
+  eepromCurrentValues.soakBelowPressure = lcdValues.soakBelowPressure;
+  eepromCurrentValues.soakAbovePressure = lcdValues.soakAbovePressure;
+  eepromCurrentValues.soakAboveWeight = lcdValues.soakAboveWeight;
+  // PI -> PF
+  eepromCurrentValues.preinfusionRamp = lcdValues.preinfusionRamp;
+  eepromCurrentValues.preinfusionRampSlope = lcdValues.preinfusionRampSlope;
+  // PRESSURE PARAMS
+  eepromCurrentValues.profilingState                = lcdValues.profilingState;
+  eepromCurrentValues.flowProfileState              = lcdValues.flowProfileState;
+  if(eepromCurrentValues.flowProfileState == 0) {
+    eepromCurrentValues.pressureProfilingStart            = lcdValues.pressureProfilingStart;
+    eepromCurrentValues.pressureProfilingFinish           = lcdValues.pressureProfilingFinish;
+    eepromCurrentValues.pressureProfilingHold             = lcdValues.pressureProfilingHold;
+    eepromCurrentValues.pressureProfilingHoldLimit        = lcdValues.pressureProfilingHoldLimit;
+    eepromCurrentValues.pressureProfilingSlope            = lcdValues.pressureProfilingSlope;
+    eepromCurrentValues.pressureProfilingSlopeShape       = lcdValues.pressureProfilingSlopeShape;
+    eepromCurrentValues.pressureProfilingFlowRestriction  = lcdValues.pressureProfilingFlowRestriction;
+  } else {
+    eepromCurrentValues.flowProfileStart                  = lcdValues.flowProfileStart;
+    eepromCurrentValues.flowProfileEnd                    = lcdValues.flowProfileEnd;
+    eepromCurrentValues.flowProfileHold                   = lcdValues.flowProfileHold;
+    eepromCurrentValues.flowProfileHoldLimit              = lcdValues.flowProfileHoldLimit;
+    eepromCurrentValues.flowProfileSlope                  = lcdValues.flowProfileSlope;
+    eepromCurrentValues.flowProfileSlopeShape             = lcdValues.flowProfileSlopeShape;
+    eepromCurrentValues.flowProfilingPressureRestriction  = lcdValues.flowProfilingPressureRestriction;
+  }
+  eepromCurrentValues.setpoint                      = lcdValues.setpoint;
+  eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
+  eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
+  eepromCurrentValues.hpwr                          = lcdValues.hpwr;
+  eepromCurrentValues.mainDivider                   = lcdValues.mainDivider;
+  eepromCurrentValues.brewDivider                   = lcdValues.brewDivider;
+
+  eepromCurrentValues.warmupState                   = lcdValues.warmupState;
+  eepromCurrentValues.lcdSleep                      = lcdValues.lcdSleep;
+  eepromCurrentValues.scalesF1                      = lcdValues.scalesF1;
+  eepromCurrentValues.scalesF2                      = lcdValues.scalesF2;
+  eepromCurrentValues.pumpFlowAtZero                = lcdValues.pumpFlowAtZero;
+
+  eepromCurrentValues.stopOnWeightState             = lcdValues.stopOnWeightState;
+  eepromCurrentValues.shotDose                      = lcdValues.shotDose;
+  eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
+  eepromCurrentValues.shotStopOnCustomWeight        = lcdValues.shotStopOnCustomWeight;
+
+  bool rc = eepromWrite(eepromCurrentValues, eepromCurrentValues.idx);
+  if (rc == true) {
+    lcdShowPopup("Update successful!");
+  } else {
+    lcdShowPopup("Data out of range!");
+  }
+}
+
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
@@ -643,12 +736,13 @@ static void updateProfilerPhases(void) {
     /* ------------------------------------------ */
       float ppStart = runningCfg.pressureProfilingStart;
       float ppEnd = runningCfg.pressureProfilingFinish;
+      float ppFlowLim = runningCfg.pressureProfilingFlowRestriction > 0.f ? runningCfg.pressureProfilingFlowRestriction : -1.f;
       rampAndHold = runningCfg.preinfusionRamp + runningCfg.pressureProfilingHold;
-      holdLimit = runningCfg.pressureProfilingHoldLimit > 0.f ? runningCfg.pressureProfilingHoldLimit : -1;
+      holdLimit = runningCfg.pressureProfilingHoldLimit > 0.f ? runningCfg.pressureProfilingHoldLimit : -1.f;
     /* ------------------------------------------ */
 
       addPressurePhase(Transition{preInfusionFinishBar, ppStart, (TransitionCurve)runningCfg.preinfusionRampSlope, runningCfg.preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
-      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)runningCfg.pressureProfilingSlopeShape, runningCfg.pressureProfilingSlope * 1000}, -1, -1, -1, -1, -1, -1);
+      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)runningCfg.pressureProfilingSlopeShape, runningCfg.pressureProfilingSlope * 1000}, ppFlowLim, -1, -1, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
     addPressurePhase(Transition{preInfusionFinishBar, 9, (TransitionCurve)runningCfg.pressureProfilingSlopeShape, runningCfg.preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
@@ -958,13 +1052,11 @@ static void calibratePump(void) {
     sensorsReadPressure();
 
 
-    unsigned long loopTimeout = millis() + 1500L;
+    unsigned long loopTimeout = millis() + 3500L;
     // Wait for pressure to reach desired level.
     while (currentState.smoothedPressure < calibrationPressure) {
       watchdogReload();
-      #if defined(SINGLE_BOARD) || defined(INDEPENDENT_DIMMER)
       closeValve();
-      #endif
       setPumpToRawValue(50);
       if (currentState.smoothedPressure < 0.05f) {
         getAndResetClickCounter();
