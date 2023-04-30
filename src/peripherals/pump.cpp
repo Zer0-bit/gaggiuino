@@ -3,8 +3,9 @@
 #include "pindef.h"
 #include <PSM.h>
 #include "utils.h"
+#include "internal_watchdog.h"
 
-PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 5);
+PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 6);
 
 float flowPerClickAtZeroBar = 0.27f;
 int maxPumpClicksPerSecond = 50;
@@ -24,7 +25,7 @@ constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
 void pumpInit(const int powerLineFrequency, const float pumpFlowAtZero) {
-  pump.freq = powerLineFrequency;
+  // pump.freq = powerLineFrequency;
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
   fpc_multiplier = 60.f / (float)maxPumpClicksPerSecond;
@@ -88,9 +89,15 @@ long getAndResetClickCounter(void) {
 }
 
 int getCPS(void) {
+  watchdogReload();
   unsigned int cps = pump.cps();
+  watchdogReload();
   if (cps > 80u) {
     pump.setDivider(2);
+    pump.initTimer(cps > 110u ? 60u : 50u);
+  }
+  else {
+    pump.initTimer(cps > 55u ? 60u : 50u);
   }
   return cps;
 }

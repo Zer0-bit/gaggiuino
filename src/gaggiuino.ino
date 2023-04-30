@@ -86,6 +86,7 @@ void setup(void) {
 
   // Pump init
   pumpInit(eepromCurrentValues.powerLineFrequency, eepromCurrentValues.pumpFlowAtZero);
+  systemState.pumpCalibrationFinished = true;
   LOG_INFO("Pump init");
 
   pageValuesRefresh(true);
