@@ -81,7 +81,7 @@ void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int fact
 #endif
 
 void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
-  lcdTargetState(1); // setting the target mode to "steam temp"
+  currentState.steamSwitchState ? lcdTargetState(1) :lcdTargetState(0) ; // setting the target temp
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float steamTempSetPoint = runningCfg.steamSetPoint + runningCfg.offsetTemp;
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
