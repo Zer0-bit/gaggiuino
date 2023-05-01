@@ -646,10 +646,6 @@ static void updateProfilerPhases(void) {
   float preInfusionFinishBar = 0;
   float preinfusionFinishFlow = 0;
   float shotTarget = -1;
-  float isPressureAbove = -1;
-  float isWeightAbove = -1;
-  float isPressureBelow = -1;
-  float isWaterPumped = -1;
 
   if (runningCfg.stopOnWeightState) {
     shotTarget = (runningCfg.shotStopOnCustomWeight < 1.f)
@@ -669,6 +665,9 @@ static void updateProfilerPhases(void) {
 
   // Setup pre-infusion if needed
   if (runningCfg.preinfusionState) {
+    float isPressureAbove = -1;
+    float isWeightAbove = -1;
+    float isWaterPumped = -1;
     if (runningCfg.preinfusionFlowState) { // flow based PI enabled
       isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionFlowPressureTarget : -1;
       isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1;
@@ -691,6 +690,9 @@ static void updateProfilerPhases(void) {
   // Setup the soak phase if neecessary
   if (runningCfg.soakState) {
     uint16_t phaseSoak = -1;
+    float isPressureAbove = -1;
+    float isWeightAbove = -1;
+    float isPressureBelow = -1;
     float maintainFlow = -1;
     float maintainPressure = -1;
     if(runningCfg.preinfusionFlowState) { // Sorting the phase values and restrictions
