@@ -548,13 +548,17 @@ void lcdQuickProfilesSwitchOrSave(void) {
 }
 
 void lcdqPSelctTrigger(void) {
+  eepromValues_t lcdValues = lcdDownloadCfg();
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues(lcdValues.idx);
 
+  lcdUploadCfg(eepromCurrentValues);
+  LOG_INFO("Profile cfg uploaded.");
 }
 
 void lcdqPSaveTrigger(void) {
-  LOG_VERBOSE("Saving profile to EEPROM");
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues(runningCfg.idx);
+  LOG_VERBOSE("Saving profile to EEPROM.");
   eepromValues_t lcdValues = lcdDownloadCfg();
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues(runningCfg.idx);
 
   eepromCurrentValues.idx = lcdValues.idx;
   eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
@@ -630,6 +634,18 @@ void lcdqPSaveTrigger(void) {
   eepromCurrentValues.shotDose                      = lcdValues.shotDose;
   eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
   eepromCurrentValues.shotStopOnCustomWeight        = lcdValues.shotStopOnCustomWeight;
+
+  eepromCurrentValues.setpoint                      = lcdValues.setpoint;
+  eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
+  eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
+  eepromCurrentValues.hpwr                          = lcdValues.hpwr;
+  eepromCurrentValues.mainDivider                   = lcdValues.mainDivider;
+  eepromCurrentValues.brewDivider                   = lcdValues.brewDivider;
+  eepromCurrentValues.warmupState                   = lcdValues.warmupState;
+  eepromCurrentValues.lcdSleep                      = lcdValues.lcdSleep;
+  eepromCurrentValues.scalesF1                      = lcdValues.scalesF1;
+  eepromCurrentValues.scalesF2                      = lcdValues.scalesF2;
+  eepromCurrentValues.pumpFlowAtZero                = lcdValues.pumpFlowAtZero;
 
   bool rc = eepromWrite(eepromCurrentValues, eepromCurrentValues.idx);
   if (rc == true) {
