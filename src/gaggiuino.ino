@@ -158,23 +158,21 @@ static void sensorsReadWeight(void) {
 }
 
 static void sensorsReadPressure(void) {
-  if (millis() > pressureTimer) {
-    previousSmoothedPressure = currentState.smoothedPressure;
-    currentState.pressure = getPressure();
-    currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
-    currentState.isPressureRising = currentState.smoothedPressure >= previousSmoothedPressure + 0.01f;
-    currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
-    currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
-    currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.01f;
-    currentState.isPressureMaxed = currentState.smoothedPressure >= ACTIVE_PROFILE(runningCfg).profilingState ? ACTIVE_PROFILE(runningCfg).pressureProfilingStart - 0.5f : ACTIVE_PROFILE(runningCfg).flowProfilingPressureRestriction - 0.5f;
+  float elapsedTime = millis() - pressureTimer;
 
-    pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
+  if (elapsedTime > GET_PRESSURE_READ_EVERY) {
+    float elapsedTimeSec = elapsedTime / 1000.f;
+    currentState.pressure = getPressure();
+    previousSmoothedPressure = currentState.smoothedPressure;
+    currentState.smoothedPressure = smoothPressure.updateEstimate(currentState.pressure);
+    currentState.pressureChangeSpeed = (currentState.smoothedPressure - previousSmoothedPressure) / elapsedTimeSec;
+    pressureTimer = millis();
   }
 }
 
-static long sensorsReadFlow(float elapsedTime) {
+static long sensorsReadFlow(float elapsedTimeSec) {
   long pumpClicks = getAndResetClickCounter();
-  currentState.pumpClicks = 1000.f * (float)pumpClicks / elapsedTime;
+  currentState.pumpClicks = (float) pumpClicks / elapsedTimeSec;
 
   currentState.pumpFlow = getPumpFlow(currentState.pumpClicks, currentState.smoothedPressure);
 
@@ -182,6 +180,7 @@ static long sensorsReadFlow(float elapsedTime) {
   // Some flow smoothing
   currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
   currentState.smoothedWeightFlow = currentState.smoothedPumpFlow; // use predicted flow as hw scales flow
+  currentState.pumpFlowChangeSpeed = (currentState.smoothedPumpFlow - previousSmoothedPumpFlow) / elapsedTimeSec;
   return pumpClicks;
 }
 
@@ -194,11 +193,9 @@ static void calculateWeightAndFlow(void) {
 
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
-      long pumpClicks = sensorsReadFlow(elapsedTime);
-      float consideredFlow = currentState.smoothedPumpFlow * (float)elapsedTime / 1000.f;
-      // Some helper vars
-      currentState.isPumpFlowRisingFast = currentState.smoothedPumpFlow > previousSmoothedPumpFlow + 0.1f;
-      currentState.isPumpFlowFallingFast = currentState.smoothedPumpFlow < previousSmoothedPumpFlow - 0.1f;
+      float elapsedTimeSec = elapsedTime / 1000.f;
+      long pumpClicks = sensorsReadFlow(elapsedTimeSec);
+      float consideredFlow = currentState.smoothedPumpFlow * elapsedTimeSec;
       // Update predictive class with our current phase
       CurrentPhase& phase = phaseProfiler.getCurrentPhase();
       predictiveWeight.update(currentState, phase, runningCfg);
@@ -278,7 +275,7 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) steamTime = millis();
       backFlush(currentState);
-      brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, false, preinfusionFinished);
+      brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, false);
       break;
     case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
@@ -685,7 +682,6 @@ static void profiling(void) {
     uint32_t timeInShot = millis() - brewingTimer;
     phaseProfiler.updatePhase(timeInShot, currentState, runningCfg);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
-    preinfusionFinished = currentPhase.getIndex() >= preInfusionFinishedPhaseIdx;
     ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
     espCommsSendShotData(shotSnapshot, 100);
 
@@ -709,7 +705,7 @@ static void profiling(void) {
     closeValve();
   }
   // Keep that water at temp
-  justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+  justDoCoffee(runningCfg, currentState, brewActive);
 }
 
 static void manualFlowControl(void) {
@@ -721,7 +717,7 @@ static void manualFlowControl(void) {
     setPumpOff();
     closeValve();
   }
-  justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+  justDoCoffee(runningCfg, currentState, brewActive);
 }
 
 //#############################################################################################
@@ -763,10 +759,9 @@ static void brewParamsReset(void) {
   previousWeight           = 0.f;
   currentState.weight      = 0.f;
   currentState.waterPumped = 0.f;
-  preinfusionFinished      = false;
   brewingTimer             = millis();
-  flowTimer                = millis() + REFRESH_FLOW_EVERY;
-  systemHealthTimer        = millis() + HEALTHCHECK_EVERY;
+  flowTimer                = brewingTimer;
+  systemHealthTimer        = brewingTimer + HEALTHCHECK_EVERY;
 
   predictiveWeight.reset();
   phaseProfiler.reset();
@@ -827,7 +822,7 @@ static inline void systemHealthCheck(float pressureThreshold) {
           lcdRefresh();
           lcdListen();
           sensorsRead();
-          justDoCoffee(runningCfg, currentState, brewActive, preinfusionFinished);
+          justDoCoffee(runningCfg, currentState, brewActive);
           break;
         default:
           sensorsRead();

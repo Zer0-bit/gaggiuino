@@ -35,8 +35,7 @@ public:
     return outputFlowStarted;
   }
 
-  inline float calculatePuckResistance(float waterFlowRate, float crossSectionalArea, float dynamicViscosity, float pressureDrop)
-  {
+  inline float calculatePuckResistance(float waterFlowRate, float crossSectionalArea, float dynamicViscosity, float pressureDrop) {
     float resistance = -(dynamicViscosity * waterFlowRate) / (crossSectionalArea * pressureDrop);
     return resistance;
   }
@@ -90,7 +89,7 @@ public:
 
     if (phaseTypePressure) {
       // If the pressure or flow are raising too fast dismiss the spike from the output.
-      if (state.isPressureRisingFast || state.isPumpFlowRisingFast) return;
+      if (fabsf(state.pressureChangeSpeed) > 5.f || fabsf(state.pumpFlowChangeSpeed) > 2.f) return;
       // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
       if (resistanceDelta > 500.f || puckResistance < 1100.f) return;
     }

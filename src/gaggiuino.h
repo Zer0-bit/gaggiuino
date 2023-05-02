@@ -81,7 +81,6 @@ bool nonBrewModeActive = false;
 
 //PP&PI variables
 int preInfusionFinishedPhaseIdx = 3;
-bool preinfusionFinished = false;
 bool homeScreenScalesEnabled = false;
 
 // Other util vars

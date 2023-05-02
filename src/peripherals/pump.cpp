@@ -49,7 +49,7 @@ inline float getPumpPct(const float targetPressure, const float flowRestriction,
     return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.95f + 0.1f + 0.2f * diff);
   }
 
-  if (currentState.isPressureFalling) {
+  if (currentState.pressureChangeSpeed < 0) {
     return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.2f);
   }
 
