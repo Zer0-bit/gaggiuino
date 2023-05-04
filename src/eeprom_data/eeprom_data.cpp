@@ -14,74 +14,471 @@ namespace {
 
   struct eepromMetadata_t eepromMetadata;
 
-  eepromValues_t getEepromDefaults(void) {
-    eepromValues_t defaultData;
+  eepromValues_t getEepromDefaults(uint8_t idx) {
+    eepromValues_t defaultData[ACTIVE_PROFILES_TOTAL];
     // Default profile
-    defaultData.idx = 0;
-    // PI
-    defaultData.preinfusionState = true;
-    defaultData.preinfusionSec = 10;
-    defaultData.preinfusionBar = 2;
-    defaultData.preinfusionRamp = 0;
-    defaultData.preinfusionFlowState = false;
-    defaultData.preinfusionFlowVol = 3.5f;
-    defaultData.preinfusionFlowTime = 10;
-    defaultData.preinfusionFlowPressureTarget = 3.5f;
-    defaultData.preinfusionPressureFlowTarget = 3.5f;
-    defaultData.preinfusionFilled = 0;
-    defaultData.preinfusionPressureAbove = 0.f;
-    defaultData.preinfusionWeightAbove = 0.f;
-    // SOAK
-    defaultData.soakState = 1;
-    defaultData.soakTimePressure = 10;
-    defaultData.soakTimeFlow = 5;
-    defaultData.soakKeepPressure = 0.f;
-    defaultData.soakKeepFlow = 0.f;
-    defaultData.soakBelowPressure = 0.f;
-    defaultData.soakAbovePressure = 0.f;
-    defaultData.soakAboveWeight = 0.f;
-    // PI -> PF
-    defaultData.preinfusionRamp = 2;
-    defaultData.preinfusionRampSlope = 2;
-    // Profiling
-    defaultData.profilingState = true;
-    defaultData.flowProfileState = false;
-    defaultData.pressureProfilingStart = 9;
-    defaultData.pressureProfilingFinish = 6;
-    defaultData.pressureProfilingHold = 5;
-    defaultData.pressureProfilingHoldLimit = 3.f;
-    defaultData.pressureProfilingSlope = 15;
-    defaultData.pressureProfilingFlowRestriction = 3.f;
-    defaultData.flowProfileStart = 3.5f;
-    defaultData.flowProfileEnd = 2.0f;
-    defaultData.flowProfileHold = 3.f;
-    defaultData.flowProfileHoldLimit = 9.f;
-    defaultData.flowProfileSlope = 15;
-    defaultData.flowProfilingPressureRestriction = 7;
-    // General brew settings
-    defaultData.homeOnShotFinish = true;
-    defaultData.brewDeltaState = true;
-    defaultData.basketPrefill = false;
-    // System settings
-    defaultData.setpoint = 93;
-    defaultData.steamSetPoint = 155;
-    defaultData.offsetTemp = 7;
-    defaultData.hpwr = 550;
-    defaultData.mainDivider = 5;
-    defaultData.brewDivider = 3;
-    defaultData.powerLineFrequency = 50;
-    defaultData.lcdSleep = 16;
-    defaultData.warmupState = false;
-    defaultData.scalesF1 = 3920;
-    defaultData.scalesF2 = 4210;
-    defaultData.pumpFlowAtZero = 0.2401f;
-    // Dose settings
-    defaultData.stopOnWeightState = false;
-    defaultData.shotDose = 18.0f;
-    defaultData.shotStopOnCustomWeight = 0.f;
-    defaultData.shotPreset = 0;
+    switch (idx) {
+      case 0:
+        defaultData[idx].idx = 0;
+        // PI
+        defaultData[idx].preinfusionState = true;
+        defaultData[idx].preinfusionSec = 10;
+        defaultData[idx].preinfusionBar = 2;
+        defaultData[idx].preinfusionRamp = 0;
+        defaultData[idx].preinfusionFlowState = false;
+        defaultData[idx].preinfusionFlowVol = 3.5f;
+        defaultData[idx].preinfusionFlowTime = 10;
+        defaultData[idx].preinfusionFlowPressureTarget = 3.5f;
+        defaultData[idx].preinfusionPressureFlowTarget = 3.5f;
+        defaultData[idx].preinfusionFilled = 0;
+        defaultData[idx].preinfusionPressureAbove = 0.f;
+        defaultData[idx].preinfusionWeightAbove = 0.f;
+        // SOAK
+        defaultData[idx].soakState = 1;
+        defaultData[idx].soakTimePressure = 10;
+        defaultData[idx].soakTimeFlow = 5;
+        defaultData[idx].soakKeepPressure = 0.f;
+        defaultData[idx].soakKeepFlow = 0.f;
+        defaultData[idx].soakBelowPressure = 0.f;
+        defaultData[idx].soakAbovePressure = 0.f;
+        defaultData[idx].soakAboveWeight = 0.f;
+        // PI -> PF
+        defaultData[idx].preinfusionRamp = 2;
+        defaultData[idx].preinfusionRampSlope = 2;
+        // Profiling
+        defaultData[idx].profilingState = true;
+        defaultData[idx].flowProfileState = false;
+        defaultData[idx].pressureProfilingStart = 9;
+        defaultData[idx].pressureProfilingFinish = 6;
+        defaultData[idx].pressureProfilingHold = 5;
+        defaultData[idx].pressureProfilingHoldLimit = 3.f;
+        defaultData[idx].pressureProfilingSlope = 15;
+        defaultData[idx].pressureProfilingFlowRestriction = 3.f;
+        defaultData[idx].flowProfileStart = 3.5f;
+        defaultData[idx].flowProfileEnd = 2.0f;
+        defaultData[idx].flowProfileHold = 3.f;
+        defaultData[idx].flowProfileHoldLimit = 9.f;
+        defaultData[idx].flowProfileSlope = 15;
+        defaultData[idx].flowProfilingPressureRestriction = 7;
+        // General brew settings
+        defaultData[idx].homeOnShotFinish = true;
+        defaultData[idx].brewDeltaState = true;
+        defaultData[idx].basketPrefill = false;
+        // System settings
+        defaultData[idx].setpoint = 93;
+        defaultData[idx].steamSetPoint = 155;
+        defaultData[idx].offsetTemp = 7;
+        defaultData[idx].hpwr = 550;
+        defaultData[idx].mainDivider = 5;
+        defaultData[idx].brewDivider = 3;
+        defaultData[idx].powerLineFrequency = 50;
+        defaultData[idx].lcdSleep = 16;
+        defaultData[idx].warmupState = false;
+        defaultData[idx].scalesF1 = 3920;
+        defaultData[idx].scalesF2 = 4210;
+        defaultData[idx].pumpFlowAtZero = 0.2401f;
+        // Dose settings
+        defaultData[idx].stopOnWeightState = false;
+        defaultData[idx].shotDose = 18.0f;
+        defaultData[idx].shotStopOnCustomWeight = 0.f;
+        defaultData[idx].shotPreset = 0;
+        break;
+      case 1:
+        defaultData[idx].idx = 0;
+        // PI
+        defaultData[idx].preinfusionState = true;
+        defaultData[idx].preinfusionSec = 10;
+        defaultData[idx].preinfusionBar = 2;
+        defaultData[idx].preinfusionRamp = 0;
+        defaultData[idx].preinfusionFlowState = false;
+        defaultData[idx].preinfusionFlowVol = 3.5f;
+        defaultData[idx].preinfusionFlowTime = 10;
+        defaultData[idx].preinfusionFlowPressureTarget = 3.5f;
+        defaultData[idx].preinfusionPressureFlowTarget = 3.5f;
+        defaultData[idx].preinfusionFilled = 0;
+        defaultData[idx].preinfusionPressureAbove = 0.f;
+        defaultData[idx].preinfusionWeightAbove = 0.f;
+        // SOAK
+        defaultData[idx].soakState = 1;
+        defaultData[idx].soakTimePressure = 10;
+        defaultData[idx].soakTimeFlow = 5;
+        defaultData[idx].soakKeepPressure = 0.f;
+        defaultData[idx].soakKeepFlow = 0.f;
+        defaultData[idx].soakBelowPressure = 0.f;
+        defaultData[idx].soakAbovePressure = 0.f;
+        defaultData[idx].soakAboveWeight = 0.f;
+        // PI -> PF
+        defaultData[idx].preinfusionRamp = 2;
+        defaultData[idx].preinfusionRampSlope = 2;
+        // Profiling
+        defaultData[idx].profilingState = true;
+        defaultData[idx].flowProfileState = false;
+        defaultData[idx].pressureProfilingStart = 9;
+        defaultData[idx].pressureProfilingFinish = 6;
+        defaultData[idx].pressureProfilingHold = 5;
+        defaultData[idx].pressureProfilingHoldLimit = 3.f;
+        defaultData[idx].pressureProfilingSlope = 15;
+        defaultData[idx].pressureProfilingFlowRestriction = 3.f;
+        defaultData[idx].flowProfileStart = 3.5f;
+        defaultData[idx].flowProfileEnd = 2.0f;
+        defaultData[idx].flowProfileHold = 3.f;
+        defaultData[idx].flowProfileHoldLimit = 9.f;
+        defaultData[idx].flowProfileSlope = 15;
+        defaultData[idx].flowProfilingPressureRestriction = 7;
+        // General brew settings
+        defaultData[idx].homeOnShotFinish = true;
+        defaultData[idx].brewDeltaState = true;
+        defaultData[idx].basketPrefill = false;
+        // System settings
+        defaultData[idx].setpoint = 93;
+        defaultData[idx].steamSetPoint = 155;
+        defaultData[idx].offsetTemp = 7;
+        defaultData[idx].hpwr = 550;
+        defaultData[idx].mainDivider = 5;
+        defaultData[idx].brewDivider = 3;
+        defaultData[idx].powerLineFrequency = 50;
+        defaultData[idx].lcdSleep = 16;
+        defaultData[idx].warmupState = false;
+        defaultData[idx].scalesF1 = 3920;
+        defaultData[idx].scalesF2 = 4210;
+        defaultData[idx].pumpFlowAtZero = 0.2401f;
+        // Dose settings
+        defaultData[idx].stopOnWeightState = false;
+        defaultData[idx].shotDose = 18.0f;
+        defaultData[idx].shotStopOnCustomWeight = 0.f;
+        defaultData[idx].shotPreset = 0;
+        break;
+      case 2:
+        defaultData[idx].idx = 0;
+        // PI
+        defaultData[idx].preinfusionState = true;
+        defaultData[idx].preinfusionSec = 10;
+        defaultData[idx].preinfusionBar = 2;
+        defaultData[idx].preinfusionRamp = 0;
+        defaultData[idx].preinfusionFlowState = false;
+        defaultData[idx].preinfusionFlowVol = 3.5f;
+        defaultData[idx].preinfusionFlowTime = 10;
+        defaultData[idx].preinfusionFlowPressureTarget = 3.5f;
+        defaultData[idx].preinfusionPressureFlowTarget = 3.5f;
+        defaultData[idx].preinfusionFilled = 0;
+        defaultData[idx].preinfusionPressureAbove = 0.f;
+        defaultData[idx].preinfusionWeightAbove = 0.f;
+        // SOAK
+        defaultData[idx].soakState = 1;
+        defaultData[idx].soakTimePressure = 10;
+        defaultData[idx].soakTimeFlow = 5;
+        defaultData[idx].soakKeepPressure = 0.f;
+        defaultData[idx].soakKeepFlow = 0.f;
+        defaultData[idx].soakBelowPressure = 0.f;
+        defaultData[idx].soakAbovePressure = 0.f;
+        defaultData[idx].soakAboveWeight = 0.f;
+        // PI -> PF
+        defaultData[idx].preinfusionRamp = 2;
+        defaultData[idx].preinfusionRampSlope = 2;
+        // Profiling
+        defaultData[idx].profilingState = true;
+        defaultData[idx].flowProfileState = false;
+        defaultData[idx].pressureProfilingStart = 9;
+        defaultData[idx].pressureProfilingFinish = 6;
+        defaultData[idx].pressureProfilingHold = 5;
+        defaultData[idx].pressureProfilingHoldLimit = 3.f;
+        defaultData[idx].pressureProfilingSlope = 15;
+        defaultData[idx].pressureProfilingFlowRestriction = 3.f;
+        defaultData[idx].flowProfileStart = 3.5f;
+        defaultData[idx].flowProfileEnd = 2.0f;
+        defaultData[idx].flowProfileHold = 3.f;
+        defaultData[idx].flowProfileHoldLimit = 9.f;
+        defaultData[idx].flowProfileSlope = 15;
+        defaultData[idx].flowProfilingPressureRestriction = 7;
+        // General brew settings
+        defaultData[idx].homeOnShotFinish = true;
+        defaultData[idx].brewDeltaState = true;
+        defaultData[idx].basketPrefill = false;
+        // System settings
+        defaultData[idx].setpoint = 93;
+        defaultData[idx].steamSetPoint = 155;
+        defaultData[idx].offsetTemp = 7;
+        defaultData[idx].hpwr = 550;
+        defaultData[idx].mainDivider = 5;
+        defaultData[idx].brewDivider = 3;
+        defaultData[idx].powerLineFrequency = 50;
+        defaultData[idx].lcdSleep = 16;
+        defaultData[idx].warmupState = false;
+        defaultData[idx].scalesF1 = 3920;
+        defaultData[idx].scalesF2 = 4210;
+        defaultData[idx].pumpFlowAtZero = 0.2401f;
+        // Dose settings
+        defaultData[idx].stopOnWeightState = false;
+        defaultData[idx].shotDose = 18.0f;
+        defaultData[idx].shotStopOnCustomWeight = 0.f;
+        defaultData[idx].shotPreset = 0;
+        break;
+      case 3:
+        defaultData[idx].idx = 0;
+        // PI
+        defaultData[idx].preinfusionState = true;
+        defaultData[idx].preinfusionSec = 10;
+        defaultData[idx].preinfusionBar = 2;
+        defaultData[idx].preinfusionRamp = 0;
+        defaultData[idx].preinfusionFlowState = false;
+        defaultData[idx].preinfusionFlowVol = 3.5f;
+        defaultData[idx].preinfusionFlowTime = 10;
+        defaultData[idx].preinfusionFlowPressureTarget = 3.5f;
+        defaultData[idx].preinfusionPressureFlowTarget = 3.5f;
+        defaultData[idx].preinfusionFilled = 0;
+        defaultData[idx].preinfusionPressureAbove = 0.f;
+        defaultData[idx].preinfusionWeightAbove = 0.f;
+        // SOAK
+        defaultData[idx].soakState = 1;
+        defaultData[idx].soakTimePressure = 10;
+        defaultData[idx].soakTimeFlow = 5;
+        defaultData[idx].soakKeepPressure = 0.f;
+        defaultData[idx].soakKeepFlow = 0.f;
+        defaultData[idx].soakBelowPressure = 0.f;
+        defaultData[idx].soakAbovePressure = 0.f;
+        defaultData[idx].soakAboveWeight = 0.f;
+        // PI -> PF
+        defaultData[idx].preinfusionRamp = 2;
+        defaultData[idx].preinfusionRampSlope = 2;
+        // Profiling
+        defaultData[idx].profilingState = true;
+        defaultData[idx].flowProfileState = false;
+        defaultData[idx].pressureProfilingStart = 9;
+        defaultData[idx].pressureProfilingFinish = 6;
+        defaultData[idx].pressureProfilingHold = 5;
+        defaultData[idx].pressureProfilingHoldLimit = 3.f;
+        defaultData[idx].pressureProfilingSlope = 15;
+        defaultData[idx].pressureProfilingFlowRestriction = 3.f;
+        defaultData[idx].flowProfileStart = 3.5f;
+        defaultData[idx].flowProfileEnd = 2.0f;
+        defaultData[idx].flowProfileHold = 3.f;
+        defaultData[idx].flowProfileHoldLimit = 9.f;
+        defaultData[idx].flowProfileSlope = 15;
+        defaultData[idx].flowProfilingPressureRestriction = 7;
+        // General brew settings
+        defaultData[idx].homeOnShotFinish = true;
+        defaultData[idx].brewDeltaState = true;
+        defaultData[idx].basketPrefill = false;
+        // System settings
+        defaultData[idx].setpoint = 93;
+        defaultData[idx].steamSetPoint = 155;
+        defaultData[idx].offsetTemp = 7;
+        defaultData[idx].hpwr = 550;
+        defaultData[idx].mainDivider = 5;
+        defaultData[idx].brewDivider = 3;
+        defaultData[idx].powerLineFrequency = 50;
+        defaultData[idx].lcdSleep = 16;
+        defaultData[idx].warmupState = false;
+        defaultData[idx].scalesF1 = 3920;
+        defaultData[idx].scalesF2 = 4210;
+        defaultData[idx].pumpFlowAtZero = 0.2401f;
+        // Dose settings
+        defaultData[idx].stopOnWeightState = false;
+        defaultData[idx].shotDose = 18.0f;
+        defaultData[idx].shotStopOnCustomWeight = 0.f;
+        defaultData[idx].shotPreset = 0;
+        break;
+      case 4:
+        defaultData[idx].idx = 0;
+        // PI
+        defaultData[idx].preinfusionState = true;
+        defaultData[idx].preinfusionSec = 10;
+        defaultData[idx].preinfusionBar = 2;
+        defaultData[idx].preinfusionRamp = 0;
+        defaultData[idx].preinfusionFlowState = false;
+        defaultData[idx].preinfusionFlowVol = 3.5f;
+        defaultData[idx].preinfusionFlowTime = 10;
+        defaultData[idx].preinfusionFlowPressureTarget = 3.5f;
+        defaultData[idx].preinfusionPressureFlowTarget = 3.5f;
+        defaultData[idx].preinfusionFilled = 0;
+        defaultData[idx].preinfusionPressureAbove = 0.f;
+        defaultData[idx].preinfusionWeightAbove = 0.f;
+        // SOAK
+        defaultData[idx].soakState = 1;
+        defaultData[idx].soakTimePressure = 10;
+        defaultData[idx].soakTimeFlow = 5;
+        defaultData[idx].soakKeepPressure = 0.f;
+        defaultData[idx].soakKeepFlow = 0.f;
+        defaultData[idx].soakBelowPressure = 0.f;
+        defaultData[idx].soakAbovePressure = 0.f;
+        defaultData[idx].soakAboveWeight = 0.f;
+        // PI -> PF
+        defaultData[idx].preinfusionRamp = 2;
+        defaultData[idx].preinfusionRampSlope = 2;
+        // Profiling
+        defaultData[idx].profilingState = true;
+        defaultData[idx].flowProfileState = false;
+        defaultData[idx].pressureProfilingStart = 9;
+        defaultData[idx].pressureProfilingFinish = 6;
+        defaultData[idx].pressureProfilingHold = 5;
+        defaultData[idx].pressureProfilingHoldLimit = 3.f;
+        defaultData[idx].pressureProfilingSlope = 15;
+        defaultData[idx].pressureProfilingFlowRestriction = 3.f;
+        defaultData[idx].flowProfileStart = 3.5f;
+        defaultData[idx].flowProfileEnd = 2.0f;
+        defaultData[idx].flowProfileHold = 3.f;
+        defaultData[idx].flowProfileHoldLimit = 9.f;
+        defaultData[idx].flowProfileSlope = 15;
+        defaultData[idx].flowProfilingPressureRestriction = 7;
+        // General brew settings
+        defaultData[idx].homeOnShotFinish = true;
+        defaultData[idx].brewDeltaState = true;
+        defaultData[idx].basketPrefill = false;
+        // System settings
+        defaultData[idx].setpoint = 93;
+        defaultData[idx].steamSetPoint = 155;
+        defaultData[idx].offsetTemp = 7;
+        defaultData[idx].hpwr = 550;
+        defaultData[idx].mainDivider = 5;
+        defaultData[idx].brewDivider = 3;
+        defaultData[idx].powerLineFrequency = 50;
+        defaultData[idx].lcdSleep = 16;
+        defaultData[idx].warmupState = false;
+        defaultData[idx].scalesF1 = 3920;
+        defaultData[idx].scalesF2 = 4210;
+        defaultData[idx].pumpFlowAtZero = 0.2401f;
+        // Dose settings
+        defaultData[idx].stopOnWeightState = false;
+        defaultData[idx].shotDose = 18.0f;
+        defaultData[idx].shotStopOnCustomWeight = 0.f;
+        defaultData[idx].shotPreset = 0;
+        break;
+      case 5:
+        defaultData[idx].idx = 0;
+        // PI
+        defaultData[idx].preinfusionState = true;
+        defaultData[idx].preinfusionSec = 10;
+        defaultData[idx].preinfusionBar = 2;
+        defaultData[idx].preinfusionRamp = 0;
+        defaultData[idx].preinfusionFlowState = false;
+        defaultData[idx].preinfusionFlowVol = 3.5f;
+        defaultData[idx].preinfusionFlowTime = 10;
+        defaultData[idx].preinfusionFlowPressureTarget = 3.5f;
+        defaultData[idx].preinfusionPressureFlowTarget = 3.5f;
+        defaultData[idx].preinfusionFilled = 0;
+        defaultData[idx].preinfusionPressureAbove = 0.f;
+        defaultData[idx].preinfusionWeightAbove = 0.f;
+        // SOAK
+        defaultData[idx].soakState = 1;
+        defaultData[idx].soakTimePressure = 10;
+        defaultData[idx].soakTimeFlow = 5;
+        defaultData[idx].soakKeepPressure = 0.f;
+        defaultData[idx].soakKeepFlow = 0.f;
+        defaultData[idx].soakBelowPressure = 0.f;
+        defaultData[idx].soakAbovePressure = 0.f;
+        defaultData[idx].soakAboveWeight = 0.f;
+        // PI -> PF
+        defaultData[idx].preinfusionRamp = 2;
+        defaultData[idx].preinfusionRampSlope = 2;
+        // Profiling
+        defaultData[idx].profilingState = true;
+        defaultData[idx].flowProfileState = false;
+        defaultData[idx].pressureProfilingStart = 9;
+        defaultData[idx].pressureProfilingFinish = 6;
+        defaultData[idx].pressureProfilingHold = 5;
+        defaultData[idx].pressureProfilingHoldLimit = 3.f;
+        defaultData[idx].pressureProfilingSlope = 15;
+        defaultData[idx].pressureProfilingFlowRestriction = 3.f;
+        defaultData[idx].flowProfileStart = 3.5f;
+        defaultData[idx].flowProfileEnd = 2.0f;
+        defaultData[idx].flowProfileHold = 3.f;
+        defaultData[idx].flowProfileHoldLimit = 9.f;
+        defaultData[idx].flowProfileSlope = 15;
+        defaultData[idx].flowProfilingPressureRestriction = 7;
+        // General brew settings
+        defaultData[idx].homeOnShotFinish = true;
+        defaultData[idx].brewDeltaState = true;
+        defaultData[idx].basketPrefill = false;
+        // System settings
+        defaultData[idx].setpoint = 93;
+        defaultData[idx].steamSetPoint = 155;
+        defaultData[idx].offsetTemp = 7;
+        defaultData[idx].hpwr = 550;
+        defaultData[idx].mainDivider = 5;
+        defaultData[idx].brewDivider = 3;
+        defaultData[idx].powerLineFrequency = 50;
+        defaultData[idx].lcdSleep = 16;
+        defaultData[idx].warmupState = false;
+        defaultData[idx].scalesF1 = 3920;
+        defaultData[idx].scalesF2 = 4210;
+        defaultData[idx].pumpFlowAtZero = 0.2401f;
+        // Dose settings
+        defaultData[idx].stopOnWeightState = false;
+        defaultData[idx].shotDose = 18.0f;
+        defaultData[idx].shotStopOnCustomWeight = 0.f;
+        defaultData[idx].shotPreset = 0;
+        break;
+      case 6:
+        defaultData[idx].idx = 0;
+        // PI
+        defaultData[idx].preinfusionState = true;
+        defaultData[idx].preinfusionSec = 10;
+        defaultData[idx].preinfusionBar = 2;
+        defaultData[idx].preinfusionRamp = 0;
+        defaultData[idx].preinfusionFlowState = false;
+        defaultData[idx].preinfusionFlowVol = 3.5f;
+        defaultData[idx].preinfusionFlowTime = 10;
+        defaultData[idx].preinfusionFlowPressureTarget = 3.5f;
+        defaultData[idx].preinfusionPressureFlowTarget = 3.5f;
+        defaultData[idx].preinfusionFilled = 0;
+        defaultData[idx].preinfusionPressureAbove = 0.f;
+        defaultData[idx].preinfusionWeightAbove = 0.f;
+        // SOAK
+        defaultData[idx].soakState = 1;
+        defaultData[idx].soakTimePressure = 10;
+        defaultData[idx].soakTimeFlow = 5;
+        defaultData[idx].soakKeepPressure = 0.f;
+        defaultData[idx].soakKeepFlow = 0.f;
+        defaultData[idx].soakBelowPressure = 0.f;
+        defaultData[idx].soakAbovePressure = 0.f;
+        defaultData[idx].soakAboveWeight = 0.f;
+        // PI -> PF
+        defaultData[idx].preinfusionRamp = 2;
+        defaultData[idx].preinfusionRampSlope = 2;
+        // Profiling
+        defaultData[idx].profilingState = true;
+        defaultData[idx].flowProfileState = false;
+        defaultData[idx].pressureProfilingStart = 9;
+        defaultData[idx].pressureProfilingFinish = 6;
+        defaultData[idx].pressureProfilingHold = 5;
+        defaultData[idx].pressureProfilingHoldLimit = 3.f;
+        defaultData[idx].pressureProfilingSlope = 15;
+        defaultData[idx].pressureProfilingFlowRestriction = 3.f;
+        defaultData[idx].flowProfileStart = 3.5f;
+        defaultData[idx].flowProfileEnd = 2.0f;
+        defaultData[idx].flowProfileHold = 3.f;
+        defaultData[idx].flowProfileHoldLimit = 9.f;
+        defaultData[idx].flowProfileSlope = 15;
+        defaultData[idx].flowProfilingPressureRestriction = 7;
+        // General brew settings
+        defaultData[idx].homeOnShotFinish = true;
+        defaultData[idx].brewDeltaState = true;
+        defaultData[idx].basketPrefill = false;
+        // System settings
+        defaultData[idx].setpoint = 93;
+        defaultData[idx].steamSetPoint = 155;
+        defaultData[idx].offsetTemp = 7;
+        defaultData[idx].hpwr = 550;
+        defaultData[idx].mainDivider = 5;
+        defaultData[idx].brewDivider = 3;
+        defaultData[idx].powerLineFrequency = 50;
+        defaultData[idx].lcdSleep = 16;
+        defaultData[idx].warmupState = false;
+        defaultData[idx].scalesF1 = 3920;
+        defaultData[idx].scalesF2 = 4210;
+        defaultData[idx].pumpFlowAtZero = 0.2401f;
+        // Dose settings
+        defaultData[idx].stopOnWeightState = false;
+        defaultData[idx].shotDose = 18.0f;
+        defaultData[idx].shotStopOnCustomWeight = 0.f;
+        defaultData[idx].shotPreset = 0;
+        break;
+      default:
+        LOG_ERROR("EEPROM Defaults init error!");
+        break;
+    }
 
-    return defaultData;
+    return defaultData[idx];
   }
 
   // kind of annoying, but allows reusing macro without messing up type safety
@@ -169,11 +566,10 @@ bool eepromWrite(eepromValues_t eepromValuesNew, uint8_t idx) {
 }
 
 uint8_t eepromInit(void) {
-  uint8_t idx;
   // selecting the last active profile
-  idx = eepromMetadata.lastActiveprofileIdx;
+  uint8_t idx = eepromMetadata.lastActiveprofileIdx;
   // initialiaze defaults on memory
-  eepromMetadata.values[idx] = getEepromDefaults();
+  eepromMetadata.values[idx] = getEepromDefaults(idx);
 
   // read version
   uint16_t version;
@@ -190,7 +586,7 @@ uint8_t eepromInit(void) {
 
   if (!readSuccess) {
     LOG_ERROR("SECU_CHECK FAILED! Applying defaults! eepromMetadata.version=%d", version);
-    eepromMetadata.values[idx] = getEepromDefaults();
+    eepromMetadata.values[idx] = getEepromDefaults(idx);
   }
 
   if (!readSuccess || version != EEPROM_DATA_VERSION) {
