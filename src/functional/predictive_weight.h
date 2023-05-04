@@ -63,12 +63,12 @@ public:
     bool preinfusionFinished = predictivePreinfusionFinishedCheck >= preInfusionFinishedPhaseIdx;
 
     bool soakEnabled = false;
-    soakEnabled = cfg.soakState
+    soakEnabled = ACTIVE_PROFILE(cfg).soakState
                     ? phaseTypePressure
-                      ? cfg.soakTimePressure > 0
-                      : cfg.soakTimeFlow > 0
+                      ? ACTIVE_PROFILE(cfg).soakTimePressure > 0
+                      : ACTIVE_PROFILE(cfg).soakTimeFlow > 0
                     : false;
-    float pressureTarget = phaseTypePressure ? cfg.preinfusionBar : cfg.preinfusionFlowPressureTarget;
+    float pressureTarget = phaseTypePressure ? ACTIVE_PROFILE(cfg).preinfusionBar : ACTIVE_PROFILE(cfg).preinfusionFlowPressureTarget;
 
 
     // Pressure has to reach full pi target bar threshold.

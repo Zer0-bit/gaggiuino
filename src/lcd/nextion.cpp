@@ -31,60 +31,63 @@ void lcdWakeUp(void) {
 
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   // bool profileType = false;
+  // Profiles
+  // TODO: set the selected profile number first!
+  // TODO: set all the profile names from saved data
   // PI
-  myNex.writeNum("piState", eepromCurrentValues.preinfusionState);
-  myNex.writeNum("piFlowState", eepromCurrentValues.preinfusionFlowState);
+  myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
+  myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
 
-  if(eepromCurrentValues.preinfusionFlowState == 0) {
-    myNex.writeNum("preinfusion.piTime.val", eepromCurrentValues.preinfusionSec);
-    myNex.writeNum("preinfusion.piFlow.val", eepromCurrentValues.preinfusionPressureFlowTarget * 10.f);
-    myNex.writeNum("preinfusion.piBar.val", eepromCurrentValues.preinfusionBar * 10.f);
+  if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0) {
+    myNex.writeNum("preinfusion.piTime.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionSec);
+    myNex.writeNum("preinfusion.piFlow.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureFlowTarget * 10.f);
+    myNex.writeNum("preinfusion.piBar.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionBar * 10.f);
   }
   else {
-    myNex.writeNum("preinfusion.piTime.val", eepromCurrentValues.preinfusionFlowTime);
-    myNex.writeNum("preinfusion.piFlow.val", eepromCurrentValues.preinfusionFlowVol * 10.f);
-    myNex.writeNum("preinfusion.piBar.val", eepromCurrentValues.preinfusionFlowPressureTarget * 10.f);
+    myNex.writeNum("preinfusion.piTime.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowTime);
+    myNex.writeNum("preinfusion.piFlow.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowVol * 10.f);
+    myNex.writeNum("preinfusion.piBar.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowPressureTarget * 10.f);
   }
-  myNex.writeNum("preinfusion.piPumped.val", eepromCurrentValues.preinfusionFilled);
-  myNex.writeNum("piRPressure", eepromCurrentValues.preinfusionPressureAbove);
-  myNex.writeNum("preinfusion.piAbove.val", eepromCurrentValues.preinfusionWeightAbove * 10.f);
+  myNex.writeNum("preinfusion.piPumped.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFilled);
+  myNex.writeNum("piRPressure", ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureAbove);
+  myNex.writeNum("preinfusion.piAbove.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionWeightAbove * 10.f);
 
   // SOAK
-  myNex.writeNum("skState", eepromCurrentValues.soakState);
+  myNex.writeNum("skState", ACTIVE_PROFILE(eepromCurrentValues).soakState);
 
-  if(eepromCurrentValues.preinfusionFlowState == 0)
-    myNex.writeNum("soak.skTime.val", eepromCurrentValues.soakTimePressure);
+  if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0)
+    myNex.writeNum("soak.skTime.val", ACTIVE_PROFILE(eepromCurrentValues).soakTimePressure);
   else
-    myNex.writeNum("soak.skTime.val", eepromCurrentValues.soakTimeFlow);
+    myNex.writeNum("soak.skTime.val", ACTIVE_PROFILE(eepromCurrentValues).soakTimeFlow);
 
-  myNex.writeNum("soak.skBar.val", eepromCurrentValues.soakKeepPressure * 10.f);
-  myNex.writeNum("soak.skFlow.val", eepromCurrentValues.soakKeepFlow * 10.f);
-  myNex.writeNum("soak.skBelow.val", eepromCurrentValues.soakBelowPressure * 10.f);
-  myNex.writeNum("soak.skAbv.val", eepromCurrentValues.soakAbovePressure * 10.f);
-  myNex.writeNum("soak.skWAbv.val", eepromCurrentValues.soakAboveWeight * 10.f);
+  myNex.writeNum("soak.skBar.val", ACTIVE_PROFILE(eepromCurrentValues).soakKeepPressure * 10.f);
+  myNex.writeNum("soak.skFlow.val", ACTIVE_PROFILE(eepromCurrentValues).soakKeepFlow * 10.f);
+  myNex.writeNum("soak.skBelow.val", ACTIVE_PROFILE(eepromCurrentValues).soakBelowPressure * 10.f);
+  myNex.writeNum("soak.skAbv.val", ACTIVE_PROFILE(eepromCurrentValues).soakAbovePressure * 10.f);
+  myNex.writeNum("soak.skWAbv.val", ACTIVE_PROFILE(eepromCurrentValues).soakAboveWeight * 10.f);
   // PI -> PF
-  myNex.writeNum("soak.skRamp.val", eepromCurrentValues.preinfusionRamp);
-  myNex.writeNum("skCrv", eepromCurrentValues.preinfusionRampSlope);
+  myNex.writeNum("soak.skRamp.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRamp);
+  myNex.writeNum("skCrv", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRampSlope);
   // PROFILING
-  myNex.writeNum("ppState", eepromCurrentValues.profilingState);
-  myNex.writeNum("ppType", eepromCurrentValues.flowProfileState);
+  myNex.writeNum("ppState", ACTIVE_PROFILE(eepromCurrentValues).profilingState);
+  myNex.writeNum("ppType", ACTIVE_PROFILE(eepromCurrentValues).flowProfileState);
 
-  if(eepromCurrentValues.flowProfileState == 0) {
-    myNex.writeNum("profiles.pStart.val", eepromCurrentValues.pressureProfilingStart * 10.f);
-    myNex.writeNum("profiles.pEnd.val", eepromCurrentValues.pressureProfilingFinish * 10.f);
-    myNex.writeNum("profiles.pHold.val", eepromCurrentValues.pressureProfilingHold);
-    myNex.writeNum("profiles.hLim.val", eepromCurrentValues.pressureProfilingHoldLimit * 10.f);
-    myNex.writeNum("profiles.pSlope.val", eepromCurrentValues.pressureProfilingSlope);
-    myNex.writeNum("profiles.pLim.val", eepromCurrentValues.pressureProfilingFlowRestriction * 10.f);
+  if(ACTIVE_PROFILE(eepromCurrentValues).flowProfileState == 0) {
+    myNex.writeNum("profiles.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingStart * 10.f);
+    myNex.writeNum("profiles.pEnd.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFinish * 10.f);
+    myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHold);
+    myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHoldLimit * 10.f);
+    myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlope);
+    myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFlowRestriction * 10.f);
   } else {
-    myNex.writeNum("profiles.pStart.val", eepromCurrentValues.flowProfileStart * 10.f);
-    myNex.writeNum("profiles.pEnd.val", eepromCurrentValues.flowProfileEnd * 10.f);
-    myNex.writeNum("profiles.pHold.val", eepromCurrentValues.flowProfileHold);
-    myNex.writeNum("profiles.hLim.val", eepromCurrentValues.flowProfileHoldLimit * 10.f);
-    myNex.writeNum("profiles.pSlope.val", eepromCurrentValues.flowProfileSlope);
-    myNex.writeNum("profiles.pLim.val", eepromCurrentValues.flowProfilingPressureRestriction * 10.f);
+    myNex.writeNum("profiles.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileStart * 10.f);
+    myNex.writeNum("profiles.pEnd.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileEnd * 10.f);
+    myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHold);
+    myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHoldLimit * 10.f);
+    myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlope);
+    myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction * 10.f);
   }
-  myNex.writeNum("pfCrv", eepromCurrentValues.flowProfileSlopeShape);
+  myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
 
   // More brew settings
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
@@ -123,61 +126,61 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
     case SCREEN_MODES::SCREEN_brew_preinfusion:
       // PI
-      myNex.writeNum("piState", eepromCurrentValues.preinfusionState);
-      myNex.writeNum("piFlowState", eepromCurrentValues.preinfusionFlowState);
+      myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
+      myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
 
-      if(eepromCurrentValues.preinfusionFlowState == 0) {
-        myNex.writeNum("preinfusion.piTime.val", eepromCurrentValues.preinfusionSec);
-        myNex.writeNum("preinfusion.piFlow.val", eepromCurrentValues.preinfusionPressureFlowTarget * 10.f);
-        myNex.writeNum("preinfusion.piBar.val", eepromCurrentValues.preinfusionBar * 10.f);
+      if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0) {
+        myNex.writeNum("preinfusion.piTime.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionSec);
+        myNex.writeNum("preinfusion.piFlow.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureFlowTarget * 10.f);
+        myNex.writeNum("preinfusion.piBar.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionBar * 10.f);
       }
       else {
-        myNex.writeNum("preinfusion.piTime.val", eepromCurrentValues.preinfusionFlowTime);
-        myNex.writeNum("preinfusion.piFlow.val", eepromCurrentValues.preinfusionFlowVol * 10.f);
-        myNex.writeNum("preinfusion.piBar.val", eepromCurrentValues.preinfusionFlowPressureTarget * 10.f);
+        myNex.writeNum("preinfusion.piTime.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowTime);
+        myNex.writeNum("preinfusion.piFlow.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowVol * 10.f);
+        myNex.writeNum("preinfusion.piBar.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowPressureTarget * 10.f);
       }
-      myNex.writeNum("preinfusion.piPumped.val", eepromCurrentValues.preinfusionFilled);
-      myNex.writeNum("piRPressure", eepromCurrentValues.preinfusionPressureAbove);
-      myNex.writeNum("preinfusion.piAbove.val", eepromCurrentValues.preinfusionWeightAbove * 10.f);
+      myNex.writeNum("preinfusion.piPumped.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFilled);
+      myNex.writeNum("piRPressure", ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureAbove);
+      myNex.writeNum("preinfusion.piAbove.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionWeightAbove * 10.f);
       break;
     case SCREEN_MODES::SCREEN_brew_soak:
-      myNex.writeNum("skState", eepromCurrentValues.soakState);
+      myNex.writeNum("skState", ACTIVE_PROFILE(eepromCurrentValues).soakState);
 
-      if(eepromCurrentValues.preinfusionFlowState == 0)
-        myNex.writeNum("soak.skTime.val", eepromCurrentValues.soakTimePressure);
+      if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0)
+        myNex.writeNum("soak.skTime.val", ACTIVE_PROFILE(eepromCurrentValues).soakTimePressure);
       else
-        myNex.writeNum("soak.skTime.val", eepromCurrentValues.soakTimeFlow);
+        myNex.writeNum("soak.skTime.val", ACTIVE_PROFILE(eepromCurrentValues).soakTimeFlow);
 
-      myNex.writeNum("soak.skBar.val", eepromCurrentValues.soakKeepPressure * 10.f);
-      myNex.writeNum("soak.skFlow.val", eepromCurrentValues.soakKeepFlow * 10.f);
-      myNex.writeNum("soak.skBelow.val", eepromCurrentValues.soakBelowPressure * 10.f);
-      myNex.writeNum("soak.skAbv.val", eepromCurrentValues.soakAbovePressure * 10.f);
-      myNex.writeNum("soak.skWAbv.val", eepromCurrentValues.soakAboveWeight * 10.f);
+      myNex.writeNum("soak.skBar.val", ACTIVE_PROFILE(eepromCurrentValues).soakKeepPressure * 10.f);
+      myNex.writeNum("soak.skFlow.val", ACTIVE_PROFILE(eepromCurrentValues).soakKeepFlow * 10.f);
+      myNex.writeNum("soak.skBelow.val", ACTIVE_PROFILE(eepromCurrentValues).soakBelowPressure * 10.f);
+      myNex.writeNum("soak.skAbv.val", ACTIVE_PROFILE(eepromCurrentValues).soakAbovePressure * 10.f);
+      myNex.writeNum("soak.skWAbv.val", ACTIVE_PROFILE(eepromCurrentValues).soakAboveWeight * 10.f);
       // PI -> PF
-      myNex.writeNum("soak.skRamp.val", eepromCurrentValues.preinfusionRamp);
-      myNex.writeNum("skCrv", eepromCurrentValues.preinfusionRampSlope);
+      myNex.writeNum("soak.skRamp.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRamp);
+      myNex.writeNum("skCrv", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRampSlope);
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
       // PROFILING
-      myNex.writeNum("ppState", eepromCurrentValues.profilingState);
-      myNex.writeNum("ppType", eepromCurrentValues.flowProfileState);
+      myNex.writeNum("ppState", ACTIVE_PROFILE(eepromCurrentValues).profilingState);
+      myNex.writeNum("ppType", ACTIVE_PROFILE(eepromCurrentValues).flowProfileState);
 
-      if(eepromCurrentValues.flowProfileState == 0) {
-        myNex.writeNum("profiles.pStart.val", eepromCurrentValues.pressureProfilingStart * 10.f);
-        myNex.writeNum("profiles.pEnd.val", eepromCurrentValues.pressureProfilingFinish * 10.f);
-        myNex.writeNum("profiles.pHold.val", eepromCurrentValues.pressureProfilingHold);
-        myNex.writeNum("profiles.hLim.val", eepromCurrentValues.pressureProfilingHoldLimit * 10.f);
-        myNex.writeNum("profiles.pSlope.val", eepromCurrentValues.pressureProfilingSlope);
-        myNex.writeNum("profiles.pLim.val", eepromCurrentValues.pressureProfilingFlowRestriction * 10.f);
+      if(ACTIVE_PROFILE(eepromCurrentValues).flowProfileState == 0) {
+        myNex.writeNum("profiles.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingStart * 10.f);
+        myNex.writeNum("profiles.pEnd.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFinish * 10.f);
+        myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHold);
+        myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHoldLimit * 10.f);
+        myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlope);
+        myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFlowRestriction * 10.f);
       } else {
-        myNex.writeNum("profiles.pStart.val", eepromCurrentValues.flowProfileStart * 10.f);
-        myNex.writeNum("profiles.pEnd.val", eepromCurrentValues.flowProfileEnd * 10.f);
-        myNex.writeNum("profiles.pHold.val", eepromCurrentValues.flowProfileHold);
-        myNex.writeNum("profiles.hLim.val", eepromCurrentValues.flowProfileHoldLimit * 10.f);
-        myNex.writeNum("profiles.pSlope.val", eepromCurrentValues.flowProfileSlope);
-        myNex.writeNum("profiles.pLim.val", eepromCurrentValues.flowProfilingPressureRestriction * 10.f);
+        myNex.writeNum("profiles.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileStart * 10.f);
+        myNex.writeNum("profiles.pEnd.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileEnd * 10.f);
+        myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHold);
+        myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHoldLimit * 10.f);
+        myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlope);
+        myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction * 10.f);
       }
-      myNex.writeNum("pfCrv", eepromCurrentValues.flowProfileSlopeShape);
+      myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
       break;
     default:
       lcdUploadCfg(eepromCurrentValues);
@@ -187,59 +190,61 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 
 eepromValues_t lcdDownloadCfg(void) {
   eepromValues_t lcdCfg = {};
+  // TODO: read the selected profile first, no?
+  // lcdCfg.activeProfile = myNex.readNumber("???");
   // PI
-  lcdCfg.preinfusionState = myNex.readNumber("piState");
-  lcdCfg.preinfusionFlowState = myNex.readNumber("piFlowState");
+  ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
+  ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
 
-  if(lcdCfg.preinfusionFlowState == 0) {
-    lcdCfg.preinfusionSec = myNex.readNumber("preinfusion.piTime.val");
-    lcdCfg.preinfusionPressureFlowTarget = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
-    lcdCfg.preinfusionBar = myNex.readNumber("preinfusion.piBar.val") / 10.f;
+  if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0) {
+    ACTIVE_PROFILE(lcdCfg).preinfusionSec = myNex.readNumber("preinfusion.piTime.val");
+    ACTIVE_PROFILE(lcdCfg).preinfusionPressureFlowTarget = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).preinfusionBar = myNex.readNumber("preinfusion.piBar.val") / 10.f;
   }
   else {
-    lcdCfg.preinfusionFlowTime = myNex.readNumber("preinfusion.piTime.val");
-    lcdCfg.preinfusionFlowVol = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
-    lcdCfg.preinfusionFlowPressureTarget = myNex.readNumber("preinfusion.piBar.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).preinfusionFlowTime = myNex.readNumber("preinfusion.piTime.val");
+    ACTIVE_PROFILE(lcdCfg).preinfusionFlowVol = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).preinfusionFlowPressureTarget = myNex.readNumber("preinfusion.piBar.val") / 10.f;
   }
-  lcdCfg.preinfusionFilled = myNex.readNumber("preinfusion.piPumped.val");
-  lcdCfg.preinfusionPressureAbove = myNex.readNumber("piRPressure");
-  lcdCfg.preinfusionWeightAbove = myNex.readNumber("preinfusion.piAbove.val") / 10.f;
+  ACTIVE_PROFILE(lcdCfg).preinfusionFilled = myNex.readNumber("preinfusion.piPumped.val");
+  ACTIVE_PROFILE(lcdCfg).preinfusionPressureAbove = myNex.readNumber("piRPressure");
+  ACTIVE_PROFILE(lcdCfg).preinfusionWeightAbove = myNex.readNumber("preinfusion.piAbove.val") / 10.f;
   // SOAK
-  lcdCfg.soakState = myNex.readNumber("skState");
+  ACTIVE_PROFILE(lcdCfg).soakState = myNex.readNumber("skState");
 
-  if(lcdCfg.preinfusionFlowState == 0)
-    lcdCfg.soakTimePressure = myNex.readNumber("soak.skTime.val");
+  if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0)
+    ACTIVE_PROFILE(lcdCfg).soakTimePressure = myNex.readNumber("soak.skTime.val");
   else
-    lcdCfg.soakTimeFlow = myNex.readNumber("soak.skTime.val");
+    ACTIVE_PROFILE(lcdCfg).soakTimeFlow = myNex.readNumber("soak.skTime.val");
 
-  lcdCfg.soakKeepPressure = myNex.readNumber("soak.skBar.val") / 10.f;
-  lcdCfg.soakKeepFlow = myNex.readNumber("soak.skFlow.val") / 10.f;
-  lcdCfg.soakBelowPressure = myNex.readNumber("soak.skBelow.val") / 10.f;
-  lcdCfg.soakAbovePressure = myNex.readNumber("soak.skAbv.val") / 10.f;
-  lcdCfg.soakAboveWeight = myNex.readNumber("soak.skWAbv.val") / 10.f;
+  ACTIVE_PROFILE(lcdCfg).soakKeepPressure = myNex.readNumber("soak.skBar.val") / 10.f;
+  ACTIVE_PROFILE(lcdCfg).soakKeepFlow = myNex.readNumber("soak.skFlow.val") / 10.f;
+  ACTIVE_PROFILE(lcdCfg).soakBelowPressure = myNex.readNumber("soak.skBelow.val") / 10.f;
+  ACTIVE_PROFILE(lcdCfg).soakAbovePressure = myNex.readNumber("soak.skAbv.val") / 10.f;
+  ACTIVE_PROFILE(lcdCfg).soakAboveWeight = myNex.readNumber("soak.skWAbv.val") / 10.f;
   // PI -> PF
-  lcdCfg.preinfusionRamp = myNex.readNumber("soak.skRamp.val");
-  lcdCfg.preinfusionRampSlope = myNex.readNumber("skCrv");
+  ACTIVE_PROFILE(lcdCfg).preinfusionRamp = myNex.readNumber("soak.skRamp.val");
+  ACTIVE_PROFILE(lcdCfg).preinfusionRampSlope = myNex.readNumber("skCrv");
   // PROFILING
-  lcdCfg.profilingState = myNex.readNumber("ppState");
-  lcdCfg.flowProfileState = myNex.readNumber("ppType");
+  ACTIVE_PROFILE(lcdCfg).profilingState = myNex.readNumber("ppState");
+  ACTIVE_PROFILE(lcdCfg).flowProfileState = myNex.readNumber("ppType");
 
-  if(lcdCfg.flowProfileState == 0) {
-    lcdCfg.pressureProfilingStart = myNex.readNumber("profiles.pStart.val") / 10.f;
-    lcdCfg.pressureProfilingFinish = myNex.readNumber("profiles.pEnd.val") / 10.f;
-    lcdCfg.pressureProfilingHold = myNex.readNumber("profiles.pHold.val");
-    lcdCfg.pressureProfilingHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
-    lcdCfg.pressureProfilingSlope = myNex.readNumber("profiles.pSlope.val");
-    lcdCfg.pressureProfilingFlowRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
+  if(ACTIVE_PROFILE(lcdCfg).flowProfileState == 0) {
+    ACTIVE_PROFILE(lcdCfg).pressureProfilingStart = myNex.readNumber("profiles.pStart.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).pressureProfilingFinish = myNex.readNumber("profiles.pEnd.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).pressureProfilingHold = myNex.readNumber("profiles.pHold.val");
+    ACTIVE_PROFILE(lcdCfg).pressureProfilingHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).pressureProfilingSlope = myNex.readNumber("profiles.pSlope.val");
+    ACTIVE_PROFILE(lcdCfg).pressureProfilingFlowRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
   } else {
-    lcdCfg.flowProfileStart = myNex.readNumber("profiles.pStart.val") / 10.f;
-    lcdCfg.flowProfileEnd = myNex.readNumber("profiles.pEnd.val") / 10.f;
-    lcdCfg.flowProfileHold = myNex.readNumber("profiles.pHold.val");
-    lcdCfg.flowProfileHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
-    lcdCfg.flowProfileSlope = myNex.readNumber("profiles.pSlope.val");
-    lcdCfg.flowProfilingPressureRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).flowProfileStart = myNex.readNumber("profiles.pStart.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).flowProfileEnd = myNex.readNumber("profiles.pEnd.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).flowProfileHold = myNex.readNumber("profiles.pHold.val");
+    ACTIVE_PROFILE(lcdCfg).flowProfileHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).flowProfileSlope = myNex.readNumber("profiles.pSlope.val");
+    ACTIVE_PROFILE(lcdCfg).flowProfilingPressureRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
   }
-  lcdCfg.flowProfileSlopeShape = myNex.readNumber("pfCrv");
+  ACTIVE_PROFILE(lcdCfg).flowProfileSlopeShape = myNex.readNumber("pfCrv");
   // More brew settings
   lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
   lcdCfg.basketPrefill                  = myNex.readNumber("basketPrefill");
