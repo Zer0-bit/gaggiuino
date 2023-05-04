@@ -24,10 +24,10 @@
 */
 
 /**
-* Version 7:
-* - Add two more restrictions:
-*   - switchPhaseOnPressureBelow
-*   - switchPhaseOnFirstDrops
+* Version 8:
+* - Replaces switchPhaseOnFirstDrops with two more restrictions:
+*   - switchOnWeightAbove
+*   - switchOnWaterPumped
 */
 struct eepromValues_t_v8 {
   uint16_t setpoint;
