@@ -25,8 +25,8 @@
 */
 
 /**
-* Version 8:
-* - Adding a lot of new stuff, there's no going back form this without a full reset.
+* Version 10:
+* - Add multiple brew profiles
 */
 struct eepromValues_t {
   uint16_t setpoint;
