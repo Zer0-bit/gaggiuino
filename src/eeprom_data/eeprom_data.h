@@ -6,6 +6,16 @@
 #include "../log.h"
 
 /**
+ * NOTE: changing this variable requires:
+ *        - bumping the version number! the serialized data will have
+ *          a different layout to accommodate more array elements
+ *        - hardcoding the current value in the archived version and
+ *          its upgrade function, to ensure loading that version
+ *          deserializes correctly
+ */
+#define MAX_PROFILES 5
+
+/**
 * current data version definition below
 *
 * changing the schema requires bumping version number. this forces a schema update
@@ -35,47 +45,54 @@ struct eepromValues_t {
   uint16_t hpwr;
   uint16_t mainDivider;
   uint16_t brewDivider;
-  // Preinfusion vars section
-  bool     preinfusionState;
-  bool     preinfusionFlowState;
-  uint16_t preinfusionSec;
-  float    preinfusionBar;
-  float    preinfusionFlowVol;
-  uint16_t preinfusionFlowTime;
-  float    preinfusionFlowPressureTarget;
-  float    preinfusionPressureFlowTarget;
-  float    preinfusionFilled;
-  bool     preinfusionPressureAbove;
-  float    preinfusionWeightAbove;
-  // Soak vars section
-  bool     soakState;
-  uint16_t soakTimePressure;
-  uint16_t soakTimeFlow;
-  float    soakKeepPressure;
-  float    soakKeepFlow;
-  float    soakBelowPressure;
-  float    soakAbovePressure;
-  float    soakAboveWeight;
-  // PI -> PF ramp settings
-  uint16_t preinfusionRamp;
-  uint16_t preinfusionRampSlope;
-  // Profiling vars section
-  bool     profilingState;
-  bool     flowProfileState;
-  float    pressureProfilingStart;
-  float    pressureProfilingFinish;
-  uint16_t pressureProfilingHold;
-  float    pressureProfilingHoldLimit;
-  uint16_t pressureProfilingSlope;
-  uint16_t pressureProfilingSlopeShape;
-  float    pressureProfilingFlowRestriction;
-  float    flowProfileStart;
-  float    flowProfileEnd;
-  uint16_t flowProfileHold;
-  float    flowProfileHoldLimit;
-  uint16_t flowProfileSlope;
-  uint16_t flowProfileSlopeShape;
-  float    flowProfilingPressureRestriction;
+  uint8_t activeProfile;
+  struct {
+    // name length is intentionally not macro/constant to avoid
+    // separating them from the version. changing the length needs
+    // a version bump!
+    char     name[50];
+    // Preinfusion vars section
+    bool     preinfusionState;
+    bool     preinfusionFlowState;
+    uint16_t preinfusionSec;
+    float    preinfusionBar;
+    float    preinfusionFlowVol;
+    uint16_t preinfusionFlowTime;
+    float    preinfusionFlowPressureTarget;
+    float    preinfusionPressureFlowTarget;
+    float    preinfusionFilled;
+    bool     preinfusionPressureAbove;
+    float    preinfusionWeightAbove;
+    // Soak vars section
+    bool     soakState;
+    uint16_t soakTimePressure;
+    uint16_t soakTimeFlow;
+    float    soakKeepPressure;
+    float    soakKeepFlow;
+    float    soakBelowPressure;
+    float    soakAbovePressure;
+    float    soakAboveWeight;
+    // PI -> PF ramp settings
+    uint16_t preinfusionRamp;
+    uint16_t preinfusionRampSlope;
+    // Profiling vars section
+    bool     profilingState;
+    bool     flowProfileState;
+    float    pressureProfilingStart;
+    float    pressureProfilingFinish;
+    uint16_t pressureProfilingHold;
+    float    pressureProfilingHoldLimit;
+    uint16_t pressureProfilingSlope;
+    uint16_t pressureProfilingSlopeShape;
+    float    pressureProfilingFlowRestriction;
+    float    flowProfileStart;
+    float    flowProfileEnd;
+    uint16_t flowProfileHold;
+    float    flowProfileHoldLimit;
+    uint16_t flowProfileSlope;
+    uint16_t flowProfileSlopeShape;
+    float    flowProfilingPressureRestriction;
+  } profiles[MAX_PROFILES];
   // Settings vars section
   uint16_t powerLineFrequency;
   uint16_t lcdSleep;
@@ -95,5 +112,7 @@ struct eepromValues_t {
 void eepromInit(void);
 bool eepromWrite(eepromValues_t);
 struct eepromValues_t eepromGetCurrentValues(void);
+
+#define ACTIVE_PROFILE(eepromValues) eepromValues.profiles[eepromValues.activeProfile]
 
 #endif

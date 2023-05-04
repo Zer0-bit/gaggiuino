@@ -15,46 +15,56 @@ namespace {
 
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
-    // PI
-    defaultData.preinfusionState = true;
-    defaultData.preinfusionSec = 10;
-    defaultData.preinfusionBar = 2;
-    defaultData.preinfusionRamp = 0;
-    defaultData.preinfusionFlowState = false;
-    defaultData.preinfusionFlowVol = 3.5f;
-    defaultData.preinfusionFlowTime = 10;
-    defaultData.preinfusionFlowPressureTarget = 3.5f;
-    defaultData.preinfusionPressureFlowTarget = 3.5f;
-    defaultData.preinfusionFilled = 0;
-    defaultData.preinfusionPressureAbove = 0.f;
-    defaultData.preinfusionWeightAbove = 0.f;
-    // SOAK
-    defaultData.soakState = 1;
-    defaultData.soakTimePressure = 10;
-    defaultData.soakTimeFlow = 5;
-    defaultData.soakKeepPressure = 0.f;
-    defaultData.soakKeepFlow = 0.f;
-    defaultData.soakBelowPressure = 0.f;
-    defaultData.soakAbovePressure = 0.f;
-    defaultData.soakAboveWeight = 0.f;
-    // PI -> PF
-    defaultData.preinfusionRamp = 2;
-    defaultData.preinfusionRampSlope = 2;
-    // Profiling
-    defaultData.profilingState = true;
-    defaultData.flowProfileState = false;
-    defaultData.pressureProfilingStart = 9;
-    defaultData.pressureProfilingFinish = 6;
-    defaultData.pressureProfilingHold = 5;
-    defaultData.pressureProfilingHoldLimit = 3.f;
-    defaultData.pressureProfilingSlope = 15;
-    defaultData.pressureProfilingFlowRestriction = 3.f;
-    defaultData.flowProfileStart = 3.5f;
-    defaultData.flowProfileEnd = 2.0f;
-    defaultData.flowProfileHold = 3.f;
-    defaultData.flowProfileHoldLimit = 9.f;
-    defaultData.flowProfileSlope = 15;
-    defaultData.flowProfilingPressureRestriction = 7;
+    // Profiles
+    defaultData.activeProfile = 0;
+    snprintf(defaultData.profiles[0].name, 50, "%s", "Default");
+    snprintf(defaultData.profiles[1].name, 50, "%s", "TBD");
+    snprintf(defaultData.profiles[2].name, 50, "%s", "TBD");
+    snprintf(defaultData.profiles[3].name, 50, "%s", "TBD");
+    snprintf(defaultData.profiles[4].name, 50, "%s", "TBD");
+    // TODO: create actual default profiles 1-4
+    for (int i=0; i<MAX_PROFILES; i++) {
+      // PI
+      defaultData.profiles[i].preinfusionState = true;
+      defaultData.profiles[i].preinfusionSec = 10;
+      defaultData.profiles[i].preinfusionBar = 2;
+      defaultData.profiles[i].preinfusionRamp = 0;
+      defaultData.profiles[i].preinfusionFlowState = false;
+      defaultData.profiles[i].preinfusionFlowVol = 3.5f;
+      defaultData.profiles[i].preinfusionFlowTime = 10;
+      defaultData.profiles[i].preinfusionFlowPressureTarget = 3.5f;
+      defaultData.profiles[i].preinfusionPressureFlowTarget = 3.5f;
+      defaultData.profiles[i].preinfusionFilled = 0;
+      defaultData.profiles[i].preinfusionPressureAbove = 0.f;
+      defaultData.profiles[i].preinfusionWeightAbove = 0.f;
+      // SOAK
+      defaultData.profiles[i].soakState = 1;
+      defaultData.profiles[i].soakTimePressure = 10;
+      defaultData.profiles[i].soakTimeFlow = 5;
+      defaultData.profiles[i].soakKeepPressure = 0.f;
+      defaultData.profiles[i].soakKeepFlow = 0.f;
+      defaultData.profiles[i].soakBelowPressure = 0.f;
+      defaultData.profiles[i].soakAbovePressure = 0.f;
+      defaultData.profiles[i].soakAboveWeight = 0.f;
+      // PI -> PF
+      defaultData.profiles[i].preinfusionRamp = 2;
+      defaultData.profiles[i].preinfusionRampSlope = 2;
+      // Profiling
+      defaultData.profiles[i].profilingState = true;
+      defaultData.profiles[i].flowProfileState = false;
+      defaultData.profiles[i].pressureProfilingStart = 9;
+      defaultData.profiles[i].pressureProfilingFinish = 6;
+      defaultData.profiles[i].pressureProfilingHold = 5;
+      defaultData.profiles[i].pressureProfilingHoldLimit = 3.f;
+      defaultData.profiles[i].pressureProfilingSlope = 15;
+      defaultData.profiles[i].pressureProfilingFlowRestriction = 3.f;
+      defaultData.profiles[i].flowProfileStart = 3.5f;
+      defaultData.profiles[i].flowProfileEnd = 2.0f;
+      defaultData.profiles[i].flowProfileHold = 3.f;
+      defaultData.profiles[i].flowProfileHoldLimit = 9.f;
+      defaultData.profiles[i].flowProfileSlope = 15;
+      defaultData.profiles[i].flowProfilingPressureRestriction = 7;
+    }
     // General brew settings
     defaultData.homeOnShotFinish = true;
     defaultData.brewDeltaState = true;
@@ -95,29 +105,31 @@ namespace {
 bool eepromWrite(eepromValues_t eepromValuesNew) {
   const char *errMsg = "Data out of range";
 
-  if (eepromValuesNew.preinfusionFlowVol < 0.f) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
+  for (int i=0; i<MAX_PROFILES; i++) {
+    if (eepromValuesNew.profiles[i].preinfusionFlowVol < 0.f) {
+      LOG_ERROR(errMsg);
+      return false;
+    }
 
-  if (eepromValuesNew.flowProfileStart < 0.f) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
+    if (eepromValuesNew.profiles[i].flowProfileStart < 0.f) {
+      LOG_ERROR(errMsg);
+      return false;
+    }
 
-  if (eepromValuesNew.flowProfileEnd < 0.f) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
+    if (eepromValuesNew.profiles[i].flowProfileEnd < 0.f) {
+      LOG_ERROR(errMsg);
+      return false;
+    }
 
-  if (eepromValuesNew.pressureProfilingStart < 0.f) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
+    if (eepromValuesNew.profiles[i].pressureProfilingStart < 0.f) {
+      LOG_ERROR(errMsg);
+      return false;
+    }
 
-  if (eepromValuesNew.pressureProfilingFinish < 0.f) {
-    LOG_ERROR(errMsg);
-    return false;
+    if (eepromValuesNew.profiles[i].pressureProfilingFinish < 0.f) {
+      LOG_ERROR(errMsg);
+      return false;
+    }
   }
 
   if (eepromValuesNew.setpoint < 1) {
