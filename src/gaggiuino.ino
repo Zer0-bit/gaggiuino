@@ -166,7 +166,7 @@ static void sensorsReadPressure(void) {
     currentState.isPressureRisingFast = currentState.smoothedPressure >= previousSmoothedPressure + 0.05f;
     currentState.isPressureFalling = currentState.smoothedPressure <= previousSmoothedPressure - 0.005f;
     currentState.isPressureFallingFast = currentState.smoothedPressure <= previousSmoothedPressure - 0.01f;
-    currentState.isPressureMaxed = currentState.smoothedPressure >= runningCfg.profilingState ? runningCfg.pressureProfilingStart - 0.5f : runningCfg.flowProfilingPressureRestriction - 0.5f;
+    currentState.isPressureMaxed = currentState.smoothedPressure >= ACTIVE_PROFILE(runningCfg).profilingState ? ACTIVE_PROFILE(runningCfg).pressureProfilingStart - 0.5f : ACTIVE_PROFILE(runningCfg).flowProfilingPressureRestriction - 0.5f;
 
     pressureTimer = millis() + GET_PRESSURE_READ_EVERY;
   }
@@ -381,60 +381,60 @@ void lcdSaveSettingsTrigger(void) {
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
       break;
     case SCREEN_MODES::SCREEN_brew_preinfusion:
-      eepromCurrentValues.preinfusionState = lcdValues.preinfusionState;
-      eepromCurrentValues.preinfusionFlowState = lcdValues.preinfusionFlowState;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionState = ACTIVE_PROFILE(lcdValues).preinfusionState;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
 
-      if(eepromCurrentValues.preinfusionFlowState == 0) {
-        eepromCurrentValues.preinfusionSec = lcdValues.preinfusionSec;
-        eepromCurrentValues.preinfusionPressureFlowTarget = lcdValues.preinfusionPressureFlowTarget;
-        eepromCurrentValues.preinfusionBar = lcdValues.preinfusionBar;
+      if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0) {
+        ACTIVE_PROFILE(eepromCurrentValues).preinfusionSec = ACTIVE_PROFILE(lcdValues).preinfusionSec;
+        ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureFlowTarget = ACTIVE_PROFILE(lcdValues).preinfusionPressureFlowTarget;
+        ACTIVE_PROFILE(eepromCurrentValues).preinfusionBar = ACTIVE_PROFILE(lcdValues).preinfusionBar;
       }
       else {
-        eepromCurrentValues.preinfusionFlowTime = lcdValues.preinfusionFlowTime;
-        eepromCurrentValues.preinfusionFlowVol = lcdValues.preinfusionFlowVol;
-        eepromCurrentValues.preinfusionFlowPressureTarget = lcdValues.preinfusionFlowPressureTarget;
+        ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowTime = ACTIVE_PROFILE(lcdValues).preinfusionFlowTime;
+        ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowVol = ACTIVE_PROFILE(lcdValues).preinfusionFlowVol;
+        ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowPressureTarget = ACTIVE_PROFILE(lcdValues).preinfusionFlowPressureTarget;
       }
-      eepromCurrentValues.preinfusionFilled = lcdValues.preinfusionFilled;
-      eepromCurrentValues.preinfusionPressureAbove = lcdValues.preinfusionPressureAbove;
-      eepromCurrentValues.preinfusionWeightAbove = lcdValues.preinfusionWeightAbove;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFilled = ACTIVE_PROFILE(lcdValues).preinfusionFilled;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureAbove = ACTIVE_PROFILE(lcdValues).preinfusionPressureAbove;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionWeightAbove = ACTIVE_PROFILE(lcdValues).preinfusionWeightAbove;
       break;
     case SCREEN_MODES::SCREEN_brew_soak:
-      eepromCurrentValues.soakState = lcdValues.soakState;
+      ACTIVE_PROFILE(eepromCurrentValues).soakState = ACTIVE_PROFILE(lcdValues).soakState;
 
-      if(eepromCurrentValues.preinfusionFlowState == 0)
-        eepromCurrentValues.soakTimePressure = lcdValues.soakTimePressure;
+      if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0)
+        ACTIVE_PROFILE(eepromCurrentValues).soakTimePressure = ACTIVE_PROFILE(lcdValues).soakTimePressure;
       else
-        eepromCurrentValues.soakTimeFlow = lcdValues.soakTimeFlow;
+        ACTIVE_PROFILE(eepromCurrentValues).soakTimeFlow = ACTIVE_PROFILE(lcdValues).soakTimeFlow;
 
-      eepromCurrentValues.soakKeepPressure = lcdValues.soakKeepPressure;
-      eepromCurrentValues.soakKeepFlow = lcdValues.soakKeepFlow;
-      eepromCurrentValues.soakBelowPressure = lcdValues.soakBelowPressure;
-      eepromCurrentValues.soakAbovePressure = lcdValues.soakAbovePressure;
-      eepromCurrentValues.soakAboveWeight = lcdValues.soakAboveWeight;
+      ACTIVE_PROFILE(eepromCurrentValues).soakKeepPressure = ACTIVE_PROFILE(lcdValues).soakKeepPressure;
+      ACTIVE_PROFILE(eepromCurrentValues).soakKeepFlow = ACTIVE_PROFILE(lcdValues).soakKeepFlow;
+      ACTIVE_PROFILE(eepromCurrentValues).soakBelowPressure = ACTIVE_PROFILE(lcdValues).soakBelowPressure;
+      ACTIVE_PROFILE(eepromCurrentValues).soakAbovePressure = ACTIVE_PROFILE(lcdValues).soakAbovePressure;
+      ACTIVE_PROFILE(eepromCurrentValues).soakAboveWeight = ACTIVE_PROFILE(lcdValues).soakAboveWeight;
       // PI -> PF
-      eepromCurrentValues.preinfusionRamp = lcdValues.preinfusionRamp;
-      eepromCurrentValues.preinfusionRampSlope = lcdValues.preinfusionRampSlope;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionRamp = ACTIVE_PROFILE(lcdValues).preinfusionRamp;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionRampSlope = ACTIVE_PROFILE(lcdValues).preinfusionRampSlope;
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
       // PRESSURE PARAMS
-      eepromCurrentValues.profilingState                = lcdValues.profilingState;
-      eepromCurrentValues.flowProfileState              = lcdValues.flowProfileState;
-      if(eepromCurrentValues.flowProfileState == 0) {
-        eepromCurrentValues.pressureProfilingStart            = lcdValues.pressureProfilingStart;
-        eepromCurrentValues.pressureProfilingFinish           = lcdValues.pressureProfilingFinish;
-        eepromCurrentValues.pressureProfilingHold             = lcdValues.pressureProfilingHold;
-        eepromCurrentValues.pressureProfilingHoldLimit        = lcdValues.pressureProfilingHoldLimit;
-        eepromCurrentValues.pressureProfilingSlope            = lcdValues.pressureProfilingSlope;
-        eepromCurrentValues.pressureProfilingSlopeShape       = lcdValues.pressureProfilingSlopeShape;
-        eepromCurrentValues.pressureProfilingFlowRestriction  = lcdValues.pressureProfilingFlowRestriction;
+      ACTIVE_PROFILE(eepromCurrentValues).profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
+      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState              = ACTIVE_PROFILE(lcdValues).flowProfileState;
+      if(ACTIVE_PROFILE(eepromCurrentValues).flowProfileState == 0) {
+        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingStart            = ACTIVE_PROFILE(lcdValues).pressureProfilingStart;
+        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFinish           = ACTIVE_PROFILE(lcdValues).pressureProfilingFinish;
+        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHold             = ACTIVE_PROFILE(lcdValues).pressureProfilingHold;
+        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).pressureProfilingHoldLimit;
+        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlope            = ACTIVE_PROFILE(lcdValues).pressureProfilingSlope;
+        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).pressureProfilingSlopeShape;
+        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).pressureProfilingFlowRestriction;
       } else {
-        eepromCurrentValues.flowProfileStart                  = lcdValues.flowProfileStart;
-        eepromCurrentValues.flowProfileEnd                    = lcdValues.flowProfileEnd;
-        eepromCurrentValues.flowProfileHold                   = lcdValues.flowProfileHold;
-        eepromCurrentValues.flowProfileHoldLimit              = lcdValues.flowProfileHoldLimit;
-        eepromCurrentValues.flowProfileSlope                  = lcdValues.flowProfileSlope;
-        eepromCurrentValues.flowProfileSlopeShape             = lcdValues.flowProfileSlopeShape;
-        eepromCurrentValues.flowProfilingPressureRestriction  = lcdValues.flowProfilingPressureRestriction;
+        ACTIVE_PROFILE(eepromCurrentValues).flowProfileStart                  = ACTIVE_PROFILE(lcdValues).flowProfileStart;
+        ACTIVE_PROFILE(eepromCurrentValues).flowProfileEnd                    = ACTIVE_PROFILE(lcdValues).flowProfileEnd;
+        ACTIVE_PROFILE(eepromCurrentValues).flowProfileHold                   = ACTIVE_PROFILE(lcdValues).flowProfileHold;
+        ACTIVE_PROFILE(eepromCurrentValues).flowProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).flowProfileHoldLimit;
+        ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlope                  = ACTIVE_PROFILE(lcdValues).flowProfileSlope;
+        ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).flowProfileSlopeShape;
+        ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).flowProfilingPressureRestriction;
       }
       break;
     case SCREEN_MODES::SCREEN_settings_boiler:
@@ -502,10 +502,10 @@ void lcdRefreshElementsTrigger(void) {
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
     case SCREEN_MODES::SCREEN_brew_preinfusion:
-      eepromCurrentValues.preinfusionFlowState = lcdValues.preinfusionFlowState;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
-      eepromCurrentValues.flowProfileState = lcdValues.flowProfileState;
+      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState = ACTIVE_PROFILE(lcdValues).flowProfileState;
       break;
     default:
       lcdShowPopup("Nope!");
@@ -528,10 +528,10 @@ void lcdQuickProfilesSwitchOrSave(void) {
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
     case SCREEN_MODES::SCREEN_brew_preinfusion:
-      eepromCurrentValues.preinfusionFlowState = lcdValues.preinfusionFlowState;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
-      eepromCurrentValues.flowProfileState = lcdValues.flowProfileState;
+      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState = ACTIVE_PROFILE(lcdValues).flowProfileState;
       break;
     default:
       lcdShowPopup("Nope!");
@@ -576,46 +576,46 @@ static void updateProfilerPhases(void) {
   }
 
   // Setup pre-infusion if needed
-  if (runningCfg.preinfusionState) {
-    if (runningCfg.preinfusionFlowState) { // flow based PI enabled
-      isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionFlowPressureTarget : -1.f;
-      isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1.f;
-      isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1.f;
+  if (ACTIVE_PROFILE(runningCfg).preinfusionState) {
+    if (ACTIVE_PROFILE(runningCfg).preinfusionFlowState) { // flow based PI enabled
+      isPressureAbove = ACTIVE_PROFILE(runningCfg).preinfusionPressureAbove ? ACTIVE_PROFILE(runningCfg).preinfusionFlowPressureTarget : -1.f;
+      isWeightAbove = ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove : -1.f;
+      isWaterPumped = ACTIVE_PROFILE(runningCfg).preinfusionFilled > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionFilled : -1.f;
 
-      addFlowPhase(Transition{runningCfg.preinfusionFlowVol}, runningCfg.preinfusionFlowPressureTarget, runningCfg.preinfusionFlowTime * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
-      preInfusionFinishBar = runningCfg.preinfusionFlowPressureTarget;
-      preinfusionFinishFlow = runningCfg.preinfusionFlowVol;
+      addFlowPhase(Transition{ACTIVE_PROFILE(runningCfg).preinfusionFlowVol}, ACTIVE_PROFILE(runningCfg).preinfusionFlowPressureTarget, ACTIVE_PROFILE(runningCfg).preinfusionFlowTime * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
+      preInfusionFinishBar = ACTIVE_PROFILE(runningCfg).preinfusionFlowPressureTarget;
+      preinfusionFinishFlow = ACTIVE_PROFILE(runningCfg).preinfusionFlowVol;
     } else { // pressure based PI enabled
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
-      isPressureAbove = runningCfg.preinfusionPressureAbove ? runningCfg.preinfusionBar : -1.f;
-      isWeightAbove = runningCfg.preinfusionWeightAbove > 0.f ? runningCfg.preinfusionWeightAbove : -1.f;
-      isWaterPumped = runningCfg.preinfusionFilled > 0.f ? runningCfg.preinfusionFilled : -1.f;
+      isPressureAbove = ACTIVE_PROFILE(runningCfg).preinfusionPressureAbove ? ACTIVE_PROFILE(runningCfg).preinfusionBar : -1.f;
+      isWeightAbove = ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove : -1.f;
+      isWaterPumped = ACTIVE_PROFILE(runningCfg).preinfusionFilled > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionFilled : -1.f;
 
-      addPressurePhase(Transition{runningCfg.preinfusionBar}, 4.f, runningCfg.preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
-      preInfusionFinishBar = runningCfg.preinfusionBar;
-      preinfusionFinishFlow = runningCfg.preinfusionPressureFlowTarget;
+      addPressurePhase(Transition{ACTIVE_PROFILE(runningCfg).preinfusionBar}, 4.f, ACTIVE_PROFILE(runningCfg).preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
+      preInfusionFinishBar = ACTIVE_PROFILE(runningCfg).preinfusionBar;
+      preinfusionFinishFlow = ACTIVE_PROFILE(runningCfg).preinfusionPressureFlowTarget;
     }
   }
   // Setup the soak phase if neecessary
-  if (runningCfg.soakState) {
+  if (ACTIVE_PROFILE(runningCfg).soakState) {
     uint16_t phaseSoak = -1;
     float maintainFlow = -1.f;
     float maintainPressure = -1.f;
-    if(runningCfg.preinfusionFlowState) { // Sorting the phase values and restrictions
-      phaseSoak = runningCfg.soakTimeFlow;
-      isPressureBelow = runningCfg.soakBelowPressure > 0.f ? runningCfg.soakBelowPressure : -1.f;
-      isPressureAbove = runningCfg.soakAbovePressure > 0.f ? runningCfg.soakAbovePressure : -1.f;
-      isWeightAbove = runningCfg.soakAboveWeight > 0.f ? runningCfg.soakAboveWeight : -1.f;
-      maintainFlow = runningCfg.soakKeepFlow > 0.f ? runningCfg.soakKeepFlow : -1.f;
-      maintainPressure = runningCfg.soakKeepPressure > 0.f ? runningCfg.soakKeepPressure : -1.f;
+    if(ACTIVE_PROFILE(runningCfg).preinfusionFlowState) { // Sorting the phase values and restrictions
+      phaseSoak = ACTIVE_PROFILE(runningCfg).soakTimeFlow;
+      isPressureBelow = ACTIVE_PROFILE(runningCfg).soakBelowPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakBelowPressure : -1.f;
+      isPressureAbove = ACTIVE_PROFILE(runningCfg).soakAbovePressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakAbovePressure : -1.f;
+      isWeightAbove = ACTIVE_PROFILE(runningCfg).soakAboveWeight > 0.f ? ACTIVE_PROFILE(runningCfg).soakAboveWeight : -1.f;
+      maintainFlow = ACTIVE_PROFILE(runningCfg).soakKeepFlow > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepFlow : -1.f;
+      maintainPressure = ACTIVE_PROFILE(runningCfg).soakKeepPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepPressure : -1.f;
       // addFlowPhase(Transition{0.f},  -1, phaseSoak * 1000, -1, isPressureBelow, isWeightAbove, -1);
     } else {
-      phaseSoak = runningCfg.soakTimePressure;
-      isPressureBelow = runningCfg.soakBelowPressure > 0.f ? runningCfg.soakBelowPressure : -1;
-      isPressureAbove = runningCfg.soakAbovePressure > 0.f ? runningCfg.soakAbovePressure : -1.f;
-      isWeightAbove = runningCfg.soakAboveWeight > 0.f ? runningCfg.soakAboveWeight : -1;
-      maintainFlow = runningCfg.soakKeepFlow > 0.f ? runningCfg.soakKeepFlow : -1.f;
-      maintainPressure = runningCfg.soakKeepPressure > 0.f ? runningCfg.soakKeepPressure : -1.f;
+      phaseSoak = ACTIVE_PROFILE(runningCfg).soakTimePressure;
+      isPressureBelow = ACTIVE_PROFILE(runningCfg).soakBelowPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakBelowPressure : -1;
+      isPressureAbove = ACTIVE_PROFILE(runningCfg).soakAbovePressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakAbovePressure : -1.f;
+      isWeightAbove = ACTIVE_PROFILE(runningCfg).soakAboveWeight > 0.f ? ACTIVE_PROFILE(runningCfg).soakAboveWeight : -1;
+      maintainFlow = ACTIVE_PROFILE(runningCfg).soakKeepFlow > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepFlow : -1.f;
+      maintainPressure = ACTIVE_PROFILE(runningCfg).soakKeepPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepPressure : -1.f;
     }
     if (maintainPressure > 0.f)
       addPressurePhase(Transition{maintainPressure}, (maintainFlow > 0.f ? maintainFlow : 2.5f), phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
@@ -627,32 +627,32 @@ static void updateProfilerPhases(void) {
   preInfusionFinishedPhaseIdx = profile.phaseCount();
 
   // Setup shot profiling
-  if (runningCfg.profilingState) {
+  if (ACTIVE_PROFILE(runningCfg).profilingState) {
     uint16_t rampAndHold = -1;
     float holdLimit = -1.f;
-    if (runningCfg.flowProfileState) { // flow based profiling enabled
+    if (ACTIVE_PROFILE(runningCfg).flowProfileState) { // flow based profiling enabled
     /* Setting the phase specific restrictions */
     /* ------------------------------------------ */
-      rampAndHold = runningCfg.preinfusionRamp + runningCfg.flowProfileHold;
-      holdLimit = runningCfg.flowProfileHoldLimit > 0.f ? runningCfg.flowProfileHoldLimit : -1;
+      rampAndHold = ACTIVE_PROFILE(runningCfg).preinfusionRamp + ACTIVE_PROFILE(runningCfg).flowProfileHold;
+      holdLimit = ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
     /* ------------------------------------------ */
 
-      addFlowPhase(Transition{preinfusionFinishFlow, runningCfg.flowProfileStart, (TransitionCurve)runningCfg.preinfusionRampSlope, runningCfg.preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
-      addFlowPhase(Transition{runningCfg.flowProfileStart, runningCfg.flowProfileEnd, (TransitionCurve)runningCfg.flowProfileSlopeShape, runningCfg.flowProfileSlope * 1000}, runningCfg.flowProfilingPressureRestriction, -1, -1, -1, -1, -1);
+      addFlowPhase(Transition{preinfusionFinishFlow, ACTIVE_PROFILE(runningCfg).flowProfileStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
+      addFlowPhase(Transition{ACTIVE_PROFILE(runningCfg).flowProfileStart, ACTIVE_PROFILE(runningCfg).flowProfileEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).flowProfileSlopeShape, ACTIVE_PROFILE(runningCfg).flowProfileSlope * 1000}, ACTIVE_PROFILE(runningCfg).flowProfilingPressureRestriction, -1, -1, -1, -1, -1);
     } else { // pressure based profiling enabled
     /* Setting the phase specific restrictions */
     /* ------------------------------------------ */
-      float ppStart = runningCfg.pressureProfilingStart;
-      float ppEnd = runningCfg.pressureProfilingFinish;
-      rampAndHold = runningCfg.preinfusionRamp + runningCfg.pressureProfilingHold;
-      holdLimit = runningCfg.pressureProfilingHoldLimit > 0.f ? runningCfg.pressureProfilingHoldLimit : -1;
+      float ppStart = ACTIVE_PROFILE(runningCfg).pressureProfilingStart;
+      float ppEnd = ACTIVE_PROFILE(runningCfg).pressureProfilingFinish;
+      rampAndHold = ACTIVE_PROFILE(runningCfg).preinfusionRamp + ACTIVE_PROFILE(runningCfg).pressureProfilingHold;
+      holdLimit = ACTIVE_PROFILE(runningCfg).pressureProfilingHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).pressureProfilingHoldLimit : -1;
     /* ------------------------------------------ */
 
-      addPressurePhase(Transition{preInfusionFinishBar, ppStart, (TransitionCurve)runningCfg.preinfusionRampSlope, runningCfg.preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
-      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)runningCfg.pressureProfilingSlopeShape, runningCfg.pressureProfilingSlope * 1000}, -1, -1, -1, -1, -1, -1);
+      addPressurePhase(Transition{preInfusionFinishBar, ppStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
+      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).pressureProfilingSlopeShape, ACTIVE_PROFILE(runningCfg).pressureProfilingSlope * 1000}, -1, -1, -1, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
-    addPressurePhase(Transition{preInfusionFinishBar, 9, (TransitionCurve)runningCfg.pressureProfilingSlopeShape, runningCfg.preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
+    addPressurePhase(Transition{preInfusionFinishBar, 9, (TransitionCurve)ACTIVE_PROFILE(runningCfg).pressureProfilingSlopeShape, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
   }
 }
 

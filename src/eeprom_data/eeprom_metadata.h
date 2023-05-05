@@ -4,7 +4,7 @@
 
 #include <Arduino.h>
 
-#define EEPROM_DATA_VERSION 9
+#define EEPROM_DATA_VERSION 10
 
 #define EEPROM_METADATA_T(__eepromValues_tName) \
   {                                             \

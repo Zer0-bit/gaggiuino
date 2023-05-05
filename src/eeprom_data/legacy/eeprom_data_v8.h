@@ -24,10 +24,10 @@
 */
 
 /**
-* Version 7:
-* - Add two more restrictions:
-*   - switchPhaseOnPressureBelow
-*   - switchPhaseOnFirstDrops
+* Version 8:
+* - Replaces switchPhaseOnFirstDrops with two more restrictions:
+*   - switchOnWeightAbove
+*   - switchOnWaterPumped
 */
 struct eepromValues_t_v8 {
   uint16_t setpoint;
@@ -83,25 +83,25 @@ static bool upgradeSchema_v8(eepromValues_t &targetValues, eepromValues_t_v8 &lo
   targetValues.hpwr = loadedValues.hpwr;
   targetValues.mainDivider = loadedValues.mainDivider;
   targetValues.brewDivider = loadedValues.brewDivider;
-  targetValues.pressureProfilingStart = loadedValues.pressureProfilingStart;
-  targetValues.pressureProfilingFinish = loadedValues.pressureProfilingFinish;
-  targetValues.pressureProfilingHold = loadedValues.pressureProfilingHold;
-  targetValues.pressureProfilingSlope = loadedValues.pressureProfilingLength;
-  targetValues.profilingState = loadedValues.pressureProfilingState;
-  targetValues.preinfusionState = loadedValues.preinfusionState;
-  targetValues.preinfusionSec = loadedValues.preinfusionSec;
-  targetValues.preinfusionBar = loadedValues.preinfusionBar;
-  targetValues.soakTimePressure = loadedValues.preinfusionSoak;
-  targetValues.preinfusionRamp = loadedValues.preinfusionRamp;
-  targetValues.preinfusionFlowState = loadedValues.preinfusionFlowState;
-  targetValues.preinfusionFlowVol = loadedValues.preinfusionFlowVol;
-  targetValues.preinfusionFlowTime = loadedValues.preinfusionFlowTime;
-  targetValues.soakTimeFlow = loadedValues.preinfusionFlowSoakTime;
-  targetValues.preinfusionFlowPressureTarget = loadedValues.preinfusionFlowPressureTarget;
-  targetValues.flowProfileState = loadedValues.flowProfileState;
-  targetValues.flowProfileStart = loadedValues.flowProfileStart;
-  targetValues.flowProfileEnd = loadedValues.flowProfileEnd;
-  targetValues.flowProfileSlope = loadedValues.flowProfileCurveSpeed;
+  ACTIVE_PROFILE(targetValues).pressureProfilingStart = loadedValues.pressureProfilingStart;
+  ACTIVE_PROFILE(targetValues).pressureProfilingFinish = loadedValues.pressureProfilingFinish;
+  ACTIVE_PROFILE(targetValues).pressureProfilingHold = loadedValues.pressureProfilingHold;
+  ACTIVE_PROFILE(targetValues).pressureProfilingSlope = loadedValues.pressureProfilingLength;
+  ACTIVE_PROFILE(targetValues).profilingState = loadedValues.pressureProfilingState;
+  ACTIVE_PROFILE(targetValues).preinfusionState = loadedValues.preinfusionState;
+  ACTIVE_PROFILE(targetValues).preinfusionSec = loadedValues.preinfusionSec;
+  ACTIVE_PROFILE(targetValues).preinfusionBar = loadedValues.preinfusionBar;
+  ACTIVE_PROFILE(targetValues).soakTimePressure = loadedValues.preinfusionSoak;
+  ACTIVE_PROFILE(targetValues).preinfusionRamp = loadedValues.preinfusionRamp;
+  ACTIVE_PROFILE(targetValues).preinfusionFlowState = loadedValues.preinfusionFlowState;
+  ACTIVE_PROFILE(targetValues).preinfusionFlowVol = loadedValues.preinfusionFlowVol;
+  ACTIVE_PROFILE(targetValues).preinfusionFlowTime = loadedValues.preinfusionFlowTime;
+  ACTIVE_PROFILE(targetValues).soakTimeFlow = loadedValues.preinfusionFlowSoakTime;
+  ACTIVE_PROFILE(targetValues).preinfusionFlowPressureTarget = loadedValues.preinfusionFlowPressureTarget;
+  ACTIVE_PROFILE(targetValues).flowProfileState = loadedValues.flowProfileState;
+  ACTIVE_PROFILE(targetValues).flowProfileStart = loadedValues.flowProfileStart;
+  ACTIVE_PROFILE(targetValues).flowProfileEnd = loadedValues.flowProfileEnd;
+  ACTIVE_PROFILE(targetValues).flowProfileSlope = loadedValues.flowProfileCurveSpeed;
   targetValues.powerLineFrequency = loadedValues.powerLineFrequency;
   targetValues.lcdSleep = loadedValues.lcdSleep;
   targetValues.warmupState = loadedValues.warmupState;
