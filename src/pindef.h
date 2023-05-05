@@ -4,6 +4,7 @@
 
 // STM32F4 pins definitions
 #define thermoDO      PB4
+#define thermoDI      PA7 // not used
 #define thermoCS      PA6
 #define thermoCLK     PA5
 
