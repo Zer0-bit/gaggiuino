@@ -33,7 +33,12 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   // bool profileType = false;
   // Profiles
   // TODO: set the selected profile number first!
-  // TODO: set all the profile names from saved data
+  // Profile names for all buttons
+  myNex.writeStr("gPf1.txt", eepromCurrentValues.profiles[0].name);
+  myNex.writeStr("gPf2.txt", eepromCurrentValues.profiles[1].name);
+  myNex.writeStr("gPf3.txt", eepromCurrentValues.profiles[2].name);
+  myNex.writeStr("gPf4.txt", eepromCurrentValues.profiles[3].name);
+  myNex.writeStr("gPf5.txt", eepromCurrentValues.profiles[4].name);
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
