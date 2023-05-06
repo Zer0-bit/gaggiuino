@@ -26,12 +26,14 @@ enum class SCREEN_MODES {
 } ;
 
 void lcdInit(void);
+void lcdInitProfiles(eepromValues_t &eepromCurrentValues);
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
 void uploadPageCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);
 void lcdWakeUp(void);
 
 eepromValues_t lcdDownloadCfg(void);
+int lcdGetSelectedProfile(void);
 int lcdGetHomeScreenScalesEnabled(void);
 int lcdGetSelectedOperationalMode(void);
 int lcdGetManualFlowVol(void);
@@ -60,5 +62,6 @@ void lcdHomeScreenScalesTrigger(void);
 void lcdBrewGraphScalesTareTrigger(void);
 void lcdPumpPhaseShitfTrigger(void);
 void lcdRefreshElementsTrigger(void);
+void lcdQuickProfileSwitch(void);
 
 #endif

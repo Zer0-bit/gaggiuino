@@ -36,12 +36,12 @@ static void copyNum(const char * src_component, const char * src_property, const
   myNex.writeNum(dst, myNex.readNumber(src));
 }
 
-void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
-  // bool profileType = false;
-  // Profiles
+// Don't need to upload this again after boot
+void lcdInitProfiles(eepromValues_t &eepromCurrentValues) {
   // Highlight the active profile
   char component[10];
-  snprintf(component, 10, "gPf%d", eepromCurrentValues.activeProfile + 1 /* 1-offset in nextion */);
+  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+  snprintf(component, 10, "gPf%d", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
   copyNum(component, "bco2", component, "bco");
   copyNum(component, "pco2", component, "pco");
   // Profile names for all buttons
@@ -50,6 +50,11 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeStr("gPf3.txt", eepromCurrentValues.profiles[2].name);
   myNex.writeStr("gPf4.txt", eepromCurrentValues.profiles[3].name);
   myNex.writeStr("gPf5.txt", eepromCurrentValues.profiles[4].name);
+}
+
+void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
+  // bool profileType = false;
+  // Profiles
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -206,8 +211,6 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 
 eepromValues_t lcdDownloadCfg(void) {
   eepromValues_t lcdCfg = {};
-  // TODO: read the selected profile first, no?
-  // lcdCfg.activeProfile = myNex.readNumber("???");
   // PI
   ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
   ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
@@ -284,6 +287,10 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.pumpFlowAtZero                 = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
 
   return lcdCfg;
+}
+
+int lcdGetSelectedProfile(void) {
+  return myNex.readNumber("pIdx") - 1 /* 1-offset in nextion */;
 }
 
 int lcdGetManualFlowVol(void) {
@@ -371,3 +378,4 @@ void trigger3(void) { lcdHomeScreenScalesTrigger(); }
 void trigger4(void) { lcdBrewGraphScalesTareTrigger(); }
 void trigger5(void) { lcdPumpPhaseShitfTrigger(); }
 void trigger6(void) { lcdRefreshElementsTrigger(); }
+void trigger7(void) { lcdQuickProfileSwitch(); }
