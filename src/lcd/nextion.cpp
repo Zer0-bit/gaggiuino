@@ -29,21 +29,13 @@ void lcdWakeUp(void) {
   myNex.writeNum("sleep", 0);
 }
 
-static void copyNum(const char * src_component, const char * src_property, const char * dst_component, const char * dst_property) {
-  char src[50], dst[50];
-  snprintf(src, 50, "%s.%s", src_component, src_property);
-  snprintf(dst, 50, "%s.%s", dst_component, dst_property);
-  myNex.writeNum(dst, myNex.readNumber(src));
-}
-
 // Don't need to upload this again after boot
 void lcdInitProfiles(eepromValues_t &eepromCurrentValues) {
   // Highlight the active profile
-  char component[10];
   myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
-  snprintf(component, 10, "gPf%d", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
-  copyNum(component, "bco2", component, "bco");
-  copyNum(component, "pco2", component, "pco");
+  String component = "gPf" + (eepromCurrentValues.activeProfile + 1);
+  myNex.writeNum(component + "bco", myNex.readNumber(component + "bco2"));
+  myNex.writeNum(component + "pco", myNex.readNumber(component + "pco2"));
   // Profile names for all buttons
   myNex.writeStr("gPf1.txt", eepromCurrentValues.profiles[0].name);
   myNex.writeStr("gPf2.txt", eepromCurrentValues.profiles[1].name);
