@@ -523,7 +523,9 @@ void lcdRefreshElementsTrigger(void) {
 }
 
 void lcdQuickProfileSwitch(void) {
-  runningCfg.activeProfile = lcdGetSelectedProfile();
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+
+  ACTIVE_PROFILE(runningCfg) = eepromCurrentValues.profiles[lcdGetSelectedProfile()];
   lcdUploadCfg(runningCfg);
 }
 
