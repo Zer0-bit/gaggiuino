@@ -42,12 +42,44 @@ void lcdInitProfiles(eepromValues_t &eepromCurrentValues) {
   myNex.writeStr("qPf3.txt", eepromCurrentValues.profiles[2].name);
   myNex.writeStr("qPf4.txt", eepromCurrentValues.profiles[3].name);
   myNex.writeStr("qPf5.txt", eepromCurrentValues.profiles[4].name);
+
+  // More brew settings
+  myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
+  myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
+
+  myNex.writeNum("basketPrefill", eepromCurrentValues.basketPrefill);
+  myNex.writeNum("brewSettings.btPrefill.val", eepromCurrentValues.basketPrefill);
+
+  myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
+  myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
+
+  // System settings
+  myNex.writeNum("moreTemp.setPoint.val", eepromCurrentValues.setpoint);
+  myNex.writeNum("moreTemp.steamSetPoint.val", eepromCurrentValues.steamSetPoint);
+  myNex.writeNum("moreTemp.offSet.val", eepromCurrentValues.offsetTemp);
+  myNex.writeNum("moreTemp.hpwr.val", eepromCurrentValues.hpwr);
+  myNex.writeNum("moreTemp.mDiv.val", eepromCurrentValues.mainDivider);
+  myNex.writeNum("moreTemp.bDiv.val", eepromCurrentValues.brewDivider);
+
+  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
+  myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
+  myNex.writeNum("morePower.lc1.val", eepromCurrentValues.scalesF1);
+  myNex.writeNum("morePower.lc2.val", eepromCurrentValues.scalesF2);
+  myNex.writeNum("morePower.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 10000.f);
+  myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
+
+  // Dose settings
+  myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
+  myNex.writeNum("shotSettings.numDose.val", eepromCurrentValues.shotDose * 10.f);
+  myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
+  myNex.writeNum("shotSettings.numDoseForced.val", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
 }
 
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   // bool profileType = false;
   // Profiles
   // PI
+
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
 
@@ -102,36 +134,36 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   }
   myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
 
-  // More brew settings
-  myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
-  myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
+  // // More brew settings
+  // myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
+  // myNex.writeNum("brewSettings.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
 
-  myNex.writeNum("basketPrefill", eepromCurrentValues.basketPrefill);
-  myNex.writeNum("brewSettings.btPrefill.val", eepromCurrentValues.basketPrefill);
+  // myNex.writeNum("basketPrefill", eepromCurrentValues.basketPrefill);
+  // myNex.writeNum("brewSettings.btPrefill.val", eepromCurrentValues.basketPrefill);
 
-  myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
-  myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
+  // myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
+  // myNex.writeNum("brewSettings.btTempDelta.val", eepromCurrentValues.brewDeltaState);
 
-  // System settings
-  myNex.writeNum("moreTemp.setPoint.val", eepromCurrentValues.setpoint);
-  myNex.writeNum("moreTemp.steamSetPoint.val", eepromCurrentValues.steamSetPoint);
-  myNex.writeNum("moreTemp.offSet.val", eepromCurrentValues.offsetTemp);
-  myNex.writeNum("moreTemp.hpwr.val", eepromCurrentValues.hpwr);
-  myNex.writeNum("moreTemp.mDiv.val", eepromCurrentValues.mainDivider);
-  myNex.writeNum("moreTemp.bDiv.val", eepromCurrentValues.brewDivider);
+  // // System settings
+  // myNex.writeNum("moreTemp.setPoint.val", eepromCurrentValues.setpoint);
+  // myNex.writeNum("moreTemp.steamSetPoint.val", eepromCurrentValues.steamSetPoint);
+  // myNex.writeNum("moreTemp.offSet.val", eepromCurrentValues.offsetTemp);
+  // myNex.writeNum("moreTemp.hpwr.val", eepromCurrentValues.hpwr);
+  // myNex.writeNum("moreTemp.mDiv.val", eepromCurrentValues.mainDivider);
+  // myNex.writeNum("moreTemp.bDiv.val", eepromCurrentValues.brewDivider);
 
-  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
-  myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
-  myNex.writeNum("morePower.lc1.val", eepromCurrentValues.scalesF1);
-  myNex.writeNum("morePower.lc2.val", eepromCurrentValues.scalesF2);
-  myNex.writeNum("morePower.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 10000.f);
-  myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
+  // myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
+  // myNex.writeNum("morePower.n1.val", eepromCurrentValues.lcdSleep);
+  // myNex.writeNum("morePower.lc1.val", eepromCurrentValues.scalesF1);
+  // myNex.writeNum("morePower.lc2.val", eepromCurrentValues.scalesF2);
+  // myNex.writeNum("morePower.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 10000.f);
+  // myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
 
-  // Dose settings
-  myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
-  myNex.writeNum("shotSettings.numDose.val", eepromCurrentValues.shotDose * 10.f);
-  myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
-  myNex.writeNum("shotSettings.numDoseForced.val", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
+  // // Dose settings
+  // myNex.writeNum("shotState", eepromCurrentValues.stopOnWeightState);
+  // myNex.writeNum("shotSettings.numDose.val", eepromCurrentValues.shotDose * 10.f);
+  // myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
+  // myNex.writeNum("shotSettings.numDoseForced.val", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
 }
 
 void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
