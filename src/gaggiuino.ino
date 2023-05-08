@@ -279,11 +279,12 @@ static void modeSelect(void) {
       break;
     case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
+      steamCtrl(runningCfg, currentState);
+
       if (!currentState.steamSwitchState) {
         brewActive ? flushActivated() : flushDeactivated();
-        steamTime = millis();
-      } else {
         steamCtrl(runningCfg, currentState);
+        pageValuesRefresh(true);
       }
       break;
     case OPERATION_MODES::OPMODE_descale:

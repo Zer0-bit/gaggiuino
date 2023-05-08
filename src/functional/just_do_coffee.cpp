@@ -14,7 +14,7 @@ inline static float TEMP_DELTA(float d, const SensorState &currentState) {
 }
 
 void justDoCoffee(const eepromValues_t &runningCfg, const SensorState &currentState, const bool brewActive) {
-  lcdTargetState(0); // setting the target mode to "brew temp"
+  lcdTargetState((int)HEATING::MODE_brew); // setting the target mode to "brew temp"
   float brewTempSetPoint = runningCfg.setpoint + runningCfg.offsetTemp;
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
 
@@ -81,7 +81,7 @@ void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int fact
 #endif
 
 void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
-  currentState.steamSwitchState ? lcdTargetState(1) :lcdTargetState(0) ; // setting the target temp
+  currentState.steamSwitchState ? lcdTargetState((int)HEATING::MODE_steam) : lcdTargetState((int)HEATING::MODE_brew); // setting the steam/hot water target temp
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float steamTempSetPoint = runningCfg.steamSetPoint + runningCfg.offsetTemp;
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
@@ -99,7 +99,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
     }
     setSteamValveRelayOn();
     setSteamBoilerRelayOn();
-    #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adjusting the pressure
+    #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adding water during steaming
       if (currentState.smoothedPressure < 1.8f) {
         #ifdef PUMP_NEEDS_OPEN_VALVE
           openValve();
