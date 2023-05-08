@@ -33,15 +33,15 @@ void lcdWakeUp(void) {
 void lcdInitProfiles(eepromValues_t &eepromCurrentValues) {
   // Highlight the active profile
   myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
-  String component = "gPf" + (eepromCurrentValues.activeProfile + 1);
+  String component = "qPf" + (eepromCurrentValues.activeProfile + 1);
   myNex.writeNum(component + "bco", myNex.readNumber(component + "bco2"));
   myNex.writeNum(component + "pco", myNex.readNumber(component + "pco2"));
   // Profile names for all buttons
-  myNex.writeStr("gPf1.txt", eepromCurrentValues.profiles[0].name);
-  myNex.writeStr("gPf2.txt", eepromCurrentValues.profiles[1].name);
-  myNex.writeStr("gPf3.txt", eepromCurrentValues.profiles[2].name);
-  myNex.writeStr("gPf4.txt", eepromCurrentValues.profiles[3].name);
-  myNex.writeStr("gPf5.txt", eepromCurrentValues.profiles[4].name);
+  myNex.writeStr("qPf1.txt", eepromCurrentValues.profiles[0].name);
+  myNex.writeStr("qPf2.txt", eepromCurrentValues.profiles[1].name);
+  myNex.writeStr("qPf3.txt", eepromCurrentValues.profiles[2].name);
+  myNex.writeStr("qPf4.txt", eepromCurrentValues.profiles[3].name);
+  myNex.writeStr("qPf5.txt", eepromCurrentValues.profiles[4].name);
 }
 
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
