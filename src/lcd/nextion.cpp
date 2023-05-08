@@ -201,8 +201,16 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
   }
 }
 
+/**
+ * This will only download profile params for a single profile. It could be set
+ * to any index of the array, as we basically load runningCfg with what's in the
+ * screen and let the profiler phases follow ACTIVE_PROFILE() of that.
+ *
+ * To keep things consistent, however, we're setting the params in the "correct" index.
+ */
 eepromValues_t lcdDownloadCfg(void) {
   eepromValues_t lcdCfg = {};
+  lcdCfg.activeProfile = lcdGetSelectedProfile();
   // PI
   ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
   ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");

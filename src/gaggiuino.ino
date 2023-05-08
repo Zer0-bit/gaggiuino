@@ -375,6 +375,9 @@ void lcdSaveSettingsTrigger(void) {
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   eepromValues_t lcdValues = lcdDownloadCfg();
 
+  // Target save to the currently selected profile on screen (not necessarily same as saved default)
+  eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[lcdValues.activeProfile];
+
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)){
     case SCREEN_MODES::SCREEN_brew_more:
       eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
@@ -382,60 +385,60 @@ void lcdSaveSettingsTrigger(void) {
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
       break;
     case SCREEN_MODES::SCREEN_brew_preinfusion:
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionState = ACTIVE_PROFILE(lcdValues).preinfusionState;
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
+      eepromTargetProfile.preinfusionState = ACTIVE_PROFILE(lcdValues).preinfusionState;
+      eepromTargetProfile.preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
 
-      if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0) {
-        ACTIVE_PROFILE(eepromCurrentValues).preinfusionSec = ACTIVE_PROFILE(lcdValues).preinfusionSec;
-        ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureFlowTarget = ACTIVE_PROFILE(lcdValues).preinfusionPressureFlowTarget;
-        ACTIVE_PROFILE(eepromCurrentValues).preinfusionBar = ACTIVE_PROFILE(lcdValues).preinfusionBar;
+      if(eepromTargetProfile.preinfusionFlowState == 0) {
+        eepromTargetProfile.preinfusionSec = ACTIVE_PROFILE(lcdValues).preinfusionSec;
+        eepromTargetProfile.preinfusionPressureFlowTarget = ACTIVE_PROFILE(lcdValues).preinfusionPressureFlowTarget;
+        eepromTargetProfile.preinfusionBar = ACTIVE_PROFILE(lcdValues).preinfusionBar;
       }
       else {
-        ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowTime = ACTIVE_PROFILE(lcdValues).preinfusionFlowTime;
-        ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowVol = ACTIVE_PROFILE(lcdValues).preinfusionFlowVol;
-        ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowPressureTarget = ACTIVE_PROFILE(lcdValues).preinfusionFlowPressureTarget;
+        eepromTargetProfile.preinfusionFlowTime = ACTIVE_PROFILE(lcdValues).preinfusionFlowTime;
+        eepromTargetProfile.preinfusionFlowVol = ACTIVE_PROFILE(lcdValues).preinfusionFlowVol;
+        eepromTargetProfile.preinfusionFlowPressureTarget = ACTIVE_PROFILE(lcdValues).preinfusionFlowPressureTarget;
       }
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFilled = ACTIVE_PROFILE(lcdValues).preinfusionFilled;
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureAbove = ACTIVE_PROFILE(lcdValues).preinfusionPressureAbove;
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionWeightAbove = ACTIVE_PROFILE(lcdValues).preinfusionWeightAbove;
+      eepromTargetProfile.preinfusionFilled = ACTIVE_PROFILE(lcdValues).preinfusionFilled;
+      eepromTargetProfile.preinfusionPressureAbove = ACTIVE_PROFILE(lcdValues).preinfusionPressureAbove;
+      eepromTargetProfile.preinfusionWeightAbove = ACTIVE_PROFILE(lcdValues).preinfusionWeightAbove;
       break;
     case SCREEN_MODES::SCREEN_brew_soak:
-      ACTIVE_PROFILE(eepromCurrentValues).soakState = ACTIVE_PROFILE(lcdValues).soakState;
+      eepromTargetProfile.soakState = ACTIVE_PROFILE(lcdValues).soakState;
 
-      if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0)
-        ACTIVE_PROFILE(eepromCurrentValues).soakTimePressure = ACTIVE_PROFILE(lcdValues).soakTimePressure;
+      if(eepromTargetProfile.preinfusionFlowState == 0)
+        eepromTargetProfile.soakTimePressure = ACTIVE_PROFILE(lcdValues).soakTimePressure;
       else
-        ACTIVE_PROFILE(eepromCurrentValues).soakTimeFlow = ACTIVE_PROFILE(lcdValues).soakTimeFlow;
+        eepromTargetProfile.soakTimeFlow = ACTIVE_PROFILE(lcdValues).soakTimeFlow;
 
-      ACTIVE_PROFILE(eepromCurrentValues).soakKeepPressure = ACTIVE_PROFILE(lcdValues).soakKeepPressure;
-      ACTIVE_PROFILE(eepromCurrentValues).soakKeepFlow = ACTIVE_PROFILE(lcdValues).soakKeepFlow;
-      ACTIVE_PROFILE(eepromCurrentValues).soakBelowPressure = ACTIVE_PROFILE(lcdValues).soakBelowPressure;
-      ACTIVE_PROFILE(eepromCurrentValues).soakAbovePressure = ACTIVE_PROFILE(lcdValues).soakAbovePressure;
-      ACTIVE_PROFILE(eepromCurrentValues).soakAboveWeight = ACTIVE_PROFILE(lcdValues).soakAboveWeight;
+      eepromTargetProfile.soakKeepPressure = ACTIVE_PROFILE(lcdValues).soakKeepPressure;
+      eepromTargetProfile.soakKeepFlow = ACTIVE_PROFILE(lcdValues).soakKeepFlow;
+      eepromTargetProfile.soakBelowPressure = ACTIVE_PROFILE(lcdValues).soakBelowPressure;
+      eepromTargetProfile.soakAbovePressure = ACTIVE_PROFILE(lcdValues).soakAbovePressure;
+      eepromTargetProfile.soakAboveWeight = ACTIVE_PROFILE(lcdValues).soakAboveWeight;
       // PI -> PF
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionRamp = ACTIVE_PROFILE(lcdValues).preinfusionRamp;
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionRampSlope = ACTIVE_PROFILE(lcdValues).preinfusionRampSlope;
+      eepromTargetProfile.preinfusionRamp = ACTIVE_PROFILE(lcdValues).preinfusionRamp;
+      eepromTargetProfile.preinfusionRampSlope = ACTIVE_PROFILE(lcdValues).preinfusionRampSlope;
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
       // PRESSURE PARAMS
-      ACTIVE_PROFILE(eepromCurrentValues).profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
-      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState              = ACTIVE_PROFILE(lcdValues).flowProfileState;
-      if(ACTIVE_PROFILE(eepromCurrentValues).flowProfileState == 0) {
-        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingStart            = ACTIVE_PROFILE(lcdValues).pressureProfilingStart;
-        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFinish           = ACTIVE_PROFILE(lcdValues).pressureProfilingFinish;
-        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHold             = ACTIVE_PROFILE(lcdValues).pressureProfilingHold;
-        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).pressureProfilingHoldLimit;
-        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlope            = ACTIVE_PROFILE(lcdValues).pressureProfilingSlope;
-        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).pressureProfilingSlopeShape;
-        ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).pressureProfilingFlowRestriction;
+      eepromTargetProfile.profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
+      eepromTargetProfile.flowProfileState              = ACTIVE_PROFILE(lcdValues).flowProfileState;
+      if(eepromTargetProfile.flowProfileState == 0) {
+        eepromTargetProfile.pressureProfilingStart            = ACTIVE_PROFILE(lcdValues).pressureProfilingStart;
+        eepromTargetProfile.pressureProfilingFinish           = ACTIVE_PROFILE(lcdValues).pressureProfilingFinish;
+        eepromTargetProfile.pressureProfilingHold             = ACTIVE_PROFILE(lcdValues).pressureProfilingHold;
+        eepromTargetProfile.pressureProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).pressureProfilingHoldLimit;
+        eepromTargetProfile.pressureProfilingSlope            = ACTIVE_PROFILE(lcdValues).pressureProfilingSlope;
+        eepromTargetProfile.pressureProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).pressureProfilingSlopeShape;
+        eepromTargetProfile.pressureProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).pressureProfilingFlowRestriction;
       } else {
-        ACTIVE_PROFILE(eepromCurrentValues).flowProfileStart                  = ACTIVE_PROFILE(lcdValues).flowProfileStart;
-        ACTIVE_PROFILE(eepromCurrentValues).flowProfileEnd                    = ACTIVE_PROFILE(lcdValues).flowProfileEnd;
-        ACTIVE_PROFILE(eepromCurrentValues).flowProfileHold                   = ACTIVE_PROFILE(lcdValues).flowProfileHold;
-        ACTIVE_PROFILE(eepromCurrentValues).flowProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).flowProfileHoldLimit;
-        ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlope                  = ACTIVE_PROFILE(lcdValues).flowProfileSlope;
-        ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).flowProfileSlopeShape;
-        ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).flowProfilingPressureRestriction;
+        eepromTargetProfile.flowProfileStart                  = ACTIVE_PROFILE(lcdValues).flowProfileStart;
+        eepromTargetProfile.flowProfileEnd                    = ACTIVE_PROFILE(lcdValues).flowProfileEnd;
+        eepromTargetProfile.flowProfileHold                   = ACTIVE_PROFILE(lcdValues).flowProfileHold;
+        eepromTargetProfile.flowProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).flowProfileHoldLimit;
+        eepromTargetProfile.flowProfileSlope                  = ACTIVE_PROFILE(lcdValues).flowProfileSlope;
+        eepromTargetProfile.flowProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).flowProfileSlopeShape;
+        eepromTargetProfile.flowProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).flowProfilingPressureRestriction;
       }
       break;
     case SCREEN_MODES::SCREEN_settings_boiler:
