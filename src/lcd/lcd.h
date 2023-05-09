@@ -60,7 +60,6 @@ void lcdSaveSettingsTrigger(void);
 void lcdScalesTareTrigger(void);
 void lcdHomeScreenScalesTrigger(void);
 void lcdBrewGraphScalesTareTrigger(void);
-void lcdPumpPhaseShitfTrigger(void);
 void lcdRefreshElementsTrigger(void);
 void lcdQuickProfileSwitch(void);
 void lcdSaveProfileTrigger(void);

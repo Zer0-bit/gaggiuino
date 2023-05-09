@@ -588,11 +588,6 @@ void lcdBrewGraphScalesTareTrigger(void) {
   } else scalesTare();
 }
 
-void lcdPumpPhaseShitfTrigger(void) {
-  pumpPhaseShift();
-  lcdShowPopup("Phase switched!");
-}
-
 void lcdRefreshElementsTrigger(void) {
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
