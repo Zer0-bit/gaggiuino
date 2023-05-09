@@ -3,6 +3,7 @@
 #include <FlashStorage_STM32.h>
 #include "eeprom_data.h"
 #include "eeprom_metadata.h"
+#include "default_profiles.h"
 #include "legacy/eeprom_data_v4.h"
 #include "legacy/eeprom_data_v5.h"
 #include "legacy/eeprom_data_v6.h"
@@ -15,55 +16,53 @@ namespace {
 
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
+
     // Profiles
     defaultData.activeProfile = 0;
-    snprintf(defaultData.profiles[0].name, 50, "%s", "Default");
-    snprintf(defaultData.profiles[1].name, 50, "%s", "TBD");
-    snprintf(defaultData.profiles[2].name, 50, "%s", "TBD");
-    snprintf(defaultData.profiles[3].name, 50, "%s", "TBD");
-    snprintf(defaultData.profiles[4].name, 50, "%s", "TBD");
-    // TODO: create actual default profiles 1-4
     for (int i=0; i<MAX_PROFILES; i++) {
+      snprintf(defaultData.profiles[i].name, 50, "%s", defaultsProfile[i].name);
       // PI
-      defaultData.profiles[i].preinfusionState = true;
-      defaultData.profiles[i].preinfusionSec = 10;
-      defaultData.profiles[i].preinfusionBar = 2;
-      defaultData.profiles[i].preinfusionRamp = 0;
-      defaultData.profiles[i].preinfusionFlowState = false;
-      defaultData.profiles[i].preinfusionFlowVol = 3.5f;
-      defaultData.profiles[i].preinfusionFlowTime = 10;
-      defaultData.profiles[i].preinfusionFlowPressureTarget = 3.5f;
-      defaultData.profiles[i].preinfusionPressureFlowTarget = 3.5f;
-      defaultData.profiles[i].preinfusionFilled = 0;
-      defaultData.profiles[i].preinfusionPressureAbove = 0.f;
-      defaultData.profiles[i].preinfusionWeightAbove = 0.f;
+      defaultData.profiles[i].preinfusionState = defaultsProfile[i].preinfusionState;
+      defaultData.profiles[i].preinfusionSec = defaultsProfile[i].preinfusionSec;
+      defaultData.profiles[i].preinfusionBar = defaultsProfile[i].preinfusionBar;
+      defaultData.profiles[i].preinfusionRamp = defaultsProfile[i].preinfusionRamp;
+      defaultData.profiles[i].preinfusionFlowState = defaultsProfile[i].preinfusionFlowState;
+      defaultData.profiles[i].preinfusionFlowVol = defaultsProfile[i].preinfusionFlowVol;
+      defaultData.profiles[i].preinfusionFlowTime = defaultsProfile[i].preinfusionFlowTime;
+      defaultData.profiles[i].preinfusionFlowPressureTarget = defaultsProfile[i].preinfusionFlowPressureTarget;
+      defaultData.profiles[i].preinfusionPressureFlowTarget = defaultsProfile[i].preinfusionPressureFlowTarget;
+      defaultData.profiles[i].preinfusionFilled = defaultsProfile[i].preinfusionFilled;
+      defaultData.profiles[i].preinfusionPressureAbove = defaultsProfile[i].preinfusionPressureAbove;
+      defaultData.profiles[i].preinfusionWeightAbove = defaultsProfile[i].preinfusionWeightAbove;
       // SOAK
-      defaultData.profiles[i].soakState = 1;
-      defaultData.profiles[i].soakTimePressure = 10;
-      defaultData.profiles[i].soakTimeFlow = 5;
-      defaultData.profiles[i].soakKeepPressure = 0.f;
-      defaultData.profiles[i].soakKeepFlow = 0.f;
-      defaultData.profiles[i].soakBelowPressure = 0.f;
-      defaultData.profiles[i].soakAbovePressure = 0.f;
-      defaultData.profiles[i].soakAboveWeight = 0.f;
+      defaultData.profiles[i].soakState = defaultsProfile[i].soakState;
+      defaultData.profiles[i].soakTimePressure = defaultsProfile[i].soakTimePressure;
+      defaultData.profiles[i].soakTimeFlow = defaultsProfile[i].soakTimeFlow;
+      defaultData.profiles[i].soakKeepPressure = defaultsProfile[i].soakKeepPressure;
+      defaultData.profiles[i].soakKeepFlow = defaultsProfile[i].soakKeepFlow;
+      defaultData.profiles[i].soakBelowPressure = defaultsProfile[i].soakBelowPressure;
+      defaultData.profiles[i].soakAbovePressure = defaultsProfile[i].soakAbovePressure;
+      defaultData.profiles[i].soakAboveWeight = defaultsProfile[i].soakAboveWeight;
       // PI -> PF
-      defaultData.profiles[i].preinfusionRamp = 2;
-      defaultData.profiles[i].preinfusionRampSlope = 2;
+      defaultData.profiles[i].preinfusionRamp = defaultsProfile[i].preinfusionRamp;
+      defaultData.profiles[i].preinfusionRampSlope = defaultsProfile[i].preinfusionRampSlope;
       // Profiling
-      defaultData.profiles[i].profilingState = true;
-      defaultData.profiles[i].flowProfileState = false;
-      defaultData.profiles[i].pressureProfilingStart = 9;
-      defaultData.profiles[i].pressureProfilingFinish = 6;
-      defaultData.profiles[i].pressureProfilingHold = 5;
-      defaultData.profiles[i].pressureProfilingHoldLimit = 3.f;
-      defaultData.profiles[i].pressureProfilingSlope = 15;
-      defaultData.profiles[i].pressureProfilingFlowRestriction = 3.f;
-      defaultData.profiles[i].flowProfileStart = 3.5f;
-      defaultData.profiles[i].flowProfileEnd = 2.0f;
-      defaultData.profiles[i].flowProfileHold = 3.f;
-      defaultData.profiles[i].flowProfileHoldLimit = 9.f;
-      defaultData.profiles[i].flowProfileSlope = 15;
-      defaultData.profiles[i].flowProfilingPressureRestriction = 7;
+      defaultData.profiles[i].profilingState = defaultsProfile[i].profilingState;
+      defaultData.profiles[i].flowProfileState = defaultsProfile[i].flowProfileState;
+      defaultData.profiles[i].pressureProfilingStart = defaultsProfile[i].pressureProfilingStart;
+      defaultData.profiles[i].pressureProfilingFinish = defaultsProfile[i].pressureProfilingFinish;
+      defaultData.profiles[i].pressureProfilingHold = defaultsProfile[i].pressureProfilingHold;
+      defaultData.profiles[i].pressureProfilingHoldLimit = defaultsProfile[i].pressureProfilingHoldLimit;
+      defaultData.profiles[i].pressureProfilingSlope = defaultsProfile[i].pressureProfilingSlope;
+      defaultData.profiles[i].pressureProfilingSlopeShape = defaultsProfile[i].pressureProfilingSlopeShape;
+      defaultData.profiles[i].pressureProfilingFlowRestriction = defaultsProfile[i].pressureProfilingFlowRestriction;
+      defaultData.profiles[i].flowProfileStart = defaultsProfile[i].flowProfileStart;
+      defaultData.profiles[i].flowProfileEnd = defaultsProfile[i].flowProfileEnd;
+      defaultData.profiles[i].flowProfileHold = defaultsProfile[i].flowProfileHold;
+      defaultData.profiles[i].flowProfileHoldLimit = defaultsProfile[i].flowProfileHoldLimit;
+      defaultData.profiles[i].flowProfileSlope = defaultsProfile[i].flowProfileSlope;
+      defaultData.profiles[i].flowProfileSlopeShape = defaultsProfile[i].flowProfileSlopeShape;
+      defaultData.profiles[i].flowProfilingPressureRestriction = defaultsProfile[i].flowProfilingPressureRestriction;
     }
     // General brew settings
     defaultData.homeOnShotFinish = true;
