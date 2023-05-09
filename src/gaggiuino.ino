@@ -527,7 +527,6 @@ void lcdRefreshElementsTrigger(void) {
 }
 
 void lcdQuickProfileSwitch(void) {
-  lcdShowPopup("lcdQuickProfileSwitch"); // debug
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
 
   eepromCurrentValues.activeProfile = lcdGetSelectedProfile();

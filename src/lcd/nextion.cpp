@@ -30,8 +30,6 @@ void lcdWakeUp(void) {
 }
 
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
-  String msg = String("upldProfile: ") + eepromCurrentValues.activeProfile; // debug
-  lcdShowPopup(msg.c_str()); // debug
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -212,8 +210,6 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 eepromValues_t lcdDownloadCfg(void) {
   eepromValues_t lcdCfg = {};
   lcdCfg.activeProfile = lcdGetSelectedProfile();
-  String msg = String("dwnldCfg profile: ") + lcdCfg.activeProfile; // debug
-  lcdShowPopup(msg.c_str()); // debug
   // PI
   ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
   ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
