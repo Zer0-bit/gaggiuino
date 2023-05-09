@@ -208,9 +208,17 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
  * To keep things consistent, however, we're setting the params in the "correct" index.
  */
 eepromValues_t lcdDownloadCfg(void) {
+  static String prevButtonValue;
   eepromValues_t lcdCfg = {};
   lcdCfg.activeProfile = lcdGetSelectedProfile();
   // PI
+  char buttonElemId[20];
+  snprintf(buttonElemId, sizeof(buttonElemId), "home.qPf%d.txt", lcdCfg.activeProfile + 1);
+  String buttonValue = myNex.readStr(buttonElemId);
+  if (buttonValue != prevButtonValue) { // check if value has changed
+    snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%s", buttonValue.c_str());
+    prevButtonValue = buttonValue;
+  }
   ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
   ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
 

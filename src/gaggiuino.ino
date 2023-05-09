@@ -624,6 +624,7 @@ void lcdQuickProfileSwitch(void) {
 
   eepromCurrentValues.activeProfile = lcdGetSelectedProfile();
   lcdUploadProfile(eepromCurrentValues);
+  lcdShowPopup("Profile switched!");
 }
 
 void lcdQuickProfilesSwitchOrSave(void) {
