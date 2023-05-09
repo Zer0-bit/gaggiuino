@@ -29,24 +29,9 @@ void lcdWakeUp(void) {
   myNex.writeNum("sleep", 0);
 }
 
-// Don't need to upload this again after boot
-void lcdInitProfiles(eepromValues_t &eepromCurrentValues) {
-  // Highlight the active profile
-  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
-  String component = "qPf" + (eepromCurrentValues.activeProfile + 1);
-  myNex.writeNum(component + "bco", myNex.readNumber(component + "bco2"));
-  myNex.writeNum(component + "pco", myNex.readNumber(component + "pco2"));
-  // Profile names for all buttons
-  myNex.writeStr("qPf1.txt", eepromCurrentValues.profiles[0].name);
-  myNex.writeStr("qPf2.txt", eepromCurrentValues.profiles[1].name);
-  myNex.writeStr("qPf3.txt", eepromCurrentValues.profiles[2].name);
-  myNex.writeStr("qPf4.txt", eepromCurrentValues.profiles[3].name);
-  myNex.writeStr("qPf5.txt", eepromCurrentValues.profiles[4].name);
-}
-
-void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
-  // bool profileType = false;
-  // Profiles
+void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
+  String msg = String("lcdUploadProfile profile: ") + eepromCurrentValues.activeProfile; // debug
+  lcdShowPopup(msg.c_str()); // debug
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -101,6 +86,20 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction * 10.f);
   }
   myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
+}
+
+// This is never called again after boot
+void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
+  // bool profileType = false;
+  // Highlight the active profile
+  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+
+  // Profile names for all buttons
+  myNex.writeStr("qPf1.txt", eepromCurrentValues.profiles[0].name);
+  myNex.writeStr("qPf2.txt", eepromCurrentValues.profiles[1].name);
+  myNex.writeStr("qPf3.txt", eepromCurrentValues.profiles[2].name);
+  myNex.writeStr("qPf4.txt", eepromCurrentValues.profiles[3].name);
+  myNex.writeStr("qPf5.txt", eepromCurrentValues.profiles[4].name);
 
   // More brew settings
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
@@ -132,6 +131,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("shotSettings.numDose.val", eepromCurrentValues.shotDose * 10.f);
   myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
   myNex.writeNum("shotSettings.numDoseForced.val", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
+
+  lcdUploadProfile(eepromCurrentValues);
 }
 
 void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
@@ -211,6 +212,8 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 eepromValues_t lcdDownloadCfg(void) {
   eepromValues_t lcdCfg = {};
   lcdCfg.activeProfile = lcdGetSelectedProfile();
+  String msg = String("lcdDownloadCfg profile: ") + lcdCfg.activeProfile; // debug
+  lcdShowPopup(msg.c_str()); // debug
   // PI
   ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
   ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");

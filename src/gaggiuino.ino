@@ -74,7 +74,6 @@ void setup(void) {
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdInitProfiles(eepromCurrentValues);
   lcdUploadCfg(eepromCurrentValues);
   LOG_INFO("LCD cfg uploaded");
 
@@ -526,10 +525,11 @@ void lcdRefreshElementsTrigger(void) {
 }
 
 void lcdQuickProfileSwitch(void) {
+  lcdShowPopup("lcdQuickProfileSwitch"); // debug
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
 
-  ACTIVE_PROFILE(runningCfg) = eepromCurrentValues.profiles[lcdGetSelectedProfile()];
-  lcdUploadCfg(runningCfg);
+  eepromCurrentValues.activeProfile = lcdGetSelectedProfile();
+  lcdUploadProfile(eepromCurrentValues);
 }
 
 void lcdQuickProfilesSwitchOrSave(void) {

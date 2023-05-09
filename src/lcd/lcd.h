@@ -26,7 +26,7 @@ enum class SCREEN_MODES {
 } ;
 
 void lcdInit(void);
-void lcdInitProfiles(eepromValues_t &eepromCurrentValues);
+void lcdUploadProfile(eepromValues_t &eepromCurrentValues);
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
 void uploadPageCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);
