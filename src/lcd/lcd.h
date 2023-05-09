@@ -63,5 +63,6 @@ void lcdBrewGraphScalesTareTrigger(void);
 void lcdPumpPhaseShitfTrigger(void);
 void lcdRefreshElementsTrigger(void);
 void lcdQuickProfileSwitch(void);
+void lcdSaveProfileTrigger(void);
 
 #endif

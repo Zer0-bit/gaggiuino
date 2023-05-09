@@ -380,3 +380,4 @@ void trigger4(void) { lcdBrewGraphScalesTareTrigger(); }
 void trigger5(void) { lcdPumpPhaseShitfTrigger(); }
 void trigger6(void) { lcdRefreshElementsTrigger(); }
 void trigger7(void) { lcdQuickProfileSwitch(); }
+void trigger8(void) { lcdSaveProfileTrigger(); }
