@@ -93,11 +93,11 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
 
   // Profile names for all buttons
-  myNex.writeStr("qPf1.txt", eepromCurrentValues.profiles[0].name);
-  myNex.writeStr("qPf2.txt", eepromCurrentValues.profiles[1].name);
-  myNex.writeStr("qPf3.txt", eepromCurrentValues.profiles[2].name);
-  myNex.writeStr("qPf4.txt", eepromCurrentValues.profiles[3].name);
-  myNex.writeStr("qPf5.txt", eepromCurrentValues.profiles[4].name);
+  myNex.writeStr("home.qPf1.txt", eepromCurrentValues.profiles[0].name);
+  myNex.writeStr("home.qPf2.txt", eepromCurrentValues.profiles[1].name);
+  myNex.writeStr("home.qPf3.txt", eepromCurrentValues.profiles[2].name);
+  myNex.writeStr("home.qPf4.txt", eepromCurrentValues.profiles[3].name);
+  myNex.writeStr("home.qPf5.txt", eepromCurrentValues.profiles[4].name);
 
   // More brew settings
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
