@@ -46,7 +46,7 @@ struct eepromValues_t {
   uint16_t mainDivider;
   uint16_t brewDivider;
   uint8_t activeProfile;
-  struct {
+  struct profile_t {
     // name length is intentionally not macro/constant to avoid
     // separating them from the version. changing the length needs
     // a version bump!

@@ -29,11 +29,9 @@ void lcdWakeUp(void) {
   myNex.writeNum("sleep", 0);
 }
 
-void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
-  // bool profileType = false;
-  // Profiles
-  // TODO: set the selected profile number first!
-  // TODO: set all the profile names from saved data
+void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
+  // Highlight the active profile
+  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -88,6 +86,20 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction * 10.f);
   }
   myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
+}
+
+// This is never called again after boot
+void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
+  // bool profileType = false;
+  // Highlight the active profile
+  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+
+  // Profile names for all buttons
+  myNex.writeStr("home.qPf1.txt", eepromCurrentValues.profiles[0].name);
+  myNex.writeStr("home.qPf2.txt", eepromCurrentValues.profiles[1].name);
+  myNex.writeStr("home.qPf3.txt", eepromCurrentValues.profiles[2].name);
+  myNex.writeStr("home.qPf4.txt", eepromCurrentValues.profiles[3].name);
+  myNex.writeStr("home.qPf5.txt", eepromCurrentValues.profiles[4].name);
 
   // More brew settings
   myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
@@ -119,6 +131,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("shotSettings.numDose.val", eepromCurrentValues.shotDose * 10.f);
   myNex.writeNum("shotPreset", eepromCurrentValues.shotPreset);
   myNex.writeNum("shotSettings.numDoseForced.val", eepromCurrentValues.shotStopOnCustomWeight * 10.f);
+
+  lcdUploadProfile(eepromCurrentValues);
 }
 
 void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
@@ -188,11 +202,21 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
   }
 }
 
+/**
+ * This will only download profile params for a single profile. It could be set
+ * to any index of the array, as we basically load runningCfg with what's in the
+ * screen and let the profiler phases follow ACTIVE_PROFILE() of that.
+ *
+ * To keep things consistent, however, we're setting the params in the "correct" index.
+ */
 eepromValues_t lcdDownloadCfg(void) {
   eepromValues_t lcdCfg = {};
-  // TODO: read the selected profile first, no?
-  // lcdCfg.activeProfile = myNex.readNumber("???");
+  lcdCfg.activeProfile = lcdGetSelectedProfile();
   // PI
+  char buttonElemId[20];
+  snprintf(buttonElemId, sizeof(buttonElemId), "home.qPf%d.txt", lcdCfg.activeProfile + 1);
+  snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%s", myNex.readStr(buttonElemId).c_str());
+
   ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
   ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
 
@@ -268,6 +292,12 @@ eepromValues_t lcdDownloadCfg(void) {
   lcdCfg.pumpFlowAtZero                 = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
 
   return lcdCfg;
+}
+
+int lcdGetSelectedProfile(void) {
+  int selected = myNex.readNumber("pIdx");
+  if (selected < 1 || selected > 5) lcdShowPopup((String("getProfile rekt: ") + selected).c_str());
+  return selected - 1 /* 1-offset in nextion */;
 }
 
 int lcdGetManualFlowVol(void) {
@@ -353,5 +383,6 @@ void trigger1(void) { lcdSaveSettingsTrigger(); }
 void trigger2(void) { lcdScalesTareTrigger(); }
 void trigger3(void) { lcdHomeScreenScalesTrigger(); }
 void trigger4(void) { lcdBrewGraphScalesTareTrigger(); }
-void trigger5(void) { lcdPumpPhaseShitfTrigger(); }
 void trigger6(void) { lcdRefreshElementsTrigger(); }
+void trigger7(void) { lcdQuickProfileSwitch(); }
+void trigger8(void) { lcdSaveProfileTrigger(); }
