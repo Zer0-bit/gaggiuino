@@ -293,7 +293,9 @@ eepromValues_t lcdDownloadCfg(void) {
 }
 
 int lcdGetSelectedProfile(void) {
-  return myNex.readNumber("pIdx") - 1 /* 1-offset in nextion */;
+  int selected = myNex.readNumber("pIdx");
+  if (selected < 1 || selected > 5) lcdShowPopup((String("lcdGetSelectedProfile rekt ") + selected).c_str());
+  return selected - 1 /* 1-offset in nextion */;
 }
 
 int lcdGetManualFlowVol(void) {
