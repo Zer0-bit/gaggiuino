@@ -464,7 +464,7 @@ void lcdSaveSettingsTrigger(void) {
     default:
       break;
   }
-
+  watchdogReload(); // reload the watchdog timer on expensive operations
   rc = eepromWrite(eepromCurrentValues);
   if (rc == true) {
     lcdShowPopup("Update successful!");
