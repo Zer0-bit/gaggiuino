@@ -5,17 +5,21 @@
 #include "pindef.h"
 
 #if defined SINGLE_BOARD
-  #include <Adafruit_MAX31855.h>
-  Adafruit_MAX31855 thermocouple(thermoCLK, thermoCS, thermoDO);
+#include <Adafruit_MAX31855.h>
+SPIClass thermoSPI(thermoDI, thermoDO, thermoCLK);
+Adafruit_MAX31855 thermocouple(thermoCS, &thermoSPI);
 #else
-  #include <max6675.h>
-  MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
+#include <max6675.h>
+SPIClass thermoSPI(thermoDI, thermoDO, thermoCLK);
+MAX6675 thermocouple(thermoCS, &thermoSPI);
 #endif
 
 static inline void thermocoupleInit(void) {
-#if defined SINGLE_BOARD
   thermocouple.begin();
-#endif
+}
+
+static inline float thermocoupleRead(void) {
+  return thermocouple.readCelsius();
 }
 
 #endif
