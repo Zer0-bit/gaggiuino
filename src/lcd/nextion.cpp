@@ -213,9 +213,9 @@ eepromValues_t lcdDownloadCfg(void) {
   eepromValues_t lcdCfg = {};
   lcdCfg.activeProfile = lcdGetSelectedProfile();
   // PI
-  char buttonElemId[20];
+  char buttonElemId[16];
   snprintf(buttonElemId, sizeof(buttonElemId), "home.qPf%d.txt", lcdCfg.activeProfile + 1);
-  snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%s", myNex.readStr(buttonElemId).c_str());
+  snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%.16s", myNex.readStr(buttonElemId).c_str());
 
   ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
   ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
