@@ -10,9 +10,8 @@ SPIClass thermoSPI(thermoDI, thermoDO, thermoCLK);
 Adafruit_MAX31855 thermocouple(thermoCS, &thermoSPI);
 #else
 #include <max6675.h>
-// SPIClass thermoSPI(thermoDI, thermoDO, thermoCLK);
-// MAX6675 thermocouple(thermoCS, &thermoSPI);
-MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
+SPIClass thermoSPI(thermoDI, thermoDO, thermoCLK);
+MAX6675 thermocouple(thermoCS, &thermoSPI);
 #endif
 
 static inline void thermocoupleInit(void) {
