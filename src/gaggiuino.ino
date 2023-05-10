@@ -378,6 +378,7 @@ void lcdSaveSettingsTrigger(void) {
   eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[lcdValues.activeProfile];
   // Save the currently selected profile name
   snprintf(eepromTargetProfile->name, 50, "%s", ACTIVE_PROFILE(lcdValues).name);
+  eepromCurrentValues.activeProfile = lcdValues.activeProfile;
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)){
     case SCREEN_MODES::SCREEN_brew_more:
@@ -538,6 +539,7 @@ void lcdSaveProfileTrigger(void) {
     eepromTargetProfile->flowProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).flowProfileSlopeShape;
     eepromTargetProfile->flowProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).flowProfilingPressureRestriction;
   }
+  eepromCurrentValues.activeProfile                 = lcdValues.activeProfile;
   eepromCurrentValues.setpoint                      = lcdValues.setpoint;
   eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
   eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
