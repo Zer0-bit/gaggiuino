@@ -6,13 +6,13 @@
 #include "../log.h"
 
 /**
- * NOTE: changing this variable requires:
- *        - bumping the version number! the serialized data will have
- *          a different layout to accommodate more array elements
- *        - hardcoding the current value in the archived version and
- *          its upgrade function, to ensure loading that version
- *          deserializes correctly
- */
+* NOTE: changing this variable requires:
+*        - bumping the version number! the serialized data will have
+*          a different layout to accommodate more array elements
+*        - hardcoding the current value in the archived version and
+*          its upgrade function, to ensure loading that version
+*          deserializes correctly
+*/
 #define MAX_PROFILES 5
 
 /**
