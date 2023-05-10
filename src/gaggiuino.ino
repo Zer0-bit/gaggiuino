@@ -371,13 +371,13 @@ void lcdSaveSettingsTrigger(void) {
   bool rc;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   watchdogReload(); // reload the watchdog timer on expensive operations
-  eepromValues_t lcdValues = lcdDownloadCfg();
+  eepromValues_t lcdValues = lcdDownloadCfg(true); // :true: means read the buttons name
   watchdogReload(); // reload the watchdog timer on expensive operations
 
   // Target save to the currently selected profile on screen (not necessarily same as saved default)
   eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[lcdValues.activeProfile];
   // Save the currently selected profile name
-  snprintf(eepromTargetProfile->name, 50, "%s", ACTIVE_PROFILE(lcdValues).name);
+  snprintf(eepromTargetProfile->name, 20, "%s", ACTIVE_PROFILE(lcdValues).name);
   eepromCurrentValues.activeProfile = lcdValues.activeProfile;
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)){
@@ -481,13 +481,13 @@ void lcdSaveProfileTrigger(void) {
   bool rc;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
   watchdogReload(); // reload the watchdog timer on expensive operations
-  eepromValues_t lcdValues = lcdDownloadCfg();
+  eepromValues_t lcdValues = lcdDownloadCfg(true); // :true: means read the buttons name
   watchdogReload(); // reload the watchdog timer on expensive operations
 
   // Target save to the currently selected profile on screen (not necessarily same as saved default)
   eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[lcdValues.activeProfile];
 
-  snprintf(eepromTargetProfile->name, 50, "%s", ACTIVE_PROFILE(lcdValues).name);
+  snprintf(eepromTargetProfile->name, 20, "%s", ACTIVE_PROFILE(lcdValues).name);
   eepromTargetProfile->preinfusionState = ACTIVE_PROFILE(lcdValues).preinfusionState;
   eepromTargetProfile->preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
 

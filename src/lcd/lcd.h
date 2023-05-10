@@ -32,7 +32,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);
 void lcdWakeUp(void);
 
-eepromValues_t lcdDownloadCfg(void);
+eepromValues_t lcdDownloadCfg(bool toSave = false);
 int lcdGetSelectedProfile(void);
 int lcdGetHomeScreenScalesEnabled(void);
 int lcdGetSelectedOperationalMode(void);
