@@ -27,11 +27,11 @@ unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 
 void scalesInit(float scalesF1, float scalesF2) {
   auto& loadCells = LoadCellSingleton::getInstance();
-  loadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, 128, scale_clk);
+  loadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, HX711_sck_2, 128, scale_clk);
   loadCells.set_scale(scalesF1, scalesF2);
   loadCells.power_up();
   delay(150);
-  if (loadCells.wait_ready_timeout(1000, 0)) {
+  if (loadCells.wait_ready_timeout(1000, 10)) {
     loadCells.tare(4);
     scalesPresent = true;
   }
@@ -44,7 +44,7 @@ void scalesInit(float scalesF1, float scalesF2) {
 
 void scalesTare(void) {
   auto& loadCells = LoadCellSingleton::getInstance();
-  if (loadCells.wait_ready_timeout(150, 0)) {
+  if (loadCells.wait_ready_timeout(150, 10)) {
     loadCells.tare(4);
   }
 }
@@ -52,7 +52,7 @@ void scalesTare(void) {
 float scalesGetWeight(void) {
   float currentWeight = 0.f;
   auto& loadCells = LoadCellSingleton::getInstance();
-  if (loadCells.wait_ready_timeout(150, 0)) {
+  if (loadCells.wait_ready_timeout(150, 10)) {
     float values[2];
     loadCells.get_units(values);
     currentWeight = values[0] + values[1];
