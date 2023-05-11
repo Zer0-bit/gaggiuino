@@ -76,6 +76,7 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHold);
     myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHoldLimit * 10.f);
     myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlope);
+    myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlopeShape);
     myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFlowRestriction * 10.f);
   } else {
     myNex.writeNum("profiles.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileStart * 10.f);
@@ -83,9 +84,9 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHold);
     myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHoldLimit * 10.f);
     myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlope);
+    myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
     myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction * 10.f);
   }
-  myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
 }
 
 // This is never called again after boot
@@ -185,6 +186,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
         myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHold);
         myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHoldLimit * 10.f);
         myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlope);
+        myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlopeShape);
         myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFlowRestriction * 10.f);
       } else {
         myNex.writeNum("profiles.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileStart * 10.f);
@@ -192,9 +194,9 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
         myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHold);
         myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHoldLimit * 10.f);
         myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlope);
+        myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
         myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction * 10.f);
       }
-      myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
       break;
     default:
       lcdUploadCfg(eepromCurrentValues);
@@ -276,6 +278,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
       ACTIVE_PROFILE(lcdCfg).pressureProfilingHold = myNex.readNumber("profiles.pHold.val");
       ACTIVE_PROFILE(lcdCfg).pressureProfilingHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
       ACTIVE_PROFILE(lcdCfg).pressureProfilingSlope = myNex.readNumber("profiles.pSlope.val");
+      ACTIVE_PROFILE(lcdCfg).pressureProfilingSlopeShape = myNex.readNumber("pfCrv");
       ACTIVE_PROFILE(lcdCfg).pressureProfilingFlowRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
     } else {
       ACTIVE_PROFILE(lcdCfg).flowProfileStart = myNex.readNumber("profiles.pStart.val") / 10.f;
@@ -283,9 +286,9 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
       ACTIVE_PROFILE(lcdCfg).flowProfileHold = myNex.readNumber("profiles.pHold.val");
       ACTIVE_PROFILE(lcdCfg).flowProfileHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
       ACTIVE_PROFILE(lcdCfg).flowProfileSlope = myNex.readNumber("profiles.pSlope.val");
+      ACTIVE_PROFILE(lcdCfg).flowProfileSlopeShape = myNex.readNumber("pfCrv");
       ACTIVE_PROFILE(lcdCfg).flowProfilingPressureRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
     }
-    ACTIVE_PROFILE(lcdCfg).flowProfileSlopeShape = myNex.readNumber("pfCrv");
   }
 
   if (lcdCurrentPageId == 10 || lcdLastCurrentPageId == 10) {// More brew settings
