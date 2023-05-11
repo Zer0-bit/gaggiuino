@@ -43,6 +43,8 @@ void lcdFetchDoseSettings(eepromValues_t &settings);
 void lcdFetchTemp(eepromValues_t &settings);
 void lcdFetchSystem(eepromValues_t &settings);
 int lcdGetSelectedProfile(void);
+bool lcdGetPreinfusionFlowState(void);
+bool lcdGetProfileFlowState(void);
 int lcdGetHomeScreenScalesEnabled(void);
 int lcdGetSelectedOperationalMode(void);
 int lcdGetManualFlowVol(void);

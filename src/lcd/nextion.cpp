@@ -213,7 +213,7 @@ void lcdFetchCurrentProfileName(eepromValues_t::profile_t &profile) {
 
 void lcdFetchPreinfusion(eepromValues_t::profile_t &profile) {
   profile.preinfusionState = myNex.readNumber("piState");
-  profile.preinfusionFlowState = myNex.readNumber("piFlowState");
+  profile.preinfusionFlowState = lcdGetPreinfusionFlowState();
 
   if(profile.preinfusionFlowState == 0) {
     profile.preinfusionSec = myNex.readNumber("preinfusion.piTime.val");
@@ -252,7 +252,7 @@ void lcdFetchSoak(eepromValues_t::profile_t &profile) {
 void lcdFetchBrewProfile(eepromValues_t::profile_t &profile) {
   // PROFILING
   profile.profilingState = myNex.readNumber("ppState");
-  profile.flowProfileState = myNex.readNumber("ppType");
+  profile.flowProfileState = lcdGetProfileFlowState();
 
   if(profile.flowProfileState == 0) {
     profile.pressureProfilingStart = myNex.readNumber("profiles.pStart.val") / 10.f;
@@ -334,6 +334,14 @@ int lcdGetSelectedProfile(void) {
   int selected = myNex.readNumber("pIdx");
   if (selected < 1 || selected > 5) lcdShowPopup((String("getProfile rekt: ") + selected).c_str());
   return selected - 1 /* 1-offset in nextion */;
+}
+
+bool lcdGetPreinfusionFlowState(void) {
+  return myNex.readNumber("piFlowState");
+}
+
+bool lcdGetProfileFlowState(void) {
+  return myNex.readNumber("ppType");
 }
 
 int lcdGetManualFlowVol(void) {

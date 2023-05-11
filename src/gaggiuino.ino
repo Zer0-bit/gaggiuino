@@ -591,14 +591,13 @@ void lcdBrewGraphScalesTareTrigger(void) {
 void lcdRefreshElementsTrigger(void) {
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  eepromValues_t lcdValues = lcdDownloadCfg();
 
   switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
     case SCREEN_MODES::SCREEN_brew_preinfusion:
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = lcdGetPreinfusionFlowState();
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
-      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState = ACTIVE_PROFILE(lcdValues).flowProfileState;
+      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState = lcdGetProfileFlowState();
       break;
     default:
       lcdShowPopup("Nope!");
