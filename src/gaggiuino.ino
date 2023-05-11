@@ -225,20 +225,20 @@ static void calculateWeightAndFlow(void) {
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
+static void pageValuesRefresh() {
+  runningCfg = lcdDownloadCfg();
+
+  homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
+  // MODE_SELECT should always be LAST
+  selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode();
+
+  updateProfilerPhases();
+
+  lcdLastCurrentPageId = lcdCurrentPageId;
+}
 
 static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
-  if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) {
-    runningCfg = lcdDownloadCfg();
-
-
-    homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
-    // MODE_SELECT should always be LAST
-    selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode();
-
-    updateProfilerPhases();
-
-    lcdLastCurrentPageId = lcdCurrentPageId;
-  }
+  if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) pageValuesRefresh();
 }
 
 //#############################################################################################
