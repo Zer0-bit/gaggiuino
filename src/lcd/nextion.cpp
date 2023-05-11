@@ -207,10 +207,6 @@ void lcdFetchProfileName(eepromValues_t::profile_t &profile, uint8_t index /* 0-
   snprintf(profile.name, sizeof(profile.name), "%.16s", myNex.readStr(buttonElemId).c_str());
 }
 
-void lcdFetchCurrentProfileName(eepromValues_t::profile_t &profile) {
-  lcdFetchProfileName(profile, lcdGetSelectedProfile());
-}
-
 void lcdFetchPreinfusion(eepromValues_t::profile_t &profile) {
   profile.preinfusionState = myNex.readNumber("piState");
   profile.preinfusionFlowState = lcdGetPreinfusionFlowState();
@@ -317,7 +313,7 @@ void lcdFetchSystem(eepromValues_t &settings) {
 eepromValues_t lcdDownloadCfg(bool toSave) {
   eepromValues_t lcdCfg = {};
   lcdCfg.activeProfile = lcdGetSelectedProfile();
-  if (toSave) lcdFetchCurrentProfileName(ACTIVE_PROFILE(lcdCfg));
+  if (toSave) lcdFetchProfileName(ACTIVE_PROFILE(lcdCfg), lcdCfg.activeProfile);
 
   lcdFetchPreinfusion(ACTIVE_PROFILE(lcdCfg));
   lcdFetchSoak(ACTIVE_PROFILE(lcdCfg));
