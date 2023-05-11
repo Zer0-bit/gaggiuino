@@ -622,32 +622,6 @@ void lcdQuickProfileSwitch(void) {
   lcdShowPopup("Profile switched!");
 }
 
-void lcdQuickProfilesSwitchOrSave(void) {
-
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  eepromValues_t lcdValues = lcdDownloadCfg();
-
-  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
-    case SCREEN_MODES::SCREEN_brew_preinfusion:
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
-      break;
-    case SCREEN_MODES::SCREEN_brew_profiling:
-      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState = ACTIVE_PROFILE(lcdValues).flowProfileState;
-      break;
-    default:
-      lcdShowPopup("Nope!");
-      break;
-  }
-  bool rc = eepromWrite(eepromCurrentValues);
-  (rc == true) ? lcdShowPopup("Switched!") : lcdShowPopup("Fail!");
-
-  eepromCurrentValues = eepromGetCurrentValues();
-  // Make the necessary changes
-  uploadPageCfg(eepromCurrentValues);
-  // refresh the screen elements
-  pageValuesRefresh(true);
-}
-
 //#############################################################################################
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
