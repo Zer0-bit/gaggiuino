@@ -214,7 +214,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 eepromValues_t lcdDownloadCfg(bool toSave) {
   eepromValues_t lcdCfg = eepromGetCurrentValues();
   lcdCfg.activeProfile = lcdGetSelectedProfile();
-  // We only want to download values when actually switching a page containing them.
+  // We only want to download values when actually switching a page with switchable vals.
   switch (lcdCurrentPageId) {
     case 4:
     case 5:
@@ -231,7 +231,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%.16s", myNex.readStr(buttonElemId).c_str());
   }
 
-  if (lcdCurrentPageId == 1 || lcdLastCurrentPageId == 1) { // PI
+  if (toSave || lcdCurrentPageId == 1 || lcdLastCurrentPageId == 1) { // PI
     ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
     ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
 
@@ -250,7 +250,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     ACTIVE_PROFILE(lcdCfg).preinfusionWeightAbove = myNex.readNumber("preinfusion.piAbove.val") / 10.f;
   }
 
-  if (lcdCurrentPageId == 2 || lcdLastCurrentPageId == 2) { // SOAK
+  if (toSave || lcdCurrentPageId == 2 || lcdLastCurrentPageId == 2) { // SOAK
     ACTIVE_PROFILE(lcdCfg).soakState = myNex.readNumber("skState");
 
     if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0)
@@ -268,7 +268,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     ACTIVE_PROFILE(lcdCfg).preinfusionRampSlope = myNex.readNumber("skCrv");
   }
 
-  if (lcdCurrentPageId == 3 || lcdLastCurrentPageId == 3) {// PROFILING
+  if (toSave || lcdCurrentPageId == 3 || lcdLastCurrentPageId == 3) {// PROFILING
     ACTIVE_PROFILE(lcdCfg).profilingState = myNex.readNumber("ppState");
     ACTIVE_PROFILE(lcdCfg).flowProfileState = myNex.readNumber("ppType");
 
@@ -291,20 +291,20 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     }
   }
 
-  if (lcdCurrentPageId == 10 || lcdLastCurrentPageId == 10) {// More brew settings
+  if (toSave || lcdCurrentPageId == 10 || lcdLastCurrentPageId == 10) {// More brew settings
     lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
     lcdCfg.basketPrefill                  = myNex.readNumber("basketPrefill");
     lcdCfg.brewDeltaState                 = myNex.readNumber("deltaState");
   }
 
-  if (lcdCurrentPageId == 11 || lcdLastCurrentPageId == 11) {// DOse settings
+  if (toSave || lcdCurrentPageId == 11 || lcdLastCurrentPageId == 11) {// DOse settings
     lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");
     lcdCfg.shotDose                       = myNex.readNumber("shotSettings.numDose.val") / 10.f;
     lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotSettings.numDoseForced.val") / 10.f;
     lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
   }
 
-  if (lcdCurrentPageId == 7 || lcdLastCurrentPageId == 7) {// System settings
+  if (toSave || lcdCurrentPageId == 7 || lcdLastCurrentPageId == 7) {// System settings
     lcdCfg.setpoint                       = myNex.readNumber("moreTemp.setPoint.val");
     lcdCfg.steamSetPoint                  = myNex.readNumber("moreTemp.steamSetPoint.val");
     lcdCfg.offsetTemp                     = myNex.readNumber("moreTemp.offSet.val");
@@ -313,7 +313,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     lcdCfg.brewDivider                    = myNex.readNumber("moreTemp.bDiv.val");
   }
 
-  if (lcdCurrentPageId == 8 || lcdLastCurrentPageId == 8) {// System settings
+  if (toSave || lcdCurrentPageId == 8 || lcdLastCurrentPageId == 8) {// System settings
     lcdCfg.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
     lcdCfg.warmupState                    = myNex.readNumber("warmupState");
     lcdCfg.scalesF1                       = myNex.readNumber("morePower.lc1.val");
