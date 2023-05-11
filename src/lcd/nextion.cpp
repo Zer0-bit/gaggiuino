@@ -256,6 +256,7 @@ void lcdFetchBrewProfile(eepromValues_t::profile_t &profile) {
     profile.pressureProfilingHold = myNex.readNumber("profiles.pHold.val");
     profile.pressureProfilingHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
     profile.pressureProfilingSlope = myNex.readNumber("profiles.pSlope.val");
+    profile.pressureProfilingSlopeShape = myNex.readNumber("pfCrv");
     profile.pressureProfilingFlowRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
   } else {
     profile.flowProfileStart = myNex.readNumber("profiles.pStart.val") / 10.f;
@@ -263,9 +264,9 @@ void lcdFetchBrewProfile(eepromValues_t::profile_t &profile) {
     profile.flowProfileHold = myNex.readNumber("profiles.pHold.val");
     profile.flowProfileHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
     profile.flowProfileSlope = myNex.readNumber("profiles.pSlope.val");
+    profile.flowProfileSlopeShape = myNex.readNumber("pfCrv");
     profile.flowProfilingPressureRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
   }
-  profile.flowProfileSlopeShape = myNex.readNumber("pfCrv");
 }
 
 void lcdFetchBrewSettings(eepromValues_t &settings) {
