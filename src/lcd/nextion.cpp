@@ -201,97 +201,131 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
       break;
   }
 }
+void lcdFetchProfileName(eepromValues_t::profile_t &profile, uint8_t index /* 0-offset */) {
+  char buttonElemId[16];
+  snprintf(buttonElemId, 16, "home.qPf%d.txt", index + 1);
+  snprintf(profile.name, sizeof(profile.name), "%.16s", myNex.readStr(buttonElemId).c_str());
+}
+
+void lcdFetchCurrentProfileName(eepromValues_t::profile_t &profile) {
+  lcdFetchProfileName(profile, lcdGetSelectedProfile());
+}
+
+void lcdFetchPreinfusion(eepromValues_t::profile_t &profile) {
+  profile.preinfusionState = myNex.readNumber("piState");
+  profile.preinfusionFlowState = myNex.readNumber("piFlowState");
+
+  if(profile.preinfusionFlowState == 0) {
+    profile.preinfusionSec = myNex.readNumber("preinfusion.piTime.val");
+    profile.preinfusionPressureFlowTarget = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
+    profile.preinfusionBar = myNex.readNumber("preinfusion.piBar.val") / 10.f;
+  }
+  else {
+    profile.preinfusionFlowTime = myNex.readNumber("preinfusion.piTime.val");
+    profile.preinfusionFlowVol = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
+    profile.preinfusionFlowPressureTarget = myNex.readNumber("preinfusion.piBar.val") / 10.f;
+  }
+  profile.preinfusionFilled = myNex.readNumber("preinfusion.piPumped.val");
+  profile.preinfusionPressureAbove = myNex.readNumber("piRPressure");
+  profile.preinfusionWeightAbove = myNex.readNumber("preinfusion.piAbove.val") / 10.f;
+}
+
+void lcdFetchSoak(eepromValues_t::profile_t &profile) {
+  // SOAK
+  profile.soakState = myNex.readNumber("skState");
+
+  if(profile.preinfusionFlowState == 0)
+    profile.soakTimePressure = myNex.readNumber("soak.skTime.val");
+  else
+    profile.soakTimeFlow = myNex.readNumber("soak.skTime.val");
+
+  profile.soakKeepPressure = myNex.readNumber("soak.skBar.val") / 10.f;
+  profile.soakKeepFlow = myNex.readNumber("soak.skFlow.val") / 10.f;
+  profile.soakBelowPressure = myNex.readNumber("soak.skBelow.val") / 10.f;
+  profile.soakAbovePressure = myNex.readNumber("soak.skAbv.val") / 10.f;
+  profile.soakAboveWeight = myNex.readNumber("soak.skWAbv.val") / 10.f;
+  // PI -> PF
+  profile.preinfusionRamp = myNex.readNumber("soak.skRamp.val");
+  profile.preinfusionRampSlope = myNex.readNumber("skCrv");
+}
+
+void lcdFetchBrewProfile(eepromValues_t::profile_t &profile) {
+  // PROFILING
+  profile.profilingState = myNex.readNumber("ppState");
+  profile.flowProfileState = myNex.readNumber("ppType");
+
+  if(profile.flowProfileState == 0) {
+    profile.pressureProfilingStart = myNex.readNumber("profiles.pStart.val") / 10.f;
+    profile.pressureProfilingFinish = myNex.readNumber("profiles.pEnd.val") / 10.f;
+    profile.pressureProfilingHold = myNex.readNumber("profiles.pHold.val");
+    profile.pressureProfilingHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
+    profile.pressureProfilingSlope = myNex.readNumber("profiles.pSlope.val");
+    profile.pressureProfilingFlowRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
+  } else {
+    profile.flowProfileStart = myNex.readNumber("profiles.pStart.val") / 10.f;
+    profile.flowProfileEnd = myNex.readNumber("profiles.pEnd.val") / 10.f;
+    profile.flowProfileHold = myNex.readNumber("profiles.pHold.val");
+    profile.flowProfileHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
+    profile.flowProfileSlope = myNex.readNumber("profiles.pSlope.val");
+    profile.flowProfilingPressureRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
+  }
+  profile.flowProfileSlopeShape = myNex.readNumber("pfCrv");
+}
+
+void lcdFetchBrewSettings(eepromValues_t &settings) {
+  // More brew settings
+  settings.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
+  settings.basketPrefill                  = myNex.readNumber("basketPrefill");
+  settings.brewDeltaState                 = myNex.readNumber("deltaState");
+}
+
+// TODO: move these to inside the profile
+void lcdFetchDoseSettings(eepromValues_t &settings) {
+  // DOse settings
+  settings.stopOnWeightState              = myNex.readNumber("shotState");
+  settings.shotDose                       = myNex.readNumber("shotSettings.numDose.val") / 10.f;
+  settings.shotStopOnCustomWeight         = myNex.readNumber("shotSettings.numDoseForced.val") / 10.f;
+  settings.shotPreset                     = myNex.readNumber("shotPreset");
+}
+
+void lcdFetchTemp(eepromValues_t &settings) {
+  settings.setpoint                       = myNex.readNumber("moreTemp.setPoint.val");
+  settings.steamSetPoint                  = myNex.readNumber("moreTemp.steamSetPoint.val");
+  settings.offsetTemp                     = myNex.readNumber("moreTemp.offSet.val");
+  settings.hpwr                           = myNex.readNumber("moreTemp.hpwr.val");
+  settings.mainDivider                    = myNex.readNumber("moreTemp.mDiv.val");
+  settings.brewDivider                    = myNex.readNumber("moreTemp.bDiv.val");
+ }
+
+void lcdFetchSystem(eepromValues_t &settings) {
+  // System settings
+  settings.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
+  settings.warmupState                    = myNex.readNumber("warmupState");
+  settings.scalesF1                       = myNex.readNumber("morePower.lc1.val");
+  settings.scalesF2                       = myNex.readNumber("morePower.lc2.val");
+  settings.pumpFlowAtZero                 = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
+}
 
 /**
-* This will only download profile params for a single profile. It could be set
-* to any index of the array, as we basically load runningCfg with what's in the
-* screen and let the profiler phases follow ACTIVE_PROFILE() of that.
-*
-* To keep things consistent, however, we're setting the params in the "correct" index.
-*/
+ * DEPRECATED
+ * This will only download profile params for a single profile. It could be set
+ * to any index of the array, as we basically load runningCfg with what's in the
+ * screen and let the profiler phases follow ACTIVE_PROFILE() of that.
+ *
+ * To keep things consistent, however, we're setting the params in the "correct" index.
+ */
 eepromValues_t lcdDownloadCfg(bool toSave) {
   eepromValues_t lcdCfg = {};
   lcdCfg.activeProfile = lcdGetSelectedProfile();
-  // PI
-  if (toSave) {
-    char buttonElemId[16];
-    snprintf(buttonElemId, 16, "home.qPf%d.txt", lcdCfg.activeProfile + 1);
-    snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%.16s", myNex.readStr(buttonElemId).c_str());
-  }
+  if (toSave) lcdFetchCurrentProfileName(ACTIVE_PROFILE(lcdCfg));
 
-  ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
-  ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
-
-  if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0) {
-    ACTIVE_PROFILE(lcdCfg).preinfusionSec = myNex.readNumber("preinfusion.piTime.val");
-    ACTIVE_PROFILE(lcdCfg).preinfusionPressureFlowTarget = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).preinfusionBar = myNex.readNumber("preinfusion.piBar.val") / 10.f;
-  }
-  else {
-    ACTIVE_PROFILE(lcdCfg).preinfusionFlowTime = myNex.readNumber("preinfusion.piTime.val");
-    ACTIVE_PROFILE(lcdCfg).preinfusionFlowVol = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).preinfusionFlowPressureTarget = myNex.readNumber("preinfusion.piBar.val") / 10.f;
-  }
-  ACTIVE_PROFILE(lcdCfg).preinfusionFilled = myNex.readNumber("preinfusion.piPumped.val");
-  ACTIVE_PROFILE(lcdCfg).preinfusionPressureAbove = myNex.readNumber("piRPressure");
-  ACTIVE_PROFILE(lcdCfg).preinfusionWeightAbove = myNex.readNumber("preinfusion.piAbove.val") / 10.f;
-  // SOAK
-  ACTIVE_PROFILE(lcdCfg).soakState = myNex.readNumber("skState");
-
-  if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0)
-    ACTIVE_PROFILE(lcdCfg).soakTimePressure = myNex.readNumber("soak.skTime.val");
-  else
-    ACTIVE_PROFILE(lcdCfg).soakTimeFlow = myNex.readNumber("soak.skTime.val");
-
-  ACTIVE_PROFILE(lcdCfg).soakKeepPressure = myNex.readNumber("soak.skBar.val") / 10.f;
-  ACTIVE_PROFILE(lcdCfg).soakKeepFlow = myNex.readNumber("soak.skFlow.val") / 10.f;
-  ACTIVE_PROFILE(lcdCfg).soakBelowPressure = myNex.readNumber("soak.skBelow.val") / 10.f;
-  ACTIVE_PROFILE(lcdCfg).soakAbovePressure = myNex.readNumber("soak.skAbv.val") / 10.f;
-  ACTIVE_PROFILE(lcdCfg).soakAboveWeight = myNex.readNumber("soak.skWAbv.val") / 10.f;
-  // PI -> PF
-  ACTIVE_PROFILE(lcdCfg).preinfusionRamp = myNex.readNumber("soak.skRamp.val");
-  ACTIVE_PROFILE(lcdCfg).preinfusionRampSlope = myNex.readNumber("skCrv");
-  // PROFILING
-  ACTIVE_PROFILE(lcdCfg).profilingState = myNex.readNumber("ppState");
-  ACTIVE_PROFILE(lcdCfg).flowProfileState = myNex.readNumber("ppType");
-
-  if(ACTIVE_PROFILE(lcdCfg).flowProfileState == 0) {
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingStart = myNex.readNumber("profiles.pStart.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingFinish = myNex.readNumber("profiles.pEnd.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingHold = myNex.readNumber("profiles.pHold.val");
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingSlope = myNex.readNumber("profiles.pSlope.val");
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingFlowRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
-  } else {
-    ACTIVE_PROFILE(lcdCfg).flowProfileStart = myNex.readNumber("profiles.pStart.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).flowProfileEnd = myNex.readNumber("profiles.pEnd.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).flowProfileHold = myNex.readNumber("profiles.pHold.val");
-    ACTIVE_PROFILE(lcdCfg).flowProfileHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).flowProfileSlope = myNex.readNumber("profiles.pSlope.val");
-    ACTIVE_PROFILE(lcdCfg).flowProfilingPressureRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
-  }
-  ACTIVE_PROFILE(lcdCfg).flowProfileSlopeShape = myNex.readNumber("pfCrv");
-  // More brew settings
-  lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
-  lcdCfg.basketPrefill                  = myNex.readNumber("basketPrefill");
-  lcdCfg.brewDeltaState                 = myNex.readNumber("deltaState");
-  // DOse settings
-  lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");
-  lcdCfg.shotDose                       = myNex.readNumber("shotSettings.numDose.val") / 10.f;
-  lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotSettings.numDoseForced.val") / 10.f;
-  lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
-  // System settings
-  lcdCfg.setpoint                       = myNex.readNumber("moreTemp.setPoint.val");
-  lcdCfg.steamSetPoint                  = myNex.readNumber("moreTemp.steamSetPoint.val");
-  lcdCfg.offsetTemp                     = myNex.readNumber("moreTemp.offSet.val");
-  lcdCfg.hpwr                           = myNex.readNumber("moreTemp.hpwr.val");
-  lcdCfg.mainDivider                    = myNex.readNumber("moreTemp.mDiv.val");
-  lcdCfg.brewDivider                    = myNex.readNumber("moreTemp.bDiv.val");
-  lcdCfg.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
-  lcdCfg.warmupState                    = myNex.readNumber("warmupState");
-  lcdCfg.scalesF1                       = myNex.readNumber("morePower.lc1.val");
-  lcdCfg.scalesF2                       = myNex.readNumber("morePower.lc2.val");
-  lcdCfg.pumpFlowAtZero                 = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
+  lcdFetchPreinfusion(ACTIVE_PROFILE(lcdCfg));
+  lcdFetchSoak(ACTIVE_PROFILE(lcdCfg));
+  lcdFetchBrewProfile(ACTIVE_PROFILE(lcdCfg));
+  lcdFetchBrewSettings(lcdCfg);
+  lcdFetchDoseSettings(lcdCfg);
+  lcdFetchTemp(lcdCfg);
+  lcdFetchSystem(lcdCfg);
 
   return lcdCfg;
 }
