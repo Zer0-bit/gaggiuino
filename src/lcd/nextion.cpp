@@ -210,95 +210,123 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 * To keep things consistent, however, we're setting the params in the "correct" index.
 */
 eepromValues_t lcdDownloadCfg(bool toSave) {
-  eepromValues_t lcdCfg = {};
+  eepromValues_t lcdCfg = eepromGetCurrentValues();
   lcdCfg.activeProfile = lcdGetSelectedProfile();
-  // PI
-  if (toSave) {
+  // We only want to download values when actually switching a page containing them.
+  switch (lcdCurrentPageId) {
+    case 4:
+    case 5:
+    case 6:
+    case 9:
+    case 12:
+    case 13:
+    return lcdCfg;
+  }
+
+  if (toSave) { // Only read this string when saving a profile
     char buttonElemId[16];
     snprintf(buttonElemId, 16, "home.qPf%d.txt", lcdCfg.activeProfile + 1);
     snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%.16s", myNex.readStr(buttonElemId).c_str());
   }
 
-  ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
-  ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
+  if (lcdCurrentPageId == 1 || lcdLastCurrentPageId == 1) { // PI
+    ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
+    ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
 
-  if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0) {
-    ACTIVE_PROFILE(lcdCfg).preinfusionSec = myNex.readNumber("preinfusion.piTime.val");
-    ACTIVE_PROFILE(lcdCfg).preinfusionPressureFlowTarget = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).preinfusionBar = myNex.readNumber("preinfusion.piBar.val") / 10.f;
+    if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0) {
+      ACTIVE_PROFILE(lcdCfg).preinfusionSec = myNex.readNumber("preinfusion.piTime.val");
+      ACTIVE_PROFILE(lcdCfg).preinfusionPressureFlowTarget = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).preinfusionBar = myNex.readNumber("preinfusion.piBar.val") / 10.f;
+    }
+    else {
+      ACTIVE_PROFILE(lcdCfg).preinfusionFlowTime = myNex.readNumber("preinfusion.piTime.val");
+      ACTIVE_PROFILE(lcdCfg).preinfusionFlowVol = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).preinfusionFlowPressureTarget = myNex.readNumber("preinfusion.piBar.val") / 10.f;
+    }
+    ACTIVE_PROFILE(lcdCfg).preinfusionFilled = myNex.readNumber("preinfusion.piPumped.val");
+    ACTIVE_PROFILE(lcdCfg).preinfusionPressureAbove = myNex.readNumber("piRPressure");
+    ACTIVE_PROFILE(lcdCfg).preinfusionWeightAbove = myNex.readNumber("preinfusion.piAbove.val") / 10.f;
   }
-  else {
-    ACTIVE_PROFILE(lcdCfg).preinfusionFlowTime = myNex.readNumber("preinfusion.piTime.val");
-    ACTIVE_PROFILE(lcdCfg).preinfusionFlowVol = myNex.readNumber("preinfusion.piFlow.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).preinfusionFlowPressureTarget = myNex.readNumber("preinfusion.piBar.val") / 10.f;
+
+  if (lcdCurrentPageId == 2 || lcdLastCurrentPageId == 2) { // SOAK
+    ACTIVE_PROFILE(lcdCfg).soakState = myNex.readNumber("skState");
+
+    if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0)
+      ACTIVE_PROFILE(lcdCfg).soakTimePressure = myNex.readNumber("soak.skTime.val");
+    else
+      ACTIVE_PROFILE(lcdCfg).soakTimeFlow = myNex.readNumber("soak.skTime.val");
+
+    ACTIVE_PROFILE(lcdCfg).soakKeepPressure = myNex.readNumber("soak.skBar.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).soakKeepFlow = myNex.readNumber("soak.skFlow.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).soakBelowPressure = myNex.readNumber("soak.skBelow.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).soakAbovePressure = myNex.readNumber("soak.skAbv.val") / 10.f;
+    ACTIVE_PROFILE(lcdCfg).soakAboveWeight = myNex.readNumber("soak.skWAbv.val") / 10.f;
+    // PI -> PF
+    ACTIVE_PROFILE(lcdCfg).preinfusionRamp = myNex.readNumber("soak.skRamp.val");
+    ACTIVE_PROFILE(lcdCfg).preinfusionRampSlope = myNex.readNumber("skCrv");
   }
-  ACTIVE_PROFILE(lcdCfg).preinfusionFilled = myNex.readNumber("preinfusion.piPumped.val");
-  ACTIVE_PROFILE(lcdCfg).preinfusionPressureAbove = myNex.readNumber("piRPressure");
-  ACTIVE_PROFILE(lcdCfg).preinfusionWeightAbove = myNex.readNumber("preinfusion.piAbove.val") / 10.f;
-  // SOAK
-  ACTIVE_PROFILE(lcdCfg).soakState = myNex.readNumber("skState");
 
-  if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0)
-    ACTIVE_PROFILE(lcdCfg).soakTimePressure = myNex.readNumber("soak.skTime.val");
-  else
-    ACTIVE_PROFILE(lcdCfg).soakTimeFlow = myNex.readNumber("soak.skTime.val");
+  if (lcdCurrentPageId == 3 || lcdLastCurrentPageId == 3) {// PROFILING
+    ACTIVE_PROFILE(lcdCfg).profilingState = myNex.readNumber("ppState");
+    ACTIVE_PROFILE(lcdCfg).flowProfileState = myNex.readNumber("ppType");
 
-  ACTIVE_PROFILE(lcdCfg).soakKeepPressure = myNex.readNumber("soak.skBar.val") / 10.f;
-  ACTIVE_PROFILE(lcdCfg).soakKeepFlow = myNex.readNumber("soak.skFlow.val") / 10.f;
-  ACTIVE_PROFILE(lcdCfg).soakBelowPressure = myNex.readNumber("soak.skBelow.val") / 10.f;
-  ACTIVE_PROFILE(lcdCfg).soakAbovePressure = myNex.readNumber("soak.skAbv.val") / 10.f;
-  ACTIVE_PROFILE(lcdCfg).soakAboveWeight = myNex.readNumber("soak.skWAbv.val") / 10.f;
-  // PI -> PF
-  ACTIVE_PROFILE(lcdCfg).preinfusionRamp = myNex.readNumber("soak.skRamp.val");
-  ACTIVE_PROFILE(lcdCfg).preinfusionRampSlope = myNex.readNumber("skCrv");
-  // PROFILING
-  ACTIVE_PROFILE(lcdCfg).profilingState = myNex.readNumber("ppState");
-  ACTIVE_PROFILE(lcdCfg).flowProfileState = myNex.readNumber("ppType");
-
-  if(ACTIVE_PROFILE(lcdCfg).flowProfileState == 0) {
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingStart = myNex.readNumber("profiles.pStart.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingFinish = myNex.readNumber("profiles.pEnd.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingHold = myNex.readNumber("profiles.pHold.val");
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingSlope = myNex.readNumber("profiles.pSlope.val");
-    ACTIVE_PROFILE(lcdCfg).pressureProfilingFlowRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
-  } else {
-    ACTIVE_PROFILE(lcdCfg).flowProfileStart = myNex.readNumber("profiles.pStart.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).flowProfileEnd = myNex.readNumber("profiles.pEnd.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).flowProfileHold = myNex.readNumber("profiles.pHold.val");
-    ACTIVE_PROFILE(lcdCfg).flowProfileHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
-    ACTIVE_PROFILE(lcdCfg).flowProfileSlope = myNex.readNumber("profiles.pSlope.val");
-    ACTIVE_PROFILE(lcdCfg).flowProfilingPressureRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
+    if(ACTIVE_PROFILE(lcdCfg).flowProfileState == 0) {
+      ACTIVE_PROFILE(lcdCfg).pressureProfilingStart = myNex.readNumber("profiles.pStart.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).pressureProfilingFinish = myNex.readNumber("profiles.pEnd.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).pressureProfilingHold = myNex.readNumber("profiles.pHold.val");
+      ACTIVE_PROFILE(lcdCfg).pressureProfilingHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).pressureProfilingSlope = myNex.readNumber("profiles.pSlope.val");
+      ACTIVE_PROFILE(lcdCfg).pressureProfilingFlowRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
+    } else {
+      ACTIVE_PROFILE(lcdCfg).flowProfileStart = myNex.readNumber("profiles.pStart.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).flowProfileEnd = myNex.readNumber("profiles.pEnd.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).flowProfileHold = myNex.readNumber("profiles.pHold.val");
+      ACTIVE_PROFILE(lcdCfg).flowProfileHoldLimit = myNex.readNumber("profiles.hLim.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).flowProfileSlope = myNex.readNumber("profiles.pSlope.val");
+      ACTIVE_PROFILE(lcdCfg).flowProfilingPressureRestriction = myNex.readNumber("profiles.pLim.val") / 10.f;
+    }
+    ACTIVE_PROFILE(lcdCfg).flowProfileSlopeShape = myNex.readNumber("pfCrv");
   }
-  ACTIVE_PROFILE(lcdCfg).flowProfileSlopeShape = myNex.readNumber("pfCrv");
-  // More brew settings
-  lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
-  lcdCfg.basketPrefill                  = myNex.readNumber("basketPrefill");
-  lcdCfg.brewDeltaState                 = myNex.readNumber("deltaState");
-  // DOse settings
-  lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");
-  lcdCfg.shotDose                       = myNex.readNumber("shotSettings.numDose.val") / 10.f;
-  lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotSettings.numDoseForced.val") / 10.f;
-  lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
-  // System settings
-  lcdCfg.setpoint                       = myNex.readNumber("moreTemp.setPoint.val");
-  lcdCfg.steamSetPoint                  = myNex.readNumber("moreTemp.steamSetPoint.val");
-  lcdCfg.offsetTemp                     = myNex.readNumber("moreTemp.offSet.val");
-  lcdCfg.hpwr                           = myNex.readNumber("moreTemp.hpwr.val");
-  lcdCfg.mainDivider                    = myNex.readNumber("moreTemp.mDiv.val");
-  lcdCfg.brewDivider                    = myNex.readNumber("moreTemp.bDiv.val");
-  lcdCfg.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
-  lcdCfg.warmupState                    = myNex.readNumber("warmupState");
-  lcdCfg.scalesF1                       = myNex.readNumber("morePower.lc1.val");
-  lcdCfg.scalesF2                       = myNex.readNumber("morePower.lc2.val");
-  lcdCfg.pumpFlowAtZero                 = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
+
+  if (lcdCurrentPageId == 10 || lcdLastCurrentPageId == 10) {// More brew settings
+    lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
+    lcdCfg.basketPrefill                  = myNex.readNumber("basketPrefill");
+    lcdCfg.brewDeltaState                 = myNex.readNumber("deltaState");
+  }
+
+  if (lcdCurrentPageId == 11 || lcdLastCurrentPageId == 11) {// DOse settings
+    lcdCfg.stopOnWeightState              = myNex.readNumber("shotState");
+    lcdCfg.shotDose                       = myNex.readNumber("shotSettings.numDose.val") / 10.f;
+    lcdCfg.shotStopOnCustomWeight         = myNex.readNumber("shotSettings.numDoseForced.val") / 10.f;
+    lcdCfg.shotPreset                     = myNex.readNumber("shotPreset");
+  }
+
+  if (lcdCurrentPageId == 7 || lcdLastCurrentPageId == 7) {// System settings
+    lcdCfg.setpoint                       = myNex.readNumber("moreTemp.setPoint.val");
+    lcdCfg.steamSetPoint                  = myNex.readNumber("moreTemp.steamSetPoint.val");
+    lcdCfg.offsetTemp                     = myNex.readNumber("moreTemp.offSet.val");
+    lcdCfg.hpwr                           = myNex.readNumber("moreTemp.hpwr.val");
+    lcdCfg.mainDivider                    = myNex.readNumber("moreTemp.mDiv.val");
+    lcdCfg.brewDivider                    = myNex.readNumber("moreTemp.bDiv.val");
+  }
+
+  if (lcdCurrentPageId == 7 || lcdLastCurrentPageId == 7) {// System settings
+    lcdCfg.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
+    lcdCfg.warmupState                    = myNex.readNumber("warmupState");
+    lcdCfg.scalesF1                       = myNex.readNumber("morePower.lc1.val");
+    lcdCfg.scalesF2                       = myNex.readNumber("morePower.lc2.val");
+    lcdCfg.pumpFlowAtZero                 = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
+  }
 
   return lcdCfg;
 }
 
 int lcdGetSelectedProfile(void) {
   int selected = myNex.readNumber("pIdx");
-  if (selected < 1 || selected > 5) lcdShowPopup((String("getProfile rekt: ") + selected).c_str());
+  if (selected < 1 || selected > 5) {
+    selected = myNex.readNumber("pIdx");
+    if (selected < 1 || selected > 5) lcdShowPopup((String("getProfile rekt: ") + selected).c_str());
+  }
   return selected - 1 /* 1-offset in nextion */;
 }
 
