@@ -31,7 +31,7 @@ void lcdWakeUp(void) {
 
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   // Highlight the active profile
-  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+  myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -93,7 +93,7 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   // bool profileType = false;
   // Highlight the active profile
-  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1); /* 1-offset in nextion */
+  myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1); /* 1-offset in nextion */
 
   // Profile names for all buttons
   myNex.writeStr("home.qPf1.txt", eepromCurrentValues.profiles[0].name);
@@ -325,12 +325,12 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
 }
 
 uint8_t lcdGetSelectedProfile(void) {
-  uint32_t selected = myNex.readNumber("pIdx");
-  if (selected < 1 || selected > 5) {
-    selected = myNex.readNumber("pIdx");
-    if (selected < 1 || selected > 5) lcdShowPopup((String("getProfile rekt: ") + selected).c_str());
+  uint32_t pId = myNex.readNumber("pId");
+  if (pId < 1 || pId > 5) {
+    pId = myNex.readNumber("pId");
+    if (pId < 1 || pId > 5) lcdShowPopup((String("getProfile rekt: ") + pId).c_str());
   }
-  return (uint8_t)(selected - 1); /* 1-offset in nextion */
+  return (uint8_t)(pId - 1); /* 1-offset in nextion */
 }
 
 int lcdGetManualFlowVol(void) {
