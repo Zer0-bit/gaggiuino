@@ -33,7 +33,7 @@ void lcdListen(void);
 void lcdWakeUp(void);
 
 eepromValues_t lcdDownloadCfg(bool toSave = false);
-int lcdGetSelectedProfile(void);
+uint8_t lcdGetSelectedProfile(void);
 int lcdGetHomeScreenScalesEnabled(void);
 int lcdGetSelectedOperationalMode(void);
 int lcdGetManualFlowVol(void);
