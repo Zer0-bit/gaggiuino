@@ -31,7 +31,7 @@ void lcdWakeUp(void) {
 
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   // Highlight the active profile
-  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+  myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -76,6 +76,7 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHold);
     myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHoldLimit * 10.f);
     myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlope);
+    myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlopeShape);
     myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFlowRestriction * 10.f);
   } else {
     myNex.writeNum("profiles.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileStart * 10.f);
@@ -83,16 +84,16 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHold);
     myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHoldLimit * 10.f);
     myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlope);
+    myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
     myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction * 10.f);
   }
-  myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
 }
 
 // This is never called again after boot
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   // bool profileType = false;
   // Highlight the active profile
-  myNex.writeNum("pIdx", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+  myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1); /* 1-offset in nextion */
 
   // Profile names for all buttons
   myNex.writeStr("home.qPf1.txt", eepromCurrentValues.profiles[0].name);
@@ -185,6 +186,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
         myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHold);
         myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingHoldLimit * 10.f);
         myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlope);
+        myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingSlopeShape);
         myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).pressureProfilingFlowRestriction * 10.f);
       } else {
         myNex.writeNum("profiles.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileStart * 10.f);
@@ -192,9 +194,9 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
         myNex.writeNum("profiles.pHold.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHold);
         myNex.writeNum("profiles.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileHoldLimit * 10.f);
         myNex.writeNum("profiles.pSlope.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlope);
+        myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
         myNex.writeNum("profiles.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).flowProfilingPressureRestriction * 10.f);
       }
-      myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).flowProfileSlopeShape);
       break;
     default:
       lcdUploadCfg(eepromCurrentValues);
@@ -303,10 +305,13 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.pumpFlowAtZero                 = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
 }
 
-int lcdGetSelectedProfile(void) {
-  int selected = myNex.readNumber("pIdx");
-  if (selected < 1 || selected > 5) lcdShowPopup((String("getProfile rekt: ") + selected).c_str());
-  return selected - 1 /* 1-offset in nextion */;
+uint8_t lcdGetSelectedProfile(void) {
+  uint32_t pId = myNex.readNumber("pId");
+  if (pId < 1 || pId > 5) {
+    pId = myNex.readNumber("pId");
+    if (pId < 1 || pId > 5) lcdShowPopup((String("getProfile rekt: ") + pId).c_str());
+  }
+  return (uint8_t)(pId - 1); /* 1-offset in nextion */
 }
 
 bool lcdGetPreinfusionFlowState(void) {
@@ -322,7 +327,7 @@ int lcdGetManualFlowVol(void) {
 }
 
 int lcdGetHomeScreenScalesEnabled(void) {
-  return myNex.readNumber("scalesEnabled");
+  return myNex.readNumber("scEn.val");
 }
 
 int lcdGetSelectedOperationalMode(void) {
