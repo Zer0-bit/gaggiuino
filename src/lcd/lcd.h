@@ -32,7 +32,6 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);
 void lcdWakeUp(void);
 
-eepromValues_t lcdDownloadCfg(bool toSave = false);
 void lcdFetchProfileName(eepromValues_t::profile_t &profile, uint8_t index);
 void lcdFetchPreinfusion(eepromValues_t::profile_t &profile);
 void lcdFetchSoak(eepromValues_t::profile_t &profile);

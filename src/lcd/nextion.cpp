@@ -303,30 +303,6 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.pumpFlowAtZero                 = myNex.readNumber("morePower.pump_zero.val") / 10000.f;
 }
 
-/**
- * DEPRECATED
- * This will only download profile params for a single profile. It could be set
- * to any index of the array, as we basically load runningCfg with what's in the
- * screen and let the profiler phases follow ACTIVE_PROFILE() of that.
- *
- * To keep things consistent, however, we're setting the params in the "correct" index.
- */
-eepromValues_t lcdDownloadCfg(bool toSave) {
-  eepromValues_t lcdCfg = {};
-  lcdCfg.activeProfile = lcdGetSelectedProfile();
-  if (toSave) lcdFetchProfileName(ACTIVE_PROFILE(lcdCfg), lcdCfg.activeProfile);
-
-  lcdFetchPreinfusion(ACTIVE_PROFILE(lcdCfg));
-  lcdFetchSoak(ACTIVE_PROFILE(lcdCfg));
-  lcdFetchBrewProfile(ACTIVE_PROFILE(lcdCfg));
-  lcdFetchBrewSettings(lcdCfg);
-  lcdFetchDoseSettings(lcdCfg);
-  lcdFetchTemp(lcdCfg);
-  lcdFetchSystem(lcdCfg);
-
-  return lcdCfg;
-}
-
 int lcdGetSelectedProfile(void) {
   int selected = myNex.readNumber("pIdx");
   if (selected < 1 || selected > 5) lcdShowPopup((String("getProfile rekt: ") + selected).c_str());

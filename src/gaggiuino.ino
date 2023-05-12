@@ -226,7 +226,31 @@ static void calculateWeightAndFlow(void) {
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 static void pageValuesRefresh() {
-  runningCfg = lcdDownloadCfg();
+  switch (static_cast<SCREEN_MODES>(lcdLastCurrentPageId)){
+    case SCREEN_MODES::SCREEN_brew_more:
+      lcdFetchBrewSettings(runningCfg);
+      break;
+    case SCREEN_MODES::SCREEN_brew_preinfusion:
+      lcdFetchPreinfusion(ACTIVE_PROFILE(runningCfg));
+      break;
+    case SCREEN_MODES::SCREEN_brew_soak:
+      lcdFetchSoak(ACTIVE_PROFILE(runningCfg));
+      break;
+    case SCREEN_MODES::SCREEN_brew_profiling:
+      lcdFetchBrewProfile(ACTIVE_PROFILE(runningCfg));
+      break;
+    case SCREEN_MODES::SCREEN_settings_boiler:
+      lcdFetchTemp(runningCfg);
+      break;
+    case SCREEN_MODES::SCREEN_settings_system:
+      lcdFetchSystem(runningCfg);
+      break;
+    case SCREEN_MODES::SCREEN_shot_settings:
+      lcdFetchDoseSettings(runningCfg);
+      break;
+    default:
+      break;
+  }
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
   // MODE_SELECT should always be LAST
