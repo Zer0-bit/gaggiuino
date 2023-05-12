@@ -338,7 +338,7 @@ int lcdGetManualFlowVol(void) {
 }
 
 int lcdGetHomeScreenScalesEnabled(void) {
-  return myNex.readNumber("scalesEnabled");
+  return myNex.readNumber("scEn.val");
 }
 
 int lcdGetSelectedOperationalMode(void) {
