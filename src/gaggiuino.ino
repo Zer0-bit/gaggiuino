@@ -225,32 +225,39 @@ static void calculateWeightAndFlow(void) {
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
-static void pageValuesRefresh() {
-  switch (static_cast<SCREEN_MODES>(lcdLastCurrentPageId)){
+static void pageValuesRefresh(eepromValues_t &settings, SCREEN_MODES page) {
+  switch (page){
     case SCREEN_MODES::SCREEN_brew_more:
-      lcdFetchBrewSettings(runningCfg);
+      lcdFetchBrewSettings(settings);
       break;
     case SCREEN_MODES::SCREEN_brew_preinfusion:
-      lcdFetchPreinfusion(ACTIVE_PROFILE(runningCfg));
+      lcdFetchPreinfusion(ACTIVE_PROFILE(settings));
       break;
     case SCREEN_MODES::SCREEN_brew_soak:
-      lcdFetchSoak(ACTIVE_PROFILE(runningCfg));
+      lcdFetchSoak(ACTIVE_PROFILE(settings));
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
-      lcdFetchBrewProfile(ACTIVE_PROFILE(runningCfg));
+      lcdFetchBrewProfile(ACTIVE_PROFILE(settings));
       break;
     case SCREEN_MODES::SCREEN_settings_boiler:
-      lcdFetchTemp(runningCfg);
+      lcdFetchTemp(settings);
       break;
     case SCREEN_MODES::SCREEN_settings_system:
-      lcdFetchSystem(runningCfg);
+      lcdFetchSystem(settings);
       break;
     case SCREEN_MODES::SCREEN_shot_settings:
-      lcdFetchDoseSettings(runningCfg);
+      lcdFetchDoseSettings(settings);
       break;
     default:
       break;
   }
+}
+
+static void pageValuesRefresh() {
+  // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
+  pageValuesRefresh(runningCfg, static_cast<SCREEN_MODES>(lcdLastCurrentPageId));
+  // Also read the page we're landing in: leaving keyboard page means a value could've changed in it
+  pageValuesRefresh(runningCfg, static_cast<SCREEN_MODES>(lcdCurrentPageId));
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
   // MODE_SELECT should always be LAST
