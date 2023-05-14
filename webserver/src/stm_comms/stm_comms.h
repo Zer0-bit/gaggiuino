@@ -22,6 +22,11 @@ void stmCommsInit(HardwareSerial& serial) {
 }
 
 void stmCommsReadData() {
-    mcuComms.readData();
+    mcuComms.readDataAndTick();
 }
+
+void stmCommsSendWeight(float weight) {
+  mcuComms.sendWeight(weight);
+}
+
 #endif
