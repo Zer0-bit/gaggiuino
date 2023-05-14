@@ -226,7 +226,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
   }
 
   if (toSave) { // Only read this string when saving a profile
-    char buttonElemId[16];
+    char buttonElemId[16]; // 15+1 bytes in the btn element name.
     snprintf(buttonElemId, 16, "home.qPf%d.txt", lcdCfg.activeProfile + 1);
     snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%.16s", myNex.readStr(buttonElemId).c_str());
   }
