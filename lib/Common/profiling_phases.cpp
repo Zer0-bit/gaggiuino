@@ -54,12 +54,17 @@ inline bool predictShotCompletion(const float targetDose, const float currentDos
 }
 
 bool PhaseStopConditions::isReached(SensorState& state, const eepromValues_t currentConfig, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
+  float desiredShotWeight = -1.f;
+  bool stopOnWeightReached = false;
+
   float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * state.shotWeight / 100.f;
-  float desiredShotWeight = (currentConfig.stopOnWeightState && currentConfig.shotStopOnCustomWeight > 1.f)
-                            ? currentConfig.shotStopOnCustomWeight
-                            : currentConfig.shotDose * currentConfig.shotPreset;
-  bool stopOnWeightReached = predictShotCompletion(desiredShotWeight, state.shotWeight, flow);
+  if (currentConfig.stopOnWeightState) {
+    desiredShotWeight = currentConfig.shotStopOnCustomWeight > 1.f
+                        ? currentConfig.shotStopOnCustomWeight
+                        : currentConfig.shotDose * currentConfig.shotPreset;
+    stopOnWeightReached = predictShotCompletion(desiredShotWeight, state.shotWeight, flow);
+  }
 
   return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
     (weight > 0.f && stopOnWeightReached) ||
