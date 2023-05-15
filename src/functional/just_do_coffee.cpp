@@ -86,7 +86,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
   float steamTempSetPoint = runningCfg.steamSetPoint + runningCfg.offsetTemp;
   float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
 
-  if (currentState.smoothedPressure > 9.f || sensorTemperature > steamTempSetPoint) {
+  if (currentState.smoothedPressure > _steamThreshold || sensorTemperature > steamTempSetPoint) {
     setBoilerOff();
     setSteamBoilerRelayOff();
     setSteamValveRelayOff();
@@ -100,7 +100,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
     setSteamValveRelayOn();
     setSteamBoilerRelayOn();
     #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adding water during steaming
-      if (currentState.smoothedPressure < 1.8f) {
+      if (currentState.smoothedPressure < _activeSteamPressure) {
         #ifdef PUMP_NEEDS_OPEN_VALVE
           openValve();
         #endif
@@ -115,7 +115,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
   }
 
   /*In case steam is forgotten ON for more than 15 min*/
-  if (currentState.smoothedPressure > 3.f) {
+  if (currentState.smoothedPressure > _passiveSteamPressure) {
     currentState.isSteamForgottenON = millis() - steamTime >= STEAM_TIMEOUT;
   } else steamTime = millis();
 }
