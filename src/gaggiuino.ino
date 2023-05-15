@@ -478,11 +478,14 @@ void lcdSaveSettingsTrigger(void) {
 
 void lcdSaveProfileTrigger(void) {
   LOG_VERBOSE("Saving profile to EEPROM");
+  lcdShowPopup("Saving [1]..");
   bool rc;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  lcdShowPopup("Saving [2]..");
   watchdogReload(); // reload the watchdog timer on expensive operations
   eepromValues_t lcdValues = lcdDownloadCfg(true); // :true: means read the buttons name
   watchdogReload(); // reload the watchdog timer on expensive operations
+  lcdShowPopup("Saving [3]..");
 
   // Target save to the currently selected profile on screen (not necessarily same as saved default)
   eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[lcdValues.activeProfile];
@@ -559,7 +562,9 @@ void lcdSaveProfileTrigger(void) {
   eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
   eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
 
+  lcdShowPopup("Saving [4]..");
   rc = eepromWrite(eepromCurrentValues);
+  lcdShowPopup("Saving [5]..");
   watchdogReload(); // reload the watchdog timer on expensive operations
   if (rc == true) {
     lcdShowPopup("Update successful!");
