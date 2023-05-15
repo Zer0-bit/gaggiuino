@@ -26,9 +26,13 @@ ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, Cu
 //----------------------------------------------------------------------//
 //------------------------------ Phase ---------------------------------//
 //----------------------------------------------------------------------//
-float Phase::getTarget(uint32_t timeInPhase) const {
+float Phase::getTarget(uint32_t timeInPhase, const ShotSnapshot& stateAtStart) const {
   long transitionTime = fmax(0L, target.time > 0L ? target.time : stopConditions.time);
-  return mapRange(timeInPhase, 0.f, transitionTime, target.start, target.end, 1, target.curve);
+  float startValue = target.start >= 0.f
+    ? target.start
+    : type == PHASE_TYPE::PHASE_TYPE_FLOW ? stateAtStart.pumpFlow : stateAtStart.pressure;
+
+  return mapRange(timeInPhase, 0.f, transitionTime, startValue, target.end, 1, target.curve);
 }
 
 float Phase::getRestriction() const {
@@ -83,8 +87,8 @@ bool GlobalStopConditions::isReached(const SensorState& state, const eepromValue
 //----------------------------------------------------------------------//
 //--------------------------- CurrentPhase -----------------------------//
 //----------------------------------------------------------------------//
-CurrentPhase::CurrentPhase(int index, const Phase& phase, uint32_t timeInPhase) : index(index), phase{ &phase }, timeInPhase(timeInPhase) {}
-CurrentPhase::CurrentPhase(const CurrentPhase& currentPhase) : index(currentPhase.index), phase{ currentPhase.phase }, timeInPhase(currentPhase.timeInPhase) {}
+CurrentPhase::CurrentPhase(int index, const Phase& phase, uint32_t timeInPhase, const ShotSnapshot& shotSnapshotAtStart) : index(index), phase{ &phase }, timeInPhase(timeInPhase), shotSnapshotAtStart{ &shotSnapshotAtStart} {}
+CurrentPhase::CurrentPhase(const CurrentPhase& currentPhase) : index(currentPhase.index), phase{ currentPhase.phase }, timeInPhase(currentPhase.timeInPhase), shotSnapshotAtStart{ currentPhase.shotSnapshotAtStart} {}
 
 Phase CurrentPhase::getPhase() { return *phase; }
 
@@ -94,7 +98,7 @@ int CurrentPhase::getIndex() { return index; }
 
 long CurrentPhase::getTimeInPhase() { return timeInPhase; }
 
-float CurrentPhase::getTarget() { return phase->getTarget(timeInPhase); }
+float CurrentPhase::getTarget() { return phase->getTarget(timeInPhase, *shotSnapshotAtStart); }
 
 float CurrentPhase::getRestriction() { return phase->getRestriction(); }
 

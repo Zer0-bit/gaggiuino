@@ -652,8 +652,6 @@ void lcdQuickProfilesSwitchOrSave(void) {
 //###############################____PRESSURE_CONTROL____######################################
 //#############################################################################################
 static void updateProfilerPhases(void) {
-  float preInfusionFinishBar = 0.f;
-  float preinfusionFinishFlow = 0.f;
   float shotTarget = -1.f;
   float isPressureAbove = -1.f;
   float isWeightAbove = -1.f;
@@ -684,40 +682,24 @@ static void updateProfilerPhases(void) {
       isWaterPumped = ACTIVE_PROFILE(runningCfg).preinfusionFilled > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionFilled : -1.f;
 
       addFlowPhase(Transition{ACTIVE_PROFILE(runningCfg).preinfusionFlowVol}, ACTIVE_PROFILE(runningCfg).preinfusionFlowPressureTarget, ACTIVE_PROFILE(runningCfg).preinfusionFlowTime * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
-      preInfusionFinishBar = ACTIVE_PROFILE(runningCfg).preinfusionFlowPressureTarget;
-      preinfusionFinishFlow = ACTIVE_PROFILE(runningCfg).preinfusionFlowVol;
     } else { // pressure based PI enabled
       // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
       isPressureAbove = ACTIVE_PROFILE(runningCfg).preinfusionPressureAbove ? ACTIVE_PROFILE(runningCfg).preinfusionBar : -1.f;
       isWeightAbove = ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove : -1.f;
       isWaterPumped = ACTIVE_PROFILE(runningCfg).preinfusionFilled > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionFilled : -1.f;
 
-      addPressurePhase(Transition{ACTIVE_PROFILE(runningCfg).preinfusionBar}, 4.f, ACTIVE_PROFILE(runningCfg).preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
-      preInfusionFinishBar = ACTIVE_PROFILE(runningCfg).preinfusionBar;
-      preinfusionFinishFlow = ACTIVE_PROFILE(runningCfg).preinfusionPressureFlowTarget;
+      addPressurePhase(Transition{ACTIVE_PROFILE(runningCfg).preinfusionBar}, ACTIVE_PROFILE(runningCfg).preinfusionPressureFlowTarget, ACTIVE_PROFILE(runningCfg).preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
     }
   }
   // Setup the soak phase if neecessary
   if (ACTIVE_PROFILE(runningCfg).soakState) {
-    uint16_t phaseSoak = -1;
-    float maintainFlow = -1.f;
-    float maintainPressure = -1.f;
-    if(ACTIVE_PROFILE(runningCfg).preinfusionFlowState) { // Sorting the phase values and restrictions
-      phaseSoak = ACTIVE_PROFILE(runningCfg).soakTimeFlow;
-      isPressureBelow = ACTIVE_PROFILE(runningCfg).soakBelowPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakBelowPressure : -1.f;
-      isPressureAbove = ACTIVE_PROFILE(runningCfg).soakAbovePressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakAbovePressure : -1.f;
-      isWeightAbove = ACTIVE_PROFILE(runningCfg).soakAboveWeight > 0.f ? ACTIVE_PROFILE(runningCfg).soakAboveWeight : -1.f;
-      maintainFlow = ACTIVE_PROFILE(runningCfg).soakKeepFlow > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepFlow : -1.f;
-      maintainPressure = ACTIVE_PROFILE(runningCfg).soakKeepPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepPressure : -1.f;
-      // addFlowPhase(Transition{0.f},  -1, phaseSoak * 1000, -1, isPressureBelow, isWeightAbove, -1);
-    } else {
-      phaseSoak = ACTIVE_PROFILE(runningCfg).soakTimePressure;
-      isPressureBelow = ACTIVE_PROFILE(runningCfg).soakBelowPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakBelowPressure : -1;
-      isPressureAbove = ACTIVE_PROFILE(runningCfg).soakAbovePressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakAbovePressure : -1.f;
-      isWeightAbove = ACTIVE_PROFILE(runningCfg).soakAboveWeight > 0.f ? ACTIVE_PROFILE(runningCfg).soakAboveWeight : -1;
-      maintainFlow = ACTIVE_PROFILE(runningCfg).soakKeepFlow > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepFlow : -1.f;
-      maintainPressure = ACTIVE_PROFILE(runningCfg).soakKeepPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepPressure : -1.f;
-    }
+    uint16_t phaseSoak = ACTIVE_PROFILE(runningCfg).preinfusionFlowState ? ACTIVE_PROFILE(runningCfg).soakTimeFlow : ACTIVE_PROFILE(runningCfg).soakTimePressure;
+    float maintainFlow = ACTIVE_PROFILE(runningCfg).soakKeepFlow > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepFlow : -1.f;
+    float maintainPressure = ACTIVE_PROFILE(runningCfg).soakKeepPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepPressure : -1.f;
+    isPressureBelow = ACTIVE_PROFILE(runningCfg).soakBelowPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakBelowPressure : -1.f;
+    isPressureAbove = ACTIVE_PROFILE(runningCfg).soakAbovePressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakAbovePressure : -1.f;
+    isWeightAbove = ACTIVE_PROFILE(runningCfg).soakAboveWeight > 0.f ? ACTIVE_PROFILE(runningCfg).soakAboveWeight : -1.f;
+
     if (maintainPressure > 0.f)
       addPressurePhase(Transition{maintainPressure}, (maintainFlow > 0.f ? maintainFlow : 2.5f), phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
     else if(maintainFlow > 0.f)
@@ -727,33 +709,50 @@ static void updateProfilerPhases(void) {
   }
   preInfusionFinishedPhaseIdx = profile.phaseCount();
 
+  // Setup ramp phase if necessary
+  if (ACTIVE_PROFILE(runningCfg).preinfusionRamp > 0) {
+    if (ACTIVE_PROFILE(runningCfg).flowProfileState) {
+      float holdLimit = ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
+
+      addFlowPhase(Transition{ACTIVE_PROFILE(runningCfg).flowProfileStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope}, holdLimit, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000, -1, -1, -1, -1);
+      // addPressurePhase(Transition{ holdLimit, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope }, ACTIVE_PROFILE(runningCfg).flowProfileStart, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000, -1, -1, -1, -1);
+    } else {
+      float holdLimit = ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
+
+      addPressurePhase(Transition{ACTIVE_PROFILE(runningCfg).pressureProfilingStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope}, holdLimit, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000, -1, -1, -1, -1);
+    }
+  }
+
   // Setup shot profiling
   if (ACTIVE_PROFILE(runningCfg).profilingState) {
-    uint16_t rampAndHold = -1;
-    float holdLimit = -1.f;
     if (ACTIVE_PROFILE(runningCfg).flowProfileState) { // flow based profiling enabled
-    /* Setting the phase specific restrictions */
-    /* ------------------------------------------ */
-      rampAndHold = ACTIVE_PROFILE(runningCfg).preinfusionRamp + ACTIVE_PROFILE(runningCfg).flowProfileHold;
-      holdLimit = ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
-    /* ------------------------------------------ */
+      /* Setting the phase specific restrictions */
+      /* ------------------------------------------ */
+      float fpStart = ACTIVE_PROFILE(runningCfg).flowProfileStart;
+      float fpEnd = ACTIVE_PROFILE(runningCfg).flowProfileEnd;
+      uint16_t fpHold = ACTIVE_PROFILE(runningCfg).flowProfileHold;
+      float holdLimit = ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
+      /* ------------------------------------------ */
 
-      addFlowPhase(Transition{preinfusionFinishFlow, ACTIVE_PROFILE(runningCfg).flowProfileStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
-      addFlowPhase(Transition{ACTIVE_PROFILE(runningCfg).flowProfileStart, ACTIVE_PROFILE(runningCfg).flowProfileEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).flowProfileSlopeShape, ACTIVE_PROFILE(runningCfg).flowProfileSlope * 1000}, ACTIVE_PROFILE(runningCfg).flowProfilingPressureRestriction, -1, -1, -1, -1, -1);
+      if (fpStart > 0.f && fpHold > 0) {
+        addFlowPhase(Transition{ fpStart }, holdLimit, fpHold * 1000, -1, -1, -1, -1);
+      }
+      addFlowPhase(Transition{ fpEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).flowProfileSlopeShape, ACTIVE_PROFILE(runningCfg).flowProfileSlope * 1000 }, ACTIVE_PROFILE(runningCfg).flowProfilingPressureRestriction, -1, -1, -1, -1, -1);
     } else { // pressure based profiling enabled
     /* Setting the phase specific restrictions */
     /* ------------------------------------------ */
       float ppStart = ACTIVE_PROFILE(runningCfg).pressureProfilingStart;
       float ppEnd = ACTIVE_PROFILE(runningCfg).pressureProfilingFinish;
-      rampAndHold = ACTIVE_PROFILE(runningCfg).preinfusionRamp + ACTIVE_PROFILE(runningCfg).pressureProfilingHold;
-      holdLimit = ACTIVE_PROFILE(runningCfg).pressureProfilingHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).pressureProfilingHoldLimit : -1;
+      uint16_t ppHold = ACTIVE_PROFILE(runningCfg).pressureProfilingHold;
+      float holdLimit = ACTIVE_PROFILE(runningCfg).pressureProfilingHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).pressureProfilingHoldLimit : -1;
     /* ------------------------------------------ */
-
-      addPressurePhase(Transition{preInfusionFinishBar, ppStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000}, holdLimit, rampAndHold * 1000, -1, -1, -1, -1);
-      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).pressureProfilingSlopeShape, ACTIVE_PROFILE(runningCfg).pressureProfilingSlope * 1000}, -1, -1, -1, -1, -1, -1);
+      if (ppStart > 0.f && ppHold > 0) {
+        addPressurePhase(Transition{ppStart}, holdLimit, ppHold * 1000, -1, -1, -1, -1);
+      }
+      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).pressureProfilingSlopeShape, ACTIVE_PROFILE(runningCfg).pressureProfilingSlope * 1000}, ACTIVE_PROFILE(runningCfg).pressureProfilingFlowRestriction, -1, -1, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
-    addPressurePhase(Transition{preInfusionFinishBar, 9, (TransitionCurve)ACTIVE_PROFILE(runningCfg).pressureProfilingSlopeShape, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
+    addPressurePhase(Transition{9.f, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
   }
 }
 
