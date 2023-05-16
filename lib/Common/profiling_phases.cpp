@@ -58,10 +58,10 @@ bool PhaseStopConditions::isReached(SensorState& state, const eepromValues_t cur
   bool stopOnWeightReached = false;
   float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * state.shotWeight / 100.f;
-  if (currentConfig.stopOnWeightState) {
-    desiredShotWeight = currentConfig.shotStopOnCustomWeight > 1.f
-                        ? currentConfig.shotStopOnCustomWeight
-                        : currentConfig.shotDose * currentConfig.shotPreset;
+  if (ACTIVE_PROFILE(currentConfig).stopOnWeightState) {
+    desiredShotWeight = ACTIVE_PROFILE(currentConfig).shotStopOnCustomWeight > 1.f
+                        ? ACTIVE_PROFILE(currentConfig).shotStopOnCustomWeight
+                        : ACTIVE_PROFILE(currentConfig).shotDose * ACTIVE_PROFILE(currentConfig).shotPreset;
     stopOnWeightReached = predictShotCompletion(desiredShotWeight, state.shotWeight, flow);
   }
 
@@ -80,10 +80,10 @@ bool GlobalStopConditions::isReached(const SensorState& state, const eepromValue
   bool stopOnWeightReached = false;
   float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * (state.shotWeight / 100.f);
-  if (currentConfig.stopOnWeightState) {
-    desiredShotWeight = currentConfig.shotStopOnCustomWeight > 1.f
-                        ? currentConfig.shotStopOnCustomWeight
-                        : currentConfig.shotDose * currentConfig.shotPreset;
+  if (ACTIVE_PROFILE(currentConfig).stopOnWeightState) {
+    desiredShotWeight = ACTIVE_PROFILE(currentConfig).shotStopOnCustomWeight > 1.f
+                        ? ACTIVE_PROFILE(currentConfig).shotStopOnCustomWeight
+                        : ACTIVE_PROFILE(currentConfig).shotDose * ACTIVE_PROFILE(currentConfig).shotPreset;
     stopOnWeightReached = predictShotCompletion(desiredShotWeight, state.shotWeight, flow);
   }
 

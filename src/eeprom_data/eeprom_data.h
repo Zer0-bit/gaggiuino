@@ -39,7 +39,6 @@
 * - Add multiple brew profiles
 */
 struct eepromValues_t {
-  uint16_t setpoint;
   uint16_t steamSetPoint;
   uint16_t offsetTemp;
   uint16_t hpwr;
@@ -50,7 +49,7 @@ struct eepromValues_t {
     // name length is intentionally not macro/constant to avoid
     // separating them from the version. changing the length needs
     // a version bump!
-    char     name[50];
+    char     name[24];
     // Preinfusion vars section
     bool     preinfusionState;
     bool     preinfusionFlowState;
@@ -77,21 +76,38 @@ struct eepromValues_t {
     uint16_t preinfusionRampSlope;
     // Profiling vars section
     bool     profilingState;
-    bool     flowProfileState;
-    float    pressureProfilingStart;
-    float    pressureProfilingFinish;
-    uint16_t pressureProfilingHold;
-    float    pressureProfilingHoldLimit;
-    uint16_t pressureProfilingSlope;
-    uint16_t pressureProfilingSlopeShape;
-    float    pressureProfilingFlowRestriction;
-    float    flowProfileStart;
-    float    flowProfileEnd;
-    uint16_t flowProfileHold;
-    float    flowProfileHoldLimit;
-    uint16_t flowProfileSlope;
-    uint16_t flowProfileSlopeShape;
-    float    flowProfilingPressureRestriction;
+    bool     tpType;
+    float    tpProfilingStart;
+    float    tpProfilingFinish;
+    uint16_t tpProfilingHold;
+    float    tpProfilingHoldLimit;
+    uint16_t tpProfilingSlope;
+    uint16_t tpProfilingSlopeShape;
+    float    tpProfilingFlowRestriction;
+    float    tfProfileStart;
+    float    tfProfileEnd;
+    uint16_t tfProfileHold;
+    float    tfProfileHoldLimit;
+    uint16_t tfProfileSlope;
+    uint16_t tfProfileSlopeShape;
+    float    tfProfilingPressureRestriction;
+    bool     mfProfileState;
+    float    mpProfilingStart;
+    float    mpProfilingFinish;
+    uint16_t mpProfilingSlope;
+    uint16_t mpProfilingSlopeShape;
+    float    mpProfilingFlowRestriction;
+    float    mfProfileStart;
+    float    mfProfileEnd;
+    uint16_t mfProfileSlope;
+    uint16_t mfProfileSlopeShape;
+    float    mfProfilingPressureRestriction;
+    /*-----------OTHER---------------------*/
+    uint16_t setpoint;
+    bool     stopOnWeightState;
+    float    shotDose;
+    float    shotStopOnCustomWeight;
+    uint16_t shotPreset;
   } profiles[MAX_PROFILES];
   // Settings vars section
   uint16_t powerLineFrequency;
@@ -103,10 +119,6 @@ struct eepromValues_t {
   int      scalesF1;
   int      scalesF2;
   float    pumpFlowAtZero;
-  bool     stopOnWeightState;
-  float    shotDose;
-  float    shotStopOnCustomWeight;
-  uint16_t shotPreset;
 };
 
 void eepromInit(void);

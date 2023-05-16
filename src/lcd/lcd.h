@@ -21,7 +21,7 @@ enum class SCREEN_MODES {
     SCREEN_brew_graph,
     SCREEN_brew_more,
     SCREEN_shot_settings,
-    SCREEN_splash,
+    SCREEN_brew_transition_profile,
     SCREEN_graph_preview
 } ;
 

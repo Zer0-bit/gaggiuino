@@ -86,7 +86,6 @@ void setup(void) {
 
   // Pump init
   pumpInit(eepromCurrentValues.powerLineFrequency, eepromCurrentValues.pumpFlowAtZero);
-  systemState.pumpCalibrationFinished = true;
   LOG_INFO("Pump init");
 
   pageValuesRefresh(true);
@@ -105,7 +104,6 @@ void setup(void) {
 
 //Main loop where all the logic is continuously run
 void loop(void) {
-  calibratePump();
   fillBoiler();
   pageValuesRefresh(false);
   lcdListen();
@@ -317,10 +315,10 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    uint16_t brewTempSetPoint = runningCfg.setpoint + runningCfg.offsetTemp;
+    uint16_t brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
-    uint16_t lcdTemp = ((uint16_t)currentState.temperature > runningCfg.setpoint && currentState.brewSwitchState)
-      ? (uint16_t)currentState.temperature / brewTempSetPoint + runningCfg.setpoint
+    uint16_t lcdTemp = ((uint16_t)currentState.temperature > ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
+      ? (uint16_t)currentState.temperature / brewTempSetPoint + ACTIVE_PROFILE(runningCfg).setpoint
       : (uint16_t)currentState.temperature;
     lcdSetTemperature(lcdTemp);
 
@@ -386,7 +384,7 @@ void lcdSaveSettingsTrigger(void) {
       eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
       eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
       break;
-    case SCREEN_MODES::SCREEN_brew_preinfusion:
+    case SCREEN_MODES::SCREEN_brew_preinfusion: // PI Settings
       eepromTargetProfile->preinfusionState = ACTIVE_PROFILE(lcdValues).preinfusionState;
       eepromTargetProfile->preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
 
@@ -404,7 +402,7 @@ void lcdSaveSettingsTrigger(void) {
       eepromTargetProfile->preinfusionPressureAbove = ACTIVE_PROFILE(lcdValues).preinfusionPressureAbove;
       eepromTargetProfile->preinfusionWeightAbove = ACTIVE_PROFILE(lcdValues).preinfusionWeightAbove;
       break;
-    case SCREEN_MODES::SCREEN_brew_soak:
+    case SCREEN_MODES::SCREEN_brew_soak: // Soak Settings
       eepromTargetProfile->soakState = ACTIVE_PROFILE(lcdValues).soakState;
 
       if(eepromTargetProfile->preinfusionFlowState == 0)
@@ -417,34 +415,50 @@ void lcdSaveSettingsTrigger(void) {
       eepromTargetProfile->soakBelowPressure = ACTIVE_PROFILE(lcdValues).soakBelowPressure;
       eepromTargetProfile->soakAbovePressure = ACTIVE_PROFILE(lcdValues).soakAbovePressure;
       eepromTargetProfile->soakAboveWeight = ACTIVE_PROFILE(lcdValues).soakAboveWeight;
-      // PI -> PF
+      // PI -> PF/Adv
       eepromTargetProfile->preinfusionRamp = ACTIVE_PROFILE(lcdValues).preinfusionRamp;
       eepromTargetProfile->preinfusionRampSlope = ACTIVE_PROFILE(lcdValues).preinfusionRampSlope;
       break;
-    case SCREEN_MODES::SCREEN_brew_profiling:
-      // PRESSURE PARAMS
+    case SCREEN_MODES::SCREEN_brew_profiling: // Main Profiling Settings
       eepromTargetProfile->profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
-      eepromTargetProfile->flowProfileState              = ACTIVE_PROFILE(lcdValues).flowProfileState;
-      if(eepromTargetProfile->flowProfileState == 0) {
-        eepromTargetProfile->pressureProfilingStart            = ACTIVE_PROFILE(lcdValues).pressureProfilingStart;
-        eepromTargetProfile->pressureProfilingFinish           = ACTIVE_PROFILE(lcdValues).pressureProfilingFinish;
-        eepromTargetProfile->pressureProfilingHold             = ACTIVE_PROFILE(lcdValues).pressureProfilingHold;
-        eepromTargetProfile->pressureProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).pressureProfilingHoldLimit;
-        eepromTargetProfile->pressureProfilingSlope            = ACTIVE_PROFILE(lcdValues).pressureProfilingSlope;
-        eepromTargetProfile->pressureProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).pressureProfilingSlopeShape;
-        eepromTargetProfile->pressureProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).pressureProfilingFlowRestriction;
+      eepromTargetProfile->mfProfileState              = ACTIVE_PROFILE(lcdValues).mfProfileState;
+      if(eepromTargetProfile->mfProfileState == 0) {
+        eepromTargetProfile->mpProfilingStart            = ACTIVE_PROFILE(lcdValues).mpProfilingStart;
+        eepromTargetProfile->mpProfilingFinish           = ACTIVE_PROFILE(lcdValues).mpProfilingFinish;
+        eepromTargetProfile->mpProfilingSlope            = ACTIVE_PROFILE(lcdValues).mpProfilingSlope;
+        eepromTargetProfile->mpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).mpProfilingSlopeShape;
+        eepromTargetProfile->mpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).mpProfilingFlowRestriction;
       } else {
-        eepromTargetProfile->flowProfileStart                  = ACTIVE_PROFILE(lcdValues).flowProfileStart;
-        eepromTargetProfile->flowProfileEnd                    = ACTIVE_PROFILE(lcdValues).flowProfileEnd;
-        eepromTargetProfile->flowProfileHold                   = ACTIVE_PROFILE(lcdValues).flowProfileHold;
-        eepromTargetProfile->flowProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).flowProfileHoldLimit;
-        eepromTargetProfile->flowProfileSlope                  = ACTIVE_PROFILE(lcdValues).flowProfileSlope;
-        eepromTargetProfile->flowProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).flowProfileSlopeShape;
-        eepromTargetProfile->flowProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).flowProfilingPressureRestriction;
+        eepromTargetProfile->mfProfileStart                  = ACTIVE_PROFILE(lcdValues).mfProfileStart;
+        eepromTargetProfile->mfProfileEnd                    = ACTIVE_PROFILE(lcdValues).mfProfileEnd;
+        eepromTargetProfile->mfProfileSlope                  = ACTIVE_PROFILE(lcdValues).mfProfileSlope;
+        eepromTargetProfile->mfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).mfProfileSlopeShape;
+        eepromTargetProfile->mfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).mfProfilingPressureRestriction;
+      }
+      break;
+case SCREEN_MODES::SCREEN_brew_transition_profile: // Advanced Profiling Settings
+      eepromTargetProfile->profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
+      eepromTargetProfile->tpType                        = ACTIVE_PROFILE(lcdValues).tpType;
+      if(eepromTargetProfile->tpType == 0) {
+        eepromTargetProfile->tpProfilingStart            = ACTIVE_PROFILE(lcdValues).tpProfilingStart;
+        eepromTargetProfile->tpProfilingFinish           = ACTIVE_PROFILE(lcdValues).tpProfilingFinish;
+        eepromTargetProfile->tpProfilingHold             = ACTIVE_PROFILE(lcdValues).tpProfilingHold;
+        eepromTargetProfile->tpProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).tpProfilingHoldLimit;
+        eepromTargetProfile->tpProfilingSlope            = ACTIVE_PROFILE(lcdValues).tpProfilingSlope;
+        eepromTargetProfile->tpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).tpProfilingSlopeShape;
+        eepromTargetProfile->tpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).tpProfilingFlowRestriction;
+      } else {
+        eepromTargetProfile->tfProfileStart                  = ACTIVE_PROFILE(lcdValues).tfProfileStart;
+        eepromTargetProfile->tfProfileEnd                    = ACTIVE_PROFILE(lcdValues).tfProfileEnd;
+        eepromTargetProfile->tfProfileHold                   = ACTIVE_PROFILE(lcdValues).tfProfileHold;
+        eepromTargetProfile->tfProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).tfProfileHoldLimit;
+        eepromTargetProfile->tfProfileSlope                  = ACTIVE_PROFILE(lcdValues).tfProfileSlope;
+        eepromTargetProfile->tfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).tfProfileSlopeShape;
+        eepromTargetProfile->tfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).tfProfilingPressureRestriction;
       }
       break;
     case SCREEN_MODES::SCREEN_settings_boiler:
-      eepromCurrentValues.setpoint                      = lcdValues.setpoint;
+      eepromTargetProfile->setpoint                      = ACTIVE_PROFILE(lcdValues).setpoint;
       eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
       eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
       eepromCurrentValues.hpwr                          = lcdValues.hpwr;
@@ -459,10 +473,10 @@ void lcdSaveSettingsTrigger(void) {
       eepromCurrentValues.pumpFlowAtZero                = lcdValues.pumpFlowAtZero;
       break;
     case SCREEN_MODES::SCREEN_shot_settings:
-      eepromCurrentValues.stopOnWeightState             = lcdValues.stopOnWeightState;
-      eepromCurrentValues.shotDose                      = lcdValues.shotDose;
-      eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
-      eepromCurrentValues.shotStopOnCustomWeight        = lcdValues.shotStopOnCustomWeight;
+      eepromTargetProfile->stopOnWeightState             = ACTIVE_PROFILE(lcdValues).stopOnWeightState;
+      eepromTargetProfile->shotDose                      = ACTIVE_PROFILE(lcdValues).shotDose;
+      eepromTargetProfile->shotPreset                    = ACTIVE_PROFILE(lcdValues).shotPreset;
+      eepromTargetProfile->shotStopOnCustomWeight        = ACTIVE_PROFILE(lcdValues).shotStopOnCustomWeight;
       break;
     default:
       break;
@@ -478,14 +492,11 @@ void lcdSaveSettingsTrigger(void) {
 
 void lcdSaveProfileTrigger(void) {
   LOG_VERBOSE("Saving profile to EEPROM");
-  lcdShowPopup("Saving [1]..");
   bool rc;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  lcdShowPopup("Saving [2]..");
   watchdogReload(); // reload the watchdog timer on expensive operations
   eepromValues_t lcdValues = lcdDownloadCfg(true); // :true: means read the buttons name
   watchdogReload(); // reload the watchdog timer on expensive operations
-  lcdShowPopup("Saving [3]..");
 
   // Target save to the currently selected profile on screen (not necessarily same as saved default)
   eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[lcdValues.activeProfile];
@@ -522,28 +533,44 @@ void lcdSaveProfileTrigger(void) {
   // PI -> PF
   eepromTargetProfile->preinfusionRamp = ACTIVE_PROFILE(lcdValues).preinfusionRamp;
   eepromTargetProfile->preinfusionRampSlope = ACTIVE_PROFILE(lcdValues).preinfusionRampSlope;
-  // PRESSURE PARAMS
+  // Main Profile PARAMS
   eepromTargetProfile->profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
-  eepromTargetProfile->flowProfileState              = ACTIVE_PROFILE(lcdValues).flowProfileState;
-  if(eepromTargetProfile->flowProfileState == 0) {
-    eepromTargetProfile->pressureProfilingStart            = ACTIVE_PROFILE(lcdValues).pressureProfilingStart;
-    eepromTargetProfile->pressureProfilingFinish           = ACTIVE_PROFILE(lcdValues).pressureProfilingFinish;
-    eepromTargetProfile->pressureProfilingHold             = ACTIVE_PROFILE(lcdValues).pressureProfilingHold;
-    eepromTargetProfile->pressureProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).pressureProfilingHoldLimit;
-    eepromTargetProfile->pressureProfilingSlope            = ACTIVE_PROFILE(lcdValues).pressureProfilingSlope;
-    eepromTargetProfile->pressureProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).pressureProfilingSlopeShape;
-    eepromTargetProfile->pressureProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).pressureProfilingFlowRestriction;
+  eepromTargetProfile->mfProfileState              = ACTIVE_PROFILE(lcdValues).mfProfileState;
+  if(eepromTargetProfile->mfProfileState == 0) {
+    eepromTargetProfile->mpProfilingStart            = ACTIVE_PROFILE(lcdValues).mpProfilingStart;
+    eepromTargetProfile->mpProfilingFinish           = ACTIVE_PROFILE(lcdValues).mpProfilingFinish;
+    eepromTargetProfile->mpProfilingSlope            = ACTIVE_PROFILE(lcdValues).mpProfilingSlope;
+    eepromTargetProfile->mpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).mpProfilingSlopeShape;
+    eepromTargetProfile->mpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).mpProfilingFlowRestriction;
   } else {
-    eepromTargetProfile->flowProfileStart                  = ACTIVE_PROFILE(lcdValues).flowProfileStart;
-    eepromTargetProfile->flowProfileEnd                    = ACTIVE_PROFILE(lcdValues).flowProfileEnd;
-    eepromTargetProfile->flowProfileHold                   = ACTIVE_PROFILE(lcdValues).flowProfileHold;
-    eepromTargetProfile->flowProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).flowProfileHoldLimit;
-    eepromTargetProfile->flowProfileSlope                  = ACTIVE_PROFILE(lcdValues).flowProfileSlope;
-    eepromTargetProfile->flowProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).flowProfileSlopeShape;
-    eepromTargetProfile->flowProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).flowProfilingPressureRestriction;
+    eepromTargetProfile->mfProfileStart                  = ACTIVE_PROFILE(lcdValues).mfProfileStart;
+    eepromTargetProfile->mfProfileEnd                    = ACTIVE_PROFILE(lcdValues).mfProfileEnd;
+    eepromTargetProfile->mfProfileSlope                  = ACTIVE_PROFILE(lcdValues).mfProfileSlope;
+    eepromTargetProfile->mfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).mfProfileSlopeShape;
+    eepromTargetProfile->mfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).mfProfilingPressureRestriction;
   }
+  // Advanced/Transition Profile PARAMS
+  eepromTargetProfile->tpType                        = ACTIVE_PROFILE(lcdValues).tpType;
+  if(eepromTargetProfile->tpType == 0) {
+    eepromTargetProfile->tpProfilingStart            = ACTIVE_PROFILE(lcdValues).tpProfilingStart;
+    eepromTargetProfile->tpProfilingFinish           = ACTIVE_PROFILE(lcdValues).tpProfilingFinish;
+    eepromTargetProfile->tpProfilingHold             = ACTIVE_PROFILE(lcdValues).tpProfilingHold;
+    eepromTargetProfile->tpProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).tpProfilingHoldLimit;
+    eepromTargetProfile->tpProfilingSlope            = ACTIVE_PROFILE(lcdValues).tpProfilingSlope;
+    eepromTargetProfile->tpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).tpProfilingSlopeShape;
+    eepromTargetProfile->tpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).tpProfilingFlowRestriction;
+  } else {
+    eepromTargetProfile->tfProfileStart                  = ACTIVE_PROFILE(lcdValues).tfProfileStart;
+    eepromTargetProfile->tfProfileEnd                    = ACTIVE_PROFILE(lcdValues).tfProfileEnd;
+    eepromTargetProfile->tfProfileHold                   = ACTIVE_PROFILE(lcdValues).tfProfileHold;
+    eepromTargetProfile->tfProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).tfProfileHoldLimit;
+    eepromTargetProfile->tfProfileSlope                  = ACTIVE_PROFILE(lcdValues).tfProfileSlope;
+    eepromTargetProfile->tfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).tfProfileSlopeShape;
+    eepromTargetProfile->tfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).tfProfilingPressureRestriction;
+  }
+  // System + Other
   eepromCurrentValues.activeProfile                 = lcdValues.activeProfile;
-  eepromCurrentValues.setpoint                      = lcdValues.setpoint;
+  eepromTargetProfile->setpoint                     = ACTIVE_PROFILE(lcdValues).setpoint;
   eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
   eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
   eepromCurrentValues.hpwr                          = lcdValues.hpwr;
@@ -554,17 +581,15 @@ void lcdSaveProfileTrigger(void) {
   eepromCurrentValues.scalesF1                      = lcdValues.scalesF1;
   eepromCurrentValues.scalesF2                      = lcdValues.scalesF2;
   eepromCurrentValues.pumpFlowAtZero                = lcdValues.pumpFlowAtZero;
-  eepromCurrentValues.stopOnWeightState             = lcdValues.stopOnWeightState;
-  eepromCurrentValues.shotDose                      = lcdValues.shotDose;
-  eepromCurrentValues.shotPreset                    = lcdValues.shotPreset;
-  eepromCurrentValues.shotStopOnCustomWeight        = lcdValues.shotStopOnCustomWeight;
+  eepromTargetProfile->stopOnWeightState            = ACTIVE_PROFILE(lcdValues).stopOnWeightState;
+  eepromTargetProfile->shotDose                     = ACTIVE_PROFILE(lcdValues).shotDose;
+  eepromTargetProfile->shotPreset                   = ACTIVE_PROFILE(lcdValues).shotPreset;
+  eepromTargetProfile->shotStopOnCustomWeight       = ACTIVE_PROFILE(lcdValues).shotStopOnCustomWeight;
   eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
   eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
   eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
 
-  lcdShowPopup("Saving [4]..");
   rc = eepromWrite(eepromCurrentValues);
-  lcdShowPopup("Saving [5]..");
   watchdogReload(); // reload the watchdog timer on expensive operations
   if (rc == true) {
     lcdShowPopup("Update successful!");
@@ -603,7 +628,7 @@ void lcdRefreshElementsTrigger(void) {
       ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
-      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState = ACTIVE_PROFILE(lcdValues).flowProfileState;
+      ACTIVE_PROFILE(eepromCurrentValues).mfProfileState = ACTIVE_PROFILE(lcdValues).mfProfileState;
       break;
     default:
       lcdShowPopup("Nope!");
@@ -637,7 +662,7 @@ void lcdQuickProfilesSwitchOrSave(void) {
       ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
-      ACTIVE_PROFILE(eepromCurrentValues).flowProfileState = ACTIVE_PROFILE(lcdValues).flowProfileState;
+      ACTIVE_PROFILE(eepromCurrentValues).mfProfileState = ACTIVE_PROFILE(lcdValues).mfProfileState;
       break;
     default:
       lcdShowPopup("Nope!");
@@ -663,10 +688,10 @@ static void updateProfilerPhases(void) {
   float isPressureBelow = -1.f;
   float isWaterPumped = -1.f;
 
-  if (runningCfg.stopOnWeightState) {
-    shotTarget = (runningCfg.shotStopOnCustomWeight < 1.f)
-      ? runningCfg.shotDose * runningCfg.shotPreset
-      : runningCfg.shotStopOnCustomWeight;
+  if (ACTIVE_PROFILE(runningCfg).stopOnWeightState) {
+    shotTarget = (ACTIVE_PROFILE(runningCfg).shotStopOnCustomWeight < 1.f)
+      ? ACTIVE_PROFILE(runningCfg).shotDose * ACTIVE_PROFILE(runningCfg).shotPreset
+      : ACTIVE_PROFILE(runningCfg).shotStopOnCustomWeight;
   }
 
 
@@ -716,45 +741,63 @@ static void updateProfilerPhases(void) {
 
   // Setup ramp phase if necessary
   if (ACTIVE_PROFILE(runningCfg).preinfusionRamp > 0) {
-    if (ACTIVE_PROFILE(runningCfg).flowProfileState) {
-      float holdLimit = ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
+    if (ACTIVE_PROFILE(runningCfg).mfProfileState) {
+      float holdLimit = -1.f; //ACTIVE_PROFILE(runningCfg).tfProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).tfProfileHoldLimit : -1;
 
-      addFlowPhase(Transition{ACTIVE_PROFILE(runningCfg).flowProfileStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope}, holdLimit, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000, -1, -1, -1, -1);
+      addFlowPhase(Transition{ACTIVE_PROFILE(runningCfg).mfProfileStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope}, holdLimit, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000, -1, -1, -1, -1);
       // addPressurePhase(Transition{ holdLimit, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope }, ACTIVE_PROFILE(runningCfg).flowProfileStart, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000, -1, -1, -1, -1);
     } else {
-      float holdLimit = ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
+      float holdLimit = -1.f; //ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
 
-      addPressurePhase(Transition{ACTIVE_PROFILE(runningCfg).pressureProfilingStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope}, holdLimit, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000, -1, -1, -1, -1);
+      addPressurePhase(Transition{ACTIVE_PROFILE(runningCfg).mpProfilingStart, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope}, holdLimit, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000, -1, -1, -1, -1);
     }
   }
 
   // Setup shot profiling
   if (ACTIVE_PROFILE(runningCfg).profilingState) {
-    if (ACTIVE_PROFILE(runningCfg).flowProfileState) { // flow based profiling enabled
+    // ----------------- Transition Profile ----------------- //
+    if (ACTIVE_PROFILE(runningCfg).tpType) { // flow based profiling enabled
       /* Setting the phase specific restrictions */
       /* ------------------------------------------ */
-      float fpStart = ACTIVE_PROFILE(runningCfg).flowProfileStart;
-      float fpEnd = ACTIVE_PROFILE(runningCfg).flowProfileEnd;
-      uint16_t fpHold = ACTIVE_PROFILE(runningCfg).flowProfileHold;
-      float holdLimit = ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).flowProfileHoldLimit : -1;
+      float fpStart = ACTIVE_PROFILE(runningCfg).tfProfileStart;
+      float fpEnd = ACTIVE_PROFILE(runningCfg).tfProfileEnd;
+      uint16_t fpHold = ACTIVE_PROFILE(runningCfg).tfProfileHold;
+      float holdLimit = ACTIVE_PROFILE(runningCfg).tfProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).tfProfileHoldLimit : -1;
       /* ------------------------------------------ */
 
       if (fpStart > 0.f && fpHold > 0) {
         addFlowPhase(Transition{ fpStart }, holdLimit, fpHold * 1000, -1, -1, -1, -1);
       }
-      addFlowPhase(Transition{ fpEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).flowProfileSlopeShape, ACTIVE_PROFILE(runningCfg).flowProfileSlope * 1000 }, ACTIVE_PROFILE(runningCfg).flowProfilingPressureRestriction, -1, -1, -1, -1, -1);
+      addFlowPhase(Transition{ fpEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).tfProfileSlopeShape, ACTIVE_PROFILE(runningCfg).tfProfileSlope * 1000 }, ACTIVE_PROFILE(runningCfg).tfProfilingPressureRestriction, -1, -1, -1, -1, -1);
     } else { // pressure based profiling enabled
     /* Setting the phase specific restrictions */
     /* ------------------------------------------ */
-      float ppStart = ACTIVE_PROFILE(runningCfg).pressureProfilingStart;
-      float ppEnd = ACTIVE_PROFILE(runningCfg).pressureProfilingFinish;
-      uint16_t ppHold = ACTIVE_PROFILE(runningCfg).pressureProfilingHold;
-      float holdLimit = ACTIVE_PROFILE(runningCfg).pressureProfilingHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).pressureProfilingHoldLimit : -1;
+      float ppStart = ACTIVE_PROFILE(runningCfg).tpProfilingStart;
+      float ppEnd = ACTIVE_PROFILE(runningCfg).tpProfilingFinish;
+      uint16_t ppHold = ACTIVE_PROFILE(runningCfg).tpProfilingHold;
+      float holdLimit = ACTIVE_PROFILE(runningCfg).tpProfilingHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).tpProfilingHoldLimit : -1;
     /* ------------------------------------------ */
       if (ppStart > 0.f && ppHold > 0) {
         addPressurePhase(Transition{ppStart}, holdLimit, ppHold * 1000, -1, -1, -1, -1);
       }
-      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).pressureProfilingSlopeShape, ACTIVE_PROFILE(runningCfg).pressureProfilingSlope * 1000}, ACTIVE_PROFILE(runningCfg).pressureProfilingFlowRestriction, -1, -1, -1, -1, -1);
+      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).tpProfilingSlopeShape, ACTIVE_PROFILE(runningCfg).tpProfilingSlope * 1000}, ACTIVE_PROFILE(runningCfg).tpProfilingFlowRestriction, -1, -1, -1, -1, -1);
+    }
+
+    // ----------------- Main Profile ----------------- //
+    if (ACTIVE_PROFILE(runningCfg).mfProfileState) { // flow based profiling enabled
+      /* Setting the phase specific restrictions */
+      /* ------------------------------------------ */
+      float fpStart = ACTIVE_PROFILE(runningCfg).mfProfileStart;
+      float fpEnd = ACTIVE_PROFILE(runningCfg).mfProfileEnd;
+      /* ------------------------------------------ */
+      addFlowPhase(Transition{ fpStart, fpEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).mfProfileSlopeShape, ACTIVE_PROFILE(runningCfg).mfProfileSlope * 1000 }, ACTIVE_PROFILE(runningCfg).mfProfilingPressureRestriction, -1, -1, -1, -1, -1);
+    } else { // pressure based profiling enabled
+    /* Setting the phase specific restrictions */
+    /* ------------------------------------------ */
+      float ppStart = ACTIVE_PROFILE(runningCfg).mpProfilingStart;
+      float ppEnd = ACTIVE_PROFILE(runningCfg).mpProfilingFinish;
+    /* ------------------------------------------ */
+      addPressurePhase(Transition{ppStart, ppEnd, (TransitionCurve)ACTIVE_PROFILE(runningCfg).mpProfilingSlopeShape, ACTIVE_PROFILE(runningCfg).mpProfilingSlope * 1000}, ACTIVE_PROFILE(runningCfg).mpProfilingFlowRestriction, -1, -1, -1, -1, -1);
     }
   } else { // Shot profiling disabled. Default to 9 bars
     addPressurePhase(Transition{9.f, (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope, ACTIVE_PROFILE(runningCfg).preinfusionRamp * 1000}, -1, -1, -1, -1, -1, -1);
@@ -834,7 +877,7 @@ static void manualFlowControl(void) {
 
 static void brewDetect(void) {
   // Do not allow brew detection while system hasn't finished it's startup procedures.
-  if (!systemState.startupInitFinished || !systemState.pumpCalibrationFinished) {
+  if (!systemState.startupInitFinished) {
     return;
   }
 
@@ -1045,72 +1088,4 @@ static void cpsInit(eepromValues_t &eepromValues) {
   } else if (cps > 0) { // 50 Hz
     eepromValues.powerLineFrequency = 50u;
   }
-}
-
-static void calibratePump(void) {
-  if (systemState.pumpCalibrationFinished) {
-    return;
-  }
-  bool recalibrating = false;
-  // Calibrate pump in both phases
-  CALIBRATE_PHASES:
-  lcdShowPopup(!recalibrating ? "Calibrating pump!" : "Re-calibrating!") ;
-  for (int phase = 0; phase < 2; phase++) {
-    watchdogReload();
-    openValve();
-    delay(1500);
-    sensorsReadPressure();
-
-
-    unsigned long loopTimeout = millis() + 1500L;
-    // Wait for pressure to reach desired level.
-    while (currentState.smoothedPressure < calibrationPressure) {
-      watchdogReload();
-      #if defined(SINGLE_BOARD) || defined(INDEPENDENT_DIMMER)
-      closeValve();
-      #endif
-      setPumpToRawValue(50);
-      if (currentState.smoothedPressure < 0.05f) {
-        getAndResetClickCounter();
-      }
-      sensorsReadPressure();
-      lcdRefresh();
-      // Exit loop if timeout is reached.
-      if (millis() > loopTimeout) {
-        break;
-      }
-    }
-
-    systemState.pumpClicks[phase] = getAndResetClickCounter();
-    setPumpToRawValue(0);
-    sensorsReadPressure();
-    lcdSetPressure(currentState.smoothedPressure);
-    lcdRefresh();
-    openValve();
-
-    // Switch pump phase for next calibration.
-    if (phase < 1) pumpPhaseShift();
-  }
-
-  // Determine which phase has fewer clicks.
-  long phaseDiffSanityCheck = systemState.pumpClicks[1] - systemState.pumpClicks[0];
-  if ( systemState.pumpCalibrationRetries < 2 ) {
-      if ((phaseDiffSanityCheck >= -1 && phaseDiffSanityCheck <= 1) || systemState.pumpClicks[0] <= 1 || systemState.pumpClicks[1] <= 1) {
-      recalibrating = true;
-      systemState.pumpCalibrationRetries++;
-      goto CALIBRATE_PHASES;
-    }
-  }
-  if (systemState.pumpClicks[1] < systemState.pumpClicks[0]) {
-    pumpPhaseShift();
-    lcdShowPopup("Pump phase [2]");
-  }
-  else if (systemState.pumpCalibrationRetries >= 4) {
-    lcdShowPopup("Calibration failed!");
-    systemState.startupInitFinished = true;
-  }
-  else lcdShowPopup("Pump phase [1]");
-
-  // Set this var to true so boiler fill phase is never repeated.
-  systemState.pumpCalibrationFinished = true;
 }

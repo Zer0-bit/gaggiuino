@@ -78,15 +78,14 @@ struct eepromValues_t_v6 {
 };
 
 static bool upgradeSchema_v6(eepromValues_t &targetValues, eepromValues_t_v6 &loadedValues) {
-  targetValues.setpoint = loadedValues.setpoint;
+  ACTIVE_PROFILE(targetValues).setpoint = loadedValues.setpoint;
   targetValues.steamSetPoint = loadedValues.steamSetPoint;
   targetValues.offsetTemp = loadedValues.offsetTemp;
   targetValues.hpwr = loadedValues.hpwr;
   targetValues.mainDivider = loadedValues.mainDivider;
   targetValues.brewDivider = loadedValues.brewDivider;
-  ACTIVE_PROFILE(targetValues).pressureProfilingStart = (float) loadedValues.pressureProfilingStart;
-  ACTIVE_PROFILE(targetValues).pressureProfilingFinish = (float) loadedValues.pressureProfilingFinish;
-  ACTIVE_PROFILE(targetValues).pressureProfilingHold = loadedValues.pressureProfilingHold;
+  ACTIVE_PROFILE(targetValues).mpProfilingStart = (float) loadedValues.pressureProfilingStart;
+  ACTIVE_PROFILE(targetValues).mpProfilingFinish = (float) loadedValues.pressureProfilingFinish;
   ACTIVE_PROFILE(targetValues).preinfusionState = loadedValues.preinfusionState;
   ACTIVE_PROFILE(targetValues).preinfusionSec = loadedValues.preinfusionSec;
   ACTIVE_PROFILE(targetValues).preinfusionBar = (float) loadedValues.preinfusionBar;
@@ -95,9 +94,9 @@ static bool upgradeSchema_v6(eepromValues_t &targetValues, eepromValues_t_v6 &lo
   ACTIVE_PROFILE(targetValues).preinfusionFlowVol = loadedValues.preinfusionFlowVol;
   ACTIVE_PROFILE(targetValues).preinfusionFlowTime = loadedValues.preinfusionFlowTime;
   ACTIVE_PROFILE(targetValues).preinfusionFlowPressureTarget = (float) loadedValues.preinfusionFlowPressureTarget;
-  ACTIVE_PROFILE(targetValues).flowProfileState = loadedValues.flowProfileState;
-  ACTIVE_PROFILE(targetValues).flowProfileStart = loadedValues.flowProfileStart;
-  ACTIVE_PROFILE(targetValues).flowProfileEnd = loadedValues.flowProfileEnd;
+  ACTIVE_PROFILE(targetValues).mfProfileState = loadedValues.flowProfileState;
+  ACTIVE_PROFILE(targetValues).mfProfileStart = loadedValues.flowProfileStart;
+  ACTIVE_PROFILE(targetValues).mfProfileEnd = loadedValues.flowProfileEnd;
   targetValues.powerLineFrequency = loadedValues.powerLineFrequency;
   targetValues.lcdSleep = loadedValues.lcdSleep;
   targetValues.warmupState = loadedValues.warmupState;
@@ -107,10 +106,10 @@ static bool upgradeSchema_v6(eepromValues_t &targetValues, eepromValues_t_v6 &lo
   targetValues.scalesF1 = loadedValues.scalesF1;
   targetValues.scalesF2 = loadedValues.scalesF2;
   targetValues.pumpFlowAtZero = loadedValues.pumpFlowAtZero;
-  targetValues.stopOnWeightState = loadedValues.stopOnWeightState;
-  targetValues.shotDose = loadedValues.shotDose;
-  targetValues.shotStopOnCustomWeight = loadedValues.shotStopOnCustomWeight;
-  targetValues.shotPreset = loadedValues.shotPreset;
+  ACTIVE_PROFILE(targetValues).stopOnWeightState = loadedValues.stopOnWeightState;
+  ACTIVE_PROFILE(targetValues).shotDose = loadedValues.shotDose;
+  ACTIVE_PROFILE(targetValues).shotStopOnCustomWeight = loadedValues.shotStopOnCustomWeight;
+  ACTIVE_PROFILE(targetValues).shotPreset = loadedValues.shotPreset;
   return true;
 }
 
