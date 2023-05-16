@@ -65,27 +65,27 @@ void setup(void) {
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  runningCfg = eepromGetCurrentValues();
   LOG_INFO("EEPROM Init");
 
-  cpsInit(eepromCurrentValues);
+  cpsInit(runningCfg);
   LOG_INFO("CPS Init");
 
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdUploadCfg(eepromCurrentValues);
+  lcdUploadCfg(runningCfg);
   LOG_INFO("LCD cfg uploaded");
 
   adsInit();
   LOG_INFO("Pressure sensor init");
 
   // Scales handling
-  scalesInit(eepromCurrentValues.scalesF1, eepromCurrentValues.scalesF2);
+  scalesInit(runningCfg.scalesF1, runningCfg.scalesF2);
   LOG_INFO("Scales init");
 
   // Pump init
-  pumpInit(eepromCurrentValues.powerLineFrequency, eepromCurrentValues.pumpFlowAtZero);
+  pumpInit(runningCfg.powerLineFrequency, runningCfg.pumpFlowAtZero);
   systemState.pumpCalibrationFinished = true;
   LOG_INFO("Pump init");
 
