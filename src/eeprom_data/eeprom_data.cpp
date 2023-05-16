@@ -20,7 +20,7 @@ namespace {
     // Profiles
     defaultData.activeProfile = 0;
     for (int i=0; i<MAX_PROFILES; i++) {
-      snprintf(defaultData.profiles[i].name, 25, "%s", defaultsProfile[i].name);
+      snprintf(defaultData.profiles[i].name, maxProfileNameChars-1, "%s", defaultsProfile[i].name);
       // temp
 
       // PI
@@ -86,7 +86,7 @@ namespace {
       defaultData.profiles[i].shotPreset = defaultsProfile[i].shotPreset;
     }
     // General brew settings
-    defaultData.homeOnShotFinish = true;
+    defaultData.homeOnShotFinish = false;
     defaultData.brewDeltaState = true;
     defaultData.basketPrefill = false;
     // System settings

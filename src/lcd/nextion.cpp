@@ -32,6 +32,8 @@ void lcdWakeUp(void) {
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   // Highlight the active profile
   myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+  // Temp
+  myNex.writeNum("sT.setPoint.val", ACTIVE_PROFILE(eepromCurrentValues).setpoint);
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -102,6 +104,11 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("pfCrv", ACTIVE_PROFILE(eepromCurrentValues).mfProfileSlopeShape);
     myNex.writeNum("pf.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).mfProfilingPressureRestriction * 10.f);
   }
+  // Dose settings
+  myNex.writeNum("shotState", ACTIVE_PROFILE(eepromCurrentValues).stopOnWeightState);
+  myNex.writeNum("dS.numDose.val", ACTIVE_PROFILE(eepromCurrentValues).shotDose * 10.f);
+  myNex.writeNum("shotPreset", ACTIVE_PROFILE(eepromCurrentValues).shotPreset);
+  myNex.writeNum("dS.numDoseForced.val", ACTIVE_PROFILE(eepromCurrentValues).shotStopOnCustomWeight * 10.f);
 }
 
 // This is never called again after boot
@@ -128,7 +135,6 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("bS.btTempDelta.val", eepromCurrentValues.brewDeltaState);
 
   // System settings
-  myNex.writeNum("sT.setPoint.val", ACTIVE_PROFILE(eepromCurrentValues).setpoint);
   myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint);
   myNex.writeNum("sT.offSet.val", eepromCurrentValues.offsetTemp);
   myNex.writeNum("sT.hpwr.val", eepromCurrentValues.hpwr);
@@ -141,12 +147,6 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("sP.lc2.val", eepromCurrentValues.scalesF2);
   myNex.writeNum("sP.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 10000.f);
   myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
-
-  // Dose settings
-  myNex.writeNum("shotState", ACTIVE_PROFILE(eepromCurrentValues).stopOnWeightState);
-  myNex.writeNum("dS.numDose.val", ACTIVE_PROFILE(eepromCurrentValues).shotDose * 10.f);
-  myNex.writeNum("shotPreset", ACTIVE_PROFILE(eepromCurrentValues).shotPreset);
-  myNex.writeNum("dS.numDoseForced.val", ACTIVE_PROFILE(eepromCurrentValues).shotStopOnCustomWeight * 10.f);
 
   lcdUploadProfile(eepromCurrentValues);
 }
@@ -247,21 +247,23 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
   eepromValues_t lcdCfg = eepromGetCurrentValues();
   lcdCfg.activeProfile = lcdGetSelectedProfile();
   // We only want to download values when actually switching a page with switchable vals.
-  switch (lcdCurrentPageId) {
-    case 4:
-    case 5:
-    case 6:
-    case 9:
-    return lcdCfg;
+  switch ((SCREEN_MODES)lcdCurrentPageId) {
+    case SCREEN_MODES::SCREEN_brew_manual:
+    case SCREEN_MODES::SCREEN_flush:
+    case SCREEN_MODES::SCREEN_descale:
+    case SCREEN_MODES::SCREEN_brew_graph:
+      return lcdCfg;
+    default:
+      break;
   }
 
   if (toSave) { // Only read this string when saving a profile
-    char buttonElemId[16]; // 15+1 bytes in the btn element name.
-    snprintf(buttonElemId, 16, "home.qPf%d.txt", lcdCfg.activeProfile + 1);
+    char buttonElemId[nexBtnBufferSize]; // 15+1 bytes in the btn element name.
+    snprintf(buttonElemId, nexBtnBufferSize, "home.qPf%d.txt", lcdCfg.activeProfile + 1);
     snprintf(ACTIVE_PROFILE(lcdCfg).name, sizeof(ACTIVE_PROFILE(lcdCfg).name), "%.16s", myNex.readStr(buttonElemId).c_str());
   }
 
-  if (toSave || lcdCurrentPageId == 1 || lcdLastCurrentPageId == 1) { // PI
+  if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_brew_preinfusion || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_brew_preinfusion) { // PI
     ACTIVE_PROFILE(lcdCfg).preinfusionState = myNex.readNumber("piState");
     ACTIVE_PROFILE(lcdCfg).preinfusionFlowState = myNex.readNumber("piFlowState");
 
@@ -280,7 +282,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     ACTIVE_PROFILE(lcdCfg).preinfusionWeightAbove = myNex.readNumber("pi.piAbove.val") / 10.f;
   }
 
-  if (toSave || lcdCurrentPageId == 2 || lcdLastCurrentPageId == 2) { // SOAK
+  if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_brew_soak || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_brew_soak) { // SOAK
     ACTIVE_PROFILE(lcdCfg).soakState = myNex.readNumber("skState");
 
     if(ACTIVE_PROFILE(lcdCfg).preinfusionFlowState == 0)
@@ -298,7 +300,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     ACTIVE_PROFILE(lcdCfg).preinfusionRampSlope = myNex.readNumber("skCrv");
   }
 
-  if (toSave || lcdCurrentPageId == 3 || lcdLastCurrentPageId == 3) {// PROFILING
+  if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_brew_profiling || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_brew_profiling) {// PROFILING
     ACTIVE_PROFILE(lcdCfg).profilingState = myNex.readNumber("ppState");
     ACTIVE_PROFILE(lcdCfg).mfProfileState = myNex.readNumber("ppType");
 
@@ -317,7 +319,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     }
   }
 
-  if (toSave || lcdCurrentPageId == 12 || lcdLastCurrentPageId == 12) {// PROFILING
+  if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_brew_transition_profile || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_brew_transition_profile) {// PROFILING
     ACTIVE_PROFILE(lcdCfg).profilingState = myNex.readNumber("ppState");
     ACTIVE_PROFILE(lcdCfg).tpType = myNex.readNumber("paType");
 
@@ -340,21 +342,21 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     }
   }
 
-  if (toSave || lcdCurrentPageId == 10 || lcdLastCurrentPageId == 10) {// More brew settings
+  if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_brew_more || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_brew_more) {// More brew settings
     lcdCfg.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
     lcdCfg.basketPrefill                  = myNex.readNumber("basketPrefill");
     lcdCfg.brewDeltaState                 = myNex.readNumber("deltaState");
   }
 
-  if (toSave || lcdCurrentPageId == 11 || lcdLastCurrentPageId == 11) {// DOse settings
+  if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_shot_settings || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_shot_settings) {// DOse settings
     ACTIVE_PROFILE(lcdCfg).stopOnWeightState              = myNex.readNumber("shotState");
     ACTIVE_PROFILE(lcdCfg).shotDose                       = myNex.readNumber("dS.numDose.val") / 10.f;
     ACTIVE_PROFILE(lcdCfg).shotStopOnCustomWeight         = myNex.readNumber("dS.numDoseForced.val") / 10.f;
     ACTIVE_PROFILE(lcdCfg).shotPreset                     = myNex.readNumber("shotPreset");
   }
 
-  if (toSave || lcdCurrentPageId == 7 || lcdLastCurrentPageId == 7) {// System settings
-    ACTIVE_PROFILE(lcdCfg).setpoint                       = myNex.readNumber("sT.setPoint.val");
+  if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_settings_boiler || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_settings_boiler) {// System settings
+    ACTIVE_PROFILE(lcdCfg).setpoint       = myNex.readNumber("sT.setPoint.val");
     lcdCfg.steamSetPoint                  = myNex.readNumber("sT.steamSetPoint.val");
     lcdCfg.offsetTemp                     = myNex.readNumber("sT.offSet.val");
     lcdCfg.hpwr                           = myNex.readNumber("sT.hpwr.val");
@@ -362,7 +364,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     lcdCfg.brewDivider                    = myNex.readNumber("sT.bDiv.val");
   }
 
-  if (toSave || lcdCurrentPageId == 8 || lcdLastCurrentPageId == 8) {// System settings
+  if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_settings_system || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_settings_system) {// System settings
     lcdCfg.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
     lcdCfg.warmupState                    = myNex.readNumber("warmupState");
     lcdCfg.scalesF1                       = myNex.readNumber("sP.lc1.val");

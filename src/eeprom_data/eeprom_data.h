@@ -34,6 +34,7 @@
 * functions that reference them. this will pop up as a compile time failure
 */
 
+const uint8_t maxProfileNameChars = 25;
 /**
 * Version 10:
 * - Add multiple brew profiles
@@ -49,7 +50,7 @@ struct eepromValues_t {
     // name length is intentionally not macro/constant to avoid
     // separating them from the version. changing the length needs
     // a version bump!
-    char     name[24];
+    char     name[maxProfileNameChars];
     // Preinfusion vars section
     bool     preinfusionState;
     bool     preinfusionFlowState;

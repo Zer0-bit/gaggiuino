@@ -7,6 +7,7 @@
 
 extern volatile int lcdCurrentPageId;
 extern volatile int lcdLastCurrentPageId;
+const uint8_t nexBtnBufferSize = 16;
 
 enum class SCREEN_MODES {
     SCREEN_home,
