@@ -71,7 +71,7 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   // PROFILING
   myNex.writeNum("ppState", ACTIVE_PROFILE(eepromCurrentValues).profilingState);
   myNex.writeNum("ppType", ACTIVE_PROFILE(eepromCurrentValues).mfProfileState);
-  myNex.writeNum("tpType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
+  myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
   // Adnvanced transition profile
   if(ACTIVE_PROFILE(eepromCurrentValues).tpType == 0) {
     myNex.writeNum("tp.tStart.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingStart * 10.f);
@@ -210,13 +210,13 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
       }
       break;
     case SCREEN_MODES::SCREEN_brew_transition_profile:
-      myNex.writeNum("tpType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
+      myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
       // Adnvanced transition profile
       if(ACTIVE_PROFILE(eepromCurrentValues).tpType == 0) {
         myNex.writeNum("tp.tStart.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingStart * 10.f);
         myNex.writeNum("tp.tEnd.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingFinish * 10.f);
         myNex.writeNum("tp.tHold.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHold);
-        myNex.writeNum("tp.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHoldLimit * 10.f);
+        myNex.writeNum("tp.h  Lim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHoldLimit * 10.f);
         myNex.writeNum("tp.tSlope.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingSlope);
         myNex.writeNum("paCrv", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingSlopeShape);
         myNex.writeNum("tp.tLim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingFlowRestriction * 10.f);
