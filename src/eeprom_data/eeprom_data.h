@@ -76,7 +76,7 @@ struct eepromValues_t {
     uint16_t preinfusionRamp;
     uint16_t preinfusionRampSlope;
     // Profiling vars section
-    bool     profilingState;
+    bool     tpState;
     bool     tpType;
     float    tpProfilingStart;
     float    tpProfilingFinish;
@@ -92,6 +92,7 @@ struct eepromValues_t {
     uint16_t tfProfileSlope;
     uint16_t tfProfileSlopeShape;
     float    tfProfilingPressureRestriction;
+    bool     profilingState;
     bool     mfProfileState;
     float    mpProfilingStart;
     float    mpProfilingFinish;

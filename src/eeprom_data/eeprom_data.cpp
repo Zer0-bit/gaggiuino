@@ -49,6 +49,7 @@ namespace {
       defaultData.profiles[i].preinfusionRamp = defaultsProfile[i].preinfusionRamp;
       defaultData.profiles[i].preinfusionRampSlope = defaultsProfile[i].preinfusionRampSlope;
       // Transition Profile - ramp&hold || advanced profiling
+      defaultData.profiles[i].tpState = defaultsProfile[i].tpState;
       defaultData.profiles[i].tpType = defaultsProfile[i].tpType; // transtion profile type :pressure|flow:
       defaultData.profiles[i].tpProfilingStart = defaultsProfile[i].tpProfilingStart;
       defaultData.profiles[i].tpProfilingFinish = defaultsProfile[i].tpProfilingFinish;

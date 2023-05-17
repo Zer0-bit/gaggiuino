@@ -69,10 +69,9 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("sk.skRamp.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRamp);
   myNex.writeNum("skCrv", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRampSlope);
   // PROFILING
-  myNex.writeNum("ppState", ACTIVE_PROFILE(eepromCurrentValues).profilingState);
-  myNex.writeNum("ppType", ACTIVE_PROFILE(eepromCurrentValues).mfProfileState);
-  myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
   // Adnvanced transition profile
+  myNex.writeNum("paState", ACTIVE_PROFILE(eepromCurrentValues).tpState);
+  myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
   if(ACTIVE_PROFILE(eepromCurrentValues).tpType == 0) {
     myNex.writeNum("tp.tStart.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingStart * 10.f);
     myNex.writeNum("tp.tEnd.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingFinish * 10.f);
@@ -91,6 +90,8 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("tp.tLim.val", ACTIVE_PROFILE(eepromCurrentValues).tfProfilingPressureRestriction * 10.f);
   }
   // Main profile
+  myNex.writeNum("ppState", ACTIVE_PROFILE(eepromCurrentValues).profilingState);
+  myNex.writeNum("ppType", ACTIVE_PROFILE(eepromCurrentValues).mfProfileState);
   if(ACTIVE_PROFILE(eepromCurrentValues).mfProfileState == 0) {
     myNex.writeNum("pf.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).mpProfilingStart * 10.f);
     myNex.writeNum("pf.pEnd.val", ACTIVE_PROFILE(eepromCurrentValues).mpProfilingFinish * 10.f);
@@ -210,6 +211,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
       }
       break;
     case SCREEN_MODES::SCREEN_brew_transition_profile:
+      myNex.writeNum("paState", ACTIVE_PROFILE(eepromCurrentValues).tpState);
       myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
       // Adnvanced transition profile
       if(ACTIVE_PROFILE(eepromCurrentValues).tpType == 0) {
@@ -320,6 +322,7 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
   }
 
   if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_brew_transition_profile || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_brew_transition_profile) {// PROFILING
+    ACTIVE_PROFILE(lcdCfg).tpState = myNex.readNumber("paState");
     ACTIVE_PROFILE(lcdCfg).tpType = myNex.readNumber("paType");
 
     if(ACTIVE_PROFILE(lcdCfg).tpType == 0) {
