@@ -140,7 +140,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   || eepromValuesNew.pumpFlowAtZero < 0.210f
   || eepromValuesNew.pumpFlowAtZero > 0.310f
   || eepromValuesNew.scalesF1 < -20000
-  || eepromValuesNew.scalesF1 > 20000
+  || eepromValuesNew.scalesF1 > 20000)
   {
     LOG_ERROR(errMsg);
     return false;
