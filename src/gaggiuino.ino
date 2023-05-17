@@ -532,22 +532,6 @@ void lcdSaveProfileTrigger(void) {
   // PI -> PF
   eepromTargetProfile->preinfusionRamp = ACTIVE_PROFILE(lcdValues).preinfusionRamp;
   eepromTargetProfile->preinfusionRampSlope = ACTIVE_PROFILE(lcdValues).preinfusionRampSlope;
-  // Main Profile PARAMS
-  eepromTargetProfile->profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
-  eepromTargetProfile->mfProfileState              = ACTIVE_PROFILE(lcdValues).mfProfileState;
-  if(eepromTargetProfile->mfProfileState == 0) {
-    eepromTargetProfile->mpProfilingStart            = ACTIVE_PROFILE(lcdValues).mpProfilingStart;
-    eepromTargetProfile->mpProfilingFinish           = ACTIVE_PROFILE(lcdValues).mpProfilingFinish;
-    eepromTargetProfile->mpProfilingSlope            = ACTIVE_PROFILE(lcdValues).mpProfilingSlope;
-    eepromTargetProfile->mpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).mpProfilingSlopeShape;
-    eepromTargetProfile->mpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).mpProfilingFlowRestriction;
-  } else {
-    eepromTargetProfile->mfProfileStart                  = ACTIVE_PROFILE(lcdValues).mfProfileStart;
-    eepromTargetProfile->mfProfileEnd                    = ACTIVE_PROFILE(lcdValues).mfProfileEnd;
-    eepromTargetProfile->mfProfileSlope                  = ACTIVE_PROFILE(lcdValues).mfProfileSlope;
-    eepromTargetProfile->mfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).mfProfileSlopeShape;
-    eepromTargetProfile->mfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).mfProfilingPressureRestriction;
-  }
   // Advanced/Transition Profile PARAMS
   eepromTargetProfile->tpType                        = ACTIVE_PROFILE(lcdValues).tpType;
   if(eepromTargetProfile->tpType == 0) {
@@ -566,6 +550,22 @@ void lcdSaveProfileTrigger(void) {
     eepromTargetProfile->tfProfileSlope                  = ACTIVE_PROFILE(lcdValues).tfProfileSlope;
     eepromTargetProfile->tfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).tfProfileSlopeShape;
     eepromTargetProfile->tfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).tfProfilingPressureRestriction;
+  }
+  // Main Profile PARAMS
+  eepromTargetProfile->profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
+  eepromTargetProfile->mfProfileState              = ACTIVE_PROFILE(lcdValues).mfProfileState;
+  if(eepromTargetProfile->mfProfileState == 0) {
+    eepromTargetProfile->mpProfilingStart            = ACTIVE_PROFILE(lcdValues).mpProfilingStart;
+    eepromTargetProfile->mpProfilingFinish           = ACTIVE_PROFILE(lcdValues).mpProfilingFinish;
+    eepromTargetProfile->mpProfilingSlope            = ACTIVE_PROFILE(lcdValues).mpProfilingSlope;
+    eepromTargetProfile->mpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).mpProfilingSlopeShape;
+    eepromTargetProfile->mpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).mpProfilingFlowRestriction;
+  } else {
+    eepromTargetProfile->mfProfileStart                  = ACTIVE_PROFILE(lcdValues).mfProfileStart;
+    eepromTargetProfile->mfProfileEnd                    = ACTIVE_PROFILE(lcdValues).mfProfileEnd;
+    eepromTargetProfile->mfProfileSlope                  = ACTIVE_PROFILE(lcdValues).mfProfileSlope;
+    eepromTargetProfile->mfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).mfProfileSlopeShape;
+    eepromTargetProfile->mfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).mfProfilingPressureRestriction;
   }
   // System + Other
   eepromCurrentValues.activeProfile                 = lcdValues.activeProfile;
@@ -637,6 +637,7 @@ void lcdRefreshElementsTrigger(void) {
       break;
   }
   bool rc = eepromWrite(eepromCurrentValues);
+  watchdogReload();
   (rc == true) ? lcdShowPopup("Switched!") : lcdShowPopup("Fail!");
 
   eepromCurrentValues = eepromGetCurrentValues();
