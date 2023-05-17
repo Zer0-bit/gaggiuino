@@ -14,6 +14,7 @@
 *          deserializes correctly
 */
 #define MAX_PROFILES 5
+const uint8_t maxProfileNameChars = 25;
 
 /**
 * current data version definition below
@@ -34,7 +35,6 @@
 * functions that reference them. this will pop up as a compile time failure
 */
 
-const uint8_t maxProfileNameChars = 25;
 /**
 * Version 10:
 * - Add multiple brew profiles

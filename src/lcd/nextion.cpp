@@ -216,7 +216,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
         myNex.writeNum("tp.tStart.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingStart * 10.f);
         myNex.writeNum("tp.tEnd.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingFinish * 10.f);
         myNex.writeNum("tp.tHold.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHold);
-        myNex.writeNum("tp.h  Lim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHoldLimit * 10.f);
+        myNex.writeNum("tp.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHoldLimit * 10.f);
         myNex.writeNum("tp.tSlope.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingSlope);
         myNex.writeNum("paCrv", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingSlopeShape);
         myNex.writeNum("tp.tLim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingFlowRestriction * 10.f);
@@ -323,21 +323,21 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
     ACTIVE_PROFILE(lcdCfg).tpType = myNex.readNumber("paType");
 
     if(ACTIVE_PROFILE(lcdCfg).tpType == 0) {
-      ACTIVE_PROFILE(lcdCfg).tpProfilingStart = myNex.readNumber("tp.pStart.val") / 10.f;
-      ACTIVE_PROFILE(lcdCfg).tpProfilingFinish = myNex.readNumber("tp.pEnd.val") / 10.f;
-      ACTIVE_PROFILE(lcdCfg).tpProfilingHold = myNex.readNumber("tp.pHold.val");
+      ACTIVE_PROFILE(lcdCfg).tpProfilingStart = myNex.readNumber("tp.tStart.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).tpProfilingFinish = myNex.readNumber("tp.tEnd.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).tpProfilingHold = myNex.readNumber("tp.tHold.val");
       ACTIVE_PROFILE(lcdCfg).tpProfilingHoldLimit = myNex.readNumber("tp.hLim.val") / 10.f;
-      ACTIVE_PROFILE(lcdCfg).tpProfilingSlope = myNex.readNumber("tp.pSlope.val");
+      ACTIVE_PROFILE(lcdCfg).tpProfilingSlope = myNex.readNumber("tp.tSlope.val");
       ACTIVE_PROFILE(lcdCfg).tpProfilingSlopeShape = myNex.readNumber("paCrv");
-      ACTIVE_PROFILE(lcdCfg).tpProfilingFlowRestriction = myNex.readNumber("tp.pLim.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).tpProfilingFlowRestriction = myNex.readNumber("tp.tLim.val") / 10.f;
     } else {
-      ACTIVE_PROFILE(lcdCfg).tfProfileStart = myNex.readNumber("tp.pStart.val") / 10.f;
-      ACTIVE_PROFILE(lcdCfg).tfProfileEnd = myNex.readNumber("tp.pEnd.val") / 10.f;
-      ACTIVE_PROFILE(lcdCfg).tfProfileHold = myNex.readNumber("tp.pHold.val");
+      ACTIVE_PROFILE(lcdCfg).tfProfileStart = myNex.readNumber("tp.tStart.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).tfProfileEnd = myNex.readNumber("tp.tEnd.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).tfProfileHold = myNex.readNumber("tp.tHold.val");
       ACTIVE_PROFILE(lcdCfg).tfProfileHoldLimit = myNex.readNumber("tp.hLim.val") / 10.f;
-      ACTIVE_PROFILE(lcdCfg).tfProfileSlope = myNex.readNumber("tp.pSlope.val");
+      ACTIVE_PROFILE(lcdCfg).tfProfileSlope = myNex.readNumber("tp.tSlope.val");
       ACTIVE_PROFILE(lcdCfg).tfProfileSlopeShape = myNex.readNumber("paCrv");
-      ACTIVE_PROFILE(lcdCfg).tfProfilingPressureRestriction = myNex.readNumber("tp.pLim.val") / 10.f;
+      ACTIVE_PROFILE(lcdCfg).tfProfilingPressureRestriction = myNex.readNumber("tp.tLim.val") / 10.f;
     }
   }
 
