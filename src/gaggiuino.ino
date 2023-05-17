@@ -437,7 +437,6 @@ void lcdSaveSettingsTrigger(void) {
       }
       break;
 case SCREEN_MODES::SCREEN_brew_transition_profile: // Advanced Profiling Settings
-      eepromTargetProfile->profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
       eepromTargetProfile->tpType                        = ACTIVE_PROFILE(lcdValues).tpType;
       if(eepromTargetProfile->tpType == 0) {
         eepromTargetProfile->tpProfilingStart            = ACTIVE_PROFILE(lcdValues).tpProfilingStart;
@@ -629,6 +628,9 @@ void lcdRefreshElementsTrigger(void) {
       break;
     case SCREEN_MODES::SCREEN_brew_profiling:
       ACTIVE_PROFILE(eepromCurrentValues).mfProfileState = ACTIVE_PROFILE(lcdValues).mfProfileState;
+      break;
+    case SCREEN_MODES::SCREEN_brew_transition_profile:
+      ACTIVE_PROFILE(eepromCurrentValues).tpType = ACTIVE_PROFILE(lcdValues).tpType;
       break;
     default:
       lcdShowPopup("Nope!");

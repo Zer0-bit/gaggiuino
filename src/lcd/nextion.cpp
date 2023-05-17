@@ -320,7 +320,6 @@ eepromValues_t lcdDownloadCfg(bool toSave) {
   }
 
   if (toSave || (SCREEN_MODES)lcdCurrentPageId == SCREEN_MODES::SCREEN_brew_transition_profile || (SCREEN_MODES)lcdLastCurrentPageId == SCREEN_MODES::SCREEN_brew_transition_profile) {// PROFILING
-    ACTIVE_PROFILE(lcdCfg).profilingState = myNex.readNumber("ppState");
     ACTIVE_PROFILE(lcdCfg).tpType = myNex.readNumber("paType");
 
     if(ACTIVE_PROFILE(lcdCfg).tpType == 0) {
