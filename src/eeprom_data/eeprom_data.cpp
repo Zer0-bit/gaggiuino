@@ -19,14 +19,6 @@ namespace {
   // Declare the DMA handle
   DMA_HandleTypeDef hdma;
 
-  // Declare the DMA transfer complete flag
-  volatile bool dmaTransferComplete = false;
-
-// Function to handle DMA transfer complete event
-// void HAL_DMA_TxCpltCallback(DMA_HandleTypeDef *hdma) {
-//     // DMA transfer complete
-//     dmaTransferComplete = true;
-// }
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
 
