@@ -13,7 +13,20 @@
 namespace {
 
   struct eepromMetadata_t eepromMetadata;
+  // Define the DMA buffer size
+  #define BUFFER_SIZE sizeof(eepromMetadata)
 
+  // Declare the DMA handle
+  DMA_HandleTypeDef hdma;
+
+  // Declare the DMA transfer complete flag
+  volatile bool dmaTransferComplete = false;
+
+// Function to handle DMA transfer complete event
+// void HAL_DMA_TxCpltCallback(DMA_HandleTypeDef *hdma) {
+//     // DMA transfer complete
+//     dmaTransferComplete = true;
+// }
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
 
@@ -151,7 +164,31 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   eepromMetadata.version = EEPROM_DATA_VERSION;
   eepromMetadata.values = eepromValuesNew;
   eepromMetadata.versionTimestampXOR = eepromMetadata.timestamp ^ eepromMetadata.version;
-  EEPROM.put(0, eepromMetadata);
+  // Enable the DMA clock
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  // Configure the DMA transfer
+  hdma.Instance = DMA1_Stream7;
+  hdma.Init.Channel = DMA_CHANNEL_0;
+  hdma.Init.Direction = DMA_MEMORY_TO_PERIPH;
+  hdma.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma.Init.MemInc = DMA_MINC_ENABLE;
+  hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+  hdma.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+  hdma.Init.Mode = DMA_NORMAL;
+  hdma.Init.Priority = DMA_PRIORITY_LOW;
+  hdma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+  hdma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma.Init.PeriphBurst = DMA_PBURST_SINGLE;
+
+  // Initialize the DMA handle
+  HAL_DMA_Init(&hdma);
+  // Start the DMA transfer
+  HAL_DMA_Start_IT(&hdma, (uint32_t)&eepromMetadata, (uint32_t)&EEPROM.put(0, eepromMetadata), BUFFER_SIZE);
+
+  // Deinitialize the DMA handle
+  HAL_DMA_DeInit(&hdma);
 
   return true;
 }
