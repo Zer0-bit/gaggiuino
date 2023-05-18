@@ -10,22 +10,22 @@ extern volatile int lcdLastCurrentPageId;
 const uint8_t nexBtnBufferSize = 16;
 
 enum class SCREEN_MODES {
-    SCREEN_home,
-    SCREEN_brew_preinfusion,
-    SCREEN_brew_soak,
-    SCREEN_brew_profiling,
-    SCREEN_brew_manual,
-    SCREEN_flush,
-    SCREEN_descale,
-    SCREEN_settings_boiler,
-    SCREEN_settings_system,
-    SCREEN_brew_graph,
-    SCREEN_brew_more,
-    SCREEN_shot_settings,
-    SCREEN_brew_transition_profile,
-    SCREEN_graph_preview,
-    SCREEN_keyboard_numeric,
-    SCREEN_keyboard_alpha
+  /* 00 */ SCREEN_home,
+  /* 01 */ SCREEN_brew_preinfusion,
+  /* 02 */ SCREEN_brew_soak,
+  /* 03 */ SCREEN_brew_profiling,
+  /* 04 */ SCREEN_brew_manual,
+  /* 05 */ SCREEN_flush,
+  /* 06 */ SCREEN_descale,
+  /* 07 */ SCREEN_settings_boiler,
+  /* 08 */ SCREEN_settings_system,
+  /* 09 */ SCREEN_brew_graph,
+  /* 0A */ SCREEN_brew_more,
+  /* 0B */ SCREEN_shot_settings,
+  /* 0C */ SCREEN_brew_transition_profile,
+  /* 0D */ SCREEN_graph_preview,
+  /* 0E */ SCREEN_keyboard_numeric,
+  /* 0F */ SCREEN_keyboard_alpha
 } ;
 
 void lcdInit(void);
