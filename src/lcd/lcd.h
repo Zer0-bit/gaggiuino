@@ -5,26 +5,27 @@
 #include <EasyNextionLibrary.h>
 #include "eeprom_data/eeprom_data.h"
 
-extern volatile int lcdCurrentPageId;
-extern volatile int lcdLastCurrentPageId;
-const uint8_t nexBtnBufferSize = 16;
+enum class NextionPage: byte {
+  /* 00 */ Home,
+  /* 01 */ BrewPreinfusion,
+  /* 02 */ BrewSoak,
+  /* 03 */ BrewProfiling,
+  /* 04 */ BrewManual,
+  /* 05 */ Flush,
+  /* 06 */ Descale,
+  /* 07 */ SettingsBoiler,
+  /* 08 */ SettingsSystem,
+  /* 09 */ BrewGraph,
+  /* 0A */ BrewMore,
+  /* 0B */ ShotSettings,
+  /* 0C */ BrewTransitionProfile,
+  /* 0D */ GraphPreview,
+  /* 0E */ KeyboardNumeric,
+  /* 0F */ KeyboardAlpha
+};
 
-enum class SCREEN_MODES {
-    SCREEN_home,
-    SCREEN_brew_preinfusion,
-    SCREEN_brew_soak,
-    SCREEN_brew_profiling,
-    SCREEN_brew_manual,
-    SCREEN_flush,
-    SCREEN_descale,
-    SCREEN_settings_boiler,
-    SCREEN_settings_system,
-    SCREEN_brew_graph,
-    SCREEN_brew_more,
-    SCREEN_shot_settings,
-    SCREEN_brew_transition_profile,
-    SCREEN_graph_preview
-} ;
+extern volatile NextionPage lcdCurrentPageId;
+extern volatile NextionPage lcdLastCurrentPageId;
 
 void lcdInit(void);
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues);
@@ -33,8 +34,12 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);
 void lcdWakeUp(void);
 
-eepromValues_t lcdDownloadCfg(bool toSave = false);
+void lcdFetchCurrentProfile(eepromValues_t & settings);
+void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile);
 uint8_t lcdGetSelectedProfile(void);
+bool lcdGetPreinfusionFlowState(void);
+bool lcdGetProfileFlowState(void);
+bool lcdGetTransitionFlowState(void);
 int lcdGetHomeScreenScalesEnabled(void);
 int lcdGetSelectedOperationalMode(void);
 int lcdGetManualFlowVol(void);

@@ -25,7 +25,7 @@ namespace {
     // Profiles
     defaultData.activeProfile = 0;
     for (int i=0; i<MAX_PROFILES; i++) {
-      snprintf(defaultData.profiles[i].name, maxProfileNameChars-1, "%s", defaultsProfile[i].name);
+      snprintf(defaultData.profiles[i].name, PROFILE_NAME_LENGTH, "%s", defaultsProfile[i].name);
       // temp
 
       // PI
@@ -156,9 +156,9 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   eepromMetadata.version = EEPROM_DATA_VERSION;
   eepromMetadata.values = eepromValuesNew;
   eepromMetadata.versionTimestampXOR = eepromMetadata.timestamp ^ eepromMetadata.version;
+
   // Enable the DMA clock
   __HAL_RCC_DMA1_CLK_ENABLE();
-
   // Configure the DMA transfer
   hdma.Instance = DMA1_Stream7;
   hdma.Init.Channel = DMA_CHANNEL_0;
@@ -173,12 +173,10 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   hdma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
   hdma.Init.MemBurst = DMA_MBURST_SINGLE;
   hdma.Init.PeriphBurst = DMA_PBURST_SINGLE;
-
   // Initialize the DMA handle
   HAL_DMA_Init(&hdma);
   // Start the DMA transfer
   HAL_DMA_Start_IT(&hdma, (uint32_t)&eepromMetadata, (uint32_t)&EEPROM.put(0, eepromMetadata), BUFFER_SIZE);
-
   // Deinitialize the DMA handle
   HAL_DMA_DeInit(&hdma);
 

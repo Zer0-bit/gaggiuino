@@ -65,30 +65,30 @@ void setup(void) {
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  runningCfg = eepromGetCurrentValues();
   LOG_INFO("EEPROM Init");
 
-  cpsInit(eepromCurrentValues);
+  cpsInit(runningCfg);
   LOG_INFO("CPS Init");
 
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdUploadCfg(eepromCurrentValues);
+  lcdUploadCfg(runningCfg);
   LOG_INFO("LCD cfg uploaded");
 
   adsInit();
   LOG_INFO("Pressure sensor init");
 
   // Scales handling
-  scalesInit(eepromCurrentValues.scalesF1, eepromCurrentValues.scalesF2);
+  scalesInit(runningCfg.scalesF1, runningCfg.scalesF2);
   LOG_INFO("Scales init");
 
   // Pump init
-  pumpInit(eepromCurrentValues.powerLineFrequency, eepromCurrentValues.pumpFlowAtZero);
+  pumpInit(runningCfg.powerLineFrequency, runningCfg.pumpFlowAtZero);
   LOG_INFO("Pump init");
 
-  pageValuesRefresh(true);
+  pageValuesRefresh();
   LOG_INFO("Setup sequence finished");
 
   // Change LED colour on setup exit.
@@ -105,7 +105,7 @@ void setup(void) {
 //Main loop where all the logic is continuously run
 void loop(void) {
   fillBoiler();
-  pageValuesRefresh(false);
+  if (lcdCurrentPageId != lcdLastCurrentPageId) pageValuesRefresh();
   lcdListen();
   sensorsRead();
   brewDetect();
@@ -223,20 +223,22 @@ static void calculateWeightAndFlow(void) {
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
-
-static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
-  if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) {
-    runningCfg = lcdDownloadCfg();
-
-
-    homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
-    // MODE_SELECT should always be LAST
-    selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode();
-
-    updateProfilerPhases();
-
-    lcdLastCurrentPageId = lcdCurrentPageId;
+static void pageValuesRefresh() {
+  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) {
+    // Read the page we're landing in: leaving keyboard page means a value could've changed in it
+    lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
+  } else {
+    // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
+    lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.activeProfile);
   }
+
+  homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
+  // MODE_SELECT should always be LAST
+  selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode();
+
+  updateProfilerPhases();
+
+  lcdLastCurrentPageId = lcdCurrentPageId;
 }
 
 //#############################################################################################
@@ -282,7 +284,7 @@ static void modeSelect(void) {
       if (!currentState.steamSwitchState) {
         brewActive ? flushActivated() : flushDeactivated();
         steamCtrl(runningCfg, currentState);
-        pageValuesRefresh(true);
+        pageValuesRefresh();
       }
       break;
     case OPERATION_MODES::OPMODE_descale:
@@ -291,7 +293,7 @@ static void modeSelect(void) {
       deScale(runningCfg, currentState);
       break;
     default:
-      pageValuesRefresh(true);
+      pageValuesRefresh();
       break;
   }
 }
@@ -323,25 +325,31 @@ static void lcdRefresh(void) {
     lcdSetTemperature(lcdTemp);
 
     /*LCD weight output*/
-    if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && homeScreenScalesEnabled) {
-      lcdSetWeight(currentState.weight);
-    }
-    else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
-    || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) {
-      if (currentState.shotWeight)
+    switch (lcdCurrentPageId) {
+      case NextionPage::Home:
+        if (homeScreenScalesEnabled) lcdSetWeight(currentState.weight);
+        break;
+      case NextionPage::BrewGraph:
+      case NextionPage::BrewManual:
         // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
-        lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
+        if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
+        break;
+      default:
+        break; // don't push needless data on other pages
     }
 
     /*LCD flow output*/
-    // no point sending this continuously if on any other screens than brew related ones
-    if ( static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
-      || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual ) {
-      lcdSetFlow(
-        currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
-          ? currentState.smoothedWeightFlow * 10.f
-          : fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f)
-      );
+    switch (lcdCurrentPageId) {
+      case NextionPage::BrewGraph:
+      case NextionPage::BrewManual:
+        lcdSetFlow(
+          currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
+            ? currentState.smoothedWeightFlow * 10.f
+            : fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f)
+        );
+        break;
+      default:
+        break; // don't push needless data on other pages
     }
 
   #ifdef DEBUG_ENABLED
@@ -363,238 +371,32 @@ static void lcdRefresh(void) {
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
-// Save the desired temp values to EEPROM
-void lcdSaveSettingsTrigger(void) {
-  LOG_VERBOSE("Saving values to EEPROM");
-  bool rc;
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+void tryEepromWrite(eepromValues_t &eepromValues) {
+  bool success = eepromWrite(eepromValues);
   watchdogReload(); // reload the watchdog timer on expensive operations
-  eepromValues_t lcdValues = lcdDownloadCfg(true); // :true: means read the buttons name
-  watchdogReload(); // reload the watchdog timer on expensive operations
-
-  // Target save to the currently selected profile on screen (not necessarily same as saved default)
-  eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[lcdValues.activeProfile];
-  // Save the currently selected profile name
-  snprintf(eepromTargetProfile->name, _maxProfileName, "%s", ACTIVE_PROFILE(lcdValues).name);
-  eepromCurrentValues.activeProfile = lcdValues.activeProfile;
-
-  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)){
-    case SCREEN_MODES::SCREEN_brew_more:
-      eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
-      eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
-      eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
-      break;
-    case SCREEN_MODES::SCREEN_brew_preinfusion: // PI Settings
-      eepromTargetProfile->preinfusionState = ACTIVE_PROFILE(lcdValues).preinfusionState;
-      eepromTargetProfile->preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
-
-      if(eepromTargetProfile->preinfusionFlowState == 0) {
-        eepromTargetProfile->preinfusionSec = ACTIVE_PROFILE(lcdValues).preinfusionSec;
-        eepromTargetProfile->preinfusionPressureFlowTarget = ACTIVE_PROFILE(lcdValues).preinfusionPressureFlowTarget;
-        eepromTargetProfile->preinfusionBar = ACTIVE_PROFILE(lcdValues).preinfusionBar;
-      }
-      else {
-        eepromTargetProfile->preinfusionFlowTime = ACTIVE_PROFILE(lcdValues).preinfusionFlowTime;
-        eepromTargetProfile->preinfusionFlowVol = ACTIVE_PROFILE(lcdValues).preinfusionFlowVol;
-        eepromTargetProfile->preinfusionFlowPressureTarget = ACTIVE_PROFILE(lcdValues).preinfusionFlowPressureTarget;
-      }
-      eepromTargetProfile->preinfusionFilled = ACTIVE_PROFILE(lcdValues).preinfusionFilled;
-      eepromTargetProfile->preinfusionPressureAbove = ACTIVE_PROFILE(lcdValues).preinfusionPressureAbove;
-      eepromTargetProfile->preinfusionWeightAbove = ACTIVE_PROFILE(lcdValues).preinfusionWeightAbove;
-      break;
-    case SCREEN_MODES::SCREEN_brew_soak: // Soak Settings
-      eepromTargetProfile->soakState = ACTIVE_PROFILE(lcdValues).soakState;
-
-      if(eepromTargetProfile->preinfusionFlowState == 0)
-        eepromTargetProfile->soakTimePressure = ACTIVE_PROFILE(lcdValues).soakTimePressure;
-      else
-        eepromTargetProfile->soakTimeFlow = ACTIVE_PROFILE(lcdValues).soakTimeFlow;
-
-      eepromTargetProfile->soakKeepPressure = ACTIVE_PROFILE(lcdValues).soakKeepPressure;
-      eepromTargetProfile->soakKeepFlow = ACTIVE_PROFILE(lcdValues).soakKeepFlow;
-      eepromTargetProfile->soakBelowPressure = ACTIVE_PROFILE(lcdValues).soakBelowPressure;
-      eepromTargetProfile->soakAbovePressure = ACTIVE_PROFILE(lcdValues).soakAbovePressure;
-      eepromTargetProfile->soakAboveWeight = ACTIVE_PROFILE(lcdValues).soakAboveWeight;
-      // PI -> PF/Adv
-      eepromTargetProfile->preinfusionRamp = ACTIVE_PROFILE(lcdValues).preinfusionRamp;
-      eepromTargetProfile->preinfusionRampSlope = ACTIVE_PROFILE(lcdValues).preinfusionRampSlope;
-      break;
-    case SCREEN_MODES::SCREEN_brew_profiling: // Main Profiling Settings
-      eepromTargetProfile->profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
-      eepromTargetProfile->mfProfileState              = ACTIVE_PROFILE(lcdValues).mfProfileState;
-      if(eepromTargetProfile->mfProfileState == 0) {
-        eepromTargetProfile->mpProfilingStart            = ACTIVE_PROFILE(lcdValues).mpProfilingStart;
-        eepromTargetProfile->mpProfilingFinish           = ACTIVE_PROFILE(lcdValues).mpProfilingFinish;
-        eepromTargetProfile->mpProfilingSlope            = ACTIVE_PROFILE(lcdValues).mpProfilingSlope;
-        eepromTargetProfile->mpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).mpProfilingSlopeShape;
-        eepromTargetProfile->mpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).mpProfilingFlowRestriction;
-      } else {
-        eepromTargetProfile->mfProfileStart                  = ACTIVE_PROFILE(lcdValues).mfProfileStart;
-        eepromTargetProfile->mfProfileEnd                    = ACTIVE_PROFILE(lcdValues).mfProfileEnd;
-        eepromTargetProfile->mfProfileSlope                  = ACTIVE_PROFILE(lcdValues).mfProfileSlope;
-        eepromTargetProfile->mfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).mfProfileSlopeShape;
-        eepromTargetProfile->mfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).mfProfilingPressureRestriction;
-      }
-      break;
-case SCREEN_MODES::SCREEN_brew_transition_profile: // Advanced Profiling Settings
-      eepromTargetProfile->tpType                        = ACTIVE_PROFILE(lcdValues).tpType;
-      if(eepromTargetProfile->tpType == 0) {
-        eepromTargetProfile->tpProfilingStart            = ACTIVE_PROFILE(lcdValues).tpProfilingStart;
-        eepromTargetProfile->tpProfilingFinish           = ACTIVE_PROFILE(lcdValues).tpProfilingFinish;
-        eepromTargetProfile->tpProfilingHold             = ACTIVE_PROFILE(lcdValues).tpProfilingHold;
-        eepromTargetProfile->tpProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).tpProfilingHoldLimit;
-        eepromTargetProfile->tpProfilingSlope            = ACTIVE_PROFILE(lcdValues).tpProfilingSlope;
-        eepromTargetProfile->tpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).tpProfilingSlopeShape;
-        eepromTargetProfile->tpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).tpProfilingFlowRestriction;
-      } else {
-        eepromTargetProfile->tfProfileStart                  = ACTIVE_PROFILE(lcdValues).tfProfileStart;
-        eepromTargetProfile->tfProfileEnd                    = ACTIVE_PROFILE(lcdValues).tfProfileEnd;
-        eepromTargetProfile->tfProfileHold                   = ACTIVE_PROFILE(lcdValues).tfProfileHold;
-        eepromTargetProfile->tfProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).tfProfileHoldLimit;
-        eepromTargetProfile->tfProfileSlope                  = ACTIVE_PROFILE(lcdValues).tfProfileSlope;
-        eepromTargetProfile->tfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).tfProfileSlopeShape;
-        eepromTargetProfile->tfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).tfProfilingPressureRestriction;
-      }
-      break;
-    case SCREEN_MODES::SCREEN_settings_boiler:
-      eepromTargetProfile->setpoint                      = ACTIVE_PROFILE(lcdValues).setpoint;
-      eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
-      eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
-      eepromCurrentValues.hpwr                          = lcdValues.hpwr;
-      eepromCurrentValues.mainDivider                   = lcdValues.mainDivider;
-      eepromCurrentValues.brewDivider                   = lcdValues.brewDivider;
-      break;
-    case SCREEN_MODES::SCREEN_settings_system:
-      eepromCurrentValues.warmupState                   = lcdValues.warmupState;
-      eepromCurrentValues.lcdSleep                      = lcdValues.lcdSleep;
-      eepromCurrentValues.scalesF1                      = lcdValues.scalesF1;
-      eepromCurrentValues.scalesF2                      = lcdValues.scalesF2;
-      eepromCurrentValues.pumpFlowAtZero                = lcdValues.pumpFlowAtZero;
-      break;
-    case SCREEN_MODES::SCREEN_shot_settings:
-      eepromTargetProfile->stopOnWeightState             = ACTIVE_PROFILE(lcdValues).stopOnWeightState;
-      eepromTargetProfile->shotDose                      = ACTIVE_PROFILE(lcdValues).shotDose;
-      eepromTargetProfile->shotPreset                    = ACTIVE_PROFILE(lcdValues).shotPreset;
-      eepromTargetProfile->shotStopOnCustomWeight        = ACTIVE_PROFILE(lcdValues).shotStopOnCustomWeight;
-      break;
-    default:
-      break;
-  }
-  rc = eepromWrite(eepromCurrentValues);
-  watchdogReload(); // reload the watchdog timer on expensive operations
-  if (rc == true) {
+  if (success) {
     lcdShowPopup("Update successful!");
   } else {
     lcdShowPopup("Data out of range!");
   }
 }
 
+// Save the desired temp values to EEPROM
+void lcdSaveSettingsTrigger(void) {
+  LOG_VERBOSE("Saving values to EEPROM");
+
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.activeProfile);
+  tryEepromWrite(eepromCurrentValues);
+}
+
 void lcdSaveProfileTrigger(void) {
   LOG_VERBOSE("Saving profile to EEPROM");
-  bool rc;
+
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  watchdogReload(); // reload the watchdog timer on expensive operations
-  eepromValues_t lcdValues = lcdDownloadCfg(true); // :true: means read the buttons name
-  watchdogReload(); // reload the watchdog timer on expensive operations
-
-  // Target save to the currently selected profile on screen (not necessarily same as saved default)
-  eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[lcdValues.activeProfile];
-
-  snprintf(eepromTargetProfile->name, _maxProfileName, "%s", ACTIVE_PROFILE(lcdValues).name);
-  eepromTargetProfile->preinfusionState = ACTIVE_PROFILE(lcdValues).preinfusionState;
-  eepromTargetProfile->preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
-
-  if(eepromTargetProfile->preinfusionFlowState == 0) {
-    eepromTargetProfile->preinfusionSec = ACTIVE_PROFILE(lcdValues).preinfusionSec;
-    eepromTargetProfile->preinfusionPressureFlowTarget = ACTIVE_PROFILE(lcdValues).preinfusionPressureFlowTarget;
-    eepromTargetProfile->preinfusionBar = ACTIVE_PROFILE(lcdValues).preinfusionBar;
-  }
-  else {
-    eepromTargetProfile->preinfusionFlowTime = ACTIVE_PROFILE(lcdValues).preinfusionFlowTime;
-    eepromTargetProfile->preinfusionFlowVol = ACTIVE_PROFILE(lcdValues).preinfusionFlowVol;
-    eepromTargetProfile->preinfusionFlowPressureTarget = ACTIVE_PROFILE(lcdValues).preinfusionFlowPressureTarget;
-  }
-  eepromTargetProfile->preinfusionFilled = ACTIVE_PROFILE(lcdValues).preinfusionFilled;
-  eepromTargetProfile->preinfusionPressureAbove = ACTIVE_PROFILE(lcdValues).preinfusionPressureAbove;
-  eepromTargetProfile->preinfusionWeightAbove = ACTIVE_PROFILE(lcdValues).preinfusionWeightAbove;
-  eepromTargetProfile->soakState = ACTIVE_PROFILE(lcdValues).soakState;
-
-  if(eepromTargetProfile->preinfusionFlowState == 0)
-    eepromTargetProfile->soakTimePressure = ACTIVE_PROFILE(lcdValues).soakTimePressure;
-  else
-    eepromTargetProfile->soakTimeFlow = ACTIVE_PROFILE(lcdValues).soakTimeFlow;
-
-  eepromTargetProfile->soakKeepPressure = ACTIVE_PROFILE(lcdValues).soakKeepPressure;
-  eepromTargetProfile->soakKeepFlow = ACTIVE_PROFILE(lcdValues).soakKeepFlow;
-  eepromTargetProfile->soakBelowPressure = ACTIVE_PROFILE(lcdValues).soakBelowPressure;
-  eepromTargetProfile->soakAbovePressure = ACTIVE_PROFILE(lcdValues).soakAbovePressure;
-  eepromTargetProfile->soakAboveWeight = ACTIVE_PROFILE(lcdValues).soakAboveWeight;
-  // PI -> PF
-  eepromTargetProfile->preinfusionRamp = ACTIVE_PROFILE(lcdValues).preinfusionRamp;
-  eepromTargetProfile->preinfusionRampSlope = ACTIVE_PROFILE(lcdValues).preinfusionRampSlope;
-  // Advanced/Transition Profile PARAMS
-  eepromTargetProfile->tpType                        = ACTIVE_PROFILE(lcdValues).tpType;
-  if(eepromTargetProfile->tpType == 0) {
-    eepromTargetProfile->tpProfilingStart            = ACTIVE_PROFILE(lcdValues).tpProfilingStart;
-    eepromTargetProfile->tpProfilingFinish           = ACTIVE_PROFILE(lcdValues).tpProfilingFinish;
-    eepromTargetProfile->tpProfilingHold             = ACTIVE_PROFILE(lcdValues).tpProfilingHold;
-    eepromTargetProfile->tpProfilingHoldLimit        = ACTIVE_PROFILE(lcdValues).tpProfilingHoldLimit;
-    eepromTargetProfile->tpProfilingSlope            = ACTIVE_PROFILE(lcdValues).tpProfilingSlope;
-    eepromTargetProfile->tpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).tpProfilingSlopeShape;
-    eepromTargetProfile->tpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).tpProfilingFlowRestriction;
-  } else {
-    eepromTargetProfile->tfProfileStart                  = ACTIVE_PROFILE(lcdValues).tfProfileStart;
-    eepromTargetProfile->tfProfileEnd                    = ACTIVE_PROFILE(lcdValues).tfProfileEnd;
-    eepromTargetProfile->tfProfileHold                   = ACTIVE_PROFILE(lcdValues).tfProfileHold;
-    eepromTargetProfile->tfProfileHoldLimit              = ACTIVE_PROFILE(lcdValues).tfProfileHoldLimit;
-    eepromTargetProfile->tfProfileSlope                  = ACTIVE_PROFILE(lcdValues).tfProfileSlope;
-    eepromTargetProfile->tfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).tfProfileSlopeShape;
-    eepromTargetProfile->tfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).tfProfilingPressureRestriction;
-  }
-  // Main Profile PARAMS
-  eepromTargetProfile->profilingState                = ACTIVE_PROFILE(lcdValues).profilingState;
-  eepromTargetProfile->mfProfileState              = ACTIVE_PROFILE(lcdValues).mfProfileState;
-  if(eepromTargetProfile->mfProfileState == 0) {
-    eepromTargetProfile->mpProfilingStart            = ACTIVE_PROFILE(lcdValues).mpProfilingStart;
-    eepromTargetProfile->mpProfilingFinish           = ACTIVE_PROFILE(lcdValues).mpProfilingFinish;
-    eepromTargetProfile->mpProfilingSlope            = ACTIVE_PROFILE(lcdValues).mpProfilingSlope;
-    eepromTargetProfile->mpProfilingSlopeShape       = ACTIVE_PROFILE(lcdValues).mpProfilingSlopeShape;
-    eepromTargetProfile->mpProfilingFlowRestriction  = ACTIVE_PROFILE(lcdValues).mpProfilingFlowRestriction;
-  } else {
-    eepromTargetProfile->mfProfileStart                  = ACTIVE_PROFILE(lcdValues).mfProfileStart;
-    eepromTargetProfile->mfProfileEnd                    = ACTIVE_PROFILE(lcdValues).mfProfileEnd;
-    eepromTargetProfile->mfProfileSlope                  = ACTIVE_PROFILE(lcdValues).mfProfileSlope;
-    eepromTargetProfile->mfProfileSlopeShape             = ACTIVE_PROFILE(lcdValues).mfProfileSlopeShape;
-    eepromTargetProfile->mfProfilingPressureRestriction  = ACTIVE_PROFILE(lcdValues).mfProfilingPressureRestriction;
-  }
-  // System + Other
-  eepromCurrentValues.activeProfile                 = lcdValues.activeProfile;
-  eepromTargetProfile->setpoint                     = ACTIVE_PROFILE(lcdValues).setpoint;
-  eepromCurrentValues.steamSetPoint                 = lcdValues.steamSetPoint;
-  eepromCurrentValues.offsetTemp                    = lcdValues.offsetTemp;
-  eepromCurrentValues.hpwr                          = lcdValues.hpwr;
-  eepromCurrentValues.mainDivider                   = lcdValues.mainDivider;
-  eepromCurrentValues.brewDivider                   = lcdValues.brewDivider;
-  eepromCurrentValues.warmupState                   = lcdValues.warmupState;
-  eepromCurrentValues.lcdSleep                      = lcdValues.lcdSleep;
-  eepromCurrentValues.scalesF1                      = lcdValues.scalesF1;
-  eepromCurrentValues.scalesF2                      = lcdValues.scalesF2;
-  eepromCurrentValues.pumpFlowAtZero                = lcdValues.pumpFlowAtZero;
-  eepromTargetProfile->stopOnWeightState            = ACTIVE_PROFILE(lcdValues).stopOnWeightState;
-  eepromTargetProfile->shotDose                     = ACTIVE_PROFILE(lcdValues).shotDose;
-  eepromTargetProfile->shotPreset                   = ACTIVE_PROFILE(lcdValues).shotPreset;
-  eepromTargetProfile->shotStopOnCustomWeight       = ACTIVE_PROFILE(lcdValues).shotStopOnCustomWeight;
-  eepromCurrentValues.homeOnShotFinish              = lcdValues.homeOnShotFinish;
-  eepromCurrentValues.basketPrefill                 = lcdValues.basketPrefill;
-  eepromCurrentValues.brewDeltaState                = lcdValues.brewDeltaState;
-
-  rc = eepromWrite(eepromCurrentValues);
-  watchdogReload(); // reload the watchdog timer on expensive operations
-  if (rc == true) {
-    lcdShowPopup("Update successful!");
-  } else {
-    lcdShowPopup("Data out of range!");
-  }
+  eepromCurrentValues.activeProfile = runningCfg.activeProfile;
+  lcdFetchCurrentProfile(eepromCurrentValues);
+  tryEepromWrite(eepromCurrentValues);
 }
 
 void lcdScalesTareTrigger(void) {
@@ -620,38 +422,33 @@ void lcdBrewGraphScalesTareTrigger(void) {
 void lcdRefreshElementsTrigger(void) {
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  eepromValues_t lcdValues = lcdDownloadCfg();
 
-  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
-    case SCREEN_MODES::SCREEN_brew_preinfusion:
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = ACTIVE_PROFILE(lcdValues).preinfusionFlowState;
+  switch (lcdCurrentPageId) {
+    case NextionPage::BrewPreinfusion:
+      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = lcdGetPreinfusionFlowState();
       break;
-    case SCREEN_MODES::SCREEN_brew_profiling:
-      ACTIVE_PROFILE(eepromCurrentValues).mfProfileState = ACTIVE_PROFILE(lcdValues).mfProfileState;
+    case NextionPage::BrewProfiling:
+      ACTIVE_PROFILE(eepromCurrentValues).mfProfileState = lcdGetProfileFlowState();
       break;
-    case SCREEN_MODES::SCREEN_brew_transition_profile:
-      ACTIVE_PROFILE(eepromCurrentValues).tpType = ACTIVE_PROFILE(lcdValues).tpType;
+    case NextionPage::BrewTransitionProfile:
+      ACTIVE_PROFILE(eepromCurrentValues).tpType = lcdGetTransitionFlowState();
       break;
     default:
       lcdShowPopup("Nope!");
       break;
   }
-  bool rc = eepromWrite(eepromCurrentValues);
-  watchdogReload();
-  (rc == true) ? lcdShowPopup("Switched!") : lcdShowPopup("Fail!");
 
-  eepromCurrentValues = eepromGetCurrentValues();
   // Make the necessary changes
   uploadPageCfg(eepromCurrentValues);
   // refresh the screen elements
-  pageValuesRefresh(true);
+  pageValuesRefresh();
 }
 
 void lcdQuickProfileSwitch(void) {
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-
-  eepromCurrentValues.activeProfile = lcdGetSelectedProfile();
-  lcdUploadProfile(eepromCurrentValues);
+  runningCfg.activeProfile = lcdGetSelectedProfile();
+  ACTIVE_PROFILE(runningCfg) = eepromGetCurrentValues().profiles[runningCfg.activeProfile];
+  updateProfilerPhases();
+  lcdUploadProfile(runningCfg);
   lcdShowPopup("Profile switched!");
 }
 
@@ -985,10 +782,10 @@ static inline void systemHealthCheck(float pressureThreshold) {
     {
       //Reloading the watchdog timer, if this function fails to run MCU is rebooted
       watchdogReload();
-      switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
-        case SCREEN_MODES::SCREEN_brew_manual:
-        case SCREEN_MODES::SCREEN_brew_graph:
-        case SCREEN_MODES::SCREEN_graph_preview:
+      switch (lcdCurrentPageId) {
+        case NextionPage::BrewManual:
+        case NextionPage::BrewGraph:
+        case NextionPage::GraphPreview:
           brewDetect();
           lcdRefresh();
           lcdListen();
@@ -1010,8 +807,8 @@ static inline void systemHealthCheck(float pressureThreshold) {
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   }
   // Throwing a pressure release countodown.
-  if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph) return;
-  if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) return;
+  if (lcdCurrentPageId == NextionPage::BrewGraph) return;
+  if (lcdCurrentPageId == NextionPage::BrewManual) return;
 
   if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
     if (millis() >= systemHealthTimer - 3500ul && millis() <= systemHealthTimer - 500ul) {
@@ -1056,7 +853,7 @@ static void fillBoiler(void) {
 }
 
 static bool isBoilerFillPhase(unsigned long elapsedTime) {
-  return static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
+  return lcdCurrentPageId == NextionPage::Home && elapsedTime >= BOILER_FILL_START_TIME;
 }
 
 static bool isBoilerFull(unsigned long elapsedTime) {
@@ -1072,7 +869,7 @@ static bool isBoilerFull(unsigned long elapsedTime) {
 
 // Checks if Brew switch is ON
 static bool isSwitchOn(void) {
-  return currentState.brewSwitchState && static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home;
+  return currentState.brewSwitchState && lcdCurrentPageId == NextionPage::Home;
 }
 
 static void fillBoilerUntilThreshod(unsigned long elapsedTime) {

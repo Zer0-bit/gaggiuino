@@ -6,15 +6,16 @@
 #include "../log.h"
 
 /**
-* NOTE: changing this variable requires:
+* NOTE: changing these constants requires:
 *        - bumping the version number! the serialized data will have
 *          a different layout to accommodate more array elements
+*          or longer strings
 *        - hardcoding the current value in the archived version and
 *          its upgrade function, to ensure loading that version
 *          deserializes correctly
 */
 #define MAX_PROFILES 5
-const uint8_t maxProfileNameChars = 25;
+#define PROFILE_NAME_LENGTH 25
 
 /**
 * current data version definition below
@@ -47,10 +48,7 @@ struct eepromValues_t {
   uint16_t brewDivider;
   uint8_t activeProfile;
   struct profile_t {
-    // name length is intentionally not macro/constant to avoid
-    // separating them from the version. changing the length needs
-    // a version bump!
-    char     name[maxProfileNameChars];
+    char     name[PROFILE_NAME_LENGTH];
     // Preinfusion vars section
     bool     preinfusionState;
     bool     preinfusionFlowState;
