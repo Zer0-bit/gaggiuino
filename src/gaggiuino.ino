@@ -88,7 +88,7 @@ void setup(void) {
   pumpInit(runningCfg.powerLineFrequency, runningCfg.pumpFlowAtZero);
   LOG_INFO("Pump init");
 
-  pageValuesRefresh(true);
+  pageValuesRefresh();
   LOG_INFO("Setup sequence finished");
 
   // Change LED colour on setup exit.
@@ -105,7 +105,7 @@ void setup(void) {
 //Main loop where all the logic is continuously run
 void loop(void) {
   fillBoiler();
-  pageValuesRefresh(false);
+  if (lcdCurrentPageId != lcdLastCurrentPageId) pageValuesRefresh();
   lcdListen();
   sensorsRead();
   brewDetect();
@@ -241,10 +241,6 @@ static void pageValuesRefresh() {
   lcdLastCurrentPageId = lcdCurrentPageId;
 }
 
-static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on page changes
-  if ( lcdCurrentPageId != lcdLastCurrentPageId || forcedUpdate == true ) pageValuesRefresh();
-}
-
 //#############################################################################################
 //############################____OPERATIONAL_MODE_CONTROL____#################################
 //#############################################################################################
@@ -288,7 +284,7 @@ static void modeSelect(void) {
       if (!currentState.steamSwitchState) {
         brewActive ? flushActivated() : flushDeactivated();
         steamCtrl(runningCfg, currentState);
-        pageValuesRefresh(true);
+        pageValuesRefresh();
       }
       break;
     case OPERATION_MODES::OPMODE_descale:
@@ -297,7 +293,7 @@ static void modeSelect(void) {
       deScale(runningCfg, currentState);
       break;
     default:
-      pageValuesRefresh(true);
+      pageValuesRefresh();
       break;
   }
 }
@@ -444,7 +440,7 @@ void lcdRefreshElementsTrigger(void) {
   // Make the necessary changes
   uploadPageCfg(eepromCurrentValues);
   // refresh the screen elements
-  pageValuesRefresh(true);
+  pageValuesRefresh();
 }
 
 void lcdQuickProfileSwitch(void) {
