@@ -386,16 +386,15 @@ void lcdSaveSettingsTrigger(void) {
   LOG_VERBOSE("Saving values to EEPROM");
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  eepromCurrentValues.activeProfile = runningCfg.activeProfile;
   lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.activeProfile);
   tryEepromWrite(eepromCurrentValues);
 }
 
 void lcdSaveProfileTrigger(void) {
-  lcdShowPopup("Saving");
   LOG_VERBOSE("Saving profile to EEPROM");
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  eepromCurrentValues.activeProfile = runningCfg.activeProfile;
   lcdFetchCurrentProfile(eepromCurrentValues);
   tryEepromWrite(eepromCurrentValues);
 }
