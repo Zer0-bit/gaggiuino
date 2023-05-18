@@ -19,7 +19,8 @@ Phase presurePhaseWithWeightTarget(float start, float end, long time, float weig
 
 SensorState state;
 eepromValues_t cfg;
-ShotSnapshot& shotSnapshotAtStart;
+ShotSnapshot shotSnapshotInstance;
+ShotSnapshot& shotSnapshotAtStart = shotSnapshotInstance;
 
 void test_current_phase_calculation(void)
 {
