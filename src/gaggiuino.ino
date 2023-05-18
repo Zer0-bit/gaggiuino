@@ -455,7 +455,7 @@ void lcdSaveProfileTrigger(void) {
   uint8_t activeProfileIndex = lcdGetSelectedProfile();
   eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[activeProfileIndex];
 
-  lcdFetchProfileName(*eepromTargetProfile, lcdGetSelectedProfile());
+  lcdFetchProfileName(*eepromTargetProfile, activeProfileIndex);
   lcdFetchPreinfusion(*eepromTargetProfile);
   lcdFetchSoak(*eepromTargetProfile);
   lcdFetchBrewProfile(*eepromTargetProfile);
