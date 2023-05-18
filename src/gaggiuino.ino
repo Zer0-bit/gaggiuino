@@ -446,6 +446,7 @@ void lcdRefreshElementsTrigger(void) {
 void lcdQuickProfileSwitch(void) {
   runningCfg.activeProfile = lcdGetSelectedProfile();
   ACTIVE_PROFILE(runningCfg) = eepromGetCurrentValues().profiles[runningCfg.activeProfile];
+  updateProfilerPhases();
   lcdUploadProfile(runningCfg);
   lcdShowPopup("Profile switched!");
 }
