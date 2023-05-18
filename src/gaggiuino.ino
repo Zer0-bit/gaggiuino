@@ -444,10 +444,9 @@ void lcdRefreshElementsTrigger(void) {
 }
 
 void lcdQuickProfileSwitch(void) {
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-
-  eepromCurrentValues.activeProfile = lcdGetSelectedProfile();
-  lcdUploadProfile(eepromCurrentValues);
+  runningCfg.activeProfile = lcdGetSelectedProfile();
+  ACTIVE_PROFILE(runningCfg) = eepromGetCurrentValues().profiles[runningCfg.activeProfile];
+  lcdUploadProfile(runningCfg);
   lcdShowPopup("Profile switched!");
 }
 
