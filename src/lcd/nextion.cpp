@@ -332,15 +332,33 @@ void lcdFetchDoseSettings(eepromValues_t::profile_t &profile) {
   profile.shotPreset                     = myNex.readNumber("shotPreset");
 }
 
+void lcdFetchTemp(eepromValues_t::profile_t &profile) {
+  profile.setpoint       = myNex.readNumber("sT.setPoint.val");
+}
+
+/**
+* Overwrites the entire profile in the index corresponding to
+* the currently selected profile on the screen.
+*/
+void lcdFetchCurrentProfile(eepromValues_t & settings) {
+  // Target save to the currently selected profile on screen (can be different from runningCfg on long press)
+  uint8_t activeProfileIndex = lcdGetSelectedProfile();
+  eepromValues_t::profile_t *profile = &settings.profiles[activeProfileIndex];
+
+  lcdFetchProfileName(*profile, activeProfileIndex);
+  lcdFetchPreinfusion(*profile);
+  lcdFetchSoak(*profile);
+  lcdFetchBrewProfile(*profile);
+  lcdFetchTransitionProfile(*profile);
+  lcdFetchDoseSettings(*profile);
+  lcdFetchTemp(*profile);
+}
+
 void lcdFetchBrewSettings(eepromValues_t &settings) {
   // More brew settings
   settings.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
   settings.basketPrefill                  = myNex.readNumber("basketPrefill");
   settings.brewDeltaState                 = myNex.readNumber("deltaState");
-}
-
-void lcdFetchTemp(eepromValues_t::profile_t &profile) {
-  profile.setpoint       = myNex.readNumber("sT.setPoint.val");
 }
 
 void lcdFetchBoiler(eepromValues_t &settings) {
@@ -358,6 +376,38 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.scalesF1                       = myNex.readNumber("sP.lc1.val");
   settings.scalesF2                       = myNex.readNumber("sP.lc2.val");
   settings.pumpFlowAtZero                 = myNex.readNumber("sP.pump_zero.val") / 10000.f;
+}
+
+void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile) {
+  switch (page) {
+    case NextionPage::BrewMore:
+      lcdFetchBrewSettings(settings);
+      break;
+    case NextionPage::BrewPreinfusion:
+      lcdFetchPreinfusion(settings.profiles[targetProfile]);
+      break;
+    case NextionPage::BrewSoak:
+      lcdFetchSoak(settings.profiles[targetProfile]);
+      break;
+    case NextionPage::BrewProfiling:
+      lcdFetchBrewProfile(settings.profiles[targetProfile]);
+      break;
+    case NextionPage::BrewTransitionProfile:
+      lcdFetchTransitionProfile(settings.profiles[targetProfile]);
+      break;
+    case NextionPage::SettingsBoiler:
+      lcdFetchTemp(settings.profiles[targetProfile]);
+      lcdFetchBoiler(settings);
+      break;
+    case NextionPage::SettingsSystem:
+      lcdFetchSystem(settings);
+      break;
+    case NextionPage::ShotSettings:
+      lcdFetchDoseSettings(settings.profiles[targetProfile]);
+      break;
+    default:
+      break;
+  }
 }
 
 uint8_t lcdGetSelectedProfile(void) {

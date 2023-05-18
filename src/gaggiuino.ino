@@ -223,45 +223,13 @@ static void calculateWeightAndFlow(void) {
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
-static void pageValuesRefresh(eepromValues_t &settings, NextionPage page) {
-  switch (page){
-    case NextionPage::BrewMore:
-      lcdFetchBrewSettings(settings);
-      break;
-    case NextionPage::BrewPreinfusion:
-      lcdFetchPreinfusion(ACTIVE_PROFILE(settings));
-      break;
-    case NextionPage::BrewSoak:
-      lcdFetchSoak(ACTIVE_PROFILE(settings));
-      break;
-    case NextionPage::BrewProfiling:
-      lcdFetchBrewProfile(ACTIVE_PROFILE(settings));
-      break;
-    case NextionPage::BrewTransitionProfile:
-      lcdFetchTransitionProfile(ACTIVE_PROFILE(settings));
-      break;
-    case NextionPage::SettingsBoiler:
-      lcdFetchTemp(ACTIVE_PROFILE(settings));
-      lcdFetchBoiler(settings);
-      break;
-    case NextionPage::SettingsSystem:
-      lcdFetchSystem(settings);
-      break;
-    case NextionPage::ShotSettings:
-      lcdFetchDoseSettings(ACTIVE_PROFILE(settings));
-      break;
-    default:
-      break;
-  }
-}
-
 static void pageValuesRefresh() {
   if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) {
     // Read the page we're landing in: leaving keyboard page means a value could've changed in it
-    pageValuesRefresh(runningCfg, lcdCurrentPageId);
+    lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
   } else {
     // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
-    pageValuesRefresh(runningCfg, lcdLastCurrentPageId);
+    lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.activeProfile);
   }
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
@@ -413,42 +381,8 @@ void lcdSaveSettingsTrigger(void) {
   bool rc;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
 
-  // TODO: Move profile fetch to profile-specific code path
-  // Target save to the currently selected profile on screen (not necessarily same as saved default)
-  uint8_t activeProfileIndex = lcdGetSelectedProfile();
-  eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[activeProfileIndex];
-  // Save the currently selected profile name // why though? this never happens in home?
-  lcdFetchProfileName(*eepromTargetProfile, activeProfileIndex);
+  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.activeProfile);
 
-  switch (lcdCurrentPageId){
-    case NextionPage::BrewMore:
-      lcdFetchBrewSettings(eepromCurrentValues);
-      break;
-    case NextionPage::BrewPreinfusion:
-      lcdFetchPreinfusion(*eepromTargetProfile);
-      break;
-    case NextionPage::BrewSoak:
-      lcdFetchSoak(*eepromTargetProfile);
-      break;
-    case NextionPage::BrewProfiling:
-      lcdFetchBrewProfile(*eepromTargetProfile);
-      break;
-    case NextionPage::BrewTransitionProfile:
-      lcdFetchTransitionProfile(*eepromTargetProfile);
-      break;
-    case NextionPage::SettingsBoiler:
-      lcdFetchTemp(*eepromTargetProfile);
-      lcdFetchBoiler(eepromCurrentValues);
-      break;
-    case NextionPage::SettingsSystem:
-      lcdFetchSystem(eepromCurrentValues);
-      break;
-    case NextionPage::ShotSettings:
-      lcdFetchDoseSettings(*eepromTargetProfile);
-      break;
-    default:
-      break;
-  }
   rc = eepromWrite(eepromCurrentValues);
   watchdogReload(); // reload the watchdog timer on expensive operations
   if (rc == true) {
@@ -463,17 +397,7 @@ void lcdSaveProfileTrigger(void) {
   bool rc;
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
 
-  // Target save to the currently selected profile on screen (not necessarily same as saved default)
-  uint8_t activeProfileIndex = lcdGetSelectedProfile();
-  eepromValues_t::profile_t *eepromTargetProfile = &eepromCurrentValues.profiles[activeProfileIndex];
-
-  lcdFetchProfileName(*eepromTargetProfile, activeProfileIndex);
-  lcdFetchPreinfusion(*eepromTargetProfile);
-  lcdFetchSoak(*eepromTargetProfile);
-  lcdFetchBrewProfile(*eepromTargetProfile);
-  lcdFetchTransitionProfile(*eepromTargetProfile);
-  lcdFetchDoseSettings(*eepromTargetProfile);
-  lcdFetchTemp(*eepromTargetProfile);
+  lcdFetchCurrentProfile(eepromCurrentValues);
 
   rc = eepromWrite(eepromCurrentValues);
   watchdogReload(); // reload the watchdog timer on expensive operations

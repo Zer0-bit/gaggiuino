@@ -34,16 +34,8 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues);
 void lcdListen(void);
 void lcdWakeUp(void);
 
-void lcdFetchProfileName(eepromValues_t::profile_t &profile, uint8_t index);
-void lcdFetchPreinfusion(eepromValues_t::profile_t &profile);
-void lcdFetchSoak(eepromValues_t::profile_t &profile);
-void lcdFetchBrewProfile(eepromValues_t::profile_t &profile);
-void lcdFetchTransitionProfile(eepromValues_t::profile_t &profile);
-void lcdFetchDoseSettings(eepromValues_t::profile_t &profile);
-void lcdFetchBrewSettings(eepromValues_t &settings);
-void lcdFetchTemp(eepromValues_t::profile_t &profile);
-void lcdFetchBoiler(eepromValues_t &settings);
-void lcdFetchSystem(eepromValues_t &settings);
+void lcdFetchCurrentProfile(eepromValues_t & settings);
+void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile);
 uint8_t lcdGetSelectedProfile(void);
 bool lcdGetPreinfusionFlowState(void);
 bool lcdGetProfileFlowState(void);
