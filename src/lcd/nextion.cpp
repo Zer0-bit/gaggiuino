@@ -367,7 +367,7 @@ void lcdFetchBoiler(eepromValues_t &settings) {
   settings.hpwr                           = myNex.readNumber("sT.hpwr.val");
   settings.mainDivider                    = myNex.readNumber("sT.mDiv.val");
   settings.brewDivider                    = myNex.readNumber("sT.bDiv.val");
- }
+}
 
 void lcdFetchSystem(eepromValues_t &settings) {
   // System settings
