@@ -440,11 +440,7 @@ void lcdRefreshElementsTrigger(void) {
       lcdShowPopup("Nope!");
       break;
   }
-  bool rc = eepromWrite(eepromCurrentValues);
-  watchdogReload();
-  (rc == true) ? lcdShowPopup("Switched!") : lcdShowPopup("Fail!");
 
-  eepromCurrentValues = eepromGetCurrentValues();
   // Make the necessary changes
   uploadPageCfg(eepromCurrentValues);
   // refresh the screen elements
