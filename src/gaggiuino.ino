@@ -371,7 +371,7 @@ static void lcdRefresh(void) {
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
-void tryEepromWrite(eepromValues_t &eepromValues) {
+void tryEepromWrite(const eepromValues_t &eepromValues) {
   bool success = eepromWrite(eepromValues);
   watchdogReload(); // reload the watchdog timer on expensive operations
   if (success) {

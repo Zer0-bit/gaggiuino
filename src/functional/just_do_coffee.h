@@ -12,9 +12,9 @@
 
 const uint32_t STEAM_TIMEOUT = 900000UL; // steam mode timeout
 const float MAX_WATER_TEMP = 105.f; // max temp allowed in hot water mode
-const float _steamThreshold = 11.f; // max allowed pressure before heaters are disabled
-const float _activeSteamPressure = 2.f; // DreamSteam enabling threshold.
-const float _passiveSteamPressure = 3.f; // DreamSteam disabling threshold.
+const float steamThreshold_ = 11.f; // max allowed pressure before heaters are disabled
+const float activeSteamPressure_ = 2.f; // DreamSteam enabling threshold.
+const float passiveSteamPressure_ = 3.f; // DreamSteam disabling threshold.
 
 enum class HEATING {
   MODE_brew,

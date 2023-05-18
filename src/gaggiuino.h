@@ -71,8 +71,6 @@ unsigned long scalesTimer;
 unsigned long flowTimer;
 unsigned long steamTime;
 
-// const
-const uint8_t _maxProfileName = 24;
 //scales vars
 float previousWeight  = 0;
 bool tareDone         = false;
