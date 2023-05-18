@@ -69,10 +69,9 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("sk.skRamp.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRamp);
   myNex.writeNum("skCrv", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRampSlope);
   // PROFILING
-  myNex.writeNum("ppState", ACTIVE_PROFILE(eepromCurrentValues).profilingState);
-  myNex.writeNum("ppType", ACTIVE_PROFILE(eepromCurrentValues).mfProfileState);
-  myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
   // Adnvanced transition profile
+  myNex.writeNum("paState", ACTIVE_PROFILE(eepromCurrentValues).tpState);
+  myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
   if(ACTIVE_PROFILE(eepromCurrentValues).tpType == 0) {
     myNex.writeNum("tp.tStart.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingStart * 10.f);
     myNex.writeNum("tp.tEnd.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingFinish * 10.f);
@@ -91,6 +90,8 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
     myNex.writeNum("tp.tLim.val", ACTIVE_PROFILE(eepromCurrentValues).tfProfilingPressureRestriction * 10.f);
   }
   // Main profile
+  myNex.writeNum("ppState", ACTIVE_PROFILE(eepromCurrentValues).profilingState);
+  myNex.writeNum("ppType", ACTIVE_PROFILE(eepromCurrentValues).mfProfileState);
   if(ACTIVE_PROFILE(eepromCurrentValues).mfProfileState == 0) {
     myNex.writeNum("pf.pStart.val", ACTIVE_PROFILE(eepromCurrentValues).mpProfilingStart * 10.f);
     myNex.writeNum("pf.pEnd.val", ACTIVE_PROFILE(eepromCurrentValues).mpProfilingFinish * 10.f);
@@ -210,13 +211,14 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
       }
       break;
     case SCREEN_MODES::SCREEN_brew_transition_profile:
+      myNex.writeNum("paState", ACTIVE_PROFILE(eepromCurrentValues).tpState);
       myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
       // Adnvanced transition profile
       if(ACTIVE_PROFILE(eepromCurrentValues).tpType == 0) {
         myNex.writeNum("tp.tStart.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingStart * 10.f);
         myNex.writeNum("tp.tEnd.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingFinish * 10.f);
         myNex.writeNum("tp.tHold.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHold);
-        myNex.writeNum("tp.h  Lim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHoldLimit * 10.f);
+        myNex.writeNum("tp.hLim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingHoldLimit * 10.f);
         myNex.writeNum("tp.tSlope.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingSlope);
         myNex.writeNum("paCrv", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingSlopeShape);
         myNex.writeNum("tp.tLim.val", ACTIVE_PROFILE(eepromCurrentValues).tpProfilingFlowRestriction * 10.f);
@@ -301,24 +303,25 @@ void lcdFetchBrewProfile(eepromValues_t::profile_t &profile) {
 }
 
 void lcdFetchTransitionProfile(eepromValues_t::profile_t &profile) {
+  profile.tpState = myNex.readNumber("paState");
   profile.tpType = lcdGetTransitionFlowState();
 
   if(profile.tpType == 0) {
-    profile.tpProfilingStart = myNex.readNumber("tp.pStart.val") / 10.f;
-    profile.tpProfilingFinish = myNex.readNumber("tp.pEnd.val") / 10.f;
-    profile.tpProfilingHold = myNex.readNumber("tp.pHold.val");
+    profile.tpProfilingStart = myNex.readNumber("tp.tStart.val") / 10.f;
+    profile.tpProfilingFinish = myNex.readNumber("tp.tEnd.val") / 10.f;
+    profile.tpProfilingHold = myNex.readNumber("tp.tHold.val");
     profile.tpProfilingHoldLimit = myNex.readNumber("tp.hLim.val") / 10.f;
-    profile.tpProfilingSlope = myNex.readNumber("tp.pSlope.val");
+    profile.tpProfilingSlope = myNex.readNumber("tp.tSlope.val");
     profile.tpProfilingSlopeShape = myNex.readNumber("paCrv");
-    profile.tpProfilingFlowRestriction = myNex.readNumber("tp.pLim.val") / 10.f;
+    profile.tpProfilingFlowRestriction = myNex.readNumber("tp.tLim.val") / 10.f;
   } else {
-    profile.tfProfileStart = myNex.readNumber("tp.pStart.val") / 10.f;
-    profile.tfProfileEnd = myNex.readNumber("tp.pEnd.val") / 10.f;
-    profile.tfProfileHold = myNex.readNumber("tp.pHold.val");
-    profile.tfProfileHoldLimit = myNex.readNumber("tp.hLim.val") / 10.f;
-    profile.tfProfileSlope = myNex.readNumber("tp.pSlope.val");
+    profile.tfProfileStart = myNex.readNumber("tp.tStart.val") / 10.f;
+    profile.tfProfileEnd = myNex.readNumber("tp.tEnd.val") / 10.f;
+    profile.tfProfileHold = myNex.readNumber("tp.tHold.val");
+    profile.tfProfileHoldLimit = myNex.readNumber("tp.tLim.val") / 10.f;
+    profile.tfProfileSlope = myNex.readNumber("tp.tSlope.val");
     profile.tfProfileSlopeShape = myNex.readNumber("paCrv");
-    profile.tfProfilingPressureRestriction = myNex.readNumber("tp.pLim.val") / 10.f;
+    profile.tfProfilingPressureRestriction = myNex.readNumber("tp.tLim.val") / 10.f;
   }
 }
 

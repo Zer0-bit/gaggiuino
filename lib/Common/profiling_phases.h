@@ -47,6 +47,10 @@ struct Transition {
   Transition(): start(-1), end(-1), curve(TransitionCurve::INSTANT), time(0) {}
   Transition(float targetValue, TransitionCurve curve = TransitionCurve::INSTANT, long time = 0):  start(-1), end(targetValue), curve(curve), time(time) {}
   Transition(float start, float end, TransitionCurve curve = TransitionCurve::LINEAR, long time = 0): start(start), end(end), curve(curve), time(time) {}
+
+  bool isInstant() {
+    return curve == TransitionCurve::INSTANT || time == 0;
+  }
 };
 
 struct Phase {
@@ -78,6 +82,10 @@ struct Profile {
 
   void addPhase(Phase phase) {
     phases.push_back(phase);
+  }
+
+  void insertPhase(Phase phase, size_t index) {
+    phases.insert(phases.begin() + index, phase);
   }
 
   void clear() {

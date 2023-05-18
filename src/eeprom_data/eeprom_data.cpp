@@ -13,6 +13,11 @@
 namespace {
 
   struct eepromMetadata_t eepromMetadata;
+  // Define the DMA buffer size
+  #define BUFFER_SIZE sizeof(eepromMetadata)
+
+  // Declare the DMA handle
+  DMA_HandleTypeDef hdma;
 
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
@@ -49,6 +54,7 @@ namespace {
       defaultData.profiles[i].preinfusionRamp = defaultsProfile[i].preinfusionRamp;
       defaultData.profiles[i].preinfusionRampSlope = defaultsProfile[i].preinfusionRampSlope;
       // Transition Profile - ramp&hold || advanced profiling
+      defaultData.profiles[i].tpState = defaultsProfile[i].tpState;
       defaultData.profiles[i].tpType = defaultsProfile[i].tpType; // transtion profile type :pressure|flow:
       defaultData.profiles[i].tpProfilingStart = defaultsProfile[i].tpProfilingStart;
       defaultData.profiles[i].tpProfilingFinish = defaultsProfile[i].tpProfilingFinish;
@@ -118,74 +124,63 @@ namespace {
 
 bool eepromWrite(eepromValues_t eepromValuesNew) {
   const char *errMsg = "Data out of range";
-
+  /* Check various profile array values */
   for (int i=0; i<MAX_PROFILES; i++) {
-    if (eepromValuesNew.profiles[i].preinfusionFlowVol < 0.f) {
-      LOG_ERROR(errMsg);
-      return false;
-    }
-
-    if (eepromValuesNew.profiles[i].mfProfileStart < 0.f) {
-      LOG_ERROR(errMsg);
-      return false;
-    }
-
-    if (eepromValuesNew.profiles[i].mfProfileEnd < 0.f) {
-      LOG_ERROR(errMsg);
-      return false;
-    }
-
-    if (eepromValuesNew.profiles[i].mpProfilingStart < 0.f) {
-      LOG_ERROR(errMsg);
-      return false;
-    }
-
-    if (eepromValuesNew.profiles[i].mpProfilingFinish < 0.f) {
-      LOG_ERROR(errMsg);
-      return false;
-    }
-    if (eepromValuesNew.profiles[i].setpoint < 1) {
+    if ( eepromValuesNew.profiles[i].preinfusionFlowVol < 0.f
+      || eepromValuesNew.profiles[i].mfProfileStart < 0.f
+      || eepromValuesNew.profiles[i].mfProfileEnd < 0.f
+      || eepromValuesNew.profiles[i].mpProfilingStart < 0.f
+      || eepromValuesNew.profiles[i].mpProfilingFinish < 0.f
+      || eepromValuesNew.profiles[i].setpoint < 1)
+    {
       LOG_ERROR(errMsg);
       return false;
     }
   }
-
-
-  if (eepromValuesNew.steamSetPoint < 1 || eepromValuesNew.steamSetPoint > 165) {
+  /* Check various global values */
+  if (eepromValuesNew.steamSetPoint < 1
+  || eepromValuesNew.steamSetPoint > 165
+  || eepromValuesNew.mainDivider < 1
+  || eepromValuesNew.brewDivider < 1
+  || eepromValuesNew.pumpFlowAtZero < 0.210f
+  || eepromValuesNew.pumpFlowAtZero > 0.310f
+  || eepromValuesNew.scalesF1 < -20000
+  || eepromValuesNew.scalesF2 > 20000)
+  {
     LOG_ERROR(errMsg);
     return false;
   }
 
-  if (eepromValuesNew.mainDivider < 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.brewDivider < 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.pumpFlowAtZero < 0.210f || eepromValuesNew.pumpFlowAtZero > 0.310f) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.scalesF1 < -20000 || eepromValuesNew.scalesF1 > 20000) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
-  if (eepromValuesNew.scalesF2 < -20000 || eepromValuesNew.scalesF2 > 20000) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
-
+  /* Saving the values struct + validation and versioning metadata */
   eepromMetadata.timestamp = millis();
   eepromMetadata.version = EEPROM_DATA_VERSION;
   eepromMetadata.values = eepromValuesNew;
   eepromMetadata.versionTimestampXOR = eepromMetadata.timestamp ^ eepromMetadata.version;
-  EEPROM.put(0, eepromMetadata);
+  // Enable the DMA clock
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  // Configure the DMA transfer
+  hdma.Instance = DMA1_Stream7;
+  hdma.Init.Channel = DMA_CHANNEL_0;
+  hdma.Init.Direction = DMA_MEMORY_TO_PERIPH;
+  hdma.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma.Init.MemInc = DMA_MINC_ENABLE;
+  hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+  hdma.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+  hdma.Init.Mode = DMA_NORMAL;
+  hdma.Init.Priority = DMA_PRIORITY_LOW;
+  hdma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+  hdma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma.Init.PeriphBurst = DMA_PBURST_SINGLE;
+
+  // Initialize the DMA handle
+  HAL_DMA_Init(&hdma);
+  // Start the DMA transfer
+  HAL_DMA_Start_IT(&hdma, (uint32_t)&eepromMetadata, (uint32_t)&EEPROM.put(0, eepromMetadata), BUFFER_SIZE);
+
+  // Deinitialize the DMA handle
+  HAL_DMA_DeInit(&hdma);
 
   return true;
 }
