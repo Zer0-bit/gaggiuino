@@ -26,7 +26,6 @@ enum class NextionPage: byte {
 
 extern volatile NextionPage lcdCurrentPageId;
 extern volatile NextionPage lcdLastCurrentPageId;
-const uint8_t nexBtnBufferSize = 16;
 
 void lcdInit(void);
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues);

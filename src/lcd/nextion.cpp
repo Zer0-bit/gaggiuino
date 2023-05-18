@@ -239,8 +239,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 }
 
 void lcdFetchProfileName(eepromValues_t::profile_t &profile, uint8_t index /* 0-offset */) {
-  char buttonElemId[nexBtnBufferSize];
-  snprintf(buttonElemId, nexBtnBufferSize, "home.qPf%d.txt", index + 1);
+  String buttonElemId = String("home.qPf") + (index + 1) + ".txt";
   snprintf(profile.name, sizeof(profile.name), "%.16s", myNex.readStr(buttonElemId).c_str());
 }
 
