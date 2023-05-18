@@ -375,37 +375,31 @@ static void lcdRefresh(void) {
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
-// Save the desired temp values to EEPROM
-void lcdSaveSettingsTrigger(void) {
-  LOG_VERBOSE("Saving values to EEPROM");
-  bool rc;
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-
-  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.activeProfile);
-
-  rc = eepromWrite(eepromCurrentValues);
+void tryEepromWrite(eepromValues_t &eepromValues) {
+  bool success = eepromWrite(eepromValues);
   watchdogReload(); // reload the watchdog timer on expensive operations
-  if (rc == true) {
+  if (success) {
     lcdShowPopup("Update successful!");
   } else {
     lcdShowPopup("Data out of range!");
   }
 }
 
+// Save the desired temp values to EEPROM
+void lcdSaveSettingsTrigger(void) {
+  LOG_VERBOSE("Saving values to EEPROM");
+
+  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.activeProfile);
+  tryEepromWrite(eepromCurrentValues);
+}
+
 void lcdSaveProfileTrigger(void) {
   LOG_VERBOSE("Saving profile to EEPROM");
-  bool rc;
+
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-
   lcdFetchCurrentProfile(eepromCurrentValues);
-
-  rc = eepromWrite(eepromCurrentValues);
-  watchdogReload(); // reload the watchdog timer on expensive operations
-  if (rc == true) {
-    lcdShowPopup("Update successful!");
-  } else {
-    lcdShowPopup("Data out of range!");
-  }
+  tryEepromWrite(eepromCurrentValues);
 }
 
 void lcdScalesTareTrigger(void) {
