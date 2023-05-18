@@ -5,28 +5,28 @@
 #include <EasyNextionLibrary.h>
 #include "eeprom_data/eeprom_data.h"
 
-extern volatile int lcdCurrentPageId;
-extern volatile int lcdLastCurrentPageId;
-const uint8_t nexBtnBufferSize = 16;
+enum class NextionPage: byte {
+  /* 00 */ Home,
+  /* 01 */ BrewPreinfusion,
+  /* 02 */ BrewSoak,
+  /* 03 */ BrewProfiling,
+  /* 04 */ BrewManual,
+  /* 05 */ Flush,
+  /* 06 */ Descale,
+  /* 07 */ SettingsBoiler,
+  /* 08 */ SettingsSystem,
+  /* 09 */ BrewGraph,
+  /* 0A */ BrewMore,
+  /* 0B */ ShotSettings,
+  /* 0C */ BrewTransitionProfile,
+  /* 0D */ GraphPreview,
+  /* 0E */ KeyboardNumeric,
+  /* 0F */ KeyboardAlpha
+};
 
-enum class SCREEN_MODES {
-  /* 00 */ SCREEN_home,
-  /* 01 */ SCREEN_brew_preinfusion,
-  /* 02 */ SCREEN_brew_soak,
-  /* 03 */ SCREEN_brew_profiling,
-  /* 04 */ SCREEN_brew_manual,
-  /* 05 */ SCREEN_flush,
-  /* 06 */ SCREEN_descale,
-  /* 07 */ SCREEN_settings_boiler,
-  /* 08 */ SCREEN_settings_system,
-  /* 09 */ SCREEN_brew_graph,
-  /* 0A */ SCREEN_brew_more,
-  /* 0B */ SCREEN_shot_settings,
-  /* 0C */ SCREEN_brew_transition_profile,
-  /* 0D */ SCREEN_graph_preview,
-  /* 0E */ SCREEN_keyboard_numeric,
-  /* 0F */ SCREEN_keyboard_alpha
-} ;
+extern volatile NextionPage lcdCurrentPageId;
+extern volatile NextionPage lcdLastCurrentPageId;
+const uint8_t nexBtnBufferSize = 16;
 
 void lcdInit(void);
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues);

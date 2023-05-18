@@ -223,31 +223,31 @@ static void calculateWeightAndFlow(void) {
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
-static void pageValuesRefresh(eepromValues_t &settings, SCREEN_MODES page) {
+static void pageValuesRefresh(eepromValues_t &settings, NextionPage page) {
   switch (page){
-    case SCREEN_MODES::SCREEN_brew_more:
+    case NextionPage::BrewMore:
       lcdFetchBrewSettings(settings);
       break;
-    case SCREEN_MODES::SCREEN_brew_preinfusion:
+    case NextionPage::BrewPreinfusion:
       lcdFetchPreinfusion(ACTIVE_PROFILE(settings));
       break;
-    case SCREEN_MODES::SCREEN_brew_soak:
+    case NextionPage::BrewSoak:
       lcdFetchSoak(ACTIVE_PROFILE(settings));
       break;
-    case SCREEN_MODES::SCREEN_brew_profiling:
+    case NextionPage::BrewProfiling:
       lcdFetchBrewProfile(ACTIVE_PROFILE(settings));
       break;
-    case SCREEN_MODES::SCREEN_brew_transition_profile:
+    case NextionPage::BrewTransitionProfile:
       lcdFetchTransitionProfile(ACTIVE_PROFILE(settings));
       break;
-    case SCREEN_MODES::SCREEN_settings_boiler:
+    case NextionPage::SettingsBoiler:
       lcdFetchTemp(ACTIVE_PROFILE(settings));
       lcdFetchBoiler(settings);
       break;
-    case SCREEN_MODES::SCREEN_settings_system:
+    case NextionPage::SettingsSystem:
       lcdFetchSystem(settings);
       break;
-    case SCREEN_MODES::SCREEN_shot_settings:
+    case NextionPage::ShotSettings:
       lcdFetchDoseSettings(ACTIVE_PROFILE(settings));
       break;
     default:
@@ -256,12 +256,12 @@ static void pageValuesRefresh(eepromValues_t &settings, SCREEN_MODES page) {
 }
 
 static void pageValuesRefresh() {
-  if (static_cast<SCREEN_MODES>(lcdLastCurrentPageId) == SCREEN_MODES::SCREEN_keyboard_numeric) {
+  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) {
     // Read the page we're landing in: leaving keyboard page means a value could've changed in it
-    pageValuesRefresh(runningCfg, static_cast<SCREEN_MODES>(lcdCurrentPageId));
+    pageValuesRefresh(runningCfg, lcdCurrentPageId);
   } else {
     // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
-    pageValuesRefresh(runningCfg, static_cast<SCREEN_MODES>(lcdLastCurrentPageId));
+    pageValuesRefresh(runningCfg, lcdLastCurrentPageId);
   }
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
@@ -361,25 +361,31 @@ static void lcdRefresh(void) {
     lcdSetTemperature(lcdTemp);
 
     /*LCD weight output*/
-    if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && homeScreenScalesEnabled) {
-      lcdSetWeight(currentState.weight);
-    }
-    else if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
-    || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) {
-      if (currentState.shotWeight)
+    switch (lcdCurrentPageId) {
+      case NextionPage::Home:
+        if (homeScreenScalesEnabled) lcdSetWeight(currentState.weight);
+        break;
+      case NextionPage::BrewGraph:
+      case NextionPage::BrewManual:
         // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
-        lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
+        if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
+        break;
+      default:
+        break; // don't push needless data on other pages
     }
 
     /*LCD flow output*/
-    // no point sending this continuously if on any other screens than brew related ones
-    if ( static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph
-      || static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual ) {
-      lcdSetFlow(
-        currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
-          ? currentState.smoothedWeightFlow * 10.f
-          : fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f)
-      );
+    switch (lcdCurrentPageId) {
+      case NextionPage::BrewGraph:
+      case NextionPage::BrewManual:
+        lcdSetFlow(
+          currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
+            ? currentState.smoothedWeightFlow * 10.f
+            : fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f)
+        );
+        break;
+      default:
+        break; // don't push needless data on other pages
     }
 
   #ifdef DEBUG_ENABLED
@@ -414,30 +420,30 @@ void lcdSaveSettingsTrigger(void) {
   // Save the currently selected profile name // why though? this never happens in home?
   lcdFetchProfileName(*eepromTargetProfile, activeProfileIndex);
 
-  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)){
-    case SCREEN_MODES::SCREEN_brew_more:
+  switch (lcdCurrentPageId){
+    case NextionPage::BrewMore:
       lcdFetchBrewSettings(eepromCurrentValues);
       break;
-    case SCREEN_MODES::SCREEN_brew_preinfusion:
+    case NextionPage::BrewPreinfusion:
       lcdFetchPreinfusion(*eepromTargetProfile);
       break;
-    case SCREEN_MODES::SCREEN_brew_soak:
+    case NextionPage::BrewSoak:
       lcdFetchSoak(*eepromTargetProfile);
       break;
-    case SCREEN_MODES::SCREEN_brew_profiling:
+    case NextionPage::BrewProfiling:
       lcdFetchBrewProfile(*eepromTargetProfile);
       break;
-    case SCREEN_MODES::SCREEN_brew_transition_profile:
+    case NextionPage::BrewTransitionProfile:
       lcdFetchTransitionProfile(*eepromTargetProfile);
       break;
-    case SCREEN_MODES::SCREEN_settings_boiler:
+    case NextionPage::SettingsBoiler:
       lcdFetchTemp(*eepromTargetProfile);
       lcdFetchBoiler(eepromCurrentValues);
       break;
-    case SCREEN_MODES::SCREEN_settings_system:
+    case NextionPage::SettingsSystem:
       lcdFetchSystem(eepromCurrentValues);
       break;
-    case SCREEN_MODES::SCREEN_shot_settings:
+    case NextionPage::ShotSettings:
       lcdFetchDoseSettings(*eepromTargetProfile);
       break;
     default:
@@ -502,14 +508,14 @@ void lcdRefreshElementsTrigger(void) {
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
 
-  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
-    case SCREEN_MODES::SCREEN_brew_preinfusion:
+  switch (lcdCurrentPageId) {
+    case NextionPage::BrewPreinfusion:
       ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = lcdGetPreinfusionFlowState();
       break;
-    case SCREEN_MODES::SCREEN_brew_profiling:
+    case NextionPage::BrewProfiling:
       ACTIVE_PROFILE(eepromCurrentValues).mfProfileState = lcdGetProfileFlowState();
       break;
-    case SCREEN_MODES::SCREEN_brew_transition_profile:
+    case NextionPage::BrewTransitionProfile:
       ACTIVE_PROFILE(eepromCurrentValues).tpType = lcdGetTransitionFlowState();
       break;
     default:
@@ -865,10 +871,10 @@ static inline void systemHealthCheck(float pressureThreshold) {
     {
       //Reloading the watchdog timer, if this function fails to run MCU is rebooted
       watchdogReload();
-      switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
-        case SCREEN_MODES::SCREEN_brew_manual:
-        case SCREEN_MODES::SCREEN_brew_graph:
-        case SCREEN_MODES::SCREEN_graph_preview:
+      switch (lcdCurrentPageId) {
+        case NextionPage::BrewManual:
+        case NextionPage::BrewGraph:
+        case NextionPage::GraphPreview:
           brewDetect();
           lcdRefresh();
           lcdListen();
@@ -890,8 +896,8 @@ static inline void systemHealthCheck(float pressureThreshold) {
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   }
   // Throwing a pressure release countodown.
-  if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_graph) return;
-  if (static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_brew_manual) return;
+  if (lcdCurrentPageId == NextionPage::BrewGraph) return;
+  if (lcdCurrentPageId == NextionPage::BrewManual) return;
 
   if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
     if (millis() >= systemHealthTimer - 3500ul && millis() <= systemHealthTimer - 500ul) {
@@ -936,7 +942,7 @@ static void fillBoiler(void) {
 }
 
 static bool isBoilerFillPhase(unsigned long elapsedTime) {
-  return static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home && elapsedTime >= BOILER_FILL_START_TIME;
+  return lcdCurrentPageId == NextionPage::Home && elapsedTime >= BOILER_FILL_START_TIME;
 }
 
 static bool isBoilerFull(unsigned long elapsedTime) {
@@ -952,7 +958,7 @@ static bool isBoilerFull(unsigned long elapsedTime) {
 
 // Checks if Brew switch is ON
 static bool isSwitchOn(void) {
-  return currentState.brewSwitchState && static_cast<SCREEN_MODES>(lcdCurrentPageId) == SCREEN_MODES::SCREEN_home;
+  return currentState.brewSwitchState && lcdCurrentPageId == NextionPage::Home;
 }
 
 static void fillBoilerUntilThreshod(unsigned long elapsedTime) {

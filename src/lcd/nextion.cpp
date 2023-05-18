@@ -5,8 +5,8 @@
 #include <Arduino.h>
 
 EasyNex myNex(USART_LCD);
-volatile int lcdCurrentPageId;
-volatile int lcdLastCurrentPageId;
+volatile NextionPage lcdCurrentPageId;
+volatile NextionPage lcdLastCurrentPageId;
 
 void lcdInit(void) {
   myNex.begin(115200);
@@ -16,13 +16,13 @@ void lcdInit(void) {
     delay(100);
   }
   myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
-  lcdCurrentPageId = myNex.currentPageId;
-  lcdLastCurrentPageId = myNex.currentPageId;
+  lcdCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
+  lcdLastCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
 }
 
 void lcdListen(void) {
   myNex.NextionListen();
-  lcdCurrentPageId = myNex.currentPageId;
+  lcdCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
 }
 
 void lcdWakeUp(void) {
@@ -154,8 +154,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 
 void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
   // Updating only page specific elements as necessary to speed up things and avoid needless writes.
-  switch (static_cast<SCREEN_MODES>(lcdCurrentPageId)) {
-    case SCREEN_MODES::SCREEN_brew_preinfusion:
+  switch (lcdCurrentPageId) {
+    case NextionPage::BrewPreinfusion:
       // PI
       myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
       myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -174,7 +174,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
       myNex.writeNum("piRPressure", ACTIVE_PROFILE(eepromCurrentValues).preinfusionPressureAbove);
       myNex.writeNum("pi.piAbove.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionWeightAbove * 10.f);
       break;
-    case SCREEN_MODES::SCREEN_brew_soak:
+    case NextionPage::BrewSoak:
       myNex.writeNum("skState", ACTIVE_PROFILE(eepromCurrentValues).soakState);
 
       if(ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState == 0)
@@ -191,7 +191,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
       myNex.writeNum("sk.skRamp.val", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRamp);
       myNex.writeNum("skCrv", ACTIVE_PROFILE(eepromCurrentValues).preinfusionRampSlope);
       break;
-    case SCREEN_MODES::SCREEN_brew_profiling:
+    case NextionPage::BrewProfiling:
       // PROFILING
       myNex.writeNum("ppState", ACTIVE_PROFILE(eepromCurrentValues).profilingState);
       myNex.writeNum("ppType", ACTIVE_PROFILE(eepromCurrentValues).mfProfileState);
@@ -210,7 +210,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
         myNex.writeNum("pf.pLim.val", ACTIVE_PROFILE(eepromCurrentValues).mfProfilingPressureRestriction * 10.f);
       }
       break;
-    case SCREEN_MODES::SCREEN_brew_transition_profile:
+    case NextionPage::BrewTransitionProfile:
       myNex.writeNum("paState", ACTIVE_PROFILE(eepromCurrentValues).tpState);
       myNex.writeNum("paType", ACTIVE_PROFILE(eepromCurrentValues).tpType);
       // Adnvanced transition profile
