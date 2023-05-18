@@ -394,6 +394,8 @@ void lcdSaveProfileTrigger(void) {
   LOG_VERBOSE("Saving profile to EEPROM");
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
+  // Make currently selected profile on screen the default
+  eepromCurrentValues.activeProfile = lcdGetSelectedProfile();
   lcdFetchCurrentProfile(eepromCurrentValues);
   tryEepromWrite(eepromCurrentValues);
 }

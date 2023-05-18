@@ -338,20 +338,16 @@ void lcdFetchTemp(eepromValues_t::profile_t &profile) {
 
 /**
 * Overwrites the entire profile in the index corresponding to
-* the currently selected profile on the screen.
+* the currently selected profile on the settings struct.
 */
 void lcdFetchCurrentProfile(eepromValues_t & settings) {
-  // Target save to the currently selected profile on screen (can be different from runningCfg on long press)
-  uint8_t activeProfileIndex = lcdGetSelectedProfile();
-  eepromValues_t::profile_t *profile = &settings.profiles[activeProfileIndex];
-
-  lcdFetchProfileName(*profile, activeProfileIndex);
-  lcdFetchPreinfusion(*profile);
-  lcdFetchSoak(*profile);
-  lcdFetchBrewProfile(*profile);
-  lcdFetchTransitionProfile(*profile);
-  lcdFetchDoseSettings(*profile);
-  lcdFetchTemp(*profile);
+  lcdFetchProfileName(ACTIVE_PROFILE(settings), settings.activeProfile);
+  lcdFetchPreinfusion(ACTIVE_PROFILE(settings));
+  lcdFetchSoak(ACTIVE_PROFILE(settings));
+  lcdFetchBrewProfile(ACTIVE_PROFILE(settings));
+  lcdFetchTransitionProfile(ACTIVE_PROFILE(settings));
+  lcdFetchDoseSettings(ACTIVE_PROFILE(settings));
+  lcdFetchTemp(ACTIVE_PROFILE(settings));
 }
 
 void lcdFetchBrewSettings(eepromValues_t &settings) {
