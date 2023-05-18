@@ -238,7 +238,8 @@ static void pageValuesRefresh(eepromValues_t &settings, SCREEN_MODES page) {
       lcdFetchBrewProfile(ACTIVE_PROFILE(settings));
       break;
     case SCREEN_MODES::SCREEN_settings_boiler:
-      lcdFetchTemp(settings);
+      lcdFetchTemp(ACTIVE_PROFILE(settings));
+      lcdFetchBoiler(settings);
       break;
     case SCREEN_MODES::SCREEN_settings_system:
       lcdFetchSystem(settings);
@@ -424,7 +425,8 @@ void lcdSaveSettingsTrigger(void) {
       lcdFetchTransitionProfile(*eepromTargetProfile);
       break;
     case SCREEN_MODES::SCREEN_settings_boiler:
-      lcdFetchTemp(eepromCurrentValues);
+      lcdFetchTemp(*eepromTargetProfile);
+      lcdFetchBoiler(eepromCurrentValues);
       break;
     case SCREEN_MODES::SCREEN_settings_system:
       lcdFetchSystem(eepromCurrentValues);
@@ -459,6 +461,7 @@ void lcdSaveProfileTrigger(void) {
   lcdFetchBrewProfile(*eepromTargetProfile);
   lcdFetchTransitionProfile(*eepromTargetProfile);
   lcdFetchDoseSettings(*eepromTargetProfile);
+  lcdFetchTemp(*eepromTargetProfile);
 
   rc = eepromWrite(eepromCurrentValues);
   watchdogReload(); // reload the watchdog timer on expensive operations

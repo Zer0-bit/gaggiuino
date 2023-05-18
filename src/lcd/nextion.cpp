@@ -340,8 +340,11 @@ void lcdFetchBrewSettings(eepromValues_t &settings) {
   settings.brewDeltaState                 = myNex.readNumber("deltaState");
 }
 
-void lcdFetchTemp(eepromValues_t &settings) {
-  ACTIVE_PROFILE(settings).setpoint       = myNex.readNumber("sT.setPoint.val");
+void lcdFetchTemp(eepromValues_t::profile_t &profile) {
+  profile.setpoint       = myNex.readNumber("sT.setPoint.val");
+}
+
+void lcdFetchBoiler(eepromValues_t &settings) {
   settings.steamSetPoint                  = myNex.readNumber("sT.steamSetPoint.val");
   settings.offsetTemp                     = myNex.readNumber("sT.offSet.val");
   settings.hpwr                           = myNex.readNumber("sT.hpwr.val");
