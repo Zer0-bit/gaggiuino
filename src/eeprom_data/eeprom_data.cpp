@@ -9,6 +9,8 @@
 #include "legacy/eeprom_data_v6.h"
 #include "legacy/eeprom_data_v7.h"
 #include "legacy/eeprom_data_v8.h"
+#include "legacy/eeprom_data_v9.h"
+#include "legacy/eeprom_data_v10.h"
 
 namespace {
 
