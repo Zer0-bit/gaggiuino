@@ -391,6 +391,7 @@ void lcdSaveSettingsTrigger(void) {
 }
 
 void lcdSaveProfileTrigger(void) {
+  lcdShowPopup("Saving");
   LOG_VERBOSE("Saving profile to EEPROM");
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
