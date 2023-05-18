@@ -256,10 +256,13 @@ static void pageValuesRefresh(eepromValues_t &settings, SCREEN_MODES page) {
 }
 
 static void pageValuesRefresh() {
-  // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
-  pageValuesRefresh(runningCfg, static_cast<SCREEN_MODES>(lcdLastCurrentPageId));
-  // Also read the page we're landing in: leaving keyboard page means a value could've changed in it
-  pageValuesRefresh(runningCfg, static_cast<SCREEN_MODES>(lcdCurrentPageId));
+  if (static_cast<SCREEN_MODES>(lcdLastCurrentPageId) == SCREEN_MODES::SCREEN_keyboard_numeric) {
+    // Read the page we're landing in: leaving keyboard page means a value could've changed in it
+    pageValuesRefresh(runningCfg, static_cast<SCREEN_MODES>(lcdCurrentPageId));
+  } else {
+    // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
+    pageValuesRefresh(runningCfg, static_cast<SCREEN_MODES>(lcdLastCurrentPageId));
+  }
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
   // MODE_SELECT should always be LAST

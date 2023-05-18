@@ -23,7 +23,9 @@ enum class SCREEN_MODES {
     SCREEN_brew_more,
     SCREEN_shot_settings,
     SCREEN_brew_transition_profile,
-    SCREEN_graph_preview
+    SCREEN_graph_preview,
+    SCREEN_keyboard_numeric,
+    SCREEN_keyboard_alpha
 } ;
 
 void lcdInit(void);
