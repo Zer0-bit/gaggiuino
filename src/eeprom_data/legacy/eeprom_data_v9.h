@@ -75,7 +75,7 @@ struct eepromValues_t_v9 {
 };
 
 static bool upgradeSchema_v9(eepromValues_t &targetValues, eepromValues_t_v9 &loadedValues) {
-  targetValues.setpoint = loadedValues.setpoint;
+  ACTIVE_PROFILE(targetValues).setpoint = loadedValues.setpoint;
   targetValues.steamSetPoint = loadedValues.steamSetPoint;
   targetValues.offsetTemp = loadedValues.offsetTemp;
   targetValues.hpwr = loadedValues.hpwr;
@@ -103,21 +103,17 @@ static bool upgradeSchema_v9(eepromValues_t &targetValues, eepromValues_t_v9 &lo
   ACTIVE_PROFILE(targetValues).preinfusionRamp = loadedValues.preinfusionRamp;
   ACTIVE_PROFILE(targetValues).preinfusionRampSlope = loadedValues.preinfusionRampSlope;
   ACTIVE_PROFILE(targetValues).profilingState = loadedValues.profilingState;
-  ACTIVE_PROFILE(targetValues).flowProfileState = loadedValues.flowProfileState;
-  ACTIVE_PROFILE(targetValues).pressureProfilingStart = loadedValues.pressureProfilingStart;
-  ACTIVE_PROFILE(targetValues).pressureProfilingFinish = loadedValues.pressureProfilingFinish;
-  ACTIVE_PROFILE(targetValues).pressureProfilingHold = loadedValues.pressureProfilingHold;
-  ACTIVE_PROFILE(targetValues).pressureProfilingHoldLimit = loadedValues.pressureProfilingHoldLimit;
-  ACTIVE_PROFILE(targetValues).pressureProfilingSlope = loadedValues.pressureProfilingSlope;
-  ACTIVE_PROFILE(targetValues).pressureProfilingSlopeShape = loadedValues.pressureProfilingSlopeShape;
-  ACTIVE_PROFILE(targetValues).pressureProfilingFlowRestriction = loadedValues.pressureProfilingFlowRestriction;
-  ACTIVE_PROFILE(targetValues).flowProfileStart = loadedValues.flowProfileStart;
-  ACTIVE_PROFILE(targetValues).flowProfileEnd = loadedValues.flowProfileEnd;
-  ACTIVE_PROFILE(targetValues).flowProfileHold = loadedValues.flowProfileHold;
-  ACTIVE_PROFILE(targetValues).flowProfileHoldLimit = loadedValues.flowProfileHoldLimit;
-  ACTIVE_PROFILE(targetValues).flowProfileSlope = loadedValues.flowProfileSlope;
-  ACTIVE_PROFILE(targetValues).flowProfileSlopeShape = loadedValues.flowProfileSlopeShape;
-  ACTIVE_PROFILE(targetValues).flowProfilingPressureRestriction = loadedValues.flowProfilingPressureRestriction;
+  ACTIVE_PROFILE(targetValues).mfProfileState = loadedValues.flowProfileState;
+  ACTIVE_PROFILE(targetValues).mpProfilingStart = loadedValues.pressureProfilingStart;
+  ACTIVE_PROFILE(targetValues).mpProfilingFinish = loadedValues.pressureProfilingFinish;
+  ACTIVE_PROFILE(targetValues).mpProfilingSlope = loadedValues.pressureProfilingSlope;
+  ACTIVE_PROFILE(targetValues).mpProfilingSlopeShape = loadedValues.pressureProfilingSlopeShape;
+  ACTIVE_PROFILE(targetValues).mpProfilingFlowRestriction = loadedValues.pressureProfilingFlowRestriction;
+  ACTIVE_PROFILE(targetValues).mfProfileStart = loadedValues.flowProfileStart;
+  ACTIVE_PROFILE(targetValues).mfProfileEnd = loadedValues.flowProfileEnd;
+  ACTIVE_PROFILE(targetValues).mfProfileSlope = loadedValues.flowProfileSlope;
+  ACTIVE_PROFILE(targetValues).mfProfileSlopeShape = loadedValues.flowProfileSlopeShape;
+  ACTIVE_PROFILE(targetValues).mfProfilingPressureRestriction = loadedValues.flowProfilingPressureRestriction;
   targetValues.powerLineFrequency = loadedValues.powerLineFrequency;
   targetValues.lcdSleep = loadedValues.lcdSleep;
   targetValues.warmupState = loadedValues.warmupState;
@@ -127,10 +123,10 @@ static bool upgradeSchema_v9(eepromValues_t &targetValues, eepromValues_t_v9 &lo
   targetValues.scalesF1 = loadedValues.scalesF1;
   targetValues.scalesF2 = loadedValues.scalesF2;
   targetValues.pumpFlowAtZero = loadedValues.pumpFlowAtZero;
-  targetValues.stopOnWeightState = loadedValues.stopOnWeightState;
-  targetValues.shotDose = loadedValues.shotDose;
-  targetValues.shotStopOnCustomWeight = loadedValues.shotStopOnCustomWeight;
-  targetValues.shotPreset = loadedValues.shotPreset;
+  ACTIVE_PROFILE(targetValues).stopOnWeightState = loadedValues.stopOnWeightState;
+  ACTIVE_PROFILE(targetValues).shotDose = loadedValues.shotDose;
+  ACTIVE_PROFILE(targetValues).shotStopOnCustomWeight = loadedValues.shotStopOnCustomWeight;
+  ACTIVE_PROFILE(targetValues).shotPreset = loadedValues.shotPreset;
   return true;
 }
 

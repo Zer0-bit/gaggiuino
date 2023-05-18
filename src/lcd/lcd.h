@@ -7,6 +7,7 @@
 
 extern volatile int lcdCurrentPageId;
 extern volatile int lcdLastCurrentPageId;
+const uint8_t nexBtnBufferSize = 16;
 
 enum class SCREEN_MODES {
     SCREEN_home,
@@ -21,7 +22,7 @@ enum class SCREEN_MODES {
     SCREEN_brew_graph,
     SCREEN_brew_more,
     SCREEN_shot_settings,
-    SCREEN_splash,
+    SCREEN_brew_transition_profile,
     SCREEN_graph_preview
 } ;
 
@@ -36,13 +37,15 @@ void lcdFetchProfileName(eepromValues_t::profile_t &profile, uint8_t index);
 void lcdFetchPreinfusion(eepromValues_t::profile_t &profile);
 void lcdFetchSoak(eepromValues_t::profile_t &profile);
 void lcdFetchBrewProfile(eepromValues_t::profile_t &profile);
+void lcdFetchTransitionProfile(eepromValues_t::profile_t &profile);
+void lcdFetchDoseSettings(eepromValues_t::profile_t &profile);
 void lcdFetchBrewSettings(eepromValues_t &settings);
-void lcdFetchDoseSettings(eepromValues_t &settings);
 void lcdFetchTemp(eepromValues_t &settings);
 void lcdFetchSystem(eepromValues_t &settings);
 uint8_t lcdGetSelectedProfile(void);
 bool lcdGetPreinfusionFlowState(void);
 bool lcdGetProfileFlowState(void);
+bool lcdGetTransitionFlowState(void);
 int lcdGetHomeScreenScalesEnabled(void);
 int lcdGetSelectedOperationalMode(void);
 int lcdGetManualFlowVol(void);

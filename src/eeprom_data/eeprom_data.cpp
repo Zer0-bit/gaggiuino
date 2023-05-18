@@ -20,7 +20,9 @@ namespace {
     // Profiles
     defaultData.activeProfile = 0;
     for (int i=0; i<MAX_PROFILES; i++) {
-      snprintf(defaultData.profiles[i].name, 50, "%s", defaultsProfile[i].name);
+      snprintf(defaultData.profiles[i].name, maxProfileNameChars-1, "%s", defaultsProfile[i].name);
+      // temp
+
       // PI
       defaultData.profiles[i].preinfusionState = defaultsProfile[i].preinfusionState;
       defaultData.profiles[i].preinfusionSec = defaultsProfile[i].preinfusionSec;
@@ -43,33 +45,51 @@ namespace {
       defaultData.profiles[i].soakBelowPressure = defaultsProfile[i].soakBelowPressure;
       defaultData.profiles[i].soakAbovePressure = defaultsProfile[i].soakAbovePressure;
       defaultData.profiles[i].soakAboveWeight = defaultsProfile[i].soakAboveWeight;
-      // PI -> PF
+      // PI -> TP/PF
       defaultData.profiles[i].preinfusionRamp = defaultsProfile[i].preinfusionRamp;
       defaultData.profiles[i].preinfusionRampSlope = defaultsProfile[i].preinfusionRampSlope;
+      // Transition Profile - ramp&hold || advanced profiling
+      defaultData.profiles[i].tpType = defaultsProfile[i].tpType; // transtion profile type :pressure|flow:
+      defaultData.profiles[i].tpProfilingStart = defaultsProfile[i].tpProfilingStart;
+      defaultData.profiles[i].tpProfilingFinish = defaultsProfile[i].tpProfilingFinish;
+      defaultData.profiles[i].tpProfilingHold = defaultsProfile[i].tpProfilingHold;
+      defaultData.profiles[i].tpProfilingHoldLimit = defaultsProfile[i].tpProfilingHoldLimit;
+      defaultData.profiles[i].tpProfilingSlope = defaultsProfile[i].tpProfilingSlope;
+      defaultData.profiles[i].tpProfilingSlopeShape = defaultsProfile[i].tpProfilingSlopeShape;
+      defaultData.profiles[i].tpProfilingFlowRestriction = defaultsProfile[i].tpProfilingFlowRestriction;
+      defaultData.profiles[i].tfProfileStart = defaultsProfile[i].tfProfileStart;
+      defaultData.profiles[i].tfProfileEnd = defaultsProfile[i].tfProfileEnd;
+      defaultData.profiles[i].tfProfileHold = defaultsProfile[i].tfProfileHold;
+      defaultData.profiles[i].tfProfileHoldLimit = defaultsProfile[i].tfProfileHoldLimit;
+      defaultData.profiles[i].tfProfileSlope = defaultsProfile[i].tfProfileSlope;
+      defaultData.profiles[i].tfProfileSlopeShape = defaultsProfile[i].tfProfileSlopeShape;
+      defaultData.profiles[i].tfProfilingPressureRestriction = defaultsProfile[i].tfProfilingPressureRestriction;
       // Profiling
       defaultData.profiles[i].profilingState = defaultsProfile[i].profilingState;
-      defaultData.profiles[i].flowProfileState = defaultsProfile[i].flowProfileState;
-      defaultData.profiles[i].pressureProfilingStart = defaultsProfile[i].pressureProfilingStart;
-      defaultData.profiles[i].pressureProfilingFinish = defaultsProfile[i].pressureProfilingFinish;
-      defaultData.profiles[i].pressureProfilingHold = defaultsProfile[i].pressureProfilingHold;
-      defaultData.profiles[i].pressureProfilingHoldLimit = defaultsProfile[i].pressureProfilingHoldLimit;
-      defaultData.profiles[i].pressureProfilingSlope = defaultsProfile[i].pressureProfilingSlope;
-      defaultData.profiles[i].pressureProfilingSlopeShape = defaultsProfile[i].pressureProfilingSlopeShape;
-      defaultData.profiles[i].pressureProfilingFlowRestriction = defaultsProfile[i].pressureProfilingFlowRestriction;
-      defaultData.profiles[i].flowProfileStart = defaultsProfile[i].flowProfileStart;
-      defaultData.profiles[i].flowProfileEnd = defaultsProfile[i].flowProfileEnd;
-      defaultData.profiles[i].flowProfileHold = defaultsProfile[i].flowProfileHold;
-      defaultData.profiles[i].flowProfileHoldLimit = defaultsProfile[i].flowProfileHoldLimit;
-      defaultData.profiles[i].flowProfileSlope = defaultsProfile[i].flowProfileSlope;
-      defaultData.profiles[i].flowProfileSlopeShape = defaultsProfile[i].flowProfileSlopeShape;
-      defaultData.profiles[i].flowProfilingPressureRestriction = defaultsProfile[i].flowProfilingPressureRestriction;
+      defaultData.profiles[i].mfProfileState = defaultsProfile[i].mfProfileState;
+      defaultData.profiles[i].mpProfilingStart = defaultsProfile[i].mpProfilingStart;
+      defaultData.profiles[i].mpProfilingFinish = defaultsProfile[i].mpProfilingFinish;
+      defaultData.profiles[i].mpProfilingSlope = defaultsProfile[i].mpProfilingSlope;
+      defaultData.profiles[i].mpProfilingSlopeShape = defaultsProfile[i].mpProfilingSlopeShape;
+      defaultData.profiles[i].mpProfilingFlowRestriction = defaultsProfile[i].mpProfilingFlowRestriction;
+      defaultData.profiles[i].mfProfileStart = defaultsProfile[i].mfProfileStart;
+      defaultData.profiles[i].mfProfileEnd = defaultsProfile[i].mfProfileEnd;
+      defaultData.profiles[i].mfProfileSlope = defaultsProfile[i].mfProfileSlope;
+      defaultData.profiles[i].mfProfileSlopeShape = defaultsProfile[i].mfProfileSlopeShape;
+      defaultData.profiles[i].mfProfilingPressureRestriction = defaultsProfile[i].mfProfilingPressureRestriction;
+      /*-----------------------OTHER-----------------*/
+      defaultData.profiles[i].setpoint = defaultsProfile[i].setpoint;
+      // Dose settings
+      defaultData.profiles[i].stopOnWeightState = defaultsProfile[i].stopOnWeightState;
+      defaultData.profiles[i].shotDose = defaultsProfile[i].shotDose;
+      defaultData.profiles[i].shotStopOnCustomWeight = defaultsProfile[i].shotStopOnCustomWeight;
+      defaultData.profiles[i].shotPreset = defaultsProfile[i].shotPreset;
     }
     // General brew settings
-    defaultData.homeOnShotFinish = true;
+    defaultData.homeOnShotFinish = false;
     defaultData.brewDeltaState = true;
     defaultData.basketPrefill = false;
     // System settings
-    defaultData.setpoint = 93;
     defaultData.steamSetPoint = 155;
     defaultData.offsetTemp = 7;
     defaultData.hpwr = 550;
@@ -81,11 +101,6 @@ namespace {
     defaultData.scalesF1 = 3920;
     defaultData.scalesF2 = 4210;
     defaultData.pumpFlowAtZero = 0.2401f;
-    // Dose settings
-    defaultData.stopOnWeightState = false;
-    defaultData.shotDose = 18.0f;
-    defaultData.shotStopOnCustomWeight = 0.f;
-    defaultData.shotPreset = 0;
 
     return defaultData;
   }
@@ -110,31 +125,31 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
       return false;
     }
 
-    if (eepromValuesNew.profiles[i].flowProfileStart < 0.f) {
+    if (eepromValuesNew.profiles[i].mfProfileStart < 0.f) {
       LOG_ERROR(errMsg);
       return false;
     }
 
-    if (eepromValuesNew.profiles[i].flowProfileEnd < 0.f) {
+    if (eepromValuesNew.profiles[i].mfProfileEnd < 0.f) {
       LOG_ERROR(errMsg);
       return false;
     }
 
-    if (eepromValuesNew.profiles[i].pressureProfilingStart < 0.f) {
+    if (eepromValuesNew.profiles[i].mpProfilingStart < 0.f) {
       LOG_ERROR(errMsg);
       return false;
     }
 
-    if (eepromValuesNew.profiles[i].pressureProfilingFinish < 0.f) {
+    if (eepromValuesNew.profiles[i].mpProfilingFinish < 0.f) {
+      LOG_ERROR(errMsg);
+      return false;
+    }
+    if (eepromValuesNew.profiles[i].setpoint < 1) {
       LOG_ERROR(errMsg);
       return false;
     }
   }
 
-  if (eepromValuesNew.setpoint < 1) {
-    LOG_ERROR(errMsg);
-    return false;
-  }
 
   if (eepromValuesNew.steamSetPoint < 1 || eepromValuesNew.steamSetPoint > 165) {
     LOG_ERROR(errMsg);
