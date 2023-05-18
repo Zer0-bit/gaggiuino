@@ -3,13 +3,13 @@
 #include "pindef.h"
 #include <PSM.h>
 #include "utils.h"
+#include "internal_watchdog.h"
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 6);
 
 float flowPerClickAtZeroBar = 0.27f;
 int maxPumpClicksPerSecond = 50;
 float fpc_multiplier = 1.2f;
-
 //https://www.desmos.com/calculator/axyl70gjae  - blue curve
 constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
   0.045f,
@@ -25,6 +25,7 @@ constexpr std::array<float, 7> pressureInefficiencyCoefficient {{
 // - max pump clicks(dependant on region power grid spec)
 // - pump clicks at 0 pressure in the system
 void pumpInit(const int powerLineFrequency, const float pumpFlowAtZero) {
+  // pump.freq = powerLineFrequency;
   maxPumpClicksPerSecond = powerLineFrequency;
   flowPerClickAtZeroBar = pumpFlowAtZero;
   fpc_multiplier = 60.f / (float)maxPumpClicksPerSecond;
@@ -48,7 +49,7 @@ inline float getPumpPct(const float targetPressure, const float flowRestriction,
     return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.95f + 0.1f + 0.2f * diff);
   }
 
-  if (currentState.isPressureFalling) {
+  if (currentState.pressureChangeSpeed < 0) {
     return fminf(maxPumpPct, pumpPctToMaintainFlow * 0.2f);
   }
 
@@ -77,6 +78,10 @@ void setPumpToRawValue(const uint8_t val) {
   pump.set(val);
 }
 
+void pumpStopAfter(const uint8_t val) {
+  pump.stopAfter(val);
+}
+
 long getAndResetClickCounter(void) {
   long counter = pump.getCounter();
   pump.resetCounter();
@@ -84,9 +89,15 @@ long getAndResetClickCounter(void) {
 }
 
 int getCPS(void) {
+  watchdogReload();
   unsigned int cps = pump.cps();
+  watchdogReload();
   if (cps > 80u) {
     pump.setDivider(2);
+    pump.initTimer(cps > 110u ? 60u : 50u);
+  }
+  else {
+    pump.initTimer(cps > 55u ? 60u : 50u);
   }
   return cps;
 }

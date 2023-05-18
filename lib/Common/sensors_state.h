@@ -6,17 +6,12 @@ struct SensorState {
   bool brewSwitchState;
   bool steamSwitchState;
   bool hotWaterSwitchState;
-  float temperature;
-  float pressure;
-  bool isPressureFalling;
-  bool isPressureFallingFast;
-  bool isPressureRising;
-  bool isPressureRisingFast;
-  bool isPressureMaxed;
-  bool isPumpFlowRisingFast;
-  bool isPumpFlowFallingFast;
   bool isSteamForgottenON;
-  float pumpFlow;
+  float temperature;          // °C
+  float pressure;             // bar
+  float pressureChangeSpeed;  // bar/s
+  float pumpFlow;             // ml/s
+  float pumpFlowChangeSpeed;  // ml/s^2
   float waterPumped;
   float weightFlow;
   float weight;

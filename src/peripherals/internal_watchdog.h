@@ -12,7 +12,7 @@ static inline void iwdcInit(void) {
     lcdShowPopup("WATCHDOG RESTARTED");
     IWatchdog.clearReset();
   }
-  IWatchdog.begin(3000000);
+  IWatchdog.begin(5000000);
   LOG_INFO("Internal watchdog Init");
 }
 

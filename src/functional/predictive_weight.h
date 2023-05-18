@@ -6,8 +6,11 @@
 #include "sensors_state.h"
 #include "../eeprom_data/eeprom_data.h"
 
+extern int preInfusionFinishedPhaseIdx;
 constexpr float crossSectionalArea = 0.0026f; // avg puck crossectional area.
 constexpr float dynamicViscosity = 0.0002964f; // avg water dynamic viscosity at 90-95 celsius.
+bool predictiveTargetReached = false;
+int predictivePreinfusionFinishedCheck = 0.f;
 
 class PredictiveWeight {
 private:
@@ -32,8 +35,7 @@ public:
     return outputFlowStarted;
   }
 
-  inline float calculatePuckResistance(float waterFlowRate, float crossSectionalArea, float dynamicViscosity, float pressureDrop)
-  {
+  inline float calculatePuckResistance(float waterFlowRate, float crossSectionalArea, float dynamicViscosity, float pressureDrop) {
     float resistance = -(dynamicViscosity * waterFlowRate) / (crossSectionalArea * pressureDrop);
     return resistance;
   }
@@ -53,19 +55,46 @@ public:
     pressureDrop = pressureDrop > 0.f ? pressureDrop : 1.f;
     truePuckResistance = calculatePuckResistance(state.smoothedPumpFlow, crossSectionalArea, dynamicViscosity, pressureDrop);
 
-    // Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
-    // as well as there being enough pressure for water to wet the puck enough to start the output
+    /* ::OBSERVATIONS::
+    Through empirical testing it's been observed that ~2 bars is the indicator of the pf headspace being full
+    as well as there being enough pressure for water to wet the puck enough to start the output.
+    On profiles whare pressure drop is of concern ~1 bar of drop is the point where liquid output starts. */
+
     bool phaseTypePressure = phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE;
-    // float pressureTarget = phaseTypePressure ? phase.getTarget() : phase.getRestriction();
-    // pressureTarget = (pressureTarget == 0.f || pressureTarget > 2.f) ? 2.f : pressureTarget;
-    // We need to watch when pressure goes above the PI pressure which is a better indicator of headspace being filled.
-    // float preinfusionPressure = cfg.preinfusionFlowState ? cfg.preinfusionFlowPressureTarget : cfg.preinfusionBar;
-    // Pressure has to cross the 1 bar threshold.
+    predictivePreinfusionFinishedCheck = phase.getIndex();
+    bool preinfusionFinished = ACTIVE_PROFILE(cfg).preinfusionState && ACTIVE_PROFILE(cfg).soakState
+                              ? predictivePreinfusionFinishedCheck >= preInfusionFinishedPhaseIdx-1
+                              : predictivePreinfusionFinishedCheck >= preInfusionFinishedPhaseIdx;
+
+    bool soakEnabled = false;
+    soakEnabled = ACTIVE_PROFILE(cfg).soakState
+                    ? phaseTypePressure
+                      ? ACTIVE_PROFILE(cfg).soakTimePressure > 0
+                      : ACTIVE_PROFILE(cfg).soakTimeFlow > 0
+                    : false;
+    float pressureTarget = phaseTypePressure ? ACTIVE_PROFILE(cfg).preinfusionBar : ACTIVE_PROFILE(cfg).preinfusionFlowPressureTarget;
+
+
+    // Pressure has to reach full pi target bar threshold.
+    if (!preinfusionFinished  && soakEnabled) {
+      if (predictiveTargetReached) {
+        // pressure drop needs to be around 1.5bar since target hit for output flow to be considered started.
+        if (pressureTarget - state.smoothedPressure > 1.f) outputFlowStarted = true;
+        else return;
+      }
+      if (!predictiveTargetReached && state.smoothedPressure < pressureTarget) {
+        return;
+      } else {
+        predictiveTargetReached = true;
+        return;
+      }
+    }
+    // Pressure has to cross the 2 bar threshold.
     if (state.smoothedPressure < 2.1f) return;
 
     if (phaseTypePressure) {
       // If the pressure or flow are raising too fast dismiss the spike from the output.
-      if (state.isPressureRisingFast || state.isPumpFlowRisingFast) return;
+      if (fabsf(state.pressureChangeSpeed) > 5.f || fabsf(state.pumpFlowChangeSpeed) > 2.f) return;
       // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
       if (resistanceDelta > 500.f || puckResistance < 1100.f) return;
     }
@@ -83,10 +112,12 @@ public:
   }
 
   void reset() {
-    outputFlowStarted = false;
-    isForceStarted = false;
     puckResistance = 0.f;
     resistanceDelta = 0.f;
+    isForceStarted = false;
+    outputFlowStarted = false;
+    predictiveTargetReached = false;
+
   }
 };
 

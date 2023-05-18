@@ -13,7 +13,7 @@ void deScale(eepromValues_t &runningCfg, const SensorState &currentState) {
   switch (descalingState) {
     case DescalingState::IDLE: // Waiting for fuckfest to begin
       if (currentState.brewSwitchState) {
-        runningCfg.setpoint = 9;
+        ACTIVE_PROFILE(runningCfg).setpoint = 9;
         openValve();
         setSteamValveRelayOn();
         descalingState = DescalingState::DESCALING_PHASE1;
@@ -69,7 +69,7 @@ void deScale(eepromValues_t &runningCfg, const SensorState &currentState) {
       }
       break;
   }
-  justDoCoffee(runningCfg, currentState, false, false);
+  justDoCoffee(runningCfg, currentState, false);
 }
 
 void solenoidBeat() {
