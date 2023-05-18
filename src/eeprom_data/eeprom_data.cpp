@@ -25,7 +25,7 @@ namespace {
     // Profiles
     defaultData.activeProfile = 0;
     for (int i=0; i<MAX_PROFILES; i++) {
-      snprintf(defaultData.profiles[i].name, maxProfileNameChars-1, "%s", defaultsProfile[i].name);
+      snprintf(defaultData.profiles[i].name, PROFILE_NAME_LENGTH, "%s", defaultsProfile[i].name);
       // temp
 
       // PI

@@ -240,7 +240,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
 
 void lcdFetchProfileName(eepromValues_t::profile_t &profile, uint8_t index /* 0-offset */) {
   String buttonElemId = String("home.qPf") + (index + 1) + ".txt";
-  snprintf(profile.name, sizeof(profile.name), "%.16s", myNex.readStr(buttonElemId).c_str());
+  snprintf(profile.name, sizeof(profile.name), "%s", myNex.readStr(buttonElemId).c_str());
 }
 
 void lcdFetchPreinfusion(eepromValues_t::profile_t &profile) {
@@ -361,12 +361,16 @@ void lcdFetchSystem(eepromValues_t &settings) {
 }
 
 uint8_t lcdGetSelectedProfile(void) {
-  uint32_t pId = myNex.readNumber("pId");
-  if (pId < 1 || pId > 5) {
+  uint8_t pId;
+  uint8_t attempts = 2;
+  do {
+    if (attempts-- <= 0) {
+      lcdShowPopup((String("getProfile rekt: ") + pId).c_str());
+      return 0;
+    }
     pId = myNex.readNumber("pId");
-    if (pId < 1 || pId > 5) lcdShowPopup((String("getProfile rekt: ") + pId).c_str());
-  }
-  return (uint8_t)(pId - 1); /* 1-offset in nextion */
+  } while (pId < 1 || pId > 5);
+  return pId - 1; /* 1-offset in nextion */
 }
 
 bool lcdGetPreinfusionFlowState(void) {
