@@ -237,6 +237,9 @@ static void pageValuesRefresh(eepromValues_t &settings, SCREEN_MODES page) {
     case SCREEN_MODES::SCREEN_brew_profiling:
       lcdFetchBrewProfile(ACTIVE_PROFILE(settings));
       break;
+    case SCREEN_MODES::SCREEN_brew_transition_profile:
+      lcdFetchTransitionProfile(ACTIVE_PROFILE(settings));
+      break;
     case SCREEN_MODES::SCREEN_settings_boiler:
       lcdFetchTemp(ACTIVE_PROFILE(settings));
       lcdFetchBoiler(settings);
