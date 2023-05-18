@@ -41,7 +41,7 @@ jobs:
       matrix:
         environment:
           - name: Main
-            command: "gaggia-lego-stlink"
+            command: "lego-stlink"
           - name: Scales
             command: "scales-calibration-dfu"
     steps:
@@ -86,7 +86,7 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-          - "gaggia-lego-stlink"
+          - "lego-stlink"
           - "scales-calibration-stlink"
           # - "uart-stm"
           # - "uart-esp"

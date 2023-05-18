@@ -45,8 +45,12 @@ struct Transition {
   long time;
 
   Transition(): start(-1), end(-1), curve(TransitionCurve::INSTANT), time(0) {}
+  Transition(float targetValue, TransitionCurve curve = TransitionCurve::INSTANT, long time = 0):  start(-1), end(targetValue), curve(curve), time(time) {}
   Transition(float start, float end, TransitionCurve curve = TransitionCurve::LINEAR, long time = 0): start(start), end(end), curve(curve), time(time) {}
-  Transition(float value):  start(value), end(value), curve(TransitionCurve::INSTANT), time(0) {}
+
+  bool isInstant() {
+    return curve == TransitionCurve::INSTANT || time == 0;
+  }
 };
 
 struct Phase {
@@ -55,7 +59,7 @@ struct Phase {
   float restriction;
   PhaseStopConditions stopConditions;
 
-  float getTarget(uint32_t timeInPhase) const;
+  float getTarget(uint32_t timeInPhase, const ShotSnapshot& shotSnapshotAtStart) const;
   float getRestriction() const;
   bool isStopConditionReached(SensorState& currentState, const eepromValues_t currentConfig, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
@@ -80,6 +84,10 @@ struct Profile {
     phases.push_back(phase);
   }
 
+  void insertPhase(Phase phase, size_t index) {
+    phases.insert(phases.begin() + index, phase);
+  }
+
   void clear() {
     phases.clear();
   }
@@ -89,10 +97,11 @@ class CurrentPhase {
 private:
   int index;
   const Phase* phase;
+  const ShotSnapshot* shotSnapshotAtStart;
   unsigned long timeInPhase;
 
 public:
-  CurrentPhase(int index, const Phase& phase, uint32_t timeInPhase);
+  CurrentPhase(int index, const Phase& phase, uint32_t timeInPhase, const ShotSnapshot& shotSnapshotAtStart);
   CurrentPhase(const CurrentPhase& currentPhase);
 
   Phase getPhase();
@@ -109,7 +118,7 @@ private:
   Profile& profile;
   size_t currentPhaseIdx = 0; // The index at which the profiler currently is.
   ShotSnapshot phaseChangedSnapshot = ShotSnapshot{0, 0, 0, 0, 0, 0}; // State when the profiler move to this currentPhaseIdx
-  CurrentPhase currentPhase = CurrentPhase(0, profile.phases[0], 0);
+  CurrentPhase currentPhase = CurrentPhase(0, profile.phases[0], 0, phaseChangedSnapshot);
 
 public:
   PhaseProfiler(Profile& profile);

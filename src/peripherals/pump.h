@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include "sensors_state.h"
 
-#define ZC_MODE    RISING
+#define ZC_MODE    FALLING
 
 constexpr uint8_t PUMP_RANGE = 100;
 
@@ -17,6 +17,7 @@ void setPumpToRawValue(const uint8_t val);
 long  getAndResetClickCounter(void);
 int getCPS(void);
 void pumpPhaseShift(void);
+void pumpStopAfter(const uint8_t val);
 float getPumpFlow(const float cps, const float pressure);
 float getPumpFlowPerClick(const float pressure);
 float getClicksPerSecondForFlow(const float flow, const float pressure);
