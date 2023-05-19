@@ -69,6 +69,14 @@ static inline bool steamState(void) {
   return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
 }
 
+static inline bool dreamSteamState(void) {
+  #ifdef DREAM_STEAM_DISABLED
+  return false; // disabled for bigger boilers which have no  need of adding water during steaming
+  #else
+  return true;
+  #endif
+}
+
 static inline bool waterPinState(void) {
   return digitalRead(waterPin) == LOW; // pin will be low when switch is ON.
 }

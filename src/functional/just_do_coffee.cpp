@@ -76,10 +76,6 @@ void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int fact
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
 
-#if not defined SINGLE_BOARD && not defined INDEPENDENT_DIMMER
-#define PUMP_NEEDS_OPEN_VALVE  // not ENABLED if using the PCB or the dimmer wired separate from relay
-#endif
-
 void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
   currentState.steamSwitchState ? lcdTargetState((int)HEATING::MODE_steam) : lcdTargetState((int)HEATING::MODE_brew); // setting the steam/hot water target temp
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
@@ -99,19 +95,11 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
     }
     setSteamValveRelayOn();
     setSteamBoilerRelayOn();
-    #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adding water during steaming
-      if (currentState.smoothedPressure < activeSteamPressure_) {
-        #ifdef PUMP_NEEDS_OPEN_VALVE
-          openValve();
-        #endif
-        setPumpToRawValue(3);
-      } else {
-        setPumpOff();
-        #ifdef PUMP_NEEDS_OPEN_VALVE
-          closeValve();
-        #endif
-      }
-    #endif
+    if (currentState.dreamSteamSwitchState && currentState.smoothedPressure < activeSteamPressure_) {
+      setPumpToRawValue(3);
+    } else {
+      setPumpOff();
+    }
   }
 
   /*In case steam is forgotten ON for more than 15 min*/
@@ -122,13 +110,8 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
 
 /*Water mode and all that*/
 void hotWaterMode(const SensorState &currentState) {
-  #ifdef PUMP_NEEDS_OPEN_VALVE
-  openValve();
-  #else
   closeValve();
-  #endif
   setPumpToRawValue(80);
-  setBoilerOn();
   if (currentState.temperature < MAX_WATER_TEMP) setBoilerOn();
   else setBoilerOff();
 }

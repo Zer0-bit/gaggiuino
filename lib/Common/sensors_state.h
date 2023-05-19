@@ -5,6 +5,7 @@
 struct SensorState {
   bool brewSwitchState;
   bool steamSwitchState;
+  bool dreamSteamSwitchState;
   bool hotWaterSwitchState;
   bool isSteamForgottenON;
   float temperature;          // °C
