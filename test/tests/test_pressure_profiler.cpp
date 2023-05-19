@@ -80,7 +80,7 @@ void test_get_pressure_for_phase(void)
 void test_get_pressure_for_phase_with_negative_change(void)
 {
   // Declare and define the stateAtStart variable
-  shotSnapshotAtStart.pressure = 0.f;
+  shotSnapshotAtStart.pressure = 9.f;
   Phase phase = pressurePhase(9, 6, 3000);
   TEST_ASSERT_EQUAL_FLOAT(9.0f, phase.getTarget(0,shotSnapshotAtStart));
   TEST_ASSERT_EQUAL_FLOAT(8.0f, phase.getTarget(1000, shotSnapshotAtStart));
