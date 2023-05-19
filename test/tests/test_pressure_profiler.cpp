@@ -68,7 +68,7 @@ void test_current_phase_calculation(void)
 void test_get_pressure_for_phase(void)
 {
     Phase phase = pressurePhase(0, 2, 1000);
-
+    stateAtStart.pressure = 0.f;
     TEST_ASSERT_EQUAL_FLOAT(0.0f, phase.getTarget(0, shotSnapshotAtStart));
     TEST_ASSERT_EQUAL_FLOAT(1.0f, phase.getTarget(500, shotSnapshotAtStart));
     TEST_ASSERT_EQUAL_FLOAT(1.5f, phase.getTarget(750, shotSnapshotAtStart));
@@ -79,6 +79,7 @@ void test_get_pressure_for_phase(void)
 void test_get_pressure_for_phase_with_negative_change(void)
 {
     Phase phase = pressurePhase(9, 6, 3000);
+    stateAtStart.pressure = 9.f;
     TEST_ASSERT_EQUAL_FLOAT(9.0f, phase.getTarget(0,shotSnapshotAtStart));
     TEST_ASSERT_EQUAL_FLOAT(8.0f, phase.getTarget(1000, shotSnapshotAtStart));
     TEST_ASSERT_EQUAL_FLOAT(7.0f, phase.getTarget(2000, shotSnapshotAtStart));
