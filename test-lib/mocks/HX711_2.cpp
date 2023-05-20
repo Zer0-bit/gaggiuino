@@ -11,7 +11,7 @@ HX711_2::~HX711_2() {
 }
 
 
-void HX711_2::begin(byte dout, byte dout2, byte pd_sck, byte pd_sck2, byte gain, unsigned char sck_mode) {
+void HX711_2::begin(byte dout, byte dout2, byte pd_sck, byte gain, unsigned char sck_mode) {
 
 }
 
