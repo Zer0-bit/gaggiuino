@@ -487,7 +487,7 @@ void lcdShowDebug(int val1, int val2) {
 
 void lcdShowPopup(const char *msg) {
   static unsigned int timer;
-  if(millis() > timer + 1000) {
+  if(millis() > timer + 1450) {
     myNex.writeStr("popupMSG.t0.txt", msg);
     myNex.writeStr("page popupMSG");
     timer = millis();
