@@ -25,7 +25,7 @@ void espCommsInit() {
 }
 
 void espCommsReadData() {
-  McuCommsSingleton::getInstance().readData();
+  McuCommsSingleton::getInstance().readDataAndTick();
 }
 
 volatile uint32_t sensorDataTimer = 0;

@@ -18,6 +18,20 @@ module.exports = {
     'react',
   ],
   rules: {
+    "max-len": [
+      "error",
+      {
+        "code": 120,
+        "tabWidth": 2,
+        "comments": 120,
+        "ignoreComments": true,
+        "ignoreTrailingComments": true,
+        "ignoreUrls": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true,
+        "ignoreRegExpLiterals": true
+      }
+    ],
     "react/jsx-props-no-spreading": "off",
     "react/self-closing-comp": "off",
     "react/destructuring-assignment": "off",

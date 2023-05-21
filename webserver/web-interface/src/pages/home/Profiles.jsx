@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Card, Container, useTheme, Typography, CardContent, CardActions,
+  Card, Container, useTheme, Typography, CardContent, CardActions, Paper, TextareaAutosize, Alert,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import QrCodeIcon from '@mui/icons-material/QrCode';
@@ -13,10 +13,12 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 // import InputAdornment from '@mui/material/InputAdornment';
 import Grid from '@mui/material/Unstable_Grid2';
+import ProfileChart from '../../components/chart/ProfileChart';
+import { Profile } from '../../models/profile';
 
 export default function Profiles() {
   const theme = useTheme();
-  // here
+
   const [elements, setElements] = useState([
     { id: 1, type: 'select', value: '' },
     { id: 2, type: 'select', value: '' },
@@ -39,6 +41,18 @@ export default function Profiles() {
     ];
     setElements(newElements);
     setNextId(nextId + 6);
+  };
+
+  const [error, setError] = useState(null);
+  const [profile, setProfile] = useState(new Profile([]));
+
+  const updateProfile = (value) => {
+    try {
+      setProfile(Profile.parse(JSON.parse(value)));
+      setError(undefined);
+    } catch (er) {
+      setError(er.message);
+    }
   };
 
   const handleRemoveRow = () => {
@@ -149,6 +163,31 @@ export default function Profiles() {
             </Grid>
           </Grid>
         </Card>
+      </Container>
+      <Container sx={{ mt: theme.spacing(2) }}>
+        <Paper sx={{ mt: theme.spacing(2), p: theme.spacing(2) }}>
+          <Typography variant="h5" sx={{ mb: theme.spacing(2) }}>
+            Profile syntax playground
+          </Typography>
+          <Grid container columns={{ xs: 1, sm: 3 }} spacing={2}>
+            <Grid item xs={1} sm={3}>
+              <Alert severity={error ? 'error' : 'success'}>
+                {error || 'Nice syntax!'}
+              </Alert>
+            </Grid>
+            <Grid item xs={1} sm={1}>
+              <TextareaAutosize
+                minRows={15}
+                onChange={(evt) => updateProfile(evt.target.value)}
+                style={{ width: '100%', backgroundColor: theme.palette.background.paper, color: theme.palette.text.secondary }}
+              >
+              </TextareaAutosize>
+            </Grid>
+            <Grid item xs={1} sm={2} position="relative" height="400">
+              <ProfileChart profile={profile} />
+            </Grid>
+          </Grid>
+        </Paper>
       </Container>
     </div>
   );

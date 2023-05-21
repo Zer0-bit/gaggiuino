@@ -2,7 +2,7 @@
 #include <LittleFS.h>
 #include "server/server_setup.h"
 #include "wifi/wifi_setup.h"
-#include "server/websocket.h"
+#include "server/websocket/websocket.h"
 #include "stm_comms/stm_comms.h"
 
 void initFS();

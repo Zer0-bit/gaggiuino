@@ -9,13 +9,13 @@ import {
 import Home from './pages/home/Home';
 import Profiles from './pages/home/Profiles';
 import Settings from './pages/home/Settings';
-import TabsBar from './components/appbar/TabsBar';
+import MainAppBar from './components/appbar/MainAppBar';
 import ThemeWrapper from './components/theme/ThemeWrapper';
 
 function Layout() {
   return (
     <ThemeWrapper>
-      <TabsBar />
+      <MainAppBar />
       <Outlet />
     </ThemeWrapper>
   );

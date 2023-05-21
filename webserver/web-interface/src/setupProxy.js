@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
-const target = 'http://192.168.2.10';
+const target = 'http://192.168.0.14';
 
 module.exports = function (app) {
   app.use(createProxyMiddleware('/api', { target, secure: false }));

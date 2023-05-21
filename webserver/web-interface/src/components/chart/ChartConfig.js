@@ -26,6 +26,7 @@ export default function getShotChartConfig(theme) {
     },
     scales: {
       x: {
+        type: 'linear',
         ticks: {
           color: theme.palette.text.secondary,
         },
