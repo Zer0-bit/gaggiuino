@@ -1,12 +1,14 @@
 root = true
 
-[*]
+[*.{h,hpp,c,cpp,rc,js,jsx}]
 end_of_line = lf
 insert_final_newline = true
 charset = utf-8
 trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
+
+[*.{h,hpp,c,cpp,rc}]
 cpp_new_line_before_open_brace_namespace = same_line
 cpp_new_line_before_open_brace_function = same_line
 cpp_new_line_before_open_brace_type = same_line
@@ -16,15 +18,5 @@ indent_style = space
 trim_trailing_whitespace = unset
 insert_final_newline = unset
 
-# Ignore paths
-[/webserver/**]
-charset = unset
-end_of_line = unset
-insert_final_newline = unset
-trim_trailing_whitespace = unset
-indent_style = unset
-indent_size = unset
-
 [platformio.ini]
 indent_style = tab
-
