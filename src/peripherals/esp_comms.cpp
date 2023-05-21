@@ -22,6 +22,8 @@ void espCommsInit() {
 
   // Set callbacks
   McuCommsSingleton::getInstance().setProfileReceivedCallback(onProfileReceived);
+  McuCommsSingleton::getInstance().setRemoteScalesWeightReceivedCallback(onRemoteScalesWeightReceived);
+  McuCommsSingleton::getInstance().setRemoteScalesDisconnectedCallback(onRemoteScalesDisconnected);
 }
 
 void espCommsReadData() {
@@ -53,4 +55,8 @@ void espCommsSendShotData(ShotSnapshot& shotData, uint32_t frequency) {
     McuCommsSingleton::getInstance().sendShotData(shotData);
     shotDataTimer = now;
   }
+}
+
+void espCommsSendTareScalesCommand() {
+  McuCommsSingleton::getInstance().sendRemoteScalesTare();
 }

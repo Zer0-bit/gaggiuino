@@ -130,9 +130,21 @@ void McuComms::sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) const 
   }
 }
 
-void McuComms::weightReceived(float weight) const {
-  if (weightReceivedCallback) {
-    weightReceivedCallback(weight);
+void McuComms::remoteScalesWeightReceived(float weight) const {
+  if (remoteScalesWeightReceivedCallback) {
+    remoteScalesWeightReceivedCallback(weight);
+  }
+}
+
+void McuComms::remoteScalesTareCommandReceived() const {
+  if (remoteScalesTareCommandCallback) {
+    remoteScalesTareCommandCallback();
+  }
+}
+
+void McuComms::remoteScalesDisconnected() const {
+  if (remoteScalesDisconnectedCallback) {
+    remoteScalesDisconnectedCallback();
   }
 }
 
@@ -218,9 +230,18 @@ void McuComms::setSensorStateSnapshotCallback(SensorStateSnapshotReceivedCallbac
   sensorStateSnapshotCallback = callback;
 }
 
-void McuComms::setWeightReceivedCallback(WeightReceivedCallback callback) {
-  weightReceivedCallback = callback;
+void McuComms::setRemoteScalesWeightReceivedCallback(RemoteScalesWeightReceivedCallback callback) {
+  remoteScalesWeightReceivedCallback = callback;
 }
+
+void McuComms::setRemoteScalesTareCommandCallback(RemoteScalesTareCommandCallback callback) {
+  remoteScalesTareCommandCallback = callback;
+}
+
+void McuComms::setRemoteScalesDisconnectedCallback(RemoteScalesDisconnectedCallback callback) {
+  remoteScalesDisconnectedCallback = callback;
+}
+
 void McuComms::setResponseReceivedCallback(ResponseReceivedCallback callback) {
   responseReceivedCallback = callback;
 }
@@ -244,16 +265,28 @@ void McuComms::sendSensorStateSnapshot(const SensorStateSnapshot& snapshot) {
   transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_SENSOR_STATE_SNAPSHOT));
 }
 
-void McuComms::sendWeight(float weight) {
-  if (!isConnected()) return;
-  uint16_t messageSize = transfer.txObj(weight);
-  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_WEIGHT));
-}
-
 void McuComms::sendResponse(McuCommsResponse response) {
   if (!isConnected()) return;
   uint16_t messageSize = transfer.txObj(response);
   transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_RESPONSE));
+}
+
+void McuComms::sendRemoteScalesWeight(float weight) {
+  if (!isConnected()) return;
+  uint16_t messageSize = transfer.txObj(weight);
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_WEIGHT));
+}
+
+void McuComms::sendRemoteScalesTare() {
+  if (!isConnected()) return;
+  uint16_t messageSize = transfer.txObj(static_cast<uint8_t>(McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE));
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE));
+}
+
+void McuComms::sendRemoteScalesDisconnected() {
+  if (!isConnected()) return;
+  uint16_t messageSize = transfer.txObj(static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_DISCONNECTED));
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_DISCONNECTED));
 }
 
 void McuComms::readDataAndTick() {
@@ -290,12 +323,18 @@ void McuComms::readDataAndTick() {
       transfer.rxObj(snapshot);
       sensorStateSnapshotReceived(snapshot);
       break;
-    } case McuCommsMessageType::MCUC_DATA_WEIGHT: {
+    } case McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_WEIGHT: {
       log("Received a weight packet\n");
       float weight = 0.f;
       transfer.rxObj(weight);
-      weightReceived(weight);
+      remoteScalesWeightReceived(weight);
       break;
+    } case McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE: {
+      log("Received tare command");
+      remoteScalesTareCommandReceived();
+    } case McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_DISCONNECTED: {
+      log("Received scales disconnected message");
+      remoteScalesDisconnected();
     }
     default:
       log("WARN: Packet ID %d not handled\n", transfer.currentPacketID());
