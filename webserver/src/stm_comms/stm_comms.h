@@ -12,7 +12,7 @@ void stmCommsInit(HardwareSerial& serial) {
   serial.setRxBufferSize(256);
   serial.setTxBufferSize(256);
   serial.begin(115200);
-  
+
   // mcuComms.setDebugPort(&Serial);
   mcuComms.begin(serial);
 
@@ -22,7 +22,7 @@ void stmCommsInit(HardwareSerial& serial) {
 }
 
 void stmCommsReadData() {
-    mcuComms.readDataAndTick();
+  mcuComms.readDataAndTick();
 }
 
 void stmCommsSendWeight(float weight) {
