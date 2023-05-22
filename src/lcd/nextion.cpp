@@ -126,14 +126,9 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeStr("home.qPf5.txt", eepromCurrentValues.profiles[4].name);
 
   // More brew settings
-  myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
-  myNex.writeNum("bS.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
-
+  myNex.writeNum("bckHome", eepromCurrentValues.homeOnShotFinish);
   myNex.writeNum("basketPrefill", eepromCurrentValues.basketPrefill);
-  myNex.writeNum("bS.btPrefill.val", eepromCurrentValues.basketPrefill);
-
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
-  myNex.writeNum("bS.btTempDelta.val", eepromCurrentValues.brewDeltaState);
 
   // System settings
   myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint);

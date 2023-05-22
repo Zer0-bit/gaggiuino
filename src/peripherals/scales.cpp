@@ -26,6 +26,12 @@ unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 #endif
 
 void scalesInit(float scalesF1, float scalesF2) {
+    // Forced predicitve scales in case someone with actual hardware scales wants to use them.
+  if (FORCE_PREDICTIVE_SCALES) {
+    scalesPresent = false;
+    return;
+  }
+
   auto& loadCells = LoadCellSingleton::getInstance();
   loadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, 128U, scale_clk);
   loadCells.set_scale(scalesF1, scalesF2);
@@ -34,11 +40,6 @@ void scalesInit(float scalesF1, float scalesF2) {
   if (loadCells.wait_ready_timeout(500, 10)) {
     loadCells.tare(4);
     scalesPresent = true;
-  }
-
-  // Forced predicitve scales in case someone with actual hardware scales wants to use them.
-  if (FORCE_PREDICTIVE_SCALES) {
-    scalesPresent = false;
   }
 }
 
