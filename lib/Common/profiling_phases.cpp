@@ -39,8 +39,8 @@ float Phase::getRestriction() const {
   return restriction;
 }
 
-bool Phase::isStopConditionReached(SensorState& currentState, const eepromValues_t currentConfig, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const {
-  return stopConditions.isReached(currentState, currentConfig, timeInShot, stateAtPhaseStart);
+bool Phase::isStopConditionReached(SensorState& currentState, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const {
+  return stopConditions.isReached(currentState, timeInShot, stateAtPhaseStart);
 }
 
 //----------------------------------------------------------------------//
@@ -48,25 +48,17 @@ bool Phase::isStopConditionReached(SensorState& currentState, const eepromValues
 //----------------------------------------------------------------------//
 inline bool predictShotCompletion(const float targetDose, const float currentDose, const float flowRate) {
   float remainingDose = targetDose - currentDose;
-  float percentRemaining = remainingDose / flowRate;
+  float secondsRemaining = remainingDose / flowRate; // g / (g/sec) -> sec ;
 
-  return percentRemaining < 0.3f ? true : false;
+  return secondsRemaining < 0.5f ? true : false;
 }
 
-bool PhaseStopConditions::isReached(SensorState& state, const eepromValues_t currentConfig, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
-  float desiredShotWeight = -1.f;
-  bool stopOnWeightReached = false;
+bool PhaseStopConditions::isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const {
+  uint32_t timeInPhase = timeInShot - stateAtPhaseStart.timeInShot;
   float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
   float stopDelta = flow * state.shotWeight / 100.f;
-  if (ACTIVE_PROFILE(currentConfig).stopOnWeightState) {
-    desiredShotWeight = ACTIVE_PROFILE(currentConfig).shotStopOnCustomWeight > 1.f
-                        ? ACTIVE_PROFILE(currentConfig).shotStopOnCustomWeight
-                        : ACTIVE_PROFILE(currentConfig).shotDose * ACTIVE_PROFILE(currentConfig).shotPreset;
-    stopOnWeightReached = predictShotCompletion(desiredShotWeight, state.shotWeight, flow);
-  }
 
-  return (time >= 0L && timeInShot - stateAtPhaseStart.timeInShot >= (uint32_t) time) ||
-    (weight > 0.f && stopOnWeightReached) ||
+  return (time >= 0L && timeInPhase >= static_cast<uint32_t>(time)) ||
     (weight > 0.f && state.shotWeight > weight ) ||
     (pressureAbove > 0.f && state.smoothedPressure > pressureAbove) ||
     (pressureBelow > 0.f && state.smoothedPressure < pressureBelow) ||
@@ -75,19 +67,16 @@ bool PhaseStopConditions::isReached(SensorState& state, const eepromValues_t cur
     (flowBelow > 0.f && state.smoothedPumpFlow < flowBelow);
 }
 
-bool GlobalStopConditions::isReached(const SensorState& state, const eepromValues_t currentConfig, long timeInShot) {
+bool GlobalStopConditions::isReached(const SensorState& state, uint32_t timeInShot) {
+  if (timeInShot < 1000) { // No shot lasts less than 1 second
+    return false;
+  }
+
   float desiredShotWeight = -1.f;
   bool stopOnWeightReached = false;
   float flow = state.weight > 0.4f ? state.smoothedWeightFlow : state.smoothedPumpFlow;
-  float stopDelta = flow * (state.shotWeight / 100.f);
-  if (ACTIVE_PROFILE(currentConfig).stopOnWeightState) {
-    desiredShotWeight = ACTIVE_PROFILE(currentConfig).shotStopOnCustomWeight > 1.f
-                        ? ACTIVE_PROFILE(currentConfig).shotStopOnCustomWeight
-                        : ACTIVE_PROFILE(currentConfig).shotDose * ACTIVE_PROFILE(currentConfig).shotPreset;
-    stopOnWeightReached = predictShotCompletion(desiredShotWeight, state.shotWeight, flow);
-  }
 
-  return (weight > 0.f && stopOnWeightReached) ||
+  return (weight > 0.f && predictShotCompletion(weight, state.shotWeight, flow)) ||
     (waterPumped > 0.f && state.waterPumped > waterPumped) ||
     (time >= 0L && timeInShot >= time);
 }
@@ -122,18 +111,17 @@ void CurrentPhase::update(int index, Phase& phase, uint32_t timeInPhase) {
 
 PhaseProfiler::PhaseProfiler(Profile& profile) : profile(profile) {}
 
-void PhaseProfiler::updatePhase(uint32_t timeInShot, SensorState& state, const eepromValues_t currentConfig) {
+void PhaseProfiler::updatePhase(uint32_t timeInShot, SensorState& state) {
   size_t phaseIdx = currentPhaseIdx;
   uint32_t timeInPhase = timeInShot - phaseChangedSnapshot.timeInShot;
 
-  if (phaseIdx >= profile.phaseCount() || profile.globalStopConditions.isReached(state, currentConfig, timeInShot)) {
+  if (phaseIdx >= profile.phaseCount() || profile.globalStopConditions.isReached(state, timeInShot)) {
     currentPhaseIdx = profile.phaseCount();
-    phaseIdx = profile.phaseCount() - 1;
-    currentPhase.update(phaseIdx, profile.phases[phaseIdx], timeInPhase);
+    currentPhase.update(currentPhaseIdx - 1, profile.phases[phaseIdx], timeInPhase);
     return;
   }
 
-  if (!profile.phases[phaseIdx].isStopConditionReached(state, currentConfig, timeInShot, phaseChangedSnapshot)) {
+  if (!profile.phases[phaseIdx].isStopConditionReached(state, timeInShot, phaseChangedSnapshot)) {
     currentPhase.update(phaseIdx, profile.phases[phaseIdx], timeInPhase);
     return;
   }
@@ -141,7 +129,7 @@ void PhaseProfiler::updatePhase(uint32_t timeInShot, SensorState& state, const e
   currentPhase.update(phaseIdx, profile.phases[phaseIdx], timeInPhase);
   phaseChangedSnapshot = buildShotSnapshot(timeInShot, state, currentPhase);
   currentPhaseIdx += 1;
-  updatePhase(timeInShot, state, currentConfig);
+  updatePhase(timeInShot, state);
 }
 
 // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
