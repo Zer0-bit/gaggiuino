@@ -144,14 +144,19 @@ static void sensorsReadTemperature(void) {
 }
 
 static void sensorsReadWeight(void) {
-  if (scalesIsPresent() && millis() > scalesTimer) {
+  float elapsedTime = millis() - scalesTimer;
+  if (scalesIsPresent() && elapsedTime > GET_SCALES_READ_EVERY) {
     if(!tareDone) {
       scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewModeActive && (scalesGetWeight() < -0.3f || scalesGetWeight() > 0.3f)) tareDone = false;
+      if (!nonBrewModeActive && (fabsf(scalesGetWeight()) > 0.3f)) tareDone = false;
       else tareDone = true;
     }
+    previousWeight = currentState.weight;
     currentState.weight = scalesGetWeight();
-    scalesTimer = millis() + GET_SCALES_READ_EVERY;
+    currentState.weightFlow = 1000.f * (currentState.weight - previousWeight) / static_cast<float>(elapsedTime);
+    // currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
+    if (brewActive) currentState.shotWeight = currentState.weight;
+    scalesTimer = millis();
   }
 }
 
@@ -648,7 +653,7 @@ void onProfileReceived(Profile& newProfile) {
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     uint32_t timeInShot = millis() - brewingTimer;
-    phaseProfiler.updatePhase(timeInShot, currentState, runningCfg);
+    phaseProfiler.updatePhase(timeInShot, currentState);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
     ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
     espCommsSendShotData(shotSnapshot, 100);
