@@ -153,14 +153,24 @@ static void sensorsReadWeight(void) {
   if (scalesIsPresent() && elapsedTime > GET_SCALES_READ_EVERY) {
     if(!tareDone) {
       scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewModeActive && (fabsf(scalesGetWeight()) > 0.3f)) tareDone = false;
-      else tareDone = true;
+      if (!nonBrewModeActive && (fabsf(scalesGetWeight()) > 0.3f)) {
+        tareDone = false;
+      }
+      else {
+        weightMeasurements.clear();
+        tareDone = true;
+      }
     }
-    float previousWeight = currentState.weight;
-    currentState.weight = scalesGetWeight();
-    currentState.weightFlow = 1000.f * (currentState.weight - previousWeight) / static_cast<float>(elapsedTime);
-    currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
-    if (brewActive) currentState.shotWeight = currentState.weight;
+
+    weightMeasurements.add(scalesGetWeight());
+    currentState.weight = fmax(0.f, weightMeasurements.latest().value);
+
+    if (brewActive) {
+      currentState.shotWeight = tareDone ? currentState.weight : 0.f;
+      currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
+      currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
+    }
+
     scalesTimer = millis();
   }
 }
@@ -763,6 +773,7 @@ static void brewParamsReset(void) {
   flowTimer                = brewingTimer;
   systemHealthTimer        = brewingTimer + HEALTHCHECK_EVERY;
 
+  weightMeasurements.clear();
   predictiveWeight.reset();
   phaseProfiler.reset();
 }
