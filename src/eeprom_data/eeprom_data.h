@@ -123,6 +123,7 @@ struct eepromValues_t {
 
 void eepromInit(void);
 bool eepromWrite(eepromValues_t);
+struct eepromValues_t eepromGetDefaultValues(void);
 struct eepromValues_t eepromGetCurrentValues(void);
 
 #define ACTIVE_PROFILE(eepromValues) eepromValues.profiles[eepromValues.activeProfile]

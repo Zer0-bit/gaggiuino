@@ -515,3 +515,5 @@ void trigger4(void) { lcdBrewGraphScalesTareTrigger(); }
 void trigger6(void) { lcdRefreshElementsTrigger(); }
 void trigger7(void) { lcdQuickProfileSwitch(); }
 void trigger8(void) { lcdSaveProfileTrigger(); }
+void trigger9(void) { lcdResetSettingsTrigger(); }
+void trigger10(void) { lcdLoadDefaultProfileTrigger(); }

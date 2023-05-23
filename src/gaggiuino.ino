@@ -386,6 +386,13 @@ void tryEepromWrite(const eepromValues_t &eepromValues) {
   }
 }
 
+void lcdSwitchActiveToStoredProfile(const eepromValues_t & storedSettings) {
+  runningCfg.activeProfile = lcdGetSelectedProfile();
+  ACTIVE_PROFILE(runningCfg) = storedSettings.profiles[runningCfg.activeProfile];
+  updateProfilerPhases();
+  lcdUploadProfile(runningCfg);
+}
+
 // Save the desired temp values to EEPROM
 void lcdSaveSettingsTrigger(void) {
   LOG_VERBOSE("Saving values to EEPROM");
@@ -402,6 +409,15 @@ void lcdSaveProfileTrigger(void) {
   eepromCurrentValues.activeProfile = runningCfg.activeProfile;
   lcdFetchCurrentProfile(eepromCurrentValues);
   tryEepromWrite(eepromCurrentValues);
+}
+
+void lcdResetSettingsTrigger(void) {
+  tryEepromWrite(eepromGetDefaultValues());
+}
+
+void lcdLoadDefaultProfileTrigger(void) {
+  lcdSwitchActiveToStoredProfile(eepromGetDefaultValues());
+  lcdShowPopup("Profile loaded!");
 }
 
 void lcdScalesTareTrigger(void) {
@@ -450,10 +466,7 @@ void lcdRefreshElementsTrigger(void) {
 }
 
 void lcdQuickProfileSwitch(void) {
-  runningCfg.activeProfile = lcdGetSelectedProfile();
-  ACTIVE_PROFILE(runningCfg) = eepromGetCurrentValues().profiles[runningCfg.activeProfile];
-  updateProfilerPhases();
-  lcdUploadProfile(runningCfg);
+  lcdSwitchActiveToStoredProfile(eepromGetCurrentValues());
   lcdShowPopup("Profile switched!");
 }
 
