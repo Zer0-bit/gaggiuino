@@ -69,5 +69,7 @@ void lcdBrewGraphScalesTareTrigger(void);
 void lcdRefreshElementsTrigger(void);
 void lcdQuickProfileSwitch(void);
 void lcdSaveProfileTrigger(void);
+void lcdResetSettingsTrigger(void);
+void lcdLoadDefaultProfileTrigger(void);
 
 #endif
