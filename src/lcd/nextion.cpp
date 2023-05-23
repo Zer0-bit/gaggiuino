@@ -137,7 +137,7 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("sT.mDiv.val", eepromCurrentValues.mainDivider);
   myNex.writeNum("sT.bDiv.val", eepromCurrentValues.brewDivider);
 
-  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
+  myNex.writeNum("sP.n1.val", eepromCurrentValues.lcdSleep*60);
   myNex.writeNum("sP.n1.val", eepromCurrentValues.lcdSleep);
   myNex.writeNum("sP.lc1.val", eepromCurrentValues.scalesF1);
   myNex.writeNum("sP.lc2.val", eepromCurrentValues.scalesF2);
@@ -366,7 +366,7 @@ void lcdFetchBoiler(eepromValues_t &settings) {
 
 void lcdFetchSystem(eepromValues_t &settings) {
   // System settings
-  settings.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
+  settings.lcdSleep                       = myNex.readNumber("sP.n1.val") / 60; // nextion sleep var
   settings.warmupState                    = myNex.readNumber("warmupState");
   settings.scalesF1                       = myNex.readNumber("sP.lc1.val");
   settings.scalesF2                       = myNex.readNumber("sP.lc2.val");

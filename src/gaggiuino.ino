@@ -319,10 +319,10 @@ static void lcdRefresh(void) {
     /*LCD temp output*/
     uint16_t brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
-    uint16_t lcdTemp = ((uint16_t)currentState.temperature > ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
+    currentState.waterTemperature = ((uint16_t)currentState.temperature > ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
       ? (uint16_t)currentState.temperature / brewTempSetPoint + ACTIVE_PROFILE(runningCfg).setpoint
       : (uint16_t)currentState.temperature;
-    lcdSetTemperature(lcdTemp);
+    lcdSetTemperature(currentState.waterTemperature);
 
     /*LCD weight output*/
     switch (lcdCurrentPageId) {
