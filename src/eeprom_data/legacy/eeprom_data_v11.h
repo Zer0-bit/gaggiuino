@@ -99,7 +99,7 @@ static bool upgradeSchema_v11(eepromValues_t &targetValues, eepromValues_t_v11 &
   targetValues.brewDivider = loadedValues.brewDivider;
   targetValues.activeProfile = loadedValues.activeProfile;
   for (int i=0; i<MAX_PROFILES; i++) {
-    // targetValues.profiles[i].name = loadedValues.profiles[i].name;
+    snprintf(targetValues.profiles[i].name, PROFILE_NAME_LENGTH, "%s", loadedValues.profiles[i].name);
     targetValues.profiles[i].preinfusionState = loadedValues.profiles[i].preinfusionState;
     targetValues.profiles[i].preinfusionFlowState = loadedValues.profiles[i].preinfusionFlowState;
     targetValues.profiles[i].preinfusionSec = loadedValues.profiles[i].preinfusionSec;
