@@ -15,7 +15,7 @@ Phase phaseArray[12];
 Profile profile{ 6,  phaseArray };
 
 void setup(void) {
-  Serial.begin(115200);
+  Serial.begin(460800);
 
   xTaskCreatePinnedToCore(
     Task1code,   /* Task function. */
