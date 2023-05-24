@@ -131,6 +131,7 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
 
   // System settings
+  myNex.writeNum("dreamSteam", eepromCurrentValues.dreamSteamEnabled);
   myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint);
   myNex.writeNum("sT.offSet.val", eepromCurrentValues.offsetTemp);
   myNex.writeNum("sT.hpwr.val", eepromCurrentValues.hpwr);
@@ -356,6 +357,7 @@ void lcdFetchBrewSettings(eepromValues_t &settings) {
 }
 
 void lcdFetchBoiler(eepromValues_t &settings) {
+  settings.dreamSteamEnabled              = myNex.readNumber("dreamSteam");
   settings.steamSetPoint                  = myNex.readNumber("sT.steamSetPoint.val");
   settings.offsetTemp                     = myNex.readNumber("sT.offSet.val");
   settings.hpwr                           = myNex.readNumber("sT.hpwr.val");

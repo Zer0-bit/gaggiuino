@@ -11,6 +11,7 @@
 #include "legacy/eeprom_data_v8.h"
 #include "legacy/eeprom_data_v9.h"
 #include "legacy/eeprom_data_v10.h"
+#include "legacy/eeprom_data_v11.h"
 
 namespace {
 
@@ -98,6 +99,7 @@ namespace {
     defaultData.brewDeltaState = true;
     defaultData.basketPrefill = false;
     // System settings
+    defaultData.dreamSteamEnabled = true;
     defaultData.steamSetPoint = 155;
     defaultData.offsetTemp = 7;
     defaultData.hpwr = 550;

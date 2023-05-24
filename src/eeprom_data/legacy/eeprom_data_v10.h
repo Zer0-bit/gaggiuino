@@ -1,13 +1,12 @@
-#ifndef EEPROM_DATA_V4_H
-#define EEPROM_DATA_V4_H
+#ifndef EEPROM_DATA_V10_H
+#define EEPROM_DATA_V10_H
 
 #include "../eeprom_data.h"
 #include "../eeprom_metadata.h"
 
 /**
-* Version 9:
-* - Multiple changes to the brew profile settings to support more customization of phases
-* - Re-organize fields
+* Version 10:
+* - ???
 */
 
 struct eepromValues_t_v10 {

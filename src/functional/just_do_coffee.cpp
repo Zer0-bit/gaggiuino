@@ -95,7 +95,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
     }
     setSteamValveRelayOn();
     setSteamBoilerRelayOn();
-    if (currentState.dreamSteamSwitchState && currentState.smoothedPressure < activeSteamPressure_) {
+    if (runningCfg.dreamSteamEnabled && currentState.smoothedPressure < activeSteamPressure_) {
       setPumpToRawValue(3);
     } else {
       setPumpOff();

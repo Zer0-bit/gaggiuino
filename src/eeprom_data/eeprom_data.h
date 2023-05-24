@@ -37,10 +37,11 @@
 */
 
 /**
-* Version 10:
-* - Add multiple brew profiles
+* Version 12:
+* - Add DreamSteam runtime setting
 */
 struct eepromValues_t {
+  bool dreamSteamEnabled;
   uint16_t steamSetPoint;
   uint16_t offsetTemp;
   uint16_t hpwr;

@@ -133,7 +133,6 @@ static void sensorsRead(void) {
 static void sensorReadSwitches(void) {
   currentState.brewSwitchState = brewState();
   currentState.steamSwitchState = steamState();
-  currentState.dreamSteamSwitchState = dreamSteamState();
   currentState.hotWaterSwitchState = waterPinState() || (currentState.brewSwitchState && currentState.steamSwitchState); // use either an actual switch, or the GC/GCP switch combo
 }
 
