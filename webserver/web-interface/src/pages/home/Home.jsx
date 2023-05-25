@@ -65,7 +65,7 @@ function Home() {
           <ProfilesTable />
         </Grid>
       </Grid>
-      {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
+      {shotDialogOpen && <ShotDialog open={shotDialogOpen.toString()} setOpen={setShotDialogOpen} />}
     </Container>
   );
 }
