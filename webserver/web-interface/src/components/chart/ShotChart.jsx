@@ -177,5 +177,5 @@ Chart.propTypes = {
 Chart.defaultProps = {
   data: undefined,
   newDataPoint: undefined,
-  maxLength: 1000,
+  maxLength: 30000,
 };
