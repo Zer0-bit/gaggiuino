@@ -32,6 +32,9 @@ void lcdWakeUp(void) {
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   // Highlight the active profile
   myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+  String buttonElemId = String("home.qPf") + (eepromCurrentValues.activeProfile + 1) + ".txt";
+  myNex.writeStr(buttonElemId, ACTIVE_PROFILE(eepromCurrentValues).name);
+
   // Temp
   myNex.writeNum("sT.setPoint.val", ACTIVE_PROFILE(eepromCurrentValues).setpoint);
   // PI
@@ -115,8 +118,6 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
 // This is never called again after boot
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   // bool profileType = false;
-  // Highlight the active profile
-  myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1); /* 1-offset in nextion */
 
   // Profile names for all buttons
   myNex.writeStr("home.qPf1.txt", eepromCurrentValues.profiles[0].name);
