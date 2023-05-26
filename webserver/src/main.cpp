@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <LittleFS.h>
 #include "stm_comms/stm_comms.h"
-
 #ifndef DISABLE_WIFI_SERVER
 #include "server/server_setup.h"
 #include "wifi/wifi_setup.h"
@@ -11,17 +10,21 @@
 #ifndef DISABLE_BLE_SCALES
 #include "scales/ble_scales.h"
 #endif
+#include "./log/log.h"
 
 void initFS();
 
 void setup() {
-  Serial.begin(460800);
+  LOG_INIT();
   stmCommsInit(Serial1);
   initFS();
 
 #ifndef DISABLE_WIFI_SERVER
   wifiSetup();
   setupServer();
+#ifdef REMOTE_LOGGING
+  REMOTE_LOG_INIT([](std::string message) {wsSendLog(message);});
+#endif
 #endif
 
 #ifndef DISABLE_BLE_SCALES
@@ -64,7 +67,7 @@ void onScalesTareReceived() {
 // -----------------------------------------
 void initFS() {
   if (!LittleFS.begin(true)) {
-    Serial.println("An error has occurred while mounting LittleFS");
+    LOG_INFO("An error has occurred while mounting LittleFS");
   }
-  Serial.println("LittleFS mounted successfully");
+  LOG_INFO("LittleFS mounted successfully");
 }

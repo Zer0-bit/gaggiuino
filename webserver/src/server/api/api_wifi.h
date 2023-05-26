@@ -5,6 +5,7 @@
 #include "AsyncTCP.h"
 #include <ArduinoJson.h>
 #include "../../wifi/wifi_setup.h"
+#include "../../log/log.h"
 
 void handlePostSelectedNetwork(AsyncWebServerRequest* request);
 void handleGetNetworks(AsyncWebServerRequest* request);
@@ -19,7 +20,7 @@ void setupWifiApi(AsyncWebServer& server) {
 }
 
 void handlePostSelectedNetwork(AsyncWebServerRequest* request) {
-  Serial.println("Got request to connect to WiFi");
+  LOG_INFO("Got request to connect to WiFi");
   int params = request->params();
   String ssid;
   String pass;
@@ -30,12 +31,12 @@ void handlePostSelectedNetwork(AsyncWebServerRequest* request) {
       // HTTP POST ssid value
       if (p->name() == PARAM_INPUT_SSID) {
         ssid = p->value();
-        Serial.printf("SSID set to: %s\n", ssid);
+        LOG_INFO("SSID set to: %s\n", ssid);
       }
       // HTTP POST pass value
       if (p->name() == PARAM_INPUT_PASS) {
         pass = p->value();
-        Serial.printf("Password set to: %s\n", "*************");
+        LOG_INFO("Password set to: %s\n", "*************");
       }
     }
   }
@@ -56,7 +57,7 @@ void handlePostSelectedNetwork(AsyncWebServerRequest* request) {
 }
 
 void handleGetNetworks(AsyncWebServerRequest* request) {
-  Serial.println("Got request get available WiFi networks");
+  LOG_INFO("Got request get available WiFi networks");
   AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(2048);
   JsonArray networksJson = json.to<JsonArray>();
@@ -73,7 +74,7 @@ void handleGetNetworks(AsyncWebServerRequest* request) {
 }
 
 void handleDeleteSelectedNetwork(AsyncWebServerRequest* request) {
-  Serial.println("Got request to disconnect connect from WiFi");
+  LOG_INFO("Got request to disconnect connect from WiFi");
   AsyncWebServerResponse* response = request->beginResponse(204);
   request->send(response);
   wifiDisconnect();

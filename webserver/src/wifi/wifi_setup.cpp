@@ -1,5 +1,6 @@
 #include "wifi_setup.h"
 #include "esp_task_wdt.h"
+#include "../log/log.h"
 
 const char* PARAM_INPUT_SSID = "ssid";
 const char* PARAM_INPUT_PASS = "pass";
@@ -27,10 +28,10 @@ void wifiInit() {
     wifiParams.pass = wifiParams.preferences.getString(PARAM_INPUT_PASS);
   }
 
-  Serial.printf("initWifi: status=[%d], ssid=[%s], ip=[%s].\n", WiFi.status(), WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+  LOG_INFO("initWifi: status=[%d], ssid=[%s], ip=[%s].\n", WiFi.status(), WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
 
   if (wifiParams.ssid == "" && wifiParams.pass == "") {
-    Serial.println("No ssid or password provided.");
+    LOG_INFO("No ssid or password provided.");
     return;
   }
 
@@ -41,23 +42,23 @@ bool wifiConnect(String ssid, String pass, const unsigned long timeout) {
   unsigned long wifiStartTimer = millis();
 
   WiFi.begin(ssid.c_str(), pass.c_str());
-  Serial.printf("Connecting to WiFi [%s]\n", ssid.c_str());
+  LOG_INFO("Connecting to WiFi [%s]\n", ssid.c_str());
 
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
+    LOG_INFO(".");
     if (WiFi.status() == WL_CONNECT_FAILED) {
-      Serial.println("\nFailed to connect. Check password.");
+      LOG_INFO("\nFailed to connect. Check password.");
       return false;
     }
     if (millis() - wifiStartTimer >= timeout) {
-      Serial.printf("\nFailed to connect after %ld seconds.\n", timeout / 1000);
+      LOG_INFO("\nFailed to connect after %ld seconds.\n", timeout / 1000);
       return false;
     }
     esp_task_wdt_reset();
     delay(200);
   }
 
-  Serial.printf("\nConnected to WiFi [%s] with IP:[%s]\n", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+  LOG_INFO("\nConnected to WiFi [%s] with IP:[%s]\n", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
 
   wifiParams.ssid = ssid;
   wifiParams.pass = pass;
@@ -82,7 +83,7 @@ int wifiNetworkCount() {
 void setupWiFiAccessPoint() {
   // Connect to Wi-Fi network with SSID and password
   WiFi.softAP("Gaggiuino AP", NULL);
-  Serial.printf("AP (Access Point) IP address: %s\n", WiFi.softAPIP().toString().c_str());
+  LOG_INFO("AP (Access Point) IP address: %s\n", WiFi.softAPIP().toString().c_str());
   wifiScanNetworks();
 }
 
@@ -93,6 +94,6 @@ void wifiDisconnect() {
     wifiParams.pass = "";
     wifiParams.attemptReconnect = true;
     wifiParams.preferences.clear();
-    Serial.println("Disconnected from WiFi and cleared saved WiFi.");
+    LOG_INFO("Disconnected from WiFi and cleared saved WiFi.");
   }
 }

@@ -1,7 +1,9 @@
 #include "websocket.h"
+#include "../../log/log.h"
 
 #define WS_MSG_SENSOR_DATA "sensor_data_update"
 #define WS_MSG_SHOT_DATA "shot_data_update"
+#define WS_MSG_LOG "log_record"
 
 AsyncWebSocket wsServer("/ws");
 DynamicJsonDocument jsonDoc(2048);
@@ -35,10 +37,10 @@ void onEvent(
 ) {
   switch (type) {
     case WS_EVT_CONNECT:
-      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      LOG_INFO("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
       break;
     case WS_EVT_DISCONNECT:
-      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      LOG_INFO("WebSocket client #%u disconnected\n", client->id());
       break;
     case WS_EVT_DATA:
       handleWebSocketMessage(arg, data, len);
@@ -59,14 +61,13 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
 
     DeserializationError err = deserializeJson(jsonDoc, data);
     if (err) {
-      Serial.print(F("deserializeJson() failed with code "));
-      Serial.println(err.c_str());
+      LOG_ERROR("deserializeJson() failed with code %s", err.c_str());
       return;
     }
 
     const char *action = jsonDoc["action"];
     const char *actionData = jsonDoc["data"];
-    Serial.printf("Message: %s -> %s\n", action, actionData);
+    LOG_INFO("Message: %s -> %s\n", action, actionData);
   }
 }
 
@@ -108,6 +109,20 @@ void wsSendShotSnapshotToClients(ShotSnapshot& snapshot) {
     data["targetTemperature"] = snapshot.targetTemperature;
     data["targetPumpFlow"] = snapshot.targetPumpFlow;
     data["targetPressure"] = snapshot.targetPressure;
+
+    char   buffer[300]; // create temp buffer
+    size_t len = serializeJson(root, buffer);  // serialize to buffer
+    wsServer.textAll(buffer, len); // send buffer to web socket
+}
+
+void wsSendLog(std::string log, std::string source) {
+    JsonObject          root = jsonDoc.to<JsonObject>();
+
+    root["action"] = WS_MSG_LOG;
+
+    JsonObject data = root.createNestedObject("data");
+    data["source"] = source;
+    data["log"] = log;
 
     char   buffer[300]; // create temp buffer
     size_t len = serializeJson(root, buffer);  // serialize to buffer

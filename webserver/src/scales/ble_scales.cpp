@@ -3,7 +3,7 @@
 #include "remote_scales.h"
 #include "scales/acaia.h"
 #include "../stm_comms/stm_comms.h"
-
+#include "../log/log.h"
 namespace {
   const uint16_t BLE_CONNECTION_MAINTENANCE_TIME = 200;
   uint32_t bleLastMaintenanceTime = 0;
@@ -28,18 +28,18 @@ void bleScalesMaintainConnection() {
 
   if (bleScales.get() == nullptr) { // No scale discovered yet. Keep checking scan results to find scales.
     std::vector<RemoteScales*> scales = remoteScalesScanner.getDiscoveredScales();
-    Serial.printf("We have %d discovered scales.\n", scales.size());
+    LOG_INFO("We have %d discovered scales.\n", scales.size());
 
     if (scales.size() > 0) {
       bleScales.reset(scales[0]);
       remoteScalesScanner.stopAsyncScan();
       bleScales->setWeightUpdatedCallback(stmCommsSendWeight);
-      bleScales->setDebugPort(&Serial);
+      bleScales->setLogCallback([](std::string message) { LOG_INFO(message.c_str()); });
       bleScales->connect();
     }
   }
   else if (!bleScales->isConnected()) { // Scale discovered but not connected. Make sure it's still reachable.
-    Serial.println("Connection failed. Will retry.");
+    LOG_INFO("Connection failed. Will retry.");
     stmCommsSendScaleDisconnected();
     bleScales.release();
     remoteScalesScanner.restartAsyncScan();
