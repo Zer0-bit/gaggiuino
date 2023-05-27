@@ -23,6 +23,8 @@ function GaugeChart({
   const options = {
     cutout: '90%',
     borderWidth: 0,
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       center: {
         text: value.toFixed(1) + unit,

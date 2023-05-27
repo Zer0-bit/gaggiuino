@@ -19,10 +19,7 @@ export async function disconnectFromWifi() {
 }
 
 export async function connectToWifi({ ssid, pass }) {
-  const formData = new FormData();
-  formData.append('ssid', ssid);
-  formData.append('pass', pass);
-  return axios.put('/api/wifi/selected-network', formData, {
+  return axios.put('/api/wifi/selected-network', { ssid, pass }, {
     timeout: 10000,
   });
 }

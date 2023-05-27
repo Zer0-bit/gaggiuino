@@ -1,33 +1,57 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Box, Paper, Typography, useTheme,
+  Box, FormControlLabel, Paper, Stack, Switch, Typography, useTheme,
 } from '@mui/material';
 import PropTypes from 'prop-types';
+import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
+import { MSG_TYPE_LOG, apiHost, filterSocketMessage } from '../../models/api';
 
-function LogContainer({ logLine }) {
+function LogContainer({ maxLines }) {
   const theme = useTheme();
   const [logLines, setLogLines] = useState([]);
   const bottomRef = useRef(null);
+  const [followLogs, setFollowLogs] = useState(false);
+
+  const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
+    share: true,
+    retryOnError: true,
+    shouldReconnect: () => true,
+    reconnectAttempts: 1000,
+    filter: (message) => filterSocketMessage(message, MSG_TYPE_LOG),
+  });
 
   useEffect(() => {
-    if (logLine) {
+    if (lastJsonMessage) {
+      const logLine = lastJsonMessage.data;
       setLogLines((prevLogLines) => {
-        while (prevLogLines.length > 400) {
+        while (prevLogLines.length > maxLines) {
           prevLogLines.shift();
         }
         return [...prevLogLines, logLine];
       });
     }
-  }, [logLine]);
+  }, [lastJsonMessage]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logLines]);
+    if (followLogs) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logLines, followLogs]);
+
+  const onChangeSwitch = (event, newValue) => {
+    setFollowLogs(newValue);
+  };
 
   return (
     <Paper elevation={3} sx={{ p: theme.spacing(2) }}>
-      <Typography gutterBottom variant="h5">Logs</Typography>
-
+      <Stack direction="row" alignItems="center">
+        <Typography sx={{ flexGrow: 1 }} gutterBottom variant="h5">Logs</Typography>
+        <FormControlLabel
+          control={<Switch value={followLogs} onChange={onChangeSwitch} />}
+          label="Follow logs"
+          labelPlacement="start"
+        />
+      </Stack>
       <Box sx={{ overflow: 'auto', height: '300px' }}>
         {logLines.map((line, index) => (
           // eslint-disable-next-line react/no-array-index-key
@@ -40,14 +64,11 @@ function LogContainer({ logLine }) {
 }
 
 LogContainer.propTypes = {
-  logLine: PropTypes.shape({
-    source: PropTypes.string.isRequired,
-    log: PropTypes.string.isRequired,
-  }),
+  maxLines: PropTypes.number,
 };
 
 LogContainer.defaultProps = {
-  logLine: undefined,
+  maxLines: 200,
 };
 
 export default LogContainer;

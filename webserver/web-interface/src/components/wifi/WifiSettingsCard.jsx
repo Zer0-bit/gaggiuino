@@ -48,11 +48,11 @@ export default function WifiSettingsCard() {
   };
 
   return (
-    <div>
-      <Card>
-        <CardContent>
+    <div style={{ height: '100%' }}>
+      <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <CardContent sx={{ flex: '1 0 auto' }}>
           <Typography gutterBottom variant="h5" component="div">
-            WiFi status
+            WiFi Status
           </Typography>
           {wifiStatusLoading ? <Loader /> : <WifiStatus status={wifiStatus} />}
         </CardContent>

@@ -43,7 +43,9 @@ function Home() {
     return (
       <Box sx={{
         border: `2px solid ${theme.palette.divider}`,
+        position: 'relative',
         borderRadius: '16px',
+        width: '100%',
         padding: '8px',
       }}
       >
@@ -61,7 +63,7 @@ function Home() {
         <Grid item xs={8} sm={8}>
           {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
         </Grid>
-        <Grid item xs={8} sm={16}>
+        <Grid item xs={16}>
           <ProfilesTable />
         </Grid>
       </Grid>
