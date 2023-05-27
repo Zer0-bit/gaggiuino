@@ -3,7 +3,6 @@
 
 #include "ESPAsyncWebServer.h"
 #include "AsyncTCP.h"
-#include <ArduinoJson.h>
 #include "mcu_comms.h"
 
 void setupWebSocket(AsyncWebServer& server);

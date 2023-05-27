@@ -1,99 +1,157 @@
 #include "wifi_setup.h"
-#include "esp_task_wdt.h"
+#include <WiFi.h>
 #include "../log/log.h"
 
-const char* PARAM_INPUT_SSID = "ssid";
-const char* PARAM_INPUT_PASS = "pass";
-WiFiParams_t wifiParams;
+WiFiParams wifiParams;
 
 void setupWiFiAccessPoint();
-
-WiFiParams_t& getWifiParams() {
-  return wifiParams;
-}
-
+void wifiScanNetworks();
 void wifiInit();
 
 void wifiSetup() {
-  WiFi.mode(WIFI_AP_STA);
-  wifiParams.preferences.begin("gaggiuino_wifi");
-  wifiInit();
+  while(!WiFi.mode(WIFI_AP_STA)) {
+    LOG_INFO("Initialising WiFi mode.");
+    delay(500);
+  }
+  LOG_INFO("Initialised WiFi in AP+STA mode.");
   setupWiFiAccessPoint();
+  wifiInit();
+  wifiScanNetworks();
 }
 
 // Initialize WiFi
 void wifiInit() {
-  if (wifiParams.ssid == "" && wifiParams.pass == "") {
-    wifiParams.ssid = wifiParams.preferences.getString(PARAM_INPUT_SSID);
-    wifiParams.pass = wifiParams.preferences.getString(PARAM_INPUT_PASS);
-  }
+  wifiParams.init();
 
-  LOG_INFO("initWifi: status=[%d], ssid=[%s], ip=[%s].\n", WiFi.status(), WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
-
-  if (wifiParams.ssid == "" && wifiParams.pass == "") {
+  if (!wifiParams.hasCredentials()) {
     LOG_INFO("No ssid or password provided.");
     return;
   }
 
-  wifiConnect(wifiParams.ssid, wifiParams.pass);
+  LOG_INFO("Will attempt connecting to %s - %s", wifiParams.getSSID().c_str(), "***");
+  wifiConnect(wifiParams.getSSID(), wifiParams.getPass());
 }
 
-bool wifiConnect(String ssid, String pass, const unsigned long timeout) {
-  unsigned long wifiStartTimer = millis();
-
-  WiFi.begin(ssid.c_str(), pass.c_str());
-  LOG_INFO("Connecting to WiFi [%s]\n", ssid.c_str());
-
-  while (WiFi.status() != WL_CONNECTED) {
-    LOG_INFO(".");
-    if (WiFi.status() == WL_CONNECT_FAILED) {
-      LOG_INFO("\nFailed to connect. Check password.");
-      return false;
-    }
-    if (millis() - wifiStartTimer >= timeout) {
-      LOG_INFO("\nFailed to connect after %ld seconds.\n", timeout / 1000);
-      return false;
-    }
-    esp_task_wdt_reset();
-    delay(200);
+bool wifiConnect(String ssid, String pass, const uint32_t timeout) {
+  if (WiFi.isConnected()) {
+    WiFi.disconnect();
   }
 
-  LOG_INFO("\nConnected to WiFi [%s] with IP:[%s]\n", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+  WiFi.begin(ssid.c_str(), pass.c_str());
+  LOG_INFO("Connecting to WiFi [%s]", ssid.c_str());
 
-  wifiParams.ssid = ssid;
-  wifiParams.pass = pass;
-  wifiParams.preferences.putString(PARAM_INPUT_SSID, ssid);
-  wifiParams.preferences.putString(PARAM_INPUT_PASS, pass);
+  if (WiFi.waitForConnectResult(timeout) != WL_CONNECTED) {
+    LOG_INFO("Failed to connect. Check password.");
+    return false;
+  }
 
-  wifiParams.attemptReconnect = false;
+  LOG_INFO("Connected to WiFi [%s] with IP:[%s]", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+  wifiParams.saveCredentials(ssid, pass);
+
   return true;
 }
 
+namespace ws_wifi {
+  uint32_t lastWiFiScan = millis() + 5000;
+  bool newScanResults = false;
+  std::vector<WiFiNetwork> wifiNetworks;
+  const uint32_t WIFI_SCAN_EVERY_MS = 60000;
+}
+
 void wifiScanNetworks() {
-  wifiParams.wifiNetworkCount = WiFi.scanNetworks();
-  if (wifiParams.wifiNetworkCount != WIFI_SCAN_FAILED) {
-    wifiParams.refreshWiFiNetworks = false;
+  // If scan is still running, do nothing
+  if (WiFi.scanComplete() == WIFI_SCAN_RUNNING) {
+    ws_wifi::newScanResults = true;
+    return;
+  }
+
+  if (WiFi.scanComplete() >= 0 && ws_wifi::newScanResults) {
+    LOG_INFO("WiFi scan completed. Updating networks in RAM");
+    ws_wifi::wifiNetworks.clear();
+    for (int i = 0; i < WiFi.scanComplete(); i++) {
+      ws_wifi::wifiNetworks.push_back(WiFiNetwork{
+        .ssid = WiFi.SSID(i),
+        .rssi = WiFi.RSSI(i),
+        .secured = WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? false : true,
+        });
+      ws_wifi::newScanResults = false;
+    }
+  }
+
+  // If scan failed or completed too long ago started again
+  if (millis() - ws_wifi::lastWiFiScan > ws_wifi::WIFI_SCAN_EVERY_MS) {
+    LOG_INFO("Starting a new WiFi scan");
+
+    WiFi.scanNetworks(true);
+    ws_wifi::lastWiFiScan = millis();
+    ws_wifi::newScanResults = true;
   }
 }
 
-int wifiNetworkCount() {
-  return wifiParams.wifiNetworkCount;
+std::vector<WiFiNetwork> wifiAvailableNetworks() {
+  return ws_wifi::wifiNetworks;
 }
 
 void setupWiFiAccessPoint() {
-  // Connect to Wi-Fi network with SSID and password
   WiFi.softAP("Gaggiuino AP", NULL);
-  LOG_INFO("AP (Access Point) IP address: %s\n", WiFi.softAPIP().toString().c_str());
-  wifiScanNetworks();
+  LOG_INFO("AP (Access Point) IP address: %s", WiFi.softAPIP().toString().c_str());
+  delay(50);
+}
+
+WiFiConnection getWiFiConnection() {
+  if (WiFi.isConnected()) {
+    return WiFiConnection{.ssid= WiFi.SSID(), .ip=WiFi.localIP().toString() };
+  } else {
+    return WiFiConnection{.ssid= "", .ip="" };
+  }
 }
 
 void wifiDisconnect() {
   if (WiFi.isConnected()) {
     WiFi.disconnect();
-    wifiParams.ssid = "";
-    wifiParams.pass = "";
-    wifiParams.attemptReconnect = true;
-    wifiParams.preferences.clear();
+    wifiParams.reset();
     LOG_INFO("Disconnected from WiFi and cleared saved WiFi.");
   }
+}
+
+uint32_t wifiConnectionMaintenanceTimer = 0;
+void wifiMaintainConnection() {
+  if (WiFi.isConnected() || !wifiParams.hasCredentials() || millis() - wifiConnectionMaintenanceTimer < 10000) {
+    return;
+  }
+  wifiConnectionMaintenanceTimer = millis();
+
+  LOG_INFO("WiFi disconnected, will attempt reconnection to %s", wifiParams.getSSID().c_str());
+  WiFi.begin(wifiParams.getSSID().c_str(), wifiParams.getPass().c_str());
+}
+
+void wifiUpdate() {
+  wifiScanNetworks();
+  wifiMaintainConnection();
+}
+
+// ----------------------------------------------------
+// ------------------ WiFiParams ----------------------
+// ----------------------------------------------------
+
+void WiFiParams::saveCredentials(String ssid, String pass) {
+  this->ssid = ssid;
+  this->pass = pass;
+  preferences.putString("ssid", ssid.c_str());
+  preferences.putString("pass", pass.c_str());
+  LOG_INFO("Saved wifi credentials [%s, %s]", ssid.c_str(), "*****");
+}
+
+void WiFiParams::init() {
+  preferences.begin("gaggiuino_wifi");
+  if (!hasCredentials()) {
+    this->ssid = preferences.getString("ssid", "");
+    this->pass = preferences.getString("pass", "");
+  }
+}
+
+void WiFiParams::reset() {
+  ssid = "";
+  pass = "";
+  preferences.clear();
 }

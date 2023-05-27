@@ -6,31 +6,35 @@
 #include "../log/log.h"
 namespace {
   const uint16_t BLE_CONNECTION_MAINTENANCE_TIME = 200;
-  uint32_t bleLastMaintenanceTime = 0;
-
   RemoteScalesScanner remoteScalesScanner;
   std::unique_ptr<RemoteScales> bleScales;
 }
 
+void bleScalesTask(void* params);
+
 void bleScalesInit() {
+  xTaskCreate(&bleScalesTask, "bleScales", 12000, NULL, 1, NULL);
+}
+
+void bleScalesTask(void* params) {
   AcaiaScalesPlugin::apply();
   BLEDevice::init("Gaggiuino");
   remoteScalesScanner.initializeAsyncScan();
+
+  LOG_INFO("Remote scales and bluetooth initialized");
+
+  while (true) {
+    bleScalesMaintainConnection();
+    vTaskDelay(BLE_CONNECTION_MAINTENANCE_TIME / portTICK_PERIOD_MS);
+  }
 }
 
 void bleScalesMaintainConnection() {
-  uint32_t now = millis();
-  if (now - bleLastMaintenanceTime < BLE_CONNECTION_MAINTENANCE_TIME) {
-    return;
-  }
-
-  bleLastMaintenanceTime = now;
-
   if (bleScales.get() == nullptr) { // No scale discovered yet. Keep checking scan results to find scales.
     std::vector<RemoteScales*> scales = remoteScalesScanner.getDiscoveredScales();
-    LOG_INFO("We have %d discovered scales.\n", scales.size());
 
     if (scales.size() > 0) {
+      LOG_INFO("We have %d discovered scales.", scales.size());
       bleScales.reset(scales[0]);
       remoteScalesScanner.stopAsyncScan();
       bleScales->setWeightUpdatedCallback(stmCommsSendWeight);

@@ -1,18 +1,28 @@
 #include "server_setup.h"
+#include "ESPAsyncWebServer.h"
+#include "AsyncTCP.h"
+
 #include "api/api_wifi.h"
+#include "api/api_static_files.h"
+#include "api/api_not_found_handler.h"
 #include "websocket/websocket.h"
+#include "../log/log.h"
 
-AsyncWebServer server(80);
-
-void setupStaticFiles(AsyncWebServer& server) {
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) { request->send(LittleFS, "/index.html", "text/html"); });
-  server.serveStatic("/", LittleFS, "/");
+namespace webserver {
+  const int PORT_NUMBER = 80;
+  AsyncWebServer server(PORT_NUMBER);
 }
 
-void setupServer() {
-  setupWifiApi(server);
-  setupStaticFiles(server);
-  setupWebSocket(server);
+void webServerSetup() {
+  setupWifiApi(webserver::server);
+  setupWebSocket(webserver::server);
+  setupStaticFiles(webserver::server);
+  webserver::server.onNotFound(&handleUrlNotFound);
 
-  server.begin();
+  LOG_INFO("Starting up web server on port %d...", webserver::PORT_NUMBER);
+  webserver::server.begin();
+}
+
+void webServerTask() {
+
 }

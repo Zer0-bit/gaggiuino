@@ -11,11 +11,15 @@
 
 #ifdef LOG_LEVEL
   void log(const char *prefix, const char *file, const int line, const char *msg, ...);
-  void log_init(void);
+  void log_init();
   void remote_log_init(void (*remoteLogCallback)(std::string msg));
 
   #define LOG_INIT() do { log_init(); } while (0)
+#ifdef REMOTE_LOGGING
   #define REMOTE_LOG_INIT(callback) do { remote_log_init(callback); } while(0)
+#else
+  #define REMOTE_LOG_INIT(callback)
+#endif
 #else
   #define LOG_INIT()
   #define REMOTE_LOG_INIT(callback)
