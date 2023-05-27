@@ -22,6 +22,9 @@ const lightTheme = createTheme({
     flow: {
       main: '#ff9d00',
     },
+    weightFlow: {
+      main: '#1d7835',
+    },
     pressure: {
       main: '#6296C5',
     },

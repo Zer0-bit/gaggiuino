@@ -65,10 +65,18 @@ function mapToChartData(input, theme) {
         yAxisID: 'y2',
       },
       {
-        label: 'Flow',
+        label: 'Pump Flow',
         data: getDataset(input, 'pumpFlow'),
         backgroundColor: alpha(theme.palette.flow.main, 0.8),
         borderColor: theme.palette.flow.main,
+        tension: 0.3,
+        yAxisID: 'y2',
+      },
+      {
+        label: 'Weight Flow',
+        data: getDataset(input, 'weightFlow'),
+        backgroundColor: alpha(theme.palette.weightFlow.main, 0.8),
+        borderColor: theme.palette.weightFlow.main,
         tension: 0.3,
         yAxisID: 'y2',
       },
@@ -131,9 +139,10 @@ function addDataPointToChartData(chartData, dataPoint) {
   chartData.datasets[0].data.push(dataPoint.temperature);
   chartData.datasets[1].data.push(dataPoint.pressure);
   chartData.datasets[2].data.push(dataPoint.pumpFlow);
-  chartData.datasets[3].data.push(dataPoint.shotWeight);
-  chartData.datasets[4].data.push(dataPoint.targetPressure);
-  chartData.datasets[5].data.push(dataPoint.targetPumpFlow);
+  chartData.datasets[3].data.push(dataPoint.weightFlow);
+  chartData.datasets[4].data.push(dataPoint.shotWeight);
+  chartData.datasets[5].data.push(dataPoint.targetPressure);
+  chartData.datasets[6].data.push(dataPoint.targetPumpFlow);
 }
 
 function Chart({ data, newDataPoint }) {
@@ -174,6 +183,7 @@ export const ShotChartDataPointType = PropTypes.shape({
   temperature: PropTypes.number,
   pressure: PropTypes.number,
   pumpFlow: PropTypes.number,
+  weightFlow: PropTypes.number,
   shotWeight: PropTypes.number,
   targetTemperature: PropTypes.number,
   targetPumpFlow: PropTypes.number,
