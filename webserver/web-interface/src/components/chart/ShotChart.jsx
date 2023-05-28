@@ -108,14 +108,26 @@ function popDataFromChartData(chartData) {
 }
 
 function addDataPointToChartData(chartData, dataPoint, maxLength) {
-  while (chartData.labels.length >= maxLength) {
+  while (maxLength > 0 && chartData.labels.length >= maxLength) {
     popDataFromChartData(chartData);
   }
   if (!dataPoint) {
     return;
   }
-  const latestLabel = chartData.labels[chartData.labels.length - 1] || 0;
-  chartData.labels.push(latestLabel + mapDataPointToLabel(dataPoint));
+
+  // If we pull a second shot while he graph is open push the
+  // datapoints of the previous shot back in time so that the new shot
+  // begins from time=0sec
+  const newTimeLabel = mapDataPointToLabel(dataPoint);
+  const previousMaxTimeLabel = chartData.labels[chartData.labels.length - 1] || 0;
+  if (previousMaxTimeLabel > newTimeLabel) {
+    chartData.labels.forEach((label, index) => {
+      // eslint-disable-next-line no-param-reassign
+      chartData.labels[index] = label - previousMaxTimeLabel;
+    });
+  }
+
+  chartData.labels.push(newTimeLabel);
   chartData.datasets[0].data.push(dataPoint.temperature);
   chartData.datasets[1].data.push(dataPoint.pressure);
   chartData.datasets[2].data.push(dataPoint.pumpFlow);
@@ -177,5 +189,5 @@ Chart.propTypes = {
 Chart.defaultProps = {
   data: undefined,
   newDataPoint: undefined,
-  maxLength: 1000,
+  maxLength: undefined,
 };

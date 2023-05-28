@@ -39,7 +39,7 @@ void setup(void) {
   Serial.begin(115200);
 
   // comms.setDebugPort(&Serial);
-  UART_MCU.begin(115200);
+  UART_MCU.begin(460800);
   comms.begin(UART_MCU);
 
   comms.setProfileReceivedCallback([](Profile& newProfile) {

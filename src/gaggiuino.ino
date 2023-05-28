@@ -324,10 +324,10 @@ static void lcdRefresh(void) {
     /*LCD temp output*/
     uint16_t brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
-    currentState.waterTemperature = ((uint16_t)currentState.temperature > ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
-      ? (uint16_t)currentState.temperature / brewTempSetPoint + ACTIVE_PROFILE(runningCfg).setpoint
-      : (uint16_t)currentState.temperature;
-    lcdSetTemperature(currentState.waterTemperature);
+    currentState.waterTemperature = (currentState.temperature > (float)ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
+      ? currentState.temperature / (float)brewTempSetPoint + (float)ACTIVE_PROFILE(runningCfg).setpoint
+      : currentState.temperature;
+    lcdSetTemperature((uint16_t)currentState.waterTemperature);
 
     /*LCD weight output*/
     switch (lcdCurrentPageId) {
@@ -406,7 +406,6 @@ void lcdSaveProfileTrigger(void) {
   LOG_VERBOSE("Saving profile to EEPROM");
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  eepromCurrentValues.activeProfile = runningCfg.activeProfile;
   lcdFetchCurrentProfile(eepromCurrentValues);
   tryEepromWrite(eepromCurrentValues);
 }
@@ -417,6 +416,7 @@ void lcdResetSettingsTrigger(void) {
 
 void lcdLoadDefaultProfileTrigger(void) {
   lcdSwitchActiveToStoredProfile(eepromGetDefaultValues());
+
   lcdShowPopup("Profile loaded!");
 }
 

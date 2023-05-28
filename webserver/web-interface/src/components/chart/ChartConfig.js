@@ -26,6 +26,7 @@ export default function getShotChartConfig(theme) {
     },
     scales: {
       x: {
+        axis: 'x',
         type: 'linear',
         ticks: {
           color: theme.palette.text.secondary,
@@ -33,6 +34,7 @@ export default function getShotChartConfig(theme) {
         grid: {
           color: theme.palette.divider,
         },
+        suggestedMax: 60,
       },
       y1: {
         type: 'linear',
