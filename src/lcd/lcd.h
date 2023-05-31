@@ -48,6 +48,7 @@ int lcdGetDescaleCycle(void);
 void lcdSetDescaleCycle(int cycle);
 void lcdSetPressure(float val);
 void lcdSetTemperature(uint16_t val);
+void lcdSetTemperatureDecimal(uint16_t val);
 void lcdTargetState(int val);
 void lcdSetWeight(float val);
 void lcdSetFlow(int val);

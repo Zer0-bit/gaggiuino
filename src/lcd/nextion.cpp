@@ -462,6 +462,10 @@ void lcdSetTemperature(uint16_t val) {
   myNex.writeNum("currentTemp", val);
 }
 
+void lcdSetTemperatureDecimal(uint16_t val) {
+  myNex.writeNum("dE.val", val);
+}
+
 void lcdSetWeight(float val) {
   char tmp[6];
   int check = snprintf(tmp, sizeof(tmp), "%.1f", static_cast<double>(val));

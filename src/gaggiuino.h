@@ -22,6 +22,7 @@
 #include "profiling_phases.h"
 #include "peripherals/esp_comms.h"
 #include "peripherals/led.h"
+#include "peripherals/tof.h"
 
 // Define some const values
 #if defined SINGLE_BOARD

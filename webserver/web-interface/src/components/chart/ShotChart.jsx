@@ -102,15 +102,15 @@ function mapToChartData(input, theme) {
   };
 }
 
-function popDataFromChartData(chartData) {
-  chartData.labels.shift();
-  chartData.datasets.forEach((dataset) => dataset.data.shift());
-}
+// function popDataFromChartData(chartData) {
+//   chartData.labels.shift();
+//   chartData.datasets.forEach((dataset) => dataset.data.shift());
+// }
 
-function addDataPointToChartData(chartData, dataPoint, maxLength) {
-  while (maxLength > 0 && chartData.labels.length >= maxLength) {
-    popDataFromChartData(chartData);
-  }
+function addDataPointToChartData(chartData, dataPoint) {
+  // while (maxLength > 0 && chartData.labels.length >= maxLength) {
+  //   popDataFromChartData(chartData);
+  // }
   if (!dataPoint) {
     return;
   }
@@ -136,7 +136,7 @@ function addDataPointToChartData(chartData, dataPoint, maxLength) {
   chartData.datasets[5].data.push(dataPoint.targetPumpFlow);
 }
 
-function Chart({ data, newDataPoint, maxLength }) {
+function Chart({ data, newDataPoint }) {
   const chartRef = useRef(null);
   const theme = useTheme();
   const config = useMemo(() => getShotChartConfig(theme), [theme]);
@@ -150,7 +150,7 @@ function Chart({ data, newDataPoint, maxLength }) {
   }, [data]);
 
   useEffect(() => {
-    addDataPointToChartData(chartData, newDataPoint, maxLength);
+    addDataPointToChartData(chartData, newDataPoint);
     chartRef.current.data.labels = chartData.labels;
     chartData.datasets.forEach((dataset, index) => {
       chartRef.current.data.datasets[index].data = dataset.data;
@@ -183,11 +183,11 @@ export const ShotChartDataPointType = PropTypes.shape({
 Chart.propTypes = {
   data: PropTypes.arrayOf(ShotChartDataPointType),
   newDataPoint: ShotChartDataPointType,
-  maxLength: PropTypes.number,
+  // maxLength: PropTypes.number,
 };
 
 Chart.defaultProps = {
   data: undefined,
   newDataPoint: undefined,
-  maxLength: undefined,
+  // maxLength: undefined,
 };
