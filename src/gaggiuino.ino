@@ -936,7 +936,12 @@ static void cpsInit(eepromValues_t &eepromValues) {
 
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
-  uint16_t reading = tof.readLvl();
+  uint32_t timer = millis();
+  uint16_t reading;
+  if (timer - millis() > 3000u) {
+    reading = tof.readLvl();
+    timer = millis();
+  }
 
   currentState.waterLvl = mapRange(reading, 50.f, 3000.f, 100.f, 5.f, 0);
 }
