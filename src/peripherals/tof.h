@@ -9,7 +9,7 @@ class TOF {
   public:
     TOF();
     void begin();
-    void readLvl(SensorState &state);
+    uint16_t readLvl();
 
   private:
     Adafruit_VL53L0X tof;
@@ -20,17 +20,19 @@ TOF::TOF(){};
 void TOF::begin() {
   #ifdef TOF_VL53L0X
   if (!tof.begin()) {
-    while(1);
+    return;
   }
   // start continuous ranging
   tof.startRangeContinuous();
   #endif
 }
 
-void TOF::readLvl(SensorState &state) {
+uint16_t TOF::readLvl() {
+  uint16_t val = 25000;
   #ifdef TOF_VL53L0X
   if (tof.isRangeComplete())
-    state.tofReading = tof.readRange();
+    val = tof.readRange();
   #endif
+  return val;
 }
 #endif

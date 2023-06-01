@@ -493,6 +493,9 @@ void lcdShowPopup(const char *msg) {
   }
 }
 
+void lcdSetTankWaterLvl(uint16_t val) {
+  myNex.writeNum("j0.val", val);
+}
 void lcdTargetState(int val) {
   myNex.writeNum("targetState", val);
 }
