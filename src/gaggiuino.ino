@@ -24,7 +24,8 @@ eepromValues_t runningCfg;
 
 SystemState systemState;
 
-LED tofnled;
+LED led;
+TOF tof;
 
 void setup(void) {
   LOG_INIT();
@@ -60,8 +61,10 @@ void setup(void) {
   espCommsInit();
 
   // Initialize LED
-  tofnled.begin();
-  tofnled.setColor(255, 255, 255); // WHITE
+  led.begin();
+  led.setColor(255, 255, 255); // WHITE
+  // Init the tof sensor
+  tof.begin();
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -92,7 +95,7 @@ void setup(void) {
   LOG_INFO("Setup sequence finished");
 
   // Change LED colour on setup exit.
-  tofnled.setColor(255, 87, 95); // 64171
+  led.setColor(255, 87, 95); // 64171
 
   iwdcInit();
 }
@@ -128,6 +131,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   updateStartupTimer();
+  readTankWaterLevel();
 }
 
 static void sensorReadSwitches(void) {
@@ -308,6 +312,7 @@ static void modeSelect(void) {
 //#############################################################################################
 
 static void lcdRefresh(void) {
+  uint16_t tempDecimal;
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
@@ -322,31 +327,35 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    uint16_t brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
+    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp; 
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
     currentState.waterTemperature = (currentState.temperature > (float)ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
       ? currentState.temperature / (float)brewTempSetPoint + (float)ACTIVE_PROFILE(runningCfg).setpoint
       : currentState.temperature;
-    lcdSetTemperature((uint16_t)currentState.waterTemperature);
 
-    /*LCD weight output*/
+    lcdSetTemperature(std::floor((uint16_t)currentState.waterTemperature));
+
+    /*LCD weight & temp & water lvl output*/
     switch (lcdCurrentPageId) {
       case NextionPage::Home:
+        // temp decimal handling
+        tempDecimal = (currentState.waterTemperature - (uint16_t)currentState.waterTemperature) * 10;
+        lcdSetTemperatureDecimal(tempDecimal);
+        // water lvl
+        lcdSetTankWaterLvl(currentState.waterLvl);
+        //weight
         if (homeScreenScalesEnabled) lcdSetWeight(currentState.weight);
         break;
       case NextionPage::BrewGraph:
       case NextionPage::BrewManual:
+        // temp decimal handling
+        tempDecimal = (currentState.waterTemperature - (uint16_t)currentState.waterTemperature) * 10;
+        lcdSetTemperatureDecimal(tempDecimal);
+
         // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
         if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
-        break;
-      default:
-        break; // don't push needless data on other pages
-    }
 
-    /*LCD flow output*/
-    switch (lcdCurrentPageId) {
-      case NextionPage::BrewGraph:
-      case NextionPage::BrewManual:
+        /*LCD flow output*/
         lcdSetFlow(
           currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
             ? currentState.smoothedWeightFlow * 10.f
@@ -923,4 +932,16 @@ static void cpsInit(eepromValues_t &eepromValues) {
   } else if (cps > 0) { // 50 Hz
     eepromValues.powerLineFrequency = 50u;
   }
+}
+
+// return the reading in mm of the tank water level.
+static void readTankWaterLevel(void) {
+  uint32_t timer = millis();
+  uint16_t reading;
+  if (timer - millis() > 3000u) {
+    reading = tof.readLvl();
+    timer = millis();
+  }
+
+  currentState.waterLvl = mapRange(reading, 50.f, 3000.f, 100.f, 5.f, 0);
 }

@@ -34,6 +34,7 @@ export default function getShotChartConfig(theme) {
         grid: {
           color: theme.palette.divider,
         },
+        min: 0,
         suggestedMax: 60,
       },
       y1: {
