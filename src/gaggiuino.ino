@@ -25,7 +25,7 @@ eepromValues_t runningCfg;
 SystemState systemState;
 
 LED led;
-TOF tof;
+TOF tof(systemState);
 
 void setup(void) {
   LOG_INIT();
@@ -937,11 +937,12 @@ static void cpsInit(eepromValues_t &eepromValues) {
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
   uint32_t timer = millis();
-  uint16_t reading;
+  uint16_t reading = 0;
   if (timer - millis() > 3000u) {
     reading = tof.readLvl();
     timer = millis();
   }
 
-  currentState.waterLvl = mapRange(reading, 50.f, 3000.f, 100.f, 5.f, 0);
+  currentState.waterLvl = mapRange(reading, 30.f, 300.f, 100.f, 5.f, 0);
+  currentState.waterLvl = constrain(currentState.waterLvl, 30.f, 300.f);
 }

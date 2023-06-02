@@ -4,6 +4,7 @@
 
 struct SystemState {
   bool startupInitFinished;
+  bool tofReady;
 };
 
 #endif
