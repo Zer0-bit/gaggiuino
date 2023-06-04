@@ -961,6 +961,6 @@ static void brewDisco(void) {
         cstate = 0; // reset state
       }
     }
-    brewActive ? timer = millis() + 50u : timer = millis() + 1500u;
+    brewActive ? timer = millis() + 15u : timer = millis() + 1500u;
   }
 }
