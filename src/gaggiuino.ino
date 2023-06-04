@@ -116,6 +116,7 @@ void loop(void) {
   lcdRefresh();
   espCommsSendSensorData(currentState);
   systemHealthCheck(0.7f);
+  brewDisco();
 }
 
 //##############################################################################################################################
@@ -938,11 +939,36 @@ static void cpsInit(eepromValues_t &eepromValues) {
 static void readTankWaterLevel(void) {
   uint32_t timer = millis();
   uint16_t reading = 0;
-  if (timer - millis() > 3000u) {
+  if (timer - millis() > 500u) {
     reading = tof.readLvl();
     timer = millis();
   }
 
-  currentState.waterLvl = mapRange(reading, 30.f, 300.f, 100.f, 5.f, 0);
-  currentState.waterLvl = constrain(currentState.waterLvl, 30.f, 300.f);
+  currentState.waterLvl = mapRange(reading, 35.f, 175.f, 100.f, 5.f, 0);
+  currentState.waterLvl = constrain(currentState.waterLvl, 35.f, 175.f);
+}
+
+static void brewDisco(void) {
+  static uint8_t cstate = 1, val = 0;
+  static uint32_t timer = millis() + 500u;
+  static uint8_t r,g,b;
+  if (brewActive) {
+    if(millis() > timer) {
+      r = (cstate & 4) ? val<<3 : 0; // Red channel enabled on cstate = 4,5,6,7  // val<<3 adjusts from 5 bit quantity to 8 bit for the library
+      g = (cstate & 2) ? val<<3 : 0; // Green channel enabled on cstate = 2,3,6,7
+      b = (cstate & 1) ? val<<3 : 0; // Blue channel enabled on cstate = 1,3,5,7
+      led.setColor(r,g,b);
+      val++;
+      if (val>31) { // if val has reached max,
+        val = 0;  // reset val
+        cstate++; // next state
+        if (cstate > 7) { // if state has reached max
+          cstate = 0; // reset state
+        }
+      }
+      timer = millis() + 500u;
+    }
+  } else {
+    timer = millis() + 500u;
+  }
 }
