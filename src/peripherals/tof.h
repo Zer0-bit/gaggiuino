@@ -23,7 +23,7 @@ TOF::TOF(SystemState& state) : sensor(state) {}
 
 void TOF::begin() {
   #ifdef TOF_VL53L0X
-  sensor.tofReady = tof.begin(Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
+  sensor.tofReady = tof.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
   // start continuous ranging
   if (sensor.tofReady)
     tof.startRangeContinuous();
