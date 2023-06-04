@@ -6,7 +6,7 @@
 #include <SimpleKalmanFilter.h>
 #include "../../lib/Common/system_state.h"
 
-SimpleKalmanFilter smoothTofOutput(0.1f, 0.1f, 0.1f);
+SimpleKalmanFilter smoothTofOutput(1.f, 1.f, 0.01f);
 
 class TOF {
   public:
@@ -23,7 +23,9 @@ TOF::TOF(SystemState& state) : sensor(state) {}
 
 void TOF::begin() {
   #ifdef TOF_VL53L0X
-  sensor.tofReady = tof.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
+  if (!tof.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY))
+    while(1);
+  else sensor.tofReady = true;
   // start continuous ranging
   if (sensor.tofReady)
     tof.startRangeContinuous();
@@ -31,7 +33,7 @@ void TOF::begin() {
 }
 
 uint16_t TOF::readLvl() {
-  uint16_t val = 175;
+  uint16_t val = 0;
   #ifdef TOF_VL53L0X
   if (tof.isRangeComplete())
     val = tof.readRange();
