@@ -96,6 +96,7 @@ void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
   JsonObject data = root.createNestedObject("data");
   data["brewActive"] = snapshot.brewActive;
   data["steamActive"] = snapshot.steamActive;
+  data["scalesPresent"] = snapshot.scalesPresent;
   data["temperature"] = snapshot.temperature;
   data["pressure"] = snapshot.pressure;
   data["pumpFlow"] = snapshot.pumpFlow;

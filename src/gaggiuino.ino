@@ -150,7 +150,8 @@ static void sensorsReadTemperature(void) {
 
 static void sensorsReadWeight(void) {
   uint32_t elapsedTime = millis() - scalesTimer;
-  if (scalesIsPresent() && elapsedTime > GET_SCALES_READ_EVERY) {
+  currentState.scalesPresent = scalesIsPresent();
+  if (currentState.scalesPresent && elapsedTime > GET_SCALES_READ_EVERY) {
     if(!tareDone) {
       scalesTare(); //Tare at the start of any weighing cycle
       if (!nonBrewModeActive && (fabsf(scalesGetWeight()) > 0.3f)) {

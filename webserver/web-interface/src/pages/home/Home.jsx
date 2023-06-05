@@ -23,9 +23,15 @@ function Home() {
   const theme = useTheme();
 
   const [shotDialogOpen, setShotDialogOpen] = useState(false);
+  const [scalesPresent, setScalesPresent] = useState(false);
+
   const [lastSensorData, setLastSensorData] = useState({
-    temperature: 0, pressure: 0, pumpFlow: 0, weight: 0,
+    temperature: 0, pressure: 0, pumpFlow: 0, weight: 0, scalesPresent: true,
   });
+
+  useEffect(() => {
+    setScalesPresent(lastSensorData.scalesPresent);
+  }, [lastSensorData]);
 
   useEffect(() => {
     if (lastJsonMessage === null) {
@@ -56,14 +62,19 @@ function Home() {
 
   return (
     <Container sx={{ pt: theme.spacing(2) }}>
-      <Grid container columns={16} spacing={1} sx={{ mb: theme.spacing(1) }}>
-        <Grid item xs={8} sm={8}>
+      <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1) }}>
+        <Grid item xs={scalesPresent ? 4 : 6}>
           {boxedComponent(<GaugeChart value={lastSensorData.temperature} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
         </Grid>
-        <Grid item xs={8} sm={8}>
+        <Grid item xs={scalesPresent ? 4 : 6}>
           {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
         </Grid>
-        <Grid item xs={16}>
+        {scalesPresent && (
+        <Grid item xs={4}>
+          {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
+        </Grid>
+        )}
+        <Grid item xs={12}>
           <ProfilesTable />
         </Grid>
       </Grid>

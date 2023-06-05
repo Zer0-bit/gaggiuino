@@ -37,6 +37,7 @@ void espCommsSendSensorData(const SensorState& state, uint32_t frequency) {
     SensorStateSnapshot sensorSnapshot = SensorStateSnapshot{
       .brewActive = state.brewSwitchState,
       .steamActive = state.steamSwitchState,
+      .scalesPresent = state.scalesPresent,
       .temperature = state.waterTemperature,
       .pressure = state.smoothedPressure,
       .pumpFlow = state.smoothedPumpFlow,

@@ -27,7 +27,7 @@ export const defaultShotData = {
 };
 
 export const apiHost = (process.env.NODE_ENV === 'development')
-  ? '192.168.0.14'
+  ? '192.168.0.21'
   : window.location.host;
 
 export function formatTimeInShot(timeInShot) {
