@@ -25,7 +25,7 @@ eepromValues_t runningCfg;
 SystemState systemState;
 
 LED led;
-TOF tof;
+TOF tof(systemState);
 
 void setup(void) {
   LOG_INIT();
@@ -64,7 +64,7 @@ void setup(void) {
   led.begin();
   led.setColor(255, 255, 255); // WHITE
   // Init the tof sensor
-  tof.begin();
+  tof.init();
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -116,6 +116,7 @@ void loop(void) {
   lcdRefresh();
   espCommsSendSensorData(currentState);
   systemHealthCheck(0.7f);
+  brewDisco();
 }
 
 //##############################################################################################################################
@@ -936,12 +937,37 @@ static void cpsInit(eepromValues_t &eepromValues) {
 
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
-  uint32_t timer = millis();
-  uint16_t reading;
-  if (timer - millis() > 3000u) {
-    reading = tof.readLvl();
-    timer = millis();
-  }
+  uint16_t reading = 0;
 
-  currentState.waterLvl = mapRange(reading, 50.f, 3000.f, 100.f, 5.f, 0);
+  reading = tof.readLvl();
+  currentState.waterLvl = mapRange(reading, 1.f, 160.f, 100.f, 1.f, 0);
+  currentState.waterLvl = constrain(currentState.waterLvl, 1.f, 160.f);
+}
+
+static void brewDisco(void) {
+  static uint8_t cstate = 1, val = 0;
+  static uint32_t timer = millis();
+  static uint8_t r,g,b;
+  if(millis() > timer) {
+    // val<<3 adjusts from 5 bit quantity to 8 bit for the library
+    if(val % 2 == 0) {
+      b = (cstate & 4) ? val<<3 : r; // Blue channel enabled on cstate = 4,5,6,7
+      g = (cstate & 2) ? val<<3 : g; // Green channel enabled on cstate = 2,3,6,7
+      r = (cstate & 1) ? val<<3 : b; // Red channel enabled on cstate = 1,3,5,7
+    } else {
+      r = (cstate & 4) ? val<<3 : b; // Red channel enabled on cstate = 4,5,6,7
+      g = (cstate & 2) ? val<<3 : g; // Green channel enabled on cstate = 2,3,6,7
+      b = (cstate & 1) ? val<<3 : r; // Blue channel enabled on cstate = 1,3,5,7
+    }
+    led.setColor(r,g,b);
+    val++;
+    if (val>31) { // if val has reached max,
+      val = 0;  // reset val
+      cstate++; // next state
+      if (cstate > 7) { // if state has reached max
+        cstate = 0; // reset state
+      }
+    }
+    brewActive ? timer = millis() + 15u : timer = millis() + 1500u;
+  }
 }

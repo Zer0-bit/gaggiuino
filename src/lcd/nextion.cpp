@@ -10,15 +10,34 @@ volatile NextionPage lcdLastCurrentPageId;
 
 void lcdInit(void) {
   myNex.begin(115200);
-  while (myNex.readNumber("ack") != 100 )
-  {
-    LOG_VERBOSE("Connecting to Nextion LCD");
-    delay(100);
+  while (!lcdCheckSerialInit("\x88\xFF\xFF\xFF", 4)) {
+    LOG_VERBOSE("Connecting to Nextion LCD...");
+    delay(5);
   }
   myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
   lcdCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
   lcdLastCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
 }
+
+bool lcdCheckSerialInit(const char* expectedOutput, size_t expectedLen) {
+  size_t receivedLen = 0;
+
+  while (receivedLen < expectedLen) {
+    int receivedByte = myNex.readByte();
+    if (receivedByte != -1) {
+      if (receivedByte == expectedOutput[receivedLen]) {
+        receivedLen++;
+      } else {
+        // Reset receivedLen if the received byte doesn't match
+        receivedLen = 0;
+      }
+    }
+  }
+
+  // Serial output matches expected output
+  return true;
+}
+
 
 void lcdListen(void) {
   myNex.NextionListen();
