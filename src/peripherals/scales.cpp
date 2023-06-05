@@ -26,9 +26,9 @@ unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 #endif
 
 void scalesInit(float scalesF1, float scalesF2) {
-    // Forced predicitve scales in case someone with actual hardware scales wants to use them.
+  scalesPresent = false;
+  // Forced predicitve scales in case someone with actual hardware scales wants to use them.
   if (FORCE_PREDICTIVE_SCALES) {
-    scalesPresent = false;
     return;
   }
 
@@ -41,24 +41,30 @@ void scalesInit(float scalesF1, float scalesF2) {
     loadCells.tare(4);
     scalesPresent = true;
   }
+  else {
+    loadCells.power_down();
+  }
 }
 
 void scalesTare(void) {
-  auto& loadCells = LoadCellSingleton::getInstance();
-  if (loadCells.wait_ready_timeout(150, 10)) {
-    loadCells.tare(4);
+  if (scalesPresent) {
+    auto& loadCells = LoadCellSingleton::getInstance();
+    if (loadCells.wait_ready_timeout(150, 10)) {
+      loadCells.tare(4);
+    }
   }
 }
 
 float scalesGetWeight(void) {
   float currentWeight = 0.f;
-  auto& loadCells = LoadCellSingleton::getInstance();
-  if (loadCells.wait_ready_timeout(150, 10)) {
-    float values[2];
-    loadCells.get_units(values);
-    currentWeight = values[0] + values[1];
+  if (scalesPresent) {
+    auto& loadCells = LoadCellSingleton::getInstance();
+    if (loadCells.wait_ready_timeout(150, 10)) {
+      float values[2];
+      loadCells.get_units(values);
+      currentWeight = values[0] + values[1];
+    }
   }
-
   return currentWeight;
 }
 
@@ -68,7 +74,8 @@ bool scalesIsPresent(void) {
 
 float scalesDripTrayWeight() {
   long value[2] = {};
-  LoadCellSingleton::getInstance().read_average(value, 4);
-
+  if (scalesPresent) {
+    LoadCellSingleton::getInstance().read_average(value, 4);
+  }
   return ((float)value[0] + (float)value[1]);
 }
