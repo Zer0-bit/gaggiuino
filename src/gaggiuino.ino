@@ -940,8 +940,8 @@ static void readTankWaterLevel(void) {
   uint16_t reading = 0;
 
   reading = tof.readLvl();
-  currentState.waterLvl = mapRange(reading, 35.f, 115.f, 100.f, 1.f, 0);
-  currentState.waterLvl = constrain(currentState.waterLvl, 35.f, 115.f);
+  currentState.waterLvl = mapRange(reading, 1.f, 160.f, 100.f, 1.f, 0);
+  currentState.waterLvl = constrain(currentState.waterLvl, 1.f, 160.f);
 }
 
 static void brewDisco(void) {
@@ -951,9 +951,9 @@ static void brewDisco(void) {
   if(millis() > timer) {
     // val<<3 adjusts from 5 bit quantity to 8 bit for the library
     if(val % 2 == 0) {
-      b = (cstate & 4) ? val<<3 : r; // Red channel enabled on cstate = 4,5,6,7
+      b = (cstate & 4) ? val<<3 : r; // Blue channel enabled on cstate = 4,5,6,7
       g = (cstate & 2) ? val<<3 : g; // Green channel enabled on cstate = 2,3,6,7
-      r = (cstate & 1) ? val<<3 : b; // Blue channel enabled on cstate = 1,3,5,7
+      r = (cstate & 1) ? val<<3 : b; // Red channel enabled on cstate = 1,3,5,7
     } else {
       r = (cstate & 4) ? val<<3 : b; // Red channel enabled on cstate = 4,5,6,7
       g = (cstate & 2) ? val<<3 : g; // Green channel enabled on cstate = 2,3,6,7

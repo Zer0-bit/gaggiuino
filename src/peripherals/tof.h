@@ -6,7 +6,7 @@
 #include <SimpleKalmanFilter.h>
 #include "../../lib/Common/system_state.h"
 
-// SimpleKalmanFilter smoothTofOutput(1.f, 1.f, 0.01f);
+SimpleKalmanFilter smoothTofOutput(1.f, 1.f, 0.01f);
 
 class TOF {
   public:
@@ -33,19 +33,15 @@ void TOF::init() {
 }
 
 uint16_t TOF::readLvl() {
-  static uint16_t i = 0;
-  uint16_t val = 35;
   static uint16_t lastNonNullVal = 36;
   #ifdef TOF_VL53L0X
 
-  val = tof.readRangeResult();
-  if (val != 0) {
-    lastNonNullVal = val;
-    if (i < 1000) sensor.tofReading[i] = val;
-    else i = 0;
-    return val;
+  sensor.tofReading = tof.readRangeResult();
+  if (sensor.tofReading != 0) {
+    lastNonNullVal = sensor.tofReading;
+    return sensor.tofReading;
   }
-  // val = smoothTofOutput.updateEstimate(val);
+  sensor.tofReading = smoothTofOutput.updateEstimate(sensor.tofReading);
   #endif
   return lastNonNullVal;
 }

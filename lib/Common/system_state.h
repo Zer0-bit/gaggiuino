@@ -5,7 +5,7 @@
 struct SystemState {
   bool startupInitFinished;
   bool tofReady;
-  uint16_t tofReading[1000];
+  uint16_t tofReading;
 };
 
 #endif
