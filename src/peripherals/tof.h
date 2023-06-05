@@ -33,13 +33,20 @@ void TOF::begin() {
 }
 
 uint16_t TOF::readLvl() {
+  static uint16_t i = 0;
   uint16_t val = 0;
+  static uint16_t lastNonNullVal = 35;
   #ifdef TOF_VL53L0X
-  if (tof.isRangeComplete())
+  if (tof.isRangeComplete()) {
     val = tof.readRange();
     val = smoothTofOutput.updateEstimate(val);
+    if (i < 1000) {
+      sensor.tofReading[i] = val;
+    } else i = 0;
+    lastNonNullVal = val;
+  }
   #endif
-  return val;
+  return val != 0 ? val : lastNonNullVal;
 }
 
 #endif
