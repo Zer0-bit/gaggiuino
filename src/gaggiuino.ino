@@ -64,7 +64,7 @@ void setup(void) {
   led.begin();
   led.setColor(255, 255, 255); // WHITE
   // Init the tof sensor
-  tof.begin();
+  tof.init();
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
@@ -940,7 +940,7 @@ static void readTankWaterLevel(void) {
   uint16_t reading = 0;
 
   reading = tof.readLvl();
-  currentState.waterLvl = mapRange(reading, 35.f, 115.f, 100.f, 5.f, 0);
+  currentState.waterLvl = mapRange(reading, 35.f, 115.f, 100.f, 1.f, 0);
   currentState.waterLvl = constrain(currentState.waterLvl, 35.f, 115.f);
 }
 
