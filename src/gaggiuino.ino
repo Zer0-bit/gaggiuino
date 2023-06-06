@@ -726,6 +726,11 @@ static void brewDetect(void) {
   if (!systemState.startupInitFinished) {
     return;
   }
+  // If there's not enough water in the tank
+  if (currentState.waterLvl < 10) {
+    lcdShowPopup("Fill the water tank!");
+    return;
+  }
 
   static bool paramsReset = true;
 
@@ -941,8 +946,9 @@ static void readTankWaterLevel(void) {
   uint16_t reading = 0;
 
   reading = tof.readLvl();
+  reading = constrain(reading, 1, 160);
   currentState.waterLvl = mapRange(reading, 1.f, 160.f, 100.f, 1.f, 0);
-  currentState.waterLvl = constrain(currentState.waterLvl, 1.f, 160.f);
+  currentState.waterLvl = constrain(currentState.waterLvl, 1.f, 100.f);
 }
 
 static void brewDisco(void) {
