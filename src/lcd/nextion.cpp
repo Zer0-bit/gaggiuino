@@ -552,12 +552,12 @@ void lcdSetLedColour(SystemState& sys) {
     sys.ledColours[0] = colourCode;
     break;
   case 2:
-    colour = colourCode / 2;
+    colour = colourCode - 255;
     sys.ledColours[1] = colour;
     ledCtrl.setGreen(colour);
     break;
   case 3:
-    colour = colourCode / 3;
+    colour = colourCode - 510;
     sys.ledColours[2] = colour;
     ledCtrl.setBlue(colour);
     break;

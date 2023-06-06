@@ -6,7 +6,7 @@
 #include <SimpleKalmanFilter.h>
 #include "../../lib/Common/system_state.h"
 
-SimpleKalmanFilter smoothTofOutput(1.f, 1.f, 0.01f);
+SimpleKalmanFilter smoothTofOutput(0.1f, 0.1f, 0.1f);
 
 class TOF {
   public:
