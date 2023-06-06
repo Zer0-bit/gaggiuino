@@ -4,6 +4,8 @@
 
 #include <EasyNextionLibrary.h>
 #include "eeprom_data/eeprom_data.h"
+#include "../../lib/Common/system_state.h"
+
 
 enum class NextionPage: byte {
   /* 00 */ Home,
@@ -21,7 +23,8 @@ enum class NextionPage: byte {
   /* 0C */ BrewTransitionProfile,
   /* 0D */ GraphPreview,
   /* 0E */ KeyboardNumeric,
-  /* 0F */ KeyboardAlpha
+  /* 0F */ KeyboardAlpha,
+  /* 10 */ Led
 };
 
 extern volatile NextionPage lcdCurrentPageId;
@@ -63,6 +66,7 @@ void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);
 void lcdSetBrewTimer(int seconds);
 void lcdWarmupStateStop(void);
+void lcdSetLedColour(SystemState& sys);
 
 /* Triggers */
 void lcdSaveSettingsTrigger(void);

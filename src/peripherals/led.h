@@ -9,22 +9,11 @@ class LED {
     LED();
     void begin();
     void setColor(uint8_t red, uint8_t green, uint8_t blue);
+    void setRed(uint8_t red);
+    void setBlue(uint8_t blue);
+    void setGreen(uint8_t green);
 
   private:
     NCP5623 tankLED;
 };
-
-LED::LED(){};
-
-void LED::begin() {
-  #ifdef LED_NCP5623
-  tankLED.begin();
-  #endif
-}
-
-void LED::setColor(uint8_t red, uint8_t green, uint8_t blue) {
-  #ifdef LED_NCP5623
-  tankLED.setColor(red, green, blue);
-  #endif
-}
 #endif

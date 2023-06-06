@@ -3,10 +3,12 @@
 #include "pindef.h"
 #include "log.h"
 #include <Arduino.h>
+#include "../peripherals/led.h"
 
 EasyNex myNex(USART_LCD);
 volatile NextionPage lcdCurrentPageId;
 volatile NextionPage lcdLastCurrentPageId;
+LED ledCtrl;
 
 void lcdInit(void) {
   myNex.begin(115200);
@@ -533,6 +535,36 @@ void lcdSetBrewTimer(int seconds) {
 
 void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
+}
+
+void lcdSetLedColour(SystemState& sys) {
+  uint16_t colourCode = myNex.readNumber("ledID");
+  uint8_t colourID;
+  uint8_t colour;
+
+  if (colourCode > 510) colourID = 3;
+  else if (colourCode > 255) colourID = 2;
+  else colourID = 1;
+
+  switch (colourID) {
+  case 1:
+    ledCtrl.setRed(colourCode);
+    sys.ledColours[0] = colourCode;
+    break;
+  case 2:
+    colour = colourCode / 2;
+    sys.ledColours[1] = colour;
+    ledCtrl.setGreen(colour);
+    break;
+  case 3:
+    colour = colourCode / 3;
+    sys.ledColours[2] = colour;
+    ledCtrl.setBlue(colour);
+    break;
+  default:
+    ledCtrl.setColor(0,0,0);
+    break;
+  }
 }
 
 void trigger1(void) { lcdSaveSettingsTrigger(); }

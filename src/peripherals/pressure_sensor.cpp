@@ -5,12 +5,10 @@
 #include "../lcd/lcd.h"
 #include "i2c_bus_reset.h"
 
-TwoWire adsTWI(PIN_WIRE_SDA, PIN_WIRE_SCL);
-
 #if defined SINGLE_BOARD
-ADS1015 ADS(0x48, &adsTWI);
+ADS1015 ADS(0x48);
 #else
-ADS1115 ADS(0x48, &adsTWI);
+ADS1115 ADS(0x48);
 #endif
 
 float previousPressure;
