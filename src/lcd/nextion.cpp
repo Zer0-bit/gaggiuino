@@ -547,6 +547,9 @@ void lcdSetLedColour(SystemState& sys) {
   else colourID = 1;
 
   switch (colourID) {
+  case 0:
+    ledCtrl.setColor(10,10,10);
+    break;
   case 1:
     ledCtrl.setRed(colourCode);
     sys.ledColours[0] = colourCode;

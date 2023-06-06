@@ -212,12 +212,13 @@ static void calculateWeightAndFlow(void) {
       if (predictiveWeight.isOutputFlow() || currentState.weight > 0.4f) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
-        // Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling
-        // if (runningCfg.flowProfileState && currentState.isPressureRising) {
-        //   if (currentState.smoothedPressure < runningCfg.flowProfilePressureTarget * 0.9f) {
-        //     actualFlow *= 0.6f;
-        //   }
-        // }
+        /* Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling,
+        once pressure stabilises around the setpoint the flow is either stable or puck restriction is high af. */
+        if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
+          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.99f) || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.99f)) {
+            actualFlow *= 0.6f;
+          }
+        }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
         currentState.shotWeight = scalesIsPresent() ? currentState.weight : currentState.shotWeight + actualFlow;
       }
