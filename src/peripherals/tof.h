@@ -33,7 +33,7 @@ void TOF::init() {
 }
 
 uint16_t TOF::readLvl() {
-  static uint16_t lastNonNullVal = 36;
+  static uint16_t lastNonNullVal = 60;
   #ifdef TOF_VL53L0X
 
   sensor.tofReading = tof.readRangeResult();
