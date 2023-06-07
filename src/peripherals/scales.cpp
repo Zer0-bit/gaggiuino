@@ -37,7 +37,7 @@ void scalesInit(float scalesF1, float scalesF2) {
   loadCells.set_scale(scalesF1, scalesF2);
   loadCells.power_up();
 
-  if (loadCells.wait_ready_timeout(500, 10)) {
+  if (loadCells.wait_ready_timeout(1000, 10)) {
     loadCells.tare(4);
     scalesPresent = true;
   }
