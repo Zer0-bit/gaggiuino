@@ -6,14 +6,14 @@
 #include <SimpleKalmanFilter.h>
 #include "../../lib/Common/system_state.h"
 
-SimpleKalmanFilter smoothTofOutput(0.01f, 0.01f, 0.01f);
+// SimpleKalmanFilter smoothTofOutput(0.01f, 0.01f, 0.01f);
 
 class TOF {
   public:
     TOF(SystemState& state);
     void init(void);
     uint16_t readLvl(void);
-    uint16_t avgLvl(uint16_t val);
+    uint16_t readRangeToPct(uint16_t val);
 
   private:
     Adafruit_VL53L0X tof = Adafruit_VL53L0X();
@@ -35,31 +35,29 @@ void TOF::init(void) {
 
 uint16_t TOF::readLvl(void) {
   #ifdef TOF_VL53L0X
-  static uint16_t lastNonNullVal;
+  // static uint16_t lastNonNullVal;
   sensor.tofReading = tof.readRangeResult();
-  if (sensor.tofReading != 0) {
-    lastNonNullVal = sensor.tofReading;
-    sensor.tofReading = smoothTofOutput.updateEstimate(sensor.tofReading);
-    return sensor.tofReading;
-  } else sensor.tofReading = lastNonNullVal;
-  // sensor.tofReading = avgLvl(sensor.tofReading);
+  // if (sensor.tofReading != 0) {
+  //   lastNonNullVal = sensor.tofReading;
+  //   sensor.tofReading = smoothTofOutput.updateEstimate(sensor.tofReading);
+  //   return sensor.tofReading;
+  // } else sensor.tofReading = lastNonNullVal;
+  sensor.tofReading = readRangeToPct(sensor.tofReading);
   #endif
   return sensor.tofReading != 0 ? sensor.tofReading : 60;
 }
 
-uint16_t TOF::avgLvl(uint16_t val) {
-  if (val >= 149) val = 10;
-  else if (val >= 133) val = 20;
-  else if (val >= 117) val = 30;
-  else if (val >= 100) val = 40;
-  else if (val >= 85) val = 50;
-  else if (val >= 69) val = 60;
-  else if (val >= 53) val = 70;
-  else if (val >= 37) val = 80;
-  else if (val >= 20) val = 90;
-  else val = 100;
+uint16_t TOF::readRangeToPct(uint16_t val) {
+  static const uint16_t ranges[] = { 100, 90, 80, 70, 60, 50, 40, 30, 20, 10 };
+  static const uint16_t thresholds[] = { 15, 30, 45, 60, 75, 90, 105, 120, 135 };
 
-  return val;
+  for (size_t i = 0; i < sizeof(thresholds) / sizeof(thresholds[0]); i++) {
+    if (val >= thresholds[i]) {
+      return ranges[i];
+    }
+  }
+
+  return 9; // if val < 15
 }
 
 #endif
