@@ -1,38 +1,119 @@
 #include "wifi_setup.h"
 #include <WiFi.h>
+#include "../task_config.h"
 #include "../log/log.h"
 
-WiFiParams wifiParams;
+/**
+ * Helper class for persisting and retrieving WiFi connection credentials
+ */
+class WiFiParams {
+private:
+  String ssid = "";
+  String pass = "";
+  Preferences preferences;
+public:
+  String getSSID() { return ssid; }
+  String getPass() { return pass;}
+  bool hasCredentials() { return ssid != ""; };
+  void saveCredentials(String ssid, String pass);
+  void init();
+  void reset();
+};
+
+namespace wifi {
+  WiFiParams credentials;
+  SemaphoreHandle_t lock = xSemaphoreCreateRecursiveMutex();
+  std::vector<WiFiNetwork> networks;
+
+  uint32_t lastScan;
+  const uint32_t SCAN_EVERY_MS = 10000;
+
+  uint32_t lastMaintainConnection;
+  const uint32_t MAINTAIN_CONNECTION_EVERY = 10000;
+
+  bool newScanResults = false;
+}
 
 void setupWiFiAccessPoint();
-void wifiScanNetworks();
+void wifiTask(void* params);
 void wifiInit();
 
 void wifiSetup() {
-  while(!WiFi.mode(WIFI_AP_STA)) {
-    LOG_INFO("Initialising WiFi mode.");
-    delay(500);
-  }
-  LOG_INFO("Initialised WiFi in AP+STA mode.");
+  WiFi.mode(WIFI_AP_STA);
   setupWiFiAccessPoint();
   wifiInit();
-  wifiScanNetworks();
+
+  xTaskCreateUniversal(&wifiTask, "wifi_maintenance", configMINIMAL_STACK_SIZE + 2048, NULL, PRIORITY_WIFI_MAINTENANCE, NULL, CORE_WIFI_MAINTENANCE);
 }
 
-// Initialize WiFi
-void wifiInit() {
-  wifiParams.init();
+std::list<WiFiNetwork> wifiAvailableNetworks() {
+  std::list<WiFiNetwork> copy;
+  if (xSemaphoreTakeRecursive(wifi::lock, portMAX_DELAY) == pdPASS) {
+    for (auto& network : wifi::networks) {
+      copy.push_back(network);
+    }
+    xSemaphoreGiveRecursive(wifi::lock);
+  }
+  return copy;
+}
 
-  if (!wifiParams.hasCredentials()) {
+WiFiConnection getWiFiConnection() {
+  if (WiFi.isConnected()) {
+    return WiFiConnection{ .ssid = WiFi.SSID(), .ip = WiFi.localIP().toString() };
+  }
+  else {
+    return WiFiConnection{ .ssid = "", .ip = "" };
+  }
+}
+
+void wifiDisconnect() {
+  if (xSemaphoreTakeRecursive(wifi::lock, portMAX_DELAY) == pdFALSE) return;
+
+  if (WiFi.isConnected()) {
+    WiFi.disconnect();
+    wifi::credentials.reset();
+    LOG_INFO("Disconnected from WiFi and cleared saved WiFi.");
+  }
+
+  xSemaphoreGiveRecursive(wifi::lock);
+}
+
+void setupWiFiAccessPoint() {
+  WiFi.softAP("Gaggiuino AP", NULL);
+  LOG_INFO("AP (Access Point) IP address: %s", WiFi.softAPIP().toString().c_str());
+}
+
+void wifiMaintainConnection();
+
+void wifiTask(void* params) {
+  wifi::lastScan = 0;
+  wifiRefreshNetworks();
+
+  wifi::lastMaintainConnection = millis();
+  while (true) {
+    wifiMaintainConnection();
+    delay(500);
+  }
+}
+
+// Initialize WiFi. If we have persisted credentials then attempt connection
+void wifiInit() {
+  wifi::credentials.init();
+
+  if (!wifi::credentials.hasCredentials()) {
     LOG_INFO("No ssid or password provided.");
     return;
   }
 
-  LOG_INFO("Will attempt connecting to %s - %s", wifiParams.getSSID().c_str(), "***");
-  wifiConnect(wifiParams.getSSID(), wifiParams.getPass());
+  LOG_INFO("Will attempt connecting to %s - %s", wifi::credentials.getSSID().c_str(), "***");
+  wifiConnect(wifi::credentials.getSSID(), wifi::credentials.getPass());
 }
 
+// Connect to WiFi with given credentials and save credential
+// to persisted memory if successful
 bool wifiConnect(String ssid, String pass, const uint32_t timeout) {
+  if (xSemaphoreTakeRecursive(wifi::lock, portMAX_DELAY) == pdFALSE) return false;
+
   if (WiFi.isConnected()) {
     WiFi.disconnect();
   }
@@ -42,92 +123,44 @@ bool wifiConnect(String ssid, String pass, const uint32_t timeout) {
 
   if (WiFi.waitForConnectResult(timeout) != WL_CONNECTED) {
     LOG_INFO("Failed to connect. Check password.");
+    xSemaphoreGiveRecursive(wifi::lock);
     return false;
   }
 
   LOG_INFO("Connected to WiFi [%s] with IP:[%s]", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
-  wifiParams.saveCredentials(ssid, pass);
+  wifi::credentials.saveCredentials(ssid, pass);
 
+  xSemaphoreGiveRecursive(wifi::lock);
   return true;
 }
 
-namespace ws_wifi {
-  uint32_t lastWiFiScan = millis() + 5000;
-  bool newScanResults = false;
-  std::vector<WiFiNetwork> wifiNetworks;
-  const uint32_t WIFI_SCAN_EVERY_MS = 60000;
-}
+// Periodically scan for networks in the surrounding area and persist them in
+// a vector which we then use to serve available networks
+void wifiRefreshNetworks() {
+  LOG_INFO("Starting a new WiFi scan");
 
-void wifiScanNetworks() {
-  // If scan is still running, do nothing
-  if (WiFi.scanComplete() == WIFI_SCAN_RUNNING) {
-    ws_wifi::newScanResults = true;
-    return;
-  }
-
-  if (WiFi.scanComplete() >= 0 && ws_wifi::newScanResults) {
+  uint16_t count = WiFi.scanNetworks(false, false, false, 100U);
+  if (count >= 0 && xSemaphoreTakeRecursive(wifi::lock, portMAX_DELAY) == pdTRUE) {
     LOG_INFO("WiFi scan completed. Updating networks in RAM");
-    ws_wifi::wifiNetworks.clear();
+    wifi::networks.clear();
     for (int i = 0; i < WiFi.scanComplete(); i++) {
-      ws_wifi::wifiNetworks.push_back(WiFiNetwork{
-        .ssid = WiFi.SSID(i),
-        .rssi = WiFi.RSSI(i),
-        .secured = WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? false : true,
-        });
-      ws_wifi::newScanResults = false;
+      wifi::networks.push_back(WiFiNetwork{ WiFi.SSID(i), WiFi.RSSI(i), WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? false : true });
     }
+    xSemaphoreGiveRecursive(wifi::lock);
   }
-
-  // If scan failed or completed too long ago started again
-  if (millis() - ws_wifi::lastWiFiScan > ws_wifi::WIFI_SCAN_EVERY_MS) {
-    LOG_INFO("Starting a new WiFi scan");
-
-    WiFi.scanNetworks(true);
-    ws_wifi::lastWiFiScan = millis();
-    ws_wifi::newScanResults = true;
-  }
+  wifi::lastScan = millis();
 }
 
-std::vector<WiFiNetwork> wifiAvailableNetworks() {
-  return ws_wifi::wifiNetworks;
-}
-
-void setupWiFiAccessPoint() {
-  WiFi.softAP("Gaggiuino AP", NULL);
-  LOG_INFO("AP (Access Point) IP address: %s", WiFi.softAPIP().toString().c_str());
-  delay(50);
-}
-
-WiFiConnection getWiFiConnection() {
-  if (WiFi.isConnected()) {
-    return WiFiConnection{.ssid= WiFi.SSID(), .ip=WiFi.localIP().toString() };
-  } else {
-    return WiFiConnection{.ssid= "", .ip="" };
-  }
-}
-
-void wifiDisconnect() {
-  if (WiFi.isConnected()) {
-    WiFi.disconnect();
-    wifiParams.reset();
-    LOG_INFO("Disconnected from WiFi and cleared saved WiFi.");
-  }
-}
-
-uint32_t wifiConnectionMaintenanceTimer = 0;
+// Check periodically if we're still connected.
+// If not attempt to reconnect
 void wifiMaintainConnection() {
-  if (WiFi.isConnected() || !wifiParams.hasCredentials() || millis() - wifiConnectionMaintenanceTimer < 10000) {
+  if (WiFi.isConnected() || !wifi::credentials.hasCredentials() || millis() - wifi::lastMaintainConnection < 10000) {
     return;
   }
-  wifiConnectionMaintenanceTimer = millis();
+  LOG_INFO("WiFi disconnected, will attempt reconnection to %s", wifi::credentials.getSSID().c_str());
 
-  LOG_INFO("WiFi disconnected, will attempt reconnection to %s", wifiParams.getSSID().c_str());
-  WiFi.begin(wifiParams.getSSID().c_str(), wifiParams.getPass().c_str());
-}
-
-void wifiUpdate() {
-  wifiScanNetworks();
-  wifiMaintainConnection();
+  wifi::lastMaintainConnection = millis();
+  wifiConnect(wifi::credentials.getSSID(), wifi::credentials.getPass(), 9000);
 }
 
 // ----------------------------------------------------
@@ -135,6 +168,8 @@ void wifiUpdate() {
 // ----------------------------------------------------
 
 void WiFiParams::saveCredentials(String ssid, String pass) {
+  if (this->ssid == ssid && this->pass == pass) return;
+
   this->ssid = ssid;
   this->pass = pass;
   preferences.putString("ssid", ssid.c_str());

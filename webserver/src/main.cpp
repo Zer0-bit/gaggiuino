@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "task_config.h"
 #include "filesystem/filesystem.h"
 #include "stm_comms/stm_comms.h"
 #include "server/server_setup.h"
@@ -15,12 +16,11 @@ void setup() {
   wifiSetup();
   webServerSetup();
   bleScalesInit();
+  vTaskDelete(NULL);     //Delete own task by passing NULL(task handle can also be used)
 }
 
 void loop() {
-  stmCommsReadData();
-  wsCleanup();
-  wifiUpdate();
+  vTaskDelete(NULL);     //Delete own task by passing NULL(task handle can also be used)
 }
 
 // ------------------------------------------------------------------------

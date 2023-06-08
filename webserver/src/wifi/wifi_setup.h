@@ -1,41 +1,29 @@
 #ifndef WIFI_SETUP_H
 #define WIFI_SETUP_H
 #include <Arduino.h>
-#include <vector>
+#include <list>
 #include <Preferences.h>
 
+/** Holds information about one of the available networks */
 struct WiFiNetwork {
   String ssid;
   int32_t rssi;
   bool secured;
 };
 
+/** Holds the current network and IP */
 struct WiFiConnection {
   String ssid;
   String ip;
 };
 
-class WiFiParams {
-private:
-  String ssid = "";
-  String pass = "";
-  Preferences preferences;
-public:
-  String getSSID() { return ssid; }
-  String getPass() { return pass;}
-  bool hasCredentials() { return ssid != ""; };
-  void saveCredentials(String ssid, String pass);
-  void init();
-  void reset();
-};
-
 // WiFi definitions
 void wifiSetup();
 bool wifiConnect(String ssid, String pass, const uint32_t timeout = 15000);
-WiFiConnection getWiFiConnection();
 void wifiDisconnect();
-void wifiUpdate();
+void wifiRefreshNetworks();
 
-std::vector<WiFiNetwork> wifiAvailableNetworks();
+WiFiConnection getWiFiConnection();
+std::list<WiFiNetwork> wifiAvailableNetworks();
 
 #endif

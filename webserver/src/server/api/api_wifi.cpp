@@ -11,11 +11,13 @@ void handlePostSelectedNetwork(AsyncWebServerRequest* request, JsonVariant& body
 void handleGetNetworks(AsyncWebServerRequest* request);
 void handleDeleteSelectedNetwork(AsyncWebServerRequest* request);
 void handleGetWifiStatus(AsyncWebServerRequest* request);
+void handleRefreshNetworks(AsyncWebServerRequest* request);
 
 void setupWifiApi(AsyncWebServer& server) {
   server.on("/api/wifi/status", HTTP_GET, handleGetWifiStatus);
   server.on("/api/wifi/networks", HTTP_GET, handleGetNetworks);
   server.on("/api/wifi/selected-network", HTTP_DELETE, handleDeleteSelectedNetwork);
+  server.on("/api/wifi/networks", HTTP_DELETE, handleRefreshNetworks);
   server.addHandler(jsonHandler("/api/wifi/selected-network", HTTP_PUT, handlePostSelectedNetwork));
 }
 
@@ -72,6 +74,12 @@ void handleGetWifiStatus(AsyncWebServerRequest* request) {
   json["status"] = connection.ip == "" ? "disconnected" : "connected";
   serializeJson(json, *response);
   request->send(response);
+}
+
+void handleRefreshNetworks(AsyncWebServerRequest* request) {
+  LOG_INFO("Got request to refresh WiFi networks");
+  wifiRefreshNetworks();
+  sendWifiConnectResponse(request, 200, "Success!");
 }
 
 void sendWifiConnectResponse(AsyncWebServerRequest* request, uint16_t code, String message) {

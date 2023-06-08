@@ -4,8 +4,9 @@
 #include "scales/acaia.h"
 #include "../stm_comms/stm_comms.h"
 #include "../log/log.h"
+#include "../task_config.h"
+
 namespace {
-  const uint16_t BLE_CONNECTION_MAINTENANCE_TIME = 200;
   RemoteScalesScanner remoteScalesScanner;
   std::unique_ptr<RemoteScales> bleScales;
 }
@@ -13,19 +14,20 @@ namespace {
 void bleScalesTask(void* params);
 
 void bleScalesInit() {
-  xTaskCreate(&bleScalesTask, "bleScales", 12000, NULL, 1, NULL);
+  AcaiaScalesPlugin::apply();
+  BLEDevice::init("Gaggiuino");
+
+  xTaskCreateUniversal(&bleScalesTask, "bleScales", configMINIMAL_STACK_SIZE + 4096, NULL, PRIORITY_BLE_SCALES_MAINTAINANCE, NULL, CORE_BLE_SCALES_MAINTAINANCE);
 }
 
 void bleScalesTask(void* params) {
-  AcaiaScalesPlugin::apply();
-  BLEDevice::init("Gaggiuino");
   remoteScalesScanner.initializeAsyncScan();
 
   LOG_INFO("Remote scales and bluetooth initialized");
 
   while (true) {
     bleScalesMaintainConnection();
-    vTaskDelay(BLE_CONNECTION_MAINTENANCE_TIME / portTICK_PERIOD_MS);
+    delay(1000);
   }
 }
 

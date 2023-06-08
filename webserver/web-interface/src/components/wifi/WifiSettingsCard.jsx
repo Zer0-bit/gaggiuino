@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import {
+  Box,
   Button,
-  Card, CardActions, CardContent, Drawer, Typography, useTheme,
+  Card, CardActions, CardContent, Drawer, Stack, Typography, useTheme,
 } from '@mui/material';
-import WifiStatus from './WifiStatus';
-import { getWifiStatus, disconnectFromWifi } from '../client/WifiClient';
-import AvailableNetworks from './available-networks/AvailableNetworks';
+import React, { useEffect, useState } from 'react';
+import { disconnectFromWifi, getWifiStatus, refrehNetworks } from '../client/WifiClient';
 import Loader from '../loader/Loader';
+import WifiStatus from './WifiStatus';
+import AvailableNetworks from './available-networks/AvailableNetworks';
 
 export default function WifiSettingsCard() {
   const [wifiStatus, setWifiStatus] = useState(null);
   const [wifiStatusLoading, setWifiStatusLoading] = useState(true);
   const [wifiDrawerOpen, setWiFiDrawerOpen] = useState(false);
+  const [wifiDrawerRefreshKey, setWifiDrawerRefreshKey] = useState(0);
+  const [networksRefreshing, setNetworksRefreshing] = useState(false);
   const theme = useTheme();
 
   function isConnected() {
@@ -33,6 +37,16 @@ export default function WifiSettingsCard() {
   async function disconnect() {
     await disconnectFromWifi();
     return loadWiFiStatus();
+  }
+
+  async function refreshNetworksAction() {
+    setNetworksRefreshing(true);
+    try {
+      await refrehNetworks();
+      setWifiDrawerRefreshKey((oldKey) => oldKey + 1);
+    } finally {
+      setNetworksRefreshing(false);
+    }
   }
 
   useEffect(() => {
@@ -68,10 +82,17 @@ export default function WifiSettingsCard() {
         open={wifiDrawerOpen}
         onClose={toggleDrawer(false)}
       >
-        <Typography variant="h5" sx={{ m: theme.spacing(2) }}>
-          Available networks
-        </Typography>
-        <AvailableNetworks onConnected={() => loadWiFiStatus()} />
+
+        <Stack spacing={1} direction="row" alignItems="center" justifyContent="space-between">
+          <Typography variant="h5" sx={{ m: theme.spacing(2) }}>
+            Available networks
+          </Typography>
+          <Typography variant="h5" sx={{ m: theme.spacing(2) }}>
+            <Button onClick={refreshNetworksAction}><RefreshIcon /></Button>
+          </Typography>
+        </Stack>
+        {networksRefreshing && <Box display="flex" justifyContent="center"><Loader /></Box>}
+        {!networksRefreshing && <AvailableNetworks key={wifiDrawerRefreshKey} onConnected={() => loadWiFiStatus()} />}
       </Drawer>
     </div>
   );

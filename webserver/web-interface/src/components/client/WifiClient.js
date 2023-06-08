@@ -23,3 +23,7 @@ export async function connectToWifi({ ssid, pass }) {
     timeout: 10000,
   });
 }
+
+export async function refrehNetworks() {
+  return axios.delete('/api/wifi/networks');
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Alert } from '@mui/material';
+import { Alert, Box } from '@mui/material';
 import { getAvailableNetworks } from '../../client/WifiClient';
 import Loader from '../../loader/Loader';
 import AvailableNetwork from './AvailableNetwork';
@@ -31,7 +31,7 @@ export default function AvailableNetworks({ onConnected }) {
   }
 
   return networks === null
-    ? <Loader />
+    ? <Box display="flex" justifyContent="center"><Loader /></Box>
     : (
       <div>
         {networks.map((network) => (

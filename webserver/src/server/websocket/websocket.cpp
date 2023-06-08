@@ -12,9 +12,24 @@ const std::string WS_MSG_LOG = "log_record";
 
 namespace websocket {
   AsyncWebSocket wsServer("/ws");
+  SemaphoreHandle_t jsonMutex = xSemaphoreCreateRecursiveMutex();
+  DynamicJsonDocument jsonDoc(2048);
+
+  bool lockJson() {
+    return xSemaphoreTakeRecursive(jsonMutex, portMAX_DELAY) == pdTRUE;
+  }
+
+  void unlockJson() {
+    jsonDoc.clear();
+    xSemaphoreGiveRecursive(jsonMutex);
+  }
 
   std::deque<std::string> msgBuffer;
+  SemaphoreHandle_t bufferLock = xSemaphoreCreateRecursiveMutex();
+
   void wsSendWithBuffer(std::string message) {
+    if (xSemaphoreTakeRecursive(bufferLock, portMAX_DELAY) == pdFALSE) return;
+
     msgBuffer.push_back(message);
     while (msgBuffer.size() > 50) {
       msgBuffer.pop_front();
@@ -24,6 +39,7 @@ namespace websocket {
       wsServer.textAll(msgBuffer.front().c_str(), msgBuffer.front().length());
       msgBuffer.pop_front();
     }
+    xSemaphoreGiveRecursive(bufferLock);
   }
 }
 
@@ -70,17 +86,19 @@ void onEvent(
 void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
   AwsFrameInfo* info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-    StaticJsonDocument<1024> json;
+    if (!websocket::lockJson()) return;
 
-    DeserializationError err = deserializeJson(json, data);
+    DeserializationError err = deserializeJson(websocket::jsonDoc, data);
     if (err) {
       LOG_ERROR("deserializeJson() failed with code %s", err.c_str());
+      websocket::unlockJson();
       return;
     }
 
-    const std::string action = json["action"].as<std::string>();
-    const std::string actionData = json["data"].as<std::string>();
+    const std::string action = websocket::jsonDoc["action"].as<std::string>();
+    const std::string actionData = websocket::jsonDoc["data"].as<std::string>();
     LOG_INFO("Message: %s -> %s\n", action.c_str(), actionData.c_str());
+    websocket::unlockJson();
   }
 }
 
@@ -88,8 +106,8 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
 //--------------------------OUTGOING---------------------------//
 //-------------------------------------------------------------//
 void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
-  StaticJsonDocument<512> json;
-  JsonObject root = json.to<JsonObject>();
+  if (!websocket::lockJson()) return;
+  JsonObject root = websocket::jsonDoc.to<JsonObject>();
 
   root["action"] = WS_MSG_SENSOR_DATA;
 
@@ -105,12 +123,14 @@ void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
 
   std::string serializedMsg; // create temp buffer
   serializeJson(root, serializedMsg);  // serialize to buffer
+  websocket::unlockJson();
+
   websocket::wsServer.textAll(serializedMsg.c_str(), serializedMsg.length());
 }
 
 void wsSendShotSnapshotToClients(ShotSnapshot& snapshot) {
-  StaticJsonDocument<512> json;
-  JsonObject root = json.to<JsonObject>();
+  if (!websocket::lockJson()) return;
+  JsonObject root = websocket::jsonDoc.to<JsonObject>();
 
   root["action"] = WS_MSG_SHOT_DATA;
 
@@ -128,12 +148,14 @@ void wsSendShotSnapshotToClients(ShotSnapshot& snapshot) {
 
   std::string serializedMsg; // create temp buffer
   serializeJson(root, serializedMsg);  // serialize to buffer
+  websocket::unlockJson();
+
   websocket::wsServer.textAll(serializedMsg.c_str(), serializedMsg.length());
 }
 
 void wsSendLog(std::string log, std::string source) {
-  DynamicJsonDocument json(256);
-  JsonObject root = json.to<JsonObject>();
+  if (!websocket::lockJson()) return;
+  JsonObject root = websocket::jsonDoc.to<JsonObject>();
 
   root["action"] = WS_MSG_LOG;
 
@@ -143,5 +165,7 @@ void wsSendLog(std::string log, std::string source) {
 
   std::string serializedMsg; // create temp buffer
   serializeJson(root, serializedMsg);  // serialize to buffer
+  websocket::unlockJson();
+
   websocket::wsSendWithBuffer(serializedMsg);
 }
