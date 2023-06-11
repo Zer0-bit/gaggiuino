@@ -6,9 +6,11 @@
 #define FORCE_PREDICTIVE_SCALES 0
 #endif
 
+#include "utils.h"
+
 void scalesInit(float scalesF1, float scalesF2);
 void scalesTare(void);
-float scalesGetWeight(void);
+Measurement scalesGetWeight(void);
 bool scalesIsPresent(void);
 float scalesDripTrayWeight();
 

@@ -64,14 +64,14 @@ void scalesTare(void) {
   }
 }
 
-float scalesGetWeight(void) {
-  float currentWeight = 0.f;
+Measurement scalesGetWeight(void) {
+  Measurement currentWeight = Measurement{ .value = 0.f, .millis = 0 };
   if (hwScalesPresent) {
     auto& loadCells = LoadCellSingleton::getInstance();
     if (loadCells.wait_ready_timeout(150, 10)) {
       float values[2];
       loadCells.get_units(values);
-      currentWeight = values[0] + values[1];
+      currentWeight = Measurement{ .value=values[0] + values[1], .millis=millis() };
     }
   }
   else if (remoteScalesIsPresent()) {

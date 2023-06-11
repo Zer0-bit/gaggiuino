@@ -19,8 +19,8 @@ void remoteScalesTare(void) {
   lastRemoteScalesTare = millis();
 }
 
-float remoteScalesGetWeight(void) {
-  return remoteScalesLatestWeight;
+Measurement remoteScalesGetWeight(void) {
+  return Measurement{ .value = remoteScalesLatestWeight, .millis = remoteScalesLastWeightTime };
 }
 
 bool remoteScalesIsPresent(void) {

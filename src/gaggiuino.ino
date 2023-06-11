@@ -154,7 +154,7 @@ static void sensorsReadWeight(void) {
   if (currentState.scalesPresent && elapsedTime > GET_SCALES_READ_EVERY) {
     if(!tareDone) {
       scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewModeActive && (fabsf(scalesGetWeight()) > 0.3f)) {
+      if (!nonBrewModeActive && (fabsf(scalesGetWeight().value) > 0.3f)) {
         tareDone = false;
       }
       else {
@@ -164,7 +164,7 @@ static void sensorsReadWeight(void) {
     }
 
     weightMeasurements.add(scalesGetWeight());
-    currentState.weight = fmax(0.f, weightMeasurements.latest().value);
+    currentState.weight = weightMeasurements.latest().value;
 
     if (brewActive) {
       currentState.shotWeight = tareDone ? currentState.weight : 0.f;
