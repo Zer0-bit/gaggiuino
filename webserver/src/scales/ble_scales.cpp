@@ -17,7 +17,7 @@ void bleScalesInit() {
   AcaiaScalesPlugin::apply();
   BLEDevice::init("Gaggiuino");
 
-  xTaskCreateUniversal(&bleScalesTask, "bleScales", configMINIMAL_STACK_SIZE + 4096, NULL, PRIORITY_BLE_SCALES_MAINTAINANCE, NULL, CORE_BLE_SCALES_MAINTAINANCE);
+  xTaskCreateUniversal(bleScalesTask, "bleScales", configMINIMAL_STACK_SIZE + 4096, NULL, PRIORITY_BLE_SCALES_MAINTAINANCE, NULL, CORE_BLE_SCALES_MAINTAINANCE);
 }
 
 void bleScalesTask(void* params) {
@@ -25,9 +25,9 @@ void bleScalesTask(void* params) {
 
   LOG_INFO("Remote scales and bluetooth initialized");
 
-  while (true) {
+  for (;;) {
     bleScalesMaintainConnection();
-    delay(1000);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
 

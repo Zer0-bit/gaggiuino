@@ -20,13 +20,13 @@ void stmCommsInit(HardwareSerial& serial) {
   mcuComms.setSensorStateSnapshotCallback(onSensorStateSnapshotReceived);
   mcuComms.setRemoteScalesTareCommandCallback(onScalesTareReceived);
 
-  xTaskCreateUniversal(&stmCommsTask, "stmComms", configMINIMAL_STACK_SIZE + 2400, NULL, PRIORITY_STM_COMMS, NULL, CORE_STM_COMMS);
+  xTaskCreateUniversal(stmCommsTask, "stmComms", configMINIMAL_STACK_SIZE + 2400, NULL, PRIORITY_STM_COMMS, NULL, CORE_STM_COMMS);
 }
 
 void stmCommsTask(void* params) {
-  while(true) {
+  for (;;) {
     stmCommsReadData();
-    delay(10);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 }
 
