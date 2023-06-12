@@ -7,10 +7,9 @@ import Grid from '@mui/material/Unstable_Grid2';
 import GaugeChart from '../../components/chart/GaugeChart';
 import {
   apiHost,
-  filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA, MSG_TYPE_SHOT_DATA,
+  filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA,
 } from '../../models/api';
 import ProfilesTable from '../../components/table/table';
-import ShotDialog from './ShotDialog';
 
 function Home() {
   const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
@@ -18,15 +17,14 @@ function Home() {
     retryOnError: true,
     shouldReconnect: () => true,
     reconnectAttempts: 1000,
-    filter: (message) => filterSocketMessage(message, MSG_TYPE_SHOT_DATA, MSG_TYPE_SENSOR_DATA),
+    filter: (message) => filterSocketMessage(message, MSG_TYPE_SENSOR_DATA),
   });
   const theme = useTheme();
 
-  const [shotDialogOpen, setShotDialogOpen] = useState(false);
   const [scalesPresent, setScalesPresent] = useState(false);
 
   const [lastSensorData, setLastSensorData] = useState({
-    temperature: 0, pressure: 0, pumpFlow: 0, weight: 0, scalesPresent: true,
+    temperature: 0, pressure: 0, pumpFlow: 0, weight: 0, scalesPresent: false,
   });
 
   useEffect(() => {
@@ -39,9 +37,6 @@ function Home() {
     }
     if (filterJsonMessage(lastJsonMessage, MSG_TYPE_SENSOR_DATA)) {
       setLastSensorData(lastJsonMessage.data);
-    }
-    if (filterJsonMessage(lastJsonMessage, MSG_TYPE_SHOT_DATA)) {
-      setShotDialogOpen(true);
     }
   }, [lastJsonMessage]);
 
@@ -78,7 +73,6 @@ function Home() {
           <ProfilesTable />
         </Grid>
       </Grid>
-      {shotDialogOpen && <ShotDialog open={shotDialogOpen.toString()} setOpen={setShotDialogOpen} />}
     </Container>
   );
 }
