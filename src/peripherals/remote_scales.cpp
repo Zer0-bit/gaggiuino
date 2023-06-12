@@ -1,6 +1,7 @@
 #ifndef REMOTE_SCALE_H
 #define REMOTE_SCALE_H
 
+#include "remote_scales.h"
 #include "esp_comms.h"
 
 bool remoteScalesPresent = false;
