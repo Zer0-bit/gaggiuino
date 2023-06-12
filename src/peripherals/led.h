@@ -6,7 +6,7 @@
 
 class LED {
   public:
-    LED();
+    LED() noexcept;
     void begin();
     void setColor(uint8_t red, uint8_t green, uint8_t blue);
     void setRed(uint8_t red);
