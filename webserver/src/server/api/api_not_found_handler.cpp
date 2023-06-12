@@ -11,6 +11,7 @@ void handleUrlNotFound(AsyncWebServerRequest* request) {
     return;
   }
 
+  // Handle redirects to index.hml to support React Single Page App
   if (shouldServeIndexHtml(request->url())) {
     LOG_VERBOSE("Not found %s. Redirecting to /index.html", request->url().c_str());
     request->send(LittleFS, "/index.html", "text/html");
@@ -22,7 +23,7 @@ void handleUrlNotFound(AsyncWebServerRequest* request) {
 }
 
 bool shouldServeIndexHtml(String path) {
-  // If the path does not begin with "/api we don't redirect
+  // If the path begin swith /api we don't redirect
   if (path.startsWith("/api")) {
     LOG_DEBUG("%s starts with /api", path.c_str());
     return false;
