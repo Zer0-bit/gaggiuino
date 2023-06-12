@@ -58,7 +58,7 @@ float percentageWithTransition(float pct, TransitionCurve transition) {
 // ------------------------------  Measurements  -----------------------------------
 // ---------------------------------------------------------------------------------
 void Measurements::add(float measurement) {
-  add(Measurement{.value=measurement, .millis=millis()});
+  add(Measurement{.value=measurement, .millis=(uint32_t) millis()});
 }
 
 void Measurements::add(Measurement measurement) {

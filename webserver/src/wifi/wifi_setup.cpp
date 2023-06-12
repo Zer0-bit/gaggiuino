@@ -4,8 +4,8 @@
 #include "../log/log.h"
 
 /**
- * Helper class for persisting and retrieving WiFi connection credentials
- */
+  * Helper class for persisting and retrieving WiFi connection credentials
+  */
 class WiFiParams {
 private:
   String ssid = "";
@@ -41,7 +41,8 @@ void wifiSetup() {
   wifi::credentials.init();
   if (!wifi::credentials.hasCredentials()) {
     LOG_INFO("No ssid or password provided.");
-  } else {
+  }
+  else {
     LOG_INFO("Will attempt connecting to %s - %s", wifi::credentials.getSSID().c_str(), "***");
     wifiConnect(wifi::credentials.getSSID(), wifi::credentials.getPass());
   }
