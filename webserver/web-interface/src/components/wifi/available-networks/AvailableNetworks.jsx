@@ -6,21 +6,24 @@ import Loader from '../../loader/Loader';
 import AvailableNetwork from './AvailableNetwork';
 
 export default function AvailableNetworks({ onConnected }) {
-  const [networks, setNetworks] = useState(null);
+  const [networks, setNetworks] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [networksError, setNetworksError] = useState(false);
   const [expandedNetworkId, setExpandedNetworkId] = useState(null);
 
   useEffect(() => {
     const loadNetworks = async () => {
-      if (networks !== null) {
-        return;
-      }
+      if (loading) return;
       try {
+        setLoading(true);
         setNetworksError(false);
+        console.log('loading networks');
         const networksResponse = await getAvailableNetworks();
         setNetworks(networksResponse);
       } catch (e) {
         setNetworksError(true);
+      } finally {
+        setLoading(false);
       }
     };
     loadNetworks();
@@ -30,7 +33,7 @@ export default function AvailableNetworks({ onConnected }) {
     return <Alert severity="error">Failed to load available networks</Alert>;
   }
 
-  return networks === null
+  return loading === true
     ? <Box display="flex" justifyContent="center"><Loader /></Box>
     : (
       <div>
