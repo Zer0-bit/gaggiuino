@@ -332,9 +332,11 @@ void McuComms::readDataAndTick() {
     } case McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE: {
       log("Received tare command");
       remoteScalesTareCommandReceived();
+      break;
     } case McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_DISCONNECTED: {
       log("Received scales disconnected message");
       remoteScalesDisconnected();
+      break;
     }
     default:
       log("WARN: Packet ID %d not handled\n", transfer.currentPacketID());
