@@ -6,6 +6,7 @@
 #include "profiling_phases.h"
 #include "SerialTransfer.h"
 #include <vector>
+#include <functional>
 
 #ifdef ESP32
 #include "esp_task_wdt.h"
@@ -54,13 +55,13 @@ public:
 
 class McuComms {
 private:
-  using ShotSnapshotReceivedCallback = void (*)(ShotSnapshot&);
-  using ProfileReceivedCallback = void (*)(Profile&);
-  using SensorStateSnapshotReceivedCallback = void (*)(SensorStateSnapshot&);
-  using ResponseReceivedCallback = void (*)(McuCommsResponse&);
-  using RemoteScalesWeightReceivedCallback = void (*)(float);
-  using RemoteScalesTareCommandCallback = void (*)();
-  using RemoteScalesDisconnectedCallback = void (*)();
+  using ShotSnapshotReceivedCallback = std::function<void(ShotSnapshot&)>;
+  using ProfileReceivedCallback = std::function<void(Profile&)>;
+  using SensorStateSnapshotReceivedCallback = std::function<void(SensorStateSnapshot&)>;
+  using ResponseReceivedCallback = std::function<void(McuCommsResponse&)>;
+  using RemoteScalesWeightReceivedCallback = std::function<void(float)>;
+  using RemoteScalesTareCommandCallback = std::function<void()>;
+  using RemoteScalesDisconnectedCallback = std::function<void()>;
 
   uint32_t lastByteReceived = 0;
   uint32_t lastHeartbeatSent = 0;
