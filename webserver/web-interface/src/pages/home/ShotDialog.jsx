@@ -7,7 +7,7 @@ import useWebSocket from 'react-use-websocket';
 import CloseIcon from '@mui/icons-material/Close';
 import Grid from '@mui/material/Unstable_Grid2';
 import {
-  apiHost, defaultShotData, filterSocketMessage, MSG_TYPE_SHOT_DATA,
+  apiHost, filterSocketMessage, MSG_TYPE_SHOT_DATA,
 } from '../../models/api';
 import ShotChart from '../../components/chart/ShotChart';
 import {
@@ -23,20 +23,13 @@ export default function ShotDialog({ open, setOpen }) {
     filter: (message) => filterSocketMessage(message, MSG_TYPE_SHOT_DATA),
   });
 
-  const [sensorData, setSensorData] = useState([]);
-  const [latestSensorData, setLatestSensorData] = useState(defaultShotData);
+  const [latestShotSnapshot, setLatestShotSnapshot] = useState(null);
 
   useEffect(() => {
     if (lastJsonMessage === null) {
       return;
     }
-    setLatestSensorData(lastJsonMessage.data);
-    setSensorData((prev) => {
-      if (prev.length >= 400) {
-        prev.shift();
-      }
-      return prev.concat(lastJsonMessage.data);
-    });
+    setLatestShotSnapshot(lastJsonMessage.data);
   }, [lastJsonMessage]);
 
   return (
@@ -63,31 +56,49 @@ export default function ShotDialog({ open, setOpen }) {
         <Grid container columns={4} spacing={1} sx={{ flexGrow: 1 }}>
           <Grid xs={4} sm={3} display="flex" alignContent="stretch" flexGrow={1}>
             <Box sx={{ position: 'relative', width: '100%' }}>
-              <ShotChart data={sensorData} newDataPoint={latestSensorData} />
+              <ShotChart newDataPoint={latestShotSnapshot} />
             </Box>
           </Grid>
           <Grid xs={4} sm={1}>
-            {latestSensorData && (
+            {latestShotSnapshot && (
             <Grid container columns={3} spacing={1}>
               <Grid xs={1} sm={3}>
-                <TimeStatBox timeInShot={latestSensorData.timeInShot} sx={{ height: '100%' }} />
+                <TimeStatBox
+                  timeInShot={latestShotSnapshot.timeInShot}
+                  sx={{ height: '100%' }}
+                />
               </Grid>
               <Grid xs={1} sm={3}>
-                <WeightStatBox shotWeight={latestSensorData.shotWeight} sx={{ height: '100%' }} />
+                <WeightStatBox
+                  shotWeight={latestShotSnapshot.shotWeight}
+                  sx={{ height: '100%' }}
+                />
               </Grid>
               <Grid xs={1} sm={3}>
-                <PressureStatBox pressure={latestSensorData.pressure} target={latestSensorData.targetPressure} sx={{ height: '100%' }} />
+                <PressureStatBox
+                  pressure={latestShotSnapshot.pressure}
+                  target={latestShotSnapshot.targetPressure}
+                  sx={{ height: '100%' }}
+                />
               </Grid>
               <Grid xs={1} sm={3}>
-                <PumpFlowStatBox pumpFlow={latestSensorData.pumpFlow} target={latestSensorData.targetPumpFlow} sx={{ height: '100%' }} />
+                <PumpFlowStatBox
+                  pumpFlow={latestShotSnapshot.pumpFlow}
+                  target={latestShotSnapshot.targetPumpFlow}
+                  sx={{ height: '100%' }}
+                />
               </Grid>
               <Grid xs={1} sm={3}>
-                <WeightFlowStatBox flow={latestSensorData.weightFlow} target={latestSensorData.targetPumpFlow} sx={{ height: '100%' }} />
+                <WeightFlowStatBox
+                  flow={latestShotSnapshot.weightFlow}
+                  target={latestShotSnapshot.targetPumpFlow}
+                  sx={{ height: '100%' }}
+                />
               </Grid>
               <Grid xs={1} sm={3}>
                 <TemperatureStatBox
-                  temperature={latestSensorData.temperature}
-                  target={latestSensorData.targetTemperature}
+                  temperature={latestShotSnapshot.temperature}
+                  target={latestShotSnapshot.targetTemperature}
                   sx={{ height: '100%' }}
                 />
               </Grid>

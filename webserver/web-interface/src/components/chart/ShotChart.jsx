@@ -155,14 +155,21 @@ function Chart({ data, newDataPoint, maxLength }) {
   const config = useMemo(() => getShotChartConfig(theme), [theme]);
   const [chartData, setChartData] = useState(mapToChartData([], theme));
 
+  if (newDataPoint && data) {
+    throw new Error("Only one of 'newDataPoint' or 'data' props must be defined");
+  }
+
   useEffect(() => {
-    if (newDataPoint && chartData.labels.length < data.length - 1) {
+    if (data === undefined) {
       return;
     }
     setChartData(mapToChartData(data, theme));
   }, [data]);
 
   useEffect(() => {
+    if (!newDataPoint) {
+      return;
+    }
     if (newShotStarted(newDataPoint, chartData)) {
       setChartData(mapToChartData([newDataPoint], theme));
     } else {
