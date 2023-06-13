@@ -4,9 +4,10 @@
 #include <stdint.h> // for uint8_t
 #include "Adafruit_VL53L0X.h"
 #include <SimpleKalmanFilter.h>
+#include "measurements.h"
 #include "../../lib/Common/system_state.h"
 
-// SimpleKalmanFilter smoothTofOutput(0.01f, 0.01f, 0.01f);
+Measurements sensorOutput(20);
 
 class TOF {
   public:
@@ -35,16 +36,12 @@ void TOF::init(void) {
 
 uint16_t TOF::readLvl(void) {
   #ifdef TOF_VL53L0X
-  // static uint16_t lastNonNullVal;
-  sensor.tofReading = tof.readRangeResult();
-  // if (sensor.tofReading != 0) {
-  //   lastNonNullVal = sensor.tofReading;
-  //   sensor.tofReading = smoothTofOutput.updateEstimate(sensor.tofReading);
-  //   return sensor.tofReading;
-  // } else sensor.tofReading = lastNonNullVal;
+  sensorOutput.add(tof.readRangeResult());
+  sensor.tofReading = sensorOutput.latest().value;
+
   sensor.tofReading = readRangeToPct(sensor.tofReading);
   #endif
-  return sensor.tofReading != 0 ? sensor.tofReading : 60;
+  return sensor.tofReading != 0 ? sensor.tofReading : 135u;
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {
