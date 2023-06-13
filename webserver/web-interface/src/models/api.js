@@ -15,7 +15,7 @@ export function filterJsonMessage(message, ...types) {
   }
   return types.some((type) => message.action === type);
 }
-export const defaultShotData = {
+export const defaultShotSnapshot = {
   timeInShot: 0,
   temperature: 0,
   pressure: 0,
