@@ -115,6 +115,10 @@ function popDataFromChartData(chartData) {
   chartData.datasets.forEach((dataset) => dataset.data.shift());
 }
 
+/**
+ * Compares the timeInShot prop of the dataPoint to the last dataPoint in chartData.
+ * If it's before it must mean a new shot was started.
+ */
 function newShotStarted(dataPoint, chartData) {
   const newTimeLabel = mapDataPointToLabel(dataPoint);
   const previousMaxTimeLabel = chartData.labels[chartData.labels.length - 1] || 0;
@@ -122,7 +126,6 @@ function newShotStarted(dataPoint, chartData) {
 }
 
 function addDataPointToChartData(chartData, dataPoint, maxLength, chartRef) {
-  /* eslint-disable no-param-reassign */
   while (!Number.isNaN(maxLength) && chartData.labels.length >= maxLength) {
     popDataFromChartData(chartData);
   }
@@ -140,12 +143,12 @@ function addDataPointToChartData(chartData, dataPoint, maxLength, chartRef) {
   chartData.datasets[5].data.push(dataPoint.targetPressure);
   chartData.datasets[6].data.push(dataPoint.targetPumpFlow);
 
+  /* eslint-disable no-param-reassign */
   chartRef.current.data.labels = chartData.labels;
   chartData.datasets.forEach((dataset, index) => {
     chartRef.current.data.datasets[index].data = dataset.data;
   });
   chartRef.current.update();
-
   /* eslint-enable no-param-reassign */
 }
 
@@ -159,15 +162,17 @@ function Chart({ data, newDataPoint, maxLength }) {
     throw new Error("Only one of 'newDataPoint' or 'data' props must be defined");
   }
 
+  // Refreshes the chart completely by reseting the chartData. This redraws the whole chart.
   useEffect(() => {
-    if (data === undefined) {
+    if (data === undefined || data === null) {
       return;
     }
     setChartData(mapToChartData(data, theme));
   }, [data]);
 
+  // Adds newDataPoint to the end of the chart unless it detects that a new shot was started. More efficient.
   useEffect(() => {
-    if (!newDataPoint) {
+    if (!newDataPoint === undefined || newDataPoint === null) {
       return;
     }
     if (newShotStarted(newDataPoint, chartData)) {
