@@ -1,5 +1,6 @@
 export const MSG_TYPE_SHOT_DATA = 'shot_data_update';
 export const MSG_TYPE_SENSOR_DATA = 'sensor_data_update';
+export const MSG_TYPE_LOG = 'log_record';
 
 export function filterSocketMessage(message, ...types) {
   if (!message || !message.data) {
@@ -26,7 +27,7 @@ export const defaultShotData = {
 };
 
 export const apiHost = (process.env.NODE_ENV === 'development')
-  ? '192.168.0.14'
+  ? '192.168.0.21'
   : window.location.host;
 
 export function formatTimeInShot(timeInShot) {

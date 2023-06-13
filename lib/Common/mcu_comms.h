@@ -6,6 +6,7 @@
 #include "profiling_phases.h"
 #include "SerialTransfer.h"
 #include <vector>
+#include <functional>
 
 #ifdef ESP32
 #include "esp_task_wdt.h"
@@ -20,17 +21,19 @@ enum class McuCommsMessageType : uint8_t {
   MCUC_DATA_SHOT_SNAPSHOT = 2,
   MCUC_DATA_PROFILE = 3,
   MCUC_DATA_SENSOR_STATE_SNAPSHOT = 4,
-  MCUC_DATA_WEIGHT = 5,
+  MCUC_DATA_REMOTE_SCALES_WEIGHT = 5,
+  MCUC_DATA_REMOTE_SCALES_DISCONNECTED = 6,
 
   // Request specific data
-  MCUC_REQ_ACTIVE_PROFILE = 6,
-  MCUC_REQ_SETTINGS = 7,
+  MCUC_REQ_ACTIVE_PROFILE = 7,
+  MCUC_REQ_SETTINGS = 8,
 
   // Commands
-  MCUC_CMD_SAVE_PROFILE = 8,
-  MCUC_CMD_SAVE_SETTINGS = 9,
+  MCUC_CMD_SAVE_PROFILE = 9,
+  MCUC_CMD_SAVE_SETTINGS = 10,
+  MCUC_CMD_REMOTE_SCALES_TARE = 11,
 
-  MCUC_RESPONSE = 10,
+  MCUC_RESPONSE = 12,
 };
 
 enum class McuCommsResponseResult : uint8_t {
@@ -52,11 +55,13 @@ public:
 
 class McuComms {
 private:
-  using ShotSnapshotReceivedCallback = void (*)(ShotSnapshot&);
-  using ProfileReceivedCallback = void (*)(Profile&);
-  using SensorStateSnapshotReceivedCallback = void (*)(SensorStateSnapshot&);
-  using WeightReceivedCallback = void (*)(float);
-  using ResponseReceivedCallback = void (*)(McuCommsResponse&);
+  using ShotSnapshotReceivedCallback = std::function<void(ShotSnapshot&)>;
+  using ProfileReceivedCallback = std::function<void(Profile&)>;
+  using SensorStateSnapshotReceivedCallback = std::function<void(SensorStateSnapshot&)>;
+  using ResponseReceivedCallback = std::function<void(McuCommsResponse&)>;
+  using RemoteScalesWeightReceivedCallback = std::function<void(float)>;
+  using RemoteScalesTareCommandCallback = std::function<void()>;
+  using RemoteScalesDisconnectedCallback = std::function<void()>;
 
   uint32_t lastByteReceived = 0;
   uint32_t lastHeartbeatSent = 0;
@@ -65,8 +70,10 @@ private:
   ShotSnapshotReceivedCallback shotSnapshotCallback = nullptr;
   ProfileReceivedCallback profileCallback = nullptr;
   SensorStateSnapshotReceivedCallback sensorStateSnapshotCallback = nullptr;
-  WeightReceivedCallback weightReceivedCallback = nullptr;
   ResponseReceivedCallback responseReceivedCallback = nullptr;
+  RemoteScalesWeightReceivedCallback remoteScalesWeightReceivedCallback = nullptr;
+  RemoteScalesTareCommandCallback remoteScalesTareCommandCallback = nullptr;
+  RemoteScalesDisconnectedCallback remoteScalesDisconnectedCallback = nullptr;
   Stream* debugPort = nullptr;
   size_t packetSize;
 
@@ -90,8 +97,10 @@ private:
   void shotSnapshotReceived(ShotSnapshot& snapshot) const;
   void profileReceived(Profile& profile) const;
   void sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) const;
-  void weightReceived(float weight) const;
   void responseReceived(McuCommsResponse& response) const;
+  void remoteScalesWeightReceived(float weight) const;
+  void remoteScalesTareCommandReceived() const;
+  void remoteScalesDisconnected() const;
 
 public:
   void begin(Stream& serial, uint32_t waitConnectionMillis = 0, size_t packetSize = MAX_DATA_PER_PACKET_DEFAULT);
@@ -99,14 +108,18 @@ public:
   void setShotSnapshotCallback(ShotSnapshotReceivedCallback callback);
   void setProfileReceivedCallback(ProfileReceivedCallback callback);
   void setSensorStateSnapshotCallback(SensorStateSnapshotReceivedCallback callback);
-  void setWeightReceivedCallback(WeightReceivedCallback callback);
   void setResponseReceivedCallback(ResponseReceivedCallback callback);
+  void setRemoteScalesWeightReceivedCallback(RemoteScalesWeightReceivedCallback callback);
+  void setRemoteScalesTareCommandCallback(RemoteScalesTareCommandCallback callback);
+  void setRemoteScalesDisconnectedCallback(RemoteScalesDisconnectedCallback callback);
 
   void sendShotData(const ShotSnapshot& snapshot);
   void sendProfile(Profile& profile);
   void sendSensorStateSnapshot(const SensorStateSnapshot& snapshot);
-  void sendWeight(float weight);
   void sendResponse(McuCommsResponse response);
+  void sendRemoteScalesWeight(float weight);
+  void sendRemoteScalesTare();
+  void sendRemoteScalesDisconnected();
 
   bool isConnected();
   void readDataAndTick();

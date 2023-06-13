@@ -149,24 +149,35 @@ static void sensorsReadTemperature(void) {
 }
 
 static void sensorsReadWeight(void) {
-  float elapsedTime = millis() - scalesTimer;
-  if (scalesIsPresent() && elapsedTime > GET_SCALES_READ_EVERY) {
+  uint32_t elapsedTime = millis() - scalesTimer;
+  currentState.scalesPresent = scalesIsPresent();
+  if (currentState.scalesPresent && elapsedTime > GET_SCALES_READ_EVERY) {
     if(!tareDone) {
       scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewModeActive && (fabsf(scalesGetWeight()) > 0.3f)) tareDone = false;
-      else tareDone = true;
+      if (!nonBrewModeActive && (fabsf(scalesGetWeight().value) > 0.3f)) {
+        tareDone = false;
+      }
+      else {
+        weightMeasurements.clear();
+        tareDone = true;
+      }
     }
-    previousWeight = currentState.weight;
-    currentState.weight = scalesGetWeight();
-    currentState.weightFlow = 1000.f * (currentState.weight - previousWeight) / static_cast<float>(elapsedTime);
-    // currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
-    if (brewActive) currentState.shotWeight = currentState.weight;
+
+    weightMeasurements.add(scalesGetWeight());
+    currentState.weight = weightMeasurements.latest().value;
+
+    if (brewActive) {
+      currentState.shotWeight = tareDone ? currentState.weight : 0.f;
+      currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
+      currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
+    }
+
     scalesTimer = millis();
   }
 }
 
 static void sensorsReadPressure(void) {
-  float elapsedTime = millis() - pressureTimer;
+  uint32_t elapsedTime = millis() - pressureTimer;
 
   if (elapsedTime > GET_PRESSURE_READ_EVERY) {
     float elapsedTimeSec = elapsedTime / 1000.f;
@@ -187,13 +198,12 @@ static long sensorsReadFlow(float elapsedTimeSec) {
   previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
   // Some flow smoothing
   currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-  currentState.smoothedWeightFlow = currentState.smoothedPumpFlow; // use predicted flow as hw scales flow
   currentState.pumpFlowChangeSpeed = (currentState.smoothedPumpFlow - previousSmoothedPumpFlow) / elapsedTimeSec;
   return pumpClicks;
 }
 
 static void calculateWeightAndFlow(void) {
-  long elapsedTime = millis() - flowTimer;
+  uint32_t elapsedTime = millis() - flowTimer;
 
   if (brewActive) {
     // Marking for tare in case smth has gone wrong and it has exited tare already.
@@ -220,7 +230,7 @@ static void calculateWeightAndFlow(void) {
           }
         }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
-        currentState.shotWeight = scalesIsPresent() ? currentState.weight : currentState.shotWeight + actualFlow;
+        currentState.shotWeight = scalesIsPresent() ? currentState.shotWeight : currentState.shotWeight + actualFlow;
       }
       currentState.waterPumped += consideredFlow;
     }
@@ -758,13 +768,13 @@ static void brewParamsReset(void) {
   tareDone                 = false;
   currentState.shotWeight  = 0.f;
   currentState.pumpFlow    = 0.f;
-  previousWeight           = 0.f;
   currentState.weight      = 0.f;
   currentState.waterPumped = 0.f;
   brewingTimer             = millis();
   flowTimer                = brewingTimer;
   systemHealthTimer        = brewingTimer + HEALTHCHECK_EVERY;
 
+  weightMeasurements.clear();
   predictiveWeight.reset();
   phaseProfiler.reset();
 }

@@ -11,7 +11,7 @@ import {
 } from '../../models/api';
 import ShotChart from '../../components/chart/ShotChart';
 import {
-  PressureStatBox, PumpFlowStatBox, TemperatureStatBox, TimeStatBox, WeightStatBox,
+  PressureStatBox, PumpFlowStatBox, TemperatureStatBox, TimeStatBox, WeightFlowStatBox, WeightStatBox,
 } from '../../components/chart/StatBox';
 
 export default function ShotDialog({ open, setOpen }) {
@@ -80,6 +80,9 @@ export default function ShotDialog({ open, setOpen }) {
               </Grid>
               <Grid xs={1} sm={3}>
                 <PumpFlowStatBox pumpFlow={latestSensorData.pumpFlow} target={latestSensorData.targetPumpFlow} sx={{ height: '100%' }} />
+              </Grid>
+              <Grid xs={1} sm={3}>
+                <WeightFlowStatBox flow={latestSensorData.weightFlow} target={latestSensorData.targetPumpFlow} sx={{ height: '100%' }} />
               </Grid>
               <Grid xs={1} sm={3}>
                 <TemperatureStatBox

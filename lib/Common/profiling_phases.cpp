@@ -14,7 +14,7 @@ ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, Cu
     .pressure = state.smoothedPressure,
     .pumpFlow = state.smoothedPumpFlow,
     .weightFlow = state.smoothedWeightFlow,
-    .temperature = state.temperature,
+    .temperature = state.waterTemperature,
     .shotWeight = state.shotWeight,
     .waterPumped = state.waterPumped,
     .targetTemperature = -1,

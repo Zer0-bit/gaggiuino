@@ -1,6 +1,7 @@
 /* 09:32 15/03/2023 - change triggering comment */
 #include "esp_comms.h"
 #include "pindef.h"
+
 namespace {
   class McuCommsSingleton {
   public:
@@ -22,6 +23,8 @@ void espCommsInit() {
 
   // Set callbacks
   McuCommsSingleton::getInstance().setProfileReceivedCallback(onProfileReceived);
+  McuCommsSingleton::getInstance().setRemoteScalesWeightReceivedCallback(onRemoteScalesWeightReceived);
+  McuCommsSingleton::getInstance().setRemoteScalesDisconnectedCallback(onRemoteScalesDisconnected);
 }
 
 void espCommsReadData() {
@@ -35,6 +38,7 @@ void espCommsSendSensorData(const SensorState& state, uint32_t frequency) {
     SensorStateSnapshot sensorSnapshot = SensorStateSnapshot{
       .brewActive = state.brewSwitchState,
       .steamActive = state.steamSwitchState,
+      .scalesPresent = state.scalesPresent,
       .temperature = state.waterTemperature,
       .pressure = state.smoothedPressure,
       .pumpFlow = state.smoothedPumpFlow,
@@ -53,4 +57,8 @@ void espCommsSendShotData(ShotSnapshot& shotData, uint32_t frequency) {
     McuCommsSingleton::getInstance().sendShotData(shotData);
     shotDataTimer = now;
   }
+}
+
+void espCommsSendTareScalesCommand() {
+  McuCommsSingleton::getInstance().sendRemoteScalesTare();
 }

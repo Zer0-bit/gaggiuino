@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
 import {
   Button,
-  Card, CardActions, CardContent, Drawer, Typography, useTheme,
+  Card, CardActions, CardContent, Typography,
 } from '@mui/material';
-import WifiStatus from './WifiStatus';
-import { getWifiStatus, disconnectFromWifi } from '../client/WifiClient';
-import AvailableNetworks from './available-networks/AvailableNetworks';
+import React, { useEffect, useState } from 'react';
+import { disconnectFromWifi, getWifiStatus } from '../client/WifiClient';
 import Loader from '../loader/Loader';
+import WifiStatus from './WifiStatus';
+import AvailableNetworksDrawer from './available-networks/AvailableNetworksDrawer';
 
 export default function WifiSettingsCard() {
-  const [wifiStatus, setWifiStatus] = useState(null);
+  const [wifiStatus, setWifiStatus] = useState({});
   const [wifiStatusLoading, setWifiStatusLoading] = useState(true);
   const [wifiDrawerOpen, setWiFiDrawerOpen] = useState(false);
-  const theme = useTheme();
 
   function isConnected() {
     return wifiStatus && wifiStatus.status === 'connected';
@@ -39,20 +38,12 @@ export default function WifiSettingsCard() {
     loadWiFiStatus();
   }, []);
 
-  const toggleDrawer = (open) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
-    }
-
-    setWiFiDrawerOpen(open);
-  };
-
   return (
-    <div>
-      <Card>
-        <CardContent>
+    <div style={{ height: '100%' }}>
+      <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <CardContent sx={{ flex: '1 0 auto' }}>
           <Typography gutterBottom variant="h5" component="div">
-            WiFi status
+            WiFi Status
           </Typography>
           {wifiStatusLoading ? <Loader /> : <WifiStatus status={wifiStatus} />}
         </CardContent>
@@ -63,16 +54,7 @@ export default function WifiSettingsCard() {
           <Button variant="outlined" size="small" color="secondary" onClick={() => loadWiFiStatus()}>Refresh</Button>
         </CardActions>
       </Card>
-      <Drawer
-        anchor="right"
-        open={wifiDrawerOpen}
-        onClose={toggleDrawer(false)}
-      >
-        <Typography variant="h5" sx={{ m: theme.spacing(2) }}>
-          Available networks
-        </Typography>
-        <AvailableNetworks onConnected={() => loadWiFiStatus()} />
-      </Drawer>
+      <AvailableNetworksDrawer open={wifiDrawerOpen} onOpenChanged={setWiFiDrawerOpen} onConnected={loadWiFiStatus} />
     </div>
   );
 }

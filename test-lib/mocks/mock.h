@@ -26,9 +26,6 @@
 #define AUTO_VERSION "test"
 #define OUTPUT_OPEN_DRAIN 0x5
 
-#define va_start(args, msg)
-#define va_end(args)
-
 static void lcdTrigger1(void) {}
 static void lcdTrigger2(void) {}
 static void lcdTrigger3(void) {}

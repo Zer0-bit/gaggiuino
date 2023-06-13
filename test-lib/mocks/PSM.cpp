@@ -18,6 +18,7 @@ unsigned long PSM::getLastMillis() {
 }
 
 unsigned char PSM::getDivider(void) {
+  return 1;
 }
 
 void PSM::setDivider(unsigned char divider) {

@@ -109,10 +109,29 @@ export function PumpFlowStatBox({
 
   return (
     <StatBox
-      label="Flow"
+      label="Pump Flow"
       icon={<AirIcon />}
       color={theme.palette.flow.main}
       stat={formatNumber(pumpFlow)}
+      statTarget={formatNumber(target)}
+      unit="ml/s"
+      sx={sx}
+      style={style}
+    />
+  );
+}
+
+export function WeightFlowStatBox({
+  flow, target, sx, style,
+}) {
+  const theme = useTheme();
+
+  return (
+    <StatBox
+      label="Weight Flow"
+      icon={<AirIcon />}
+      color={theme.palette.weightFlow.main}
+      stat={formatNumber(flow)}
       statTarget={formatNumber(target)}
       unit="ml/s"
       sx={sx}
