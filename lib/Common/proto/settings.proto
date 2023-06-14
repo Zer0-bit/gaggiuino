@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+import "profile.proto";
+
+message BoilerSettingsDto {
+  uint32 steamSetPoint = 1;
+  uint32 offsetTemp = 2;
+  uint32 hpwr = 3;
+  uint32 mainDivider = 4;
+  uint32 brewDivider = 5;
+}
+
+message SystemSettingsDto {
+  uint32 powerLineFrequency = 1;
+  float pumpFlowAtZero = 2;
+  int32 scalesF1 = 3;
+  int32 scalesF2 = 4;
+  uint32 lcdSleep = 5;
+  bool warmupState = 6;
+}
+
+message BrewSettingsDto {
+  bool homeOnShotFinish = 1;
+  bool brewDeltaState = 2;
+  bool basketPrefill = 3;
+}
+
+message ProfileSettingsDto {
+  uint32 activeProfileIndex = 1;
+  repeated ProfileDto savedProfiles = 2;
+}
+
+message LedSettingsDto {
+  message Color {
+    uint32 R = 1;
+    uint32 G = 2;
+    uint32 B = 3;
+  }
+  bool state = 1;
+  Color color = 2;
+}
+
+message GaggiaSettingsDto {
+  BoilerSettingsDto boiler = 1;
+  SystemSettingsDto system = 2;
+  BrewSettingsDto brew = 3;
+  ProfileSettingsDto profiles = 4;
+  LedSettingsDto led = 5;
+}

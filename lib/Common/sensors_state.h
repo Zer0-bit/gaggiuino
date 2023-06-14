@@ -42,4 +42,18 @@ struct SensorStateSnapshot {
   uint16_t waterLvl;
 };
 
+struct ShotSnapshot {
+  uint32_t timeInShot;
+  float pressure;
+  float pumpFlow;
+  float weightFlow;
+  float temperature;
+  float shotWeight;
+  float waterPumped;
+
+  float targetTemperature;
+  float targetPumpFlow;
+  float targetPressure;
+};
+
 #endif

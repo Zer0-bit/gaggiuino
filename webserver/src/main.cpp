@@ -16,11 +16,11 @@ void setup() {
   wifiSetup();
   webServerSetup();
   bleScalesInit();
-  vTaskDelete(NULL);     //Delete own task by passing NULL(task handle can also be used)
+  vTaskDelete(NULL);     //Delete own task by passing NULL
 }
 
 void loop() {
-  vTaskDelete(NULL);     //Delete own task by passing NULL(task handle can also be used)
+  vTaskDelete(NULL);     //Delete own task by passing NULL
 }
 
 // ------------------------------------------------------------------------

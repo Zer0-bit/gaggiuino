@@ -5,11 +5,11 @@
 #include "Arduino.h"
 
 enum class TransitionCurve {
-  EASE_IN_OUT,
-  EASE_IN,
-  EASE_OUT,
-  LINEAR,
-  INSTANT,
+  EASE_IN_OUT = 0,
+  EASE_IN = 1,
+  EASE_OUT = 2,
+  LINEAR = 3,
+  INSTANT = 4,
 };
 
 float mapRange(float sourceNumber, float fromA, float fromB, float toA, float toB, int decimalPrecision, TransitionCurve transition = TransitionCurve::LINEAR);

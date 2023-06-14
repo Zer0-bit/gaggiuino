@@ -22,7 +22,7 @@ enum class DescalingState {
   FINISHED
 };
 
-void deScale(eepromValues_t &runningCfg, const SensorState &currentState);
+void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState);
 void solenoidBeat(void);
 void backFlush(const SensorState &currentState);
 void flushActivated(void);

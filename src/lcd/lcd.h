@@ -3,11 +3,10 @@
 #define LCD_H
 
 #include <EasyNextionLibrary.h>
-#include "eeprom_data/eeprom_data.h"
+#include "gaggia_settings.h"
 #include "../../lib/Common/system_state.h"
 
-
-enum class NextionPage: byte {
+enum class NextionPage : byte {
   /* 00 */ Home,
   /* 01 */ BrewPreinfusion,
   /* 02 */ BrewSoak,
@@ -31,15 +30,15 @@ extern volatile NextionPage lcdLastCurrentPageId;
 
 void lcdInit(void);
 bool lcdCheckSerialInit(const char* expectedOutput, size_t expectedLen);
-void lcdUploadProfile(eepromValues_t &eepromCurrentValues);
-void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
-void uploadPageCfg(eepromValues_t &eepromCurrentValues, SystemState &sys);
+void lcdUploadProfile(GaggiaSettings& settings);
+void lcdUploadCfg(GaggiaSettings& settings);
+void uploadPageCfg(GaggiaSettings& settings, SystemState &sys);
 void lcdListen(void);
 void lcdWakeUp(void);
 
-void lcdFetchCurrentProfile(eepromValues_t & settings);
-void lcdFetchLed(eepromValues_t & settings);
-void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile);
+void lcdFetchCurrentProfile(GaggiaSettings& settings);
+void lcdFetchLed(GaggiaSettings& settings);
+void lcdFetchPage(GaggiaSettings& settings, NextionPage page, int targetProfile);
 uint8_t lcdGetSelectedProfile(void);
 bool lcdGetPreinfusionFlowState(void);
 bool lcdGetProfileFlowState(void);
@@ -60,7 +59,7 @@ void lcdSetUpTime(float val);
 void lcdSetTankWaterLvl(uint16_t val);
 
 void lcdShowDebug(int val1, int val2);
-void lcdShowPopup(const char *msg);
+void lcdShowPopup(String msg);
 
 void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);

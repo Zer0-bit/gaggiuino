@@ -5,6 +5,7 @@
 #include "../lcd/lcd.h"
 #include "../log.h"
 #include "i2c_bus_reset.h"
+#include "log.h"
 
 #if defined SINGLE_BOARD
 ADS1015 ADS(0x48);

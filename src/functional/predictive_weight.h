@@ -5,6 +5,8 @@
 #include "profiling_phases.h"
 #include "sensors_state.h"
 #include "../eeprom_data/eeprom_data.h"
+#include "shot_profiler.h"
+#include "../lcd/nextion_profile_mapping.h"
 
 extern int preInfusionFinishedPhaseIdx;
 constexpr float crossSectionalArea = 0.0026f; // avg puck crossectional area.
@@ -41,7 +43,7 @@ public:
     return resistance;
   }
 
-  void update(const SensorState& state, CurrentPhase& phase, const eepromValues_t& cfg) {
+  void update(const SensorState& state, CurrentPhase& phase, const GaggiaSettings& cfg) {
     // If at least 50ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
     if (isForceStarted || outputFlowStarted || state.waterPumped >= 65.f) {
@@ -61,20 +63,14 @@ public:
     as well as there being enough pressure for water to wet the puck enough to start the output.
     On profiles whare pressure drop is of concern ~1 bar of drop is the point where liquid output starts. */
 
-    bool phaseTypePressure = phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE;
+    bool phaseTypePressure = phase.getType() == PhaseType::PRESSURE;
     predictivePreinfusionFinishedCheck = phase.getIndex();
-    preinfusionFinished = ACTIVE_PROFILE(cfg).preinfusionState && ACTIVE_PROFILE(cfg).soakState
-                              ? predictivePreinfusionFinishedCheck >= preInfusionFinishedPhaseIdx-1
-                              : predictivePreinfusionFinishedCheck >= preInfusionFinishedPhaseIdx;
+    bool preinfusionFinished = predictivePreinfusionFinishedCheck > PHASE_SOAK_INDEX; // This won't work for arbitrary profiles
 
     bool soakEnabled = false;
-    soakEnabled = ACTIVE_PROFILE(cfg).soakState
-                    ? phaseTypePressure
-                      ? ACTIVE_PROFILE(cfg).soakTimePressure > 0
-                      : ACTIVE_PROFILE(cfg).soakTimeFlow > 0
-                    : false;
-    float pressureTarget = phaseTypePressure ? ACTIVE_PROFILE(cfg).preinfusionBar : ACTIVE_PROFILE(cfg).preinfusionFlowPressureTarget;
+    soakEnabled = ACTIVE_PROFILE(cfg).phases[PHASE_SOAK_INDEX].stopConditions.time > 0; // This won't work for arbitrary profiles
 
+    float pressureTarget = phaseTypePressure ? phase.getPhase()->target.end : phase.getPhase()->restriction;
 
     // Pressure has to reach full pi target bar threshold.
     if (!preinfusionFinished  && soakEnabled) {

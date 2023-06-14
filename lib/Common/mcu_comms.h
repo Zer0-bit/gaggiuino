@@ -46,13 +46,6 @@ struct McuCommsResponse {
   McuCommsResponseResult result;
 };
 
-class ProfileSerializer {
-public:
-  size_t neededBufferSize(Profile& profile) const;
-  std::vector<uint8_t> serializeProfile(Profile& profile) const;
-  void deserializeProfile(std::vector<uint8_t>& data, Profile& profile) const;
-};
-
 class McuComms {
 private:
   using ShotSnapshotReceivedCallback = std::function<void(ShotSnapshot&)>;
@@ -65,7 +58,6 @@ private:
 
   uint32_t lastByteReceived = 0;
   uint32_t lastHeartbeatSent = 0;
-  ProfileSerializer profileSerializer;
   SerialTransfer transfer;
   ShotSnapshotReceivedCallback shotSnapshotCallback = nullptr;
   ProfileReceivedCallback profileCallback = nullptr;

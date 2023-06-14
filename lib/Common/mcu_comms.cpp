@@ -1,33 +1,10 @@
 /* 09:32 15/03/2023 - change triggering comment */
 #include "mcu_comms.h"
+#include "proto/proto_serializer.h"
+#include "proto/profile_converters.h"
 #include <stdarg.h>
 
 using namespace std;
-
-size_t ProfileSerializer::neededBufferSize(Profile& profile) const {
-  return sizeof(profile.phaseCount()) + profile.phaseCount() * sizeof(Phase) + sizeof(profile.globalStopConditions);
-}
-
-vector<uint8_t> ProfileSerializer::serializeProfile(Profile& profile) const {
-  vector<uint8_t> buffer;
-  buffer.reserve(neededBufferSize(profile));
-  size_t phaseCount = profile.phaseCount();
-
-  memcpy(buffer.data(), &phaseCount, sizeof(phaseCount));
-  memcpy(buffer.data() + sizeof(phaseCount), profile.phases.data(), phaseCount * sizeof(Phase));
-  memcpy(buffer.data() + sizeof(phaseCount) + phaseCount * sizeof(Phase), &profile.globalStopConditions, sizeof(profile.globalStopConditions));
-
-  return buffer;
-}
-
-void ProfileSerializer::deserializeProfile(vector<uint8_t>& buffer, Profile& profile) const {
-  size_t phaseCount;
-  memcpy(&phaseCount, buffer.data(), sizeof(profile.phaseCount()));
-  profile.phases.clear();
-  profile.phases.reserve(phaseCount);
-  memcpy(profile.phases.data(), buffer.data() + sizeof(profile.phaseCount()), phaseCount * sizeof(Phase));
-  memcpy(&profile.globalStopConditions, buffer.data() + sizeof(profile.phaseCount()) + phaseCount * sizeof(Phase), sizeof(profile.globalStopConditions));
-}
 
 //---------------------------------------------------------------------------------
 //---------------------------    PRIVATE METHODS       ----------------------------
@@ -254,9 +231,8 @@ void McuComms::sendShotData(const ShotSnapshot& snapshot) {
 
 void McuComms::sendProfile(Profile& profile) {
   if (!isConnected()) return;
-  size_t dataSize = profileSerializer.neededBufferSize(profile);
-  vector<uint8_t> buffer = profileSerializer.serializeProfile(profile);
-  sendMultiPacket(buffer, dataSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_PROFILE));
+  vector<uint8_t> buffer = ProtoSerializer::serialize<ProfileConverter>(profile);
+  sendMultiPacket(buffer, buffer.size(), static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_PROFILE));
 }
 
 void McuComms::sendSensorStateSnapshot(const SensorStateSnapshot& snapshot) {
@@ -314,7 +290,7 @@ void McuComms::readDataAndTick() {
       log("Received a profile packet\n");
       vector<uint8_t> data = receiveMultiPacket();
       Profile profile;
-      profileSerializer.deserializeProfile(data, profile);
+      ProtoSerializer::deserialize<ProfileConverter>(data, profile);
       profileReceived(profile);
       break;
     } case McuCommsMessageType::MCUC_DATA_SENSOR_STATE_SNAPSHOT: {

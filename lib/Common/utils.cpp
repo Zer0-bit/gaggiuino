@@ -53,3 +53,4 @@ float percentageWithTransition(float pct, TransitionCurve transition) {
     return easeInOut(pct);
   }
 }
+

@@ -13,23 +13,23 @@ inline static float TEMP_DELTA(float d, const SensorState &currentState) {
   );
 }
 
-void justDoCoffee(const eepromValues_t &runningCfg, const SensorState &currentState, const bool brewActive) {
+void justDoCoffee(const GaggiaSettings &settings, const SensorState &currentState, const bool brewActive) {
   lcdTargetState((int)HEATING::MODE_brew); // setting the target mode to "brew temp"
-  float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
-  float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
+  float brewTempSetPoint = ACTIVE_PROFILE(settings).waterTemperature + settings.boiler.offsetTemp;
+  float sensorTemperature = currentState.temperature + settings.boiler.offsetTemp;
 
   if (brewActive) { //if brewState == true
     if(sensorTemperature <= brewTempSetPoint - 5.f) {
       setBoilerOn();
     } else {
       float deltaOffset = 0.f;
-      if (runningCfg.brewDeltaState) {
+      if (settings.brew.brewDeltaState) {
         float tempDelta = TEMP_DELTA(brewTempSetPoint, currentState);
         float BREW_TEMP_DELTA = mapRange(sensorTemperature, brewTempSetPoint, brewTempSetPoint + tempDelta, tempDelta, 0, 0);
         deltaOffset = constrain(BREW_TEMP_DELTA, 0, tempDelta);
       }
       if (sensorTemperature <= brewTempSetPoint + deltaOffset) {
-        pulseHeaters(runningCfg.hpwr, runningCfg.mainDivider, runningCfg.brewDivider, brewActive);
+        pulseHeaters(settings.boiler.hpwr, settings.boiler.mainDivider, settings.boiler.brewDivider, brewActive);
       } else {
         setBoilerOff();
       }
@@ -38,15 +38,15 @@ void justDoCoffee(const eepromValues_t &runningCfg, const SensorState &currentSt
     if (sensorTemperature <= ((float)brewTempSetPoint - 10.f)) {
       setBoilerOn();
     } else {
-      int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
+      int HPWR_LOW = settings.boiler.hpwr / settings.boiler.mainDivider;
       // Calculating the boiler heating power range based on the below input values
-      int HPWR_OUT = mapRange(sensorTemperature, brewTempSetPoint - 10, brewTempSetPoint, runningCfg.hpwr, HPWR_LOW, 0);
-      HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
+      int HPWR_OUT = mapRange(sensorTemperature, brewTempSetPoint - 10, brewTempSetPoint, settings.boiler.hpwr, HPWR_LOW, 0);
+      HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, settings.boiler.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
 
       if (sensorTemperature <= ((float)brewTempSetPoint - 5.f)) {
-        pulseHeaters(HPWR_OUT, 1, runningCfg.mainDivider, brewActive);
+        pulseHeaters(HPWR_OUT, 1, settings.boiler.mainDivider, brewActive);
       } else if (sensorTemperature < ((float)brewTempSetPoint)) {
-        pulseHeaters(HPWR_OUT,  runningCfg.brewDivider, runningCfg.brewDivider, brewActive);
+        pulseHeaters(HPWR_OUT,  settings.boiler.brewDivider, settings.boiler.brewDivider, brewActive);
       } else {
         setBoilerOff();
       }
@@ -75,11 +75,11 @@ void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int fact
 //#############################################################################################
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
-void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState) {
+void steamCtrl(const GaggiaSettings& settings, SensorState& currentState) {
   currentState.steamSwitchState ? lcdTargetState((int)HEATING::MODE_steam) : lcdTargetState((int)HEATING::MODE_brew); // setting the steam/hot water target temp
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
-  float steamTempSetPoint = runningCfg.steamSetPoint + runningCfg.offsetTemp;
-  float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
+  float steamTempSetPoint = settings.boiler.steamSetPoint + settings.boiler.offsetTemp;
+  float sensorTemperature = currentState.temperature + settings.boiler.offsetTemp;
 
   if (currentState.smoothedPressure > steamThreshold_ || sensorTemperature > steamTempSetPoint) {
     setBoilerOff();

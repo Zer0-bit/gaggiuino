@@ -1,5 +1,7 @@
 /* 09:32 15/03/2023 - change triggering comment */
 #pragma GCC optimize ("Ofast")
+#define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
+#include <FlashStorage_STM32.h>
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
 #endif
@@ -20,7 +22,7 @@ SensorState currentState;
 
 OPERATION_MODES selectedOperationalMode;
 
-eepromValues_t runningCfg;
+GaggiaSettings runningCfg;
 
 SystemState systemState;
 
@@ -66,9 +68,9 @@ void setup(void) {
   // Init the tof sensor
   tof.init(currentState);
 
-  // Initialising the saved values or writing defaults if first start
+  // Initialising the vsaved values or writing defaults if first start
   eepromInit();
-  runningCfg = eepromGetCurrentValues();
+  runningCfg = eepromGetCurrentSettings();
   LOG_INFO("EEPROM Init");
 
   cpsInit(runningCfg);
@@ -84,11 +86,11 @@ void setup(void) {
   LOG_INFO("Pressure sensor init");
 
   // Scales handling
-  scalesInit(runningCfg.scalesF1, runningCfg.scalesF2);
+  scalesInit(runningCfg.system.scalesF1, runningCfg.system.scalesF2);
   LOG_INFO("Scales init");
 
   // Pump init
-  pumpInit(runningCfg.powerLineFrequency, runningCfg.pumpFlowAtZero);
+  pumpInit(runningCfg.system.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
   LOG_INFO("Pump init");
 
   pageValuesRefresh();
@@ -143,7 +145,7 @@ static void sensorReadSwitches(void) {
 
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
-    currentState.temperature = thermocoupleRead() - runningCfg.offsetTemp;
+    currentState.temperature = thermocoupleRead() - runningCfg.boiler.offsetTemp;
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }
@@ -223,12 +225,12 @@ static void calculateWeightAndFlow(void) {
         float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
         /* Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling,
         once pressure stabilises around the setpoint the flow is either stable or puck restriction is high af. */
-        if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
-          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f)
-          || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
-            actualFlow *= 0.3f;
-          }
-        }
+        // if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
+        //   if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f)
+        //   || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
+        //     actualFlow *= 0.3f;
+        //   }
+        // }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
         currentState.shotWeight = currentState.scalesPresent ? currentState.shotWeight : currentState.shotWeight + actualFlow;
       }
@@ -257,17 +259,15 @@ static void readTankWaterLevel(void) {
 //##############################################################################################################################
 static void pageValuesRefresh() {
   // Read the page we're landing in: leaving keyboard page means a value could've changed in it
-  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
+  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.profiles.activeProfileIndex);
   // Or maybe it's a page that needs constant polling
-  else if (lcdLastCurrentPageId == NextionPage::Led) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
+  else if (lcdLastCurrentPageId == NextionPage::Led) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.profiles.activeProfileIndex);
   // Finally read the page we left, as it could've been changed in place (e.g. boolean toggles)
-  else lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.activeProfile);
+  else lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.profiles.activeProfileIndex);
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
   // MODE_SELECT should always be LAST
   selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode();
-
-  updateProfilerPhases();
 
   lcdLastCurrentPageId = lcdCurrentPageId;
 }
@@ -349,10 +349,10 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
+    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).waterTemperature + runningCfg.boiler.offsetTemp; 
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
-    currentState.waterTemperature = (currentState.temperature > (float)ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
-      ? currentState.temperature / (float)brewTempSetPoint + (float)ACTIVE_PROFILE(runningCfg).setpoint
+    currentState.waterTemperature = (currentState.temperature > (float)ACTIVE_PROFILE(runningCfg).waterTemperature && currentState.brewSwitchState)
+      ? currentState.temperature / (float)brewTempSetPoint + (float)ACTIVE_PROFILE(runningCfg).waterTemperature
       : currentState.temperature;
 
     lcdSetTemperature(std::floor((uint16_t)currentState.waterTemperature));
@@ -401,8 +401,8 @@ static void lcdRefresh(void) {
 //#############################################################################################
 //###################################____SAVE_BUTTON____#######################################
 //#############################################################################################
-void tryEepromWrite(const eepromValues_t &eepromValues) {
-  bool success = eepromWrite(eepromValues);
+void tryEepromWrite(const GaggiaSettings& settings) {
+  bool success = eepromWrite(settings);
   watchdogReload(); // reload the watchdog timer on expensive operations
   if (success) {
     lcdShowPopup("Update successful!");
@@ -411,36 +411,34 @@ void tryEepromWrite(const eepromValues_t &eepromValues) {
   }
 }
 
-void lcdSwitchActiveToStoredProfile(const eepromValues_t & storedSettings) {
-  runningCfg.activeProfile = lcdGetSelectedProfile();
-  ACTIVE_PROFILE(runningCfg) = storedSettings.profiles[runningCfg.activeProfile];
-  updateProfilerPhases();
+void lcdSwitchActiveToStoredProfile(const GaggiaSettings& storedSettings) {
+  runningCfg.profiles.activeProfileIndex = lcdGetSelectedProfile();
+  ACTIVE_PROFILE(runningCfg) = storedSettings.profiles.savedProfiles[runningCfg.profiles.activeProfileIndex];
   lcdUploadProfile(runningCfg);
 }
 
 // Save the desired temp values to EEPROM
 void lcdSaveSettingsTrigger(void) {
   LOG_VERBOSE("Saving values to EEPROM");
-
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.activeProfile);
+  GaggiaSettings eepromCurrentValues = eepromGetCurrentSettings();
+  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.profiles.activeProfileIndex);
   tryEepromWrite(eepromCurrentValues);
 }
 
 void lcdSaveProfileTrigger(void) {
   LOG_VERBOSE("Saving profile to EEPROM");
 
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  lcdFetchCurrentProfile(eepromCurrentValues);
-  tryEepromWrite(eepromCurrentValues);
+  GaggiaSettings currentSettings = eepromGetCurrentSettings();
+  lcdFetchCurrentProfile(currentSettings);
+  tryEepromWrite(currentSettings);
 }
 
 void lcdResetSettingsTrigger(void) {
-  tryEepromWrite(eepromGetDefaultValues());
+  tryEepromWrite(eepromGetDefaultSettings());
 }
 
 void lcdLoadDefaultProfileTrigger(void) {
-  lcdSwitchActiveToStoredProfile(eepromGetDefaultValues());
+  lcdSwitchActiveToStoredProfile(eepromGetDefaultSettings());
 
   lcdShowPopup("Profile loaded!");
 }
@@ -467,224 +465,22 @@ void lcdBrewGraphScalesTareTrigger(void) {
 }
 
 void lcdRefreshElementsTrigger(void) {
-
-  eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-
-  switch (lcdCurrentPageId) {
-    case NextionPage::BrewPreinfusion:
-      ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState = lcdGetPreinfusionFlowState();
-      break;
-    case NextionPage::BrewProfiling:
-      ACTIVE_PROFILE(eepromCurrentValues).mfProfileState = lcdGetProfileFlowState();
-      break;
-    case NextionPage::BrewTransitionProfile:
-      ACTIVE_PROFILE(eepromCurrentValues).tpType = lcdGetTransitionFlowState();
-      break;
-    default:
-      lcdShowPopup("Nope!");
-      break;
-  }
+  GaggiaSettings eepromCurrentSettings = eepromGetCurrentSettings();
 
   // Make the necessary changes
-  uploadPageCfg(eepromCurrentValues, systemState);
+  uploadPageCfg(eepromCurrentSettings, systemState);
   // refresh the screen elements
   pageValuesRefresh();
 }
 
 void lcdQuickProfileSwitch(void) {
-  lcdSwitchActiveToStoredProfile(eepromGetCurrentValues());
+  lcdSwitchActiveToStoredProfile(eepromGetCurrentSettings());
   lcdShowPopup("Profile switched!");
 }
 
 //#############################################################################################
 //###############################____PROFILING_CONTROL____#####################################
 //#############################################################################################
-static void updateProfilerPhases(void) {
-  float shotTarget = -1.f;
-
-  if (ACTIVE_PROFILE(runningCfg).stopOnWeightState) {
-    shotTarget = (ACTIVE_PROFILE(runningCfg).shotStopOnCustomWeight < 1.f)
-      ? ACTIVE_PROFILE(runningCfg).shotDose * ACTIVE_PROFILE(runningCfg).shotPreset
-      : ACTIVE_PROFILE(runningCfg).shotStopOnCustomWeight;
-  }
-
-  //update global stop conditions (currently only stopOnWeight is configured in nextion)
-  profile.globalStopConditions = GlobalStopConditions{ .weight=shotTarget };
-
-  profile.clear();
-
-  //Setup release pressure + fill@7ml/sec
-  if (runningCfg.basketPrefill) {
-    addFillBasketPhase(7.f);
-  }
-
-  // Setup pre-infusion if needed
-  if (ACTIVE_PROFILE(runningCfg).preinfusionState) {
-    addPreinfusionPhases();
-  }
-
-  // Setup the soak phase if neecessary
-  if (ACTIVE_PROFILE(runningCfg).soakState) {
-    addSoakPhase();
-  }
-  preInfusionFinishedPhaseIdx = profile.phaseCount();
-
-  addMainExtractionPhasesAndRamp();
-}
-
-void addPreinfusionPhases() {
-  if (ACTIVE_PROFILE(runningCfg).preinfusionFlowState) { // flow based PI enabled
-    float isPressureAbove = ACTIVE_PROFILE(runningCfg).preinfusionPressureAbove ? ACTIVE_PROFILE(runningCfg).preinfusionFlowPressureTarget : -1.f;
-    float isWeightAbove = ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove : -1.f;
-    float isWaterPumped = ACTIVE_PROFILE(runningCfg).preinfusionFilled > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionFilled : -1.f;
-
-    addFlowPhase(Transition{ ACTIVE_PROFILE(runningCfg).preinfusionFlowVol }, ACTIVE_PROFILE(runningCfg).preinfusionFlowPressureTarget, ACTIVE_PROFILE(runningCfg).preinfusionFlowTime * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
-  }
-  else { // pressure based PI enabled
-    // For now handling phase switching on restrictions here but as this grow will have to deal with it otherwise.
-    float isPressureAbove = ACTIVE_PROFILE(runningCfg).preinfusionPressureAbove ? ACTIVE_PROFILE(runningCfg).preinfusionBar : -1.f;
-    float isWeightAbove = ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionWeightAbove : -1.f;
-    float isWaterPumped = ACTIVE_PROFILE(runningCfg).preinfusionFilled > 0.f ? ACTIVE_PROFILE(runningCfg).preinfusionFilled : -1.f;
-
-    addPressurePhase(Transition{ ACTIVE_PROFILE(runningCfg).preinfusionBar }, ACTIVE_PROFILE(runningCfg).preinfusionPressureFlowTarget, ACTIVE_PROFILE(runningCfg).preinfusionSec * 1000, isPressureAbove, -1, isWeightAbove, isWaterPumped);
-  }
-}
-
-void addSoakPhase() {
-    uint16_t phaseSoak = ACTIVE_PROFILE(runningCfg).preinfusionFlowState ? ACTIVE_PROFILE(runningCfg).soakTimeFlow : ACTIVE_PROFILE(runningCfg).soakTimePressure;
-    float maintainFlow = ACTIVE_PROFILE(runningCfg).soakKeepFlow > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepFlow : -1.f;
-    float maintainPressure = ACTIVE_PROFILE(runningCfg).soakKeepPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakKeepPressure : -1.f;
-    float isPressureBelow = ACTIVE_PROFILE(runningCfg).soakBelowPressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakBelowPressure : -1.f;
-    float isPressureAbove = ACTIVE_PROFILE(runningCfg).soakAbovePressure > 0.f ? ACTIVE_PROFILE(runningCfg).soakAbovePressure : -1.f;
-    float isWeightAbove = ACTIVE_PROFILE(runningCfg).soakAboveWeight > 0.f ? ACTIVE_PROFILE(runningCfg).soakAboveWeight : -1.f;
-
-    if (maintainPressure > 0.f)
-      addPressurePhase(Transition{maintainPressure}, (maintainFlow > 0.f ? maintainFlow : 2.5f), phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
-    else if(maintainFlow > 0.f)
-      addFlowPhase(Transition{maintainFlow},  -1, phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
-    else
-      addPressurePhase(Transition{maintainPressure}, maintainFlow, phaseSoak * 1000, isPressureAbove, isPressureBelow, isWeightAbove, -1);
-}
-
-void addMainExtractionPhasesAndRamp() {
-  int rampPhaseIndex = -1;
-
-  if (ACTIVE_PROFILE(runningCfg).profilingState) {
-    if (ACTIVE_PROFILE(runningCfg).tpState) {
-      // ----------------- Transition Profile ----------------- //
-      if (ACTIVE_PROFILE(runningCfg).tpType) { // flow based profiling enabled
-        /* Setting the phase specific restrictions */
-        /* ------------------------------------------ */
-        float fpStart = ACTIVE_PROFILE(runningCfg).tfProfileStart;
-        float fpEnd = ACTIVE_PROFILE(runningCfg).tfProfileEnd;
-        uint16_t fpHold = ACTIVE_PROFILE(runningCfg).tfProfileHold * 1000;
-        float holdLimit = ACTIVE_PROFILE(runningCfg).tfProfileHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).tfProfileHoldLimit : -1;
-        TransitionCurve curve = (TransitionCurve)ACTIVE_PROFILE(runningCfg).tfProfileSlopeShape;
-        uint16_t curveTime = ACTIVE_PROFILE(runningCfg).tfProfileSlope * 1000;
-        /* ------------------------------------------ */
-
-        if (fpStart > 0.f && fpHold > 0) {
-          addFlowPhase(Transition{ fpStart }, holdLimit, fpHold, -1, -1, -1, -1);
-          rampPhaseIndex = rampPhaseIndex > 0 ? rampPhaseIndex : profile.phaseCount() - 1;
-        }
-        addFlowPhase(Transition{ fpStart, fpEnd, curve, curveTime }, ACTIVE_PROFILE(runningCfg).tfProfilingPressureRestriction, curveTime, -1, -1, -1, -1);
-        rampPhaseIndex = rampPhaseIndex > 0 ? rampPhaseIndex : profile.phaseCount() - 1;
-      }
-      else { // pressure based profiling enabled
-        /* Setting the phase specific restrictions */
-        /* ------------------------------------------ */
-        float ppStart = ACTIVE_PROFILE(runningCfg).tpProfilingStart;
-        float ppEnd = ACTIVE_PROFILE(runningCfg).tpProfilingFinish;
-        uint16_t ppHold = ACTIVE_PROFILE(runningCfg).tpProfilingHold * 1000;
-        float holdLimit = ACTIVE_PROFILE(runningCfg).tpProfilingHoldLimit > 0.f ? ACTIVE_PROFILE(runningCfg).tpProfilingHoldLimit : -1;
-        TransitionCurve curve = (TransitionCurve)ACTIVE_PROFILE(runningCfg).tpProfilingSlopeShape;
-        uint16_t curveTime = ACTIVE_PROFILE(runningCfg).tpProfilingSlope * 1000;
-        /* ------------------------------------------ */
-
-        if (ppStart > 0.f && ppHold > 0) {
-          addPressurePhase(Transition{ ppStart }, holdLimit, ppHold, -1, -1, -1, -1);
-          rampPhaseIndex = rampPhaseIndex > 0 ? rampPhaseIndex : profile.phaseCount() - 1;
-        }
-        addPressurePhase(Transition{ ppStart, ppEnd, curve, curveTime }, ACTIVE_PROFILE(runningCfg).tpProfilingFlowRestriction, curveTime, -1, -1, -1, -1);
-        rampPhaseIndex = rampPhaseIndex > 0 ? rampPhaseIndex : profile.phaseCount() - 1;
-      }
-    }
-
-    // ----------------- Main Profile ----------------- //
-    if (ACTIVE_PROFILE(runningCfg).mfProfileState) { // flow based profiling enabled
-      /* Setting the phase specific restrictions */
-      /* ------------------------------------------ */
-      float fpStart = ACTIVE_PROFILE(runningCfg).mfProfileStart;
-      float fpEnd = ACTIVE_PROFILE(runningCfg).mfProfileEnd;
-      TransitionCurve curve = (TransitionCurve)ACTIVE_PROFILE(runningCfg).mfProfileSlopeShape;
-      uint16_t curveTime = ACTIVE_PROFILE(runningCfg).mfProfileSlope * 1000;
-
-      /* ------------------------------------------ */
-      addFlowPhase(Transition(fpStart, fpEnd, curve, curveTime), ACTIVE_PROFILE(runningCfg).mfProfilingPressureRestriction, -1, -1, -1, -1, -1);
-    }
-    else { // pressure based profiling enabled
-      /* Setting the phase specific restrictions */
-      /* ------------------------------------------ */
-      float ppStart = ACTIVE_PROFILE(runningCfg).mpProfilingStart;
-      float ppEnd = ACTIVE_PROFILE(runningCfg).mpProfilingFinish;
-      TransitionCurve curve = (TransitionCurve)ACTIVE_PROFILE(runningCfg).mpProfilingSlopeShape;
-      uint16_t curveTime = ACTIVE_PROFILE(runningCfg).mpProfilingSlope * 1000;
-      /* ------------------------------------------ */
-      addPressurePhase(Transition(ppStart, ppEnd, curve, curveTime), ACTIVE_PROFILE(runningCfg).mpProfilingFlowRestriction, -1, -1, -1, -1, -1);
-    }
-  } else { // Shot profiling disabled. Default to 9 bars
-    addPressurePhase(Transition(9.f), -1, -1, -1, -1, -1, -1);
-  }
-
-  rampPhaseIndex = rampPhaseIndex > 0 ? rampPhaseIndex : profile.phaseCount() - 1;
-  insertRampPhaseIfNeeded(rampPhaseIndex);
-}
-
-// ------------ Insert a ramp phase in the rampPhaseIndex position ------------ //
-void insertRampPhaseIfNeeded(size_t rampPhaseIndex) {
-  uint16_t rampTime = ACTIVE_PROFILE(runningCfg).preinfusionRamp;
-  TransitionCurve rampCurve = (TransitionCurve)ACTIVE_PROFILE(runningCfg).preinfusionRampSlope;
-
-  if (rampPhaseIndex <= 0 || rampTime <= 0 || rampCurve == TransitionCurve::INSTANT) { // No ramp needed
-    return;
-  }
-
-  // Get the phase currently in rampPhaseIndex - this is the phase we want to ramp to
-  Phase targetPhase = profile.phases[rampPhaseIndex];
-  float targetValue = targetPhase.target.isInstant() ? targetPhase.target.end : targetPhase.target.start;
-
-  if (targetValue <= 0) { // No ramp needed, next phase will perform a ramp.
-    return;
-  }
-
-  profile.insertPhase(Phase {
-    .type           = targetPhase.type,
-    .target         = Transition(targetValue, rampCurve, rampTime * 1000),
-    .restriction    = -1,
-    .stopConditions = PhaseStopConditions{ .time=rampTime * 1000 }
-  }, rampPhaseIndex);
-}
-
-void addFillBasketPhase(float flowRate) {
-  addFlowPhase(Transition(flowRate), -1, -1, 0.1f, -1, -1, -1);
-}
-
-void addPressurePhase(Transition pressure, float flowRestriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float isWaterPumped) {
-  addPhase(PHASE_TYPE::PHASE_TYPE_PRESSURE, pressure, flowRestriction, timeMs, pressureAbove, pressureBelow, shotWeight, isWaterPumped);
-}
-
-void addFlowPhase(Transition flow, float pressureRestriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float isWaterPumped) {
-  addPhase(PHASE_TYPE::PHASE_TYPE_FLOW, flow, pressureRestriction, timeMs, pressureAbove, pressureBelow, shotWeight, isWaterPumped);
-}
-
-void addPhase(PHASE_TYPE type, Transition target, float restriction, int timeMs, float pressureAbove, float pressureBelow, float shotWeight, float isWaterPumped) {
-  profile.addPhase(Phase {
-    .type           = type,
-    .target         = target,
-    .restriction    = restriction,
-    .stopConditions = PhaseStopConditions{ .time=timeMs, .pressureAbove=pressureAbove, .pressureBelow=pressureBelow, .weight=shotWeight, .waterPumpedInPhase=isWaterPumped }
-  });
-}
 
 void onProfileReceived(Profile& newProfile) {
 }
@@ -692,6 +488,7 @@ void onProfileReceived(Profile& newProfile) {
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     uint32_t timeInShot = millis() - brewingTimer;
+    phaseProfiler.setProfile(ACTIVE_PROFILE(runningCfg));
     phaseProfiler.updatePhase(timeInShot, currentState);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
     ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
@@ -701,7 +498,7 @@ static void profiling(void) {
       setPumpOff();
       closeValve();
       brewActive = false;
-    } else if (currentPhase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE) {
+    } else if (currentPhase.getType() == PhaseType::PRESSURE) {
       float newBarValue = currentPhase.getTarget();
       float flowRestriction =  currentPhase.getRestriction();
       openValve();
@@ -953,16 +750,16 @@ static void updateStartupTimer(void) {
   lcdSetUpTime(getTimeSinceInit() / 1000);
 }
 
-static void cpsInit(eepromValues_t &eepromValues) {
+static void cpsInit(GaggiaSettings &runningCfg) {
   int cps = getCPS();
   if (cps > 110) { // double 60 Hz
-    eepromValues.powerLineFrequency = 60u;
+    runningCfg.system.powerLineFrequency = 60u;
   } else if (cps > 80) { // double 50 Hz
-    eepromValues.powerLineFrequency = 50u;
+    runningCfg.system.powerLineFrequency = 50u;
   } else if (cps > 55) { // 60 Hz
-    eepromValues.powerLineFrequency = 60u;
+    runningCfg.system.powerLineFrequency = 60u;
   } else if (cps > 0) { // 50 Hz
-    eepromValues.powerLineFrequency = 50u;
+    runningCfg.system.powerLineFrequency = 50u;
   }
 }
 
@@ -992,7 +789,7 @@ static void doLed(void) {
           lcdFetchLed(runningCfg);
         }
       default: // intentionally fall through
-        led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
+        led.setColor(runningCfg.led.color.R, runningCfg.led.color.G, runningCfg.led.color.B);
     }
   }
 }

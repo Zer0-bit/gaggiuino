@@ -19,6 +19,7 @@
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"
 #include "functional/predictive_weight.h"
+#include "functional/shot_profiler.h"
 #include "profiling_phases.h"
 #include "peripherals/esp_comms.h"
 #include "peripherals/led.h"
