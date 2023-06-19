@@ -189,8 +189,9 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   eepromMetadata.version = EEPROM_DATA_VERSION;
   eepromMetadata.values = eepromValuesNew;
   eepromMetadata.versionTimestampXOR = eepromMetadata.timestamp ^ eepromMetadata.version;
+  EEPROM.put(0, eepromMetadata);
 
-  dmaWriteCurrentMetadata();
+  // dmaWriteCurrentMetadata();
 
   return true;
 }

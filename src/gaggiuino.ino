@@ -77,7 +77,7 @@ void setup(void) {
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdUploadCfg(runningCfg);
+  lcdUploadCfg(runningCfg, systemState);
   LOG_INFO("LCD cfg uploaded");
 
   adsInit();
@@ -481,7 +481,7 @@ void lcdRefreshElementsTrigger(void) {
   }
 
   // Make the necessary changes
-  uploadPageCfg(eepromCurrentValues);
+  uploadPageCfg(eepromCurrentValues, systemState);
   // refresh the screen elements
   pageValuesRefresh();
 }

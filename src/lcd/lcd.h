@@ -33,8 +33,8 @@ extern volatile NextionPage lcdLastCurrentPageId;
 void lcdInit(void);
 bool lcdCheckSerialInit(const char* expectedOutput, size_t expectedLen);
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues);
-void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
-void uploadPageCfg(eepromValues_t &eepromCurrentValues);
+void lcdUploadCfg(eepromValues_t &eepromCurrentValues, SystemState &sys);
+void uploadPageCfg(eepromValues_t &eepromCurrentValues, SystemState &sys);
 void lcdListen(void);
 void lcdWakeUp(void);
 

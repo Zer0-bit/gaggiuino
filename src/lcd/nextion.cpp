@@ -137,7 +137,7 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
 }
 
 // This is never called again after boot
-void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
+void lcdUploadCfg(eepromValues_t &eepromCurrentValues, SystemState &sys) {
   // bool profileType = false;
 
   // Profile names for all buttons
@@ -167,11 +167,14 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 
   // Led
   myNex.writeNum("ledOn", eepromCurrentValues.ledState);
+  sys.ledColours[0] = eepromCurrentValues.ledR;
+  sys.ledColours[1] = eepromCurrentValues.ledR;
+  sys.ledColours[2] = eepromCurrentValues.ledB;
 
   lcdUploadProfile(eepromCurrentValues);
 }
 
-void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
+void uploadPageCfg(eepromValues_t &eepromCurrentValues, SystemState &sys) {
   // Updating only page specific elements as necessary to speed up things and avoid needless writes.
   switch (lcdCurrentPageId) {
     case NextionPage::BrewPreinfusion:
@@ -252,7 +255,7 @@ void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
       }
       break;
     default:
-      lcdUploadCfg(eepromCurrentValues);
+      lcdUploadCfg(eepromCurrentValues, sys);
       break;
   }
 }
