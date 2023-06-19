@@ -12,7 +12,6 @@ extern int preInfusionFinishedPhaseIdx;
 constexpr float crossSectionalArea = 0.0026f; // avg puck crossectional area.
 constexpr float dynamicViscosity = 0.0002964f; // avg water dynamic viscosity at 90-95 celsius.
 bool predictiveTargetReached = false;
-int predictivePreinfusionFinishedCheck = 0.f;
 
 class PredictiveWeight {
 private:
@@ -31,8 +30,8 @@ public:
     puckResistance(0.f),
     truePuckResistance(0.f),
     resistanceDelta(0.f),
-    pressureDrop(0.f)
-  {}
+    pressureDrop(0.f) {
+  }
 
   bool isOutputFlow() {
     return outputFlowStarted;
@@ -64,16 +63,14 @@ public:
     On profiles whare pressure drop is of concern ~1 bar of drop is the point where liquid output starts. */
 
     bool phaseTypePressure = phase.getType() == PhaseType::PRESSURE;
-    predictivePreinfusionFinishedCheck = phase.getIndex();
-    bool preinfusionFinished = predictivePreinfusionFinishedCheck > PHASE_SOAK_INDEX; // This won't work for arbitrary profiles
+    bool preinfusionFinished = phase.getIndex() > PHASE_SOAK_INDEX; // This won't work for arbitrary profiles
 
-    bool soakEnabled = false;
-    soakEnabled = ACTIVE_PROFILE(cfg).phases[PHASE_SOAK_INDEX].stopConditions.time > 0; // This won't work for arbitrary profiles
+    bool soakEnabled = !(ACTIVE_PROFILE(cfg).phases[PHASE_SOAK_INDEX].skip); // This won't work for arbitrary profiles
 
     float pressureTarget = phaseTypePressure ? phase.getPhase()->target.end : phase.getPhase()->restriction;
 
     // Pressure has to reach full pi target bar threshold.
-    if (!preinfusionFinished  && soakEnabled) {
+    if (!preinfusionFinished && soakEnabled) {
       if (predictiveTargetReached) {
         // pressure drop needs to be around 1.5bar since target hit for output flow to be considered started.
         if (pressureTarget - state.smoothedPressure > 1.f) outputFlowStarted = true;
@@ -81,7 +78,8 @@ public:
       }
       if (!predictiveTargetReached && state.smoothedPressure < pressureTarget) {
         return;
-      } else {
+      }
+      else {
         predictiveTargetReached = true;
         return;
       }
@@ -114,7 +112,6 @@ public:
     isForceStarted = false;
     outputFlowStarted = false;
     predictiveTargetReached = false;
-
   }
 };
 
