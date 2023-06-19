@@ -165,6 +165,9 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("sP.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 10000.f);
   myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
 
+  // Led
+  myNex.writeNum("ledOn", eepromCurrentValues.ledState);
+
   lcdUploadProfile(eepromCurrentValues);
 }
 
@@ -394,7 +397,15 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.pumpFlowAtZero                 = myNex.readNumber("sP.pump_zero.val") / 10000.f;
 }
 
-void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile) {
+void lcdFetchLed(eepromValues_t &settings, SystemState& sys) {
+  // Led Settings
+  settings.ledState                       = myNex.readNumber("ledOn");
+  settings.ledR                           = sys.ledColours[0];
+  settings.ledR                           = sys.ledColours[1];
+  settings.ledR                           = sys.ledColours[2];
+}
+
+void lcdFetchPage(eepromValues_t &settings, NextionPage page, SystemState &sys,int targetProfile) {
   switch (page) {
     case NextionPage::BrewMore:
       lcdFetchBrewSettings(settings);
@@ -420,6 +431,9 @@ void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile)
       break;
     case NextionPage::ShotSettings:
       lcdFetchDoseSettings(settings.profiles[targetProfile]);
+      break;
+    case NextionPage::Led:
+      lcdFetchLed(settings, sys);
       break;
     default:
       break;
@@ -537,37 +551,45 @@ void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
 }
 
-void lcdSetLedColour(SystemState& sys) {
-  uint16_t colourCode = myNex.readNumber("ledID");
-  uint8_t colourID;
+void lcdSetLedColour(SystemState& sys, eepromValues_t &settings) {
+  if (!settings.ledState) return; // skipping the whole shabang if led state == off
+
+  uint16_t colourCode = 0;
+  uint8_t colourID = 0;
   uint8_t colour;
 
-  if (colourCode > 510) colourID = 3;
-  else if (colourCode > 255) colourID = 2;
-  else colourID = 1;
-
-  switch (colourID) {
-  case 0:
-    ledCtrl.setColor(10,10,10);
-    break;
-  case 1:
-    ledCtrl.setRed(colourCode);
-    sys.ledColours[0] = colourCode;
-    break;
-  case 2:
-    colour = colourCode - 255;
-    sys.ledColours[1] = colour;
-    ledCtrl.setGreen(colour);
-    break;
-  case 3:
-    colour = colourCode - 510;
-    sys.ledColours[2] = colour;
-    ledCtrl.setBlue(colour);
-    break;
-  default:
-    ledCtrl.setColor(0,0,0);
-    break;
+  // Handling active colour customisations
+  if (lcdCurrentPageId == NextionPage::Led) {
+    colourCode = myNex.readNumber("ledID"); // reading the slider colour code
+    // extracting the slider id
+    if (colourCode > 510) colourID = 3;
+    else if (colourCode > 255) colourID = 2;
+    else colourID = 1;
   }
+
+  // Set the colour
+  switch (colourID) {
+    case 0:
+      ledCtrl.setColor(settings.ledR,settings.ledG,settings.ledB);
+      break;
+    case 1:
+      ledCtrl.setRed(colourCode);
+      sys.ledColours[0] = colourCode;
+      break;
+    case 2:
+      colour = colourCode - 255;
+      sys.ledColours[1] = colour;
+      ledCtrl.setGreen(colour);
+      break;
+    case 3:
+      colour = colourCode - 510;
+      sys.ledColours[2] = colour;
+      ledCtrl.setBlue(colour);
+      break;
+    default:
+      ledCtrl.setColor(sys.ledColours[0],sys.ledColours[1],sys.ledColours[2]);
+      break;
+    }
 }
 
 void trigger1(void) { lcdSaveSettingsTrigger(); }

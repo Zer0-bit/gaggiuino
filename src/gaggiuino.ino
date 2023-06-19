@@ -66,7 +66,7 @@ void setup(void) {
   // Init the tof sensor
   tof.init();
 
-  // Initialising the vsaved values or writing defaults if first start
+  // Initialising the saved values or writing defaults if first start
   eepromInit();
   runningCfg = eepromGetCurrentValues();
   LOG_INFO("EEPROM Init");
@@ -247,10 +247,10 @@ static void calculateWeightAndFlow(void) {
 static void pageValuesRefresh() {
   if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) {
     // Read the page we're landing in: leaving keyboard page means a value could've changed in it
-    lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
+    lcdFetchPage(runningCfg, lcdCurrentPageId, systemState, runningCfg.activeProfile);
   } else {
     // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
-    lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.activeProfile);
+    lcdFetchPage(runningCfg, lcdLastCurrentPageId, systemState, runningCfg.activeProfile);
   }
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
@@ -419,7 +419,7 @@ void lcdSaveSettingsTrigger(void) {
   LOG_VERBOSE("Saving values to EEPROM");
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.activeProfile);
+  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, systemState, runningCfg.activeProfile);
   tryEepromWrite(eepromCurrentValues);
 }
 
@@ -992,7 +992,7 @@ static void brewDisco(void) {
      timer = millis() + 15u;
     }
   } else {
-    if (lcdCurrentPageId == NextionPage::Led) lcdSetLedColour(systemState);
+    if (lcdCurrentPageId == NextionPage::Led) lcdSetLedColour(systemState, runningCfg);
     else led.setColor(systemState.ledColours[0], systemState.ledColours[1], systemState.ledColours[2]);
   }
 }

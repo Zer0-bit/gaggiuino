@@ -11,6 +11,7 @@
 #include "legacy/eeprom_data_v8.h"
 #include "legacy/eeprom_data_v9.h"
 #include "legacy/eeprom_data_v10.h"
+#include "legacy/eeprom_data_v11.h"
 
 namespace {
 
@@ -109,6 +110,10 @@ namespace {
     defaultData.scalesF1 = 3920;
     defaultData.scalesF2 = 4210;
     defaultData.pumpFlowAtZero = 0.2401f;
+    defaultData.ledState  = true;
+    defaultData.ledG = 15;
+    defaultData.ledG = 15;
+    defaultData.ledB = 15;
 
     return defaultData;
   }
