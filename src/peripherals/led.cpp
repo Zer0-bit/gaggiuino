@@ -1,7 +1,7 @@
 #include "led.h"
 #include <Arduino.h>
 
-LED::LED(){};
+LED::LED() : timer(0) {};
 
 void LED::begin() {
   #ifdef LED_NCP5623
@@ -34,9 +34,9 @@ void LED::setGreen(uint8_t green) {
 }
 
 void LED::setDisco(uint32_t increment) {
-  static uint8_t cstate = 1, val = 0;
-  static uint8_t r,g,b;
   if(millis() > LED::timer) {
+    static uint8_t cstate = 1, val = 0;
+    static uint8_t r,g,b;
     // val<<3 adjusts from 5 bit quantity to 8 bit for the library
     if(val % 2 == 0) {
       b = (cstate & 4) ? val<<3 : r; // Blue channel enabled on cstate = 4,5,6,7

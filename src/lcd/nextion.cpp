@@ -400,7 +400,7 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.pumpFlowAtZero                 = myNex.readNumber("sP.pump_zero.val") / 10000.f;
 }
 
-void lcdFetchLed(eepromValues_t &settings, SystemState& sys) {
+void lcdFetchLed(eepromValues_t &settings, const SystemState& sys) {
   // Led Settings
   settings.ledState                       = myNex.readNumber("ledOn");
   settings.ledR                           = sys.ledColours[0];
@@ -408,7 +408,7 @@ void lcdFetchLed(eepromValues_t &settings, SystemState& sys) {
   settings.ledB                           = sys.ledColours[2];
 }
 
-void lcdFetchPage(eepromValues_t &settings, NextionPage page, SystemState &sys,int targetProfile) {
+void lcdFetchPage(eepromValues_t &settings, NextionPage page, const SystemState &sys,int targetProfile) {
   switch (page) {
     case NextionPage::BrewMore:
       lcdFetchBrewSettings(settings);
@@ -554,7 +554,7 @@ void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
 }
 
-void lcdSetLedColour(SystemState& sys, eepromValues_t &settings) {
+void lcdSetLedColour(SystemState& sys, const eepromValues_t &settings) {
   if (!settings.ledState) return; // skipping the whole shabang if led state == off
 
   uint16_t colourCode = 0;
