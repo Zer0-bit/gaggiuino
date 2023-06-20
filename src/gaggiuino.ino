@@ -974,7 +974,7 @@ static void crazyLed(void) {
         break;
     }
   } else {
-    if (lcdCurrentPageId == NextionPage::Led) lcdSetLedColour(systemState, runningCfg);
-    else led.setColor(systemState.ledColours[0], systemState.ledColours[1], systemState.ledColours[2]);
+    if (lcdCurrentPageId == NextionPage::Led) lcdSetLedColour(runningCfg);
+    else led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
   }
 }

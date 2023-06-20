@@ -551,12 +551,11 @@ void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
 }
 
-void lcdSetLedColour(SystemState& sys, eepromValues_t &settings) {
+void lcdSetLedColour(eepromValues_t& settings) {
   if (!settings.ledState) return; // skipping the whole shabang if led state == off
 
   uint16_t colourCode = 0;
   uint8_t colourID = 0;
-  uint8_t colour;
 
   // Handling active colour customisations
   if (lcdCurrentPageId == NextionPage::Led) {
@@ -573,20 +572,15 @@ void lcdSetLedColour(SystemState& sys, eepromValues_t &settings) {
       ledCtrl.setColor(settings.ledR,settings.ledG,settings.ledB);
       break;
     case 1:
-      sys.ledColours[0] = colourCode;
       settings.ledR = colourCode;
       ledCtrl.setRed(settings.ledR);
       break;
     case 2:
-      colour = colourCode - 255;
-      sys.ledColours[1] = colour;
-      settings.ledG = colour;
+      settings.ledG = colourCode - 255;;
       ledCtrl.setGreen(settings.ledG);
       break;
     case 3:
-      colour = colourCode - 510;
-      sys.ledColours[2] = colour;
-      settings.ledB = colour;
+      settings.ledB = colourCode - 510;
       ledCtrl.setBlue(settings.ledB);
       break;
     default:
