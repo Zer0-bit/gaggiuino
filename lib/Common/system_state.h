@@ -4,8 +4,6 @@
 
 struct SystemState {
   bool startupInitFinished;
-  bool tofReady;
-  uint16_t tofReading;
   uint8_t ledColours[3];
 };
 

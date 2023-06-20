@@ -3,25 +3,24 @@
 
 #include <stdint.h> // for uint8_t
 #include "Adafruit_VL53L0X.h"
-#include <SimpleKalmanFilter.h>
 #include "measurements.h"
-#include "../../lib/Common/system_state.h"
+#include "../../lib/Common/sensors_state.h"
 
 Measurements sensorOutput(20);
 
 class TOF {
   public:
-    TOF(SystemState& state);
+    TOF(SensorState& state);
     void init(void);
     uint16_t readLvl(void);
     uint16_t readRangeToPct(uint16_t val);
 
   private:
     Adafruit_VL53L0X tof = Adafruit_VL53L0X();
-    SystemState& sensor;
+    SensorState& sensor;
 };
 
-TOF::TOF(SystemState& state) : sensor(state) {}
+TOF::TOF(SensorState& state) : sensor(state) {}
 
 void TOF::init(void) {
   #ifdef TOF_VL53L0X
