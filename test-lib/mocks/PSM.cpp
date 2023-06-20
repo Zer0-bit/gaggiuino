@@ -27,5 +27,5 @@ void PSM::setDivider(unsigned char divider) {
 void PSM::shiftDividerCounter(char value) {
 }
 
-void PSM::initTimer(unsigned int freq, TIM_TypeDef* timerInstance) {
+void PSM::initTimer(unsigned int freq, int timerInstance) {
 }
