@@ -12,8 +12,10 @@ class LED {
     void setRed(uint8_t red);
     void setBlue(uint8_t blue);
     void setGreen(uint8_t green);
+    void setDisco(uint32_t timer);
 
   private:
     NCP5623 tankLED;
+    uint32_t timer;
 };
 #endif
