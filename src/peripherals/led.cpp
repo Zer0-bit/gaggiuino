@@ -1,7 +1,7 @@
 #include "led.h"
 #include <Arduino.h>
 
-LED::LED() : timer(0) {};
+LED::LED() : timer(millis()) {};
 
 void LED::begin() {
   #ifdef LED_NCP5623
