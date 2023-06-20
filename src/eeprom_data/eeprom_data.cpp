@@ -1,7 +1,5 @@
-/* 09:32 15/03/2023 - change triggering comment */
-#define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
-#include <FlashStorage_STM32.h>
 #include "eeprom_data.h"
+#include <FlashStorage_STM32.h>
 #include "eeprom_metadata.h"
 #include "default_profiles.h"
 #include "legacy/eeprom_data_v4.h"
@@ -12,6 +10,7 @@
 #include "legacy/eeprom_data_v9.h"
 #include "legacy/eeprom_data_v10.h"
 #include "legacy/eeprom_data_v11.h"
+#include "../log.h"
 
 namespace {
 

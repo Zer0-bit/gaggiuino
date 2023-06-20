@@ -3,7 +3,6 @@
 #define EEPROM_DATA_H
 
 #include <Arduino.h>
-#include "../log.h"
 
 /**
 * NOTE: changing these constants requires:
