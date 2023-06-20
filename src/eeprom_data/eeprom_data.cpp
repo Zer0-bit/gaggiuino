@@ -19,7 +19,7 @@ namespace {
   #define BUFFER_SIZE sizeof(eepromMetadata)
 
   // Declare the DMA handle
-  DMA_HandleTypeDef hdma;
+  //DMA_HandleTypeDef hdma;
 
   eepromValues_t getEepromDefaults(void) {
     eepromValues_t defaultData;
@@ -125,7 +125,7 @@ namespace {
   }
 
   bool loadCurrentEepromData EEPROM_METADATA_LOADER(EEPROM_DATA_VERSION, eepromMetadata_t, copy_t);
-
+  /*
   void dmaWriteCurrentMetadata() {
     // Enable the DMA clock
     __HAL_RCC_DMA1_CLK_ENABLE();
@@ -149,9 +149,8 @@ namespace {
     HAL_DMA_Start_IT(&hdma, (uint32_t)&eepromMetadata, (uint32_t)&EEPROM.put(0, eepromMetadata), BUFFER_SIZE);
     // Deinitialize the DMA handle
     HAL_DMA_DeInit(&hdma);
-  }
+  }*/
 }
-
 
 
 bool eepromWrite(eepromValues_t eepromValuesNew) {
