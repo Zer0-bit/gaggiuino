@@ -378,7 +378,7 @@ void lcdFetchCurrentProfile(eepromValues_t & settings) {
 
 void lcdFetchBrewSettings(eepromValues_t &settings) {
   // More brew settings
-  settings.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
+  settings.homeOnShotFinish               = myNex.readNumber("bckHome");
   settings.basketPrefill                  = myNex.readNumber("basketPrefill");
   settings.brewDeltaState                 = myNex.readNumber("deltaState");
 }
