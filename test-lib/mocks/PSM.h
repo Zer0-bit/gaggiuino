@@ -4,7 +4,7 @@ class PSM
 public:
   PSM(unsigned char sensePin, unsigned char controlPin, unsigned int range, int mode, unsigned char divider, unsigned char interruptMinTimeDiff);
 
-  void initTimer(unsigned int freq, TIM_TypeDef* timerInstance);
+  void initTimer(unsigned int freq, int timerInstance);
   void set(unsigned int value);
 
   long getCounter();
