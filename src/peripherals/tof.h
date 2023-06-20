@@ -30,16 +30,14 @@ void TOF::init(void) {
     sensor.tofReady = tof.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
   }
   // start continuous ranging
-  tof.startRangeContinuous(50u);
+  tof.startRangeContinuous(100u);
   #endif
 }
 
 uint16_t TOF::readLvl(void) {
   #ifdef TOF_VL53L0X
   sensorOutput.add(tof.readRangeResult());
-  sensor.tofReading = sensorOutput.latest().value;
-
-  sensor.tofReading = readRangeToPct(sensor.tofReading);
+  sensor.tofReading = readRangeToPct(sensorOutput.latest().value);
   #endif
   return sensor.tofReading != 0 ? sensor.tofReading : 135u;
 }
