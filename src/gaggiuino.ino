@@ -225,7 +225,8 @@ static void calculateWeightAndFlow(void) {
         /* Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling,
         once pressure stabilises around the setpoint the flow is either stable or puck restriction is high af. */
         if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
-          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.99f) || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.99f)) {
+          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f) 
+          || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
             actualFlow *= 0.6f;
           }
         }

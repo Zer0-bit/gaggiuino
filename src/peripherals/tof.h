@@ -30,7 +30,7 @@ void TOF::init(void) {
     sensor.tofReady = tof.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
   }
   // start continuous ranging
-  tof.startRangeContinuous(200u);
+  tof.startRangeContinuous(50u);
   #endif
 }
 
@@ -46,7 +46,7 @@ uint16_t TOF::readLvl(void) {
 
 uint16_t TOF::readRangeToPct(uint16_t val) {
   static const uint16_t water_lvl[] = { 100, 90, 80, 70, 60, 50, 40, 30, 20, 10 };
-  static const uint16_t ranges[] = { 15, 30, 45, 60, 75, 90, 105, 120, 135 };
+  static const uint16_t ranges[] = { 15, 30, 45, 60, 75, 90, 105, 120, 125 };
 
   for (size_t i = 0; i < sizeof(ranges) / sizeof(ranges[0]); i++) {
     if (val <= ranges[i]) {
