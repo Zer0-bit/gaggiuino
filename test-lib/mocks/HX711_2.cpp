@@ -2,7 +2,7 @@
 
 
 
-HX711_2::HX711_2(TIM_TypeDef* timerInstance) {
+HX711_2::HX711_2(int timerInstance) {
 
 }
 
