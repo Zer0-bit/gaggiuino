@@ -404,8 +404,8 @@ void lcdFetchLed(eepromValues_t &settings, SystemState& sys) {
   // Led Settings
   settings.ledState                       = myNex.readNumber("ledOn");
   settings.ledR                           = sys.ledColours[0];
-  settings.ledR                           = sys.ledColours[1];
-  settings.ledR                           = sys.ledColours[2];
+  settings.ledG                           = sys.ledColours[1];
+  settings.ledB                           = sys.ledColours[2];
 }
 
 void lcdFetchPage(eepromValues_t &settings, NextionPage page, SystemState &sys,int targetProfile) {
