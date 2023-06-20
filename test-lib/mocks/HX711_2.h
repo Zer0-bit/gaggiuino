@@ -4,7 +4,7 @@ class HX711_2
 {
   public:
 
-    HX711_2();
+    HX711_2(TIM_TypeDef* timerInstance);
     virtual ~HX711_2();
     // Initialize library with data output pin, clock input pin and gain factor.
     // Channel selection is made by passing the appropriate gain:
