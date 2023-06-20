@@ -400,12 +400,9 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.pumpFlowAtZero                 = myNex.readNumber("sP.pump_zero.val") / 10000.f;
 }
 
-void lcdFetchLed(eepromValues_t &settings, const SystemState& sys) {
+void lcdFetchLed(eepromValues_t &settings) {
   // Led Settings
   settings.ledState                       = myNex.readNumber("ledOn");
-  settings.ledR                           = sys.ledColours[0];
-  settings.ledG                           = sys.ledColours[1];
-  settings.ledB                           = sys.ledColours[2];
 }
 
 void lcdFetchPage(eepromValues_t &settings, NextionPage page, const SystemState &sys,int targetProfile) {
@@ -436,7 +433,7 @@ void lcdFetchPage(eepromValues_t &settings, NextionPage page, const SystemState 
       lcdFetchDoseSettings(settings.profiles[targetProfile]);
       break;
     case NextionPage::Led:
-      lcdFetchLed(settings, sys);
+      lcdFetchLed(settings);
       break;
     default:
       break;
@@ -554,7 +551,7 @@ void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
 }
 
-void lcdSetLedColour(SystemState& sys, const eepromValues_t &settings) {
+void lcdSetLedColour(SystemState& sys, eepromValues_t &settings) {
   if (!settings.ledState) return; // skipping the whole shabang if led state == off
 
   uint16_t colourCode = 0;
@@ -576,21 +573,24 @@ void lcdSetLedColour(SystemState& sys, const eepromValues_t &settings) {
       ledCtrl.setColor(settings.ledR,settings.ledG,settings.ledB);
       break;
     case 1:
-      ledCtrl.setRed(colourCode);
       sys.ledColours[0] = colourCode;
+      settings.ledR = colourCode;
+      ledCtrl.setRed(settings.ledR);
       break;
     case 2:
       colour = colourCode - 255;
       sys.ledColours[1] = colour;
-      ledCtrl.setGreen(colour);
+      settings.ledG = colour;
+      ledCtrl.setGreen(settings.ledG);
       break;
     case 3:
       colour = colourCode - 510;
       sys.ledColours[2] = colour;
-      ledCtrl.setBlue(colour);
+      settings.ledB = colour;
+      ledCtrl.setBlue(settings.ledB);
       break;
     default:
-      ledCtrl.setColor(sys.ledColours[0],sys.ledColours[1],sys.ledColours[2]);
+      ledCtrl.setColor(settings.ledR,settings.ledG,settings.ledB);
       break;
     }
 }

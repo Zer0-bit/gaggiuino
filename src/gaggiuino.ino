@@ -62,7 +62,7 @@ void setup(void) {
 
   // Initialize LED
   led.begin();
-  led.setColor(255, 255, 255); // WHITE
+  led.setColor(9, 0, 9); // WHITE
   // Init the tof sensor
   tof.init();
 
