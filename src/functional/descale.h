@@ -2,12 +2,9 @@
 #ifndef DESCALE_H
 #define DESCALE_H
 
-#include "../peripherals/pump.h"
-#include "../lcd/lcd.h"
-#include "../eeprom_data/eeprom_data.h"
-#include "sensors_state.h"
-#include "just_do_coffee.h"
 #include <Arduino.h>
+#include "sensors_state.h"
+#include "../eeprom_data/eeprom_data.h"
 
 const unsigned long DESCALE_PHASE1_EVERY = 30000UL; //30000 // short pump pulses during descale
 const unsigned long DESCALE_PHASE2_EVERY = 60000UL; //60000 // long pause for scale softening

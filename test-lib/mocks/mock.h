@@ -30,4 +30,11 @@ static void lcdTrigger1(void) {}
 static void lcdTrigger2(void) {}
 static void lcdTrigger3(void) {}
 static void lcdTrigger4(void) {}
+
+typedef struct { } TIM_TypeDef;
+
+#define TIM1 ((TIM_TypeDef *) 1)
+#define TIM3 ((TIM_TypeDef *) 1)
+#define TIM9 ((TIM_TypeDef *) 1)
+
 #endif
