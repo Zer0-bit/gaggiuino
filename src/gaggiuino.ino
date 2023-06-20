@@ -116,7 +116,6 @@ void loop(void) {
   lcdRefresh();
   espCommsSendSensorData(currentState);
   systemHealthCheck(0.7f);
-  crazyLed();
 }
 
 //##############################################################################################################################
@@ -133,6 +132,7 @@ static void sensorsRead(void) {
   calculateWeightAndFlow();
   updateStartupTimer();
   readTankWaterLevel();
+  crazyLed();
 }
 
 static void sensorReadSwitches(void) {
@@ -954,13 +954,6 @@ static void cpsInit(eepromValues_t &eepromValues) {
 
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
-  // uint16_t reading = 0;
-
-  // reading = tof.readLvl();
-  // reading = constrain(reading, 1, 150);
-  // currentState.waterLvl = mapRange(reading, 1.f, 150.f, 100.f, 1.f, 0);
-  // currentState.waterLvl = constrain(currentState.waterLvl, 1.f, 100.f);
-
   currentState.waterLvl = tof.readLvl();
 }
 
