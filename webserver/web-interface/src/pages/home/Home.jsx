@@ -3,7 +3,7 @@ import useWebSocket from 'react-use-websocket';
 import {
   Box, Container, useTheme,
 } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import GaugeChart from '../../components/chart/GaugeChart';
 import {
   apiHost,
