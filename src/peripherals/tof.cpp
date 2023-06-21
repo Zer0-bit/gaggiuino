@@ -25,8 +25,8 @@ uint16_t TOF::readLvl(SensorState& sensor) {
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {
-  static const uint16_t water_lvl[] = { 100, 90, 80, 70, 60, 50, 40, 30, 20, 10 };
-  static const uint16_t ranges[] = { 15, 30, 45, 60, 75, 90, 105, 120, 125 };
+  static const uint16_t water_lvl[] = { 100u, 90u, 80u, 70u, 60u, 50u, 40u, 30u, 20u, 10u };
+  static const uint16_t ranges[] = { 15u, 30u, 45u, 60u, 75u, 90u, 105u, 120u, 125u };
 
   for (size_t i = 0; i < sizeof(ranges) / sizeof(ranges[0]); i++) {
     if (val <= ranges[i]) {

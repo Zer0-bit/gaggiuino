@@ -559,7 +559,7 @@ void lcdSetLedColour(eepromValues_t& settings) {
 
   // Handling active colour customisations
   if (lcdCurrentPageId == NextionPage::Led) {
-    colourCode = myNex.readNumber("ledID"); // reading the slider colour code
+    colourCode = myNex.readNumber("ledNum"); // reading the slider colour code
     // extracting the slider id
     if (colourCode > 510) colourID = 3;
     else if (colourCode > 255) colourID = 2;

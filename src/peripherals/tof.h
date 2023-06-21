@@ -13,7 +13,7 @@ class TOF {
     uint16_t readRangeToPct(uint16_t val);
 
   private:
-    Adafruit_VL53L0X tof = Adafruit_VL53L0X();
+    Adafruit_VL53L0X tof;
 };
 
 #endif

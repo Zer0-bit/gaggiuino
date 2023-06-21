@@ -23,8 +23,7 @@ enum class NextionPage: byte {
   /* 0C */ BrewTransitionProfile,
   /* 0D */ GraphPreview,
   /* 0E */ KeyboardNumeric,
-  /* 0F */ KeyboardAlpha,
-  /* 10 */ Led
+  /* 0F */ Led
 };
 
 extern volatile NextionPage lcdCurrentPageId;
