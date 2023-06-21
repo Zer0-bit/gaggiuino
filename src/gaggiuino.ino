@@ -25,7 +25,7 @@ eepromValues_t runningCfg;
 SystemState systemState;
 
 LED led;
-TOF tof(currentState);
+TOF tof;
 
 void setup(void) {
   LOG_INIT();
@@ -64,7 +64,7 @@ void setup(void) {
   led.begin();
   led.setColor(9, 0, 9); // WHITE
   // Init the tof sensor
-  tof.init();
+  tof.init(currentState);
 
   // Initialising the saved values or writing defaults if first start
   eepromInit();
@@ -954,7 +954,7 @@ static void cpsInit(eepromValues_t &eepromValues) {
 
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
-  currentState.waterLvl = tof.readLvl();
+  currentState.waterLvl = tof.readLvl(currentState);
 }
 
 static void crazyLed(void) {
