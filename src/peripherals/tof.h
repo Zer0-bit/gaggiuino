@@ -29,7 +29,7 @@ void TOF::init(void) {
     sensor.tofReady = tof.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
   }
   // start continuous ranging
-  tof.startRangeContinuous(100u);
+  tof.startRangeContinuous(10u);
   #endif
 }
 
