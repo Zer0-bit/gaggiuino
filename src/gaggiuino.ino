@@ -95,7 +95,7 @@ void setup(void) {
   LOG_INFO("Setup sequence finished");
 
   // Change LED colour on setup exit.
-  led.setColor(255, 87, 95); // 64171
+  led.setColor(9, 0, 9); // 64171
 
   iwdcInit();
 }
@@ -132,7 +132,7 @@ static void sensorsRead(void) {
   calculateWeightAndFlow();
   updateStartupTimer();
   readTankWaterLevel();
-  crazyLed();
+  doLed();
 }
 
 static void sensorReadSwitches(void) {
@@ -957,7 +957,7 @@ static void readTankWaterLevel(void) {
   currentState.waterLvl = tof.readLvl(currentState);
 }
 
-static void crazyLed(void) {
+static void doLed(void) {
   if (brewActive) {
     switch(lcdCurrentPageId) {
       case NextionPage::BrewGraph:
@@ -965,16 +965,24 @@ static void crazyLed(void) {
         led.setDisco(15u);
         break;
       case NextionPage::Flush:
-        led.setDisco(5u);
+        led.setDisco(100u);
         break;
       case NextionPage::Descale:
         led.setDisco(500u);
         break;
       default:
+        led.setColor(0, 0, 0);
         break;
     }
   } else {
-    if (lcdCurrentPageId == NextionPage::Led) lcdSetLedColour(runningCfg);
-    else led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
+    switch(lcdCurrentPageId) {
+      case NextionPage::Led:
+        lcdSetLedColour(runningCfg);
+        break;
+      case NextionPage::Home:
+      default:
+        led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
+        break;
+    }
   }
 }

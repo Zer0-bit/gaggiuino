@@ -3,8 +3,6 @@
 #include "tof.h"
 #include "measurements.h"
 
-Measurements sensorOutput(20);
-
 TOF::TOF() {};
 
 void TOF::init(SensorState& sensor) {
@@ -18,6 +16,7 @@ void TOF::init(SensorState& sensor) {
 
 uint16_t TOF::readLvl(SensorState& sensor) {
   #ifdef TOF_VL53L0X
+  static Measurements sensorOutput(20);
   sensorOutput.add(tof.readRangeResult());
   sensor.tofReading = readRangeToPct(sensorOutput.latest().value);
   #endif
