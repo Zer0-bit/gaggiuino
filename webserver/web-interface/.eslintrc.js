@@ -18,38 +18,37 @@ module.exports = {
     'react',
   ],
   rules: {
-    "max-len": [
-      "error",
+    'max-len': [
+      'error',
       {
-        "code": 120,
-        "tabWidth": 2,
-        "comments": 120,
-        "ignoreComments": true,
-        "ignoreTrailingComments": true,
-        "ignoreUrls": true,
-        "ignoreStrings": true,
-        "ignoreTemplateLiterals": true,
-        "ignoreRegExpLiterals": true
-      }
+        code: 120,
+        tabWidth: 2,
+        comments: 120,
+        ignoreComments: true,
+        ignoreTrailingComments: true,
+        ignoreUrls: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreRegExpLiterals: true,
+      },
     ],
-    "react/jsx-props-no-spreading": "off",
-    "react/self-closing-comp": "off",
-    "react/destructuring-assignment": "off",
-    "react/jsx-no-bind": "off",
-    "react/prop-types": "off",
-    "react/jsx-fragments": "off",
+    'react/jsx-props-no-spreading': 'off',
+    'react/self-closing-comp': 'off',
+    'react/destructuring-assignment': 'off',
+    'react/jsx-no-bind': 'off',
+    'react/prop-types': 'off',
+    'react/jsx-fragments': 'off',
     'no-plusplus': 'off',
-    "import/no-extraneous-dependencies": [
-      "error",
+    'import/no-extraneous-dependencies': [
+      'error',
       {
-        "devDependencies": [
-          "**/*.stories.*",
-          "**/.storybook/**/*.*"
+        devDependencies: [
+          '**/*.stories.*',
+          '**/.storybook/**/*.*',
         ],
-        "peerDependencies": true
-      }
-    ]
+        peerDependencies: true,
+      },
+    ],
   },
   ignorePatterns: ['build/*.js', 'scripts/*.js', 'config/*.js'],
-
 };
