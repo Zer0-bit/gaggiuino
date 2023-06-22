@@ -965,7 +965,7 @@ static void doLed(void) {
         led.setDisco(15u);
         break;
       case NextionPage::Flush:
-        led.setDisco(5u);
+        led.setDisco(100u);
         break;
       case NextionPage::Descale:
         led.setDisco(500u);
@@ -980,14 +980,6 @@ static void doLed(void) {
         lcdSetLedColour(runningCfg);
         break;
       case NextionPage::Home:
-        led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
-        break;
-      case NextionPage::Flush:
-        led.setDisco(5u);
-        break;
-      case NextionPage::Descale:
-        led.setDisco(500u);
-        break;
       default:
         led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
         break;
