@@ -14,7 +14,6 @@
 #define dimmerPin     PA1
 #define steamPin      PC15
 #define valvePin      PC13
-#define waterPin      PA12
 
 #ifdef PCBV2
 // PCB V2
