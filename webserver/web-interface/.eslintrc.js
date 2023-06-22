@@ -1,3 +1,5 @@
+const extensions = ['.js', '.jsx', '.ts', '.tsx'];
+
 module.exports = {
   env: {
     browser: true,
@@ -6,6 +8,9 @@ module.exports = {
   extends: [
     'plugin:react/recommended',
     'airbnb',
+    'react-app',
+    'react-app/jest',
+    'plugin:@typescript-eslint/recommended',
   ],
   parserOptions: {
     ecmaFeatures: {
@@ -15,8 +20,16 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: [
+    '@typescript-eslint',
     'react',
   ],
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions,
+      },
+    },
+  },
   rules: {
     'max-len': [
       'error',
@@ -43,12 +56,14 @@ module.exports = {
       'error',
       {
         devDependencies: [
-          '**/*.stories.*',
-          '**/.storybook/**/*.*',
+          '!./src/setupTests.ts',
         ],
         peerDependencies: true,
       },
     ],
+    // allow JSX with any file extension
+    'import/extensions': [2, { extensions }],
+    'react/jsx-filename-extension': [2, { extensions }],
   },
   ignorePatterns: ['build/*.js', 'scripts/*.js', 'config/*.js'],
 };
