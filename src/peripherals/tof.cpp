@@ -18,11 +18,12 @@ void TOF::init(SensorState& sensor) {
 
 uint16_t TOF::readLvl(SensorState& sensor) {
   #ifdef TOF_VL53L0X
+  uint16_t tofReading;
   static Measurements sensorOutput(20);
   sensorOutput.add(tof.readRangeContinuousMillimeters());
-  sensor.tofReading = readRangeToPct(sensorOutput.latest().value);
+  tofReading = readRangeToPct(sensorOutput.latest().value);
   #endif
-  return sensor.tofReading != 0 ? sensor.tofReading : 125u;
+  return tofReading != 0 ? tofReading : 125u;
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {

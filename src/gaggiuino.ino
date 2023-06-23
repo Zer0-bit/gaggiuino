@@ -77,7 +77,7 @@ void setup(void) {
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdUploadCfg(runningCfg, systemState);
+  lcdUploadCfg(runningCfg);
   LOG_INFO("LCD cfg uploaded");
 
   adsInit();
