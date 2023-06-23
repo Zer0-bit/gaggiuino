@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include "tof.h"
 #include "measurements.h"
@@ -7,10 +6,11 @@ TOF::TOF() {};
 
 void TOF::init(SensorState& sensor) {
   #ifdef TOF_VL53L0X
+  Wire.begin();
   while(!sensor.tofReady) {
     sensor.tofReady = tof.init();
   }
-  tof.startContinuous(10u);
+  tof.startContinuous();
   #endif
 }
 
@@ -20,18 +20,30 @@ uint16_t TOF::readLvl(SensorState& sensor) {
   sensorOutput.add(tof.readRangeContinuousMillimeters());
   sensor.tofReading = readRangeToPct(sensorOutput.latest().value);
   #endif
-  return sensor.tofReading != 0 ? sensor.tofReading : 135u;
+  return sensor.tofReading != 0 ? sensor.tofReading : 125u;
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {
-  static const uint16_t water_lvl[] = { 100u, 90u, 80u, 70u, 60u, 50u, 40u, 30u, 20u, 10u };
-  static const uint16_t ranges[] = { 15u, 30u, 45u, 60u, 75u, 90u, 105u, 120u, 125u };
+  enum WaterLevel {
+    Full = 100u,
+    LVL90 = 90u,
+    LVL80 = 80u,
+    LVL70 = 70u,
+    LVL60 = 60u,
+    LVL50 = 50u,
+    LVL40 = 40u,
+    LVL30 = 30u,
+    LVL20 = 20u,
+    LVL10 = 10u,
+    Refill = 9u
+  };
 
-  for (size_t i = 0; i < sizeof(ranges) / sizeof(ranges[0]); i++) {
-    if (val <= ranges[i]) {
-      return water_lvl[i];
+  static const std::array<uint16_t, 9> ranges = { 15u, 30u, 45u, 60u, 75u, 90u, 105u, 115u, 125u };
+  for (size_t i = 0; i < ranges.size(); i++) {
+    if (val >= ranges[i]) {
+      return WaterLevel(i);
     }
   }
 
-  return 9; // if val < 15
+  return WaterLevel::Refill; // if val < 15
 }
