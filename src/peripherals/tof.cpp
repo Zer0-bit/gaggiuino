@@ -6,11 +6,12 @@ TOF::TOF() {};
 
 void TOF::init(SensorState& sensor) {
   #ifdef TOF_VL53L0X
-  Wire.begin();
+  tof.setAddress(0x29);
   while(!sensor.tofReady) {
     sensor.tofReady = tof.init();
   }
-  tof.startContinuous();
+  tof.setMeasurementTimingBudget(200u);
+  tof.startContinuous(100u);
   #endif
 }
 
