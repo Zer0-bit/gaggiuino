@@ -2,7 +2,7 @@
 #define TOF_H
 
 #include <stdint.h> // for uint8_t
-#include "Adafruit_VL53L0X.h"
+#include <VL53L0X.h>
 #include "../../lib/Common/sensors_state.h"
 
 class TOF {
@@ -13,7 +13,7 @@ class TOF {
     uint16_t readRangeToPct(uint16_t val);
 
   private:
-    Adafruit_VL53L0X tof;
+    VL53L0X tof;
 };
 
 #endif

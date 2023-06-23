@@ -105,7 +105,7 @@ namespace {
     defaultData.scalesF2 = 4210;
     defaultData.pumpFlowAtZero = 0.2401f;
     defaultData.ledState  = true;
-    defaultData.ledG = 9;
+    defaultData.ledR = 9;
     defaultData.ledG = 0;
     defaultData.ledB = 9;
 

@@ -77,7 +77,7 @@ void setup(void) {
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdUploadCfg(runningCfg, systemState);
+  lcdUploadCfg(runningCfg);
   LOG_INFO("LCD cfg uploaded");
 
   adsInit();
@@ -369,11 +369,7 @@ static void lcdRefresh(void) {
         if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
 
         /*LCD flow output*/
-        lcdSetFlow(
-          currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
-            ? currentState.smoothedWeightFlow * 10.f
-            : fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f)
-        );
+        lcdSetFlow(fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f));
         break;
       default:
         break; // don't push needless data on other pages
