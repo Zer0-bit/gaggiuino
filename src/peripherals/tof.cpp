@@ -14,13 +14,14 @@ void TOF::tofTimerISR() {
 void TOF::init(SensorState& sensor) {
   #ifdef TOF_VL53L0X
   tof_sensor.setAddress(0x29);
+  tof_sensor.setMeasurementTimingBudget(200000);
   while(!sensor.tofReady) {
     sensor.tofReady = tof_sensor.init();
   }
 
   // Configure the hardware timer
   hw_timer = new HardwareTimer(TIM10);
-  hw_timer->setOverflow(10000, MICROSEC_FORMAT);
+  hw_timer->setOverflow(200000, MICROSEC_FORMAT);
   hw_timer->setInterruptPriority(5, 5);
   hw_timer->attachInterrupt(tofTimerISR); // Attach the ISR function to the timer
 
