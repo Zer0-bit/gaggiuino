@@ -9,11 +9,12 @@ class TOF {
   public:
     TOF();
     void init(SensorState& sensor);
-    uint16_t readLvl(SensorState& sensor);
+    uint16_t readLvl();
     uint16_t readRangeToPct(uint16_t val);
 
   private:
-    VL53L0X tof;
+    HardwareTimer* hw_timer;
+    static inline void tofTimerISR(void);
 };
 
 #endif

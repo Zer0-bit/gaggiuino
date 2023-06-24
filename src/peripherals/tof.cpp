@@ -1,29 +1,41 @@
-#include <Wire.h>
 #include "tof.h"
 #include "measurements.h"
 
-TOF::TOF() {};
+VL53L0X tof_sensor;
+volatile uint16_t tofReading = 0;
+
+TOF::TOF() {}
+
+void TOF::tofTimerISR() {
+  // Read TOF sensor value and update tofReading variable
+  tofReading = tof_sensor.readRangeContinuousMillimeters();
+}
 
 void TOF::init(SensorState& sensor) {
   #ifdef TOF_VL53L0X
-  Wire.begin();
-  tof.setAddress(0x29);
+  tof_sensor.setAddress(0x29);
+  tof_sensor.setMeasurementTimingBudget(200000);
   while(!sensor.tofReady) {
-    sensor.tofReady = tof.init();
+    sensor.tofReady = tof_sensor.init();
   }
-  tof.setMeasurementTimingBudget(200000);
-  tof.startContinuous(100u);
+
+  // Configure the hardware timer
+  hw_timer = new HardwareTimer(TIM10);
+  hw_timer->setOverflow(200000, MICROSEC_FORMAT);
+  hw_timer->setInterruptPriority(5, 5);
+  hw_timer->attachInterrupt(tofTimerISR); // Attach the ISR function to the timer
+
+
   #endif
 }
 
-uint16_t TOF::readLvl(SensorState& sensor) {
+uint16_t TOF::readLvl() {
   #ifdef TOF_VL53L0X
-  uint16_t tofReading;
   static Measurements sensorOutput(20);
-  sensorOutput.add(tof.readRangeContinuousMillimeters());
-  tofReading = readRangeToPct(sensorOutput.latest().value);
+  sensorOutput.add(tofReading); // Use the stored value from the hardware timer
+  uint16_t tofReadingPct = readRangeToPct(sensorOutput.latest().value);
+  return tofReadingPct != 0 ? tofReadingPct : 125u;
   #endif
-  return tofReading != 0 ? tofReading : 125u;
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {
