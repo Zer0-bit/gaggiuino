@@ -14,7 +14,8 @@ class TOF {
 
   private:
     HardwareTimer* hw_timer;
-    static inline void tofTimerISR(void);
+    static void TimerHandler10(void);
+    static TOF* instance;
 };
 
 #endif
