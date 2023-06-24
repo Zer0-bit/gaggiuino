@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
 import ProgressBar from '../../components/inputs/ProgressBar';
 import LogContainer from '../../components/log/LogContainer';

@@ -22,69 +22,43 @@
     "react-refresh": "^0.14.0",
     "react-router-dom": "^6.11.2",
     "react-use-websocket": "^4.3.1",
-    "terser-webpack-plugin": "^5.3.9",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "eslint": "^8.41.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
+    "@vitejs/plugin-react": "^4.0.1",
+    "babel-jest": "^27.5.1",
+    "browserslist": "^4.21.5",
+    "dotenv": "^10.0.0",
+    "dotenv-expand": "^5.1.0",
+    "eslint": "^8.43.0",
     "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "http-proxy-middleware": "^2.0.6",
-    "workbox-webpack-plugin": "^6.5.4",
-    "webpack": "^5.84.0",
-    "webpack-dev-server": "^4.15.0",
-    "webpack-manifest-plugin": "^4.1.1",
-    "semver": "^7.5.1",
-    "source-map-loader": "^3.0.2",
-    "style-loader": "^3.3.3",
-    "resolve": "^1.22.2",
-    "resolve-url-loader": "^4.0.0",
-    "sass-loader": "^12.6.0",
-    "react-dev-utils": "^12.0.1",
-    "react-app-polyfill": "^3.0.0",
-    "postcss": "^8.4.23",
-    "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-loader": "^6.2.1",
-    "postcss-normalize": "^10.0.1",
-    "postcss-preset-env": "^7.8.3",
     "jest": "^27.5.1",
     "jest-resolve": "^27.5.1",
     "jest-watch-typeahead": "^1.1.0",
-    "mini-css-extract-plugin": "^2.7.6",
-    "html-webpack-plugin": "^5.5.1",
-    "css-loader": "^6.7.4",
-    "css-minimizer-webpack-plugin": "^3.4.1",
-    "dotenv": "^10.0.0",
-    "dotenv-expand": "^5.1.0",
-    "eslint-config-react-app": "^7.0.1",
-    "eslint-webpack-plugin": "^3.2.0",
-    "file-loader": "^6.2.0",
-    "case-sensitive-paths-webpack-plugin": "^2.4.0",
-    "browserslist": "^4.21.5",
-    "babel-jest": "^27.5.1",
-    "babel-loader": "^8.3.0",
-    "babel-plugin-named-asset-import": "^0.3.8",
-    "babel-preset-react-app": "^10.0.1",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
-    "@svgr/webpack": "^6.5.1",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@babel/core": "^7.21.8"
+    "react-dev-utils": "^12.0.1",
+    "semver": "^7.5.1",
+    "typescript": "^5.1.3",
+    "vite": "^4.3.9",
+    "vite-plugin-svgr": "^3.2.0",
+    "vite-tsconfig-paths": "^4.2.0"
   },
   "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "start": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview",
+    "test": "jest --watch",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx"
   },
   "browserslist": {
     "production": [
@@ -106,22 +80,14 @@
       "src/**/*.{js,jsx,ts,tsx}",
       "!src/**/*.d.ts"
     ],
-    "setupFiles": [
-      "react-app-polyfill/jsdom"
-    ],
     "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.js"
+      "<rootDir>/src/setupTests.ts"
     ],
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
       "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
     ],
     "testEnvironment": "jsdom",
-    "transform": {
-      "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
-      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-    },
     "transformIgnorePatterns": [
       "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
       "^.+\\.module\\.(css|sass|scss)$"
@@ -148,10 +114,5 @@
       "jest-watch-typeahead/testname"
     ],
     "resetMocks": true
-  },
-  "babel": {
-    "presets": [
-      "react-app"
-    ]
   }
 }
