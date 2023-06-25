@@ -2,7 +2,7 @@
 #define TOF_H
 
 #include <stdint.h> // for uint8_t
-#include <VL53L0X.h>
+#include <Adafruit_VL53L0X.h>
 #include "../../lib/Common/sensors_state.h"
 
 class TOF {
@@ -13,8 +13,8 @@ class TOF {
     uint16_t readRangeToPct(uint16_t val);
 
   private:
-    HardwareTimer* hw_timer;
-    static void TimerHandler10(void);
+    // HardwareTimer* hw_timer;
+    // static void TimerHandler10(void);
     static TOF* instance;
 };
 
