@@ -21,7 +21,9 @@ static inline void pinInit(void) {
   #endif
   pinMode(brewPin,  INPUT_PULLUP);
   pinMode(steamPin, INPUT_PULLUP);
+  #ifdef waterPin
   pinMode(waterPin, INPUT_PULLUP);
+  #endif
 }
 
 // Actuating the heater element
@@ -70,7 +72,11 @@ static inline bool steamState(void) {
 }
 
 static inline bool waterPinState(void) {
+  #ifdef waterPin
   return digitalRead(waterPin) == LOW; // pin will be low when switch is ON.
+  #else
+  return false;
+  #endif
 }
 
 static inline void openValve(void) {

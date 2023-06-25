@@ -11,7 +11,7 @@
 #define UART_LCD Serial2
 #define USART_DEBUG Serial  // USB-CDC (Takes PA8,PA9,PA10,PA11)
 
-HX711_2 loadcell;
+HX711_2 loadcell(TIM3);
 
 #if defined SINGLE_HX711_BOARD
   unsigned char scale_clk = OUTPUT;
