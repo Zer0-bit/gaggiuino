@@ -131,7 +131,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   updateStartupTimer();
-  readTankWaterLevel(1000);
+  readTankWaterLevel();
   doLed();
 }
 
@@ -243,14 +243,14 @@ static void calculateWeightAndFlow(void) {
 }
 
 // return the reading in mm of the tank water level.
-static void readTankWaterLevel(uint32_t interval) {
-  // if (lcdCurrentPageId == NextionPage::Home) {
-  //   static uint32_t tof_timeout = millis();
-  //   if (millis() >= tof_timeout) {
-  currentState.waterLvl = tof.readLvl();
-  //     tof_timeout = millis() + interval;
-  //   }
-  // }
+static void readTankWaterLevel(void) {
+  if (lcdCurrentPageId == NextionPage::Home) {
+    // static uint32_t tof_timeout = millis();
+    // if (millis() >= tof_timeout) {
+    currentState.waterLvl = tof.readLvl();
+      // tof_timeout = millis() + 500;
+    // }
+  }
 }
 
 //##############################################################################################################################
