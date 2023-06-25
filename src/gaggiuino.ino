@@ -77,7 +77,7 @@ void setup(void) {
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
 
-  lcdUploadCfg(runningCfg, systemState);
+  lcdUploadCfg(runningCfg);
   LOG_INFO("LCD cfg uploaded");
 
   adsInit();
@@ -115,7 +115,7 @@ void loop(void) {
   modeSelect();
   lcdRefresh();
   espCommsSendSensorData(currentState);
-  systemHealthCheck(0.7f);
+  systemHealthCheck(SYS_PRESSURE_IDLE);
 }
 
 //##############################################################################################################################
@@ -227,7 +227,7 @@ static void calculateWeightAndFlow(void) {
         if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
           if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f) 
           || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
-            actualFlow *= 0.6f;
+            actualFlow *= 0.3f;
           }
         }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
@@ -239,6 +239,17 @@ static void calculateWeightAndFlow(void) {
     currentState.consideredFlow = 0.f;
     currentState.pumpClicks = getAndResetClickCounter();
     flowTimer = millis();
+  }
+}
+
+// return the reading in mm of the tank water level.
+static void readTankWaterLevel(void) {
+  if (lcdCurrentPageId == NextionPage::Home) {
+    // static uint32_t tof_timeout = millis();
+    // if (millis() >= tof_timeout) {
+    currentState.waterLvl = tof.readLvl();
+      // tof_timeout = millis() + 500;
+    // }
   }
 }
 
@@ -369,11 +380,7 @@ static void lcdRefresh(void) {
         if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
 
         /*LCD flow output*/
-        lcdSetFlow(
-          currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
-            ? currentState.smoothedWeightFlow * 10.f
-            : fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f)
-        );
+        lcdSetFlow(fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f));
         break;
       default:
         break; // don't push needless data on other pages
@@ -950,11 +957,6 @@ static void cpsInit(eepromValues_t &eepromValues) {
   } else if (cps > 0) { // 50 Hz
     eepromValues.powerLineFrequency = 50u;
   }
-}
-
-// return the reading in mm of the tank water level.
-static void readTankWaterLevel(void) {
-  currentState.waterLvl = tof.readLvl(currentState);
 }
 
 static void doLed(void) {

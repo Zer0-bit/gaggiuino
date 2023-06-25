@@ -4,7 +4,6 @@
 
 struct SystemState {
   bool startupInitFinished;
-  uint8_t ledColours[3];
 };
 
 #endif

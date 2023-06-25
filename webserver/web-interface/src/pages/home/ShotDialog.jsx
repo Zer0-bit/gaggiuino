@@ -5,7 +5,7 @@ import {
 import PropTypes from 'prop-types';
 import useWebSocket from 'react-use-websocket';
 import CloseIcon from '@mui/icons-material/Close';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import {
   apiHost, filterSocketMessage, MSG_TYPE_SHOT_DATA,
 } from '../../models/api';

@@ -12,7 +12,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 // import InputAdornment from '@mui/material/InputAdornment';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import ProfileChart from '../../components/chart/ProfileChart';
 import { Profile } from '../../models/profile';
 
