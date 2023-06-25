@@ -115,7 +115,7 @@ void loop(void) {
   modeSelect();
   lcdRefresh();
   espCommsSendSensorData(currentState);
-  systemHealthCheck(0.7f);
+  systemHealthCheck(SYS_PRESSURE_IDLE);
 }
 
 //##############################################################################################################################
@@ -227,7 +227,7 @@ static void calculateWeightAndFlow(void) {
         if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
           if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f) 
           || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
-            actualFlow *= 0.6f;
+            actualFlow *= 0.3f;
           }
         }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);

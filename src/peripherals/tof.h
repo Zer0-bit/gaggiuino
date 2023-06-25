@@ -13,8 +13,9 @@ class TOF {
     uint16_t readRangeToPct(uint16_t val);
 
   private:
-    // HardwareTimer* hw_timer;
-    // static void TimerHandler10(void);
+    HardwareTimer* hw_timer;
+    static void TimerHandler10(void);
+    uint32_t tofReading;
     static TOF* instance;
 };
 

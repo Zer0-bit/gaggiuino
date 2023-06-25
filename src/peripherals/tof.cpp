@@ -2,14 +2,13 @@
 #include "measurements.h"
 
 Adafruit_VL53L0X tof_sensor;
-Measurements sensorOutput(20);
 
 TOF::TOF() {}
 TOF* TOF::instance = nullptr;
 
 // void TOF::TimerHandler10() {
 //   if (instance != nullptr && tof_sensor.isRangeComplete()) {
-//     sensorOutput.add(tof_sensor.readRangeResult());
+//     instance->TOF::tofReading = tof_sensor.readRangeResult();
 //   }
 // }
 
@@ -21,10 +20,11 @@ void TOF::init(SensorState& sensor) {
   tof_sensor.startRangeContinuous();
 
   // Configure the hardware timer
-  // hw_timer = new HardwareTimer(TIM10);
-  // hw_timer->setOverflow(1000000, MICROSEC_FORMAT);
-  // hw_timer->setInterruptPriority(1, 1);
-  // hw_timer->attachInterrupt(TOF::TimerHandler10); // Attach the ISR function to the timer
+  // instance->hw_timer = new HardwareTimer(TIM10);
+  // instance->hw_timer->setCount(100000, MICROSEC_FORMAT);
+  // instance->hw_timer->setOverflow(100000, MICROSEC_FORMAT);
+  // instance->hw_timer->setInterruptPriority(1, 1);
+  // instance->hw_timer->attachInterrupt(TOF::TimerHandler10); // Attach the ISR function to the timer
 
   instance = this;
   #endif
@@ -33,9 +33,9 @@ void TOF::init(SensorState& sensor) {
 uint16_t TOF::readLvl() {
   #ifdef TOF_VL53L0X
   if(tof_sensor.isRangeComplete()) {
-    sensorOutput.add(tof_sensor.readRangeResult());
+    instance->TOF::tofReading = tof_sensor.readRangeResult();
   }
-  return sensorOutput.latest().value != 0 ? readRangeToPct(sensorOutput.latest().value) : readRangeToPct(sensorOutput.previous().value);
+  return  instance->TOF::tofReading != 0 ? readRangeToPct(instance->TOF::tofReading) : 125u;
   #endif
 }
 
