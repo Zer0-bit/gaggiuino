@@ -115,7 +115,7 @@ void loop(void) {
   modeSelect();
   lcdRefresh();
   espCommsSendSensorData(currentState);
-  systemHealthCheck(0.7f);
+  systemHealthCheck(SYS_PRESSURE_IDLE);
 }
 
 //##############################################################################################################################
@@ -131,7 +131,7 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   updateStartupTimer();
-  readTankWaterLevel(1000);
+  readTankWaterLevel();
   doLed();
 }
 
@@ -227,7 +227,7 @@ static void calculateWeightAndFlow(void) {
         if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
           if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f) 
           || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
-            actualFlow *= 0.6f;
+            actualFlow *= 0.3f;
           }
         }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
@@ -243,14 +243,14 @@ static void calculateWeightAndFlow(void) {
 }
 
 // return the reading in mm of the tank water level.
-static void readTankWaterLevel(uint32_t interval) {
-  // if (lcdCurrentPageId == NextionPage::Home) {
-  //   static uint32_t tof_timeout = millis();
-  //   if (millis() >= tof_timeout) {
-  currentState.waterLvl = tof.readLvl();
-  //     tof_timeout = millis() + interval;
-  //   }
-  // }
+static void readTankWaterLevel(void) {
+  if (lcdCurrentPageId == NextionPage::Home) {
+    // static uint32_t tof_timeout = millis();
+    // if (millis() >= tof_timeout) {
+    currentState.waterLvl = tof.readLvl();
+      // tof_timeout = millis() + 500;
+    // }
+  }
 }
 
 //##############################################################################################################################
