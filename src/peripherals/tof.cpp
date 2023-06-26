@@ -1,7 +1,9 @@
+#include <movingAvg.h>
 #include "tof.h"
 #include "measurements.h"
 
 Adafruit_VL53L0X tof_sensor;
+movingAvg mvAvg(10);
 
 TOF::TOF() {}
 TOF* TOF::instance = nullptr;
@@ -18,7 +20,7 @@ void TOF::init(SensorState& sensor) {
     sensor.tofReady = tof_sensor.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
   }
   tof_sensor.startRangeContinuous();
-
+  mvAvg.begin();
   // Configure the hardware timer
   // instance->hw_timer = new HardwareTimer(TIM10);
   // instance->hw_timer->setCount(100000, MICROSEC_FORMAT);
@@ -33,9 +35,9 @@ void TOF::init(SensorState& sensor) {
 uint16_t TOF::readLvl() {
   #ifdef TOF_VL53L0X
   if(tof_sensor.isRangeComplete()) {
-    instance->TOF::tofReading = tof_sensor.readRangeResult();
+    instance->TOF::tofReading = mvAvg.reading(tof_sensor.readRangeResult());
   }
-  return  instance->TOF::tofReading != 0 ? readRangeToPct(instance->TOF::tofReading) : 125u;
+  return  instance->TOF::tofReading != 0 ? readRangeToPct(instance->TOF::tofReading) : mvAvg.getAvg(10);
   #endif
 }
 

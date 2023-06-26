@@ -61,7 +61,7 @@ static inline void setSteamBoilerRelayOff(void) {
 
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
-static inline bool brewState(void) {  //Monitors the current flowing through the ACS712 circuit and returns a value depending on the power value (P) the system draws
+static inline bool brewState(void) {
   return digitalRead(brewPin) == LOW; // pin will be low when switch is ON.
 }
 

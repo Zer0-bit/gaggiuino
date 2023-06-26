@@ -784,7 +784,6 @@ static void brewParamsReset(void) {
 static bool sysReadinessCheck(void) {
   // Startup procedures not finished
   if (!systemState.startupInitFinished) {
-    lcdShowPopup("SYSTEM NOT READY!");
     return false;
   }
   // If there's not enough water in the tank
