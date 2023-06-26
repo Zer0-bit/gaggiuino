@@ -90,6 +90,6 @@ bool homeScreenScalesEnabled = false;
 float previousSmoothedPressure;
 float previousSmoothedPumpFlow;
 
-static void systemHealthCheck(float pressureThreshold);
+static void sysHealthCheck(float pressureThreshold);
 
 #endif

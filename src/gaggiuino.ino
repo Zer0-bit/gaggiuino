@@ -115,7 +115,7 @@ void loop(void) {
   modeSelect();
   lcdRefresh();
   espCommsSendSensorData(currentState);
-  systemHealthCheck(SYS_PRESSURE_IDLE);
+  sysHealthCheck(SYS_PRESSURE_IDLE);
 }
 
 //##############################################################################################################################
@@ -798,7 +798,7 @@ static bool sysReadinessCheck(void) {
   return true;
 }
 
-static inline void systemHealthCheck(float pressureThreshold) {
+static inline void sysHealthCheck(float pressureThreshold) {
   //Reloading the watchdog timer, if this function fails to run MCU is rebooted
   watchdogReload();
 
