@@ -740,20 +740,14 @@ static void manualFlowControl(void) {
 //#############################################################################################
 
 static void brewDetect(void) {
-  // Do not allow brew detection while system hasn't finished it's startup procedures.
-  if (!systemState.startupInitFinished) {
-    return;
-  }
-  // If there's not enough water in the tank
-  if (currentState.waterLvl < 10) {
-    lcdShowPopup("Fill the water tank!");
+  // Do not allow brew detection while system reports not ready.
+  if (!sysReadinessCheck()) {
     return;
   }
 
   static bool paramsReset = true;
-
   if (currentState.brewSwitchState) {
-    if(!paramsReset) {
+    if (!paramsReset) {
       lcdWakeUp();
       brewParamsReset();
       paramsReset = true;
@@ -765,7 +759,7 @@ static void brewDetect(void) {
   } else {
     brewActive = false;
     currentState.pumpClicks = getAndResetClickCounter();
-    if(paramsReset) {
+    if (paramsReset) {
       brewParamsReset();
       paramsReset = false;
     }
@@ -785,6 +779,23 @@ static void brewParamsReset(void) {
   weightMeasurements.clear();
   predictiveWeight.reset();
   phaseProfiler.reset();
+}
+
+static bool sysReadinessCheck(void) {
+  // Startup procedures not finished
+  if (!systemState.startupInitFinished) {
+    lcdShowPopup("SYSTEM NOT READY!");
+    return false;
+  }
+  // If there's not enough water in the tank
+  if ((lcdCurrentPageId != NextionPage::BrewGraph || lcdCurrentPageId != NextionPage::BrewManual) 
+  && currentState.waterLvl < MIN_WATER_LVL)
+  {
+    lcdShowPopup("Fill the water tank!");
+    return false;
+  }
+
+  return true;
 }
 
 static inline void systemHealthCheck(float pressureThreshold) {

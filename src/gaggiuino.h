@@ -39,6 +39,7 @@
 #define BOILER_FILL_TIMEOUT     8000UL // Boiler fill timeout - 8sec since system init.
 #define BOILER_FILL_SKIP_TEMP   85.f // Boiler fill skip temperature threshold
 #define SYS_PRESSURE_IDLE       0.7f // System pressure threshold at idle
+#define MIN_WATER_LVL           10u // Min allowable tank water lvl
 
 enum class OPERATION_MODES {
   OPMODE_straight9Bar,
