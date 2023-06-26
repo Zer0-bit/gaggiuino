@@ -744,8 +744,8 @@ static void brewDetect(void) {
   if (!systemState.startupInitFinished) {
     return;
   }
-  // If there's not enough water in the tank
-  if (currentState.waterLvl < 10) {
+  // If there's not enough water in the tank and we're not in an active brew
+  if (lcdCurrentPageId != NextionPage::BrewGraph && currentState.waterLvl < 10) {
     lcdShowPopup("Fill the water tank!");
     return;
   }
@@ -753,7 +753,7 @@ static void brewDetect(void) {
   static bool paramsReset = true;
 
   if (currentState.brewSwitchState) {
-    if(!paramsReset) {
+    if (!paramsReset) {
       lcdWakeUp();
       brewParamsReset();
       paramsReset = true;
@@ -765,7 +765,7 @@ static void brewDetect(void) {
   } else {
     brewActive = false;
     currentState.pumpClicks = getAndResetClickCounter();
-    if(paramsReset) {
+    if (paramsReset) {
       brewParamsReset();
       paramsReset = false;
     }
