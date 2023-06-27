@@ -757,7 +757,9 @@ static void brewDetect(void) {
     return;
   }
   // If there's not enough water in the tank
-  if (lcdCurrentPageId == NextionPage::Home && currentState.waterLvl < 10) {
+  if (lcdCurrentPageId != NextionPage::BrewGraph 
+      && lcdCurrentPageId != NextionPage::BrewManual 
+      && currentState.waterLvl < 10) {
     lcdShowPopup("Fill the water tank!");
     return;
   }
