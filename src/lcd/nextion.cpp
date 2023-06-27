@@ -8,7 +8,6 @@
 EasyNex myNex(USART_LCD);
 volatile NextionPage lcdCurrentPageId;
 volatile NextionPage lcdLastCurrentPageId;
-LED ledCtrl;
 
 void lcdInit(void) {
   myNex.begin(115200);
@@ -397,9 +396,17 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.pumpFlowAtZero                 = myNex.readNumber("sP.pump_zero.val") / 10000.f;
 }
 
+void lcdLoadDecodeColour(eepromValues_t &settings, uint16_t colourCode) {
+    // extracting the slider id
+    if      (colourCode > 510)  settings.ledB = colourCode - 510;
+    else if (colourCode > 255)  settings.ledG = colourCode - 255;
+    else                        settings.ledR = colourCode;
+}
+
 void lcdFetchLed(eepromValues_t &settings) {
   // Led Settings
-  settings.ledState                       = myNex.readNumber("ledOn");
+  settings.ledState = myNex.readNumber("ledOn");
+  lcdLoadDecodeColour(settings, myNex.readNumber("ledNum"));
 }
 
 void lcdFetchPage(eepromValues_t &settings, NextionPage page, const SystemState &sys,int targetProfile) {
@@ -546,44 +553,6 @@ void lcdSetBrewTimer(int seconds) {
 
 void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
-}
-
-void lcdSetLedColour(eepromValues_t& settings) {
-  if (!settings.ledState) return; // skipping the whole shabang if led state == off
-
-  uint16_t colourCode = 0;
-  uint8_t colourID = 0;
-
-  // Handling active colour customisations
-  if (lcdCurrentPageId == NextionPage::Led) {
-    colourCode = myNex.readNumber("ledNum"); // reading the slider colour code
-    // extracting the slider id
-    if (colourCode > 510) colourID = 3;
-    else if (colourCode > 255) colourID = 2;
-    else colourID = 1;
-  }
-
-  // Set the colour
-  switch (colourID) {
-    case 0:
-      ledCtrl.setColor(settings.ledR,settings.ledG,settings.ledB);
-      break;
-    case 1:
-      settings.ledR = colourCode;
-      ledCtrl.setRed(settings.ledR);
-      break;
-    case 2:
-      settings.ledG = colourCode - 255;;
-      ledCtrl.setGreen(settings.ledG);
-      break;
-    case 3:
-      settings.ledB = colourCode - 510;
-      ledCtrl.setBlue(settings.ledB);
-      break;
-    default:
-      ledCtrl.setColor(settings.ledR,settings.ledG,settings.ledB);
-      break;
-    }
 }
 
 void trigger1(void) { lcdSaveSettingsTrigger(); }

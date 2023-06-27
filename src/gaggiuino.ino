@@ -108,7 +108,7 @@ void setup(void) {
 //Main loop where all the logic is continuously run
 void loop(void) {
   fillBoiler();
-  if (lcdCurrentPageId != lcdLastCurrentPageId) pageValuesRefresh();
+  pageValuesRefresh();
   lcdListen();
   sensorsRead();
   brewDetect();
@@ -225,7 +225,7 @@ static void calculateWeightAndFlow(void) {
         /* Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling,
         once pressure stabilises around the setpoint the flow is either stable or puck restriction is high af. */
         if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
-          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f) 
+          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f)
           || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
             actualFlow *= 0.3f;
           }
@@ -257,6 +257,11 @@ static void readTankWaterLevel(void) {
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 static void pageValuesRefresh() {
+  if (lcdCurrentPageId != lcdLastCurrentPageId) settingsValuesRefresh();
+  liveValuesRefresh();
+}
+
+static void settingsValuesRefresh() {
   if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) {
     // Read the page we're landing in: leaving keyboard page means a value could've changed in it
     lcdFetchPage(runningCfg, lcdCurrentPageId, systemState, runningCfg.activeProfile);
@@ -272,6 +277,17 @@ static void pageValuesRefresh() {
   updateProfilerPhases();
 
   lcdLastCurrentPageId = lcdCurrentPageId;
+}
+
+// This refresh runs on every cycle, so it only applies to pages that need to be polled
+static void liveValuesRefresh() {
+  switch(lcdCurrentPageId) {
+    case NextionPage::Led:
+      lcdFetchPage(runningCfg, lcdCurrentPageId, systemState, runningCfg.activeProfile);
+      break;
+    default:
+      break;
+  }
 }
 
 //#############################################################################################
@@ -351,7 +367,7 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp; 
+    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
     currentState.waterTemperature = (currentState.temperature > (float)ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
       ? currentState.temperature / (float)brewTempSetPoint + (float)ACTIVE_PROFILE(runningCfg).setpoint
@@ -787,7 +803,7 @@ static bool sysReadinessCheck(void) {
     return false;
   }
   // If there's not enough water in the tank
-  if ((lcdCurrentPageId != NextionPage::BrewGraph || lcdCurrentPageId != NextionPage::BrewManual) 
+  if ((lcdCurrentPageId != NextionPage::BrewGraph || lcdCurrentPageId != NextionPage::BrewManual)
   && currentState.waterLvl < MIN_WATER_LVL)
   {
     lcdShowPopup("Fill the water tank!");
@@ -986,15 +1002,5 @@ static void doLed(void) {
         led.setColor(0, 0, 0);
         break;
     }
-  } else {
-    switch(lcdCurrentPageId) {
-      case NextionPage::Led:
-        lcdSetLedColour(runningCfg);
-        break;
-      case NextionPage::Home:
-      default:
-        led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
-        break;
-    }
-  }
+  } else led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
 }
