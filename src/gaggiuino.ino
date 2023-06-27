@@ -150,28 +150,30 @@ static void sensorsReadTemperature(void) {
 
 static void sensorsReadWeight(void) {
   uint32_t elapsedTime = millis() - scalesTimer;
-  currentState.scalesPresent = scalesIsPresent();
-  if (currentState.scalesPresent && elapsedTime > GET_SCALES_READ_EVERY) {
-    if(!tareDone) {
-      scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewModeActive && (fabsf(scalesGetWeight().value) > 0.3f)) {
-        tareDone = false;
-      }
-      else {
+
+  if (elapsedTime > GET_SCALES_READ_EVERY) {
+    currentState.scalesPresent = scalesIsPresent();
+    if (currentState.scalesPresent) {
+      if (currentState.tarePending) {
+        scalesTare(); //Tare at the start of any weighing cycle
         weightMeasurements.clear();
-        tareDone = true;
+        weightMeasurements.add(scalesGetWeight());
+        if (nonBrewModeActive 
+            || (fabsf(weightMeasurements.latest().value) > 0.3f)) {
+          currentState.tarePending = false;
+        }
+      } else {
+        weightMeasurements.add(scalesGetWeight());
       }
+
+      currentState.weight = weightMeasurements.latest().value;
     }
-
-    weightMeasurements.add(scalesGetWeight());
-    currentState.weight = weightMeasurements.latest().value;
-
+    
     if (brewActive) {
-      currentState.shotWeight = tareDone ? currentState.weight : 0.f;
+      currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
       currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
       currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
     }
-
     scalesTimer = millis();
   }
 }
@@ -207,7 +209,7 @@ static void calculateWeightAndFlow(void) {
 
   if (brewActive) {
     // Marking for tare in case smth has gone wrong and it has exited tare already.
-    if (currentState.weight < -0.3f) tareDone = false;
+    if (currentState.weight < -.3f) currentState.tarePending = true;
 
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
@@ -231,7 +233,7 @@ static void calculateWeightAndFlow(void) {
           }
         }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
-        currentState.shotWeight = scalesIsPresent() ? currentState.shotWeight : currentState.shotWeight + actualFlow;
+        currentState.shotWeight = currentState.scalesPresent ? currentState.shotWeight : currentState.shotWeight + actualFlow;
       }
       currentState.waterPumped += consideredFlow;
     }
@@ -451,7 +453,7 @@ void lcdLoadDefaultProfileTrigger(void) {
 
 void lcdScalesTareTrigger(void) {
   LOG_VERBOSE("Tare scales");
-  if (scalesIsPresent()) scalesTare();
+  if (currentState.scalesPresent) currentState.tarePending = true;
 }
 
 void lcdHomeScreenScalesTrigger(void) {
@@ -461,12 +463,15 @@ void lcdHomeScreenScalesTrigger(void) {
 
 void lcdBrewGraphScalesTareTrigger(void) {
   LOG_VERBOSE("Predictive scales tare action completed!");
-  if (!scalesIsPresent()) {
+  if (currentState.scalesPresent) {
+    currentState.tarePending = true;
+  }
+  else {
     if (currentState.shotWeight > 0.f) {
       currentState.shotWeight = 0.f;
       predictiveWeight.setIsForceStarted(true);
     } else predictiveWeight.setIsForceStarted(true);
-  } else scalesTare();
+  } 
 }
 
 void lcdRefreshElementsTrigger(void) {
@@ -767,7 +772,7 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset(void) {
-  tareDone                 = false;
+  currentState.tarePending = true;
   currentState.shotWeight  = 0.f;
   currentState.pumpFlow    = 0.f;
   currentState.weight      = 0.f;
