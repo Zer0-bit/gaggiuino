@@ -62,7 +62,7 @@ void setup(void) {
 
   // Initialize LED
   led.begin();
-  led.setColor(9, 0, 9); // WHITE
+  led.setColor(9u, 0u, 9u); // WHITE
   // Init the tof sensor
   tof.init(currentState);
 
@@ -95,7 +95,7 @@ void setup(void) {
   LOG_INFO("Setup sequence finished");
 
   // Change LED colour on setup exit.
-  led.setColor(9, 0, 9); // 64171
+  led.setColor(9u, 0u, 9u); // 64171
 
   iwdcInit();
 }
@@ -987,9 +987,11 @@ static void doLed(void) {
         break;
     }
   } else {
+    uint16_t sliderReading;
     switch(lcdCurrentPageId) {
       case NextionPage::Led:
-        lcdSetLedColour(runningCfg);
+        sliderReading = lcdGetSliderColour();
+        setLedColour(sliderReading);
         break;
       case NextionPage::Home:
       default:
@@ -998,3 +1000,34 @@ static void doLed(void) {
     }
   }
 }
+
+static void setLedColour(uint16_t colour) {
+  uint8_t colourID = 0;
+  if (colour > 510) colourID = 3;
+  else if (colour > 255) colourID = 2;
+  else colourID = 1;
+
+  // Set the colour
+  switch (colourID) {
+    case 0:
+      led.setColor(runningCfg.ledR,runningCfg.ledG,runningCfg.ledB);
+      break;
+    case 1:
+      runningCfg.ledR = (uint8_t)colour;
+      led.setRed(runningCfg.ledR);
+      break;
+    case 2:
+      runningCfg.ledG = uint8_t(colour - 255);
+      led.setGreen(runningCfg.ledG);
+      break;
+    case 3:
+      runningCfg.ledB = uint8_t(colour - 510);
+      led.setBlue(runningCfg.ledB);
+      break;
+    default:
+      led.setColor(runningCfg.ledR,runningCfg.ledG,runningCfg.ledB);
+      break;
+    }
+}
+
+
