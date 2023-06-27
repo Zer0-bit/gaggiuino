@@ -65,7 +65,7 @@ void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);
 void lcdSetBrewTimer(int seconds);
 void lcdWarmupStateStop(void);
-void lcdSetLedColour(eepromValues_t &settings);
+uint16_t lcdGetSliderColour(void);
 
 /* Triggers */
 void lcdSaveSettingsTrigger(void);
