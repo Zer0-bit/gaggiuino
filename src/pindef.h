@@ -14,6 +14,11 @@
 #define dimmerPin     PA1
 #define steamPin      PC15
 #define valvePin      PC13
+#if defined(SINGLE_BOARD)
+#define waterPin      PB15
+#else
+#define waterPin      PA12
+#endif
 
 #ifdef PCBV2
 // PCB V2
