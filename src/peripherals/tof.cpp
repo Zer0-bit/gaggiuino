@@ -39,6 +39,7 @@ uint16_t TOF::readLvl() {
   }
   return  instance->TOF::tofReading != 0 ? readRangeToPct(instance->TOF::tofReading) : 125u;
   #endif
+  return 90.f;
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {
