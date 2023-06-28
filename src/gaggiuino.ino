@@ -225,7 +225,7 @@ static void calculateWeightAndFlow(void) {
         /* Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling,
         once pressure stabilises around the setpoint the flow is either stable or puck restriction is high af. */
         if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
-          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f) 
+          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f)
           || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
             actualFlow *= 0.3f;
           }
@@ -350,7 +350,7 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp; 
+    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
     currentState.waterTemperature = (currentState.temperature > (float)ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
       ? currentState.temperature / (float)brewTempSetPoint + (float)ACTIVE_PROFILE(runningCfg).setpoint
@@ -786,7 +786,7 @@ static bool sysReadinessCheck(void) {
     return false;
   }
   // If there's not enough water in the tank
-  if ((lcdCurrentPageId != NextionPage::BrewGraph || lcdCurrentPageId != NextionPage::BrewManual) 
+  if ((lcdCurrentPageId != NextionPage::BrewGraph || lcdCurrentPageId != NextionPage::BrewManual)
   && currentState.waterLvl < MIN_WATER_LVL)
   {
     lcdShowPopup("Fill the water tank!");
@@ -986,47 +986,15 @@ static void doLed(void) {
         break;
     }
   } else {
-    uint16_t sliderReading;
     switch(lcdCurrentPageId) {
       case NextionPage::Led:
-        sliderReading = lcdGetSliderColour();
-        setLedColour(sliderReading);
-        break;
-      case NextionPage::Home:
-      default:
+        static uint32_t timer = millis();
+        if (millis() > timer) {
+          timer = millis() + 100u;
+          lcdFetchLed(runningCfg);
+        }
+      default: // intentionally fall through
         led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
-        break;
     }
   }
 }
-
-static void setLedColour(uint16_t colour) {
-  uint8_t colourID = 0;
-  if (colour > 510) colourID = 3;
-  else if (colour > 255) colourID = 2;
-  else colourID = 1;
-
-  // Set the colour
-  switch (colourID) {
-    case 0:
-      led.setColor(runningCfg.ledR,runningCfg.ledG,runningCfg.ledB);
-      break;
-    case 1:
-      runningCfg.ledR = (uint8_t)colour;
-      led.setRed(runningCfg.ledR);
-      break;
-    case 2:
-      runningCfg.ledG = uint8_t(colour - 255);
-      led.setGreen(runningCfg.ledG);
-      break;
-    case 3:
-      runningCfg.ledB = uint8_t(colour - 510);
-      led.setBlue(runningCfg.ledB);
-      break;
-    default:
-      led.setColor(runningCfg.ledR,runningCfg.ledG,runningCfg.ledB);
-      break;
-    }
-}
-
-
