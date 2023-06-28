@@ -258,11 +258,11 @@ static void readTankWaterLevel(void) {
 //##############################################################################################################################
 static void pageValuesRefresh() {
   // Read the page we're landing in: leaving keyboard page means a value could've changed in it
-  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) lcdFetchPage(runningCfg, lcdCurrentPageId, systemState, runningCfg.activeProfile);
+  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
   // Or maybe it's a page that needs constant polling
-  else if (lcdLastCurrentPageId == NextionPage::Led) lcdFetchPage(runningCfg, lcdCurrentPageId, systemState, runningCfg.activeProfile);
+  else if (lcdLastCurrentPageId == NextionPage::Led) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
   // Finally read the page we left, as it could've been changed in place (e.g. boolean toggles)
-  else lcdFetchPage(runningCfg, lcdLastCurrentPageId, systemState, runningCfg.activeProfile);
+  else lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.activeProfile);
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
   // MODE_SELECT should always be LAST
@@ -426,7 +426,7 @@ void lcdSaveSettingsTrigger(void) {
   LOG_VERBOSE("Saving values to EEPROM");
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, systemState, runningCfg.activeProfile);
+  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.activeProfile);
   tryEepromWrite(eepromCurrentValues);
 }
 

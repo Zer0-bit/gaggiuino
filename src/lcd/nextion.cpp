@@ -400,7 +400,7 @@ void lcdFetchLed(eepromValues_t &settings) {
   settings.ledState                       = myNex.readNumber("ledOn");
 }
 
-void lcdFetchPage(eepromValues_t &settings, NextionPage page, const SystemState &sys, int targetProfile) {
+void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile) {
   switch (page) {
     case NextionPage::BrewMore:
       lcdFetchBrewSettings(settings);
