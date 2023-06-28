@@ -395,9 +395,22 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.pumpFlowAtZero                 = myNex.readNumber("sP.pump_zero.val") / 10000.f;
 }
 
+void lcdLoadDecodeColour(eepromValues_t &settings, uint32_t colourCode) {
+  static struct {uint8_t r, g, b;} cachedRgb;
+  // extracting the slider id
+  if      (colourCode > 510)  cachedRgb.b = colourCode - 510;
+  else if (colourCode > 255)  cachedRgb.g = colourCode - 255;
+  else                        cachedRgb.r = colourCode;
+  // update settings with all three cached colours
+  settings.ledR = cachedRgb.r;
+  settings.ledG = cachedRgb.g;
+  settings.ledB = cachedRgb.b;
+}
+
 void lcdFetchLed(eepromValues_t &settings) {
   // Led Settings
-  settings.ledState                       = myNex.readNumber("ledOn");
+  settings.ledState = myNex.readNumber("ledOn");
+  lcdLoadDecodeColour(settings, myNex.readNumber("ledNum"));
 }
 
 void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile) {
@@ -544,16 +557,6 @@ void lcdSetBrewTimer(int seconds) {
 
 void lcdWarmupStateStop(void) {
   myNex.writeNum("warmupState", 0);
-}
-
-uint16_t lcdGetSliderColour(void) {
-  static uint32_t timer = millis();
-  static uint32_t colourCode;
-  if (millis() > timer) {
-    timer = millis() + 100u;
-    colourCode = myNex.readNumber("ledNum"); // reading the slider colour code
-  }
-  return colourCode; // reading the slider colour code
 }
 
 void trigger1(void) { lcdSaveSettingsTrigger(); }

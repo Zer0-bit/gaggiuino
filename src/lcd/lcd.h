@@ -38,6 +38,7 @@ void lcdListen(void);
 void lcdWakeUp(void);
 
 void lcdFetchCurrentProfile(eepromValues_t & settings);
+void lcdFetchLed(eepromValues_t & settings);
 void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile);
 uint8_t lcdGetSelectedProfile(void);
 bool lcdGetPreinfusionFlowState(void);
@@ -65,7 +66,6 @@ void lcdBrewTimerStart(void);
 void lcdBrewTimerStop(void);
 void lcdSetBrewTimer(int seconds);
 void lcdWarmupStateStop(void);
-uint16_t lcdGetSliderColour(void);
 
 /* Triggers */
 void lcdSaveSettingsTrigger(void);
