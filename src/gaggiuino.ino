@@ -257,13 +257,12 @@ static void readTankWaterLevel(void) {
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 static void pageValuesRefresh() {
-  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) {
-    // Read the page we're landing in: leaving keyboard page means a value could've changed in it
-    lcdFetchPage(runningCfg, lcdCurrentPageId, systemState, runningCfg.activeProfile);
-  } else {
-    // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
-    lcdFetchPage(runningCfg, lcdLastCurrentPageId, systemState, runningCfg.activeProfile);
-  }
+  // Read the page we're landing in: leaving keyboard page means a value could've changed in it
+  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) lcdFetchPage(runningCfg, lcdCurrentPageId, systemState, runningCfg.activeProfile);
+  // Or maybe it's a page that needs constant polling
+  else if (lcdLastCurrentPageId == NextionPage::Led) lcdFetchPage(runningCfg, lcdCurrentPageId, systemState, runningCfg.activeProfile);
+  // Finally read the page we left, as it could've been changed in place (e.g. boolean toggles)
+  else lcdFetchPage(runningCfg, lcdLastCurrentPageId, systemState, runningCfg.activeProfile);
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
   // MODE_SELECT should always be LAST
