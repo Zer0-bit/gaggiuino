@@ -3,6 +3,7 @@
 
 #include <stdint.h> // for uint8_t
 #include <NCP5623.h>
+#include <pca9632.h>
 
 #ifdef LED_NCP5623
 NCP5623 tankLED;
