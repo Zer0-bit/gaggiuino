@@ -116,6 +116,7 @@ void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
   data["steamActive"] = snapshot.steamActive;
   data["scalesPresent"] = snapshot.scalesPresent;
   data["temperature"] = snapshot.temperature;
+  data["waterLvl"] = snapshot.waterLvl;
   data["pressure"] = snapshot.pressure;
   data["pumpFlow"] = snapshot.pumpFlow;
   data["weightFlow"] = snapshot.weightFlow;
