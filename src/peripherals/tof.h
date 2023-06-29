@@ -52,8 +52,8 @@ uint16_t TOF::readLvl() {
   if(tof_sensor.isRangeComplete()) {
     TOF::tofReading = mvAvg.reading(tof_sensor.readRangeResult());
   }
-  return  TOF::tofReading != 0 ? readRangeToPct(TOF::tofReading) : 125u;
   #endif
+  return  TOF::tofReading != 0 ? readRangeToPct(TOF::tofReading) : 30u;
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {

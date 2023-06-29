@@ -1,7 +1,7 @@
 #ifndef LED_H
 #define LED_H
 
-#include <stdint.h> // for uint8_t
+#include <Arduino.h>
 #include <NCP5623.h>
 
 NCP5623 tankLED;
@@ -9,7 +9,7 @@ NCP5623 tankLED;
 class LED {
   public:
     LED() noexcept;
-    void begin();
+    void begin(void);
     void setColor(uint8_t red, uint8_t green, uint8_t blue);
     void setRed(uint8_t red);
     void setBlue(uint8_t blue);
