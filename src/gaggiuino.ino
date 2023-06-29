@@ -973,13 +973,13 @@ static void doLed(void) {
     switch(lcdCurrentPageId) {
       case NextionPage::BrewGraph:
       case NextionPage::BrewManual:
-        led.setDisco(15u);
+        led.setDisco(led.CLASSIC);
         break;
       case NextionPage::Flush:
-        led.setDisco(100u);
+        led.setDisco(led.STROBE);
         break;
       case NextionPage::Descale:
-        led.setDisco(500u);
+        led.setDisco(led.DESCALE);
         break;
       default:
         led.setColor(0, 0, 0);

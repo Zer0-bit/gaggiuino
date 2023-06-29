@@ -21,7 +21,11 @@ class LED {
     void setBlue(uint8_t blue);
     void setGreen(uint8_t green);
     void setDisco(uint32_t timer);
-
+    enum discoMode : uint16_t {
+      STROBE = 100u,
+      CLASSIC = 15u,
+      DESCALE = 1000u
+    };
   private:
     uint32_t timer;
 };
@@ -60,8 +64,8 @@ void LED::setGreen(uint8_t green) {
 
 void LED::setDisco(uint32_t increment) {
   switch(increment) {
-    case 15: // brew time disco
-    case 500: // slow fade during descale
+    case LED::CLASSIC: // brew time disco
+    case LED::DESCALE: // slow fade during descale
       if(millis() > LED::timer) {
         static uint8_t cstate = 1, val = 0;
         static uint8_t r,g,b;
@@ -86,7 +90,7 @@ void LED::setDisco(uint32_t increment) {
         }
         LED::timer = millis() + increment;
       }
-    case 100: // flush strobe
+    case LED::STROBE: // flush strobe
       if(millis() > LED::timer) {
         static uint8_t val = 0;
         // val<<3 adjusts from 5 bit quantity to 8 bit for the library
