@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <NCP5623.h>
-#include <pca9632.h>
+#include <PCA9632.h>
 
 #ifdef LED_NCP5623
 NCP5623 tankLED;
