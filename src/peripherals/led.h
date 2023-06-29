@@ -4,7 +4,12 @@
 #include <stdint.h> // for uint8_t
 #include <NCP5623.h>
 
+#ifdef LED_NCP5623
 NCP5623 tankLED;
+#endif
+#ifdef LED_PCA9632
+PCA9632 tankLED;
+#endif
 
 class LED {
   public:
@@ -23,31 +28,31 @@ class LED {
 LED::LED() : timer(millis()) {};
 
 void LED::begin() {
-  #ifdef LED_NCP5623
+  #if defined LED_NCP5623 || defined LED_PCA9632
   tankLED.begin();
   #endif
 }
 
 void LED::setColor(uint8_t red, uint8_t green, uint8_t blue) {
-  #ifdef LED_NCP5623
+  #if defined LED_NCP5623 || defined LED_PCA9632
   tankLED.setColor(red, green, blue);
   #endif
 }
 
 void LED::setRed(uint8_t red) {
-  #ifdef LED_NCP5623
+  #if defined LED_NCP5623 || defined LED_PCA9632
   tankLED.setRed(red);
   #endif
 }
 
 void LED::setBlue(uint8_t blue) {
-  #ifdef LED_NCP5623
+  #if defined LED_NCP5623 || defined LED_PCA9632
   tankLED.setBlue(blue);
   #endif
 }
 
 void LED::setGreen(uint8_t green) {
-  #ifdef LED_NCP5623
+  #if defined LED_NCP5623 || defined LED_PCA9632
   tankLED.setGreen(green);
   #endif
 }
