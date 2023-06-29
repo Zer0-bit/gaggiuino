@@ -7,7 +7,7 @@
 #include "../../lib/Common/sensors_state.h"
 
 Adafruit_VL53L0X tof_sensor;
-movingAvg mvAvg(10);
+movingAvg mvAvg(4);
 
 class TOF {
   public:
