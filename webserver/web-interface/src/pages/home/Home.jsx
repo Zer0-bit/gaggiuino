@@ -65,7 +65,7 @@ function Home() {
         <Grid item xs={6}>
           {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={scalesPresent ? 6 : 12}>
           {boxedComponent(<GaugeLiquid initialValue={lastSensorData.waterLvl}/>)}
           {/* {boxedComponent(<GaugeChart value={lastSensorData.waterLvl} primaryColor={theme.palette.pressure.main} title="Water Level" unit="%" maxValue={100} />)} */}
         </Grid>

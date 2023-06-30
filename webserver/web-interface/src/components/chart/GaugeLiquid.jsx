@@ -8,8 +8,6 @@ class GaugeLiquidComponent extends Component {
     this.state = {
       value: props.initialValue || 50
     };
-    // startColor = "#6495ed"; // cornflowerblue
-    // endColor = "#dc143c"; // crimson
   }
 
   updateValue = (newValue) => {
@@ -17,40 +15,21 @@ class GaugeLiquidComponent extends Component {
   };
 
   render() {
-    const radius = 70;
+    const radius = 50;
 
     return (
       <div>
-        <div style={{ textAlign: "center", color: "" }}>Water Level</div>
+        <div style={{ textAlign: "center", fontSize: "13px", color: "gray" }}>Water Level</div>
+        <br></br>
         <GaugeLiquid
           style={{ margin: "0 auto" }}
           width={radius * 2}
           height={radius * 2}
           value={this.state.value}
           percent="%"
-          textSize={1}
+          textSize={0}
           textOffsetX={0}
           textOffsetY={0}
-          textRenderer={props => {
-            const value = Math.round(props.value);
-            const radius = Math.min(props.height / 2, props.width / 2);
-            const textPixels = (props.textSize * radius) / 2;
-            const valueStyle = {
-              fontSize: textPixels
-            };
-            const percentStyle = {
-              fontSize: textPixels * 0.6
-            };
-
-            return (
-              <tspan>
-                <tspan className="value" style={valueStyle}>
-                  {value}
-                </tspan>
-                <tspan style={percentStyle}>{props.percent}</tspan>
-              </tspan>
-            );
-          }}
           riseAnimation
           waveAnimation
           waveFrequency={1}
