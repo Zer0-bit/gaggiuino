@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  React, { useState, useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import {
   Box, Container, useTheme,
@@ -11,7 +11,6 @@ import {
   filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA,
 } from '../../models/api';
 import ProfilesTable from '../../components/table/table';
-import App from '../../App';
 
 function Home() {
   const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
@@ -67,7 +66,7 @@ function Home() {
           {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
         </Grid>
         <Grid item xs={6}>
-          {boxedComponent(<GaugeLiquid value={lastSensorData.waterLvl} primaryColor={theme.palette.pressure.main} title="Water Level" unit="%" maxValue={100} />)}
+          {boxedComponent(<GaugeLiquid initialValue={lastSensorData.waterLvl}/>)}
           {/* {boxedComponent(<GaugeChart value={lastSensorData.waterLvl} primaryColor={theme.palette.pressure.main} title="Water Level" unit="%" maxValue={100} />)} */}
         </Grid>
         {scalesPresent && (
