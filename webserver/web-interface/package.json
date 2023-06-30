@@ -19,6 +19,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.8.0",
+    "react-liquid-gauge": "^1.2.4",
     "react-refresh": "^0.14.0",
     "react-router-dom": "^6.11.2",
     "react-use-websocket": "^4.3.1",

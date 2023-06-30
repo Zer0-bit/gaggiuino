@@ -5,11 +5,13 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import GaugeChart from '../../components/chart/GaugeChart';
+import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import {
   apiHost,
   filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA,
 } from '../../models/api';
 import ProfilesTable from '../../components/table/table';
+import App from '../../App';
 
 function Home() {
   const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
@@ -65,7 +67,8 @@ function Home() {
           {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
         </Grid>
         <Grid item xs={6}>
-          {boxedComponent(<GaugeChart value={lastSensorData.waterLvl} primaryColor={theme.palette.pressure.main} title="Water Level" unit="%" maxValue={100} />)}
+          {boxedComponent(<GaugeLiquid value={lastSensorData.waterLvl} primaryColor={theme.palette.pressure.main} title="Water Level" unit="%" maxValue={100} />)}
+          {/* {boxedComponent(<GaugeChart value={lastSensorData.waterLvl} primaryColor={theme.palette.pressure.main} title="Water Level" unit="%" maxValue={100} />)} */}
         </Grid>
         {scalesPresent && (
         <Grid item xs={6}>
