@@ -3,13 +3,13 @@ import useWebSocket from 'react-use-websocket';
 import {
   Box, Container, useTheme,
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import GaugeChart from '../../components/chart/GaugeChart';
-import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import {
   apiHost,
   filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA,
 } from '../../models/api';
+import Grid from '@mui/material/Grid';
+import GaugeChart from '../../components/chart/GaugeChart';
+import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import ProfilesTable from '../../components/table/table';
 
 function Home() {
@@ -28,13 +28,14 @@ function Home() {
     temperature: 0, pressure: 0, pumpFlow: 0, weight: 0, scalesPresent: false, waterLvl: 0,
   });
 
-  // const gaugeComponent = new GaugeLiquid();
-
   function handleUpdateValue() {
     const gaugeComponent = new GaugeLiquid();
-
     gaugeComponent.state.value = lastSensorData.waterLvl;
   };
+
+  useEffect(() => {
+    handleUpdateValue(); // Run the function initially
+  }, [lastSensorData.waterLvl]);
 
   useEffect(() => {
     setScalesPresent(lastSensorData.scalesPresent);
@@ -74,8 +75,7 @@ function Home() {
           {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
         </Grid>
         <Grid item xs={scalesPresent ? 6 : 12}>
-          {boxedComponent(<GaugeLiquid {...handleUpdateValue()}/>)}
-          {/* {boxedComponent(<GaugeChart value={lastSensorData.waterLvl} primaryColor={theme.palette.pressure.main} title="Water Level" unit="%" maxValue={100} />)} */}
+          {boxedComponent(<GaugeLiquid />)}
         </Grid>
         {scalesPresent && (
         <Grid item xs={6}>
