@@ -6,7 +6,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(1.f, 1.f, 0.04f);
+SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
@@ -336,6 +336,7 @@ static void modeSelect(void) {
 
 static void lcdRefresh(void) {
   uint16_t tempDecimal;
+  float lcdFlow;
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
@@ -374,12 +375,11 @@ static void lcdRefresh(void) {
         // temp decimal handling
         tempDecimal = (currentState.waterTemperature - (uint16_t)currentState.waterTemperature) * 10;
         lcdSetTemperatureDecimal(tempDecimal);
-
         // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
         if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
-
         /*LCD flow output*/
-        lcdSetFlow(fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f));
+        lcdFlow = currentState.smoothedPumpFlow * 10.f;
+        lcdSetFlow( predictiveWeight.preinfusionFinished ? lcdFlow * 2.f : lcdFlow);
         break;
       default:
         break; // don't push needless data on other pages
