@@ -5,14 +5,11 @@ import GaugeLiquid from "react-liquid-gauge";
 class GaugeLiquidComponent extends Component {
   constructor(props) {
     super(props);
+    // this.initialValue = 10;
     this.state = {
-      value: props.initialValue || 50
+      value: 90
     };
   }
-
-  updateValue = (newValue) => {
-    this.setState({ value: newValue });
-  };
 
   render() {
     const radius = 52;
