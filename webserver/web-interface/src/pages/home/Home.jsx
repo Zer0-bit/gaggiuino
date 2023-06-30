@@ -35,6 +35,7 @@ function Home() {
 
   // Run the function on every waterLvl value change
   useEffect(() => {
+    handleUpdateValue();
   }, [lastSensorData.waterLvl]);
 
   useEffect(() => {
