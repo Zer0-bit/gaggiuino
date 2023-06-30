@@ -33,8 +33,8 @@ function Home() {
     gaugeComponent.state.value = lastSensorData.waterLvl;
   };
 
+  // Run the function on every waterLvl value change
   useEffect(() => {
-    handleUpdateValue(); // Run the function initially
   }, [lastSensorData.waterLvl]);
 
   useEffect(() => {
