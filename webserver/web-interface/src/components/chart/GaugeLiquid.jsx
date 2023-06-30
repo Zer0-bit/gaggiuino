@@ -15,7 +15,7 @@ class GaugeLiquidComponent extends Component {
   };
 
   render() {
-    const radius = 50;
+    const radius = 52;
 
     return (
       <div>

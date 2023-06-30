@@ -139,9 +139,10 @@ export default function Profiles() {
                                 value={element.value}
                                 onChange={(event) => handleSelectChange(event, element.id)}
                               >
-                                <option value="1">Option1</option>
-                                <option value="2">Option2</option>
-                                <option value="3">Option3</option>
+                                <option value="1">Preinfusion</option>
+                                <option value="2">Soak</option>
+                                <option value="3">Flow</option>
+                                <option value="4">Pressure</option>
                               </Select>
                             </Grid>
                           );
