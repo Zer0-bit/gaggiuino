@@ -62,10 +62,9 @@ function Home() {
     <Container sx={{ pt: theme.spacing(2) }}>
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1) }}>
         <Grid item xs={2}>
-          <Box sx={{ border: `3px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
-            {/* {boxedComponent(<GaugeChart value={lastSensorData.temperature} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)} */}
-            {boxedComponent(<GaugeLiquid value={lastSensorData.waterLvl} radius={50}/>)}
-            {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
+          <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
+            {boxedComponent(<GaugeLiquid value={60} radius={50}/>)}
+            {boxedComponent(<GaugeChart value={0.6} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
             {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
           </Box>
         </Grid>
@@ -73,15 +72,17 @@ function Home() {
           <ProfilesTable />
         </Grid>
         <Grid item xs={4}>
-          <Box justify-content="space-between" sx={{ border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
-            {boxedComponent(<GaugeChart value={lastSensorData.temperature} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
-            <Fab color="primary" aria-label="add">
-              <RemoveIcon />
-            </Fab>
-            <TextField id="outlined-read-only-input" label="Target"  defaultValue="93C" InputProps={{readOnly: true,}} />
-            <Fab color="primary" aria-label="add">
-              <AddIcon />
-            </Fab>
+          <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
+            {boxedComponent(<GaugeChart value={95.7} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
+            <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '5px', gap: '8px', }} >
+              <Fab color="primary" aria-label="add">
+                <RemoveIcon />
+              </Fab>
+              <TextField sx={{ width: '10ch', }} id="outlined-read-only-input" label="Target"  defaultValue="93C" InputProps={{readOnly: true,}} />
+              <Fab color="primary" aria-label="rem">
+                <AddIcon />
+              </Fab>
+            </Box>
           </Box>
         </Grid>
       </Grid>
