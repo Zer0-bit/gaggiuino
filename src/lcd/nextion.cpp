@@ -8,12 +8,32 @@ EasyNex myNex(USART_LCD);
 volatile NextionPage lcdCurrentPageId;
 volatile NextionPage lcdLastCurrentPageId;
 
+// decode/encode bit packing.
+// format is 000000sd rrrrrrrr gggggggg bbbbbbbb, where s = state, d = disco, r/g/b = colors
+void lcdDecodeLedSettings(uint32_t code, bool &state, bool &disco, uint8_t &r, uint8_t &g, uint8_t &b) {
+  state = (code & 0x02000000);
+  disco = (code & 0x01000000);
+  r     = (code & 0x00FF0000) >> 16;
+  g     = (code & 0x0000FF00) >> 8;
+  b     = (code & 0x000000FF);
+}
+
+uint32_t lcdEncodeLedSettings(bool state, bool disco, uint8_t r, uint8_t g, uint8_t b) {
+  uint32_t code;
+  code = state ? 0x01 : 0x00;
+  code = (code << 1) | (disco ? 0x01 : 0x00);
+  code = (code << 8) | (r & 0xFF);
+  code = (code << 8) | (g & 0xFF);
+  code = (code << 8) | (b & 0xFF);
+  return code;
+}
+
 void lcdInit(void) {
   myNex.begin(115200);
-  while (!lcdCheckSerialInit("\x88\xFF\xFF\xFF", 4)) {
-    LOG_VERBOSE("Connecting to Nextion LCD...");
-    delay(5);
-  }
+  // while (!lcdCheckSerialInit("\x88\xFF\xFF\xFF", 4)) {
+  //   LOG_VERBOSE("Connecting to Nextion LCD...");
+  //   delay(5);
+  // }
   myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
   lcdCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
   lcdLastCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
@@ -37,7 +57,6 @@ bool lcdCheckSerialInit(const char* expectedOutput, size_t expectedLen) {
   // Serial output matches expected output
   return true;
 }
-
 
 void lcdListen(void) {
   myNex.NextionListen();
@@ -136,8 +155,6 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
 
 // This is never called again after boot
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
-  // bool profileType = false;
-
   // Profile names for all buttons
   myNex.writeStr("home.qPf1.txt", eepromCurrentValues.profiles[0].name);
   myNex.writeStr("home.qPf2.txt", eepromCurrentValues.profiles[1].name);
@@ -164,7 +181,15 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
 
   // Led
-  myNex.writeNum("ledOn", eepromCurrentValues.ledState);
+  myNex.writeNum("ledNum",
+    lcdEncodeLedSettings(
+      eepromCurrentValues.ledState,
+      eepromCurrentValues.ledDisco,
+      eepromCurrentValues.ledR,
+      eepromCurrentValues.ledG,
+      eepromCurrentValues.ledB
+    )
+  );
 
   lcdUploadProfile(eepromCurrentValues);
 }
@@ -395,22 +420,10 @@ void lcdFetchSystem(eepromValues_t &settings) {
   settings.pumpFlowAtZero                 = myNex.readNumber("sP.pump_zero.val") / 10000.f;
 }
 
-void lcdLoadDecodeColour(eepromValues_t &settings, uint32_t colourCode) {
-  static struct {uint8_t r, g, b;} cachedRgb;
-  // extracting the slider id
-  if      (colourCode > 510)  cachedRgb.b = colourCode - 510;
-  else if (colourCode > 255)  cachedRgb.g = colourCode - 255;
-  else                        cachedRgb.r = colourCode;
-  // update settings with all three cached colours
-  settings.ledR = cachedRgb.r;
-  settings.ledG = cachedRgb.g;
-  settings.ledB = cachedRgb.b;
-}
-
 void lcdFetchLed(eepromValues_t &settings) {
   // Led Settings
-  settings.ledState = myNex.readNumber("ledOn");
-  lcdLoadDecodeColour(settings, myNex.readNumber("ledNum"));
+  uint32_t ledNum = myNex.readNumber("ledNum");
+  lcdDecodeLedSettings(ledNum, settings.ledState, settings.ledDisco, settings.ledR, settings.ledG, settings.ledB);
 }
 
 void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile) {
