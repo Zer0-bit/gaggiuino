@@ -44,7 +44,7 @@ function Home() {
 
   function boxedComponent(component) {
     return (
-      <Box sx={{
+      <Box ref={boxRef} sx={{
         border: `0px solid ${theme.palette.divider}`,
         position: 'relative',
         borderRadius: '20px',
@@ -58,11 +58,11 @@ function Home() {
   }
 
   const boxRef = useRef(null);
-  const [boxSize, setBoxSize] = useState({ width: 50, height: 0 });
+  const [boxSize, setBoxSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     if (boxRef.current) {
-      const { width, height } = boxRef.GaugeChart.getBoundingClientRect();
+      const { width, height } = boxRef.current.getBoundingClientRect();
       setBoxSize({ width, height });
     }
   }, []);
@@ -72,7 +72,7 @@ function Home() {
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
         <Grid item xs={2}>
           <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px', gap: '0px' }}>
-            {boxedComponent(<GaugeLiquid value={lastSensorData.waterLvl} radius={boxSize.width}/>)}
+            {boxedComponent(<GaugeLiquid value={lastSensorData.waterLvl} radius={boxSize.width/8}/>)}
             {boxedComponent(<GaugeChart value={lastSensorData.pressure} maintainAspectRatio={false}  primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
             {boxedComponent(<GaugeChart value={lastSensorData.weight} maintainAspectRatio={false} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
           </Box>
