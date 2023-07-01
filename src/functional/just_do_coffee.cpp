@@ -1,6 +1,5 @@
 /* 09:32 15/03/2023 - change triggering comment */
 #include "just_do_coffee.h"
-#include "../lcd/lcd.h"
 
 extern unsigned long steamTime;
 // inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
@@ -13,9 +12,8 @@ inline static float TEMP_DELTA(float d, const SensorState &currentState) {
   );
 }
 
-void justDoCoffee(const GaggiaSettings &settings, const SensorState &currentState, const bool brewActive) {
-  lcdTargetState((int)HEATING::MODE_brew); // setting the target mode to "brew temp"
-  float brewTempSetPoint = ACTIVE_PROFILE(settings).waterTemperature + settings.boiler.offsetTemp;
+void justDoCoffee(const GaggiaSettings &settings, const SensorState &currentState, float waterTemperature, const bool brewActive) {
+  float brewTempSetPoint = waterTemperature + settings.boiler.offsetTemp;
   float sensorTemperature = currentState.temperature + settings.boiler.offsetTemp;
 
   if (brewActive) { //if brewState == true
@@ -75,8 +73,7 @@ void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int fact
 //#############################################################################################
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
-void steamCtrl(const GaggiaSettings& settings, SensorState& currentState) {
-  currentState.steamSwitchState ? lcdTargetState((int)HEATING::MODE_steam) : lcdTargetState((int)HEATING::MODE_brew); // setting the steam/hot water target temp
+void steamCtrl(const GaggiaSettings& settings, SensorState& currentState, SystemState& systemState) {
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float steamTempSetPoint = settings.boiler.steamSetPoint + settings.boiler.offsetTemp;
   float sensorTemperature = currentState.temperature + settings.boiler.offsetTemp;
@@ -105,7 +102,7 @@ void steamCtrl(const GaggiaSettings& settings, SensorState& currentState) {
 
   /*In case steam is forgotten ON for more than 15 min*/
   if (currentState.smoothedPressure > passiveSteamPressure_) {
-    currentState.isSteamForgottenON = millis() - steamTime >= STEAM_TIMEOUT;
+    systemState.isSteamForgottenON = millis() - steamTime >= STEAM_TIMEOUT;
   } else steamTime = millis();
 }
 

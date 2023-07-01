@@ -6,12 +6,16 @@
 #include "wifi/wifi_setup.h"
 #include "server/websocket/websocket.h"
 #include "scales/ble_scales.h"
+#include "persistence/persistence.h"
 #include "./log/log.h"
+
+GaggiaSettings settings;
 
 void setup() {
   LOG_INIT();
   REMOTE_LOG_INIT([](std::string message) {wsSendLog(message);});
   initFS();
+  persistence::init();
   stmCommsInit(Serial1);
   wifiSetup();
   webServerSetup();
@@ -26,14 +30,22 @@ void loop() {
 // ------------------------------------------------------------------------
 // ---------------- Handle STM communication messages ---------------------
 // ------------------------------------------------------------------------
-void onSensorStateSnapshotReceived(SensorStateSnapshot& sensorData) {
+void onSensorStateSnapshotReceived(const SensorStateSnapshot& sensorData) {
   wsSendSensorStateSnapshotToClients(sensorData);
 }
 
-void onShotSnapshotReceived(ShotSnapshot& shotData) {
+void onShotSnapshotReceived(const ShotSnapshot& shotData) {
   wsSendShotSnapshotToClients(shotData);
 }
 
 void onScalesTareReceived() {
   bleScalesTare();
+}
+
+void onGaggiaSettingsRequested() {
+  stmCommsSendGaggiaSettings(settings);
+}
+
+void onProfileRequested() {
+  stmCommsSendProfile(persistence::getActiveProfile());
 }

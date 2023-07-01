@@ -23,49 +23,34 @@ enum class McuCommsMessageType : uint8_t {
   MCUC_DATA_SENSOR_STATE_SNAPSHOT = 4,
   MCUC_DATA_REMOTE_SCALES_WEIGHT = 5,
   MCUC_DATA_REMOTE_SCALES_DISCONNECTED = 6,
+  MCUC_DATA_ALL_SETTINGS = 7,
+  MCUC_DATA_BREW_SETTINGS = 8,
+  MCUC_DATA_BOILER_SETTINGS = 9,
+  MCUC_DATA_SYSTEM_SETTINGS = 10,
+  MCUC_DATA_LED_SETTINGS = 11,
+  MCUC_DATA_NOTIFICATION = 12,
+  MCUC_DATA_MANUAL_BREW_PHASE = 13,
+  MCUC_DATA_SYSTEM_STATE = 14,
 
   // Request specific data
-  MCUC_REQ_ACTIVE_PROFILE = 7,
-  MCUC_REQ_SETTINGS = 8,
+  MCUC_REQ_DATA = 15,
 
   // Commands
-  MCUC_CMD_SAVE_PROFILE = 9,
-  MCUC_CMD_SAVE_SETTINGS = 10,
-  MCUC_CMD_REMOTE_SCALES_TARE = 11,
-
-  MCUC_RESPONSE = 12,
+  MCUC_CMD_REMOTE_SCALES_TARE = 16,
 };
 
-enum class McuCommsResponseResult : uint8_t {
-  MCUC_OK = 0,
-  MCUC_ERROR = 1,
-};
-
-struct McuCommsResponse {
+struct McuCommsRequestData {
   McuCommsMessageType type;
-  McuCommsResponseResult result;
 };
 
 class McuComms {
 private:
-  using ShotSnapshotReceivedCallback = std::function<void(ShotSnapshot&)>;
-  using ProfileReceivedCallback = std::function<void(Profile&)>;
-  using SensorStateSnapshotReceivedCallback = std::function<void(SensorStateSnapshot&)>;
-  using ResponseReceivedCallback = std::function<void(McuCommsResponse&)>;
-  using RemoteScalesWeightReceivedCallback = std::function<void(float)>;
-  using RemoteScalesTareCommandCallback = std::function<void()>;
-  using RemoteScalesDisconnectedCallback = std::function<void()>;
+  using MessageReceivedCallback = std::function<void(McuCommsMessageType, std::vector<uint8_t>&)>;
 
   uint32_t lastByteReceived = 0;
   uint32_t lastHeartbeatSent = 0;
   SerialTransfer transfer;
-  ShotSnapshotReceivedCallback shotSnapshotCallback = nullptr;
-  ProfileReceivedCallback profileCallback = nullptr;
-  SensorStateSnapshotReceivedCallback sensorStateSnapshotCallback = nullptr;
-  ResponseReceivedCallback responseReceivedCallback = nullptr;
-  RemoteScalesWeightReceivedCallback remoteScalesWeightReceivedCallback = nullptr;
-  RemoteScalesTareCommandCallback remoteScalesTareCommandCallback = nullptr;
-  RemoteScalesDisconnectedCallback remoteScalesDisconnectedCallback = nullptr;
+  MessageReceivedCallback messageReceivedCallback = nullptr;
   Stream* debugPort = nullptr;
   size_t packetSize;
 
@@ -79,17 +64,16 @@ private:
   * |      | |______|____________________________________________________________ index of current packet
   * |______|_____________________________________________________________________ index of last packet
   */
-  void sendMultiPacket(std::vector<uint8_t>& buffer, size_t dataSize, uint8_t packetID);
+  void sendMultiPacket(const std::vector<uint8_t>& buffer, McuCommsMessageType messageType);
   std::vector<uint8_t> receiveMultiPacket();
   void log(const char* format, ...) const;
-  void logBufferHex(std::vector<uint8_t>& buffer, size_t dataSize) const;
+  void logBufferHex(const std::vector<uint8_t>& buffer, size_t dataSize) const;
   void establishConnection(uint32_t timeout);
   void sendHeartbeat();
 
   void shotSnapshotReceived(ShotSnapshot& snapshot) const;
   void profileReceived(Profile& profile) const;
   void sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) const;
-  void responseReceived(McuCommsResponse& response) const;
   void remoteScalesWeightReceived(float weight) const;
   void remoteScalesTareCommandReceived() const;
   void remoteScalesDisconnected() const;
@@ -97,25 +81,15 @@ private:
 public:
   void begin(Stream& serial, uint32_t waitConnectionMillis = 0, size_t packetSize = MAX_DATA_PER_PACKET_DEFAULT);
   void setDebugPort(Stream* debugPort);
-  void setShotSnapshotCallback(ShotSnapshotReceivedCallback callback);
-  void setProfileReceivedCallback(ProfileReceivedCallback callback);
-  void setSensorStateSnapshotCallback(SensorStateSnapshotReceivedCallback callback);
-  void setResponseReceivedCallback(ResponseReceivedCallback callback);
-  void setRemoteScalesWeightReceivedCallback(RemoteScalesWeightReceivedCallback callback);
-  void setRemoteScalesTareCommandCallback(RemoteScalesTareCommandCallback callback);
-  void setRemoteScalesDisconnectedCallback(RemoteScalesDisconnectedCallback callback);
+  void setMessageReceivedCallback(MessageReceivedCallback callback);
 
-  void sendShotData(const ShotSnapshot& snapshot);
-  void sendProfile(Profile& profile);
-  void sendSensorStateSnapshot(const SensorStateSnapshot& snapshot);
-  void sendResponse(McuCommsResponse response);
-  void sendRemoteScalesWeight(float weight);
-  void sendRemoteScalesTare();
-  void sendRemoteScalesDisconnected();
+  // Sends a message with no data. Useful for commands. This is equivalent to sending the message with an empty data vector
+  void sendMessage(McuCommsMessageType messageType);
+  // Sends a message of a given type with its corresponding data. Sender and receiver must agree on how this data is serialized/deserialized
+  void sendMessage(McuCommsMessageType messageType, const std::vector<uint8_t>& data);
 
   bool isConnected();
   void readDataAndTick();
 };
-
 
 #endif

@@ -6,8 +6,6 @@ struct SensorState {
   bool brewSwitchState;
   bool steamSwitchState;
   bool hotWaterSwitchState;
-  bool isSteamForgottenON;
-  bool scalesPresent;
   bool tarePending;
   float temperature;          // °C
   /* calculated water temperature as wanted but not guaranteed
@@ -27,19 +25,19 @@ struct SensorState {
   float consideredFlow;
   long pumpClicks;
   uint16_t waterLvl;
-  bool tofReady;
 };
 
 struct SensorStateSnapshot {
   bool brewActive;
   bool steamActive;
-  bool scalesPresent;
+  bool hotWaterSwitchState;
   float temperature;
+  float waterTemperature;
   float pressure;
   float pumpFlow;
   float weightFlow;
   float weight;
-  uint16_t waterLvl;
+  uint16_t waterLevel;
 };
 
 struct ShotSnapshot {

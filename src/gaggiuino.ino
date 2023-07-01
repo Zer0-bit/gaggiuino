@@ -1,7 +1,6 @@
 /* 09:32 15/03/2023 - change triggering comment */
 #pragma GCC optimize ("Ofast")
 #define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
-#include <FlashStorage_STM32.h>
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
 #endif
@@ -12,16 +11,16 @@ SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
-//default phases. Updated in updateProfilerPhases.
-Profile profile;
-PhaseProfiler phaseProfiler{profile};
+bool activeProfileInitialized = false;
+Profile manualProfile;
+Profile activeProfile;
+PhaseProfiler phaseProfiler;
 
 PredictiveWeight predictiveWeight;
 
 SensorState currentState;
 
-OPERATION_MODES selectedOperationalMode;
-
+bool gaggiaSettingsInitialised = false;
 GaggiaSettings runningCfg;
 
 SystemState systemState;
@@ -50,9 +49,6 @@ void setup(void) {
   closeValve();
   LOG_INFO("Valve closed");
 
-  lcdInit();
-  LOG_INFO("LCD Init");
-
 #if defined(DEBUG_ENABLED)
   // Debug init if enabled
   dbgInit();
@@ -66,21 +62,29 @@ void setup(void) {
   led.begin();
   led.setColor(9u, 0u, 9u); // WHITE
   // Init the tof sensor
-  tof.init(currentState);
+  tof.init(systemState);
 
-  // Initialising the vsaved values or writing defaults if first start
-  eepromInit();
-  runningCfg = eepromGetCurrentSettings();
-  LOG_INFO("EEPROM Init");
+  // Load settings from ESP.
+  espCommsRequestData(McuCommsMessageType::MCUC_DATA_ALL_SETTINGS);
+  while (!gaggiaSettingsInitialised) {
+    delay(50);
+    espCommsRequestData(McuCommsMessageType::MCUC_DATA_ALL_SETTINGS);
+  }
+  LOG_INFO("Settings Init");
+  
+  // Load profile from ESP
+  espCommsRequestData(McuCommsMessageType::MCUC_DATA_PROFILE);
+  while (!activeProfileInitialized) {
+    delay(50);
+    espCommsRequestData(McuCommsMessageType::MCUC_DATA_PROFILE);
+  }
+  LOG_INFO("Profile Init");
 
   cpsInit(runningCfg);
   LOG_INFO("CPS Init");
 
   thermocoupleInit();
   LOG_INFO("Thermocouple Init");
-
-  lcdUploadCfg(runningCfg);
-  LOG_INFO("LCD cfg uploaded");
 
   adsInit();
   LOG_INFO("Pressure sensor init");
@@ -92,9 +96,6 @@ void setup(void) {
   // Pump init
   pumpInit(runningCfg.system.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
   LOG_INFO("Pump init");
-
-  pageValuesRefresh();
-  LOG_INFO("Setup sequence finished");
 
   // Change LED colour on setup exit.
   led.setColor(9u, 0u, 9u); // 64171
@@ -110,13 +111,10 @@ void setup(void) {
 //Main loop where all the logic is continuously run
 void loop(void) {
   fillBoiler();
-  if (lcdCurrentPageId != lcdLastCurrentPageId) pageValuesRefresh();
-  lcdListen();
   sensorsRead();
   brewDetect();
   modeSelect();
-  lcdRefresh();
-  espCommsSendSensorData(currentState);
+  espUpdateState();
   sysHealthCheck(SYS_PRESSURE_IDLE);
 }
 
@@ -173,8 +171,8 @@ static void sensorsReadWeight(void) {
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
     }
-    scalesTimer = millis();
   }
+  scalesTimer = millis();
 }
 
 static void sensorsReadPressure(void) {
@@ -245,7 +243,7 @@ static void calculateWeightAndFlow(void) {
 
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
-  if (lcdCurrentPageId == NextionPage::Home) {
+  if (!brewActive) {
     // static uint32_t tof_timeout = millis();
     // if (millis() >= tof_timeout) {
     currentState.waterLvl = tof.readLvl();
@@ -254,22 +252,14 @@ static void readTankWaterLevel(void) {
   }
 }
 
-//##############################################################################################################################
-//############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
-//##############################################################################################################################
-static void pageValuesRefresh() {
-  // Read the page we're landing in: leaving keyboard page means a value could've changed in it
-  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.profiles.activeProfileIndex);
-  // Or maybe it's a page that needs constant polling
-  else if (lcdLastCurrentPageId == NextionPage::Led) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.profiles.activeProfileIndex);
-  // Finally read the page we left, as it could've been changed in place (e.g. boolean toggles)
-  else lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.profiles.activeProfileIndex);
+// Function to track time since system has started
+static unsigned long getTimeSinceInit(void) {
+  static unsigned long startTime = millis();
+  return millis() - startTime;
+}
 
-  homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
-  // MODE_SELECT should always be LAST
-  selectedOperationalMode = (OPERATION_MODES) lcdGetSelectedOperationalMode();
-
-  lcdLastCurrentPageId = lcdCurrentPageId;
+static void updateStartupTimer() {
+  systemState.timeAlive = getTimeSinceInit() / 1000;
 }
 
 //#############################################################################################
@@ -278,217 +268,103 @@ static void pageValuesRefresh() {
 static void modeSelect(void) {
   if (!systemState.startupInitFinished) return;
 
-  switch (selectedOperationalMode) {
+  switch (systemState.operationMode) {
     //REPLACE ALL THE BELOW WITH OPMODE_auto_profiling
-    case OPERATION_MODES::OPMODE_straight9Bar:
-    case OPERATION_MODES::OPMODE_justPreinfusion:
-    case OPERATION_MODES::OPMODE_justPressureProfile:
-    case OPERATION_MODES::OPMODE_preinfusionAndPressureProfile:
-    case OPERATION_MODES::OPMODE_flowPreinfusionStraight9BarProfiling:
-    case OPERATION_MODES::OPMODE_justFlowBasedProfiling:
-    case OPERATION_MODES::OPMODE_FlowBasedPreinfusionPressureBasedProfiling:
-    case OPERATION_MODES::OPMODE_everythingFlowProfiled:
-    case OPERATION_MODES::OPMODE_pressureBasedPreinfusionAndFlowProfile:
+    case OperationMode::BREW_AUTO:
       nonBrewModeActive = false;
       if (currentState.hotWaterSwitchState) hotWaterMode(currentState);
-      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState);
+      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState, systemState);
       else {
         profiling();
         steamTime = millis();
       }
       break;
-    case OPERATION_MODES::OPMODE_manual:
+    case OperationMode::BREW_MANUAL:
       nonBrewModeActive = false;
       if (!currentState.steamSwitchState) steamTime = millis();
-      manualFlowControl();
+      profiling();
       break;
-    case OPERATION_MODES::OPMODE_flush:
+    case OperationMode::FLUSH:
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) steamTime = millis();
       backFlush(currentState);
-      brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, false);
+      brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, activeProfile.waterTemperature, false);
       break;
-    case OPERATION_MODES::OPMODE_steam:
+    case OperationMode::STEAM:
       nonBrewModeActive = true;
-      steamCtrl(runningCfg, currentState);
+      steamCtrl(runningCfg, currentState, systemState);
 
       if (!currentState.steamSwitchState) {
         brewActive ? flushActivated() : flushDeactivated();
-        steamCtrl(runningCfg, currentState);
-        pageValuesRefresh();
+        steamCtrl(runningCfg, currentState, systemState);
       }
       break;
-    case OPERATION_MODES::OPMODE_descale:
+    case OperationMode::DESCALE:
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) steamTime = millis();
-      deScale(runningCfg, currentState);
+      deScale(runningCfg, currentState, systemState);
       break;
     default:
-      pageValuesRefresh();
       break;
   }
 }
 
 //#############################################################################################
-//################################____LCD_REFRESH_CONTROL___###################################
+//################################____EPS_COMMS_CONTROL___###################################
 //#############################################################################################
 
-static void lcdRefresh(void) {
-  uint16_t tempDecimal;
-
+static void espUpdateState(void) {
   if (millis() > pageRefreshTimer) {
-    /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
-    #ifdef BEAUTIFY_GRAPH
-      lcdSetPressure(currentState.smoothedPressure * 10.f);
-    #else
-      lcdSetPressure(
-        currentState.pressure > 0.f
-          ? currentState.pressure * 10.f
-          : 0.f
-      );
-    #endif
-
-    /*LCD temp output*/
-    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).waterTemperature + runningCfg.boiler.offsetTemp; 
-    // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
-    currentState.waterTemperature = (currentState.temperature > (float)ACTIVE_PROFILE(runningCfg).waterTemperature && currentState.brewSwitchState)
-      ? currentState.temperature / (float)brewTempSetPoint + (float)ACTIVE_PROFILE(runningCfg).waterTemperature
-      : currentState.temperature;
-
-    lcdSetTemperature(std::floor((uint16_t)currentState.waterTemperature));
-
-    /*LCD weight & temp & water lvl output*/
-    switch (lcdCurrentPageId) {
-      case NextionPage::Home:
-        // temp decimal handling
-        tempDecimal = (currentState.waterTemperature - (uint16_t)currentState.waterTemperature) * 10;
-        lcdSetTemperatureDecimal(tempDecimal);
-        // water lvl
-        lcdSetTankWaterLvl(currentState.waterLvl);
-        //weight
-        if (homeScreenScalesEnabled) lcdSetWeight(currentState.weight);
-        break;
-      case NextionPage::BrewGraph:
-      case NextionPage::BrewManual:
-        // temp decimal handling
-        tempDecimal = (currentState.waterTemperature - (uint16_t)currentState.waterTemperature) * 10;
-        lcdSetTemperatureDecimal(tempDecimal);
-        // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
-        if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
-        /*LCD flow output*/
-        lcdSetFlow( currentState.smoothedPumpFlow * 10.f);
-        break;
-      default:
-        break; // don't push needless data on other pages
-    }
-
-  #ifdef DEBUG_ENABLED
-    lcdShowDebug(readTempSensor(), getAdsError());
-  #endif
-
-    /*LCD timer and warmup*/
-    if (brewActive) {
-      lcdSetBrewTimer((millis() > brewingTimer) ? (int)((millis() - brewingTimer) / 1000) : 0);
-      lcdBrewTimerStart(); // nextion timer start
-      lcdWarmupStateStop(); // Flagging warmup notification on Nextion needs to stop (if enabled)
-    } else {
-      lcdBrewTimerStop(); // nextion timer stop
-    }
-
+    espCommsSendSystemState(systemState, 1000);
+    espCommsSendSensorData(currentState, 500);
     pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
   }
 }
-//#############################################################################################
-//###################################____SAVE_BUTTON____#######################################
-//#############################################################################################
-void tryEepromWrite(const GaggiaSettings& settings) {
-  bool success = eepromWrite(settings);
-  watchdogReload(); // reload the watchdog timer on expensive operations
-  if (success) {
-    lcdShowPopup("Update successful!");
-  } else {
-    lcdShowPopup("Data out of range!");
+
+void onProfileReceived(Profile& newProfile) {
+  activeProfile = newProfile;
+  activeProfileInitialized = true;
+}
+
+void onGaggiaSettingsReceived(GaggiaSettings& newSettings) {
+  gaggiaSettingsInitialised = true;
+  runningCfg = newSettings;
+}
+
+void onManualBrewPhaseReceived(Phase& phase) {
+  if (manualProfile.phaseCount() != 1) {
+    manualProfile.phases.resize(1);
   }
+  manualProfile.phases[0] = phase;
 }
 
-void lcdSwitchActiveToStoredProfile(const GaggiaSettings& storedSettings) {
-  runningCfg.profiles.activeProfileIndex = lcdGetSelectedProfile();
-  ACTIVE_PROFILE(runningCfg) = storedSettings.profiles.savedProfiles[runningCfg.profiles.activeProfileIndex];
-  lcdUploadProfile(runningCfg);
+void onOperationModeReceived(OperationMode operationMode) {
+  systemState.operationMode = operationMode;
 }
 
-// Save the desired temp values to EEPROM
-void lcdSaveSettingsTrigger(void) {
-  LOG_VERBOSE("Saving values to EEPROM");
-  GaggiaSettings eepromCurrentValues = eepromGetCurrentSettings();
-  lcdFetchPage(eepromCurrentValues, lcdCurrentPageId, runningCfg.profiles.activeProfileIndex);
-  tryEepromWrite(eepromCurrentValues);
+void onBoilerSettingsReceived(BoilerSettings& boilerSettings) {
+  runningCfg.boiler = boilerSettings;
+}
+void onLedSettingsReceived(LedSettings& ledSettings) {
+  runningCfg.led = ledSettings;
 }
 
-void lcdSaveProfileTrigger(void) {
-  LOG_VERBOSE("Saving profile to EEPROM");
-
-  GaggiaSettings currentSettings = eepromGetCurrentSettings();
-  lcdFetchCurrentProfile(currentSettings);
-  tryEepromWrite(currentSettings);
+void onSystemSettingsReceived(SystemSettings& systemSettings) {
+  runningCfg.system = systemSettings;
 }
 
-void lcdResetSettingsTrigger(void) {
-  tryEepromWrite(eepromGetDefaultSettings());
-}
-
-void lcdLoadDefaultProfileTrigger(void) {
-  lcdSwitchActiveToStoredProfile(eepromGetDefaultSettings());
-
-  lcdShowPopup("Profile loaded!");
-}
-
-void lcdScalesTareTrigger(void) {
-  LOG_VERBOSE("Tare scales");
-  if (currentState.scalesPresent) currentState.tarePending = true;
-}
-
-void lcdHomeScreenScalesTrigger(void) {
-  LOG_VERBOSE("Scales enabled or disabled");
-  homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
-}
-
-void lcdBrewGraphScalesTareTrigger(void) {
-  LOG_VERBOSE("Predictive scales tare action completed!");
-  if (currentState.scalesPresent) {
-    currentState.tarePending = true;
-  }
-  else {
-    currentState.shotWeight = 0.f;
-    predictiveWeight.setIsForceStarted(true);
-  }
-}
-
-void lcdRefreshElementsTrigger(void) {
-  GaggiaSettings eepromCurrentSettings = eepromGetCurrentSettings();
-
-  // Make the necessary changes
-  uploadPageCfg(eepromCurrentSettings, systemState);
-  // refresh the screen elements
-  pageValuesRefresh();
-}
-
-void lcdQuickProfileSwitch(void) {
-  lcdSwitchActiveToStoredProfile(eepromGetCurrentSettings());
-  lcdShowPopup("Profile switched!");
+void onBrewSettingsReceived(BrewSettings& brewSettings) {
+  runningCfg.brew = brewSettings;
 }
 
 //#############################################################################################
 //###############################____PROFILING_CONTROL____#####################################
 //#############################################################################################
 
-void onProfileReceived(Profile& newProfile) {
-}
-
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     uint32_t timeInShot = millis() - brewingTimer;
-    phaseProfiler.setProfile(ACTIVE_PROFILE(runningCfg));
+    phaseProfiler.setProfile(systemState.operationMode == OperationMode::BREW_AUTO ? activeProfile : manualProfile);
     phaseProfiler.updatePhase(timeInShot, currentState);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
     ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
@@ -514,19 +390,8 @@ static void profiling(void) {
     closeValve();
   }
   // Keep that water at temp
-  justDoCoffee(runningCfg, currentState, brewActive);
-}
-
-static void manualFlowControl(void) {
-  if (brewActive) {
-    openValve();
-    float flow_reading = lcdGetManualFlowVol() / 10.f ;
-    setPumpFlow(flow_reading, 0.f, currentState);
-  } else {
-    setPumpOff();
-    closeValve();
-  }
-  justDoCoffee(runningCfg, currentState, brewActive);
+  // TODO: If active phase overrides the water temperature, then send the active phase's temp
+  justDoCoffee(runningCfg, currentState, activeProfile.waterTemperature, brewActive);
 }
 
 //#############################################################################################
@@ -542,7 +407,6 @@ static void brewDetect(void) {
   static bool paramsReset = true;
   if (currentState.brewSwitchState) {
     if (!paramsReset) {
-      lcdWakeUp();
       brewParamsReset();
       paramsReset = true;
       brewActive = true;
@@ -581,10 +445,8 @@ static bool sysReadinessCheck(void) {
     return false;
   }
   // If there's not enough water in the tank
-  if ((lcdCurrentPageId != NextionPage::BrewGraph || lcdCurrentPageId != NextionPage::BrewManual)
-  && currentState.waterLvl < MIN_WATER_LVL)
-  {
-    lcdShowPopup("Fill the water tank!");
+  if (!brewActive && currentState.waterLvl < MIN_WATER_LVL) {
+    espCommsSendNotification(Notification::warn("Fill the water tank!"));
     return false;
   }
 
@@ -607,21 +469,21 @@ static inline void sysHealthCheck(float pressureThreshold) {
     setSteamBoilerRelayOff();
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
-      currentState.steamSwitchState ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
+      currentState.steamSwitchState ? espCommsSendNotification(Notification::warn("COOLDOWN!")) : espCommsSendNotification(Notification::warn("TEMP READ ERROR"));  // writing a LCD message
       currentState.temperature  = thermocoupleRead() - runningCfg.offsetTemp;  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }
 
   /*Shut down heaters if steam has been ON and unused fpr more than 10 minutes.*/
-  while (currentState.isSteamForgottenON) {
+  while (systemState.isSteamForgottenON) {
     //Reloading the watchdog timer, if this function fails to run MCU is rebooted
     watchdogReload();
-    lcdShowPopup("TURN STEAM OFF NOW!");
+    espCommsSendNotification(Notification::warn("TURN STEAM OFF NOW!"));
     setPumpOff();
     setBoilerOff();
     setSteamBoilerRelayOff();
-    currentState.isSteamForgottenON = currentState.steamSwitchState;
+    systemState.isSteamForgottenON = currentState.steamSwitchState;
   }
 
   //Releasing the excess pressure after steaming or brewing if necessary
@@ -633,38 +495,24 @@ static inline void sysHealthCheck(float pressureThreshold) {
     return;
   }
   // Should enter the block every "systemHealthTimer" seconds
+  // TODO Find a way to not run this when we're still showing the brewGraph
   if (millis() >= systemHealthTimer) {
-    while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
+    while (!brewActive && currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
     {
-      //Reloading the watchdog timer, if this function fails to run MCU is rebooted
-      watchdogReload();
-      switch (lcdCurrentPageId) {
-        case NextionPage::BrewManual:
-        case NextionPage::BrewGraph:
-        case NextionPage::GraphPreview:
-          brewDetect();
-          lcdRefresh();
-          lcdListen();
-          sensorsRead();
-          justDoCoffee(runningCfg, currentState, brewActive);
-          break;
-        default:
-          sensorsRead();
-          lcdShowPopup("Releasing pressure!");
-          setPumpOff();
-          setBoilerOff();
-          setSteamValveRelayOff();
-          setSteamBoilerRelayOff();
-          openValve();
-          break;
-      }
+      sensorsRead();
+      espCommsSendNotification(Notification::info("Releasing pressure!"));
+      setPumpOff();
+      setBoilerOff();
+      setSteamValveRelayOff();
+      setSteamBoilerRelayOff();
+      openValve();
+      break;
     }
     closeValve();
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
   }
   // Throwing a pressure release countodown.
-  if (lcdCurrentPageId == NextionPage::BrewGraph) return;
-  if (lcdCurrentPageId == NextionPage::BrewManual) return;
+  if (brewActive) return;
 
   if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
     if (millis() >= systemHealthTimer - 3500ul && millis() <= systemHealthTimer - 500ul) {
@@ -672,17 +520,11 @@ static inline void sysHealthCheck(float pressureThreshold) {
       int countdown = (int)(systemHealthTimer-millis())/1000;
       unsigned int check = snprintf(tmp, sizeof(tmp), "Dropping beats in: %i", countdown);
       if (check > 0 && check <= sizeof(tmp)) {
-        lcdShowPopup(tmp);
+        espCommsSendNotification(Notification::info(tmp));
       }
     }
   }
   #endif
-}
-
-// Function to track time since system has started
-static unsigned long getTimeSinceInit(void) {
-  static unsigned long startTime = millis();
-  return millis() - startTime;
 }
 
 static void fillBoiler(void) {
@@ -701,7 +543,7 @@ static void fillBoiler(void) {
     fillBoilerUntilThreshod(getTimeSinceInit());
   }
   else if (isSwitchOn()) {
-    lcdShowPopup("Brew Switch ON!");
+    espCommsSendNotification(Notification::warn("Brew Switch ON!"));
   }
 #else
   systemState.startupInitFinished = true;
@@ -709,7 +551,7 @@ static void fillBoiler(void) {
 }
 
 static bool isBoilerFillPhase(unsigned long elapsedTime) {
-  return lcdCurrentPageId == NextionPage::Home && elapsedTime >= BOILER_FILL_START_TIME;
+  return elapsedTime >= BOILER_FILL_START_TIME;
 }
 
 static bool isBoilerFull(unsigned long elapsedTime) {
@@ -725,7 +567,7 @@ static bool isBoilerFull(unsigned long elapsedTime) {
 
 // Checks if Brew switch is ON
 static bool isSwitchOn(void) {
-  return currentState.brewSwitchState && lcdCurrentPageId == NextionPage::Home;
+  return currentState.brewSwitchState;
 }
 
 static void fillBoilerUntilThreshod(unsigned long elapsedTime) {
@@ -741,14 +583,15 @@ static void fillBoilerUntilThreshod(unsigned long elapsedTime) {
     return;
   }
 
-  lcdShowPopup("Filling boiler!");
+  espCommsSendNotification(Notification::info("Filling boiler!"));
   openValve();
   setPumpToRawValue(35);
 }
 
-static void updateStartupTimer(void) {
-  lcdSetUpTime(getTimeSinceInit() / 1000);
-}
+// TODO: 
+// static void updateStartupTimer(void) {
+//   lcdSetUpTime(getTimeSinceInit() / 1000);
+// }
 
 static void cpsInit(GaggiaSettings &runningCfg) {
   int cps = getCPS();
@@ -765,15 +608,15 @@ static void cpsInit(GaggiaSettings &runningCfg) {
 
 static void doLed(void) {
   if (runningCfg.ledDisco && brewActive) {
-    switch(lcdCurrentPageId) {
-      case NextionPage::BrewGraph:
-      case NextionPage::BrewManual:
+    switch(systemState.operationMode) {
+      case OperationMode::BREW_AUTO:
+      case OperationMode::BREW_MANUAL:
         led.setDisco(led.CLASSIC);
         break;
-      case NextionPage::Flush:
+      case OperationMode::FLUSH:
         led.setDisco(led.STROBE);
         break;
-      case NextionPage::Descale:
+      case OperationMode::DESCALE:
         led.setDisco(led.DESCALE);
         break;
       default:
@@ -781,15 +624,6 @@ static void doLed(void) {
         break;
     }
   } else {
-    switch(lcdCurrentPageId) {
-      case NextionPage::Led:
-        static uint32_t timer = millis();
-        if (millis() > timer) {
-          timer = millis() + 100u;
-          lcdFetchLed(runningCfg);
-        }
-      default: // intentionally fall through
-        led.setColor(runningCfg.led.color.R, runningCfg.led.color.G, runningCfg.led.color.B);
-    }
+    led.setColor(runningCfg.led.color.R, runningCfg.led.color.G, runningCfg.led.color.B);
   }
 }

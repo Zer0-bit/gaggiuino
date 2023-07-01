@@ -28,10 +28,8 @@ namespace ProtoSerializer {
 
   template<class MESSAGE_CONVERTER>
   bool deserialize(std::vector<uint8_t>& data, typename MESSAGE_CONVERTER::LocalType& target) {
-    // We need to convert the vector to a NanoPb::StringInputStream that the library expects
-    NanoPb::StringInputStream inputStream(std::make_unique<std::string>(data.begin(), data.end()));
     // Invoke the decoding
-    bool result = NanoPb::decode<MESSAGE_CONVERTER>(inputStream, target);
+    bool result = NanoPb::decode<MESSAGE_CONVERTER>(data.data(), data.size(), target);
     return result;
   }
 }

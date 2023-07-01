@@ -5,8 +5,9 @@
 #include "utils.h"
 #include "../peripherals/peripherals.h"
 #include "../peripherals/pump.h"
-#include "../eeprom_data/eeprom_data.h"
+#include "gaggia_settings.h"
 #include "sensors_state.h"
+#include "system_state.h"
 #include <Arduino.h>
 
 
@@ -22,9 +23,9 @@ enum class HEATING {
   MODE_hotWater
 };
 
-void justDoCoffee(const GaggiaSettings &gaggiaSettings, const SensorState &currentState, const bool brewActive);
+void justDoCoffee(const GaggiaSettings &gaggiaSettings, const SensorState &currentState, float waterTemperature, const bool brewActive);
 void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int factor_2, const bool brewActive);
-void steamCtrl(const GaggiaSettings &runningCfg, SensorState &currentState);
+void steamCtrl(const GaggiaSettings &runningCfg, SensorState &currentState, SystemState& systemState);
 void hotWaterMode(const SensorState &currentState);
 
 #endif

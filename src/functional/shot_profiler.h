@@ -25,12 +25,13 @@ public:
 
 class PhaseProfiler {
 private:
-  const Profile* profile;
+  const Profile* profile = nullptr;
   size_t currentPhaseIdx = 0; // The index at which the profiler currently is.
   ShotSnapshot phaseChangedSnapshot = ShotSnapshot{ 0, 0, 0, 0, 0, 0 }; // State when the profiler move to this currentPhaseIdx
   CurrentPhase currentPhase = CurrentPhase(0, profile->phases[0], 0, phaseChangedSnapshot);
 
 public:
+  PhaseProfiler();
   PhaseProfiler(const Profile& profile);
   // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
   void setProfile(const Profile& profile) { this->profile = &profile; };

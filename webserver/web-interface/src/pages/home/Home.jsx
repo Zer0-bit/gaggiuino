@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import  React, { useState, useEffect, useRef } from 'react';
+=======
+import React, { useState, useEffect } from 'react';
+>>>>>>> f364c7c (Move persistence to ESP and communicate data via mcu comms)
 import useWebSocket from 'react-use-websocket';
 import {
   Box, Container, useTheme, Fab, TextField, Grid, Button, Skeleton, Stack,
@@ -26,7 +30,7 @@ function Home() {
   const [scalesPresent, setScalesPresent] = useState(false);
 
   const [lastSensorData, setLastSensorData] = useState({
-    temperature: 0, pressure: 0, pumpFlow: 0, weight: 0, scalesPresent: false, waterLvl: 0,
+    temperature: 0, pressure: 0, pumpFlow: 0, weight: 0, scalesPresent: false, waterLevel: 0,
   });
 
   useEffect(() => {
@@ -76,7 +80,7 @@ function Home() {
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
         <Grid item xs={2}>
           <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px', gap: '0px' }}>
-            {boxedComponent(<GaugeLiquid value={lastSensorData.waterLvl} radius={boxSize.width}/>)}
+            {boxedComponent(<GaugeLiquid value={lastSensorData.waterLevel} radius={boxSize.width}/>)}
             {boxedComponent(<GaugeChart value={lastSensorData.pressure} maintainAspectRatio={false}  primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
             {boxedComponent(<GaugeChart value={lastSensorData.weight} maintainAspectRatio={false} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
           </Box>

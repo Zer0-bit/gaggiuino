@@ -4,9 +4,7 @@
 
 #include "profiling_phases.h"
 #include "sensors_state.h"
-#include "../eeprom_data/eeprom_data.h"
 #include "shot_profiler.h"
-#include "../lcd/nextion_profile_mapping.h"
 
 extern int preInfusionFinishedPhaseIdx;
 constexpr float crossSectionalArea = 0.0026f; // avg puck crossectional area.
@@ -21,6 +19,7 @@ private:
   float truePuckResistance;
   float resistanceDelta;
   float pressureDrop;
+  float peakPressure;
 
 public:
   bool preinfusionFinished;
@@ -50,8 +49,10 @@ public:
       return;
     }
     float previousPuckResistance = puckResistance;
+
     puckResistance = state.smoothedPressure * 1000.f / state.smoothedPumpFlow; // Resistance in mBar * s / g
     resistanceDelta = puckResistance - previousPuckResistance;
+    peakPressure = fmaxf(peakPressure, state.smoothedPressure);
     pressureDrop = state.smoothedPressure * 10.f;
     pressureDrop -= pressureDrop - state.pumpClicks;
     pressureDrop = pressureDrop > 0.f ? pressureDrop : 1.f;
@@ -62,32 +63,16 @@ public:
     as well as there being enough pressure for water to wet the puck enough to start the output.
     On profiles whare pressure drop is of concern ~1 bar of drop is the point where liquid output starts. */
 
-    bool phaseTypePressure = phase.getType() == PhaseType::PRESSURE;
-    bool preinfusionFinished = phase.getIndex() > PHASE_SOAK_INDEX; // This won't work for arbitrary profiles
-
-    bool soakEnabled = !(ACTIVE_PROFILE(cfg).phases[PHASE_SOAK_INDEX].skip); // This won't work for arbitrary profiles
-
-    float pressureTarget = phaseTypePressure ? phase.getPhase()->target.end : phase.getPhase()->restriction;
-
-    // Pressure has to reach full pi target bar threshold.
-    if (!preinfusionFinished && soakEnabled) {
-      if (predictiveTargetReached) {
-        // pressure drop needs to be around 1.5bar since target hit for output flow to be considered started.
-        if (pressureTarget - state.smoothedPressure > 1.f) outputFlowStarted = true;
-        else return;
-      }
-      if (!predictiveTargetReached && state.smoothedPressure < pressureTarget) {
-        return;
-      }
-      else {
-        predictiveTargetReached = true;
-        return;
-      }
+    // The following should catch soak phase dripping. We've reached a peak that is over 2bars and the pressure
+    // is now dropping. Has dropped at least 1 bar.
+    if (peakPressure > 2.f && state.smoothedPressure < peakPressure - 1.f) {
+      outputFlowStarted = true;
     }
+
     // Pressure has to cross the 2 bar threshold.
     if (state.smoothedPressure < 2.1f) return;
 
-    if (phaseTypePressure) {
+    if (phase.getType() == PhaseType::PRESSURE) {
       // If the pressure or flow are raising too fast dismiss the spike from the output.
       if (fabsf(state.pressureChangeSpeed) > 5.f || fabsf(state.pumpFlowChangeSpeed) > 2.f) return;
       // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
@@ -107,6 +92,7 @@ public:
   }
 
   void reset() {
+    peakPressure = 0.f;
     puckResistance = 0.f;
     resistanceDelta = 0.f;
     isForceStarted = false;

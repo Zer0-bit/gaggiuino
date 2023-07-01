@@ -3,8 +3,11 @@
 
 #include <Arduino.h>
 #include <FlashStorage_STM32.hpp>
-#include "eeprom_data.h"
 #include <memory>
+#include <vector>
+#include "eeprom_base.h"
+
+#define EEPROM_DATA_VERSION 13
 
 // This provider is so that we can use a fake EEPROM to run proper migration tests
 // Notice it loads an EEPROMMock when RUNNING_TESTS is defined
@@ -30,9 +33,10 @@ using eepromValueMigrationFunc_t = bool(*)(BaseValues_t& source, BaseValues_t& t
 using eepromValueInstantiationFunc_t = std::unique_ptr<BaseValues_t>(*)();
 
 // Defining these arrays as `extern` to avoid multiple definition errors.
-extern eepromValueLoaderFunc_t    eepromValueLoaders[EEPROM_DATA_VERSION];
-extern eepromValueMigrationFunc_t eepromValueMigrators[EEPROM_DATA_VERSION];
+extern eepromValueLoaderFunc_t        eepromValueLoaders[EEPROM_DATA_VERSION];
+extern eepromValueMigrationFunc_t     eepromValueMigrators[EEPROM_DATA_VERSION];
 extern eepromValueInstantiationFunc_t eepromValueInstantiators[EEPROM_DATA_VERSION];
+extern std::vector<uint8_t>           eepromSupportedVersions;
 
 bool migrate(uint8_t startingVersion, uint8_t targetVersion, BaseValues_t* targetValues);
 
@@ -44,7 +48,6 @@ template <typename T>
 T getTargetDefaultsIfAvailable(BaseValues_t* targetDefaults) {
   return targetDefaults == nullptr ? T{} : static_cast<T&>(*targetDefaults);
 }
-
 
 #define EEPROM_VALUES_LOADER(__eepromDataVersion, __eepromMetadata_tName, __fetchValues_fName)       \
   ()                                                                                                 \
@@ -70,12 +73,13 @@ T getTargetDefaultsIfAvailable(BaseValues_t* targetDefaults) {
   {                                                                                    \
     eepromValueLoaders[version] = &_loadEepromValues_v##version;                       \
     eepromValueInstantiators[version] = &instantiateEepromVersion<eepromValues_tName>; \
+    eepromSupportedVersions.push_back(version);                                         \
   }
 
 #define REGISTER_EEPROM_DATA_MIGRATOR(version, upgradeSchema_fName)                    \
   void __attribute__((constructor)) _registerEepromValueMigrator_v##version()          \
   {                                                                                    \
-    eepromValueMigrators[version-1] = &upgradeSchema_fName;                            \
+    eepromValueMigrators[version] = &upgradeSchema_fName;                            \
   }
 
 #endif

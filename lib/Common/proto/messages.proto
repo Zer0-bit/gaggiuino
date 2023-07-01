@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+enum OperationModeDto {
+  BREW_AUTO = 0;
+  BREW_MANUAL = 1;
+  FLUSH = 2;
+  DESCALE = 3;
+  STEAM = 4;
+};
+
+message UpdateOperationModeDto {
+  OperationModeDto operationMode = 1;
+}
+
+message RequestDataDto {
+  uint32 type = 1;
+}
+
+message SystemStateDto {
+  bool startupInitFinished = 1;
+  bool tofReady = 2;
+  bool isSteamForgottenON = 3;
+  bool scalesPresent = 4;
+  OperationModeDto operationMode = 5;
+}
+
+message SensorStateSnapshotDto {
+  bool brewActive = 1;
+  bool steamActive = 2;
+  bool hotWaterSwitchState = 3;
+  float temperature = 4;
+  float waterTemperature = 5;
+  float pressure = 6;
+  float pumpFlow = 7;
+  float weightFlow = 8;
+  float weight = 9;
+  uint32 waterLevel = 10;
+}
+
+message ShotSnapshotDto {
+  uint32 timeInShot = 1;
+  float pressure = 2;
+  float pumpFlow = 3;
+  float weightFlow = 4;
+  float temperature = 5;
+  float shotWeight = 6;
+  float waterPumped = 7;
+  float targetTemperature = 8;
+  float targetPumpFlow = 9;
+  float targetPressure = 10;
+}
+
+message MeasurementDto {
+  float value = 1;
+  uint32 time = 2;
+}
+
+message NotificationDto {
+  enum NotificationTypeDto {
+    INFO = 0;
+    SUCCESS = 1;
+    WARN = 2;
+    ERROR = 3;
+  }
+  NotificationTypeDto type = 1;
+  string message = 2;
+}

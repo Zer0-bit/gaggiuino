@@ -6,8 +6,8 @@
 
 /** Holds a measurement value and the time it was taken */
 struct Measurement {
-  float value;
-  uint32_t millis;
+  float value = 0.f;
+  uint32_t millis = 0u;
 };
 
 /** Holds a measurement delta and can calculate its speed of change */

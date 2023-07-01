@@ -4,7 +4,8 @@
 
 #include <Arduino.h>
 #include "sensors_state.h"
-#include "../eeprom_data/eeprom_data.h"
+#include "system_state.h"
+#include "gaggia_settings.h"
 
 const unsigned long DESCALE_PHASE1_EVERY = 30000UL; //30000 // short pump pulses during descale
 const unsigned long DESCALE_PHASE2_EVERY = 60000UL; //60000 // long pause for scale softening
@@ -22,7 +23,7 @@ enum class DescalingState {
   FINISHED
 };
 
-void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState);
+void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState, SystemState& systemState);
 void solenoidBeat(void);
 void backFlush(const SensorState &currentState);
 void flushActivated(void);

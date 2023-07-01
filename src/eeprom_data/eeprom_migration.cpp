@@ -1,12 +1,10 @@
 #include "eeprom_migration.h"
 
-// Earilest supported version for migrations
-#define EEPROM_DATA_EARLIEST_VERSION 12
-
 // Initializing the eeprom value and migrator arrays.
-eepromValueLoaderFunc_t eepromValueLoaders[EEPROM_DATA_VERSION];
-eepromValueMigrationFunc_t eepromValueMigrators[EEPROM_DATA_VERSION];
+eepromValueLoaderFunc_t        eepromValueLoaders[EEPROM_DATA_VERSION];
+eepromValueMigrationFunc_t     eepromValueMigrators[EEPROM_DATA_VERSION];
 eepromValueInstantiationFunc_t eepromValueInstantiators[EEPROM_DATA_VERSION];
+std::vector<uint8_t>           eepromSupportedVersions;
 
 using namespace std;
 

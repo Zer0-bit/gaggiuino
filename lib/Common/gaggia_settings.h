@@ -2,7 +2,6 @@
 #define GAGGIA_SETTINGS_H
 
 #include <Arduino.h>
-#include "profiling_phases.h"
 #include <vector>
 
 struct BoilerSettings {
@@ -27,11 +26,6 @@ struct BrewSettings {
   bool     brewDeltaState;    /* Should gaggia add more heating power during a shot to compensate for cold water entering */
 };
 
-struct ProfileSettings {
-  uint8_t              activeProfileIndex; /* Currently selected profile */
-  std::vector<Profile> savedProfiles;      /* Saved profiles array */
-};
-
 struct LedSettings {
   bool state;        /* Should the led be ON or OFF */
   bool disco;
@@ -43,11 +37,10 @@ struct LedSettings {
 };
 
 struct GaggiaSettings {
-  BoilerSettings   boiler;
-  SystemSettings   system;
-  BrewSettings     brew;
-  ProfileSettings  profiles;
-  LedSettings      led;
+  BoilerSettings boiler;
+  SystemSettings system;
+  BrewSettings   brew;
+  LedSettings    led;
 };
 
 #endif

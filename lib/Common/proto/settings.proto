@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-import "profile.proto";
-
 message BoilerSettingsDto {
   uint32 steamSetPoint = 1;
   uint32 offsetTemp = 2;
@@ -25,11 +23,6 @@ message BrewSettingsDto {
   bool basketPrefill = 3;
 }
 
-message ProfileSettingsDto {
-  uint32 activeProfileIndex = 1;
-  repeated ProfileDto savedProfiles = 2;
-}
-
 message LedSettingsDto {
   message Color {
     uint32 R = 1;
@@ -43,7 +36,6 @@ message LedSettingsDto {
 message GaggiaSettingsDto {
   BoilerSettingsDto boiler = 1;
   SystemSettingsDto system = 2;
-  BrewSettingsDto brew = 3;
-  ProfileSettingsDto profiles = 4;
-  LedSettingsDto led = 5;
+  BrewSettingsDto   brew = 3;
+  LedSettingsDto    led = 4;
 }

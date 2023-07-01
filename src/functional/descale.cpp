@@ -2,7 +2,9 @@
 #include "descale.h"
 #include "just_do_coffee.h"
 #include "../peripherals/internal_watchdog.h"
-#include "../lcd/lcd.h"
+#include "../peripherals/esp_comms.h"
+
+const int DESCALE_MAX_CYCLES = 100;
 
 DescalingState descalingState = DescalingState::IDLE;
 
@@ -11,11 +13,10 @@ uint8_t counter = 0;
 unsigned long descalingTimer = 0;
 int descalingCycle = 0;
 
-void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState) {
+void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState, SystemState& systemState) {
   switch (descalingState) {
     case DescalingState::IDLE: // Waiting for fuckfest to begin
       if (currentState.brewSwitchState) {
-        ACTIVE_PROFILE(gaggiaSettings).waterTemperature = 9;
         openValve();
         setSteamValveRelayOn();
         descalingState = DescalingState::DESCALING_PHASE1;
@@ -27,8 +28,8 @@ void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState) {
       currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
       setPumpToRawValue(10);
       if (millis() - descalingTimer > DESCALE_PHASE1_EVERY) {
-        lcdSetDescaleCycle(descalingCycle++);
-        if (descalingCycle < 100) {
+        descalingCycle += 1;
+        if (descalingCycle < DESCALE_MAX_CYCLES) {
           descalingTimer = millis();
           descalingState = DescalingState::DESCALING_PHASE2;
         } else {
@@ -41,7 +42,7 @@ void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState) {
       setPumpOff();
       if (millis() - descalingTimer > DESCALE_PHASE2_EVERY) {
         descalingTimer = millis();
-        lcdSetDescaleCycle(descalingCycle++);
+        descalingCycle += 1;
         descalingState = DescalingState::DESCALING_PHASE3;
       }
       break;
@@ -50,8 +51,8 @@ void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState) {
       setPumpToRawValue(30);
       if (millis() - descalingTimer > DESCALE_PHASE3_EVERY) {
         solenoidBeat();
-        lcdSetDescaleCycle(descalingCycle++);
-        if (descalingCycle < 100) {
+        descalingCycle += 1;
+        if (descalingCycle < DESCALE_MAX_CYCLES) {
           descalingTimer = millis();
           descalingState = DescalingState::DESCALING_PHASE1;
         } else {
@@ -65,13 +66,14 @@ void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState) {
       setSteamValveRelayOff();
       currentState.brewSwitchState ? descalingState = DescalingState::FINISHED : descalingState = DescalingState::IDLE;
       if (millis() - descalingTimer > 1000) {
-        lcdBrewTimerStop();
-        lcdShowPopup("FINISHED");
+        // lcdBrewTimerStop(); TODO
+        espCommsSendNotification(Notification::info("Descale finished!"));
         descalingTimer = millis();
       }
       break;
   }
-  justDoCoffee(gaggiaSettings, currentState, false);
+  systemState.descaleProgress = descalingCycle / DESCALE_MAX_CYCLES;
+  justDoCoffee(gaggiaSettings, currentState, 9.f, false);
 }
 
 void solenoidBeat() {

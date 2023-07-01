@@ -4,6 +4,7 @@
 //-------------------------- PhaseProfiler -----------------------------//
 //----------------------------------------------------------------------//
 
+PhaseProfiler::PhaseProfiler() {}
 PhaseProfiler::PhaseProfiler(const Profile& profile) : profile(&profile) {}
 
 void PhaseProfiler::updatePhase(uint32_t timeInShot, SensorState& state) {

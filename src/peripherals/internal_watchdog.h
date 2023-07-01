@@ -3,14 +3,14 @@
 #define INTERNALWATCHDOG_H
 #include <Arduino.h>
 #include <IWatchdog.h>
-#include "../lcd/lcd.h"
+#include "esp_comms.h"
 #include "../log.h"
 
 /*Checking whether system is booting after a hard reset initiated by the internal watchdog.*/
 static inline void iwdcInit(void) {
   // IWDC init
   if(IWatchdog.isReset()) {
-    lcdShowPopup("WATCHDOG RESTARTED");
+    espCommsSendNotification(Notification::error("WATCHDOG RESTARTED"));
     IWatchdog.clearReset();
   }
   IWatchdog.begin(5000000);

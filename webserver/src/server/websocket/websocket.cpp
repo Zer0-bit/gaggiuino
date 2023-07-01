@@ -105,7 +105,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
 //-------------------------------------------------------------//
 //--------------------------OUTGOING---------------------------//
 //-------------------------------------------------------------//
-void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
+void wsSendSensorStateSnapshotToClients(const SensorStateSnapshot& snapshot) {
   if (!websocket::lockJson()) return;
   JsonObject root = websocket::jsonDoc.to<JsonObject>();
 
@@ -114,13 +114,14 @@ void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
   JsonObject data = root.createNestedObject("data");
   data["brewActive"] = snapshot.brewActive;
   data["steamActive"] = snapshot.steamActive;
-  data["scalesPresent"] = snapshot.scalesPresent;
+  data["hotWaterActive"] = snapshot.hotWaterSwitchState;
   data["temperature"] = snapshot.temperature;
-  data["waterLvl"] = snapshot.waterLvl;
+  data["waterTemperature"] = snapshot.waterTemperature;
   data["pressure"] = snapshot.pressure;
   data["pumpFlow"] = snapshot.pumpFlow;
   data["weightFlow"] = snapshot.weightFlow;
   data["weight"] = snapshot.weight;
+  data["waterLevel"] = snapshot.waterLevel;
 
   std::string serializedMsg; // create temp buffer
   serializeJson(root, serializedMsg);  // serialize to buffer
@@ -129,7 +130,7 @@ void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
   websocket::wsServer.textAll(serializedMsg.c_str(), serializedMsg.length());
 }
 
-void wsSendShotSnapshotToClients(ShotSnapshot& snapshot) {
+void wsSendShotSnapshotToClients(const ShotSnapshot& snapshot) {
   if (!websocket::lockJson()) return;
   JsonObject root = websocket::jsonDoc.to<JsonObject>();
 
