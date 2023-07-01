@@ -12,7 +12,6 @@ import {
 } from '../../models/api';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
-import ProfilesTable from '../../components/table/table';
 
 function Home() {
   const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
