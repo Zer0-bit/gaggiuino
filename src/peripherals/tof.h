@@ -65,7 +65,7 @@ uint16_t TOF::readRangeToPct(uint16_t val) {
     }
   }
 
-  return 9u; // if val < 15
+  return 9u;
 }
 
 #endif
