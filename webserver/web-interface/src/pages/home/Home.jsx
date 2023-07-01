@@ -1,7 +1,7 @@
 import  React, { useState, useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import {
-  Box, Container, useTheme, Fab, TextField
+  Box, Container, useTheme, Fab, TextField, Grid,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -9,7 +9,6 @@ import {
   apiHost,
   filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA,
 } from '../../models/api';
-import Grid from '@mui/material/Grid';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import ProfilesTable from '../../components/table/table';
@@ -59,22 +58,26 @@ function Home() {
   }
 
   return (
-    <Container sx={{ pt: theme.spacing(2) }}>
-      <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1) }}>
+    <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
+      <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
         <Grid item xs={2}>
-          <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
+          <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px', gap: '0px' }}>
             {boxedComponent(<GaugeLiquid value={lastSensorData.waterLvl} radius={50}/>)}
             {boxedComponent(<GaugeChart value={lastSensorData.pressure} maintainAspectRatio={false}  primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
             {boxedComponent(<GaugeChart value={lastSensorData.weight} maintainAspectRatio={false} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
           </Box>
         </Grid>
-        <Grid item xs={6}>
-          <ProfilesTable />
+        <Grid item xs={6} sx={{gap: '8px'}}>
+          {/* <ProfilesTable /> */}
+          <Box sx={{ border: `5px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', height: '100%', padding: '0px' }}>
+          </Box>
         </Grid>
         <Grid item xs={4}>
-          <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
-            {boxedComponent(<GaugeChart value={lastSensorData.temperature} maintainAspectRatio={true} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C"/>)}
-            <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '5px', gap: '8px', }} >
+          <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px' }}>
+            <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '400px', width: '100%', padding: '0px', backgroundColor: '#292929'}}>
+            {boxedComponent(<GaugeChart value={lastSensorData.temperature} maintainAspectRatio={true} primaryColor={theme.palette.temperature.main} unit="°C"/>)}
+            </Box>
+            <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '8px', }} >
               <Fab color="primary" aria-label="add">
                 <RemoveIcon />
               </Fab>
