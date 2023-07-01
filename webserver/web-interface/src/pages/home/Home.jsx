@@ -98,8 +98,8 @@ function Home() {
             </Box>
             <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `2px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '2px', gap: '0px', backgroundColor: '#292929' }} ></Box>
             <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px', }} >
-              <TextField variant="standard" sx={{ width: '10ch', }} id="outlined-read-only-input" label="Scales"  defaultValue="93C" InputProps={{readOnly: true,}} />
-              <Button variant="outlined" startIcon={<ScaleIcon />} sx={{ width: '35%' }}>
+              <TextField variant="standard" sx={{ width: '10ch', }} id="outlined-read-only-input" label="Scales"  defaultValue="0.0g" InputProps={{readOnly: true,}} />
+              <Button variant="outlined" startIcon={<ScaleIcon />} sx={{ width: '40%' }}>
                 Tare
               </Button>
             </Box>
