@@ -54,11 +54,11 @@ function Home() {
   function boxedComponent(component) {
     return (
       <Box sx={{
-        border: `2px solid ${theme.palette.divider}`,
+        border: `0px solid ${theme.palette.divider}`,
         position: 'relative',
-        borderRadius: '16px',
+        borderRadius: '20px',
         width: '100%',
-        padding: '8px',
+        padding: '10px',
       }}
       >
         {component}
@@ -69,22 +69,24 @@ function Home() {
   return (
     <Container sx={{ pt: theme.spacing(2) }}>
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1) }}>
-        <Grid item xs={6}>
-          {boxedComponent(<GaugeChart value={lastSensorData.temperature} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
+        <Grid item xs={2}>
+          <Box sx={{ border: `3px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
+            {boxedComponent(<GaugeChart value={lastSensorData.temperature} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
+            {boxedComponent(<GaugeLiquid />)}
+            {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
+            {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
+          </Box>
         </Grid>
-        <Grid item xs={6}>
-          {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
-        </Grid>
-        <Grid item xs={scalesPresent ? 6 : 12}>
-          {boxedComponent(<GaugeLiquid />)}
-        </Grid>
-        {scalesPresent && (
-        <Grid item xs={6}>
-          {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
-        </Grid>
-        )}
-        <Grid item xs={12} container direction={'row'} gridRow={1}>
+        <Grid item xs={8}>
           <ProfilesTable />
+        </Grid>
+        <Grid item xs={2}>
+          <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
+            {boxedComponent(<GaugeChart value={lastSensorData.temperature} primaryColor={theme.palette.temperature.main} title="Temperature" unit="°C" />)}
+            {boxedComponent(<GaugeLiquid />)}
+            {boxedComponent(<GaugeChart value={lastSensorData.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
+            {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
+          </Box>
         </Grid>
       </Grid>
     </Container>
