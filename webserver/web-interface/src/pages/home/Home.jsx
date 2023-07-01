@@ -83,7 +83,7 @@ function Home() {
           {boxedComponent(<GaugeChart value={lastSensorData.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
         </Grid>
         )}
-        <Grid item xs={12}>
+        <Grid item xs={12} container direction={'row'} gridRow={1}>
           <ProfilesTable />
         </Grid>
       </Grid>
