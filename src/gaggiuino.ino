@@ -378,8 +378,7 @@ static void lcdRefresh(void) {
         // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
         if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
         /*LCD flow output*/
-        lcdFlow = currentState.smoothedPumpFlow * 10.f;
-        lcdSetFlow( predictiveWeight.preinfusionFinished ? lcdFlow * 2.f : lcdFlow);
+        lcdSetFlow( currentState.smoothedPumpFlow * 10.f);
         break;
       default:
         break; // don't push needless data on other pages
