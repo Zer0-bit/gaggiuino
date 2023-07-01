@@ -16,6 +16,7 @@ function GaugeChart({
   primaryColor,
   unit,
   title,
+  maintainAspectRatio = false,
 }) {
   const theme = useTheme();
 
@@ -23,7 +24,7 @@ function GaugeChart({
     cutout: '90%',
     borderWidth: 0,
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: {maintainAspectRatio},
     plugins: {
       center: {
         text: value.toFixed(1) + unit,
