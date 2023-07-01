@@ -14,6 +14,7 @@
 #include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
+#include "peripherals/twiControls.h"
 #include "sensors_state.h"
 #include "system_state.h"
 #include "functional/descale.h"

@@ -97,6 +97,10 @@ void setup(void) {
   // Change LED colour on setup exit.
   led.setColor(9u, 0u, 9u); // 64171
 
+#ifdef TWI_CONTROLS
+  twiControlsInit();
+#endif
+
   iwdcInit();
 }
 
@@ -136,9 +140,13 @@ static void sensorsRead(void) {
 }
 
 static void sensorReadSwitches(void) {
+#ifdef TWI_CONTROLS
+  twiControlsRead(currentState);
+#else
   currentState.brewSwitchState = brewState();
   currentState.steamSwitchState = steamState();
   currentState.hotWaterSwitchState = waterPinState() || (currentState.brewSwitchState && currentState.steamSwitchState); // use either an actual switch, or the GC/GCP switch combo
+#endif
 }
 
 static void sensorsReadTemperature(void) {
@@ -243,6 +251,7 @@ static void calculateWeightAndFlow(void) {
 
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
+  #ifdef TOF_VL53L0X
   if (lcdCurrentPageId == NextionPage::Home) {
     // static uint32_t tof_timeout = millis();
     // if (millis() >= tof_timeout) {
@@ -250,6 +259,9 @@ static void readTankWaterLevel(void) {
       // tof_timeout = millis() + 500;
     // }
   }
+  #else
+    currentState.waterLvl = digitalRead(PB15) ? 9 : 90;
+  #endif
 }
 
 //##############################################################################################################################
