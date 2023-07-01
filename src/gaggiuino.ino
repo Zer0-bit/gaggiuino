@@ -335,7 +335,6 @@ static void modeSelect(void) {
 
 static void lcdRefresh(void) {
   uint16_t tempDecimal;
-  float lcdFlow;
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
