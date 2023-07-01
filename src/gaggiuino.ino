@@ -464,7 +464,7 @@ void lcdBrewGraphScalesTareTrigger(void) {
   else {
     currentState.shotWeight = 0.f;
     predictiveWeight.setIsForceStarted(true);
-  } 
+  }
 }
 
 void lcdRefreshElementsTrigger(void) {
@@ -968,7 +968,7 @@ static void cpsInit(eepromValues_t &eepromValues) {
 }
 
 static void doLed(void) {
-  if (brewActive) {
+  if (runningCfg.ledDisco && brewActive) {
     switch(lcdCurrentPageId) {
       case NextionPage::BrewGraph:
       case NextionPage::BrewManual:

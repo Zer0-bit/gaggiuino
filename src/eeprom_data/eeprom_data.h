@@ -118,10 +118,11 @@ struct eepromValues_t {
   int      scalesF1;
   int      scalesF2;
   float    pumpFlowAtZero;
-  bool ledState;
-  uint8_t ledR;
-  uint8_t ledG;
-  uint8_t ledB;
+  bool     ledState;
+  bool     ledDisco;
+  uint8_t  ledR;
+  uint8_t  ledG;
+  uint8_t  ledB;
 };
 
 void eepromInit(void);
