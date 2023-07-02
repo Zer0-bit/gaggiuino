@@ -47,10 +47,14 @@ function Home() {
       <Box ref={boxRef} sx={{
         border: `0px solid ${theme.palette.divider}`,
         position: 'relative',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        display: 'flex',
         borderRadius: '20px',
         width: '100%',
         padding: '10px',
       }}
+      style={{ marginTop: '-9px' }}
       >
         {component}
       </Box>
@@ -90,8 +94,8 @@ function Home() {
         </Grid>
         <Grid item xs={4}>
           <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px' }}>
-            <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '400px', width: '100%', padding: '0px', backgroundColor: '#292929'}}>
-            {boxedComponent(<GaugeChart value={lastSensorData.temperature} maintainAspectRatio={true} primaryColor={theme.palette.temperature.main} unit="°C"/>)}
+            <Box sx={{ justifyContent: 'space-evenly', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '180px', width: '100%', padding: '0px', backgroundColor: '#292929'}}>
+              {boxedComponent(<GaugeChart value={lastSensorData.temperature} maintainAspectRatio={true} primaryColor={theme.palette.temperature.main} unit="°C"/>)}
             </Box>
             <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px', }} >
               <TextField variant="standard" sx={{ width: '10ch', }} id="outlined-read-only-input" label="Target"  defaultValue="93C" InputProps={{readOnly: true,}} />
