@@ -1,5 +1,5 @@
-#ifndef EEPROM_DATA_V4_H
-#define EEPROM_DATA_V4_H
+#ifndef EEPROM_DATA_V9_H
+#define EEPROM_DATA_V9_H
 
 #include "../eeprom_data.h"
 #include "../eeprom_metadata.h"
