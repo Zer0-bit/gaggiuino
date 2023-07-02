@@ -1,7 +1,7 @@
 import  React, { useState, useEffect, useRef } from 'react';
 import useWebSocket from 'react-use-websocket';
 import {
-  Box, Container, useTheme, Fab, TextField, Grid, Button,
+  Box, Container, useTheme, Fab, TextField, Grid, Button, Skeleton, Stack,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -79,7 +79,13 @@ function Home() {
         </Grid>
         <Grid item xs={6} sx={{gap: '8px'}}>
           {/* <ProfilesTable /> */}
-          <Box sx={{ border: `0.1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', height: '100%', padding: '0px', backgroundColor: '#292929' }}>
+          <Box sx={{ border: `0.1px solid ${theme.palette.divider}`, justifyContent: 'center', alignItems: 'center', display: 'flex', position: 'relative', borderRadius: '16px', width: '100%', height: '100%', padding: '0px', backgroundColor: '#292929' }}>
+            <Stack spacing={1} width='98%'>
+              {/* For variant="text", adjust the height via font-size */}
+              <Skeleton variant="rounded" sx={{ fontSize: '1rem' }} width='100%' height={210} />
+              <Skeleton variant="rounded" width='50%' height={150} />
+              <Skeleton variant="rounded" width='50%' height={150} />
+            </Stack>
           </Box>
         </Grid>
         <Grid item xs={4}>
