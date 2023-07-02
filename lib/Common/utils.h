@@ -13,4 +13,5 @@ enum class TransitionCurve {
 };
 
 float mapRange(float sourceNumber, float fromA, float fromB, float toA, float toB, int decimalPrecision, TransitionCurve transition = TransitionCurve::LINEAR);
+
 #endif

@@ -22,6 +22,7 @@
 #include "profiling_phases.h"
 #include "peripherals/esp_comms.h"
 #include "peripherals/led.h"
+#include "peripherals/tof.h"
 
 // Define some const values
 #if defined SINGLE_BOARD
@@ -37,6 +38,8 @@
 #define BOILER_FILL_START_TIME  3000UL // Boiler fill start time - 3 sec since system init.
 #define BOILER_FILL_TIMEOUT     8000UL // Boiler fill timeout - 8sec since system init.
 #define BOILER_FILL_SKIP_TEMP   85.f // Boiler fill skip temperature threshold
+#define SYS_PRESSURE_IDLE       0.7f // System pressure threshold at idle
+#define MIN_WATER_LVL           10u // Min allowable tank water lvl
 
 enum class OPERATION_MODES {
   OPMODE_straight9Bar,
@@ -72,8 +75,7 @@ unsigned long flowTimer;
 unsigned long steamTime;
 
 //scales vars
-float previousWeight  = 0;
-bool tareDone         = false;
+Measurements weightMeasurements(4);
 
 // brew detection vars
 bool brewActive = false;
@@ -87,6 +89,6 @@ bool homeScreenScalesEnabled = false;
 float previousSmoothedPressure;
 float previousSmoothedPumpFlow;
 
-static void systemHealthCheck(float pressureThreshold);
+static void sysHealthCheck(float pressureThreshold);
 
 #endif

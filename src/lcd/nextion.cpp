@@ -8,16 +8,54 @@ EasyNex myNex(USART_LCD);
 volatile NextionPage lcdCurrentPageId;
 volatile NextionPage lcdLastCurrentPageId;
 
+// decode/encode bit packing.
+// format is 000000sd rrrrrrrr gggggggg bbbbbbbb, where s = state, d = disco, r/g/b = colors
+void lcdDecodeLedSettings(uint32_t code, bool &state, bool &disco, uint8_t &r, uint8_t &g, uint8_t &b) {
+  state = (code & 0x02000000);
+  disco = (code & 0x01000000);
+  r     = (code & 0x00FF0000) >> 16;
+  g     = (code & 0x0000FF00) >> 8;
+  b     = (code & 0x000000FF);
+}
+
+uint32_t lcdEncodeLedSettings(bool state, bool disco, uint8_t r, uint8_t g, uint8_t b) {
+  uint32_t code;
+  code = state ? 0x01 : 0x00;
+  code = (code << 1) | (disco ? 0x01 : 0x00);
+  code = (code << 8) | (r & 0xFF);
+  code = (code << 8) | (g & 0xFF);
+  code = (code << 8) | (b & 0xFF);
+  return code;
+}
+
 void lcdInit(void) {
   myNex.begin(115200);
-  while (myNex.readNumber("ack") != 100 )
-  {
-    LOG_VERBOSE("Connecting to Nextion LCD");
-    delay(100);
+  while (!lcdCheckSerialInit("\x88\xFF\xFF\xFF", 4)) {
+    LOG_VERBOSE("Connecting to Nextion LCD...");
+    delay(5);
   }
   myNex.writeStr("splash.build_version.txt", AUTO_VERSION);
   lcdCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
   lcdLastCurrentPageId = static_cast<NextionPage>(myNex.currentPageId);
+}
+
+bool lcdCheckSerialInit(const char* expectedOutput, size_t expectedLen) {
+  size_t receivedLen = 0;
+
+  while (receivedLen < expectedLen) {
+    int receivedByte = myNex.readByte();
+    if (receivedByte != -1) {
+      if (receivedByte == expectedOutput[receivedLen]) {
+        receivedLen++;
+      } else {
+        // Reset receivedLen if the received byte doesn't match
+        receivedLen = 0;
+      }
+    }
+  }
+
+  // Serial output matches expected output
+  return true;
 }
 
 void lcdListen(void) {
@@ -32,6 +70,9 @@ void lcdWakeUp(void) {
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   // Highlight the active profile
   myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1  /* 1-offset in nextion */);
+  String buttonElemId = String("home.qPf") + (eepromCurrentValues.activeProfile + 1) + ".txt";
+  myNex.writeStr(buttonElemId, ACTIVE_PROFILE(eepromCurrentValues).name);
+
   // Temp
   myNex.writeNum("sT.setPoint.val", ACTIVE_PROFILE(eepromCurrentValues).setpoint);
   // PI
@@ -114,10 +155,6 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
 
 // This is never called again after boot
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
-  // bool profileType = false;
-  // Highlight the active profile
-  myNex.writeNum("pId", eepromCurrentValues.activeProfile + 1); /* 1-offset in nextion */
-
   // Profile names for all buttons
   myNex.writeStr("home.qPf1.txt", eepromCurrentValues.profiles[0].name);
   myNex.writeStr("home.qPf2.txt", eepromCurrentValues.profiles[1].name);
@@ -126,14 +163,9 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeStr("home.qPf5.txt", eepromCurrentValues.profiles[4].name);
 
   // More brew settings
-  myNex.writeNum("homeOnBrewFinish", eepromCurrentValues.homeOnShotFinish);
-  myNex.writeNum("bS.btGoHome.val", eepromCurrentValues.homeOnShotFinish);
-
+  myNex.writeNum("bckHome", eepromCurrentValues.homeOnShotFinish);
   myNex.writeNum("basketPrefill", eepromCurrentValues.basketPrefill);
-  myNex.writeNum("bS.btPrefill.val", eepromCurrentValues.basketPrefill);
-
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
-  myNex.writeNum("bS.btTempDelta.val", eepromCurrentValues.brewDeltaState);
 
   // System settings
   myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint);
@@ -142,17 +174,27 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("sT.mDiv.val", eepromCurrentValues.mainDivider);
   myNex.writeNum("sT.bDiv.val", eepromCurrentValues.brewDivider);
 
-  myNex.writeNum("systemSleepTime", eepromCurrentValues.lcdSleep*60);
   myNex.writeNum("sP.n1.val", eepromCurrentValues.lcdSleep);
   myNex.writeNum("sP.lc1.val", eepromCurrentValues.scalesF1);
   myNex.writeNum("sP.lc2.val", eepromCurrentValues.scalesF2);
   myNex.writeNum("sP.pump_zero.val", eepromCurrentValues.pumpFlowAtZero * 10000.f);
   myNex.writeNum("warmupState", eepromCurrentValues.warmupState);
 
+  // Led
+  myNex.writeNum("ledNum",
+    lcdEncodeLedSettings(
+      eepromCurrentValues.ledState,
+      eepromCurrentValues.ledDisco,
+      eepromCurrentValues.ledR,
+      eepromCurrentValues.ledG,
+      eepromCurrentValues.ledB
+    )
+  );
+
   lcdUploadProfile(eepromCurrentValues);
 }
 
-void uploadPageCfg(eepromValues_t &eepromCurrentValues) {
+void uploadPageCfg(eepromValues_t &eepromCurrentValues, SystemState &sys) {
   // Updating only page specific elements as necessary to speed up things and avoid needless writes.
   switch (lcdCurrentPageId) {
     case NextionPage::BrewPreinfusion:
@@ -356,7 +398,7 @@ void lcdFetchCurrentProfile(eepromValues_t & settings) {
 
 void lcdFetchBrewSettings(eepromValues_t &settings) {
   // More brew settings
-  settings.homeOnShotFinish               = myNex.readNumber("homeOnBrewFinish");
+  settings.homeOnShotFinish               = myNex.readNumber("bckHome");
   settings.basketPrefill                  = myNex.readNumber("basketPrefill");
   settings.brewDeltaState                 = myNex.readNumber("deltaState");
 }
@@ -371,11 +413,17 @@ void lcdFetchBoiler(eepromValues_t &settings) {
 
 void lcdFetchSystem(eepromValues_t &settings) {
   // System settings
-  settings.lcdSleep                       = myNex.readNumber("systemSleepTime") / 60;
+  settings.lcdSleep                       = myNex.readNumber("sP.n1.val"); // nextion sleep var
   settings.warmupState                    = myNex.readNumber("warmupState");
   settings.scalesF1                       = myNex.readNumber("sP.lc1.val");
   settings.scalesF2                       = myNex.readNumber("sP.lc2.val");
   settings.pumpFlowAtZero                 = myNex.readNumber("sP.pump_zero.val") / 10000.f;
+}
+
+void lcdFetchLed(eepromValues_t &settings) {
+  // Led Settings
+  uint32_t ledNum = myNex.readNumber("ledNum");
+  lcdDecodeLedSettings(ledNum, settings.ledState, settings.ledDisco, settings.ledR, settings.ledG, settings.ledB);
 }
 
 void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile) {
@@ -404,6 +452,9 @@ void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile)
       break;
     case NextionPage::ShotSettings:
       lcdFetchDoseSettings(settings.profiles[targetProfile]);
+      break;
+    case NextionPage::Led:
+      lcdFetchLed(settings);
       break;
     default:
       break;
@@ -467,6 +518,10 @@ void lcdSetTemperature(uint16_t val) {
   myNex.writeNum("currentTemp", val);
 }
 
+void lcdSetTemperatureDecimal(uint16_t val) {
+  myNex.writeNum("dE.val", val);
+}
+
 void lcdSetWeight(float val) {
   char tmp[6];
   int check = snprintf(tmp, sizeof(tmp), "%.1f", static_cast<double>(val));
@@ -487,13 +542,16 @@ void lcdShowDebug(int val1, int val2) {
 
 void lcdShowPopup(const char *msg) {
   static unsigned int timer;
-  if(millis() > timer + 1000) {
+  if(millis() > timer + 1150) {
     myNex.writeStr("popupMSG.t0.txt", msg);
     myNex.writeStr("page popupMSG");
     timer = millis();
   }
 }
 
+void lcdSetTankWaterLvl(uint16_t val) {
+  myNex.writeNum("j0.val", val);
+}
 void lcdTargetState(int val) {
   myNex.writeNum("targetState", val);
 }
@@ -521,3 +579,5 @@ void trigger4(void) { lcdBrewGraphScalesTareTrigger(); }
 void trigger6(void) { lcdRefreshElementsTrigger(); }
 void trigger7(void) { lcdQuickProfileSwitch(); }
 void trigger8(void) { lcdSaveProfileTrigger(); }
+void trigger9(void) { lcdResetSettingsTrigger(); }
+void trigger10(void) { lcdLoadDefaultProfileTrigger(); }

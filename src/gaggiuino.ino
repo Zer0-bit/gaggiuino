@@ -6,7 +6,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
-SimpleKalmanFilter smoothPumpFlow(1.f, 1.f, 0.04f);
+SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
@@ -24,7 +24,8 @@ eepromValues_t runningCfg;
 
 SystemState systemState;
 
-LED tofnled;
+LED led;
+TOF tof;
 
 void setup(void) {
   LOG_INIT();
@@ -60,10 +61,12 @@ void setup(void) {
   espCommsInit();
 
   // Initialize LED
-  tofnled.begin();
-  tofnled.setColor(255, 255, 255); // WHITE
+  led.begin();
+  led.setColor(9u, 0u, 9u); // WHITE
+  // Init the tof sensor
+  tof.init(currentState);
 
-  // Initialising the vsaved values or writing defaults if first start
+  // Initialising the saved values or writing defaults if first start
   eepromInit();
   runningCfg = eepromGetCurrentValues();
   LOG_INFO("EEPROM Init");
@@ -92,7 +95,7 @@ void setup(void) {
   LOG_INFO("Setup sequence finished");
 
   // Change LED colour on setup exit.
-  tofnled.setColor(255, 87, 95); // 64171
+  led.setColor(9u, 0u, 9u); // 64171
 
   iwdcInit();
 }
@@ -112,7 +115,7 @@ void loop(void) {
   modeSelect();
   lcdRefresh();
   espCommsSendSensorData(currentState);
-  systemHealthCheck(0.7f);
+  sysHealthCheck(SYS_PRESSURE_IDLE);
 }
 
 //##############################################################################################################################
@@ -128,6 +131,8 @@ static void sensorsRead(void) {
   sensorsReadPressure();
   calculateWeightAndFlow();
   updateStartupTimer();
+  readTankWaterLevel();
+  doLed();
 }
 
 static void sensorReadSwitches(void) {
@@ -144,19 +149,34 @@ static void sensorsReadTemperature(void) {
 }
 
 static void sensorsReadWeight(void) {
-  if (scalesIsPresent() && millis() > scalesTimer) {
-    if(!tareDone) {
-      scalesTare(); //Tare at the start of any weighing cycle
-      if (!nonBrewModeActive && (scalesGetWeight() < -0.3f || scalesGetWeight() > 0.3f)) tareDone = false;
-      else tareDone = true;
+  uint32_t elapsedTime = millis() - scalesTimer;
+
+  if (elapsedTime > GET_SCALES_READ_EVERY) {
+    currentState.scalesPresent = scalesIsPresent();
+    if (currentState.scalesPresent) {
+      if (currentState.tarePending) {
+        scalesTare();
+        weightMeasurements.clear();
+        weightMeasurements.add(scalesGetWeight());
+        currentState.tarePending = false;
+      }
+      else {
+        weightMeasurements.add(scalesGetWeight());
+      }
+      currentState.weight = weightMeasurements.latest().value;
     }
-    currentState.weight = scalesGetWeight();
-    scalesTimer = millis() + GET_SCALES_READ_EVERY;
+
+    if (brewActive) {
+      currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
+      currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
+      currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
+    }
+    scalesTimer = millis();
   }
 }
 
 static void sensorsReadPressure(void) {
-  float elapsedTime = millis() - pressureTimer;
+  uint32_t elapsedTime = millis() - pressureTimer;
 
   if (elapsedTime > GET_PRESSURE_READ_EVERY) {
     float elapsedTimeSec = elapsedTime / 1000.f;
@@ -177,17 +197,16 @@ static long sensorsReadFlow(float elapsedTimeSec) {
   previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
   // Some flow smoothing
   currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-  currentState.smoothedWeightFlow = currentState.smoothedPumpFlow; // use predicted flow as hw scales flow
   currentState.pumpFlowChangeSpeed = (currentState.smoothedPumpFlow - previousSmoothedPumpFlow) / elapsedTimeSec;
   return pumpClicks;
 }
 
 static void calculateWeightAndFlow(void) {
-  long elapsedTime = millis() - flowTimer;
+  uint32_t elapsedTime = millis() - flowTimer;
 
   if (brewActive) {
     // Marking for tare in case smth has gone wrong and it has exited tare already.
-    if (currentState.weight < -0.3f) tareDone = false;
+    if (currentState.weight < -.3f) currentState.tarePending = true;
 
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
@@ -202,14 +221,16 @@ static void calculateWeightAndFlow(void) {
       if (predictiveWeight.isOutputFlow() || currentState.weight > 0.4f) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
-        // Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling
-        // if (runningCfg.flowProfileState && currentState.isPressureRising) {
-        //   if (currentState.smoothedPressure < runningCfg.flowProfilePressureTarget * 0.9f) {
-        //     actualFlow *= 0.6f;
-        //   }
-        // }
+        /* Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling,
+        once pressure stabilises around the setpoint the flow is either stable or puck restriction is high af. */
+        if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
+          if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f)
+          || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
+            actualFlow *= 0.3f;
+          }
+        }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
-        currentState.shotWeight = scalesIsPresent() ? currentState.weight : currentState.shotWeight + actualFlow;
+        currentState.shotWeight = currentState.scalesPresent ? currentState.shotWeight : currentState.shotWeight + actualFlow;
       }
       currentState.waterPumped += consideredFlow;
     }
@@ -220,17 +241,27 @@ static void calculateWeightAndFlow(void) {
   }
 }
 
+// return the reading in mm of the tank water level.
+static void readTankWaterLevel(void) {
+  if (lcdCurrentPageId == NextionPage::Home) {
+    // static uint32_t tof_timeout = millis();
+    // if (millis() >= tof_timeout) {
+    currentState.waterLvl = tof.readLvl();
+      // tof_timeout = millis() + 500;
+    // }
+  }
+}
+
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
 //##############################################################################################################################
 static void pageValuesRefresh() {
-  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) {
-    // Read the page we're landing in: leaving keyboard page means a value could've changed in it
-    lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
-  } else {
-    // Read the page we left, as it could've been changed in place (e.g. boolean toggles)
-    lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.activeProfile);
-  }
+  // Read the page we're landing in: leaving keyboard page means a value could've changed in it
+  if (lcdLastCurrentPageId == NextionPage::KeyboardNumeric) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
+  // Or maybe it's a page that needs constant polling
+  else if (lcdLastCurrentPageId == NextionPage::Led) lcdFetchPage(runningCfg, lcdCurrentPageId, runningCfg.activeProfile);
+  // Finally read the page we left, as it could've been changed in place (e.g. boolean toggles)
+  else lcdFetchPage(runningCfg, lcdLastCurrentPageId, runningCfg.activeProfile);
 
   homeScreenScalesEnabled = lcdGetHomeScreenScalesEnabled();
   // MODE_SELECT should always be LAST
@@ -303,6 +334,7 @@ static void modeSelect(void) {
 //#############################################################################################
 
 static void lcdRefresh(void) {
+  uint16_t tempDecimal;
 
   if (millis() > pageRefreshTimer) {
     /*LCD pressure output, as a measure to beautify the graphs locking the live pressure read for the LCD alone*/
@@ -317,36 +349,34 @@ static void lcdRefresh(void) {
     #endif
 
     /*LCD temp output*/
-    uint16_t brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
+    float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
     // float liveTempWithOffset = currentState.temperature - runningCfg.offsetTemp;
-    uint16_t lcdTemp = ((uint16_t)currentState.temperature > ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
-      ? (uint16_t)currentState.temperature / brewTempSetPoint + ACTIVE_PROFILE(runningCfg).setpoint
-      : (uint16_t)currentState.temperature;
-    lcdSetTemperature(lcdTemp);
+    currentState.waterTemperature = (currentState.temperature > (float)ACTIVE_PROFILE(runningCfg).setpoint && currentState.brewSwitchState)
+      ? currentState.temperature / (float)brewTempSetPoint + (float)ACTIVE_PROFILE(runningCfg).setpoint
+      : currentState.temperature;
 
-    /*LCD weight output*/
+    lcdSetTemperature(std::floor((uint16_t)currentState.waterTemperature));
+
+    /*LCD weight & temp & water lvl output*/
     switch (lcdCurrentPageId) {
       case NextionPage::Home:
+        // temp decimal handling
+        tempDecimal = (currentState.waterTemperature - (uint16_t)currentState.waterTemperature) * 10;
+        lcdSetTemperatureDecimal(tempDecimal);
+        // water lvl
+        lcdSetTankWaterLvl(currentState.waterLvl);
+        //weight
         if (homeScreenScalesEnabled) lcdSetWeight(currentState.weight);
         break;
       case NextionPage::BrewGraph:
       case NextionPage::BrewManual:
+        // temp decimal handling
+        tempDecimal = (currentState.waterTemperature - (uint16_t)currentState.waterTemperature) * 10;
+        lcdSetTemperatureDecimal(tempDecimal);
         // If the weight output is a negative value lower than -0.8 you might want to tare again before extraction starts.
         if (currentState.shotWeight) lcdSetWeight(currentState.shotWeight > -0.8f ? currentState.shotWeight : -0.9f);
-        break;
-      default:
-        break; // don't push needless data on other pages
-    }
-
-    /*LCD flow output*/
-    switch (lcdCurrentPageId) {
-      case NextionPage::BrewGraph:
-      case NextionPage::BrewManual:
-        lcdSetFlow(
-          currentState.weight > 0.4f // currentState.weight is always zero if scales are not present
-            ? currentState.smoothedWeightFlow * 10.f
-            : fmaxf(currentState.consideredFlow * 100.f, currentState.smoothedPumpFlow * 10.f)
-        );
+        /*LCD flow output*/
+        lcdSetFlow( currentState.smoothedPumpFlow * 10.f);
         break;
       default:
         break; // don't push needless data on other pages
@@ -381,6 +411,13 @@ void tryEepromWrite(const eepromValues_t &eepromValues) {
   }
 }
 
+void lcdSwitchActiveToStoredProfile(const eepromValues_t & storedSettings) {
+  runningCfg.activeProfile = lcdGetSelectedProfile();
+  ACTIVE_PROFILE(runningCfg) = storedSettings.profiles[runningCfg.activeProfile];
+  updateProfilerPhases();
+  lcdUploadProfile(runningCfg);
+}
+
 // Save the desired temp values to EEPROM
 void lcdSaveSettingsTrigger(void) {
   LOG_VERBOSE("Saving values to EEPROM");
@@ -394,14 +431,23 @@ void lcdSaveProfileTrigger(void) {
   LOG_VERBOSE("Saving profile to EEPROM");
 
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  eepromCurrentValues.activeProfile = runningCfg.activeProfile;
   lcdFetchCurrentProfile(eepromCurrentValues);
   tryEepromWrite(eepromCurrentValues);
 }
 
+void lcdResetSettingsTrigger(void) {
+  tryEepromWrite(eepromGetDefaultValues());
+}
+
+void lcdLoadDefaultProfileTrigger(void) {
+  lcdSwitchActiveToStoredProfile(eepromGetDefaultValues());
+
+  lcdShowPopup("Profile loaded!");
+}
+
 void lcdScalesTareTrigger(void) {
   LOG_VERBOSE("Tare scales");
-  if (scalesIsPresent()) scalesTare();
+  if (currentState.scalesPresent) currentState.tarePending = true;
 }
 
 void lcdHomeScreenScalesTrigger(void) {
@@ -411,12 +457,13 @@ void lcdHomeScreenScalesTrigger(void) {
 
 void lcdBrewGraphScalesTareTrigger(void) {
   LOG_VERBOSE("Predictive scales tare action completed!");
-  if (!scalesIsPresent()) {
-    if (currentState.shotWeight > 0.f) {
-      currentState.shotWeight = 0.f;
-      predictiveWeight.setIsForceStarted(true);
-    } else predictiveWeight.setIsForceStarted(true);
-  } else scalesTare();
+  if (currentState.scalesPresent) {
+    currentState.tarePending = true;
+  }
+  else {
+    currentState.shotWeight = 0.f;
+    predictiveWeight.setIsForceStarted(true);
+  }
 }
 
 void lcdRefreshElementsTrigger(void) {
@@ -439,16 +486,13 @@ void lcdRefreshElementsTrigger(void) {
   }
 
   // Make the necessary changes
-  uploadPageCfg(eepromCurrentValues);
+  uploadPageCfg(eepromCurrentValues, systemState);
   // refresh the screen elements
   pageValuesRefresh();
 }
 
 void lcdQuickProfileSwitch(void) {
-  runningCfg.activeProfile = lcdGetSelectedProfile();
-  ACTIVE_PROFILE(runningCfg) = eepromGetCurrentValues().profiles[runningCfg.activeProfile];
-  updateProfilerPhases();
-  lcdUploadProfile(runningCfg);
+  lcdSwitchActiveToStoredProfile(eepromGetCurrentValues());
   lcdShowPopup("Profile switched!");
 }
 
@@ -648,7 +692,7 @@ void onProfileReceived(Profile& newProfile) {
 static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     uint32_t timeInShot = millis() - brewingTimer;
-    phaseProfiler.updatePhase(timeInShot, currentState, runningCfg);
+    phaseProfiler.updatePhase(timeInShot, currentState);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
     ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
     espCommsSendShotData(shotSnapshot, 100);
@@ -693,15 +737,14 @@ static void manualFlowControl(void) {
 //#############################################################################################
 
 static void brewDetect(void) {
-  // Do not allow brew detection while system hasn't finished it's startup procedures.
-  if (!systemState.startupInitFinished) {
+  // Do not allow brew detection while system reports not ready.
+  if (!sysReadinessCheck()) {
     return;
   }
 
   static bool paramsReset = true;
-
   if (currentState.brewSwitchState) {
-    if(!paramsReset) {
+    if (!paramsReset) {
       lcdWakeUp();
       brewParamsReset();
       paramsReset = true;
@@ -713,7 +756,7 @@ static void brewDetect(void) {
   } else {
     brewActive = false;
     currentState.pumpClicks = getAndResetClickCounter();
-    if(paramsReset) {
+    if (paramsReset) {
       brewParamsReset();
       paramsReset = false;
     }
@@ -721,21 +764,37 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset(void) {
-  tareDone                 = false;
+  currentState.tarePending = true;
   currentState.shotWeight  = 0.f;
   currentState.pumpFlow    = 0.f;
-  previousWeight           = 0.f;
   currentState.weight      = 0.f;
   currentState.waterPumped = 0.f;
   brewingTimer             = millis();
   flowTimer                = brewingTimer;
   systemHealthTimer        = brewingTimer + HEALTHCHECK_EVERY;
 
+  weightMeasurements.clear();
   predictiveWeight.reset();
   phaseProfiler.reset();
 }
 
-static inline void systemHealthCheck(float pressureThreshold) {
+static bool sysReadinessCheck(void) {
+  // Startup procedures not finished
+  if (!systemState.startupInitFinished) {
+    return false;
+  }
+  // If there's not enough water in the tank
+  if ((lcdCurrentPageId != NextionPage::BrewGraph || lcdCurrentPageId != NextionPage::BrewManual)
+  && currentState.waterLvl < MIN_WATER_LVL)
+  {
+    lcdShowPopup("Fill the water tank!");
+    return false;
+  }
+
+  return true;
+}
+
+static inline void sysHealthCheck(float pressureThreshold) {
   //Reloading the watchdog timer, if this function fails to run MCU is rebooted
   watchdogReload();
 
@@ -904,5 +963,36 @@ static void cpsInit(eepromValues_t &eepromValues) {
     eepromValues.powerLineFrequency = 60u;
   } else if (cps > 0) { // 50 Hz
     eepromValues.powerLineFrequency = 50u;
+  }
+}
+
+static void doLed(void) {
+  if (runningCfg.ledDisco && brewActive) {
+    switch(lcdCurrentPageId) {
+      case NextionPage::BrewGraph:
+      case NextionPage::BrewManual:
+        led.setDisco(led.CLASSIC);
+        break;
+      case NextionPage::Flush:
+        led.setDisco(led.STROBE);
+        break;
+      case NextionPage::Descale:
+        led.setDisco(led.DESCALE);
+        break;
+      default:
+        led.setColor(0, 0, 0);
+        break;
+    }
+  } else {
+    switch(lcdCurrentPageId) {
+      case NextionPage::Led:
+        static uint32_t timer = millis();
+        if (millis() > timer) {
+          timer = millis() + 100u;
+          lcdFetchLed(runningCfg);
+        }
+      default: // intentionally fall through
+        led.setColor(runningCfg.ledR, runningCfg.ledG, runningCfg.ledB);
+    }
   }
 }

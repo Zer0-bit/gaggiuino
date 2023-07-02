@@ -1,6 +1,8 @@
 /* 09:32 15/03/2023 - change triggering comment */
-#include "../peripherals/internal_watchdog.h"
 #include "descale.h"
+#include "just_do_coffee.h"
+#include "../peripherals/internal_watchdog.h"
+#include "../lcd/lcd.h"
 
 DescalingState descalingState = DescalingState::IDLE;
 

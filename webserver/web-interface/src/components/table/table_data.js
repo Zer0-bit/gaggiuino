@@ -5,14 +5,14 @@ export const tableColumns = [
   {
     field: 'time', headerName: 'Time', type: 'number', minWidth: 90,
   },
-  {
-    field: 'description',
-    headerName: 'Description',
-    description: 'This column has a value getter and is not sortable.',
-    sortable: false,
-    minWidth: 100,
-    valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
-  },
+  // {
+  //   field: 'description',
+  //   headerName: 'Description',
+  //   description: 'This column has a value getter and is not sortable.',
+  //   sortable: false,
+  //   minWidth: 100,
+  //   valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
+  // },
 ];
 
 export const tableRows = [

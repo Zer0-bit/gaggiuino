@@ -1,26 +1,31 @@
 #include <Arduino.h>
-#include <LittleFS.h>
+#include "task_config.h"
+#include "filesystem/filesystem.h"
+#include "stm_comms/stm_comms.h"
 #include "server/server_setup.h"
 #include "wifi/wifi_setup.h"
-#include "server/websocket.h"
-#include "stm_comms/stm_comms.h"
-
-void initFS();
+#include "server/websocket/websocket.h"
+#include "scales/ble_scales.h"
+#include "./log/log.h"
 
 void setup() {
-  Serial.begin(115200);
-  stmCommsInit(Serial1);
+  LOG_INIT();
+  REMOTE_LOG_INIT([](std::string message) {wsSendLog(message);});
   initFS();
+  stmCommsInit(Serial1);
   wifiSetup();
-  setupServer();
+  webServerSetup();
+  bleScalesInit();
+  vTaskDelete(NULL);     //Delete own task by passing NULL(task handle can also be used)
 }
 
 void loop() {
-  stmCommsReadData();
-  wsCleanup();
+  vTaskDelete(NULL);     //Delete own task by passing NULL(task handle can also be used)
 }
 
-// Handle STM data
+// ------------------------------------------------------------------------
+// ---------------- Handle STM communication messages ---------------------
+// ------------------------------------------------------------------------
 void onSensorStateSnapshotReceived(SensorStateSnapshot& sensorData) {
   wsSendSensorStateSnapshotToClients(sensorData);
 }
@@ -29,10 +34,6 @@ void onShotSnapshotReceived(ShotSnapshot& shotData) {
   wsSendShotSnapshotToClients(shotData);
 }
 
-// Initialize SPIFFS
-void initFS() {
-  if (!LittleFS.begin(true)) {
-    Serial.println("An error has occurred while mounting LittleFS");
-  }
-  Serial.println("LittleFS mounted successfully");
+void onScalesTareReceived() {
+  bleScalesTare();
 }

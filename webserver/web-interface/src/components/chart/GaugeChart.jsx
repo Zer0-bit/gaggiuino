@@ -1,4 +1,3 @@
-import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import PropTypes from 'prop-types';
 import {
@@ -17,12 +16,16 @@ function GaugeChart({
   primaryColor,
   unit,
   title,
+  maintainAspectRatio = false,
 }) {
   const theme = useTheme();
 
   const options = {
     cutout: '90%',
     borderWidth: 0,
+    responsive: true,
+    updateMode: 'resize',
+    maintainAspectRatio: {maintainAspectRatio},
     plugins: {
       center: {
         text: value.toFixed(1) + unit,

@@ -1,26 +1,29 @@
 #ifndef WIFI_SETUP_H
 #define WIFI_SETUP_H
-#include <WiFi.h>
-#include <Preferences.h>
 #include <Arduino.h>
+#include <list>
+#include <Preferences.h>
 
-// WiFi definitions
-struct WiFiParams_t {
-  int wifiNetworkCount = 0;
-  bool refreshWiFiNetworks = false;
-  bool attemptReconnect = false;
-
+/** Holds information about one of the available networks */
+struct WiFiNetwork {
   String ssid;
-  String pass;
-  Preferences preferences;
+  int32_t rssi;
+  bool secured;
 };
 
-void wifiSetup();
-bool wifiConnect(String ssid, String pass, const unsigned long timeout = 10000);
-void wifiDisconnect();
-void wiFiApSetup();
-int  wifiNetworkCount();
+/** Holds the current network and IP */
+struct WiFiConnection {
+  String ssid;
+  String ip;
+};
 
-extern const char* PARAM_INPUT_SSID;
-extern const char* PARAM_INPUT_PASS;
+// WiFi definitions
+void wifiSetup();
+bool wifiConnect(String ssid, String pass, const uint32_t timeout = 15000);
+void wifiDisconnect();
+void wifiRefreshNetworks();
+
+WiFiConnection getWiFiConnection();
+std::list<WiFiNetwork> wifiAvailableNetworks();
+
 #endif

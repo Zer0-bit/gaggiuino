@@ -3,7 +3,6 @@
 #define EEPROM_DATA_H
 
 #include <Arduino.h>
-#include "../log.h"
 
 /**
 * NOTE: changing these constants requires:
@@ -119,10 +118,16 @@ struct eepromValues_t {
   int      scalesF1;
   int      scalesF2;
   float    pumpFlowAtZero;
+  bool     ledState;
+  bool     ledDisco;
+  uint8_t  ledR;
+  uint8_t  ledG;
+  uint8_t  ledB;
 };
 
 void eepromInit(void);
 bool eepromWrite(eepromValues_t);
+struct eepromValues_t eepromGetDefaultValues(void);
 struct eepromValues_t eepromGetCurrentValues(void);
 
 #define ACTIVE_PROFILE(eepromValues) eepromValues.profiles[eepromValues.activeProfile]

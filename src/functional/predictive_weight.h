@@ -22,6 +22,7 @@ private:
   float pressureDrop;
 
 public:
+  bool preinfusionFinished;
   PredictiveWeight() :
     outputFlowStarted(false),
     isForceStarted(false),
@@ -62,7 +63,7 @@ public:
 
     bool phaseTypePressure = phase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE;
     predictivePreinfusionFinishedCheck = phase.getIndex();
-    bool preinfusionFinished = ACTIVE_PROFILE(cfg).preinfusionState && ACTIVE_PROFILE(cfg).soakState
+    preinfusionFinished = ACTIVE_PROFILE(cfg).preinfusionState && ACTIVE_PROFILE(cfg).soakState
                               ? predictivePreinfusionFinishedCheck >= preInfusionFinishedPhaseIdx-1
                               : predictivePreinfusionFinishedCheck >= preInfusionFinishedPhaseIdx;
 

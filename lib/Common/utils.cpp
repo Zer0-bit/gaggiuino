@@ -20,8 +20,8 @@ float mapRange(float refNumber, float refStart, float refEnd, float targetStart,
 
   float finalNumber = targetStart + deltaTarget * percentageWithTransition(pct, transition);
 
-  int calcScale = (int) pow(10, decimalPrecision >= 0 ? decimalPrecision : 1);
-  return (float) round(finalNumber * calcScale) / calcScale;
+  int calcScale = (int)pow(10, decimalPrecision >= 0 ? decimalPrecision : 1);
+  return (float)round(finalNumber * calcScale) / calcScale;
 }
 
 float easeIn(float pct) {
@@ -33,19 +33,23 @@ float easeOut(float pct) {
 }
 
 float easeInOut(float pct) {
-  return 0.5f * (sinf((pct - 0.5f) * (float) M_PI) + 1.f);
+  return 0.5f * (sinf((pct - 0.5f) * (float)M_PI) + 1.f);
 }
 
 float percentageWithTransition(float pct, TransitionCurve transition) {
   if (transition == TransitionCurve::LINEAR) {
     return pct;
-  } else if (transition == TransitionCurve::EASE_IN) {
+  }
+  else if (transition == TransitionCurve::EASE_IN) {
     return easeIn(pct);
-  } else if (transition == TransitionCurve::EASE_OUT) {
+  }
+  else if (transition == TransitionCurve::EASE_OUT) {
     return easeOut(pct);
-  } else if (transition == TransitionCurve::INSTANT) {
+  }
+  else if (transition == TransitionCurve::INSTANT) {
     return 1.f;
-  } else {
+  }
+  else {
     return easeInOut(pct);
   }
 }

@@ -1,18 +1,36 @@
 #include "server_setup.h"
-#include "wifi_api.h"
-#include "websocket.h"
+#include "ESPAsyncWebServer.h"
+#include "AsyncTCP.h"
 
-AsyncWebServer server(80);
+#include "api/api_wifi.h"
+#include "api/api_static_files.h"
+#include "api/api_not_found_handler.h"
+#include "websocket/websocket.h"
+#include "../task_config.h"
+#include "../log/log.h"
 
-void setupStaticFiles(AsyncWebServer& server) {
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) { request->send(LittleFS, "/index.html", "text/html"); });
-  server.serveStatic("/", LittleFS, "/");
+namespace webserver {
+  const int PORT_NUMBER = 80;
+  AsyncWebServer server(PORT_NUMBER);
 }
 
-void setupServer() {
-  setupWifiApi(server);
-  setupStaticFiles(server);
-  setupWebSocket(server);
+void webServerTask(void* params);
 
-  server.begin();
+void webServerSetup() {
+  setupWifiApi(webserver::server);
+  setupWebSocket(webserver::server);
+  setupStaticFiles(webserver::server);
+  webserver::server.onNotFound(&handleUrlNotFound);
+
+  LOG_INFO("Starting up web server on port %d...", webserver::PORT_NUMBER);
+  webserver::server.begin();
+
+  xTaskCreateUniversal(webServerTask, "webserverMaintenance", configMINIMAL_STACK_SIZE + 100, NULL, PRIORITY_WEBSERVER_MAINTENANCE, NULL, CORE_WEBSERVER_MAINTENANCE);
+}
+
+void webServerTask(void* params) {
+  while(true) {
+    wsCleanup();
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+  }
 }

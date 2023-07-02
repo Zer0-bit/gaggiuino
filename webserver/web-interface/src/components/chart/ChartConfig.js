@@ -26,12 +26,16 @@ export default function getShotChartConfig(theme) {
     },
     scales: {
       x: {
+        axis: 'x',
+        type: 'linear',
         ticks: {
           color: theme.palette.text.secondary,
         },
         grid: {
           color: theme.palette.divider,
         },
+        min: 0,
+        suggestedMax: 60,
       },
       y1: {
         type: 'linear',

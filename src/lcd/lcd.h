@@ -4,6 +4,8 @@
 
 #include <EasyNextionLibrary.h>
 #include "eeprom_data/eeprom_data.h"
+#include "../../lib/Common/system_state.h"
+
 
 enum class NextionPage: byte {
   /* 00 */ Home,
@@ -21,20 +23,22 @@ enum class NextionPage: byte {
   /* 0C */ BrewTransitionProfile,
   /* 0D */ GraphPreview,
   /* 0E */ KeyboardNumeric,
-  /* 0F */ KeyboardAlpha
+  /* 0F */ Led
 };
 
 extern volatile NextionPage lcdCurrentPageId;
 extern volatile NextionPage lcdLastCurrentPageId;
 
 void lcdInit(void);
+bool lcdCheckSerialInit(const char* expectedOutput, size_t expectedLen);
 void lcdUploadProfile(eepromValues_t &eepromCurrentValues);
 void lcdUploadCfg(eepromValues_t &eepromCurrentValues);
-void uploadPageCfg(eepromValues_t &eepromCurrentValues);
+void uploadPageCfg(eepromValues_t &eepromCurrentValues, SystemState &sys);
 void lcdListen(void);
 void lcdWakeUp(void);
 
 void lcdFetchCurrentProfile(eepromValues_t & settings);
+void lcdFetchLed(eepromValues_t & settings);
 void lcdFetchPage(eepromValues_t &settings, NextionPage page, int targetProfile);
 uint8_t lcdGetSelectedProfile(void);
 bool lcdGetPreinfusionFlowState(void);
@@ -48,10 +52,12 @@ int lcdGetDescaleCycle(void);
 void lcdSetDescaleCycle(int cycle);
 void lcdSetPressure(float val);
 void lcdSetTemperature(uint16_t val);
+void lcdSetTemperatureDecimal(uint16_t val);
 void lcdTargetState(int val);
 void lcdSetWeight(float val);
 void lcdSetFlow(int val);
 void lcdSetUpTime(float val);
+void lcdSetTankWaterLvl(uint16_t val);
 
 void lcdShowDebug(int val1, int val2);
 void lcdShowPopup(const char *msg);
@@ -69,5 +75,7 @@ void lcdBrewGraphScalesTareTrigger(void);
 void lcdRefreshElementsTrigger(void);
 void lcdQuickProfileSwitch(void);
 void lcdSaveProfileTrigger(void);
+void lcdResetSettingsTrigger(void);
+void lcdLoadDefaultProfileTrigger(void);
 
 #endif

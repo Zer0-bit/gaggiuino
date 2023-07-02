@@ -11,7 +11,7 @@
 #define UART_LCD Serial2
 #define USART_DEBUG Serial  // USB-CDC (Takes PA8,PA9,PA10,PA11)
 
-HX711_2 loadcell;
+HX711_2 loadcell(TIM3);
 
 #if defined SINGLE_HX711_BOARD
   unsigned char scale_clk = OUTPUT;
@@ -34,8 +34,7 @@ void setup() {
   while (myNex.readNumber("initCheck") != 100) {
     delay(600);
   }
-
-  loadcell.begin(LOADCELL_1_DOUT_PIN, LOADCELL_2_DOUT_PIN, LOADCELL_1_SCK_PIN, LOADCELL_2_SCK_PIN, 128, scale_clk);
+  loadcell.begin(LOADCELL_1_DOUT_PIN, LOADCELL_2_DOUT_PIN, LOADCELL_1_SCK_PIN, 128U, scale_clk);
   loadcell.set_scale();
   loadcell.power_up();
   loadcell.tare();

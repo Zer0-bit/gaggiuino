@@ -18,6 +18,7 @@ unsigned long PSM::getLastMillis() {
 }
 
 unsigned char PSM::getDivider(void) {
+  return 1;
 }
 
 void PSM::setDivider(unsigned char divider) {
@@ -26,5 +27,5 @@ void PSM::setDivider(unsigned char divider) {
 void PSM::shiftDividerCounter(char value) {
 }
 
-void PSM::initTimer(unsigned int freq) {
+void PSM::initTimer(unsigned int freq, int timerInstance) {
 }

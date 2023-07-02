@@ -35,7 +35,7 @@ struct PhaseStopConditions {
   float weight = -1; //example: when pushed weight >0 stop this phase)
   float waterPumpedInPhase = -1;
 
-  bool isReached(SensorState& state, const eepromValues_t currentConfig, long timeInShot, ShotSnapshot stateAtPhaseStart) const;
+  bool isReached(SensorState& state, long timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
 struct Transition {
@@ -61,7 +61,7 @@ struct Phase {
 
   float getTarget(uint32_t timeInPhase, const ShotSnapshot& shotSnapshotAtStart) const;
   float getRestriction() const;
-  bool isStopConditionReached(SensorState& currentState, const eepromValues_t currentConfig, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const;
+  bool isStopConditionReached(SensorState& currentState, uint32_t timeInShot, ShotSnapshot stateAtPhaseStart) const;
 };
 
 struct GlobalStopConditions {
@@ -69,7 +69,7 @@ struct GlobalStopConditions {
   float weight = -1;
   float waterPumped = -1;
 
-  bool isReached(const SensorState& state, const eepromValues_t currentConfig, long timeInShot);
+  bool isReached(const SensorState& state, uint32_t timeInShot);
 };
 
 struct Profile {
@@ -123,7 +123,7 @@ private:
 public:
   PhaseProfiler(Profile& profile);
   // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
-  void updatePhase(uint32_t timeInShot, SensorState& state, const eepromValues_t currentConfig);
+  void updatePhase(uint32_t timeInShot, SensorState& state);
   CurrentPhase& getCurrentPhase();
   bool isFinished();
   void reset();

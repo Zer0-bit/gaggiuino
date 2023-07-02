@@ -20,13 +20,16 @@ const lightTheme = createTheme({
       main: '#ef4040',
     },
     flow: {
-      main: '#844B48',
+      main: '#ff9d00',
+    },
+    weightFlow: {
+      main: '#1d7835',
     },
     pressure: {
       main: '#6296C5',
     },
     weight: {
-      main: '#ffb53e',
+      main: '#844B48',
     },
   },
 });
@@ -44,13 +47,16 @@ const darkTheme = createTheme({
       main: '#ef4040',
     },
     flow: {
-      main: '#844B48',
+      main: '#ffb53e',
+    },
+    weightFlow: {
+      main: '#1d7835',
     },
     pressure: {
       main: '#6296C5',
     },
     weight: {
-      main: '#ffb53e',
+      main: '#a75c58',
     },
     background: {
       default: '#111',

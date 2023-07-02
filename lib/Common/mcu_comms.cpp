@@ -8,7 +8,7 @@ size_t ProfileSerializer::neededBufferSize(Profile& profile) const {
   return sizeof(profile.phaseCount()) + profile.phaseCount() * sizeof(Phase) + sizeof(profile.globalStopConditions);
 }
 
-vector<uint8_t> ProfileSerializer::serializeProfile(Profile& profile) {
+vector<uint8_t> ProfileSerializer::serializeProfile(Profile& profile) const {
   vector<uint8_t> buffer;
   buffer.reserve(neededBufferSize(profile));
   size_t phaseCount = profile.phaseCount();
@@ -20,7 +20,7 @@ vector<uint8_t> ProfileSerializer::serializeProfile(Profile& profile) {
   return buffer;
 }
 
-void ProfileSerializer::deserializeProfile(vector<uint8_t>& buffer, Profile& profile) const{
+void ProfileSerializer::deserializeProfile(vector<uint8_t>& buffer, Profile& profile) const {
   size_t phaseCount;
   memcpy(&phaseCount, buffer.data(), sizeof(profile.phaseCount()));
   profile.phases.clear();
@@ -130,10 +130,34 @@ void McuComms::sensorStateSnapshotReceived(SensorStateSnapshot& snapshot) const 
   }
 }
 
-void McuComms::log(const char* format, ...) {
+void McuComms::remoteScalesWeightReceived(float weight) const {
+  if (remoteScalesWeightReceivedCallback) {
+    remoteScalesWeightReceivedCallback(weight);
+  }
+}
+
+void McuComms::remoteScalesTareCommandReceived() const {
+  if (remoteScalesTareCommandCallback) {
+    remoteScalesTareCommandCallback();
+  }
+}
+
+void McuComms::remoteScalesDisconnected() const {
+  if (remoteScalesDisconnectedCallback) {
+    remoteScalesDisconnectedCallback();
+  }
+}
+
+void McuComms::responseReceived(McuCommsResponse& response) const {
+  if (responseReceivedCallback) {
+    responseReceivedCallback(response);
+  }
+}
+
+void McuComms::log(const char* format, ...) const {
   if (!debugPort) return;
 
-  std::array<char,128>buffer;
+  std::array<char, 128>buffer;
   va_list args;
   va_start(args, format);
   vsnprintf(buffer.data(), buffer.size(), format, args);
@@ -142,30 +166,52 @@ void McuComms::log(const char* format, ...) {
   debugPort->print(buffer.data());
 }
 
-void McuComms::logBufferHex(vector<uint8_t>& buffer, size_t dataSize) {
+void McuComms::logBufferHex(vector<uint8_t>& buffer, size_t dataSize) const {
   if (!debugPort) return;
 
   std::array<char, 3>hex;
   for (size_t i = 0u; i < dataSize; i++) {
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wformat-truncation"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
     snprintf(hex.data(), hex.max_size(), "%02x ", buffer[i]);
-    #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
     debugPort->print(hex.data());
   }
   debugPort->println();
 }
 
+void McuComms::establishConnection(uint32_t timeout) {
+  if (timeout <= 0) return;
+
+  uint32_t waitingStart = millis();
+
+  while (millis() - waitingStart < timeout && lastByteReceived == 0) {
+    sendHeartbeat();
+    readDataAndTick();
+    delay(10);
+  }
+
+  if (lastByteReceived > 0) {
+    log("Successful connection after=%dms", millis() - waitingStart);
+  }
+  else {
+    log("Unsuccessful connection after=%dms", millis() - waitingStart);
+  }
+}
+
+void McuComms::sendHeartbeat() {
+  uint16_t messageSize = transfer.txObj(static_cast<uint8_t>(McuCommsMessageType::MCUC_HEARTBEAT));
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_HEARTBEAT));
+}
+
 //---------------------------------------------------------------------------------
 //---------------------------    PUBLIC METHODS       ----------------------------
 //---------------------------------------------------------------------------------
-void McuComms::begin(Stream& serial, size_t pcktSize) {
-  McuComms::packetSize = pcktSize;
-  log("Staring with packetSize: %d\n", pcktSize);
-#ifdef ESP32
-  log("Starting for ESP32\n");
-#endif
+void McuComms::begin(Stream& serial, uint32_t waitConnectionMillis, size_t packetSize) {
+  McuComms::packetSize = packetSize;
+  log("Staring with packetSize: %d\n", packetSize);
   transfer.begin(serial, true);
+  establishConnection(waitConnectionMillis);
 }
 
 void McuComms::setDebugPort(Stream* dbgPort) {
@@ -184,47 +230,112 @@ void McuComms::setSensorStateSnapshotCallback(SensorStateSnapshotReceivedCallbac
   sensorStateSnapshotCallback = callback;
 }
 
+void McuComms::setRemoteScalesWeightReceivedCallback(RemoteScalesWeightReceivedCallback callback) {
+  remoteScalesWeightReceivedCallback = callback;
+}
+
+void McuComms::setRemoteScalesTareCommandCallback(RemoteScalesTareCommandCallback callback) {
+  remoteScalesTareCommandCallback = callback;
+}
+
+void McuComms::setRemoteScalesDisconnectedCallback(RemoteScalesDisconnectedCallback callback) {
+  remoteScalesDisconnectedCallback = callback;
+}
+
+void McuComms::setResponseReceivedCallback(ResponseReceivedCallback callback) {
+  responseReceivedCallback = callback;
+}
+
 void McuComms::sendShotData(const ShotSnapshot& snapshot) {
+  if (!isConnected()) return;
   uint16_t messageSize = transfer.txObj(snapshot);
-  transfer.sendData(messageSize, PACKET_SHOT_SNAPSHOT);
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_SHOT_SNAPSHOT));
 }
 
 void McuComms::sendProfile(Profile& profile) {
+  if (!isConnected()) return;
   size_t dataSize = profileSerializer.neededBufferSize(profile);
   vector<uint8_t> buffer = profileSerializer.serializeProfile(profile);
-  sendMultiPacket(buffer, dataSize, PACKET_PROFILE);
+  sendMultiPacket(buffer, dataSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_PROFILE));
 }
 
 void McuComms::sendSensorStateSnapshot(const SensorStateSnapshot& snapshot) {
+  if (!isConnected()) return;
   uint16_t messageSize = transfer.txObj(snapshot);
-  transfer.sendData(messageSize, PACKET_SENSOR_STATE_SNAPSHOT);
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_SENSOR_STATE_SNAPSHOT));
 }
 
-void McuComms::readData() {
-  size_t availableData = transfer.available();
+void McuComms::sendResponse(McuCommsResponse response) {
+  if (!isConnected()) return;
+  uint16_t messageSize = transfer.txObj(response);
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_RESPONSE));
+}
 
-  if (availableData) {
+void McuComms::sendRemoteScalesWeight(float weight) {
+  if (!isConnected()) return;
+  uint16_t messageSize = transfer.txObj(weight);
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_WEIGHT));
+}
+
+void McuComms::sendRemoteScalesTare() {
+  if (!isConnected()) return;
+  uint16_t messageSize = transfer.txObj(static_cast<uint8_t>(McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE));
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE));
+}
+
+void McuComms::sendRemoteScalesDisconnected() {
+  if (!isConnected()) return;
+  uint16_t messageSize = transfer.txObj(static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_DISCONNECTED));
+  transfer.sendData(messageSize, static_cast<uint8_t>(McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_DISCONNECTED));
+}
+
+void McuComms::readDataAndTick() {
+  uint8_t availableData = transfer.available();
+
+  if (availableData > 0) {
     log("Some data is available\n");
-
-    switch (transfer.currentPacketID()) {
-    case PACKET_SHOT_SNAPSHOT: {
+    lastByteReceived = millis();
+    switch (static_cast<McuCommsMessageType>(transfer.currentPacketID())) {
+    case McuCommsMessageType::MCUC_HEARTBEAT: {
+      break;
+    } case McuCommsMessageType::MCUC_RESPONSE: {
+      log("Received a response packet\n");
+      McuCommsResponse response;
+      transfer.rxObj(response);
+      responseReceived(response);
+      break;
+    } case McuCommsMessageType::MCUC_DATA_SHOT_SNAPSHOT: {
       log("Received a shot snapshot packet\n");
       ShotSnapshot snapshot;
       transfer.rxObj(snapshot);
       shotSnapshotReceived(snapshot);
       break;
-    } case PACKET_PROFILE: {
+    } case McuCommsMessageType::MCUC_DATA_PROFILE: {
       log("Received a profile packet\n");
       vector<uint8_t> data = receiveMultiPacket();
       Profile profile;
       profileSerializer.deserializeProfile(data, profile);
       profileReceived(profile);
       break;
-    } case PACKET_SENSOR_STATE_SNAPSHOT: {
+    } case McuCommsMessageType::MCUC_DATA_SENSOR_STATE_SNAPSHOT: {
       log("Received a sensor state snapshot packet\n");
       SensorStateSnapshot snapshot;
       transfer.rxObj(snapshot);
       sensorStateSnapshotReceived(snapshot);
+      break;
+    } case McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_WEIGHT: {
+      log("Received a weight packet\n");
+      float weight = 0.f;
+      transfer.rxObj(weight);
+      remoteScalesWeightReceived(weight);
+      break;
+    } case McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE: {
+      log("Received tare command");
+      remoteScalesTareCommandReceived();
+      break;
+    } case McuCommsMessageType::MCUC_DATA_REMOTE_SCALES_DISCONNECTED: {
+      log("Received scales disconnected message");
+      remoteScalesDisconnected();
       break;
     }
     default:
@@ -232,4 +343,15 @@ void McuComms::readData() {
       break;
     }
   }
+
+  if (millis() - lastHeartbeatSent > HEARTBEAT_TIME_DELTA_MSEC) {
+    log("McuConnection[%s]: Sending heartbeat.\n", isConnected() ? "active" : "inactive");
+    sendHeartbeat();
+    lastHeartbeatSent = millis();
+  }
+}
+
+/** If we haven't heard from the other side for 3 heartbeat times we're no longer connected */
+bool McuComms::isConnected() {
+  return millis() - lastByteReceived < 3 * HEARTBEAT_TIME_DELTA_MSEC;
 }
