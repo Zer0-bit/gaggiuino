@@ -86,9 +86,9 @@ function Home() {
           <Box sx={{ border: `0.1px solid ${theme.palette.divider}`, justifyContent: 'center', alignItems: 'center', display: 'flex', position: 'relative', borderRadius: '16px', width: '100%', height: '100%', padding: '0px', backgroundColor: '#292929' }}>
             <Stack spacing={1} width='98%'>
               {/* For variant="text", adjust the height via font-size */}
-              <Skeleton variant="rounded" sx={{ fontSize: '1rem' }} width='100%' height={210} />
-              <Skeleton variant="rounded" width='50%' height={150} />
-              <Skeleton variant="rounded" width='50%' height={150} />
+              <Skeleton variant="rounded" sx={{ fontSize: '1rem', borderRadius: '16px' }} width='100%' height={190} />
+              <Skeleton variant="rounded" width='50%' height={150} sx={{ fontSize: '1rem', borderRadius: '16px' }} />
+              <Skeleton variant="rounded" width='50%' height={150} sx={{ fontSize: '1rem', borderRadius: '16px' }} />
             </Stack>
           </Box>
         </Grid>
