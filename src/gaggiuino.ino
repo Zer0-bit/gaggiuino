@@ -164,12 +164,12 @@ static void sensorsReadWeight(void) {
         weightMeasurements.add(scalesGetWeight());
       }
       currentState.weight = weightMeasurements.latest().value;
-    }
 
-    if (brewActive) {
-      currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
-      currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
-      currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
+      if (brewActive) {
+        currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
+        currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
+        currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
+      }
     }
     scalesTimer = millis();
   }
