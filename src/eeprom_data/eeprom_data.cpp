@@ -103,7 +103,7 @@ namespace {
     defaultData.warmupState = false;
     defaultData.scalesF1 = 3920;
     defaultData.scalesF2 = 4210;
-    defaultData.pumpFlowAtZero = 0.2401f;
+    defaultData.pumpFlowAtZero = 0.2225f;
     defaultData.ledState  = true;
     defaultData.ledDisco  = true;
     defaultData.ledR = 9;
