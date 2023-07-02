@@ -26,6 +26,8 @@ class LED {
       CLASSIC = 15u,
       DESCALE = 1000u
     };
+    void setCurrent(uint8_t pwm);
+    void setPulse(float smoothness_pts, float gamma, float beta);
   private:
     uint32_t timer;
 };
@@ -106,4 +108,17 @@ void LED::setDisco(uint32_t increment) {
   }
 }
 
+void LED::setCurrent(uint8_t pwm) {
+  #if defined LED_NCP5623 || defined LED_PCA9632
+  tankLED.setCurrent(pwm);
+  #endif
+}
+
+void LED::setPulse(float smoothness_pts, float gamma, float beta) {
+  for (int i=0;i<smoothness_pts;i++){
+        uint8_t pwm_val = 31*(exp(-(pow(((i/smoothness_pts)-beta)/gamma,2.0))/2.0));
+        setCurrent(pwm_val);
+        delay(5);
+  }
+}
 #endif
