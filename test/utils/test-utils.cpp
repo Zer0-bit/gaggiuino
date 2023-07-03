@@ -69,13 +69,6 @@ void TEST_ASSERT_EQUAL_GAGGIA_SETTINGS(const GaggiaSettings& expected, const Gag
   TEST_ASSERT_EQUAL_MESSAGE(expected.brew.homeOnShotFinish, actual.brew.homeOnShotFinish, "screen.homeOnShotFinish");
   TEST_ASSERT_EQUAL_MESSAGE(expected.brew.brewDeltaState, actual.brew.brewDeltaState, "brew.brewDeltaState");
   TEST_ASSERT_EQUAL_MESSAGE(expected.brew.basketPrefill, actual.brew.basketPrefill, "brew.basketPrefill");
-
-  TEST_ASSERT_EQUAL_MESSAGE(expected.profiles.activeProfileIndex, actual.profiles.activeProfileIndex, "profiles.activeProfileIndex");
-  TEST_ASSERT_EQUAL_MESSAGE(expected.profiles.savedProfiles.size(), actual.profiles.savedProfiles.size(), "profiles.savedProfiles.size");
-
-  for (auto i = 0; i < expected.profiles.savedProfiles.size(); i++) {
-    TEST_ASSERT_EQUAL_PROFILE(expected.profiles.savedProfiles[i], actual.profiles.savedProfiles[i]);
-  }
 }
 
 #include <iostream>

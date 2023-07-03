@@ -142,6 +142,10 @@ public:
   };
 
   static bool decoderApply(const ProtoType& proto, LocalType& local) {
+    BoilerSettingsConverter::decoderApply(proto.boiler, local.boiler);
+    SystemSettingsConverter::decoderApply(proto.system, local.system);
+    BrewSettingsConverter::decoderApply(proto.brew, local.brew);
+    LedSettingsConverter::decoderApply(proto.led, local.led);
     return true;
   };
 };

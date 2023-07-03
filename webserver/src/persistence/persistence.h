@@ -10,11 +10,14 @@ namespace persistence {
   void init();
 
   const GaggiaSettings& getSettings();
-  void saveSettings(const GaggiaSettings& settings);
+  bool saveSettings(const GaggiaSettings& settings);
 
   const std::vector<SavedProfile>& getSavedProfiles();
 
-  const Profile& getActiveProfile();
+  ProfileId getActiveProfileId();
+  bool saveActiveProfileId(ProfileId id);
+
+  bool profileExists(ProfileId id);
   std::pair<bool, Profile> getProfile(ProfileId id);
   bool deleteProfile(ProfileId id);
   bool saveProfile(ProfileId id, const Profile& profile);

@@ -204,8 +204,6 @@ public:
   };
 };
 
-
-
 class NotificationConverter : public NanoPb::Converter::MessageConverter<NotificationConverter, Notification, NotificationDto, NotificationDto_fields> {
 public:
   static ProtoType encoderInit(const LocalType& local) {

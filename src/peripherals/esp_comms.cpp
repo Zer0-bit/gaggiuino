@@ -169,6 +169,12 @@ void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>
     onBrewSettingsReceived(brewSettings);
     break;
   }
+  case McuCommsMessageType::MCUC_CMD_UPDATE_OPERATION_MODE: {
+    UpdateOperationMode command;
+    ProtoSerializer::deserialize<UpdateOperationModeConverter>(data, command);
+    onOperationModeReceived(command.operationMode);
+    break;
+  }
   default: // Ignore message in all other cases
     break;
   }

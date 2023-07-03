@@ -63,6 +63,12 @@ void onMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>& da
     onShotSnapshotReceived(snapshot);
     break;
   }
+  case McuCommsMessageType::MCUC_DATA_SYSTEM_STATE: {
+    SystemState systemState;
+    ProtoSerializer::deserialize<SystemStateConverter>(data, systemState);
+    onSystemStateReceived(systemState);
+    break;
+  }
   case McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE: {
     onScalesTareReceived();
     break;
@@ -106,11 +112,58 @@ void stmCommsSendGaggiaSettings(const GaggiaSettings& settings) {
   );
   xSemaphoreGiveRecursive(mcucLock);
 }
+
 void stmCommsSendProfile(const Profile& profile) {
   if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
   mcuComms.sendMessage(
     McuCommsMessageType::MCUC_DATA_PROFILE,
     ProtoSerializer::serialize<ProfileConverter>(profile)
+  );
+  xSemaphoreGiveRecursive(mcucLock);
+}
+
+void stmCommsSendBrewSettings(const BrewSettings& settings) {
+  if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
+  mcuComms.sendMessage(
+    McuCommsMessageType::MCUC_DATA_BREW_SETTINGS,
+    ProtoSerializer::serialize<BrewSettingsConverter>(settings)
+  );
+  xSemaphoreGiveRecursive(mcucLock);
+}
+
+void stmCommsSendBoilerSettings(const BoilerSettings& settings) {
+  if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
+  mcuComms.sendMessage(
+    McuCommsMessageType::MCUC_DATA_BOILER_SETTINGS,
+    ProtoSerializer::serialize<BoilerSettingsConverter>(settings)
+  );
+  xSemaphoreGiveRecursive(mcucLock);
+}
+
+void stmCommsSendLedSettings(const LedSettings& settings) {
+  if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
+  mcuComms.sendMessage(
+    McuCommsMessageType::MCUC_DATA_LED_SETTINGS,
+    ProtoSerializer::serialize<LedSettingsConverter>(settings)
+  );
+  xSemaphoreGiveRecursive(mcucLock);
+}
+
+void stmCommsSendSystemSettings(const SystemSettings& settings) {
+  if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
+  mcuComms.sendMessage(
+    McuCommsMessageType::MCUC_DATA_SYSTEM_SETTINGS,
+    ProtoSerializer::serialize<SystemSettingsConverter>(settings)
+  );
+  xSemaphoreGiveRecursive(mcucLock);
+}
+
+void stmCommsSendUpdateOperationMode(const OperationMode mode) {
+  if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
+  UpdateOperationMode command = { .operationMode = mode };
+  mcuComms.sendMessage(
+    McuCommsMessageType::MCUC_CMD_UPDATE_OPERATION_MODE,
+    ProtoSerializer::serialize<UpdateOperationModeConverter>(command)
   );
   xSemaphoreGiveRecursive(mcucLock);
 }

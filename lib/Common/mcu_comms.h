@@ -37,6 +37,7 @@ enum class McuCommsMessageType : uint8_t {
 
   // Commands
   MCUC_CMD_REMOTE_SCALES_TARE = 16,
+  MCUC_CMD_UPDATE_OPERATION_MODE = 17,
 };
 
 struct McuCommsRequestData {

@@ -10,22 +10,21 @@
 #include "saved_profiles.h"
 #include "../log/log.h"
 
-#define KEY_PROFILE(id) std::string("profile_" + std::to_string(id))
+#define KEY_PROFILE(id) std::string("p_id_" + std::to_string(id))
 
 namespace persistence {
   SemaphoreHandle_t persistenceLock = xSemaphoreCreateRecursiveMutex();
 
   GaggiaSettings persistedSettings;
-  Profile activeProfile;
   SavedProfiles profileDictionary;
   ProfileId nextProfileId;
   ProfileId activeProfileId;
 
-  const std::string KEY_NEXT_PROFILE_ID = "next_profile_id";
+  const std::string KEY_NEXT_PROFILE_ID = "n_p_id";
   const std::string KEY_NAMESPACE = "gaggiuino_state";
-  const std::string KEY_ACTIVE_PROFILE_ID = "active_profile_id";
-  const std::string KEY_SETTINGS = "settings";
-  const std::string KEY_SAVED_PROFILES = "profile_summaries";
+  const std::string KEY_ACTIVE_PROFILE_ID = "act_p_id";
+  const std::string KEY_SETTINGS = "g_settings";
+  const std::string KEY_SAVED_PROFILES = "p_sum";
 
   Preferences preferences;
 
@@ -33,7 +32,7 @@ namespace persistence {
   void initProfiles();
   void initSettings();
   void initNextProfileId();
-  void initActiveProfile();
+  void initActiveProfileId();
   ProfileId getAndIncrementProfileId();
   std::vector<SavedProfile>::iterator findProfileById(ProfileId id_to_find);
   template<class MESSAGE_CONVERTER> void loadProtoResource(std::string key, typename MESSAGE_CONVERTER::LocalType& target);
@@ -46,6 +45,7 @@ namespace persistence {
   // Initialise settings or load defaults
   void init() {
     preferences.begin(KEY_NAMESPACE.c_str(), false);
+
     initSettings();
     LOG_INFO("Initialized settings");
 
@@ -55,14 +55,15 @@ namespace persistence {
     initProfiles();
     LOG_INFO("Initialized profile dictionary [size=%d]", profileDictionary.profiles.size());
 
-    initActiveProfile();
-    LOG_INFO("Initialized activeProfile to %d - %s", activeProfileId, activeProfile.name);
+    initActiveProfileId();
+    LOG_INFO("Initialized activeProfileId to %d", activeProfileId);
   }
 
   // Settings methods
-  void saveSettings(const GaggiaSettings& settings) {
+  bool saveSettings(const GaggiaSettings& settings) {
     saveProtoResource<GaggiaSettingsConverter>(KEY_SETTINGS, settings);
     persistedSettings = settings;
+    return true;
   }
 
   // Save gaggia settings
@@ -74,6 +75,11 @@ namespace persistence {
   // use getActiveProfile() or getProfile(id)
   const std::vector<SavedProfile>& getSavedProfiles() {
     return profileDictionary.profiles;
+  }
+
+  bool profileExists(ProfileId id) {
+    auto profilePointer = findProfileById(id);
+    return profilePointer != profileDictionary.profiles.end() && preferences.isKey(KEY_PROFILE(id).c_str());
   }
 
   // Get a profile by a given id
@@ -90,13 +96,11 @@ namespace persistence {
     return { true, profile };
   }
 
-  // Returns the active profile
-  const Profile& getActiveProfile() {
-    return activeProfile;
+  ProfileId getActiveProfileId() {
+    return activeProfileId;
   }
 
-  // Updates the active profile id
-  bool updateActiveProfile(ProfileId id) {
+  bool saveActiveProfileId(ProfileId id) {
     if (xSemaphoreTakeRecursive(persistenceLock, portMAX_DELAY) == pdFALSE) return false;
 
     auto profilePointer = findProfileById(id);
@@ -105,7 +109,7 @@ namespace persistence {
     }
 
     activeProfileId = id;
-    loadProtoResource<ProfileConverter>(KEY_PROFILE(id), activeProfile);
+    preferences.putUInt(KEY_ACTIVE_PROFILE_ID.c_str(), activeProfileId);
 
     xSemaphoreGiveRecursive(persistenceLock);
     return true;
@@ -173,12 +177,14 @@ namespace persistence {
   void initProfiles() {
     // Retrieve profile summaries or initialize profiles
     if (preferences.isKey(KEY_SAVED_PROFILES.c_str())) {
+      LOG_INFO("Found profile dictionary");
       loadProtoResource<SavedProfilesConverter>(KEY_SAVED_PROFILES, profileDictionary);
       // TODO: Should we perform health check of saved profiles and attempt to recover?
       return;
     }
 
     // If saved profiles were not present initialize all resources to defaults
+    LOG_INFO("Not found profile dictionary");
     std::vector<Profile> profiles = default_settings::getDefaultProfiles();
     profileDictionary.profiles.clear();
 
@@ -196,38 +202,44 @@ namespace persistence {
   // Retrieve settings or initialize to defaults if not present
   void initSettings() {
     if (preferences.isKey(KEY_SETTINGS.c_str())) {
-      loadProtoResource<GaggiaSettingsConverter>(KEY_SETTINGS, persistedSettings);
+      LOG_INFO("Found persisted settings. Will load them");
+      GaggiaSettings settings;
+      loadProtoResource<GaggiaSettingsConverter>(KEY_SETTINGS, settings);
+      LOG_INFO("Default boiler.hpwr = %d", settings.boiler.hpwr);
+      persistedSettings = settings;
       return;
     }
 
-    persistedSettings = default_settings::getDefaultSettings();
-    saveProtoResource<GaggiaSettingsConverter>(KEY_SETTINGS, persistedSettings);
+    LOG_INFO("Not found persisted settings. Will load defaults");
+    saveSettings(default_settings::getDefaultSettings());
+    LOG_INFO("Default boiler.hpwr = %d", persistedSettings.boiler.hpwr);
+    loadProtoResource<GaggiaSettingsConverter>(KEY_SETTINGS, persistedSettings);
+    LOG_INFO("Reloaded boiler.hpwr = %d", persistedSettings.boiler.hpwr);
   }
 
   // Initialize nextProfileId
   void initNextProfileId() {
     if (preferences.isKey(KEY_NEXT_PROFILE_ID.c_str())) {
+      LOG_INFO("Found nextProfileId. Will load it");
       nextProfileId = preferences.getUInt(KEY_NEXT_PROFILE_ID.c_str());
       return;
     }
 
+    LOG_INFO("Not nextProfileId. Will default it");
     nextProfileId = 0u;
     preferences.putUInt(KEY_NEXT_PROFILE_ID.c_str(), nextProfileId);
   }
 
   // Retrieve active profile index or initialize to zero
-  void initActiveProfile() {
+  void initActiveProfileId() {
     if (preferences.isKey(KEY_ACTIVE_PROFILE_ID.c_str())) {
+      LOG_INFO("Found activeProfileId. Will load it");
       activeProfileId = preferences.getUInt(KEY_ACTIVE_PROFILE_ID.c_str());
     }
     else {
+      LOG_INFO("Not found activeProfileId. Will default it");
       activeProfileId = 0u;
       preferences.putUInt(KEY_ACTIVE_PROFILE_ID.c_str(), activeProfileId);
-    }
-
-    auto result = getProfile(activeProfileId);
-    if (result.first) {
-      activeProfile = result.second;
     }
   }
 
@@ -253,6 +265,7 @@ namespace persistence {
   void loadProtoResource(std::string key, typename MESSAGE_CONVERTER::LocalType& target) {
     size_t size = preferences.getBytesLength(key.c_str());
     std::vector<uint8_t> data(size);
+    LOG_INFO("Retrieving key[%s] from nvs with size=%dbytes", key.c_str(), size);
     preferences.getBytes(key.c_str(), data.data(), size);
     ProtoSerializer::deserialize<MESSAGE_CONVERTER>(data, target);
   }
@@ -260,6 +273,7 @@ namespace persistence {
   template<class MESSAGE_CONVERTER>
   void saveProtoResource(std::string key, const typename MESSAGE_CONVERTER::LocalType& source) {
     std::vector<uint8_t> data = ProtoSerializer::serialize<MESSAGE_CONVERTER>(source);
+    LOG_INFO("Saving key[%s] to nvs with size=%dbytes", key.c_str(), data.size());
     preferences.putBytes(key.c_str(), data.data(), data.size());
   }
 } // namespace state
