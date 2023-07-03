@@ -236,7 +236,7 @@ public:
   };
 
   static bool decoderApply(const ProtoType& proto, LocalType& local) {
-    local.type = static_cast<McuCommsMessageType>(local.type);
+    local.type = static_cast<McuCommsMessageType>(proto.type);
     return true;
   };
 };
