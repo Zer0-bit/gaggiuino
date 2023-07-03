@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import  React, { useState, useEffect, useRef } from 'react';
-=======
 import React, { useState, useEffect } from 'react';
->>>>>>> f364c7c (Move persistence to ESP and communicate data via mcu comms)
 import useWebSocket from 'react-use-websocket';
 import {
   Box, Container, useTheme, Fab, TextField, Grid, Button, Skeleton, Stack,
