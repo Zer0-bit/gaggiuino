@@ -2,9 +2,10 @@
 #include "pressure_sensor.h"
 #include "pindef.h"
 #include "ADS1X15.h"
-#include "../lcd/lcd.h"
 #include "../log.h"
 #include "i2c_bus_reset.h"
+#include "esp_comms.h"
+#include "log.h"
 
 #if defined SINGLE_BOARD
 ADS1015 ADS(0x48);
@@ -56,7 +57,7 @@ void getAdsError(void) {
   char tmp[25];
   unsigned int check = snprintf(tmp, sizeof(tmp), "ADS error code: %i", result);
   if (check > 0 && check <= sizeof(tmp)) {
-    lcdShowPopup(tmp);
+    espCommsSendNotification(Notification::error(tmp));
   }
 }
 
@@ -72,7 +73,12 @@ void i2cResetState(void) {
     char tmp[25];
     unsigned int check = snprintf(tmp, sizeof(tmp), "I2C error code: %i", result);
     if (check > 0 && check <= sizeof(tmp)) {
-      result == 0 ? adsInit() : lcdShowPopup(tmp);
+      if (result == 0) {
+        adsInit();
+      }
+      else {
+        espCommsSendNotification(Notification::error(tmp));
+      }
     }
     delay(50);
   }

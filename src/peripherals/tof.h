@@ -1,10 +1,11 @@
 #ifndef TOF_H
 #define TOF_H
 
+#include "HardwareTimer.h"
 #include <stdint.h> // for uint8_t
 #include <Adafruit_VL53L0X.h>
 #include <movingAvg.h>
-#include "../../lib/Common/sensors_state.h"
+#include "system_state.h"
 
 Adafruit_VL53L0X tof_sensor;
 movingAvg mvAvg(4);
@@ -12,9 +13,9 @@ movingAvg mvAvg(4);
 class TOF {
   public:
     TOF();
-    void init(SensorState& sensor);
+    void init(SystemState&);
     uint16_t readLvl();
-    uint16_t readRangeToPct(uint16_t val);
+    uint16_t readRangeToPct(uint16_t);
 
   private:
     // HardwareTimer* hw_timer;
@@ -30,10 +31,10 @@ TOF::TOF() {}
 //   }
 // }
 
-void TOF::init(SensorState& sensor) {
+void TOF::init(SystemState& systemState) {
   #ifdef TOF_VL53L0X
-  while(!sensor.tofReady) {
-    sensor.tofReady = tof_sensor.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
+  while(!systemState.tofReady) {
+    systemState.tofReady = tof_sensor.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
   }
   tof_sensor.startRangeContinuous();
   mvAvg.begin();

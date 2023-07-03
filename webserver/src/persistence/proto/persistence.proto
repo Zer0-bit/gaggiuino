@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message SavedProfileDto {
+    uint32 id = 1;
+    string name = 2;
+}
+
+message SavedProfilesDto {
+    repeated SavedProfileDto profiles = 1;
+}
+
