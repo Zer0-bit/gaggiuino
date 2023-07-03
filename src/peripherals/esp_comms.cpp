@@ -98,7 +98,7 @@ void espCommsSendSystemState(const SystemState& systemState, uint32_t frequency)
 void espCommsRequestData(McuCommsMessageType dataType) {
   McuCommsSingleton::getInstance().sendMessage(
     McuCommsMessageType::MCUC_REQ_DATA,
-    ProtoSerializer::serialize<McuCommsRequestDataConverter>(McuCommsRequestData{dataType})
+    ProtoSerializer::serialize<McuCommsRequestDataConverter>(McuCommsRequestData{ dataType })
   );
 }
 
@@ -170,7 +170,7 @@ void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>
     break;
   }
   case McuCommsMessageType::MCUC_CMD_UPDATE_OPERATION_MODE: {
-    UpdateOperationMode command;
+    UpdateOperationMode command{ .operationMode = OperationMode::BREW_AUTO }; // init default
     ProtoSerializer::deserialize<UpdateOperationModeConverter>(data, command);
     onOperationModeReceived(command.operationMode);
     break;

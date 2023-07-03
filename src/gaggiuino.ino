@@ -465,7 +465,7 @@ static inline void sysHealthCheck(float pressureThreshold) {
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
       currentState.steamSwitchState ? espCommsSendNotification(Notification::warn("COOLDOWN!")) : espCommsSendNotification(Notification::warn("TEMP READ ERROR"));  // writing a LCD message
-      currentState.temperature  = thermocoupleRead() - runningCfg.offsetTemp;  // Making sure we're getting a value
+      currentState.temperature  = thermocoupleRead() - runningCfg.boiler.offsetTemp;  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }
