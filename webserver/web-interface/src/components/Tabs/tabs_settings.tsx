@@ -59,7 +59,7 @@ export default function VerticalTabs() {
         <Tab icon={<TemperatureIcon />} label="Boiler" {...a11yProps(0)} />
         <Tab icon={<CoffeeMakerIcon />} label="System" {...a11yProps(1)} />
         <Tab icon={<FlareIcon />} label="Led"    {...a11yProps(2)} />
-        <Tab icon={<ScaleIcon />}  {...a11yProps(3)} />
+        <Tab icon={<ScaleIcon />}  label="Scales" {...a11yProps(3)} />
         <Tab icon={<LogoDevIcon />}label="SysLog" {...a11yProps(4)} />
       </Tabs>
       <TabPanel value={value} index={0}>
