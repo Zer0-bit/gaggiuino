@@ -44,7 +44,7 @@ function LogContainer({ maxLines }) {
 
   return (
     <Paper elevation={3} sx={{ p: theme.spacing(2), width: '100%' }}>
-      <Stack direction="row" alignItems="center" sx={{ height: '300px', width: '100%'  }} >
+      <Stack direction="row" alignItems="center" sx={{ height: '100%', width: '100%'  }} >
         <Typography sx={{ flexGrow: 1 }} gutterBottom variant="h5">Logs</Typography>
         <FormControlLabel
           control={<Switch value={followLogs} onChange={onChangeSwitch} />}
