@@ -1,14 +1,17 @@
 #include "websocket.h"
-#include "../../log/log.h"
 #include <deque>
 #include <WiFi.h>
 #include "ESPAsyncWebServer.h"
 #include "AsyncTCP.h"
 #include <ArduinoJson.h>
+#include "../../log/log.h"
+
+#include "../json/json_system_state_converters.h"
 
 const std::string WS_MSG_SENSOR_DATA = "sensor_data_update";
 const std::string WS_MSG_SHOT_DATA = "shot_data_update";
 const std::string WS_MSG_LOG = "log_record";
+const std::string WS_MSG_SYSTEM_STATE = "log_sys_state";
 
 namespace websocket {
   AsyncWebSocket wsServer("/ws");
@@ -105,7 +108,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
 //-------------------------------------------------------------//
 //--------------------------OUTGOING---------------------------//
 //-------------------------------------------------------------//
-void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
+void wsSendSensorStateSnapshotToClients(const SensorStateSnapshot& snapshot) {
   if (!websocket::lockJson()) return;
   JsonObject root = websocket::jsonDoc.to<JsonObject>();
 
@@ -114,13 +117,14 @@ void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
   JsonObject data = root.createNestedObject("data");
   data["brewActive"] = snapshot.brewActive;
   data["steamActive"] = snapshot.steamActive;
-  data["scalesPresent"] = snapshot.scalesPresent;
+  data["hotWaterActive"] = snapshot.hotWaterSwitchState;
   data["temperature"] = snapshot.temperature;
-  data["waterLvl"] = snapshot.waterLvl;
+  data["waterTemperature"] = snapshot.waterTemperature;
   data["pressure"] = snapshot.pressure;
   data["pumpFlow"] = snapshot.pumpFlow;
   data["weightFlow"] = snapshot.weightFlow;
   data["weight"] = snapshot.weight;
+  data["waterLevel"] = snapshot.waterLevel;
 
   std::string serializedMsg; // create temp buffer
   serializeJson(root, serializedMsg);  // serialize to buffer
@@ -129,7 +133,7 @@ void wsSendSensorStateSnapshotToClients(SensorStateSnapshot& snapshot) {
   websocket::wsServer.textAll(serializedMsg.c_str(), serializedMsg.length());
 }
 
-void wsSendShotSnapshotToClients(ShotSnapshot& snapshot) {
+void wsSendShotSnapshotToClients(const ShotSnapshot& snapshot) {
   if (!websocket::lockJson()) return;
   JsonObject root = websocket::jsonDoc.to<JsonObject>();
 
@@ -169,4 +173,20 @@ void wsSendLog(std::string log, std::string source) {
   websocket::unlockJson();
 
   websocket::wsSendWithBuffer(serializedMsg);
+}
+
+void wsSendSystemStateToClients(const SystemState& systemState) {
+  if (!websocket::lockJson()) return;
+  JsonObject root = websocket::jsonDoc.to<JsonObject>();
+
+  root["action"] = WS_MSG_SYSTEM_STATE;
+
+  JsonObject data = root.createNestedObject("data");
+  json::mapSystemStateToJson(systemState, data);
+
+  std::string serializedMsg; // create temp buffer
+  serializeJson(root, serializedMsg);  // serialize to buffer
+  websocket::unlockJson();
+
+  websocket::wsServer.textAll(serializedMsg.c_str(), serializedMsg.length());
 }

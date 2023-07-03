@@ -71,7 +71,7 @@ Measurement scalesGetWeight(void) {
     if (loadCells.wait_ready_timeout(150, 10)) {
       float values[2];
       loadCells.get_units(values);
-      currentWeight = Measurement{ .value=values[0] + values[1], .millis=millis() };
+      currentWeight = Measurement{ .value=values[0] + values[1], .millis=static_cast<uint32_t>(millis()) };
     }
   }
   else if (remoteScalesIsPresent()) {

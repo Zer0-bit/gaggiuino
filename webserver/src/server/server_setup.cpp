@@ -5,6 +5,9 @@
 #include "api/api_wifi.h"
 #include "api/api_static_files.h"
 #include "api/api_not_found_handler.h"
+#include "api/api_settings.h"
+#include "api/api_profile.h"
+#include "api/api_system_state.h"
 #include "websocket/websocket.h"
 #include "../task_config.h"
 #include "../log/log.h"
@@ -18,6 +21,9 @@ void webServerTask(void* params);
 
 void webServerSetup() {
   setupWifiApi(webserver::server);
+  setupSettingsApi(webserver::server);
+  setupProfileApi(webserver::server);
+  setupSystemStateApi(webserver::server);
   setupWebSocket(webserver::server);
   setupStaticFiles(webserver::server);
   webserver::server.onNotFound(&handleUrlNotFound);

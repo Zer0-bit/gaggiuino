@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+enum PhaseTypeDto {
+    FLOW = 0;
+    PRESSURE = 1;
+}
+
+enum TransitionCurveDto {
+    EASE_IN_OUT = 0;
+    EASE_IN = 1;
+    EASE_OUT = 2;
+    LINEAR = 3;
+    INSTANT = 4;
+}
+
+message PhaseStopConditionsDto {
+    uint32 time = 1;
+    float pressureAbove = 2;
+    float pressureBelow = 3;
+    float flowAbove = 4;
+    float flowBelow = 5;
+    float weight = 6;
+    float waterPumpedInPhase = 7;
+}
+
+message TransitionDto {
+    float start = 1;
+    float end = 2;
+    TransitionCurveDto curve = 3;
+    uint32 time = 4;
+}
+
+message PhaseDto {
+    PhaseTypeDto type = 1;
+    TransitionDto target = 2;
+    float restriction = 3;
+    PhaseStopConditionsDto stopConditions = 4;
+    float waterTemperature = 5;
+    string name = 6;
+    bool skip = 7;
+}
+
+message GlobalStopConditionsDto {
+    uint32 time = 1;
+    float weight = 2;
+    float waterPumped = 3;
+}
+
+message BrewRecipeDto {
+    float coffeeIn = 1;
+    float coffeeOut = 2;
+    float ratio = 3;
+}
+
+message ProfileDto {
+    string name = 1;
+    repeated PhaseDto phases = 2;
+    GlobalStopConditionsDto globalStopConditions = 3;
+    float waterTemperature = 4;
+    BrewRecipeDto recipe = 5;
+}

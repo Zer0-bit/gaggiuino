@@ -2,6 +2,10 @@
 #ifndef PINDEF_H
 #define PINDEF_H
 
+#ifdef RUNNING_TESTS
+#include "mock.h"
+#endif
+
 // STM32F4 pins definitions
 #define thermoDO      PB4
 #define thermoDI      PA7 // not used
