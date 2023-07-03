@@ -98,7 +98,7 @@ export default function Profiles() {
               </CardContent>
               <CardActions>
                 <IconButton style={{ float: 'right' }} color="primary" aria-label="upload picture" component="label" sx={{ ml: theme.spacing(3) }}>
-                  <input hidden accept=".json" type="file" onChange={(evt) => updateProfile(evt.target.value)}/>
+                  <input hidden accept=".json" type="file" onChange={(evt) => updateProfile(evt.target.value)} />
                   <UploadFileIcon fontSize="large" />
                 </IconButton>
                 <IconButton style={{ float: 'right' }} color="primary" aria-label="upload picture" component="label">
@@ -112,7 +112,7 @@ export default function Profiles() {
       </Container>
       <Container sx={{ mt: theme.spacing(2) }}>
         <Card sx={{ mt: theme.spacing(2) }}>
-            <Grid container columns={{ xs: 1, sm: 1 }}>
+          <Grid container columns={{ xs: 1, sm: 1 }}>
             <Grid item xs={1}>
               <CardContent>
                 <Typography gutterBottom variant="h5">

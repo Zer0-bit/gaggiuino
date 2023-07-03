@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Card, Container, useTheme, Typography, CardContent, CardActions, Button, Radio, RadioGroup, FormControlLabel, Box, Tabs
+  Card, Container, useTheme, Typography, CardContent, CardActions, Button, Radio, RadioGroup, FormControlLabel, Box, Tabs,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
@@ -8,14 +8,17 @@ import Grid from '@mui/material/Grid';
 import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
 import ProgressBar from '../../components/inputs/ProgressBar';
 import LogContainer from '../../components/log/LogContainer';
-import VerticalTabs from '../../components/Tabs/tabs_settings'
+import VerticalTabs from '../../components/Tabs/tabs_settings';
 
 export default function Settings() {
   const theme = useTheme();
 
   function boxedComponent(component) {
     return (
-      <Box sx={{ border: `2px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px' }}>
+      <Box sx={{
+        border: `2px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px',
+      }}
+      >
         {component}
       </Box>
     );
@@ -37,17 +40,23 @@ export default function Settings() {
               </CardContent>
               <CardActions><ProgressBar /></CardActions>
               <CardActions>
-              <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '10%', padding: '1px' }}>
-                <IconButton color="primary" aria-label="download  " component="label" size='large'>
-                  <input hidden accept=".bin" type="file" />
-                  <AttachFileOutlinedIcon />
-                </IconButton>
-              </Box>
-                <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '10px', width: '100%', padding: '1px' }}>
+                <Box sx={{
+                  border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '10%', padding: '1px',
+                }}
+                >
+                  <IconButton color="primary" aria-label="download  " component="label" size="large">
+                    <input hidden accept=".bin" type="file" />
+                    <AttachFileOutlinedIcon />
+                  </IconButton>
+                </Box>
+                <Box sx={{
+                  border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '10px', width: '100%', padding: '1px',
+                }}
+                >
                   <RadioGroup aria-labelledby="demo-radio-buttons-group-label" defaultValue="blackpill" name="radio-buttons-group">
-                  <FormControlLabel value="blackpill" control={<Radio />} label="STM32-Blackpill" />
-                  <FormControlLabel value="esp32-flash" control={<Radio />} label="ESP32-Flash" />
-                  <FormControlLabel value="esp32-filesystem" control={<Radio />} label="ESP32-Filesystem" />
+                    <FormControlLabel value="blackpill" control={<Radio />} label="STM32-Blackpill" />
+                    <FormControlLabel value="esp32-flash" control={<Radio />} label="ESP32-Flash" />
+                    <FormControlLabel value="esp32-filesystem" control={<Radio />} label="ESP32-Filesystem" />
                   </RadioGroup>
                 </Box>
                 <Button variant="contained" component="label">Upload</Button>
@@ -55,7 +64,10 @@ export default function Settings() {
             </Card>
           </Grid>
           <Grid item xs={12} sm={12}>
-            <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '10px', width: '100%', padding: '1px' }}>
+            <Box sx={{
+              border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '10px', width: '100%', padding: '1px',
+            }}
+            >
               <Card sx={{ height: '100%' }}>
                 <CardContent sx={{ width: '100%' }}>
                   <Typography gutterBottom variant="h5">

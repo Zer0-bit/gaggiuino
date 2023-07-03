@@ -44,7 +44,7 @@ function LogContainer({ maxLines }) {
 
   return (
     <Paper elevation={3} sx={{ p: theme.spacing(2), width: '100%' }}>
-      <Stack direction="row" alignItems="center" sx={{ height: '100%', width: '100%'  }} >
+      <Stack direction="row" alignItems="center" sx={{ height: '100%', width: '100%' }}>
         <Typography sx={{ flexGrow: 1 }} gutterBottom variant="h5">Logs</Typography>
         <FormControlLabel
           control={<Switch value={followLogs} onChange={onChangeSwitch} />}
@@ -52,7 +52,7 @@ function LogContainer({ maxLines }) {
           labelPlacement="start"
         />
       </Stack>
-      <Box sx={{ overflow: 'auto', height: '300px', width: '100%'  }}>
+      <Box sx={{ overflow: 'auto', height: '300px', width: '100%' }}>
         {logLines.map((line, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <Typography key={index} variant="body2">{`[${line.source}] ${line.log}`}</Typography>

@@ -17,7 +17,9 @@ interface TabPanelProps {
 }
 
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+  const {
+    children, value, index, ...other
+  } = props;
 
   return (
     <div
@@ -51,13 +53,16 @@ export default function VerticalTabs() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: '100%', width: '100%', borderRadius: '16px' }} >
-      <Tabs orientation="vertical" variant="standard" value={value} onChange={handleChange} sx={{ borderRight: 1, borderColor: 'divider', }} >
+    <Box sx={{
+      flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: '100%', width: '100%', borderRadius: '16px',
+    }}
+    >
+      <Tabs orientation="vertical" variant="standard" value={value} onChange={handleChange} sx={{ borderRight: 1, borderColor: 'divider' }}>
         <Tab icon={<TemperatureIcon />} label="Boiler" {...a11yProps(0)} />
         <Tab icon={<CoffeeMakerIcon />} label="System" {...a11yProps(1)} />
-        <Tab icon={<FlareIcon />} label="Led"    {...a11yProps(2)} />
+        <Tab icon={<FlareIcon />} label="Led" {...a11yProps(2)} />
         <Tab icon={<ScaleIcon />} label="Scales" {...a11yProps(3)} />
-        <Tab icon={<LogoDevIcon />}label="SysLog" {...a11yProps(4)} />
+        <Tab icon={<LogoDevIcon />} label="SysLog" {...a11yProps(4)} />
       </Tabs>
       <TabPanel value={value} index={0}>
         PLACEHOLDER
@@ -71,7 +76,7 @@ export default function VerticalTabs() {
       <TabPanel value={value} index={3}>
         PLACEHOLDER
       </TabPanel>
-      <TabPanel value={value} index={4} >
+      <TabPanel value={value} index={4}>
         <LogContainer />
       </TabPanel>
     </Box>
