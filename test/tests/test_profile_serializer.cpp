@@ -10,7 +10,7 @@ void test_profile_serializer_works_correctly(void) {
   profile.phases.push_back({ .type = PhaseType::PRESSURE, .target = Transition(10.f, TransitionCurve::EASE_IN_OUT, 1000), .restriction = -1,  .stopConditions = PhaseStopConditions{.time = 1000} });
   profile.phases.push_back({ .type = PhaseType::FLOW, .target = Transition(10.f, 5.f, TransitionCurve::EASE_IN), .restriction = 2.f,  .stopConditions = PhaseStopConditions{.weight = 10.f}, .waterTemperature = 95.f });
   profile.phases.push_back({ .type = PhaseType::FLOW, .target = Transition(0.f, 5.f, TransitionCurve::EASE_OUT), .restriction = 3.f,  .stopConditions = PhaseStopConditions{.pressureAbove = 2.f} });
-  profile.phases.push_back({ .type = PhaseType::FLOW, .target = Transition(10.f, 5.f, TransitionCurve::LINEAR), .restriction = 3.f,  .stopConditions = PhaseStopConditions{.pressureAbove = 2.f, .flowAbove = 1.f, .flowBelow = 2.4f, .pressureBelow = 1.3f, .time = 199, .waterPumpedInPhase = 29, .weight = 20.f} });
+  profile.phases.push_back({ .type = PhaseType::FLOW, .target = Transition(10.f, 5.f, TransitionCurve::LINEAR), .restriction = 3.f,  .stopConditions = PhaseStopConditions{.time = 199, .pressureAbove = 2.f, .pressureBelow = 1.3f, .flowAbove = 1.f, .flowBelow = 2.4f, .weight = 20.f,  .waterPumpedInPhase = 29} });
   profile.globalStopConditions.time = 60000;
   profile.globalStopConditions.weight = 35.4f;
   profile.globalStopConditions.waterPumped = 120.3f;

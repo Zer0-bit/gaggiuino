@@ -138,7 +138,7 @@ void test_phases_with_stop_conditions_and_skipped_phases() {
 
   Profile profile;
   profile.addPhase(presurePhaseWithWeightTarget(2, 2, 30000, weightTarget));
-  profile.addPhase(Phase{ .skip = true, .stopConditions = {.time = 100000} }); // should be skipped;
+  profile.addPhase(Phase{ .stopConditions = {.time = 100000}, .skip = true }); // should be skipped;
   profile.addPhase(pressurePhase(5, 5, 1000));
 
   PhaseProfiler profiler = PhaseProfiler{ profile };

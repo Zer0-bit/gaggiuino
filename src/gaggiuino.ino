@@ -68,6 +68,7 @@ void setup(void) {
   espCommsRequestData(McuCommsMessageType::MCUC_DATA_ALL_SETTINGS);
   while (!gaggiaSettingsInitialised) {
     delay(50);
+    espCommsReadData();
     espCommsRequestData(McuCommsMessageType::MCUC_DATA_ALL_SETTINGS);
   }
   LOG_INFO("Settings Init");
@@ -76,6 +77,7 @@ void setup(void) {
   espCommsRequestData(McuCommsMessageType::MCUC_DATA_PROFILE);
   while (!activeProfileInitialized) {
     delay(50);
+    espCommsReadData();
     espCommsRequestData(McuCommsMessageType::MCUC_DATA_PROFILE);
   }
   LOG_INFO("Profile Init");
