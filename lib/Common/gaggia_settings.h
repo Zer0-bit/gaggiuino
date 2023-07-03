@@ -28,7 +28,7 @@ struct BrewSettings {
 
 struct LedSettings {
   bool state;        /* Should the led be ON or OFF */
-  bool disco;
+  bool disco;        /* Should we activate disco mode during brew */
   struct Color {     /* The led color */
     uint8_t R;
     uint8_t G;

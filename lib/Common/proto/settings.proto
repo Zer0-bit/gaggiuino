@@ -31,6 +31,7 @@ message LedSettingsDto {
   }
   bool state = 1;
   Color color = 2;
+  bool disco = 3;
 }
 
 message GaggiaSettingsDto {

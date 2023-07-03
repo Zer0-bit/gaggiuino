@@ -50,6 +50,7 @@ public:
         .G = local.color.G,
         .B = local.color.B,
       },
+      .disco = local.disco,
     };
   };
 
@@ -62,6 +63,7 @@ public:
     local.color.R = proto.color.R;
     local.color.G = proto.color.G;
     local.color.B = proto.color.B;
+    local.disco = proto.disco;
     return true;
   };
 };

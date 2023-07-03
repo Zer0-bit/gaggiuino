@@ -69,6 +69,12 @@ void TEST_ASSERT_EQUAL_GAGGIA_SETTINGS(const GaggiaSettings& expected, const Gag
   TEST_ASSERT_EQUAL_MESSAGE(expected.brew.homeOnShotFinish, actual.brew.homeOnShotFinish, "screen.homeOnShotFinish");
   TEST_ASSERT_EQUAL_MESSAGE(expected.brew.brewDeltaState, actual.brew.brewDeltaState, "brew.brewDeltaState");
   TEST_ASSERT_EQUAL_MESSAGE(expected.brew.basketPrefill, actual.brew.basketPrefill, "brew.basketPrefill");
+
+  TEST_ASSERT_EQUAL_MESSAGE(expected.led.state, actual.led.state, "led.state");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.led.disco, actual.led.disco, "led.disco");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.led.color.R, actual.led.color.R, "led.color.R");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.led.color.G, actual.led.color.G, "led.color.G");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.led.color.B, actual.led.color.B, "led.color.B");
 }
 
 #include <iostream>
