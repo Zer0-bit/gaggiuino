@@ -21,16 +21,20 @@ function GaugeChart({
   const theme = useTheme();
 
   const options = {
-    cutout: '90%',
+    cutout: '89%',
     borderWidth: 0,
     responsive: true,
     updateMode: 'resize',
-    maintainAspectRatio: {maintainAspectRatio},
+    maintainAspectRatio: maintainAspectRatio,
+    animation: {
+      animateRotate: false,
+      animateScale: false,
+    },
     plugins: {
       center: {
         text: value.toFixed(1) + unit,
         color: primaryColor,
-        maxFontSize: 50,
+        maxFontSize: 55,
       },
       title: {
         display: title && title.length > 0,
@@ -40,7 +44,6 @@ function GaugeChart({
   };
 
   const data = {
-    cutout: '90%',
     datasets: [{
       data: [value, Math.max(0, maxValue - value)],
       backgroundColor: [

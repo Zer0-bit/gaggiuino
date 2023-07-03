@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import useWebSocket from 'react-use-websocket';
 import {
   Box, Container, useTheme, Fab, TextField, Grid, Button, Skeleton, Stack,
@@ -44,7 +44,7 @@ function Home() {
 
   function boxedComponent(component) {
     return (
-      <Box ref={boxRef} sx={{
+      <Box ref={gaugeRef} sx={{
         border: `0px solid ${theme.palette.divider}`,
         position: 'relative',
         justifyContent: 'space-evenly',
@@ -61,14 +61,22 @@ function Home() {
     );
   }
 
-  const boxRef = useRef(null);
-  const [boxSize, setBoxSize] = useState({ width: 0, height: 0 });
+  const gaugeRef = useRef(null);
+  const [gaugeSize, setGaugeSize] = useState({ width: 0, height: 0 });
+  const calculateGaugeSize = () => {
+    if (gaugeRef.current) {
+      const { width, height } = gaugeRef.current.getBoundingClientRect();
+      setGaugeSize({ width, height });
+    }
+  };
 
   useEffect(() => {
-    if (boxRef.current) {
-      const { width, height } = boxRef.current.getBoundingClientRect();
-      setBoxSize({ width, height });
-    }
+    calculateGaugeSize();
+    window.addEventListener('resize', calculateGaugeSize);
+
+    return () => {
+      window.removeEventListener('resize', calculateGaugeSize);
+    };
   }, []);
 
   return (
@@ -76,8 +84,8 @@ function Home() {
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
         <Grid item xs={2}>
           <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px', gap: '0px' }}>
-            {boxedComponent(<GaugeLiquid value={lastSensorData.waterLevel} radius={boxSize.width}/>)}
-            {boxedComponent(<GaugeChart value={lastSensorData.pressure} maintainAspectRatio={false}  primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
+            {boxedComponent(<GaugeLiquid value={lastSensorData.waterLevel} radius={gaugeSize.width}/>)}
+            {boxedComponent(<GaugeChart value={9} maintainAspectRatio={false}  primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
             {boxedComponent(<GaugeChart value={lastSensorData.weight} maintainAspectRatio={false} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
           </Box>
         </Grid>
@@ -95,7 +103,7 @@ function Home() {
         <Grid item xs={4}>
           <Box sx={{ border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px' }}>
             <Box sx={{ justifyContent: 'space-evenly', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '180px', width: '100%', padding: '0px', backgroundColor: '#292929'}}>
-              {boxedComponent(<GaugeChart value={lastSensorData.temperature} maintainAspectRatio={true} primaryColor={theme.palette.temperature.main} unit="°C"/>)}
+              {boxedComponent(<GaugeChart value={93} maintainAspectRatio={true} primaryColor={theme.palette.temperature.main} unit="°C"/>)}
             </Box>
             <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px', }} >
               <TextField variant="standard" sx={{ width: '10ch', }} id="outlined-read-only-input" label="Target"  defaultValue="93C" InputProps={{readOnly: true,}} />

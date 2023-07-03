@@ -9,8 +9,8 @@ function GaugeLiquidComponent({value=0, radius=50}) {
       <br></br>
       <GaugeLiquid
         style={{ margin: "0 auto" }}
-        width={radius / 3.5}
-        height={radius / 3.5}
+        width={radius / 3.7}
+        height={radius / 3.7}
         value={value}
         percent="%"
         textSize={1.3}
