@@ -5,34 +5,58 @@
 #include "proto/profile_converters.h"
 #include "proto/settings_converters.h"
 #include "proto/proto_serializer.h"
+#include "../log.h"
 
-namespace {
-  class McuCommsSingleton {
-  public:
-    static McuComms& getInstance() {
-      static McuComms instance;
-      return instance;
+namespace esp {
+  McuComms mcuComms;
+  bool receivedSettingsAtLeastOnce = false;
+  bool receivedProfileAtLeastOnce = false;
+  uint32_t requestDataTimer = 0;
+
+  void initialiseState() {
+    // Load settings from ESP
+    requestDataTimer = 0;
+    while (!receivedSettingsAtLeastOnce) {
+      if (millis() - requestDataTimer > 1000) {
+        espCommsRequestData(McuCommsMessageType::MCUC_DATA_ALL_SETTINGS);
+        requestDataTimer = millis();
+      }
+      espCommsReadData();
+      delay(2);
     }
-  private:
-    McuCommsSingleton() = default;
-    ~McuCommsSingleton() = default;
-  };
+    LOG_INFO("Settings Init");
+
+    // Load profile from ESP
+    requestDataTimer = 0;
+    while (!receivedProfileAtLeastOnce) {
+      if (millis() - requestDataTimer > 1000) {
+        espCommsRequestData(McuCommsMessageType::MCUC_DATA_PROFILE);
+        requestDataTimer = millis();
+      }
+      espCommsReadData();
+      delay(2);
+    }
+    LOG_INFO("Profile Init");
+  }
 }
 
 void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>& data);
 void espCommsInit() {
-  USART_ESP.begin(460800);
+  USART_ESP.begin(921600);
 
   // mcuComms.setDebugPort(&USART_ESP);
-  McuCommsSingleton::getInstance().begin(USART_ESP);
+  esp::mcuComms.begin(USART_ESP, 1000);
 
   // Set callbacks
-  McuCommsSingleton::getInstance().setMessageReceivedCallback(handleMessageReceived);
+  esp::mcuComms.setMessageReceivedCallback(handleMessageReceived);
+
+  esp::initialiseState();
 }
 
 //---------------------------------------------------------------------------
 //--------------------------- SENDING TO ESP --------------------------------
 //---------------------------------------------------------------------------
+
 
 volatile uint32_t sensorDataTimer = 0;
 void espCommsSendSensorData(const SensorState& state, uint32_t frequency) {
@@ -52,7 +76,7 @@ void espCommsSendSensorData(const SensorState& state, uint32_t frequency) {
     .waterLevel = state.waterLvl,
   };
 
-  McuCommsSingleton::getInstance().sendMessage(
+  esp::mcuComms.sendMessage(
     McuCommsMessageType::MCUC_DATA_SENSOR_STATE_SNAPSHOT,
     ProtoSerializer::serialize<SensorStateSnapshotConverter>(sensorSnapshot)
   );
@@ -64,7 +88,7 @@ void espCommsSendShotData(const ShotSnapshot& shotData, uint32_t frequency) {
   uint32_t now = millis();
   if (now - shotDataTimer < frequency) return;
 
-  McuCommsSingleton::getInstance().sendMessage(
+  esp::mcuComms.sendMessage(
     McuCommsMessageType::MCUC_DATA_SHOT_SNAPSHOT,
     ProtoSerializer::serialize<ShotSnapshotConverter>(shotData)
   );
@@ -72,11 +96,11 @@ void espCommsSendShotData(const ShotSnapshot& shotData, uint32_t frequency) {
 }
 
 void espCommsSendTareScalesCommand() {
-  McuCommsSingleton::getInstance().sendMessage(McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE);
+  esp::mcuComms.sendMessage(McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE);
 }
 
 void espCommsSendNotification(Notification notification) {
-  McuCommsSingleton::getInstance().sendMessage(
+  esp::mcuComms.sendMessage(
     McuCommsMessageType::MCUC_DATA_NOTIFICATION,
     ProtoSerializer::serialize<NotificationConverter>(notification)
   );
@@ -87,7 +111,7 @@ void espCommsSendSystemState(const SystemState& systemState, uint32_t frequency)
   uint32_t now = millis();
   if (now - systemStateTimer < frequency) return;
 
-  McuCommsSingleton::getInstance().sendMessage(
+  esp::mcuComms.sendMessage(
     McuCommsMessageType::MCUC_DATA_SYSTEM_STATE,
     ProtoSerializer::serialize<SystemStateConverter>(systemState)
   );
@@ -96,7 +120,7 @@ void espCommsSendSystemState(const SystemState& systemState, uint32_t frequency)
 }
 
 void espCommsRequestData(McuCommsMessageType dataType) {
-  McuCommsSingleton::getInstance().sendMessage(
+  esp::mcuComms.sendMessage(
     McuCommsMessageType::MCUC_REQ_DATA,
     ProtoSerializer::serialize<McuCommsRequestDataConverter>(McuCommsRequestData{ dataType })
   );
@@ -105,8 +129,9 @@ void espCommsRequestData(McuCommsMessageType dataType) {
 //---------------------------------------------------------------------------
 //------------------------- RECEIVING FROM ESP ------------------------------
 //---------------------------------------------------------------------------
+
 void espCommsReadData() {
-  McuCommsSingleton::getInstance().readDataAndTick();
+  esp::mcuComms.readDataAndTick();
 }
 
 void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>& data) {
@@ -114,6 +139,7 @@ void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>
   case McuCommsMessageType::MCUC_DATA_PROFILE: {
     Profile profile;
     ProtoSerializer::deserialize<ProfileConverter>(data, profile);
+    esp::receivedProfileAtLeastOnce = true;
     onProfileReceived(profile);
     break;
   }
@@ -130,6 +156,7 @@ void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>
   case McuCommsMessageType::MCUC_DATA_ALL_SETTINGS: {
     GaggiaSettings settings;
     ProtoSerializer::deserialize<GaggiaSettingsConverter>(data, settings);
+    esp::receivedSettingsAtLeastOnce = true;
     onGaggiaSettingsReceived(settings);
     break;
   }

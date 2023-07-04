@@ -59,7 +59,6 @@ void TEST_ASSERT_EQUAL_GAGGIA_SETTINGS(const GaggiaSettings& expected, const Gag
   TEST_ASSERT_EQUAL_MESSAGE(expected.boiler.mainDivider, actual.boiler.mainDivider, "boiler.mainDivider");
   TEST_ASSERT_EQUAL_MESSAGE(expected.boiler.brewDivider, actual.boiler.brewDivider, "boiler.brewDivider");
 
-  TEST_ASSERT_EQUAL_MESSAGE(expected.system.powerLineFrequency, actual.system.powerLineFrequency, "system.powerLineFrequency");
   TEST_ASSERT_EQUAL_MESSAGE(expected.system.pumpFlowAtZero, actual.system.pumpFlowAtZero, "system.pumpFlowAtZero");
   TEST_ASSERT_EQUAL_MESSAGE(expected.system.scalesF1, actual.system.scalesF1, "system.scalesF1");
   TEST_ASSERT_EQUAL_MESSAGE(expected.system.scalesF2, actual.system.scalesF2, "system.scalesF2");

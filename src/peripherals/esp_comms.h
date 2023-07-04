@@ -27,17 +27,17 @@ void onRemoteScalesWeightReceived(float weight);
 void onRemoteScalesDisconnected();
 
 // Settings updates
-void onGaggiaSettingsReceived(GaggiaSettings& gaggiaSettings);
-void onBoilerSettingsReceived(BoilerSettings& boilerSettings);
-void onLedSettingsReceived(LedSettings& ledSettings);
-void onSystemSettingsReceived(SystemSettings& systemSettings);
-void onBrewSettingsReceived(BrewSettings& brewSettings);
+void onGaggiaSettingsReceived(const GaggiaSettings& gaggiaSettings);
+void onBoilerSettingsReceived(const BoilerSettings& boilerSettings);
+void onLedSettingsReceived(const LedSettings& ledSettings);
+void onSystemSettingsReceived(const SystemSettings& systemSettings);
+void onBrewSettingsReceived(const BrewSettings& brewSettings);
 
 // System state updates
-void onOperationModeReceived(OperationMode operationMode);
+void onOperationModeReceived(const OperationMode operationMode);
 
 // Profiling
-void onProfileReceived(Profile& profile);
-void onManualBrewPhaseReceived(Phase& phase);
+void onProfileReceived(const Profile& profile);
+void onManualBrewPhaseReceived(const Phase& phase);
 
 #endif

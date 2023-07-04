@@ -12,7 +12,6 @@ struct BoilerSettings {
   uint16_t brewDivider;
 };
 struct SystemSettings {
-  uint16_t powerLineFrequency; /* Frequence of main power in Hz */
   float    pumpFlowAtZero;     /* A PZ constant used for pump calibration */
   int      scalesF1;           /* Scales calibration constant 1 */
   int      scalesF2;           /* Scales calibration constant 2 */

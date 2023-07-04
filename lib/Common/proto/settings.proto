@@ -9,7 +9,7 @@ message BoilerSettingsDto {
 }
 
 message SystemSettingsDto {
-  uint32 powerLineFrequency = 1;
+  reserved 1;
   float pumpFlowAtZero = 2;
   int32 scalesF1 = 3;
   int32 scalesF2 = 4;
