@@ -7,6 +7,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import ScaleIcon from '@mui/icons-material/Scale';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
+import ShowAlert from '../../components/alert/alert';
 import useSensorStateStore from '../../state/SensorStateStore';
 import ShowAlert from '../../components/alert/alert';
 
