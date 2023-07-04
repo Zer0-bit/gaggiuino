@@ -12,6 +12,8 @@ import {
 } from '../../models/api';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
+import ShowAlert from '../../components/alert/alert';
+import ShotDialog from './ShotDialog';
 
 function Home() {
   const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
@@ -83,6 +85,7 @@ function Home() {
 
   return (
     <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
+      <ShowAlert level='INFO' text='Welcome home motherfucker \_O_/' />
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
         <Grid item xs={2}>
           <Box sx={{
