@@ -1,46 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import useWebSocket from 'react-use-websocket';
 import {
   Box, Container, useTheme, Fab, TextField, Grid, Button, Skeleton, Stack,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ScaleIcon from '@mui/icons-material/Scale';
-import {
-  apiHost,
-  filterJsonMessage, filterSocketMessage, MSG_TYPE_SENSOR_DATA,
-} from '../../models/api';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
+import useSensorStateStore from '../../state/SensorStateStore';
 
 function Home() {
-  const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
-    share: true,
-    retryOnError: true,
-    shouldReconnect: () => true,
-    reconnectAttempts: 1000,
-    filter: (message) => filterSocketMessage(message, MSG_TYPE_SENSOR_DATA),
-  });
   const theme = useTheme();
 
-  const [scalesPresent, setScalesPresent] = useState(false);
-
-  const [lastSensorData, setLastSensorData] = useState({
-    temperature: 0, pressure: 0, pumpFlow: 0, weight: 0, scalesPresent: false, waterLevel: 0,
-  });
-
-  useEffect(() => {
-    setScalesPresent(lastSensorData.scalesPresent);
-  }, [lastSensorData]);
-
-  useEffect(() => {
-    if (lastJsonMessage === null) {
-      return;
-    }
-    if (filterJsonMessage(lastJsonMessage, MSG_TYPE_SENSOR_DATA)) {
-      setLastSensorData(lastJsonMessage.data);
-    }
-  }, [lastJsonMessage]);
+  const { sensorState } = useSensorStateStore();
 
   function boxedComponent(component) {
     return (
@@ -89,9 +61,9 @@ function Home() {
             border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px', gap: '0px',
           }}
           >
-            {boxedComponent(<GaugeLiquid value={lastSensorData.waterLevel} radius={gaugeSize.width} />)}
-            {boxedComponent(<GaugeChart value={lastSensorData.pressure} maintainAspectRatio={false} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
-            {boxedComponent(<GaugeChart value={lastSensorData.weight} maintainAspectRatio={false} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
+            {boxedComponent(<GaugeLiquid value={sensorState.waterLevel} radius={gaugeSize.width} />)}
+            {boxedComponent(<GaugeChart value={sensorState.pressure} maintainAspectRatio={false} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
+            {boxedComponent(<GaugeChart value={sensorState.weight} maintainAspectRatio={false} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
           </Box>
         </Grid>
         <Grid item xs={6} sx={{ gap: '8px' }}>
@@ -117,7 +89,7 @@ function Home() {
               justifyContent: 'space-evenly', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '180px', width: '100%', padding: '0px', backgroundColor: '#292929',
             }}
             >
-              {boxedComponent(<GaugeChart value={lastSensorData.temperature} maintainAspectRatio primaryColor={theme.palette.temperature.main} unit="°C" />)}
+              {boxedComponent(<GaugeChart value={sensorState.temperature} maintainAspectRatio primaryColor={theme.palette.temperature.main} unit="°C" />)}
             </Box>
             <Box sx={{
               justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',

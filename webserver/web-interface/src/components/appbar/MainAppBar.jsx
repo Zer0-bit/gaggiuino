@@ -10,13 +10,10 @@ import {
   useTheme, Stack, AppBar, Toolbar, Fab, useMediaQuery, MenuItem, Button, Menu,
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
 import Logo from '../icons/Logo';
 import ThemeModeToggle from '../theme/ThemeModeToggle';
 import ShotDialog from '../../pages/home/ShotDialog';
-import {
-  MSG_TYPE_SHOT_DATA, apiHost, filterJsonMessage, filterSocketMessage,
-} from '../../models/api';
+import useShotDataStore from '../../state/ShotDataStore';
 
 const menuItems = {
   '/': { label: 'Home', icon: <CoffeeIcon /> },
@@ -142,19 +139,11 @@ function MainAppBar() {
   const [activeTab, setActiveTab] = useState(location.pathname || '/');
   const [shotDialogOpen, setShotDialogOpen] = useState(false);
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
-  const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
-    share: true,
-    retryOnError: true,
-    shouldReconnect: () => true,
-    reconnectAttempts: 1000,
-    filter: (message) => filterSocketMessage(message, MSG_TYPE_SHOT_DATA),
-  });
+  const { latestShotDatapoint } = useShotDataStore();
 
   useEffect(() => {
-    if (lastJsonMessage !== null && filterJsonMessage(lastJsonMessage, MSG_TYPE_SHOT_DATA)) {
-      setShotDialogOpen(true);
-    }
-  }, [lastJsonMessage]);
+    if (latestShotDatapoint.timeInShot > 0) setShotDialogOpen(true);
+  }, [latestShotDatapoint]);
 
   const activeColor = theme.palette.mode === 'light' ? theme.palette.primary.contrastText : theme.palette.primary.main;
 

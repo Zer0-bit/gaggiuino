@@ -136,7 +136,6 @@ public:
       .targetTemperature = local.targetTemperature,
       .targetPumpFlow = local.targetPumpFlow,
       .targetPressure = local.targetPressure ,
-
     };
   };
 

@@ -1,36 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   AppBar, Box, Dialog, IconButton, Stack, Toolbar,
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import useWebSocket from 'react-use-websocket';
 import CloseIcon from '@mui/icons-material/Close';
 import Grid from '@mui/material/Grid';
-import {
-  apiHost, filterSocketMessage, MSG_TYPE_SHOT_DATA,
-} from '../../models/api';
 import ShotChart from '../../components/chart/ShotChart';
 import {
   PressureStatBox, PumpFlowStatBox, TemperatureStatBox, TimeStatBox, WeightFlowStatBox, WeightStatBox,
 } from '../../components/chart/StatBox';
+import useShotDataStore from '../../state/ShotDataStore';
 
 export default function ShotDialog({ open, setOpen }) {
-  const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
-    share: true,
-    retryOnError: true,
-    shouldReconnect: () => true,
-    reconnectAttempts: 1000,
-    filter: (message) => filterSocketMessage(message, MSG_TYPE_SHOT_DATA),
-  });
-
-  const [latestShotSnapshot, setLatestShotSnapshot] = useState(null);
-
-  useEffect(() => {
-    if (lastJsonMessage === null) {
-      return;
-    }
-    setLatestShotSnapshot(lastJsonMessage.data);
-  }, [lastJsonMessage]);
+  const { latestShotDatapoint } = useShotDataStore();
 
   return (
     <Dialog
@@ -56,49 +38,49 @@ export default function ShotDialog({ open, setOpen }) {
         <Grid container columns={4} spacing={1} sx={{ flexGrow: 1 }}>
           <Grid xs={4} sm={3} display="flex" alignContent="stretch" flexGrow={1}>
             <Box sx={{ position: 'relative', width: '100%' }}>
-              <ShotChart newDataPoint={latestShotSnapshot} />
+              <ShotChart newDataPoint={latestShotDatapoint} />
             </Box>
           </Grid>
           <Grid xs={4} sm={1}>
-            {latestShotSnapshot && (
+            {latestShotDatapoint && (
             <Grid container columns={3} spacing={1}>
               <Grid xs={1} sm={3}>
                 <TimeStatBox
-                  timeInShot={latestShotSnapshot.timeInShot}
+                  timeInShot={latestShotDatapoint.timeInShot}
                   sx={{ height: '100%' }}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
                 <WeightStatBox
-                  shotWeight={latestShotSnapshot.shotWeight}
+                  shotWeight={latestShotDatapoint.shotWeight}
                   sx={{ height: '100%' }}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
                 <PressureStatBox
-                  pressure={latestShotSnapshot.pressure}
-                  target={latestShotSnapshot.targetPressure}
+                  pressure={latestShotDatapoint.pressure}
+                  target={latestShotDatapoint.targetPressure}
                   sx={{ height: '100%' }}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
                 <PumpFlowStatBox
-                  pumpFlow={latestShotSnapshot.pumpFlow}
-                  target={latestShotSnapshot.targetPumpFlow}
+                  pumpFlow={latestShotDatapoint.pumpFlow}
+                  target={latestShotDatapoint.targetPumpFlow}
                   sx={{ height: '100%' }}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
                 <WeightFlowStatBox
-                  flow={latestShotSnapshot.weightFlow}
-                  target={latestShotSnapshot.targetPumpFlow}
+                  flow={latestShotDatapoint.weightFlow}
+                  target={latestShotDatapoint.targetPumpFlow}
                   sx={{ height: '100%' }}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
                 <TemperatureStatBox
-                  temperature={latestShotSnapshot.temperature}
-                  target={latestShotSnapshot.targetTemperature}
+                  temperature={latestShotDatapoint.temperature}
+                  target={latestShotDatapoint.targetTemperature}
                   sx={{ height: '100%' }}
                 />
               </Grid>

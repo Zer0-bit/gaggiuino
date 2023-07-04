@@ -11,7 +11,7 @@
 const std::string WS_MSG_SENSOR_DATA = "sensor_data_update";
 const std::string WS_MSG_SHOT_DATA = "shot_data_update";
 const std::string WS_MSG_LOG = "log_record";
-const std::string WS_MSG_SYSTEM_STATE = "log_sys_state";
+const std::string WS_MSG_SYSTEM_STATE ="sys_state";
 
 namespace websocket {
   AsyncWebSocket wsServer("/ws");
