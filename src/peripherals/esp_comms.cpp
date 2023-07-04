@@ -63,7 +63,7 @@ void espCommsSendSensorData(const SensorState& state, uint32_t frequency) {
   uint32_t now = millis();
   if (now - sensorDataTimer < frequency) return;
 
-  SensorStateSnapshot sensorSnapshot = SensorStateSnapshot{
+  SensorStateSnapshot sensorSnapshot = SensorStateSnapshot {
     .brewActive = state.brewSwitchState,
     .steamActive = state.steamSwitchState,
     .hotWaterSwitchState = state.hotWaterSwitchState,
@@ -73,7 +73,7 @@ void espCommsSendSensorData(const SensorState& state, uint32_t frequency) {
     .pumpFlow = state.smoothedPumpFlow,
     .weightFlow = state.smoothedWeightFlow,
     .weight = state.weight,
-    .waterLevel = state.waterLvl,
+    .waterLevel = state.waterLvl
   };
 
   esp::mcuComms.sendMessage(

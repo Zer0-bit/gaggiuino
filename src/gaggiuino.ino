@@ -6,7 +6,7 @@
 #endif
 #include "gaggiuino.h"
 
-SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
+SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.01f);
 SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
@@ -228,11 +228,7 @@ static void calculateWeightAndFlow(void) {
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
   if (!brewActive) {
-    // static uint32_t tof_timeout = millis();
-    // if (millis() >= tof_timeout) {
     currentState.waterLvl = tof.readLvl();
-      // tof_timeout = millis() + 500;
-    // }
   }
 }
 
