@@ -59,7 +59,7 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "test": "jest --watch",
-    "lint": "eslint src --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx --fix"
   },
   "browserslist": {
     "production": [

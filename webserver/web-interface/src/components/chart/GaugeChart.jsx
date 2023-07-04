@@ -25,7 +25,7 @@ function GaugeChart({
     borderWidth: 0,
     responsive: true,
     updateMode: 'resize',
-    maintainAspectRatio: maintainAspectRatio,
+    maintainAspectRatio,
     animation: {
       animateRotate: false,
       animateScale: false,
