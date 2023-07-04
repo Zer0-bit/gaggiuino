@@ -25,7 +25,6 @@ namespace json {
   void mapSystemSettingsToJson(const SystemSettings& system, JsonObject& target) {
     target["warmupState"] = system.warmupState;
     target["lcdSleep"] = system.lcdSleep;
-    target["powerLineFrequency"] = system.powerLineFrequency;
     target["pumpFlowAtZero"] = system.pumpFlowAtZero;
     target["scalesF1"] = system.scalesF1;
     target["scalesF2"] = system.scalesF2;
@@ -53,7 +52,6 @@ namespace json {
   // ------------------------------------------------------------------------------------------
   SystemSettings mapJsonToSystemSettings(const JsonObject& json) {
     return SystemSettings{
-      .powerLineFrequency = json["powerLineFrequency"],
       .pumpFlowAtZero = json["pumpFlowAtZero"],
       .scalesF1 = json["scalesF1"],
       .scalesF2 = json["scalesF2"],

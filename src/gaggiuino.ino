@@ -64,24 +64,6 @@ void setup(void) {
   // Init the tof sensor
   tof.init(systemState);
 
-  // Load settings from ESP.
-  espCommsRequestData(McuCommsMessageType::MCUC_DATA_ALL_SETTINGS);
-  while (!gaggiaSettingsInitialised) {
-    delay(50);
-    espCommsReadData();
-    espCommsRequestData(McuCommsMessageType::MCUC_DATA_ALL_SETTINGS);
-  }
-  LOG_INFO("Settings Init");
-  
-  // Load profile from ESP
-  espCommsRequestData(McuCommsMessageType::MCUC_DATA_PROFILE);
-  while (!activeProfileInitialized) {
-    delay(50);
-    espCommsReadData();
-    espCommsRequestData(McuCommsMessageType::MCUC_DATA_PROFILE);
-  }
-  LOG_INFO("Profile Init");
-
   cpsInit(runningCfg);
   LOG_INFO("CPS Init");
 
@@ -96,7 +78,7 @@ void setup(void) {
   LOG_INFO("Scales init");
 
   // Pump init
-  pumpInit(runningCfg.system.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
+  pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
   LOG_INFO("Pump init");
 
   // Change LED colour on setup exit.
@@ -318,39 +300,42 @@ static void espUpdateState(void) {
   }
 }
 
-void onProfileReceived(Profile& newProfile) {
+void onProfileReceived(const Profile& newProfile) {
   activeProfile = newProfile;
   activeProfileInitialized = true;
 }
 
-void onGaggiaSettingsReceived(GaggiaSettings& newSettings) {
+void onGaggiaSettingsReceived(const GaggiaSettings& newSettings) {
   gaggiaSettingsInitialised = true;
   runningCfg = newSettings;
+  if (systemState.startupInitFinished) {
+    pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
+  }
 }
 
-void onManualBrewPhaseReceived(Phase& phase) {
+void onManualBrewPhaseReceived(const Phase& phase) {
   if (manualProfile.phaseCount() != 1) {
     manualProfile.phases.resize(1);
   }
   manualProfile.phases[0] = phase;
 }
 
-void onOperationModeReceived(OperationMode operationMode) {
+void onOperationModeReceived(const OperationMode operationMode) {
   systemState.operationMode = operationMode;
 }
 
-void onBoilerSettingsReceived(BoilerSettings& boilerSettings) {
+void onBoilerSettingsReceived(const BoilerSettings& boilerSettings) {
   runningCfg.boiler = boilerSettings;
 }
-void onLedSettingsReceived(LedSettings& ledSettings) {
+void onLedSettingsReceived(const LedSettings& ledSettings) {
   runningCfg.led = ledSettings;
 }
 
-void onSystemSettingsReceived(SystemSettings& systemSettings) {
+void onSystemSettingsReceived(const SystemSettings& systemSettings) {
   runningCfg.system = systemSettings;
 }
 
-void onBrewSettingsReceived(BrewSettings& brewSettings) {
+void onBrewSettingsReceived(const BrewSettings& brewSettings) {
   runningCfg.brew = brewSettings;
 }
 
@@ -593,13 +578,13 @@ static void fillBoilerUntilThreshod(unsigned long elapsedTime) {
 static void cpsInit(GaggiaSettings &runningCfg) {
   int cps = getCPS();
   if (cps > 110) { // double 60 Hz
-    runningCfg.system.powerLineFrequency = 60u;
+    currentState.powerLineFrequency = 60u;
   } else if (cps > 80) { // double 50 Hz
-    runningCfg.system.powerLineFrequency = 50u;
+    currentState.powerLineFrequency = 50u;
   } else if (cps > 55) { // 60 Hz
-    runningCfg.system.powerLineFrequency = 60u;
+    currentState.powerLineFrequency = 60u;
   } else if (cps > 0) { // 50 Hz
-    runningCfg.system.powerLineFrequency = 50u;
+    currentState.powerLineFrequency = 50u;
   }
 }
 

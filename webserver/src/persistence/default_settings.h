@@ -23,7 +23,6 @@ namespace default_settings {
     defaultData.brew.basketPrefill = false;
 
     // System settings
-    defaultData.system.powerLineFrequency = 50;
     defaultData.system.scalesF1 = 3920;
     defaultData.system.scalesF2 = 4210;
     defaultData.system.pumpFlowAtZero = 0.2401f;

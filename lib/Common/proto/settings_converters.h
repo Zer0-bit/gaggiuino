@@ -72,7 +72,6 @@ class SystemSettingsConverter : public NanoPb::Converter::MessageConverter<Syste
 public:
   static ProtoType encoderInit(const LocalType& local) {
     return SystemSettingsDto{
-      .powerLineFrequency = local.powerLineFrequency,
       .pumpFlowAtZero = local.pumpFlowAtZero,
       .scalesF1 = local.scalesF1,
       .scalesF2 = local.scalesF2,
@@ -86,7 +85,6 @@ public:
   };
 
   static bool decoderApply(const ProtoType& proto, LocalType& local) {
-    local.powerLineFrequency = proto.powerLineFrequency;
     local.pumpFlowAtZero = proto.pumpFlowAtZero;
     local.scalesF1 = proto.scalesF1;
     local.scalesF2 = proto.scalesF2;

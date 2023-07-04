@@ -41,9 +41,11 @@ void onScalesTareReceived() {
   bleScalesTare();
 }
 void onGaggiaSettingsRequested() {
+  LOG_INFO("STM request active settings");
   stmCommsSendGaggiaSettings(state::getSettings());
 }
 void onProfileRequested() {
+  LOG_INFO("STM request active profile");
   stmCommsSendProfile(state::getActiveProfile());
 }
 void onSystemStateReceived(const SystemState& systemState) {

@@ -16,7 +16,7 @@ void onMessageReceived(McuCommsMessageType type, std::vector<uint8_t>& data);
 void stmCommsInit(HardwareSerial& serial) {
   serial.setRxBufferSize(256);
   serial.setTxBufferSize(256);
-  serial.begin(460800);
+  serial.begin(921600);
 
   // mcuComms.setDebugPort(&Serial);
   mcuComms.begin(serial);
