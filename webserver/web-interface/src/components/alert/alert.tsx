@@ -5,7 +5,7 @@ import Modal from '@mui/material/Modal';
 
 const style = {
     position: 'absolute' as 'absolute',
-    top: '0%',
+    bottom: '0%',
     left: '70%',
     transform: 'translate(-0%, -0%)',
     width: '30%',
