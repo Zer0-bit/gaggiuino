@@ -13,7 +13,6 @@ import {
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import ShowAlert from '../../components/alert/alert';
-import ShotDialog from './ShotDialog';
 
 function Home() {
   const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
@@ -83,6 +82,21 @@ function Home() {
     };
   }, []);
 
+  function handleRemove() {
+    const targetBox = document.getElementById('targetBox');
+    const currentValue = parseInt(targetBox.value);
+    const newValue = currentValue - 1;
+    targetBox.value = newValue.toString();
+  }
+
+  function handleAdd() {
+    const targetBox = document.getElementById('targetBox');
+    const currentValue = parseInt(targetBox.value);
+    const newValue = currentValue + 1;
+    targetBox.value = newValue.toString();
+
+  }
+
   return (
     <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
       <ShowAlert level='INFO' text='Welcome home motherfucker \_O_/' />
@@ -126,11 +140,11 @@ function Home() {
               justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
             }}
             >
-              <TextField variant="standard" sx={{ width: '10ch' }} id="outlined-read-only-input" label="Target" defaultValue="93C" InputProps={{ readOnly: true }} />
-              <Fab color="primary" aria-label="add">
+              <TextField variant="standard" sx={{ width: '10ch' }} id="targetBox" label="Target (°C)" value="93" InputProps={{ readOnly: true }} />
+              <Fab color="primary" aria-label="add" onClick={handleRemove}>
                 <RemoveIcon />
               </Fab>
-              <Fab color="primary" aria-label="rem">
+              <Fab color="primary" aria-label="rem" onClick={handleAdd}>
                 <AddIcon />
               </Fab>
             </Box>
@@ -143,8 +157,8 @@ function Home() {
               justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
             }}
             >
-              <TextField variant="standard" sx={{ width: '10ch' }} id="outlined-read-only-input" label="Scales" defaultValue="0.0g" InputProps={{ readOnly: true }} />
-              <Button variant="outlined" startIcon={<ScaleIcon />} sx={{ width: '40%' }}>
+              <TextField variant="standard" sx={{ width: '10ch' }} id="outlined-read-only-input" label="Scales (g)" value={lastSensorData.weight} InputProps={{ readOnly: true }} />
+              <Button variant="contained" startIcon={<ScaleIcon />} sx={{ width: '40%' }}>
                 Tare
               </Button>
             </Box>
