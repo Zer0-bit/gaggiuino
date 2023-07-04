@@ -10,7 +10,7 @@ import useShotDataStore from '../state/ShotDataStore';
 
 enum WsActionType {
     SensorStateUpdate = 'sensor_data_update',
-    ShotStapshotUpdate = 'shot_data_update',
+    ShotSnapshotUpdate = 'shot_data_update',
     LogRecordUpdate = 'log_record',
     SystemStateUpdate = 'sys_state',
 }
@@ -42,7 +42,7 @@ const useWebSocket = (url:string) => {
       case WsActionType.SensorStateUpdate:
         updateSensorState(messageData.data as SensorState);
         break;
-      case WsActionType.ShotStapshotUpdate:
+      case WsActionType.ShotSnapshotUpdate:
         addShotDatapoint(messageData.data as ShotSnapshot);
         break;
       case WsActionType.LogRecordUpdate:
