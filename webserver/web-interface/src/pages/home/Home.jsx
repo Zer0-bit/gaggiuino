@@ -9,7 +9,6 @@ import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import ShowAlert from '../../components/alert/alert';
 import useSensorStateStore from '../../state/SensorStateStore';
-import ShowAlert from '../../components/alert/alert';
 
 function Home() {
   const theme = useTheme();
@@ -130,7 +129,7 @@ function Home() {
               justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
             }}
             >
-              <TextField variant="standard" sx={{ width: '10ch' }} id="outlined-read-only-input" label="Scales (g)" value={lastSensorData.weight} InputProps={{ readOnly: true }} />
+              <TextField variant="standard" sx={{ width: '10ch' }} id="outlined-read-only-input" label="Scales (g)" value={sensorState.weight} InputProps={{ readOnly: true }} />
               <Button variant="contained" startIcon={<ScaleIcon />} sx={{ width: '40%' }}>
                 Tare
               </Button>
