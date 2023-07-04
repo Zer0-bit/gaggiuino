@@ -2,41 +2,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Box, FormControlLabel, Paper, Stack, Switch, Typography, useTheme,
 } from '@mui/material';
-import PropTypes from 'prop-types';
-import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
-import { MSG_TYPE_LOG, apiHost, filterSocketMessage } from '../../models/api';
+import useLogMessageStore from '../../state/LogStore';
 
-function LogContainer({ maxLines }) {
+function LogContainer() {
   const theme = useTheme();
-  const [logLines, setLogLines] = useState([]);
   const bottomRef = useRef(null);
   const [followLogs, setFollowLogs] = useState(false);
 
-  const { lastJsonMessage } = useWebSocket(`ws://${apiHost}/ws`, {
-    share: true,
-    retryOnError: true,
-    shouldReconnect: () => true,
-    reconnectAttempts: 1000,
-    filter: (message) => filterSocketMessage(message, MSG_TYPE_LOG),
-  });
-
-  useEffect(() => {
-    if (lastJsonMessage) {
-      const logLine = lastJsonMessage.data;
-      setLogLines((prevLogLines) => {
-        while (prevLogLines.length > maxLines) {
-          prevLogLines.shift();
-        }
-        return [...prevLogLines, logLine];
-      });
-    }
-  }, [lastJsonMessage]);
+  const { logs } = useLogMessageStore();
 
   useEffect(() => {
     if (followLogs) {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [logLines, followLogs]);
+  }, [logs, followLogs]);
 
   const onChangeSwitch = (event, newValue) => {
     setFollowLogs(newValue);
@@ -53,7 +32,7 @@ function LogContainer({ maxLines }) {
         />
       </Stack>
       <Box sx={{ overflow: 'auto', height: '300px', width: '100%' }}>
-        {logLines.map((line, index) => (
+        {logs.map((line, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <Typography key={index} variant="body2">{`[${line.source}] ${line.log}`}</Typography>
         ))}
@@ -62,13 +41,5 @@ function LogContainer({ maxLines }) {
     </Paper>
   );
 }
-
-LogContainer.propTypes = {
-  maxLines: PropTypes.number,
-};
-
-LogContainer.defaultProps = {
-  maxLines: 200,
-};
 
 export default LogContainer;
