@@ -30,25 +30,24 @@ export default function ShowAlert({ level, text }: BasicModalProps) {
     React.useEffect(() => {
         if (level && text) {
             handleOpen();
-            const timer = setTimeout(handleClose, 3000); // Auto-close after 3 seconds
-            return () => clearTimeout(timer); // Cleanup the timer on component unmount
+            const timer = setTimeout(handleClose, 3000);
+            return () => clearTimeout(timer);
         }
     }, [level, text]);
 
     const getBorderColor = () => {
-        // Define your border colors based on the level value
-        if (level === 'INFO') {
-          return '#178bca';
+        const alertMapToColour: { [key: string]: string } = {
+            INFO: '#178bca',
+            WARN: 'orange',
+            ERROR: '#FF5733'
+        };
+      
+        if (level in alertMapToColour) {
+          return alertMapToColour[level];
         }
-        if (level === 'WARN') {
-          return 'orange';
-        }
-        if (level === 'ERROR') {
-          return '#FF5733';
-        }
-        // Default border color if level doesn't match any conditions
+      
         return 'gray';
-      };
+    };
     
     const dynamicStyle = {
         ...style,

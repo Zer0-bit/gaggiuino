@@ -54,19 +54,14 @@ function Home() {
     };
   }, []);
 
-  function handleRemove() {
-    const targetBox = document.getElementById('targetBox');
-    const currentValue = parseInt(targetBox.value);
-    const newValue = currentValue - 1;
-    targetBox.value = newValue.toString();
-  }
+  const [targetValue, setTargetValue] = useState(93);
 
   function handleAdd() {
-    const targetBox = document.getElementById('targetBox');
-    const currentValue = parseInt(targetBox.value);
-    const newValue = currentValue + 1;
-    targetBox.value = newValue.toString();
+    setTargetValue(oldValue => oldValue + 1);
+  }
 
+  function handleRemove() {
+    setTargetValue(oldValue => oldValue - 1);
   }
 
   return (
@@ -112,7 +107,7 @@ function Home() {
               justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
             }}
             >
-              <TextField variant="standard" sx={{ width: '10ch' }} id="targetBox" label="Target (°C)" value="93" InputProps={{ readOnly: true }} />
+              <TextField variant="standard" sx={{ width: '10ch' }} id="targetBox" label="Target (°C)" value={targetValue} InputProps={{ readOnly: true }} />
               <Fab color="primary" aria-label="add" onClick={handleRemove}>
                 <RemoveIcon />
               </Fab>
