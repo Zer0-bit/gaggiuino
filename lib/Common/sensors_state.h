@@ -25,6 +25,7 @@ struct SensorState {
   float consideredFlow;
   long pumpClicks;
   uint16_t waterLvl;
+  float powerLineFrequency;
 };
 
 struct SensorStateSnapshot {
