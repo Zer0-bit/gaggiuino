@@ -6,15 +6,16 @@ import Modal from '@mui/material/Modal';
 
 const style = {
     position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '50%',
+    top: '0%',
+    left: '70%',
+    transform: 'translate(-0%, -0%)',
+    width: '30%',
     bgcolor: 'background.paper',
-    border: '10px solid',
+    border: '2px solid',
     boxShadow: 50,
-    p: 10,
-    justifyContent: 'center'
+    p: 1,
+    justifyContent: 'center',
+    borderRadius: '16px'
 };
 
 export interface BasicModalProps {
@@ -52,7 +53,7 @@ export default function ShowAlert({ level, text }: BasicModalProps) {
     
     const dynamicStyle = {
         ...style,
-        border: `10px solid ${getBorderColor()}`, // Set the border color dynamically
+        border: `2px solid ${getBorderColor()}`, // Set the border color dynamically
     };
 
     return (
@@ -65,10 +66,10 @@ export default function ShowAlert({ level, text }: BasicModalProps) {
                 aria-describedby="modal-alert-description"
             >
                 <Box sx={dynamicStyle}>
-                <Typography id="modal-alert-type" variant="h3" component="h3">
+                <Typography id="modal-alert-type" variant="h6" component="h6">
                     {level}
                 </Typography>
-                <Typography id="modal-alert-description" variant="h5" sx={{ mt: 2 }}>
+                <Typography id="modal-alert-description" variant="h6" sx={{ mt: 2 }}>
                     {text}
                 </Typography>
                 </Box>
