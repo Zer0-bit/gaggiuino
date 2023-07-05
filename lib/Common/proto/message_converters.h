@@ -50,6 +50,8 @@ public:
       .isSteamForgottenON = local.isSteamForgottenON,
       .scalesPresent = local.scalesPresent,
       .operationMode = OperationModeConverter::encode(local.operationMode),
+      .timeAlive = local.timeAlive,
+      .descaleProgress = local.descaleProgress,
     };
   };
 
@@ -63,6 +65,8 @@ public:
     local.isSteamForgottenON = proto.isSteamForgottenON;
     local.scalesPresent = proto.scalesPresent;
     local.operationMode = OperationModeConverter::decode(proto.operationMode);
+    local.timeAlive = proto.timeAlive;
+    local.descaleProgress = proto.descaleProgress;
     return true;
   };
 };

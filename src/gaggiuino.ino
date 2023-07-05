@@ -6,12 +6,11 @@
 #endif
 #include "gaggiuino.h"
 
-SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
+SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.01f);
 SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
-bool activeProfileInitialized = false;
 Profile manualProfile;
 Profile activeProfile;
 PhaseProfiler phaseProfiler;
@@ -20,7 +19,6 @@ PredictiveWeight predictiveWeight;
 
 SensorState currentState;
 
-bool gaggiaSettingsInitialised = false;
 GaggiaSettings runningCfg;
 
 SystemState systemState;
@@ -128,29 +126,48 @@ static void sensorReadSwitches(void) {
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
     currentState.temperature = thermocoupleRead() - runningCfg.boiler.offsetTemp;
+
+    float brewTempSetPoint = activeProfile.waterTemperature + runningCfg.boiler.offsetTemp;
+
+    currentState.waterTemperature = (currentState.temperature > activeProfile.waterTemperature && currentState.brewSwitchState)
+      ? currentState.temperature / (float)brewTempSetPoint + activeProfile.waterTemperature
+      : currentState.temperature;
+
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
+  }
+}
+
+static Measurement handleTaringAndReadWeight() {
+  if (!currentState.tarePending) { // No tare needed just get weight
+    return scalesGetWeight();
+  }
+
+  // Tare is required. Invoke it.
+  scalesTare();
+  weightMeasurements.clear();
+  Measurement weight = scalesGetWeight();
+
+  if (fabsf(weight.value < 0.3f)) { // Tare was successful. return reading
+    currentState.tarePending = false;
+    return weight;
+  } else {  // Tare was unsuccessful. return 0 weight.
+    return Measurement{ .value=0.f, .millis = millis()};
   }
 }
 
 static void sensorsReadWeight(void) {
   uint32_t elapsedTime = millis() - scalesTimer;
 
+  systemState.scalesPresent = scalesIsPresent();
   if (elapsedTime > GET_SCALES_READ_EVERY) {
-    systemState.scalesPresent = scalesIsPresent();
     if (systemState.scalesPresent) {
-      if (currentState.tarePending) {
-        scalesTare();
-        weightMeasurements.clear();
-        weightMeasurements.add(scalesGetWeight());
-        currentState.tarePending = false;
-      }
-      else {
-        weightMeasurements.add(scalesGetWeight());
-      }
+      Measurement weight = handleTaringAndReadWeight();
+      weightMeasurements.add(weight);
+
       currentState.weight = weightMeasurements.latest().value;
 
       if (brewActive) {
-        currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
+        currentState.shotWeight = currentState.weight;
         currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
@@ -198,7 +215,7 @@ static void calculateWeightAndFlow(void) {
       long pumpClicks = sensorsReadFlow(elapsedTimeSec);
       float consideredFlow = currentState.smoothedPumpFlow * elapsedTimeSec;
       // Update predictive class with our current phase
-      CurrentPhase& phase = phaseProfiler.getCurrentPhase();
+      const CurrentPhase& phase = phaseProfiler.getCurrentPhase();
       predictiveWeight.update(currentState, phase, runningCfg);
 
       // Start the predictive weight calculations when conditions are true
@@ -214,7 +231,9 @@ static void calculateWeightAndFlow(void) {
         //   }
         // }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
-        currentState.shotWeight = systemState.scalesPresent ? currentState.shotWeight : currentState.shotWeight + actualFlow;
+        if (!systemState.scalesPresent) {
+          currentState.shotWeight = currentState.shotWeight + actualFlow;
+        }
       }
       currentState.waterPumped += consideredFlow;
     }
@@ -228,11 +247,7 @@ static void calculateWeightAndFlow(void) {
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
   if (!brewActive) {
-    // static uint32_t tof_timeout = millis();
-    // if (millis() >= tof_timeout) {
     currentState.waterLvl = tof.readLvl();
-      // tof_timeout = millis() + 500;
-    // }
   }
 }
 
@@ -296,17 +311,19 @@ static void espUpdateState(void) {
   if (millis() > pageRefreshTimer) {
     espCommsSendSystemState(systemState, 1000);
     espCommsSendSensorData(currentState, 500);
-    pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
+ 
+    if (brewActive) {
+      espCommsSendShotData(buildShotSnapshot(millis() - brewingTimer, currentState, phaseProfiler), 100);
+    }
+    pageRefreshTimer = millis() + REFRESH_ESP_DATA_EVERY;
   }
 }
 
 void onProfileReceived(const Profile& newProfile) {
   activeProfile = newProfile;
-  activeProfileInitialized = true;
 }
 
 void onGaggiaSettingsReceived(const GaggiaSettings& newSettings) {
-  gaggiaSettingsInitialised = true;
   runningCfg = newSettings;
   if (systemState.startupInitFinished) {
     pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
@@ -348,9 +365,7 @@ static void profiling(void) {
     uint32_t timeInShot = millis() - brewingTimer;
     phaseProfiler.setProfile(systemState.operationMode == OperationMode::BREW_AUTO ? activeProfile : manualProfile);
     phaseProfiler.updatePhase(timeInShot, currentState);
-    CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
-    ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
-    espCommsSendShotData(shotSnapshot, 100);
+    const CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
 
     if (phaseProfiler.isFinished()) {
       setPumpOff();

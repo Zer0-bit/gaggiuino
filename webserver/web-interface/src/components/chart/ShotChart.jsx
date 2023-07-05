@@ -168,7 +168,7 @@ function Chart({ data, newDataPoint, maxLength }) {
       return;
     }
     setChartData(mapToChartData(data, theme));
-  }, [data]);
+  }, [data, theme]);
 
   // Adds newDataPoint to the end of the chart unless it detects that a new shot was started. More efficient.
   useEffect(() => {
@@ -180,7 +180,7 @@ function Chart({ data, newDataPoint, maxLength }) {
     } else {
       addDataPointToChartData(chartData, newDataPoint, maxLength, chartRef);
     }
-  }, [newDataPoint]);
+  }, [newDataPoint, theme, chartData, maxLength]);
 
   return (
     <Line

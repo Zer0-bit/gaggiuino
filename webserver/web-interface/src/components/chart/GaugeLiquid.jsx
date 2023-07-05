@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import GaugeLiquid from 'react-liquid-gauge';
 
 function GaugeLiquidComponent({ value = 0, radius = 50 }) {

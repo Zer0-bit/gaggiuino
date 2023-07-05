@@ -37,7 +37,11 @@ void onSensorStateSnapshotReceived(const SensorStateSnapshot& sensorData) {
 void onShotSnapshotReceived(const ShotSnapshot& shotData) {
   wsSendShotSnapshotToClients(shotData);
 }
+void onSystemStateReceived(const SystemState& systemState) {
+  wsSendSystemStateToClients(systemState);
+}
 void onScalesTareReceived() {
+  LOG_INFO("STM sent tare command");
   bleScalesTare();
 }
 void onGaggiaSettingsRequested() {
@@ -47,9 +51,6 @@ void onGaggiaSettingsRequested() {
 void onProfileRequested() {
   LOG_INFO("STM request active profile");
   stmCommsSendProfile(state::getActiveProfile());
-}
-void onSystemStateReceived(const SystemState& systemState) {
-  wsSendSystemStateToClients(systemState);
 }
 
 // ------------------------------------------------------------------------

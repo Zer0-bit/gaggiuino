@@ -39,6 +39,10 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+TabPanel.defaultProps = {
+  children: null,
+};
+
 function a11yProps(index: number) {
   return {
     id: `vertical-tab-${index}`,

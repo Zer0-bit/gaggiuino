@@ -101,3 +101,22 @@ jobs:
       - name: Run static analysis on ${{ matrix.environment }}
         run: |
           ~/.platformio/penv/bin/platformio check -e ${{ matrix.environment }} --fail-on-defect medium --fail-on-defect high
+
+  web-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+          cache-dependency-path: webserver/web-interface/package-lock.json
+      - run: npm ci
+        working-directory: webserver/web-interface/
+      - run: npm run build --if-present
+        working-directory: webserver/web-interface/
+      - run: npm run lint
+        working-directory: webserver/web-interface/
+        env:
+          CI: true

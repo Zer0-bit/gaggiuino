@@ -17,7 +17,6 @@ export default function AvailableNetworks({ onConnected }) {
       try {
         setLoading(true);
         setNetworksError(false);
-        console.log('loading networks');
         const networksResponse = await getAvailableNetworks();
         setNetworks(networksResponse);
       } catch (e) {
@@ -27,7 +26,7 @@ export default function AvailableNetworks({ onConnected }) {
       }
     };
     loadNetworks();
-  }, []);
+  }, [loading]);
 
   if (networksError) {
     return <Alert severity="error">Failed to load available networks</Alert>;
@@ -60,5 +59,5 @@ AvailableNetworks.propTypes = {
 };
 
 AvailableNetworks.defaultProps = {
-  onConnected: () => {},
+  onConnected: () => false,
 };

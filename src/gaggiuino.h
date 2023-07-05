@@ -31,7 +31,7 @@
 #endif
 #define GET_PRESSURE_READ_EVERY 10 // Pressure refresh interval (ms)
 #define GET_SCALES_READ_EVERY   100 // Scales refresh interval (ms)
-#define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
+#define REFRESH_ESP_DATA_EVERY  100 // Screen refresh interval (ms)
 #define REFRESH_FLOW_EVERY      50 // Flow refresh interval (ms)
 #define HEALTHCHECK_EVERY       30000 // System checks happen every 30sec
 #define BOILER_FILL_START_TIME  3000UL // Boiler fill start time - 3 sec since system init.

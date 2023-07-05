@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material';
 
 export const ThemeModeContext = createContext({
   themeMode: 'dark',
-  changeThemeMode: () => {},
+  changeThemeMode: () => false,
 });
 
 export default function ThemeModeToggle() {
