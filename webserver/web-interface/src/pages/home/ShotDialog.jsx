@@ -36,48 +36,48 @@ export default function ShotDialog({ open, setOpen }) {
         </AppBar>
 
         <Grid container columns={4} spacing={1} sx={{ flexGrow: 1 }}>
-          <Grid xs={4} sm={3} display="flex" alignContent="stretch" flexGrow={1}>
+          <Grid item xs={4} sm={3} display="flex" alignContent="stretch" flexGrow={1}>
             <Box sx={{ position: 'relative', width: '100%' }}>
               <ShotChart newDataPoint={latestShotDatapoint} />
             </Box>
           </Grid>
-          <Grid xs={4} sm={1}>
+          <Grid item xs={4} sm={1}>
             {latestShotDatapoint && (
             <Grid container columns={3} spacing={1}>
-              <Grid xs={1} sm={3}>
+              <Grid item xs={1} sm={3}>
                 <TimeStatBox
                   timeInShot={latestShotDatapoint.timeInShot}
                   sx={{ height: '100%' }}
                 />
               </Grid>
-              <Grid xs={1} sm={3}>
+              <Grid item xs={1} sm={3}>
                 <WeightStatBox
                   shotWeight={latestShotDatapoint.shotWeight}
                   sx={{ height: '100%' }}
                 />
               </Grid>
-              <Grid xs={1} sm={3}>
+              <Grid item xs={1} sm={3}>
                 <PressureStatBox
                   pressure={latestShotDatapoint.pressure}
                   target={latestShotDatapoint.targetPressure}
                   sx={{ height: '100%' }}
                 />
               </Grid>
-              <Grid xs={1} sm={3}>
+              <Grid item xs={1} sm={3}>
                 <PumpFlowStatBox
                   pumpFlow={latestShotDatapoint.pumpFlow}
                   target={latestShotDatapoint.targetPumpFlow}
                   sx={{ height: '100%' }}
                 />
               </Grid>
-              <Grid xs={1} sm={3}>
+              <Grid item xs={1} sm={3}>
                 <WeightFlowStatBox
                   flow={latestShotDatapoint.weightFlow}
                   target={latestShotDatapoint.targetPumpFlow}
                   sx={{ height: '100%' }}
                 />
               </Grid>
-              <Grid xs={1} sm={3}>
+              <Grid item xs={1} sm={3}>
                 <TemperatureStatBox
                   temperature={latestShotDatapoint.temperature}
                   target={latestShotDatapoint.targetTemperature}
