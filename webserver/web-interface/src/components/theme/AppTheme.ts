@@ -65,6 +65,6 @@ const darkTheme = createTheme({
   },
 });
 
-export default function getAppTheme(mode) {
+export default function getAppTheme(mode: 'dark' | 'light') {
   return (mode === 'light') ? lightTheme : darkTheme;
 }

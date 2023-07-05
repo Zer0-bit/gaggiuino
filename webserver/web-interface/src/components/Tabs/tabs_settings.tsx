@@ -124,40 +124,58 @@ export default function VerticalTabs() {
         </Box>
       </TabPanel>
       <TabPanel value={value} index={1}>
-      <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px', }} >
+        <Box sx={{
+          justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px',
+        }}
+        >
           <Typography>Scales Factor 1:</Typography>
-          <TextField variant="standard" sx={{ width: '5ch', '& input': {textAlign: 'center',}, }} id="contained-read-only-input"   defaultValue="0" InputProps={{readOnly: true,}} />
+          <TextField variant="standard" sx={{ width: '5ch', '& input': { textAlign: 'center' } }} id="contained-read-only-input" defaultValue="0" InputProps={{ readOnly: true }} />
           <Button variant="contained" startIcon={<RemoveIcon />} sx={{ width: '5%' }} />
           <Button variant="contained" startIcon={<AddIcon />} sx={{ width: '5%' }} />
         </Box>
-        <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px', }} >
+        <Box sx={{
+          justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px',
+        }}
+        >
           <Typography>Scales Factor 2:</Typography>
-          <TextField variant="standard" sx={{ width: '5ch', '& input': {textAlign: 'center',}, }} id="contained-read-only-input"   defaultValue="0" InputProps={{readOnly: true,}} />
+          <TextField variant="standard" sx={{ width: '5ch', '& input': { textAlign: 'center' } }} id="contained-read-only-input" defaultValue="0" InputProps={{ readOnly: true }} />
           <Button variant="contained" startIcon={<RemoveIcon />} sx={{ width: '5%' }} />
           <Button variant="contained" startIcon={<AddIcon />} sx={{ width: '5%' }} />
         </Box>
-        <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px', }} >
+        <Box sx={{
+          justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px',
+        }}
+        >
           <Typography>LCD Sleep:</Typography>
-          <TextField variant="standard" sx={{ width: '5ch', '& input': {textAlign: 'center',}, }} id="contained-read-only-input"   defaultValue="0" InputProps={{readOnly: true,}} />
+          <TextField variant="standard" sx={{ width: '5ch', '& input': { textAlign: 'center' } }} id="contained-read-only-input" defaultValue="0" InputProps={{ readOnly: true }} />
           <Button variant="contained" startIcon={<RemoveIcon />} sx={{ width: '5%' }} />
           <Button variant="contained" startIcon={<AddIcon />} sx={{ width: '5%' }} />
         </Box>
-        <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px', }} >
+        <Box sx={{
+          justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px',
+        }}
+        >
           <Typography>System Update rate:</Typography>
-          <TextField variant="standard" sx={{ width: '5ch', '& input': {textAlign: 'center',}, }} id="contained-read-only-input"   defaultValue="0" InputProps={{readOnly: true,}} />
+          <TextField variant="standard" sx={{ width: '5ch', '& input': { textAlign: 'center' } }} id="contained-read-only-input" defaultValue="0" InputProps={{ readOnly: true }} />
           <Button variant="contained" startIcon={<RemoveIcon />} sx={{ width: '5%' }} />
           <Button variant="contained" startIcon={<AddIcon />} sx={{ width: '5%' }} />
         </Box>
-        <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px', }} >
+        <Box sx={{
+          justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px',
+        }}
+        >
           <Typography>Pump Zero:</Typography>
-          <TextField variant="standard" sx={{ width: '5ch', '& input': {textAlign: 'center',}, }} id="contained-read-only-input"   defaultValue="0" InputProps={{readOnly: true,}} />
+          <TextField variant="standard" sx={{ width: '5ch', '& input': { textAlign: 'center' } }} id="contained-read-only-input" defaultValue="0" InputProps={{ readOnly: true }} />
           <Button variant="contained" startIcon={<RemoveIcon />} sx={{ width: '5%' }} />
           <Button variant="contained" startIcon={<AddIcon />} sx={{ width: '5%' }} />
         </Box>
-        <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px', }} >
+        <Box sx={{
+          justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px',
+        }}
+        >
           <Typography>Reset to defaults:</Typography>
           <Switch defaultChecked />
-        </Box>   
+        </Box>
       </TabPanel>
       <TabPanel value={value} index={2}>
         PLACEHOLDER
