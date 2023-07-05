@@ -142,8 +142,8 @@ static void sensorsReadTemperature(void) {
 static void sensorsReadWeight(void) {
   uint32_t elapsedTime = millis() - scalesTimer;
 
+  systemState.scalesPresent = scalesIsPresent();
   if (elapsedTime > GET_SCALES_READ_EVERY) {
-    systemState.scalesPresent = scalesIsPresent();
     if (systemState.scalesPresent) {
       if (currentState.tarePending) {
         scalesTare();
@@ -221,7 +221,9 @@ static void calculateWeightAndFlow(void) {
         //   }
         // }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
-        currentState.shotWeight = systemState.scalesPresent ? currentState.shotWeight : currentState.shotWeight + actualFlow;
+        if (!systemState.scalesPresent) {
+          currentState.shotWeight = currentState.shotWeight + actualFlow;
+        }
       }
       currentState.waterPumped += consideredFlow;
     }
@@ -299,7 +301,11 @@ static void espUpdateState(void) {
   if (millis() > pageRefreshTimer) {
     espCommsSendSystemState(systemState, 1000);
     espCommsSendSensorData(currentState, 500);
-    pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
+ 
+    if (brewActive) {
+      espCommsSendShotData(buildShotSnapshot(millis() - brewingTimer, currentState, phaseProfiler), 100);
+    }
+    pageRefreshTimer = millis() + REFRESH_ESP_DATA_EVERY;
   }
 }
 
@@ -352,8 +358,6 @@ static void profiling(void) {
     phaseProfiler.setProfile(systemState.operationMode == OperationMode::BREW_AUTO ? activeProfile : manualProfile);
     phaseProfiler.updatePhase(timeInShot, currentState);
     const CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
-    ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, phaseProfiler);
-    espCommsSendShotData(shotSnapshot, 100);
 
     if (phaseProfiler.isFinished()) {
       setPumpOff();
