@@ -128,6 +128,13 @@ static void sensorReadSwitches(void) {
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
     currentState.temperature = thermocoupleRead() - runningCfg.boiler.offsetTemp;
+
+    float brewTempSetPoint = activeProfile.waterTemperature + runningCfg.boiler.offsetTemp;
+
+    currentState.waterTemperature = (currentState.temperature > activeProfile.waterTemperature && currentState.brewSwitchState)
+      ? currentState.temperature / (float)brewTempSetPoint + activeProfile.waterTemperature
+      : currentState.temperature;
+
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }
