@@ -75,9 +75,25 @@ void test_system_state_serialized_correctly(void) {
   TEST_ASSERT_EQUAL_SYSTEM_STATE(systemState, deserializedSystemState);
 }
 
+void test_measurement_serialized_correctly(void) {
+  Measurement weight = {
+    .value = 10.3f,
+  };
+
+  std::vector<uint8_t> serializedData = ProtoSerializer::serialize<MeasurementConverter>(weight);
+  std::cout << "Output size: " << serializedData.size() << "(bytes)" << std::endl;
+
+  Measurement deserializedWeight = {};
+  ProtoSerializer::deserialize<MeasurementConverter>(serializedData, deserializedWeight);
+
+  TEST_ASSERT_EQUAL_MESSAGE(weight.value, deserializedWeight.value, "value");
+  TEST_ASSERT_EQUAL_MESSAGE(weight.millis, deserializedWeight.millis, "millis");
+}
+
 void runAllSettingsSerializerTests(void) {
   RUN_TEST(test_settings_serializer_works_correctly);
   RUN_TEST(test_data_request_is_serialized_correctly);
   RUN_TEST(test_shot_snapshot_is_serialized_correctly);
   RUN_TEST(test_system_state_serialized_correctly);
+  RUN_TEST(test_measurement_serialized_correctly);
 }
