@@ -11,7 +11,6 @@ SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
-bool activeProfileInitialized = false;
 Profile manualProfile;
 Profile activeProfile;
 PhaseProfiler phaseProfiler;
@@ -20,7 +19,6 @@ PredictiveWeight predictiveWeight;
 
 SensorState currentState;
 
-bool gaggiaSettingsInitialised = false;
 GaggiaSettings runningCfg;
 
 SystemState systemState;
@@ -323,11 +321,9 @@ static void espUpdateState(void) {
 
 void onProfileReceived(const Profile& newProfile) {
   activeProfile = newProfile;
-  activeProfileInitialized = true;
 }
 
 void onGaggiaSettingsReceived(const GaggiaSettings& newSettings) {
-  gaggiaSettingsInitialised = true;
   runningCfg = newSettings;
   if (systemState.startupInitFinished) {
     pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
