@@ -23,13 +23,13 @@ void PhaseProfiler::updatePhase(uint32_t timeInShot, SensorState& state) {
   }
 
   currentPhase.update(phaseIdx, profile->phases[phaseIdx], timeInPhase);
-  phaseChangedSnapshot = buildShotSnapshot(timeInShot, state, currentPhase);
+  phaseChangedSnapshot = buildShotSnapshot(timeInShot, state, *this);
   currentPhaseIdx += 1;
   updatePhase(timeInShot, state);
 }
 
 // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
-CurrentPhase& PhaseProfiler::getCurrentPhase() {
+const CurrentPhase& PhaseProfiler::getCurrentPhase() const {
   return currentPhase;
 }
 
@@ -43,6 +43,9 @@ void PhaseProfiler::reset() {
   currentPhase.update(0, profile->phases[0], 0);
 }
 
+const Profile& PhaseProfiler::getActiveProfile() const {
+  return *(profile);
+}
 
 //----------------------------------------------------------------------//
 //--------------------------- CurrentPhase -----------------------------//
@@ -50,17 +53,17 @@ void PhaseProfiler::reset() {
 CurrentPhase::CurrentPhase(int index, const Phase& phase, uint32_t timeInPhase, const ShotSnapshot& shotSnapshotAtStart) : index(index), phase{ &phase }, timeInPhase(timeInPhase), shotSnapshotAtStart{ &shotSnapshotAtStart } {}
 CurrentPhase::CurrentPhase(const CurrentPhase& currentPhase) : index(currentPhase.index), phase{ currentPhase.phase }, timeInPhase(currentPhase.timeInPhase), shotSnapshotAtStart{ currentPhase.shotSnapshotAtStart } {}
 
-const Phase* CurrentPhase::getPhase() { return phase; }
+const Phase* CurrentPhase::getPhase() const { return phase; }
 
-PhaseType CurrentPhase::getType() { return phase->type; }
+PhaseType CurrentPhase::getType() const { return phase->type; }
 
-int CurrentPhase::getIndex() { return index; }
+int CurrentPhase::getIndex() const { return index; }
 
-uint32_t CurrentPhase::getTimeInPhase() { return timeInPhase; }
+uint32_t CurrentPhase::getTimeInPhase() const { return timeInPhase; }
 
-float CurrentPhase::getTarget() { return phase->getTarget(timeInPhase, *shotSnapshotAtStart); }
+float CurrentPhase::getTarget() const { return phase->getTarget(timeInPhase, *shotSnapshotAtStart); }
 
-float CurrentPhase::getRestriction() { return phase->getRestriction(); }
+float CurrentPhase::getRestriction() const { return phase->getRestriction(); }
 
 void CurrentPhase::update(int index, const Phase& phase, uint32_t timeInPhase) {
   CurrentPhase::index = index;
@@ -72,7 +75,9 @@ void CurrentPhase::update(int index, const Phase& phase, uint32_t timeInPhase) {
 //------------------------- ShotSnapshot -------------------------------//
 //----------------------------------------------------------------------//
 
-ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, CurrentPhase& phase) {
+ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, const PhaseProfiler& profiler) {
+  const CurrentPhase& phase = profiler.getCurrentPhase();
+  const Profile& activeProfile = profiler.getActiveProfile();
   float targetFlow = (phase.getType() == PhaseType::FLOW) ? phase.getTarget() : phase.getRestriction();
   float targetPressure = (phase.getType() == PhaseType::PRESSURE) ? phase.getTarget() : phase.getRestriction();
 
@@ -84,7 +89,7 @@ ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, Cu
     .temperature = state.waterTemperature,
     .shotWeight = state.shotWeight,
     .waterPumped = state.waterPumped,
-    .targetTemperature = -1,
+    .targetTemperature = activeProfile.waterTemperature,
     .targetPumpFlow = targetFlow,
     .targetPressure = targetPressure
   };

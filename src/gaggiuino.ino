@@ -198,7 +198,7 @@ static void calculateWeightAndFlow(void) {
       long pumpClicks = sensorsReadFlow(elapsedTimeSec);
       float consideredFlow = currentState.smoothedPumpFlow * elapsedTimeSec;
       // Update predictive class with our current phase
-      CurrentPhase& phase = phaseProfiler.getCurrentPhase();
+      const CurrentPhase& phase = phaseProfiler.getCurrentPhase();
       predictiveWeight.update(currentState, phase, runningCfg);
 
       // Start the predictive weight calculations when conditions are true
@@ -344,8 +344,8 @@ static void profiling(void) {
     uint32_t timeInShot = millis() - brewingTimer;
     phaseProfiler.setProfile(systemState.operationMode == OperationMode::BREW_AUTO ? activeProfile : manualProfile);
     phaseProfiler.updatePhase(timeInShot, currentState);
-    CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
-    ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
+    const CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
+    ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, phaseProfiler);
     espCommsSendShotData(shotSnapshot, 100);
 
     if (phaseProfiler.isFinished()) {

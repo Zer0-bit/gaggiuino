@@ -41,7 +41,7 @@ public:
     return resistance;
   }
 
-  void update(const SensorState& state, CurrentPhase& phase, const GaggiaSettings& cfg) {
+  void update(const SensorState& state, const CurrentPhase& phase, const GaggiaSettings& cfg) {
     // If at least 50ml have been pumped, there has to be output (unless the water is going to the void)
     // No point going through all the below logic if we hardsetting the predictive scales to start counting
     if (isForceStarted || outputFlowStarted || state.waterPumped >= 65.f) {

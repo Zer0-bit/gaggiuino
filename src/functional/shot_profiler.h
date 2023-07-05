@@ -14,12 +14,12 @@ public:
   CurrentPhase(int index, const Phase& phase, uint32_t timeInPhase, const ShotSnapshot& shotSnapshotAtStart);
   CurrentPhase(const CurrentPhase& currentPhase);
 
-  const Phase* getPhase();
-  PhaseType getType();
-  int getIndex();
-  uint32_t getTimeInPhase();
-  float getTarget();
-  float getRestriction();
+  const Phase* getPhase() const;
+  PhaseType getType() const;
+  int getIndex() const;
+  uint32_t getTimeInPhase() const;
+  float getTarget() const;
+  float getRestriction() const;
   void update(int index, const Phase& phase, uint32_t timeInPhase);
 };
 
@@ -36,13 +36,14 @@ public:
   // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
   void setProfile(const Profile& profile) { this->profile = &profile; };
   void updatePhase(uint32_t timeInShot, SensorState& state);
-  CurrentPhase& getCurrentPhase();
+  const CurrentPhase& getCurrentPhase() const;
   bool isFinished();
   void reset();
+  const Profile& getActiveProfile() const;
 };
 
 // Helper functions
 
-ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, CurrentPhase& phase);
+ShotSnapshot buildShotSnapshot(uint32_t timeInShot, const SensorState& state, const PhaseProfiler& phase);
 
 #endif
