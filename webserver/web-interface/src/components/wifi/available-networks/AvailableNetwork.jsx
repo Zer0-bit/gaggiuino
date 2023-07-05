@@ -79,7 +79,7 @@ AvailableNetwork.propTypes = {
 };
 
 AvailableNetwork.defaultProps = {
-  onClick: () => {},
-  onConnected: () => {},
+  onClick: () => false,
+  onConnected: () => false,
   expanded: false,
 };

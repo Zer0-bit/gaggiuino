@@ -58,5 +58,5 @@ AvailableNetworksDrawer.propTypes = {
 };
 
 AvailableNetworksDrawer.defaultProps = {
-  onConnected: () => {},
+  onConnected: () => false,
 };
