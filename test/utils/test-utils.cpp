@@ -76,6 +76,30 @@ void TEST_ASSERT_EQUAL_GAGGIA_SETTINGS(const GaggiaSettings& expected, const Gag
   TEST_ASSERT_EQUAL_MESSAGE(expected.led.color.B, actual.led.color.B, "led.color.B");
 }
 
+void TEST_ASSERT_EQUAL_SHOT_SNAPSHOT(const ShotSnapshot& expected, const ShotSnapshot& actual) {
+  TEST_ASSERT_EQUAL_MESSAGE(expected.timeInShot, actual.timeInShot, "snapshot.timeInShot");
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.pressure, actual.pressure, "snapshot.pressure");
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.pumpFlow, actual.pumpFlow, "snapshot.pumpFlow");
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.weightFlow, actual.weightFlow, "snapshot.weightFlow");
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.temperature, actual.temperature, "snapshot.temperature");
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.shotWeight, actual.shotWeight, "snapshot.shotWeight");
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.waterPumped, actual.waterPumped, "snapshot.waterPumped");
+
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.targetTemperature, actual.targetTemperature, "snapshot.targetTemperature");
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.targetPumpFlow, actual.targetPumpFlow, "snapshot.targetPumpFlow");
+  TEST_ASSERT_EQUAL_FLOAT_MESSAGE(expected.targetPressure, actual.targetPressure, "snapshot.targetPressure");
+}
+
+void TEST_ASSERT_EQUAL_SYSTEM_STATE(const SystemState& expected, const SystemState& actual) {
+  TEST_ASSERT_EQUAL_MESSAGE(expected.startupInitFinished, actual.startupInitFinished, "system.startupInitFinished");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.operationMode, actual.operationMode, "system.operationMode");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.tofReady, actual.tofReady, "system.tofReady");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.isSteamForgottenON, actual.isSteamForgottenON, "system.isSteamForgottenON");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.scalesPresent, actual.scalesPresent, "system.scalesPresent");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.timeAlive, actual.timeAlive, "system.timeAlive");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.descaleProgress, actual.descaleProgress, "system.descaleProgress");
+}
+
 #include <iostream>
 #include <string>
 #include <vector>

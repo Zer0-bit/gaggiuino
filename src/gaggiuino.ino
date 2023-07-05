@@ -11,7 +11,6 @@ SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
-bool activeProfileInitialized = false;
 Profile manualProfile;
 Profile activeProfile;
 PhaseProfiler phaseProfiler;
@@ -20,7 +19,6 @@ PredictiveWeight predictiveWeight;
 
 SensorState currentState;
 
-bool gaggiaSettingsInitialised = false;
 GaggiaSettings runningCfg;
 
 SystemState systemState;
@@ -139,25 +137,37 @@ static void sensorsReadTemperature(void) {
   }
 }
 
+static Measurement handleTaringAndReadWeight() {
+  if (!currentState.tarePending) { // No tare needed just get weight
+    return scalesGetWeight();
+  }
+
+  // Tare is required. Invoke it.
+  scalesTare();
+  weightMeasurements.clear();
+  Measurement weight = scalesGetWeight();
+
+  if (fabsf(weight.value < 0.3f)) { // Tare was successful. return reading
+    currentState.tarePending = false;
+    return weight;
+  } else {  // Tare was unsuccessful. return 0 weight.
+    return Measurement{ .value=0.f, .millis = millis()};
+  }
+}
+
 static void sensorsReadWeight(void) {
   uint32_t elapsedTime = millis() - scalesTimer;
 
+  systemState.scalesPresent = scalesIsPresent();
   if (elapsedTime > GET_SCALES_READ_EVERY) {
-    systemState.scalesPresent = scalesIsPresent();
     if (systemState.scalesPresent) {
-      if (currentState.tarePending) {
-        scalesTare();
-        weightMeasurements.clear();
-        weightMeasurements.add(scalesGetWeight());
-        currentState.tarePending = false;
-      }
-      else {
-        weightMeasurements.add(scalesGetWeight());
-      }
+      Measurement weight = handleTaringAndReadWeight();
+      weightMeasurements.add(weight);
+
       currentState.weight = weightMeasurements.latest().value;
 
       if (brewActive) {
-        currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
+        currentState.shotWeight = currentState.weight;
         currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
@@ -221,7 +231,9 @@ static void calculateWeightAndFlow(void) {
         //   }
         // }
         currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
-        currentState.shotWeight = systemState.scalesPresent ? currentState.shotWeight : currentState.shotWeight + actualFlow;
+        if (!systemState.scalesPresent) {
+          currentState.shotWeight = currentState.shotWeight + actualFlow;
+        }
       }
       currentState.waterPumped += consideredFlow;
     }
@@ -299,17 +311,19 @@ static void espUpdateState(void) {
   if (millis() > pageRefreshTimer) {
     espCommsSendSystemState(systemState, 1000);
     espCommsSendSensorData(currentState, 500);
-    pageRefreshTimer = millis() + REFRESH_SCREEN_EVERY;
+ 
+    if (brewActive) {
+      espCommsSendShotData(buildShotSnapshot(millis() - brewingTimer, currentState, phaseProfiler), 100);
+    }
+    pageRefreshTimer = millis() + REFRESH_ESP_DATA_EVERY;
   }
 }
 
 void onProfileReceived(const Profile& newProfile) {
   activeProfile = newProfile;
-  activeProfileInitialized = true;
 }
 
 void onGaggiaSettingsReceived(const GaggiaSettings& newSettings) {
-  gaggiaSettingsInitialised = true;
   runningCfg = newSettings;
   if (systemState.startupInitFinished) {
     pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
@@ -352,8 +366,6 @@ static void profiling(void) {
     phaseProfiler.setProfile(systemState.operationMode == OperationMode::BREW_AUTO ? activeProfile : manualProfile);
     phaseProfiler.updatePhase(timeInShot, currentState);
     const CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
-    ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, phaseProfiler);
-    espCommsSendShotData(shotSnapshot, 100);
 
     if (phaseProfiler.isFinished()) {
       setPumpOff();
