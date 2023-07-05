@@ -30,8 +30,7 @@ export default function ShowAlert({ level, text }: BasicModalProps) {
   React.useEffect(() => {
     if (level && text) {
       handleOpen();
-      const timer = setTimeout(handleClose, 3000);
-      clearTimeout(timer);
+      setTimeout(handleClose, 3000);
     }
   }, [level, text]);
 
