@@ -57,16 +57,16 @@ function Home() {
   const [targetValue, setTargetValue] = useState(93);
 
   function handleAdd() {
-    setTargetValue(oldValue => oldValue + 1);
+    setTargetValue((oldValue) => oldValue + 1);
   }
 
   function handleRemove() {
-    setTargetValue(oldValue => oldValue - 1);
+    setTargetValue((oldValue) => oldValue - 1);
   }
 
   return (
     <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
-      <ShowAlert level='INFO' text='Welcome home motherfucker \_O_/' />
+      <ShowAlert level="INFO" text="Welcome home motherfucker \_O_/" />
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
         <Grid item xs={2}>
           <Box sx={{

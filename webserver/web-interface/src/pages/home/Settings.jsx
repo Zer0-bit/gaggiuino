@@ -1,28 +1,26 @@
 import React from 'react';
 import {
-  Card, Container, useTheme, Typography, CardContent, CardActions, Button, Radio, RadioGroup, FormControlLabel, Box, Tabs,
+  Card,
+  Container,
+  useTheme,
+  Typography,
+  CardContent,
+  CardActions,
+  Button,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  Box,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
 import Grid from '@mui/material/Grid';
 import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
 import ProgressBar from '../../components/inputs/ProgressBar';
-import LogContainer from '../../components/log/LogContainer';
 import VerticalTabs from '../../components/Tabs/tabs_settings';
 
 export default function Settings() {
   const theme = useTheme();
-
-  function boxedComponent(component) {
-    return (
-      <Box sx={{
-        border: `2px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '1px',
-      }}
-      >
-        {component}
-      </Box>
-    );
-  }
 
   return (
     <div>
