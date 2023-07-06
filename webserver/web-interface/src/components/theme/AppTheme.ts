@@ -1,28 +1,5 @@
 import { PaletteMode, createTheme } from '@mui/material';
 
-declare module '@mui/material/styles' {
-
-  interface Palette {
-    appbar?: Palette['primary'],
-    temperature: Palette['primary'],
-    flow: Palette['primary'],
-    weightFlow: Palette['primary'],
-    pressure: Palette['primary'],
-    weight: Palette['primary'],
-    water: Palette['primary'],
-  }
-
-  interface PaletteOptions {
-    appbar?: PaletteOptions['primary'],
-    temperature: PaletteOptions['primary'],
-    flow: PaletteOptions['primary'],
-    weightFlow: PaletteOptions['primary'],
-    pressure: PaletteOptions['primary'],
-    weight: PaletteOptions['primary'],
-    water: Palette['primary'],
-  }
-}
-
 const lightTheme = createTheme({
   palette: {
     mode: 'light',
