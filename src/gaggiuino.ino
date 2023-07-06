@@ -1,13 +1,13 @@
 /* 09:32 15/03/2023 - change triggering comment */
 #pragma GCC optimize ("Ofast")
-#define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
+// #define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
 #if defined(DEBUG_ENABLED)
   #include "dbg.h"
 #endif
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.06f);
-SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
+SimpleKalmanFilter smoothPumpFlow(0.6f, 0.6f, 0.06f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
@@ -178,7 +178,6 @@ static void sensorsReadWeight(void) {
 
 static void sensorsReadPressure(void) {
   uint32_t elapsedTime = millis() - pressureTimer;
-
   if (elapsedTime > GET_PRESSURE_READ_EVERY) {
     float elapsedTimeSec = elapsedTime / 1000.f;
     currentState.pressure = getPressure();
@@ -483,9 +482,6 @@ static inline void sysHealthCheck(float pressureThreshold) {
     systemState.isSteamForgottenON = currentState.steamSwitchState;
   }
 
-  //Releasing the excess pressure after steaming or brewing if necessary
-  #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-
   // No point going through the whole thing if this first condition isn't met.
   if (currentState.brewSwitchState || currentState.steamSwitchState || currentState.hotWaterSwitchState) {
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
@@ -497,13 +493,12 @@ static inline void sysHealthCheck(float pressureThreshold) {
     while (!brewActive && currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
     {
       sensorsRead();
-      espCommsSendNotification(Notification::info("Releasing pressure!"));
+      // espCommsSendNotification(Notification::info("Releasing pressure!"));
       setPumpOff();
       setBoilerOff();
       setSteamValveRelayOff();
       setSteamBoilerRelayOff();
       openValve();
-      break;
     }
     closeValve();
     systemHealthTimer = millis() + HEALTHCHECK_EVERY;
@@ -515,13 +510,12 @@ static inline void sysHealthCheck(float pressureThreshold) {
     if (millis() >= systemHealthTimer - 3500ul && millis() <= systemHealthTimer - 500ul) {
       char tmp[25];
       int countdown = (int)(systemHealthTimer-millis())/1000;
-      unsigned int check = snprintf(tmp, sizeof(tmp), "Dropping beats in: %i", countdown);
+      unsigned int check = snprintf(tmp, sizeof(tmp), "Dropping the beats in: %i", countdown);
       if (check > 0 && check <= sizeof(tmp)) {
         espCommsSendNotification(Notification::info(tmp));
       }
     }
   }
-  #endif
 }
 
 static void fillBoiler(void) {
