@@ -152,9 +152,12 @@ function Home() {
                   />
                 </Grid>
                 <Grid xs={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                  <Box sx={{
+                    width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly',
+                  }}
+                  >
                     <Button size="small" onClick={() => false}>
-                      <ScaleIcon />
+                      <ScaleIcon sx={{ mr: theme.spacing(1) }} />
                       Tare
                     </Button>
                   </Box>
