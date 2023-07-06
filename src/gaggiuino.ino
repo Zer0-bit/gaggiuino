@@ -158,22 +158,28 @@ static Measurement handleTaringAndReadWeight() {
 static void sensorsReadWeight(void) {
   uint32_t elapsedTime = millis() - scalesTimer;
 
-  systemState.scalesPresent = scalesIsPresent();
   if (elapsedTime > GET_SCALES_READ_EVERY) {
+    systemState.scalesPresent = scalesIsPresent();
     if (systemState.scalesPresent) {
-      Measurement weight = handleTaringAndReadWeight();
-      weightMeasurements.add(weight);
-
+      if (currentState.tarePending) {
+        scalesTare();
+        weightMeasurements.clear();
+        weightMeasurements.add(scalesGetWeight());
+        currentState.tarePending = false;
+      }
+      else {
+        weightMeasurements.add(scalesGetWeight());
+      }
       currentState.weight = weightMeasurements.latest().value;
 
       if (brewActive) {
-        currentState.shotWeight = currentState.weight;
+        currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
         currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
     }
+    scalesTimer = millis();
   }
-  scalesTimer = millis();
 }
 
 static void sensorsReadPressure(void) {
