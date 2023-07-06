@@ -15,7 +15,7 @@ import {
   Legend,
 } from 'chart.js';
 import { useTheme, alpha } from '@mui/material';
-import getShotChartConfig from './ChartConfig';
+import { getShotChartConfig } from './ChartConfig';
 
 ChartJS.register(
   CategoryScale,

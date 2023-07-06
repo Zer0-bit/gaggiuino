@@ -1,52 +1,69 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import PropTypes from 'prop-types';
 import {
   Chart as ChartJS,
   ArcElement,
   Title,
+  ChartOptions,
+  Color,
+  ChartData,
 } from 'chart.js';
 import { useTheme } from '@mui/material';
 import GaugeCentralTextPlugin from './GaugeCentralTextPlugin';
 
 ChartJS.register(ArcElement, Title, GaugeCentralTextPlugin);
 
+interface GaugeChartProps {
+  value: number;
+  maxValue?: number;
+  primaryColor: Color;
+  unit?: string;
+  title?: string;
+}
+
 function GaugeChart({
   value,
-  maxValue = 0,
+  maxValue,
   primaryColor,
   unit,
   title,
-  maintainAspectRatio = false,
-}) {
+}: GaugeChartProps) {
   const theme = useTheme();
 
-  const options = {
+  const options: ChartOptions<'doughnut'> = {
     cutout: '89%',
-    borderWidth: 0,
     responsive: true,
-    updateMode: 'resize',
-    maintainAspectRatio,
+    borderColor: primaryColor,
+    maintainAspectRatio: false,
     animation: {
       animateRotate: false,
       animateScale: false,
     },
     plugins: {
+      tooltip: {
+        enabled: false,
+      },
       center: {
         text: value.toFixed(1) + unit,
         color: primaryColor,
         maxFontSize: 55,
       },
       title: {
-        display: title && title.length > 0,
+        display: !!title && title.length > 0,
         text: title,
+        color: theme.palette.text.secondary,
+        font: {
+          family: theme.typography.fontFamily,
+          weight: 'normal',
+        },
       },
     },
   };
 
-  const data = {
+  const data: ChartData<'doughnut'> = {
     datasets: [{
-      data: [value, Math.max(0, maxValue - value)],
+      data: [value, Math.max(0, (maxValue || 100) - value)],
+      borderWidth: 0,
       backgroundColor: [
         primaryColor,
         theme.palette.divider,
@@ -58,17 +75,8 @@ function GaugeChart({
 
 export default GaugeChart;
 
-GaugeChart.propTypes = {
-  value: PropTypes.number.isRequired,
-  maxValue: PropTypes.number,
-  primaryColor: PropTypes.string,
-  unit: PropTypes.string,
-  title: PropTypes.string,
-};
-
 GaugeChart.defaultProps = {
   maxValue: 100,
-  primaryColor: '#6296C5',
   unit: '',
   title: '',
 };

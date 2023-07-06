@@ -10,7 +10,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TextField from '@mui/material/TextField';
-import Select from '@mui/material/Select';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 // import InputAdornment from '@mui/material/InputAdornment';
 import Grid from '@mui/material/Grid';
 import ProfileChart from '../../components/chart/ProfileChart';
@@ -43,14 +43,24 @@ export default function Profiles() {
     setNextId(nextId + 6);
   };
 
-  const [error, setError] = useState(null);
-  const [profile, setProfile] = useState(new Profile([]));
+  const [error, setError] = useState<string>();
+  const [profile, setProfile] = useState<Profile>({
+    name: '',
+    phases: [],
+    waterTemperature: 93,
+  });
 
-  const updateProfile = (value) => {
+  const updateProfile = (value: string) => {
     try {
-      setProfile(Profile.parse(JSON.parse(value)));
+      const newProfile = JSON.parse(value) as Profile;
+      if (!Array.isArray(newProfile.phases)
+      || newProfile.name === undefined
+      || newProfile.waterTemperature === undefined) {
+        throw Error('Invalid syntax');
+      }
+      setProfile(newProfile);
       setError(undefined);
-    } catch (er) {
+    } catch (er: any) {
       setError(er.message);
     }
   };
@@ -75,7 +85,7 @@ export default function Profiles() {
     setNextId(7);
   };
 
-  const handleSelectChange = (event, id) => {
+  const handleSelectChange = (event: SelectChangeEvent, id: number) => {
     const updatedElements = elements.map((element) => {
       if (element.id === id) {
         return { ...element, value: event.target.value };
@@ -181,8 +191,7 @@ export default function Profiles() {
                 minRows={15}
                 onChange={(evt) => updateProfile(evt.target.value)}
                 style={{ width: '100%', backgroundColor: theme.palette.background.paper, color: theme.palette.text.secondary }}
-              >
-              </TextareaAutosize>
+              />
             </Grid>
             <Grid item xs={1} sm={2} position="relative" height="400">
               <ProfileChart profile={profile} />

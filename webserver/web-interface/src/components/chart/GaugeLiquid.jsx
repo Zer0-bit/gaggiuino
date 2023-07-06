@@ -1,11 +1,19 @@
+import { Typography, useTheme } from '@mui/material';
 import React from 'react';
 import GaugeLiquid from 'react-liquid-gauge';
 
 function GaugeLiquidComponent({ value = 0, radius = 50 }) {
+  const theme = useTheme();
   return (
     <div>
-      <div style={{ textAlign: 'center', fontSize: '13px', color: 'gray' }}>Water Level</div>
-      <br></br>
+      <div>
+        <Typography sx={{
+          mb: theme.spacing(1), textAlign: 'center', fontSize: '13px', color: theme.palette.text.secondary,
+        }}
+        >
+          Water Level
+        </Typography>
+      </div>
       <GaugeLiquid
         style={{ margin: '0 auto' }}
         width={radius / 3.7}
@@ -20,12 +28,12 @@ function GaugeLiquidComponent({ value = 0, radius = 50 }) {
         waveFrequency={1}
         waveAmplitude={3}
         textStyle={{
-          fill: '#178bca',
-          fontFamily: 'Arial',
+          fill: theme.palette.water.main,
+          fontFamily: theme.typography.fontFamily,
         }}
         waveTextStyle={{
-          fill: '#178bca',
-          fontFamily: 'Arial',
+          fill: theme.palette.water.main,
+          fontFamily: theme.typography.fontFamily,
         }}
       />
     </div>
