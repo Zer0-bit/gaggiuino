@@ -104,6 +104,7 @@ function Home() {
                   <TextField
                     fullWidth
                     sx={{
+                      textAlign: 'center',
                       backgroundColor: colorScaling(theme.palette.background.default, 0.3),
                       border: 0,
                     }}
@@ -111,7 +112,11 @@ function Home() {
                     value={activeProfile?.waterTemperature || 0}
                     onChange={(e) => handleTempUpdate(parseInt(e.target.value, 10))}
                     InputProps={{
-                      disableUnderline: true,
+                      sx: {
+                        '& input': {
+                          textAlign: 'center',
+                        },
+                      },
                     }}
                   />
                 </Grid>
@@ -139,15 +144,20 @@ function Home() {
                   <TextField
                     fullWidth
                     sx={{
+                      textAlign: 'center',
                       backgroundColor: colorScaling(theme.palette.background.default, 0.3),
                       border: 0,
                     }}
                     disabled
                     type="text"
-                    value={sensorState.weight}
+                    value={sensorState.weight.toFixed(1)}
                     onChange={(e) => handleTempUpdate(parseInt(e.target.value, 10))}
                     InputProps={{
-                      disableUnderline: true,
+                      sx: {
+                        '& input': {
+                          textAlign: 'center',
+                        },
+                      },
                     }}
                   />
                 </Grid>
