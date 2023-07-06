@@ -62,8 +62,8 @@ const darkTheme = createTheme({
       main: '#a75c58',
     },
     background: {
-      default: '#111',
-      paper: '#111',
+      default: '#222',
+      paper: '#232323',
     },
     water: {
       main: '#178bca',

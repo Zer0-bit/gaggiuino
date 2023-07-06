@@ -58,10 +58,11 @@ export function GaugeChart({
         enabled: false,
       },
       center: {
-        text: value.toFixed(1) + unit,
+        value: value.toFixed(1),
+        unit,
         color: primaryColor,
         maxFontSize: 55,
-        minFontSize: 12,
+        minFontSize: 1,
       },
     },
   };

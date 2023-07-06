@@ -5,13 +5,15 @@ import {
   Box,
   Button,
   Container,
-  Fab,
   Unstable_Grid2 as Grid, Paper,
   Skeleton,
   TextField,
   Typography,
   lighten,
+  Stack,
   useTheme,
+  IconButton,
+  darken,
 } from '@mui/material';
 import React, { useEffect } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
@@ -31,22 +33,21 @@ function Home() {
     fetchActiveProfile();
   }, [fetchActiveProfile]);
 
-  function handleAdd() {
+  function handleTempUpdate(value: number) {
     if (!activeProfile) return;
-    activeProfile.waterTemperature += 1;
+    if (value > 169 || value < 0) return;
+    activeProfile.waterTemperature = value;
     updateActiveProfile(activeProfile);
   }
 
-  function handleRemove() {
-    if (!activeProfile) return;
-    activeProfile.waterTemperature -= 1;
-    updateActiveProfile(activeProfile);
-  }
+  const colorScaling = theme.palette.mode === 'light' ? lighten : darken;
 
   return (
     <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
       {/* <ShowAlert level="INFO" text="Welcome home motherfucker \_O_/" /> */}
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
+
+        {/* Left size Gauges */}
         <Grid xs={2}>
           <Box sx={{ p: theme.spacing(2) }}>
             <GaugeLiquid value={sensorState.waterLevel} />
@@ -54,10 +55,9 @@ function Home() {
           <Box sx={{ mt: theme.spacing(1), p: theme.spacing(2) }}>
             <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
           </Box>
-          <Box sx={{ mt: theme.spacing(1), p: theme.spacing(2) }}>
-            <GaugeChart value={sensorState.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />
-          </Box>
         </Grid>
+
+        {/* Center part - profiles */}
         <Grid xs={6} sx={{ gap: '8px', position: 'relative' }}>
           <Box>
             <Grid container spacing={1}>
@@ -81,35 +81,86 @@ function Home() {
             </Grid>
           </Box>
         </Grid>
+
+        {/* Left part - Temperature Gauge and Scale */}
         <Grid xs={4}>
-          <AspectRatioBox ratio={1} sx={{ borderRadius: '50%', backgroundColor: lighten(theme.palette.background.default, 0.2) }}>
-            <GaugeChart value={sensorState.temperature} primaryColor={theme.palette.temperature.main} unit="°C" />
-          </AspectRatioBox>
           <Box sx={{
-            justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
+            pb: 1, pl: 0.5, pr: 0.5, borderRadius: '50%', backgroundColor: colorScaling(theme.palette.background.default, 0.4),
           }}
           >
-            <TextField variant="standard" sx={{ width: '10ch' }} id="targetBox" label="Target (°C)" value={activeProfile?.waterTemperature || 0} InputProps={{ readOnly: true }} />
-            <Fab color="primary" aria-label="add" onClick={handleRemove}>
-              <RemoveIcon />
-            </Fab>
-            <Fab color="primary" aria-label="rem" onClick={handleAdd}>
-              <AddIcon />
-            </Fab>
+            <AspectRatioBox ratio={1}>
+              <GaugeChart value={sensorState.temperature} primaryColor={theme.palette.temperature.main} unit="°C" />
+            </AspectRatioBox>
           </Box>
-          <Box sx={{
-            justifyContent: 'center', alignItems: 'center', display: 'flex', border: `2px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '2px', gap: '0px', backgroundColor: '#292929',
-          }}
-          >
-          </Box>
-          <Box sx={{
-            justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
-          }}
-          >
-            <TextField variant="standard" sx={{ width: '10ch' }} id="outlined-read-only-input" label="Scales (g)" value={sensorState.weight} InputProps={{ readOnly: true }} />
-            <Button variant="contained" startIcon={<ScaleIcon />} sx={{ width: '40%' }}>
-              Tare
-            </Button>
+
+          <Box sx={{ mt: theme.spacing(3) }}>
+            <Grid container spacing={2}>
+              {/* Target temp input line */}
+              <Grid container xs={12} alignItems="center">
+                <Grid xs={4}>
+                  <Typography variant="caption" color={theme.palette.text.secondary}>TARGET TEMP</Typography>
+                </Grid>
+                <Grid xs={4}>
+                  <TextField
+                    fullWidth
+                    sx={{
+                      backgroundColor: colorScaling(theme.palette.background.default, 0.3),
+                      border: 0,
+                    }}
+                    type="text"
+                    value={activeProfile?.waterTemperature || 0}
+                    onChange={(e) => handleTempUpdate(parseInt(e.target.value, 10))}
+                    InputProps={{
+                      disableUnderline: true,
+                    }}
+                  />
+                </Grid>
+                <Grid xs={4}>
+                  <Box sx={{
+                    width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly',
+                  }}
+                  >
+                    <IconButton size="small" color="primary" onClick={() => handleTempUpdate((activeProfile?.waterTemperature || 0) - 1)}>
+                      <RemoveIcon />
+                    </IconButton>
+                    <IconButton size="small" color="primary" onClick={() => handleTempUpdate((activeProfile?.waterTemperature || 0) + 1)}>
+                      <AddIcon />
+                    </IconButton>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {/* Scale input line */}
+              <Grid container xs={12} alignItems="center">
+                <Grid xs={4}>
+                  <Typography variant="caption" color={theme.palette.text.secondary}>SCALE</Typography>
+                </Grid>
+                <Grid xs={4}>
+                  <TextField
+                    fullWidth
+                    sx={{
+                      backgroundColor: colorScaling(theme.palette.background.default, 0.3),
+                      border: 0,
+                    }}
+                    disabled
+                    type="text"
+                    value={sensorState.weight}
+                    onChange={(e) => handleTempUpdate(parseInt(e.target.value, 10))}
+                    InputProps={{
+                      disableUnderline: true,
+                    }}
+                  />
+                </Grid>
+                <Grid xs={4}>
+                  <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                    <Button size="small" onClick={() => false}>
+                      <ScaleIcon />
+                      Tare
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
           </Box>
         </Grid>
       </Grid>
