@@ -5,13 +5,15 @@ declare module 'chart.js' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface PluginOptionsByType<TType extends ChartType = ChartType> {
     center?: {
-      text: string,
+      value: string,
+      unit: string,
       color?: string | CanvasGradient | CanvasPattern,
       minFontSize?: number,
       maxFontSize?: number,
       fontStyle?: FontStyle,
       sidePadding?: number,
       lineHeight?: number,
+      unitFontRatio?: number,
     },
   }
 }
@@ -26,10 +28,12 @@ const GaugeCentralTextPlugin: Plugin = {
       // Get options from the center object in options
       const centerConfig = chart.config.options.plugins.center;
       const fontStyle = centerConfig?.fontStyle || 'Arial';
-      const txt = centerConfig.text || '';
+      const value = centerConfig.value || '';
+      const unit = centerConfig.unit || '';
       const color = centerConfig.color || '#000';
       const maxFontSize = centerConfig.maxFontSize || 75;
       const sidePadding = centerConfig.sidePadding || 20;
+      const unitFontRatio = centerConfig.unitFontRatio || 0.7;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
       const { innerRadius } = (chart as any)._metasets[(chart as any)._metasets.length - 1].data[0];
       const sidePaddingCalculated = (sidePadding / 100) * (innerRadius * 2);
@@ -39,7 +43,7 @@ const GaugeCentralTextPlugin: Plugin = {
 
       // Get the width of the string and also the width of the element minus 10 to
       // give it 5px side padding
-      const stringWidth = ctx.measureText(txt).width;
+      const stringWidth = ctx.measureText(`${value}${unit}`).width;
       const elementWidth = (innerRadius * 2) - sidePaddingCalculated;
 
       // Find out how much the font can grow in width.
@@ -63,20 +67,30 @@ const GaugeCentralTextPlugin: Plugin = {
         wrapText = true;
       }
 
-      // Set font settings to draw it correctly.
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
-      let centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
+      // Get the widths
       ctx.font = `${fontSizeToUse}px ${fontStyle}`;
+      const valueWidth = ctx.measureText(value).width;
+      ctx.font = `${fontSizeToUse * unitFontRatio}px ${fontStyle}`;
+      const unitWidth = ctx.measureText(unit).width;
+
+      // Set font settings to draw it correctly.
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      let centerX = ((chart.chartArea.left + chart.chartArea.right) / 2) - (valueWidth + unitWidth) / 2;
+      let centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
       ctx.fillStyle = color as string | CanvasGradient | CanvasPattern;
 
       if (!wrapText) {
-        ctx.fillText(txt, centerX, centerY);
+        ctx.font = `${fontSizeToUse}px ${fontStyle}`;
+        ctx.fillText(value, centerX, centerY);
+        centerX += valueWidth;
+
+        ctx.font = `${fontSizeToUse * unitFontRatio}px ${fontStyle}`;
+        ctx.fillText(unit, centerX, centerY);
         return;
       }
 
-      const words = txt.split(' ');
+      const words = value.split(' ');
       let line = '';
       const lines = [];
 
