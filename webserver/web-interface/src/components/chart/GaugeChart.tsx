@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -8,8 +8,9 @@ import {
   Color,
   ChartData,
 } from 'chart.js';
-import { useTheme } from '@mui/material';
+import { Typography, TypographyProps, useTheme } from '@mui/material';
 import GaugeCentralTextPlugin from './GaugeCentralTextPlugin';
+import AspectRatioBox from '../layout/AspectRatioBox';
 
 ChartJS.register(ArcElement, Title, GaugeCentralTextPlugin);
 
@@ -21,7 +22,23 @@ interface GaugeChartProps {
   title?: string;
 }
 
-function GaugeChart({
+export function GaugeTitle({ children, sx }: TypographyProps) {
+  const theme = useTheme();
+  return (
+    <Typography
+      variant="body2"
+      sx={{
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+        ...sx,
+      }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+export function GaugeChart({
   value,
   maxValue,
   primaryColor,
@@ -33,12 +50,9 @@ function GaugeChart({
   const options: ChartOptions<'doughnut'> = {
     cutout: '89%',
     responsive: true,
+    maintainAspectRatio: true,
+    animation: false,
     borderColor: primaryColor,
-    maintainAspectRatio: false,
-    animation: {
-      animateRotate: false,
-      animateScale: false,
-    },
     plugins: {
       tooltip: {
         enabled: false,
@@ -47,16 +61,18 @@ function GaugeChart({
         text: value.toFixed(1) + unit,
         color: primaryColor,
         maxFontSize: 55,
+        minFontSize: 12,
       },
-      title: {
-        display: !!title && title.length > 0,
-        text: title,
-        color: theme.palette.text.secondary,
-        font: {
-          family: theme.typography.fontFamily,
-          weight: 'normal',
-        },
-      },
+      // title: {
+      //   display: !!title && title.length > 0,
+      //   text: title,
+      //   color: theme.palette.text.secondary,
+      //   font: {
+
+      //     family: theme.typography.fontFamily,
+      //     weight: 'normal',
+      //   },
+      // },
     },
   };
 
@@ -70,7 +86,12 @@ function GaugeChart({
       ],
     }],
   };
-  return <Doughnut data={data} options={options} />;
+  return (
+    <>
+      {title && <GaugeTitle>{title}</GaugeTitle>}
+      <AspectRatioBox><Doughnut data={data} options={options} /></AspectRatioBox>
+    </>
+  );
 }
 
 export default GaugeChart;

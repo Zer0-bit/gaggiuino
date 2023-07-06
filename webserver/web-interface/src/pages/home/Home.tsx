@@ -1,15 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Box, Container, useTheme, Fab, TextField, Button, Skeleton, Typography, Unstable_Grid2 as Grid, Paper,
-} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ScaleIcon from '@mui/icons-material/Scale';
+import {
+  Box,
+  Button,
+  Container,
+  Fab,
+  Unstable_Grid2 as Grid, Paper,
+  Skeleton,
+  TextField,
+  Typography,
+  lighten,
+  useTheme,
+} from '@mui/material';
+import React, { useEffect } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
-import useSensorStateStore from '../../state/SensorStateStore';
-import useProfileStore from '../../state/ProfileStore';
 import ProfileChart from '../../components/chart/ProfileChart';
+import AspectRatioBox from '../../components/layout/AspectRatioBox';
+import useProfileStore from '../../state/ProfileStore';
+import useSensorStateStore from '../../state/SensorStateStore';
 
 function Home() {
   const theme = useTheme();
@@ -17,48 +27,9 @@ function Home() {
   const { sensorState } = useSensorStateStore();
   const { activeProfile, updateActiveProfile, fetchActiveProfile } = useProfileStore();
 
-  function boxedComponent(component: React.ReactNode) {
-    return (
-      <Box
-        ref={gaugeRef}
-        sx={{
-          border: `0px solid ${theme.palette.divider}`,
-          position: 'relative',
-          justifyContent: 'space-evenly',
-          alignItems: 'center',
-          display: 'flex',
-          borderRadius: '20px',
-          width: '100%',
-          padding: '10px',
-        }}
-        style={{ marginTop: '-9px' }}
-      >
-        {component}
-      </Box>
-    );
-  }
-
   useEffect(() => {
     fetchActiveProfile();
   }, [fetchActiveProfile]);
-
-  const gaugeRef = useRef<HTMLDivElement>(null);
-  const [gaugeSize, setGaugeSize] = useState({ width: 0, height: 0 });
-  const calculateGaugeSize = () => {
-    if (gaugeRef.current) {
-      const { width, height } = gaugeRef.current.getBoundingClientRect();
-      setGaugeSize({ width, height });
-    }
-  };
-
-  useEffect(() => {
-    calculateGaugeSize();
-    window.addEventListener('resize', calculateGaugeSize);
-
-    return () => {
-      window.removeEventListener('resize', calculateGaugeSize);
-    };
-  }, []);
 
   function handleAdd() {
     if (!activeProfile) return;
@@ -77,13 +48,14 @@ function Home() {
       {/* <ShowAlert level="INFO" text="Welcome home motherfucker \_O_/" /> */}
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
         <Grid xs={2}>
-          <Box sx={{
-            border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px', gap: '0px',
-          }}
-          >
-            {boxedComponent(<GaugeLiquid value={sensorState.waterLevel} radius={gaugeSize.width} />)}
-            {boxedComponent(<GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />)}
-            {boxedComponent(<GaugeChart value={sensorState.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />)}
+          <Box sx={{ p: theme.spacing(2) }}>
+            <GaugeLiquid value={sensorState.waterLevel} />
+          </Box>
+          <Box sx={{ mt: theme.spacing(1), p: theme.spacing(2) }}>
+            <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
+          </Box>
+          <Box sx={{ mt: theme.spacing(1), p: theme.spacing(2) }}>
+            <GaugeChart value={sensorState.weight} primaryColor={theme.palette.weight.main} title="Weight" unit="gr" maxValue={100} />
           </Box>
         </Grid>
         <Grid xs={6} sx={{ gap: '8px', position: 'relative' }}>
@@ -110,42 +82,34 @@ function Home() {
           </Box>
         </Grid>
         <Grid xs={4}>
+          <AspectRatioBox ratio={1} sx={{ borderRadius: '50%', backgroundColor: lighten(theme.palette.background.default, 0.2) }}>
+            <GaugeChart value={sensorState.temperature} primaryColor={theme.palette.temperature.main} unit="°C" />
+          </AspectRatioBox>
           <Box sx={{
-            border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '0px',
+            justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
           }}
           >
-            <Box sx={{
-              justifyContent: 'space-evenly', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '180px', width: '100%', padding: '0px', backgroundColor: '#292929',
-            }}
-            >
-              {boxedComponent(<GaugeChart value={sensorState.temperature} primaryColor={theme.palette.temperature.main} unit="°C" />)}
-            </Box>
-            <Box sx={{
-              justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
-            }}
-            >
-              <TextField variant="standard" sx={{ width: '10ch' }} id="targetBox" label="Target (°C)" value={activeProfile?.waterTemperature || 0} InputProps={{ readOnly: true }} />
-              <Fab color="primary" aria-label="add" onClick={handleRemove}>
-                <RemoveIcon />
-              </Fab>
-              <Fab color="primary" aria-label="rem" onClick={handleAdd}>
-                <AddIcon />
-              </Fab>
-            </Box>
-            <Box sx={{
-              justifyContent: 'center', alignItems: 'center', display: 'flex', border: `2px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '2px', gap: '0px', backgroundColor: '#292929',
-            }}
-            >
-            </Box>
-            <Box sx={{
-              justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
-            }}
-            >
-              <TextField variant="standard" sx={{ width: '10ch' }} id="outlined-read-only-input" label="Scales (g)" value={sensorState.weight} InputProps={{ readOnly: true }} />
-              <Button variant="contained" startIcon={<ScaleIcon />} sx={{ width: '40%' }}>
-                Tare
-              </Button>
-            </Box>
+            <TextField variant="standard" sx={{ width: '10ch' }} id="targetBox" label="Target (°C)" value={activeProfile?.waterTemperature || 0} InputProps={{ readOnly: true }} />
+            <Fab color="primary" aria-label="add" onClick={handleRemove}>
+              <RemoveIcon />
+            </Fab>
+            <Fab color="primary" aria-label="rem" onClick={handleAdd}>
+              <AddIcon />
+            </Fab>
+          </Box>
+          <Box sx={{
+            justifyContent: 'center', alignItems: 'center', display: 'flex', border: `2px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '2px', gap: '0px', backgroundColor: '#292929',
+          }}
+          >
+          </Box>
+          <Box sx={{
+            justifyContent: 'center', alignItems: 'center', display: 'flex', border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '25px',
+          }}
+          >
+            <TextField variant="standard" sx={{ width: '10ch' }} id="outlined-read-only-input" label="Scales (g)" value={sensorState.weight} InputProps={{ readOnly: true }} />
+            <Button variant="contained" startIcon={<ScaleIcon />} sx={{ width: '40%' }}>
+              Tare
+            </Button>
           </Box>
         </Grid>
       </Grid>
