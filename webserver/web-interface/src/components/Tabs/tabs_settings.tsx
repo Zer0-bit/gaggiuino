@@ -10,6 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
 import LogContainer from '../log/LogContainer';
+import ThemeModeToggle from '../theme/ThemeModeToggle';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -179,6 +180,13 @@ export default function VerticalTabs() {
         >
           <Typography>Reset to defaults:</Typography>
           <Switch defaultChecked />
+        </Box>
+        <Box sx={{
+          justifyContent: 'center', alignItems: 'center', display: 'flex', border: `1px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '16px', width: '100%', padding: '10px', gap: '10px',
+        }}
+        >
+          <Typography>Dark/Light toggle:</Typography>
+          <ThemeModeToggle />
         </Box>
       </TabPanel>
       <TabPanel value={value} index={2}>

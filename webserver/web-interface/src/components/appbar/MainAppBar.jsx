@@ -7,7 +7,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Box from '@mui/material/Box';
 import {
-  useTheme, Stack, AppBar, Toolbar, Fab, useMediaQuery, MenuItem, Button, Menu,
+  useTheme, Stack, AppBar, Toolbar, Fab, useMediaQuery, MenuItem, Button, Menu, Skeleton, Typography,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import Logo from '../icons/Logo';
@@ -150,31 +150,32 @@ function MainAppBar() {
   return (
     <AppBar sx={{ position: 'static' }} elevation={1}>
       <Toolbar>
-        <Stack sx={{ display: 'flex', flexGrow: 1 }} direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-          <Box
+      <Stack sx={{ display: 'flex', flexGrow: 1, }} direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+        <Box
+          sx={{
+            color: activeColor, alignContent: 'center',
+          }}
+        >
+          <Fab
+            onClick={() => setShotDialogOpen(true)}
+            size="medium"
             sx={{
-              color: activeColor, alignContent: 'center',
+              color: 'primary.main',
+              backgroundColor: 'background.default',
+              boxShadow: 0,
+              '&:hover': { boxShadow: 0, backgroundColor: 'background.default' },
             }}
           >
-            <Fab
-              onClick={() => setShotDialogOpen(true)}
-              size="medium"
-              sx={{
-                color: 'primary.main',
-                backgroundColor: 'background.default',
-                boxShadow: 0,
-                '&:hover': { boxShadow: 0, backgroundColor: 'background.default' },
-              }}
-            >
-              <Box height={30} sx={{ ml: '-4px' }}><Logo size={30} sx={{}} /></Box>
-            </Fab>
-          </Box>
-          {isBiggerScreen && (
-            <TabMenu activeItem={activeTab} activeColor={activeColor} onChange={setActiveTab} />
-          )}
-          {!isBiggerScreen && (<NavMenu activeItem={activeTab} onChange={setActiveTab} />)}
-          <ThemeModeToggle />
-        </Stack>
+            <Box height={30} sx={{ ml: '-4px' }}><Logo size={30} sx={{}} /></Box>
+          </Fab>
+        </Box>
+        {isBiggerScreen && (
+          <TabMenu activeItem={activeTab} activeColor={activeColor} onChange={setActiveTab} />
+        )}
+        {/* {!isBiggerScreen && (<NavMenu activeItem={activeTab} onChange={setActiveTab} />)}
+          <ThemeModeToggle /> */}
+          <Skeleton variant="rounded" height={40} width={100} sx={{ fontSize: '1rem', borderRadius: '16px', display: 'flex', alignContent: 'end',  textAlign: 'center'}}></Skeleton>
+      </Stack>
       </Toolbar>
       <Box />
       {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
