@@ -18,7 +18,7 @@ Phase& espCommsGetManualPhase();
 void espCommsSendSensorData(const SensorState& state, uint32_t frequency = 1000);
 void espCommsSendShotData(const ShotSnapshot& shotData, uint32_t frequency = 100);
 void espCommsSendTareScalesCommand();
-void espCommsSendNotification(const Notification notification);
+void espCommsSendNotification(const Notification notification, uint32_t frequency = 1000);
 void espCommsSendSystemState(const SystemState& systemState, uint32_t frequency = 1000);
 void espCommsRequestData(McuCommsMessageType dataType);
 

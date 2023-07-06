@@ -63,16 +63,6 @@ export function GaugeChart({
         maxFontSize: 55,
         minFontSize: 12,
       },
-      // title: {
-      //   display: !!title && title.length > 0,
-      //   text: title,
-      //   color: theme.palette.text.secondary,
-      //   font: {
-
-      //     family: theme.typography.fontFamily,
-      //     weight: 'normal',
-      //   },
-      // },
     },
   };
 

@@ -514,12 +514,8 @@ static inline void sysHealthCheck(float pressureThreshold) {
 
   if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
     if (millis() >= systemHealthTimer - 3500ul && millis() <= systemHealthTimer - 500ul) {
-      char tmp[25];
       int countdown = (int)(systemHealthTimer-millis())/1000;
-      unsigned int check = snprintf(tmp, sizeof(tmp), "Dropping the beats in: %i", countdown);
-      if (check > 0 && check <= sizeof(tmp)) {
-        espCommsSendNotification(Notification::info(tmp));
-      }
+      espCommsSendNotification(Notification::info("Dropping beats in: " + std::to_string(countdown)));
     }
   }
 }
