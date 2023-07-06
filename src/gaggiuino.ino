@@ -493,7 +493,7 @@ static inline void sysHealthCheck(float pressureThreshold) {
     while (!brewActive && currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
     {
       sensorsRead();
-      // espCommsSendNotification(Notification::info("Releasing pressure!"));
+      espCommsSendNotification(Notification::info("Releasing pressure!"));
       setPumpOff();
       setBoilerOff();
       setSteamValveRelayOff();
