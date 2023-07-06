@@ -115,16 +115,12 @@ void backFlush(const SensorState &currentState) {
 
 
 void flushActivated(void) {
-  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
-      openValve();
-  #endif
+  openValve();
   setPumpFullOn();
 }
 
 void flushDeactivated(void) {
-  #if defined SINGLE_BOARD || defined LEGO_VALVE_RELAY
-      closeValve();
-  #endif
+  closeValve();
   setPumpOff();
 }
 

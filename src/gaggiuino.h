@@ -40,13 +40,6 @@
 #define SYS_PRESSURE_IDLE       0.7f // System pressure threshold at idle
 #define MIN_WATER_LVL           10u // Min allowable tank water lvl
 
-//Some consts
-#ifndef LEGO_VALVE_RELAY
-const float calibrationPressure = 2.f;
-#else
-const float calibrationPressure = 0.65f;
-#endif
-
 //Timers
 unsigned long systemHealthTimer;
 unsigned long pageRefreshTimer;

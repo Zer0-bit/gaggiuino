@@ -7,7 +7,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.06f);
-SimpleKalmanFilter smoothPumpFlow(0.6f, 0.6f, 0.06f);
+SimpleKalmanFilter smoothPumpFlow(0.6f, 0.6f, 0.006f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
@@ -147,7 +147,7 @@ static Measurement handleTaringAndReadWeight() {
   weightMeasurements.clear();
   Measurement weight = scalesGetWeight();
 
-  if (fabsf(weight.value < 0.3f)) { // Tare was successful. return reading
+  if (fabsf(weight.value < 0.3f) && fabsf(weight.value > -0.2f)) { // Tare was successful. return reading
     currentState.tarePending = false;
     return weight;
   } else {  // Tare was unsuccessful. return 0 weight.
@@ -519,8 +519,6 @@ static inline void sysHealthCheck(float pressureThreshold) {
 }
 
 static void fillBoiler(void) {
-  #if defined LEGO_VALVE_RELAY || defined SINGLE_BOARD
-
   if (systemState.startupInitFinished) {
     return;
   }
@@ -536,9 +534,6 @@ static void fillBoiler(void) {
   else if (isSwitchOn()) {
     espCommsSendNotification(Notification::warn("Brew Switch ON!"));
   }
-#else
-  systemState.startupInitFinished = true;
-#endif
 }
 
 static bool isBoilerFillPhase(unsigned long elapsedTime) {
