@@ -1,6 +1,6 @@
 root = true
 
-[*.{h,hpp,c,cpp,rc,js,jsx}]
+[*.{h,hpp,c,cpp,rc,js,jsx,ts,tsx}]
 end_of_line = lf
 insert_final_newline = true
 charset = utf-8

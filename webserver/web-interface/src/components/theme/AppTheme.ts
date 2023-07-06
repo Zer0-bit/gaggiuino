@@ -1,4 +1,4 @@
-import { createTheme } from '@mui/material';
+import { PaletteMode, createTheme } from '@mui/material';
 
 const lightTheme = createTheme({
   palette: {
@@ -31,6 +31,9 @@ const lightTheme = createTheme({
     weight: {
       main: '#844B48',
     },
+    water: {
+      main: '#178bca',
+    },
   },
 });
 
@@ -62,9 +65,12 @@ const darkTheme = createTheme({
       default: '#111',
       paper: '#111',
     },
+    water: {
+      main: '#178bca',
+    },
   },
 });
 
-export default function getAppTheme(mode: 'dark' | 'light') {
+export default function getAppTheme(mode: PaletteMode) {
   return (mode === 'light') ? lightTheme : darkTheme;
 }

@@ -1,19 +1,37 @@
-const GaugeCentralTextPlugin = {
+import { FontStyle } from '@mui/material/styles/createTypography';
+import { Plugin, ChartType } from 'chart.js';
+
+declare module 'chart.js' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface PluginOptionsByType<TType extends ChartType = ChartType> {
+    center?: {
+      text: string,
+      color?: string | CanvasGradient | CanvasPattern,
+      minFontSize?: number,
+      maxFontSize?: number,
+      fontStyle?: FontStyle,
+      sidePadding?: number,
+      lineHeight?: number,
+    },
+  }
+}
+
+const GaugeCentralTextPlugin: Plugin = {
   id: 'center',
   afterDraw(chart) {
-    if (chart.config.options.plugins && chart.config.options.plugins.center) {
+    if (chart.config.options?.plugins?.center) {
       // Get ctx from string
       const { ctx } = chart;
 
       // Get options from the center object in options
       const centerConfig = chart.config.options.plugins.center;
-      const fontStyle = centerConfig.fontStyle || 'Arial';
-      const txt = centerConfig.text;
+      const fontStyle = centerConfig?.fontStyle || 'Arial';
+      const txt = centerConfig.text || '';
       const color = centerConfig.color || '#000';
       const maxFontSize = centerConfig.maxFontSize || 75;
       const sidePadding = centerConfig.sidePadding || 20;
-      // eslint-disable-next-line no-underscore-dangle
-      const { innerRadius } = chart._metasets[chart._metasets.length - 1].data[0];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
+      const { innerRadius } = (chart as any)._metasets[(chart as any)._metasets.length - 1].data[0];
       const sidePaddingCalculated = (sidePadding / 100) * (innerRadius * 2);
       // Start with a base font of 30px
       ctx.font = `30px ${fontStyle}`;
@@ -51,7 +69,7 @@ const GaugeCentralTextPlugin = {
       const centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
       let centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
       ctx.font = `${fontSizeToUse}px ${fontStyle}`;
-      ctx.fillStyle = color;
+      ctx.fillStyle = color as string | CanvasGradient | CanvasPattern;
 
       if (!wrapText) {
         ctx.fillText(txt, centerX, centerY);
