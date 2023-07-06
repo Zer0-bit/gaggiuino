@@ -99,7 +99,12 @@ void espCommsSendTareScalesCommand() {
   esp::mcuComms.sendMessage(McuCommsMessageType::MCUC_CMD_REMOTE_SCALES_TARE);
 }
 
-void espCommsSendNotification(Notification notification) {
+volatile uint32_t notificationTimer;
+void espCommsSendNotification(Notification notification, uint32_t frequency) {
+  uint32_t now = millis();
+  if (now - notificationTimer < frequency) return;
+  notificationTimer = now;
+
   esp::mcuComms.sendMessage(
     McuCommsMessageType::MCUC_DATA_NOTIFICATION,
     ProtoSerializer::serialize<NotificationConverter>(notification)
@@ -110,13 +115,12 @@ volatile uint32_t systemStateTimer;
 void espCommsSendSystemState(const SystemState& systemState, uint32_t frequency) {
   uint32_t now = millis();
   if (now - systemStateTimer < frequency) return;
+  systemStateTimer = now;
 
   esp::mcuComms.sendMessage(
     McuCommsMessageType::MCUC_DATA_SYSTEM_STATE,
     ProtoSerializer::serialize<SystemStateConverter>(systemState)
   );
-
-  systemStateTimer = now;
 }
 
 void espCommsRequestData(McuCommsMessageType dataType) {

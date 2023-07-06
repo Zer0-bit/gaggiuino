@@ -90,10 +90,24 @@ void test_measurement_serialized_correctly(void) {
   TEST_ASSERT_EQUAL_MESSAGE(weight.millis, deserializedWeight.millis, "millis");
 }
 
+void test_notification_serialized_correctly(void) {
+  Notification notification = Notification::info("some notification");
+
+  std::vector<uint8_t> serializedData = ProtoSerializer::serialize<NotificationConverter>(notification);
+  std::cout << "Output size: " << serializedData.size() << "(bytes)" << std::endl;
+
+  Notification deserializedNotification = {};
+  ProtoSerializer::deserialize<NotificationConverter>(serializedData, deserializedNotification);
+
+  TEST_ASSERT_EQUAL_MESSAGE(notification.type, deserializedNotification.type, "type");
+  TEST_ASSERT_EQUAL_STRING_MESSAGE(notification.message.c_str(), deserializedNotification.message.c_str(), "message");
+}
+
 void runAllSettingsSerializerTests(void) {
   RUN_TEST(test_settings_serializer_works_correctly);
   RUN_TEST(test_data_request_is_serialized_correctly);
   RUN_TEST(test_shot_snapshot_is_serialized_correctly);
   RUN_TEST(test_system_state_serialized_correctly);
   RUN_TEST(test_measurement_serialized_correctly);
+  RUN_TEST(test_notification_serialized_correctly);
 }
