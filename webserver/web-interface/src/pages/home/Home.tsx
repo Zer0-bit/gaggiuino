@@ -14,7 +14,7 @@ function Home() {
 
   const { sensorState } = useSensorStateStore();
 
-  function boxedComponent(component) {
+  function boxedComponent(component: React.ReactNode) {
     return (
       <Box
         ref={gaugeRef}
@@ -35,7 +35,7 @@ function Home() {
     );
   }
 
-  const gaugeRef = useRef(null);
+  const gaugeRef = useRef<HTMLDivElement>(null);
   const [gaugeSize, setGaugeSize] = useState({ width: 0, height: 0 });
   const calculateGaugeSize = () => {
     if (gaugeRef.current) {
