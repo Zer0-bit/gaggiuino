@@ -58,9 +58,11 @@ void onProfileRequested() {
 // ------------------------------------------------------------------------
 void state::onActiveProfileUpdated(const Profile& profile) {
   stmCommsSendProfile(state::getActiveProfile());
+  wsSendActiveProfileUpdated();
 }
 void state::onAllSettingsUpdated(const GaggiaSettings& settings) {
   stmCommsSendGaggiaSettings(state::getSettings());
+  wsSendSettingsUpdated();
 }
 void state::onBrewSettingsUpdated(const BrewSettings& settings) {
   stmCommsSendBrewSettings(settings);

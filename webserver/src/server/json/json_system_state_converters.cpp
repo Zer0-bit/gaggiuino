@@ -30,6 +30,32 @@ namespace json {
     target["operationMode"] = mapOperationModeToJsonValue(updateOperationMode.operationMode);
   }
 
+  void mapSensorStateToJson(const SensorStateSnapshot& sensorState, JsonObject& target) {
+    target["brewActive"] = sensorState.brewActive;
+    target["steamActive"] = sensorState.steamActive;
+    target["hotWaterActive"] = sensorState.hotWaterSwitchState;
+    target["temperature"] = sensorState.temperature;
+    target["waterTemperature"] = sensorState.waterTemperature;
+    target["pressure"] = sensorState.pressure;
+    target["pumpFlow"] = sensorState.pumpFlow;
+    target["weightFlow"] = sensorState.weightFlow;
+    target["weight"] = sensorState.weight;
+    target["waterLevel"] = sensorState.waterLevel;
+  }
+
+  void mapShotSnapshotToJson(const ShotSnapshot& shotSnaposhot, JsonObject& target) {
+    target["timeInShot"] = shotSnaposhot.timeInShot;
+    target["pressure"] = shotSnaposhot.pressure;
+    target["pumpFlow"] = shotSnaposhot.pumpFlow;
+    target["weightFlow"] = shotSnaposhot.weightFlow;
+    target["temperature"] = shotSnaposhot.temperature;
+    target["shotWeight"] = shotSnaposhot.shotWeight;
+    target["waterPumped"] = shotSnaposhot.waterPumped;
+    target["targetTemperature"] = shotSnaposhot.targetTemperature;
+    target["targetPumpFlow"] = shotSnaposhot.targetPumpFlow;
+    target["targetPressure"] = shotSnaposhot.targetPressure;
+  }
+
   // ------------------------------------------------------------------------------------------
   // ----------------------------------- Deserializers ----------------------------------------
   // ------------------------------------------------------------------------------------------
@@ -44,7 +70,7 @@ namespace json {
   }
 
   UpdateOperationMode mapJsonToUpdateOperationMode(const JsonObject& json) {
-    return UpdateOperationMode {
+    return UpdateOperationMode{
       .operationMode = mapJsonValueToOperationMode(json["operationMode"]),
     };
   }

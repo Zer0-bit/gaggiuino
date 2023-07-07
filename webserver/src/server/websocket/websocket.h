@@ -13,5 +13,7 @@ void wsSendSensorStateSnapshotToClients(const SensorStateSnapshot& snapshot);
 void wsSendShotSnapshotToClients(const ShotSnapshot& snapshot);
 void wsSendLog(std::string log, std::string source = "webserver");
 void wsSendSystemStateToClients(const SystemState& systemState);
+void wsSendActiveProfileUpdated();
+void wsSendSettingsUpdated();
 
 #endif

@@ -1,5 +1,5 @@
 import React, {
-  useRef, useMemo,
+  useRef, useMemo, useState, useEffect,
 } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
@@ -66,6 +66,7 @@ interface DataPoints {
   labels: Array<number>;
   pressureData: Array<number>,
   flowData: Array<number>,
+  tempData: Array<number>
 }
 
 function profileToDatasets(profile: Profile): DataPoints {
@@ -73,6 +74,7 @@ function profileToDatasets(profile: Profile): DataPoints {
     labels: [],
     pressureData: [],
     flowData: [],
+    tempData: [],
   };
 
   let phaseStartTime = 0;
@@ -86,19 +88,24 @@ function profileToDatasets(profile: Profile): DataPoints {
       const phaseTime = phase.stopConditions?.time || transitionTime + 5000;
       const pressureTargets = getPressureSegment(phase, previousPressure);
       const flowTargets = getFlowSegment(phase, previousFlow);
+      let phaseTemp = (phase.waterTemperature || 0);
+      phaseTemp = phaseTemp > 0 ? phaseTemp : profile.waterTemperature;
 
       data.labels.push(phaseStartTime / 1000);
       data.flowData.push(flowTargets.start);
       data.pressureData.push(pressureTargets.start);
+      data.tempData.push(phaseTemp);
 
       if (transitionTime < phaseTime) {
         data.labels.push((phaseStartTime + transitionTime) / 1000);
         data.flowData.push(flowTargets.end);
         data.pressureData.push(pressureTargets.end);
+        data.tempData.push(phaseTemp);
       }
       data.labels.push((phaseStartTime + phaseTime) / 1000);
       data.flowData.push(flowTargets.end);
       data.pressureData.push(pressureTargets.end);
+      data.tempData.push(phaseTemp);
 
       phaseStartTime += phaseTime + 500;
       currentSegment += 1;
@@ -129,6 +136,14 @@ function mapToChartData(profile: Profile, theme: Theme): ChartData<'line'> {
         tension: 0,
         yAxisID: 'y2',
       },
+      {
+        label: 'Temp',
+        data: data.tempData,
+        backgroundColor: alpha(theme.palette.temperature.main, 0.8),
+        borderColor: theme.palette.temperature.main,
+        tension: 0.11,
+        yAxisID: 'y1',
+      },
     ],
   };
 }
@@ -141,7 +156,12 @@ function ProfileChart({ profile }: ProfileChartProps) {
   const chartRef = useRef(null);
   const theme = useTheme();
   const config = useMemo(() => getProfilePreviewChartConfig(theme), [theme]);
-  const chartData = useMemo(() => mapToChartData(profile, theme), [profile, theme]);
+  const [chartData, setChartData] = useState(mapToChartData(profile, theme));
+
+  useEffect(() => {
+    console.log('Profile preview useEffect triggered', profile);
+    setChartData(mapToChartData(profile, theme));
+  }, [profile, theme]);
 
   return (
     <Line

@@ -10,7 +10,6 @@ import {
   TextField,
   Typography,
   lighten,
-  Stack,
   useTheme,
   IconButton,
   darken,
@@ -36,8 +35,7 @@ function Home() {
   function handleTempUpdate(value: number) {
     if (!activeProfile) return;
     if (value > 169 || value < 0) return;
-    activeProfile.waterTemperature = value;
-    updateActiveProfile(activeProfile);
+    updateActiveProfile({ ...activeProfile, waterTemperature: value });
   }
 
   const colorScaling = theme.palette.mode === 'light' ? lighten : darken;
