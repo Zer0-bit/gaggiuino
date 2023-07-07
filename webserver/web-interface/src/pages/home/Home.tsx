@@ -48,7 +48,7 @@ function Home() {
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
 
         {/* Left size Gauges */}
-        <Grid xs={2}>
+        <Grid xs={4} sm={2} md={2}>
           <Box sx={{ p: theme.spacing(2) }}>
             <GaugeLiquid value={sensorState.waterLevel} />
           </Box>
@@ -58,7 +58,7 @@ function Home() {
         </Grid>
 
         {/* Center part - profiles */}
-        <Grid xs={6} sx={{ gap: '8px', position: 'relative' }}>
+        <Grid xs={4} sm={6} md={6} sx={{ gap: '8px', position: 'relative' }}>
           <Box>
             <Grid container spacing={1}>
               <Grid xs={12}>
@@ -103,10 +103,10 @@ function Home() {
                 <Grid xs={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     sx={{
                       textAlign: 'center',
                       backgroundColor: colorScaling(theme.palette.background.default, 0.3),
-                      border: 0,
                     }}
                     type="text"
                     value={activeProfile?.waterTemperature || 0}
@@ -115,6 +115,8 @@ function Home() {
                       sx: {
                         '& input': {
                           textAlign: 'center',
+                          paddingLeft: 0,
+                          paddingRight: 0,
                         },
                       },
                     }}
@@ -142,11 +144,11 @@ function Home() {
                 </Grid>
                 <Grid xs={4}>
                   <TextField
+                    size="small"
                     fullWidth
                     sx={{
                       textAlign: 'center',
                       backgroundColor: colorScaling(theme.palette.background.default, 0.3),
-                      border: 0,
                     }}
                     disabled
                     type="text"
@@ -156,6 +158,8 @@ function Home() {
                       sx: {
                         '& input': {
                           textAlign: 'center',
+                          paddingLeft: 0,
+                          paddingRight: 0,
                         },
                       },
                     }}
