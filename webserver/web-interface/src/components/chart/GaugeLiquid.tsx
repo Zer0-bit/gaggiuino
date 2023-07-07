@@ -1,22 +1,32 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect, useRef, useState,
+} from 'react';
 import { debounce, useTheme } from '@mui/material';
-import GaugeLiquid from 'react-liquid-gauge';
+import LiquidFillGauge from 'react-liquid-gauge';
 import AspectRatioBox from '../layout/AspectRatioBox';
 import { GaugeTitle } from './GaugeChart';
 
-function GaugeLiquidComponent({ value = 0 }) {
+export default function GaugeLiquidComponent({ value }: { value: number}) {
   const theme = useTheme();
-  const gaugeRef = useRef(null);
+  const gaugeRef = useRef<HTMLElement | null>(null);
   const [gaugeSize, setGaugeSize] = useState({ width: 0, height: 0 });
 
-  const calculateGaugeSize = debounce(() => {
-    if (gaugeRef.current) {
-      const { width, height } = gaugeRef.current.getBoundingClientRect();
-      setGaugeSize({ width, height });
-    }
-  }, 300);
+  const calculateGaugeSize = useCallback(
+    () => {
+      const debouncedCalculateSize = debounce(() => {
+        if (gaugeRef.current) {
+          const { width, height } = gaugeRef.current.getBoundingClientRect();
+          setGaugeSize({ width, height });
+        }
+      }, 300);
+      debouncedCalculateSize();
+    },
+    [gaugeRef, setGaugeSize],
+  );
 
   useEffect(() => {
+    console.log('Hey!');
     calculateGaugeSize();
     window.addEventListener('resize', calculateGaugeSize);
 
@@ -30,7 +40,7 @@ function GaugeLiquidComponent({ value = 0 }) {
       <GaugeTitle sx={{ mb: theme.spacing(1) }}>Water Level</GaugeTitle>
       <AspectRatioBox ref={gaugeRef}>
         {gaugeSize.width > 10 && (
-        <GaugeLiquid
+        <LiquidFillGauge
           style={{ margin: '0 auto' }}
           width={gaugeSize.width - 10}
           height={gaugeSize.width - 10}
@@ -57,5 +67,3 @@ function GaugeLiquidComponent({ value = 0 }) {
     </>
   );
 }
-
-export default GaugeLiquidComponent;

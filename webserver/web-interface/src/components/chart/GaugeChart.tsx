@@ -63,6 +63,7 @@ export function GaugeChart({
         color: primaryColor,
         maxFontSize: 55,
         minFontSize: 1,
+        sidePadding: 10,
       },
     },
   };

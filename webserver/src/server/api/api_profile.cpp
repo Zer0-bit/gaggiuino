@@ -93,9 +93,12 @@ void handlePostProfile(AsyncWebServerRequest* request, JsonVariant& body) {
   SavedProfile savedProfile = result.second;
 
   AsyncResponseStream* response = request->beginResponseStream("application/json");
-  body["id"] = savedProfile.id;
 
-  serializeJson(body, *response);
+  body.clear();
+  JsonObject responseBody = body.as<JsonObject>();
+  json::mapProfileToJson(savedProfile.id, newProfile, responseBody);
+
+  serializeJson(responseBody, *response);
   request->send(response);
 }
 
@@ -115,9 +118,12 @@ void handleUpdateProfile(AsyncWebServerRequest* request, JsonVariant& body) {
   persistence::saveProfile(id, profile);
 
   AsyncResponseStream* response = request->beginResponseStream("application/json");
-  body["id"] = id;
 
-  serializeJson(body, *response);
+  body.clear();
+  JsonObject responseBody = body.as<JsonObject>();
+  json::mapProfileToJson(id, profile, responseBody);
+
+  serializeJson(responseBody, *response);
   request->send(response);
 }
 
@@ -199,8 +205,11 @@ void handleUpdateActiveProfile(AsyncWebServerRequest* request, JsonVariant& body
   AsyncResponseStream* response = request->beginResponseStream("application/json");
 
   state::updateActiveProfile(json::mapJsonToProfile(body));
-  body["id"] = state::getActiveProfileId();
 
-  serializeJson(body, *response);
+  body.clear();
+  JsonObject responseBody = body.as<JsonObject>();
+  json::mapProfileToJson(state::getActiveProfileId(), state::getActiveProfile(), responseBody);
+
+  serializeJson(responseBody, *response);
   request->send(response);
 }

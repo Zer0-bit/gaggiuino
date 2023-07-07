@@ -3,6 +3,7 @@
 
 #include "ArduinoJson.h"
 #include "system_state.h"
+#include "sensors_state.h"
 #include "string"
 
 namespace json {
@@ -12,6 +13,8 @@ namespace json {
   std::string mapOperationModeToJsonValue(const OperationMode& mode);
   void mapSystemStateToJson(const SystemState& systemState, JsonObject& target);
   void mapUpdateOperationModeToJson(const UpdateOperationMode& updateOperationMode, JsonObject& target);
+  void mapSensorStateToJson(const SensorStateSnapshot& sensorState, JsonObject& target);
+  void mapShotSnapshotToJson(const ShotSnapshot& shotSnaposhot, JsonObject& target);
 
   // ------------------------------------------------------------------------------------------
   // ----------------------------------- Deserializers ----------------------------------------
