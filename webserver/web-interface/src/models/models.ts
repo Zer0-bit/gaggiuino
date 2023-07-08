@@ -29,10 +29,6 @@ export interface SensorState {
     waterLevel: number;
 }
 
-export interface Shot {
-    dataPoints: ShotSnapshot,
-}
-
 export interface ShotSnapshot {
     timeInShot: number;
     pressure: number;
@@ -49,4 +45,9 @@ export interface ShotSnapshot {
 export interface LogMessage {
     source: string,
     log: string,
+}
+
+export interface Shot {
+  time: number,
+  datapoints: Array<ShotSnapshot>,
 }

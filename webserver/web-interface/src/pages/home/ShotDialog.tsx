@@ -9,19 +9,21 @@ import {
   PressureStatBox, PumpFlowStatBox, TemperatureStatBox, TimeStatBox, WeightFlowStatBox, WeightStatBox,
 } from '../../components/chart/StatBox';
 import useShotDataStore from '../../state/ShotDataStore';
+import { Shot } from '../../models/models';
 
 interface ShotDialogProps {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  open?: boolean;
+  setOpen: (value: boolean) => void;
+  historyShot?: Shot;
 }
 
-const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
+export default function ShotDialog({ open, setOpen, historyShot }: ShotDialogProps) {
   const { latestShotDatapoint } = useShotDataStore();
 
   return (
     <Dialog
       fullScreen
-      open={open}
+      open={open || false}
       onClose={() => setOpen(false)}
       PaperProps={{ elevation: 0 }}
     >
@@ -42,7 +44,8 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
         <Grid container columns={4} spacing={1} sx={{ flexGrow: 1 }}>
           <Grid xs={4} sm={3} display="flex" alignContent="stretch" flexGrow={1}>
             <Box sx={{ position: 'relative', width: '100%' }}>
-              <ShotChart newDataPoint={latestShotDatapoint} />
+              {historyShot && <ShotChart data={historyShot.datapoints} />}
+              {!historyShot && <ShotChart newDataPoint={latestShotDatapoint} />}
             </Box>
           </Grid>
           <Grid xs={4} sm={1}>
@@ -52,15 +55,12 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                 <TimeStatBox
                   timeInShot={latestShotDatapoint.timeInShot}
                   sx={{ height: '100%' }}
-                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
                 <WeightStatBox
                   shotWeight={latestShotDatapoint.shotWeight}
-                  target=""
                   sx={{ height: '100%' }}
-                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
@@ -68,7 +68,6 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                   pressure={latestShotDatapoint.pressure}
                   target={latestShotDatapoint.targetPressure}
                   sx={{ height: '100%' }}
-                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
@@ -76,7 +75,6 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                   pumpFlow={latestShotDatapoint.pumpFlow}
                   target={latestShotDatapoint.targetPumpFlow}
                   sx={{ height: '100%' }}
-                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
@@ -84,7 +82,6 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                   flow={latestShotDatapoint.weightFlow}
                   target={latestShotDatapoint.targetPumpFlow}
                   sx={{ height: '100%' }}
-                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
@@ -92,7 +89,6 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                   temperature={latestShotDatapoint.temperature}
                   target={latestShotDatapoint.targetTemperature}
                   sx={{ height: '100%' }}
-                  style={{}}
                 />
               </Grid>
             </Grid>
@@ -102,6 +98,9 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
       </Stack>
     </Dialog>
   );
-};
+}
 
-export default ShotDialog;
+ShotDialog.defaultProps = {
+  open: false,
+  historyShot: undefined,
+};

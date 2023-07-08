@@ -22,12 +22,15 @@ import AspectRatioBox from '../../components/layout/AspectRatioBox';
 import useProfileStore from '../../state/ProfileStore';
 import useSensorStateStore from '../../state/SensorStateStore';
 import { ProfileReview } from '../../components/profile/ProfilePreview';
+import ShotHistory from '../../components/shot/ShotHistory';
+import useShotDataStore from '../../state/ShotDataStore';
 
 function Home() {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
 
   const { sensorState } = useSensorStateStore();
+  const { shotHistory } = useShotDataStore();
   const {
     activeProfile, updateActiveProfile, fetchActiveProfile, persistActiveProfile,
   } = useProfileStore();
@@ -70,7 +73,6 @@ function Home() {
         <Grid xs={7} sm={6} sx={{ gap: '8px', position: 'relative' }}>
           <Box>
             <Grid container spacing={1}>
-
               <Grid xs={12}>
                 {activeProfile && (
                 <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
@@ -78,6 +80,13 @@ function Home() {
                 </Paper>
                 ) }
                 {!activeProfile && <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />}
+              </Grid>
+              <Grid xs={12}>
+                <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+                  <Typography variant="h6">Shot history</Typography>
+                  {shotHistory.length > 0 && <ShotHistory />}
+                  {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
+                </Paper>
               </Grid>
               <Grid xs={6}>
                 <Skeleton variant="rounded" height={150} sx={{ borderRadius: '16px' }} />
@@ -105,7 +114,7 @@ function Home() {
               {/* Target temp input line */}
               <Grid container xs={12} alignItems="center">
                 <Grid xs={4}>
-                  <Typography fontSize={10} color={theme.palette.text.secondary}>TARGET TEMP</Typography>
+                  <Typography fontSize={10}>TARGET TEMP</Typography>
                 </Grid>
                 <Grid xs={4}>
                   <TextField
@@ -147,7 +156,7 @@ function Home() {
               {/* Scale input line */}
               <Grid container xs={12} alignItems="center">
                 <Grid xs={4}>
-                  <Typography fontSize={10} color={theme.palette.text.secondary}>SCALE</Typography>
+                  <Typography fontSize={10}>SCALE</Typography>
                 </Grid>
                 <Grid xs={4}>
                   <TextField

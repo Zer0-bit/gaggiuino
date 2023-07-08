@@ -194,7 +194,7 @@ export default function Profiles() {
               <TextareaAutosize
                 minRows={15}
                 onChange={(evt) => updateProfile(evt.target.value)}
-                style={{ width: '100%', backgroundColor: theme.palette.background.paper, color: theme.palette.text.secondary }}
+                style={{ width: '100%', backgroundColor: theme.palette.background.paper }}
               />
             </Grid>
             <Grid item xs={1} sm={2} position="relative" height="400">

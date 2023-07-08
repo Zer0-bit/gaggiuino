@@ -39,7 +39,7 @@ function LinkTab(props: LinkTabProps) {
   const location = useLocation();
   const theme = useTheme();
 
-  const textColor = theme.palette.text.secondary;
+  const textColor = theme.palette.text.primary;
   const activeColor = theme.palette.mode === 'light'
     ? theme.palette.primary.contrastText
     : theme.palette.primary.main;

@@ -17,13 +17,13 @@ interface GlobalRestrictionProps {
 
 function GlobalRestriction({ icon: Icon, value, color = undefined }: GlobalRestrictionProps) {
   const theme = useTheme();
-  const [finalColor, setFinalColor] = useState(theme.palette.text.secondary);
+  const [finalColor, setFinalColor] = useState(theme.palette.text.primary);
 
   useEffect(() => {
     if (!value) {
       setFinalColor(theme.palette.text.disabled);
     } else if (!color) {
-      setFinalColor(theme.palette.text.secondary);
+      setFinalColor(theme.palette.text.primary);
     } else {
       setFinalColor(color);
     }
@@ -73,7 +73,6 @@ export function ProfileReview({ profile, onSave, onEdit }: ProfileReviewProps) {
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         mb: theme.spacing(2),
-        color: theme.palette.text.secondary,
       }}
       >
         <Typography variant="h6">{profile.name}</Typography>
@@ -92,7 +91,6 @@ export function ProfileReview({ profile, onSave, onEdit }: ProfileReviewProps) {
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         fontSize: theme.typography.caption.fontSize,
-        color: theme.palette.text.secondary,
       }}
       >
         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>STOP ON</Box>

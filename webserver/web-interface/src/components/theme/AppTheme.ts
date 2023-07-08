@@ -1,4 +1,4 @@
-import { PaletteMode, createTheme } from '@mui/material';
+import { PaletteMode, alpha, createTheme } from '@mui/material';
 
 const lightTheme = createTheme({
   palette: {
@@ -26,13 +26,17 @@ const lightTheme = createTheme({
       main: '#1d7835',
     },
     pressure: {
-      main: '#6296C5',
+      main: '#3c91de',
     },
     weight: {
       main: '#844B48',
     },
     water: {
       main: '#178bca',
+    },
+    text: {
+      primary: alpha('#000000', 0.8),
+      secondary: alpha('#000000', 0.6),
     },
   },
 });
@@ -56,7 +60,7 @@ const darkTheme = createTheme({
       main: '#1d7835',
     },
     pressure: {
-      main: '#6296C5',
+      main: '#3c91de',
     },
     weight: {
       main: '#a75c58',
@@ -68,6 +72,11 @@ const darkTheme = createTheme({
     water: {
       main: '#178bca',
     },
+    text: {
+      primary: alpha('#FFF', 0.8),
+      secondary: alpha('#FFF', 0.6),
+    },
+
   },
 });
 

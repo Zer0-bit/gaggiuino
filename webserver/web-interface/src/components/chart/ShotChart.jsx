@@ -172,7 +172,7 @@ function Chart({ data, newDataPoint, maxLength }) {
 
   // Adds newDataPoint to the end of the chart unless it detects that a new shot was started. More efficient.
   useEffect(() => {
-    if (!newDataPoint === undefined || newDataPoint === null) {
+    if (newDataPoint === undefined || newDataPoint === null) {
       return;
     }
     if (newShotStarted(newDataPoint, chartData)) {
