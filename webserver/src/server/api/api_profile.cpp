@@ -73,7 +73,7 @@ void handleGetProfileById(AsyncWebServerRequest* request) {
   }
 
   AsyncResponseStream* response = request->beginResponseStream("application/json");
-  DynamicJsonDocument json(4096);
+  DynamicJsonDocument json(2048);
   JsonObject jsonObj = json.to<JsonObject>();
 
   json::mapProfileToJson(id, result.second, jsonObj);
@@ -93,9 +93,7 @@ void handlePostProfile(AsyncWebServerRequest* request, JsonVariant& body) {
   SavedProfile savedProfile = result.second;
 
   AsyncResponseStream* response = request->beginResponseStream("application/json");
-
-  body.clear();
-  JsonObject responseBody = body.as<JsonObject>();
+  JsonObject responseBody = body.to<JsonObject>();
   json::mapProfileToJson(savedProfile.id, newProfile, responseBody);
 
   serializeJson(responseBody, *response);
@@ -118,9 +116,7 @@ void handleUpdateProfile(AsyncWebServerRequest* request, JsonVariant& body) {
   persistence::saveProfile(id, profile);
 
   AsyncResponseStream* response = request->beginResponseStream("application/json");
-
-  body.clear();
-  JsonObject responseBody = body.as<JsonObject>();
+  JsonObject responseBody = body.to<JsonObject>();
   json::mapProfileToJson(id, profile, responseBody);
 
   serializeJson(responseBody, *response);
@@ -202,12 +198,11 @@ void handlePersistActiveProfile(AsyncWebServerRequest* request) {
 
 void handleUpdateActiveProfile(AsyncWebServerRequest* request, JsonVariant& body) {
   LOG_INFO("Got request to update active profile");
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
 
   state::updateActiveProfile(json::mapJsonToProfile(body));
 
-  body.clear();
-  JsonObject responseBody = body.as<JsonObject>();
+  AsyncResponseStream* response = request->beginResponseStream("application/json");
+  JsonObject responseBody = body.to<JsonObject>();
   json::mapProfileToJson(state::getActiveProfileId(), state::getActiveProfile(), responseBody);
 
   serializeJson(responseBody, *response);
