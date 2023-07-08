@@ -2,7 +2,6 @@ import React from 'react';
 import {
   AppBar, Box, Dialog, IconButton, Stack, Toolbar,
 } from '@mui/material';
-import PropTypes from 'prop-types';
 import CloseIcon from '@mui/icons-material/Close';
 import Grid from '@mui/material/Unstable_Grid2';
 import ShotChart from '../../components/chart/ShotChart';
@@ -53,15 +52,15 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                 <TimeStatBox
                   timeInShot={latestShotDatapoint.timeInShot}
                   sx={{ height: '100%' }}
-                  style=''
+                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
                 <WeightStatBox
                   shotWeight={latestShotDatapoint.shotWeight}
-                  target=''
+                  target=""
                   sx={{ height: '100%' }}
-                  style=''
+                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
@@ -69,7 +68,7 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                   pressure={latestShotDatapoint.pressure}
                   target={latestShotDatapoint.targetPressure}
                   sx={{ height: '100%' }}
-                  style=''
+                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
@@ -77,7 +76,7 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                   pumpFlow={latestShotDatapoint.pumpFlow}
                   target={latestShotDatapoint.targetPumpFlow}
                   sx={{ height: '100%' }}
-                  style=''
+                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
@@ -85,7 +84,7 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                   flow={latestShotDatapoint.weightFlow}
                   target={latestShotDatapoint.targetPumpFlow}
                   sx={{ height: '100%' }}
-                  style=''
+                  style={{}}
                 />
               </Grid>
               <Grid xs={1} sm={3}>
@@ -93,7 +92,7 @@ const ShotDialog: React.FC<ShotDialogProps> = ({ open, setOpen }) => {
                   temperature={latestShotDatapoint.temperature}
                   target={latestShotDatapoint.targetTemperature}
                   sx={{ height: '100%' }}
-                  style=''
+                  style={{}}
                 />
               </Grid>
             </Grid>

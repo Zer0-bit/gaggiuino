@@ -40,10 +40,9 @@ function LinkTab(props: LinkTabProps) {
   const theme = useTheme();
 
   const textColor = theme.palette.text.secondary;
-  const activeColor =
-    theme.palette.mode === 'light'
-      ? theme.palette.primary.contrastText
-      : theme.palette.primary.main;
+  const activeColor = theme.palette.mode === 'light'
+    ? theme.palette.primary.contrastText
+    : theme.palette.primary.main;
   const id = path.replace('/', '');
   const { label, icon } = menuItems[path];
 
@@ -172,10 +171,9 @@ function MainAppBar() {
     if (latestShotDatapoint.timeInShot > 0) setShotDialogOpen(true);
   }, [latestShotDatapoint]);
 
-  const activeColor =
-    theme.palette.mode === 'light'
-      ? theme.palette.primary.contrastText
-      : theme.palette.primary.main;
+  const activeColor = theme.palette.mode === 'light'
+    ? theme.palette.primary.contrastText
+    : theme.palette.primary.main;
 
   return (
     <AppBar sx={{ position: 'static' }} elevation={1}>
@@ -227,7 +225,8 @@ function MainAppBar() {
               alignContent: 'end',
               textAlign: 'center',
             }}
-          ></Skeleton>
+          >
+          </Skeleton>
         </Stack>
       </Toolbar>
       <Box />
