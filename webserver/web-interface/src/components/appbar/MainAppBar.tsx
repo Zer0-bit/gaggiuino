@@ -7,27 +7,43 @@ import TuneIcon from '@mui/icons-material/Tune';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Box from '@mui/material/Box';
 import {
-  useTheme, Stack, AppBar, Toolbar, Fab, useMediaQuery, MenuItem, Button, Menu, Skeleton,
+  useTheme,
+  Stack,
+  AppBar,
+  Toolbar,
+  Fab,
+  useMediaQuery,
+  MenuItem,
+  Button,
+  Menu,
+  Skeleton,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import Logo from '../icons/Logo';
 import ShotDialog from '../../pages/home/ShotDialog';
 import useShotDataStore from '../../state/ShotDataStore';
 
-const menuItems = {
+const menuItems: { [key: string]: { label: string; icon: JSX.Element } } = {
   '/': { label: 'Home', icon: <CoffeeIcon /> },
   '/profiles': { label: 'Profiles', icon: <TuneIcon /> },
   '/settings': { label: 'Settings', icon: <SettingsIcon /> },
 };
 
-function LinkTab(props) {
+interface LinkTabProps {
+  value: string;
+}
+
+function LinkTab(props: LinkTabProps) {
   const { value: path } = props;
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
 
   const textColor = theme.palette.text.secondary;
-  const activeColor = theme.palette.mode === 'light' ? theme.palette.primary.contrastText : theme.palette.primary.main;
+  const activeColor =
+    theme.palette.mode === 'light'
+      ? theme.palette.primary.contrastText
+      : theme.palette.primary.main;
   const id = path.replace('/', '');
   const { label, icon } = menuItems[path];
 
@@ -40,8 +56,7 @@ function LinkTab(props) {
       onClick={() => navigate(path)}
       label={label}
       icon={icon}
-    >
-    </Tab>
+    />
   );
 }
 
@@ -49,7 +64,13 @@ LinkTab.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-function TabMenu({ activeItem, onChange, activeColor }) {
+interface TabMenuProps {
+  activeItem: string;
+  onChange: (value: string) => void;
+  activeColor: string;
+}
+
+function TabMenu({ activeItem, onChange, activeColor }: TabMenuProps) {
   return (
     <Tabs
       value={activeItem}
@@ -62,17 +83,24 @@ function TabMenu({ activeItem, onChange, activeColor }) {
         },
       }}
     >
-      {Object.keys(menuItems).map((item) => <LinkTab key={item} value={item} />)}
+      {Object.keys(menuItems).map((item) => (
+        <LinkTab key={item} value={item} />
+      ))}
     </Tabs>
   );
 }
 
-function NavMenu({ activeItem, onChange }) {
+interface NavMenuProps {
+  activeItem: string;
+  onChange: (value: string) => void;
+}
+
+function NavMenu({ activeItem, onChange }: NavMenuProps) {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const theme = useTheme();
 
-  const handleOpenMenu = (event) => {
+  const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -135,8 +163,8 @@ function NavMenu({ activeItem, onChange }) {
 function MainAppBar() {
   const theme = useTheme();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState(location.pathname || '/');
-  const [shotDialogOpen, setShotDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>(location.pathname || '/');
+  const [shotDialogOpen, setShotDialogOpen] = useState<boolean>(false);
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
   const { latestShotDatapoint } = useShotDataStore();
 
@@ -144,15 +172,25 @@ function MainAppBar() {
     if (latestShotDatapoint.timeInShot > 0) setShotDialogOpen(true);
   }, [latestShotDatapoint]);
 
-  const activeColor = theme.palette.mode === 'light' ? theme.palette.primary.contrastText : theme.palette.primary.main;
+  const activeColor =
+    theme.palette.mode === 'light'
+      ? theme.palette.primary.contrastText
+      : theme.palette.primary.main;
 
   return (
     <AppBar sx={{ position: 'static' }} elevation={1}>
       <Toolbar>
-        <Stack sx={{ display: 'flex', flexGrow: 1 }} direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+        <Stack
+          sx={{ display: 'flex', flexGrow: 1 }}
+          direction="row"
+          spacing={2}
+          justifyContent="space-between"
+          alignItems="center"
+        >
           <Box
             sx={{
-              color: activeColor, alignContent: 'center',
+              color: activeColor,
+              alignContent: 'center',
             }}
           >
             <Fab
@@ -162,26 +200,34 @@ function MainAppBar() {
                 color: 'primary.main',
                 backgroundColor: 'background.default',
                 boxShadow: 0,
-                '&:hover': { boxShadow: 0, backgroundColor: 'background.default' },
+                '&:hover': {
+                  boxShadow: 0,
+                  backgroundColor: 'background.default',
+                },
               }}
             >
-              <Box height={30} sx={{ ml: '-4px' }}><Logo size={30} sx={{}} /></Box>
+              <Box height={30} sx={{ ml: '-4px' }}>
+                <Logo size={30} />
+              </Box>
             </Fab>
           </Box>
           {isBiggerScreen && (
-          <TabMenu activeItem={activeTab} activeColor={activeColor} onChange={setActiveTab} />
+            <TabMenu activeItem={activeTab} activeColor={activeColor} onChange={setActiveTab} />
           )}
-          {!isBiggerScreen && (<NavMenu activeItem={activeTab} onChange={setActiveTab} />)}
+          {!isBiggerScreen && <NavMenu activeItem={activeTab} onChange={setActiveTab} />}
           {/* <ThemeModeToggle /> */}
           <Skeleton
             variant="rounded"
             height={40}
             width={100}
             sx={{
-              fontSize: '1rem', borderRadius: '16px', display: 'flex', alignContent: 'end', textAlign: 'center',
+              fontSize: '1rem',
+              borderRadius: '16px',
+              display: 'flex',
+              alignContent: 'end',
+              textAlign: 'center',
             }}
-          >
-          </Skeleton>
+          ></Skeleton>
         </Stack>
       </Toolbar>
       <Box />
