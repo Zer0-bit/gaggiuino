@@ -159,7 +159,6 @@ function ProfileChart({ profile }: ProfileChartProps) {
   const [chartData, setChartData] = useState(mapToChartData(profile, theme));
 
   useEffect(() => {
-    console.log('Profile preview useEffect triggered', profile);
     setChartData(mapToChartData(profile, theme));
   }, [profile, theme]);
 

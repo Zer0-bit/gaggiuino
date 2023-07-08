@@ -13,20 +13,24 @@ import {
   useTheme,
   IconButton,
   darken,
+  useMediaQuery,
 } from '@mui/material';
 import React, { useEffect } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
-import ProfileChart from '../../components/chart/ProfileChart';
 import AspectRatioBox from '../../components/layout/AspectRatioBox';
 import useProfileStore from '../../state/ProfileStore';
 import useSensorStateStore from '../../state/SensorStateStore';
+import { ProfileReview } from '../../components/profile/ProfilePreview';
 
 function Home() {
   const theme = useTheme();
+  const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
 
   const { sensorState } = useSensorStateStore();
-  const { activeProfile, updateActiveProfile, fetchActiveProfile } = useProfileStore();
+  const {
+    activeProfile, updateActiveProfile, fetchActiveProfile, persistActiveProfile,
+  } = useProfileStore();
 
   useEffect(() => {
     fetchActiveProfile();
@@ -38,6 +42,10 @@ function Home() {
     updateActiveProfile({ ...activeProfile, waterTemperature: value });
   }
 
+  function handlePersistActiveProfile() {
+    persistActiveProfile();
+  }
+
   const colorScaling = theme.palette.mode === 'light' ? lighten : darken;
 
   return (
@@ -46,28 +54,29 @@ function Home() {
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
 
         {/* Left size Gauges */}
-        <Grid xs={4} sm={2} md={2}>
+        {isBiggerScreen && (
+        <Grid sm={2} md={2}>
           <Box sx={{ p: theme.spacing(2) }}>
             <GaugeLiquid value={sensorState.waterLevel} />
           </Box>
           <Box sx={{ mt: theme.spacing(1), p: theme.spacing(2) }}>
             <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
           </Box>
+
         </Grid>
+        )}
 
         {/* Center part - profiles */}
-        <Grid xs={4} sm={6} md={6} sx={{ gap: '8px', position: 'relative' }}>
+        <Grid xs={7} sm={6} sx={{ gap: '8px', position: 'relative' }}>
           <Box>
             <Grid container spacing={1}>
+
               <Grid xs={12}>
                 {activeProfile && (
                 <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
-                  <Typography variant="h6" sx={{ color: theme.palette.text.secondary, mb: theme.spacing(2) }}>
-                    {activeProfile.name}
-                  </Typography>
-                  <Box position="relative"><ProfileChart profile={activeProfile} /></Box>
+                  <ProfileReview profile={activeProfile} onSave={handlePersistActiveProfile} onEdit={console.log} />
                 </Paper>
-                )}
+                ) }
                 {!activeProfile && <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />}
               </Grid>
               <Grid xs={6}>
@@ -80,8 +89,8 @@ function Home() {
           </Box>
         </Grid>
 
-        {/* Left part - Temperature Gauge and Scale */}
-        <Grid xs={4}>
+        {/* Right part - Temperature Gauge and Scale */}
+        <Grid xs={5} sm={4}>
           <Box sx={{
             pb: 1, pl: 0.5, pr: 0.5, borderRadius: '50%', backgroundColor: colorScaling(theme.palette.background.default, 0.4),
           }}
@@ -96,7 +105,7 @@ function Home() {
               {/* Target temp input line */}
               <Grid container xs={12} alignItems="center">
                 <Grid xs={4}>
-                  <Typography variant="caption" color={theme.palette.text.secondary}>TARGET TEMP</Typography>
+                  <Typography fontSize={10} color={theme.palette.text.secondary}>TARGET TEMP</Typography>
                 </Grid>
                 <Grid xs={4}>
                   <TextField
@@ -138,7 +147,7 @@ function Home() {
               {/* Scale input line */}
               <Grid container xs={12} alignItems="center">
                 <Grid xs={4}>
-                  <Typography variant="caption" color={theme.palette.text.secondary}>SCALE</Typography>
+                  <Typography fontSize={10} color={theme.palette.text.secondary}>SCALE</Typography>
                 </Grid>
                 <Grid xs={4}>
                   <TextField
@@ -168,13 +177,25 @@ function Home() {
                     width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly',
                   }}
                   >
-                    <Button size="small" onClick={() => false}>
-                      <ScaleIcon sx={{ mr: theme.spacing(1) }} />
+                    <Button sx={{ fontSize: { xs: 12, sm: 14 } }} size="small" onClick={() => false}>
+                      <ScaleIcon fontSize="inherit" sx={{ mr: theme.spacing(1) }} />
                       Tare
                     </Button>
                   </Box>
                 </Grid>
               </Grid>
+              {/* End of scale input line */}
+              {!isBiggerScreen
+                && (
+                <Grid xs={12} sx={{ display: 'flex', alignItems: 'stretch' }}>
+                  <Box sx={{ width: '50%', p: theme.spacing(1) }}>
+                    <GaugeLiquid value={sensorState.waterLevel} />
+                  </Box>
+                  <Box sx={{ width: '50%', p: theme.spacing(1) }}>
+                    <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
+                  </Box>
+                </Grid>
+                )}
             </Grid>
           </Box>
         </Grid>
