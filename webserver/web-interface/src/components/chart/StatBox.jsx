@@ -8,7 +8,7 @@ import ScaleIcon from '@mui/icons-material/Scale';
 import CompressIcon from '@mui/icons-material/Compress';
 import AirIcon from '@mui/icons-material/Air';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
-import { formatTimeInShot } from '../../models/api';
+import { formatTime } from '../../models/api';
 
 function formatNumber(value, decimals = 1) {
   return typeof value === 'number' ? value.toFixed(decimals) : undefined;
@@ -57,7 +57,7 @@ export function TimeStatBox({ timeInShot, sx, style }) {
       label="Time"
       icon={<TimerIcon />}
       color={theme.palette.text.primary}
-      stat={formatTimeInShot(timeInShot)}
+      stat={formatTime({ time: timeInShot })}
       sx={sx}
       style={style}
     />
