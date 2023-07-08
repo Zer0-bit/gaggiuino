@@ -60,8 +60,12 @@ export default function Profiles() {
       }
       setProfile(newProfile);
       setError(undefined);
-    } catch (er: any) {
-      setError(er.message);
+    } catch (er: unknown) {
+      if (er instanceof Error) {
+        setError(er.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
     }
   };
 
