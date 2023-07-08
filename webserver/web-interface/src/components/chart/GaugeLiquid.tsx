@@ -26,7 +26,6 @@ export default function GaugeLiquidComponent({ value }: { value: number}) {
   );
 
   useEffect(() => {
-    console.log('Hey!');
     calculateGaugeSize();
     window.addEventListener('resize', calculateGaugeSize);
 
@@ -37,7 +36,7 @@ export default function GaugeLiquidComponent({ value }: { value: number}) {
 
   return (
     <>
-      <GaugeTitle sx={{ mb: theme.spacing(1) }}>Water Level</GaugeTitle>
+      <GaugeTitle sx={{ mb: theme.spacing(1) }}>Water</GaugeTitle>
       <AspectRatioBox ref={gaugeRef}>
         {gaugeSize.width > 10 && (
         <LiquidFillGauge

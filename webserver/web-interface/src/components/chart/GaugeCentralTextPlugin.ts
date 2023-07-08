@@ -67,9 +67,11 @@ const GaugeCentralTextPlugin: Plugin = {
         wrapText = true;
       }
 
-      // Get the widths
+      // Get the text metrics
       ctx.font = `${fontSizeToUse}px ${fontStyle}`;
-      const valueWidth = ctx.measureText(value).width;
+      let metrics = ctx.measureText(value);
+      const valueWidth = metrics.width;
+      const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
       ctx.font = `${fontSizeToUse * unitFontRatio}px ${fontStyle}`;
       const unitWidth = ctx.measureText(unit).width;
 
@@ -77,7 +79,7 @@ const GaugeCentralTextPlugin: Plugin = {
       ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
       let centerX = ((chart.chartArea.left + chart.chartArea.right) / 2) - (valueWidth + unitWidth) / 2;
-      let centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
+      let centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2) + textHeight / 3;
       ctx.fillStyle = color as string | CanvasGradient | CanvasPattern;
 
       if (!wrapText) {
@@ -98,7 +100,7 @@ const GaugeCentralTextPlugin: Plugin = {
       // eslint-disable-next-line no-plusplus
       for (let n = 0; n < words.length; n++) {
         const testLine = `${line + words[n]} `;
-        const metrics = ctx.measureText(testLine);
+        metrics = ctx.measureText(testLine);
         const testWidth = metrics.width;
         if (testWidth > elementWidth && n > 0) {
           lines.push(line);
