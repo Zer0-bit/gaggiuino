@@ -13,7 +13,7 @@ uint8_t counter = 0;
 unsigned long descalingTimer = 0;
 int descalingCycle = 0;
 
-void deScale(GaggiaSettings &gaggiaSettings, const SensorState &currentState, SystemState& systemState) {
+void deScale(const GaggiaSettings &gaggiaSettings, const SensorState &currentState, SystemState& systemState) {
   switch (descalingState) {
     case DescalingState::IDLE: // Waiting for fuckfest to begin
       if (currentState.brewSwitchState) {

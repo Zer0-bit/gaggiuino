@@ -25,7 +25,7 @@ enum class HEATING {
 
 void justDoCoffee(const GaggiaSettings &gaggiaSettings, const SensorState &currentState, float waterTemperature, const bool brewActive);
 void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int factor_2, const bool brewActive);
-void steamCtrl(const GaggiaSettings &runningCfg, SensorState &currentState, SystemState& systemState);
+void steamCtrl(const GaggiaSettings &runningCfg, const SensorState &currentState, SystemState& systemState);
 void hotWaterMode(const SensorState &currentState);
 
 #endif

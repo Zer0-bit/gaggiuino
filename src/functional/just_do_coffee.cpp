@@ -73,7 +73,7 @@ void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int fact
 //#############################################################################################
 //################################____STEAM_POWER_CONTROL____##################################
 //#############################################################################################
-void steamCtrl(const GaggiaSettings& settings, SensorState& currentState, SystemState& systemState) {
+void steamCtrl(const GaggiaSettings& settings, const SensorState& currentState, SystemState& systemState) {
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float steamTempSetPoint = settings.boiler.steamSetPoint + settings.boiler.offsetTemp;
   float sensorTemperature = currentState.temperature + settings.boiler.offsetTemp;
