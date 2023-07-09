@@ -33,7 +33,7 @@ function mapDataPointToLabel(dataPoint) {
     return 0;
   }
 
-  return dataPoint.timeInShot / 1000;
+  return dataPoint.timeInShot;
 }
 
 function getLabels(input) {

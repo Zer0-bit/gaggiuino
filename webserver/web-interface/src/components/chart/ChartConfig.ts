@@ -30,12 +30,13 @@ export function getShotChartConfig(theme: Theme): ChartOptions<'line'> {
         type: 'linear',
         ticks: {
           color: theme.palette.text.secondary,
+          callback: (tickValue) => `${tickValue as number / 1000}`,
         },
         grid: {
           color: theme.palette.divider,
         },
         min: 0,
-        suggestedMax: 60,
+        suggestedMax: 60000,
       },
       y1: {
         type: 'linear',
