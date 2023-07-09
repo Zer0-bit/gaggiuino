@@ -49,7 +49,7 @@ export function StatBox({
           </Box>
           {statTarget && statTarget >= '0' && (
             <Box display="flex" justifyContent="flex-end" alignItems="center" color={color}>
-              <SportsScoreIcon sx={{ fontSize: '6px' }} />
+              <SportsScoreIcon fontSize="inherit" />
               {`${statTarget} ${unit}`}
             </Box>
           )}
