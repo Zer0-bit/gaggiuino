@@ -8,7 +8,7 @@ import {
   List, ListItem, ListItemAvatar,
   ListItemText,
 } from '@mui/material';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { formatTime } from '../../models/api';
 import useShotDataStore from '../../state/ShotDataStore';
 import ShotDialog from '../../pages/home/ShotDialog';
@@ -16,17 +16,14 @@ import { Shot } from '../../models/models';
 
 enum TimeOfDay {
   Morning = 'Morning',
-  Noon = 'Noon',
   Afternoon = 'Afternoon',
   Evening = 'Evening',
 }
 
 const getTimeOfDay = (date: Date): TimeOfDay => {
   const hours = date.getHours();
-  if (hours < 12) {
+  if (hours > 5 && hours < 12) {
     return TimeOfDay.Morning;
-  } if (hours < 14) {
-    return TimeOfDay.Noon;
   } if (hours < 18) {
     return TimeOfDay.Afternoon;
   }
@@ -37,10 +34,8 @@ const getIcon = (timeOfDay: TimeOfDay) => {
   switch (timeOfDay) {
     case TimeOfDay.Morning:
       return <Brightness7Icon />;
-    case TimeOfDay.Noon:
-      return <Brightness5Icon />;
     case TimeOfDay.Afternoon:
-      return <Brightness3Icon />;
+      return <Brightness5Icon />;
     case TimeOfDay.Evening:
       return <NightsStayIcon />;
     default:
@@ -52,23 +47,21 @@ const getColorForTimeOfDay = (timeOfDay: TimeOfDay): string => {
   switch (timeOfDay) {
     case TimeOfDay.Morning:
       return 'yellow';
-    case TimeOfDay.Noon:
-      return 'orange';
     case TimeOfDay.Afternoon:
-      return 'blue';
+      return 'orange';
     case TimeOfDay.Evening:
-      return 'purple';
+      return 'blue';
     default:
-      return 'gray';
+      return 'grey';
   }
 };
 
 export default function ShotHistory() {
   const { shotHistory } = useShotDataStore();
   const [viewingShot, setViewingShot] = useState<Shot | undefined>(undefined);
+  const [sortedShotHistory, setSortedShotHistory] = useState<Shot[]>([]);
 
   const handleShotSelected = useCallback((shot: Shot) => {
-    console.log(shot);
     setViewingShot(shot);
   }, [setViewingShot]);
 
@@ -78,16 +71,23 @@ export default function ShotHistory() {
     }
   }, [setViewingShot]);
 
+  useEffect(() => {
+    const shallowCopy = [...shotHistory]; // avoid mutating state
+    shallowCopy.sort((s1, s2) => s2.time - s1.time);
+    setSortedShotHistory(shallowCopy);
+  }, [setSortedShotHistory, shotHistory]);
+
   return (
     <>
       <List>
-        {shotHistory.sort((s1, s2) => s2.time - s1.time).map((shot) => {
+        {sortedShotHistory.map((shot) => {
           const shotDate = new Date(shot.time);
           const timeOfDay = getTimeOfDay(shotDate);
           const icon = getIcon(timeOfDay);
           const color = getColorForTimeOfDay(timeOfDay);
           const duration = formatTime({ time: shot.datapoints[shot.datapoints.length - 1].timeInShot });
-          const formattedTimeInDate = shotDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const formattedTimeInDay = shotDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const formattedDay = shotDate.toLocaleDateString([], { day: 'numeric', month: 'short' });
 
           return (
             <ListItem key={shot.time} disableGutters>
@@ -97,7 +97,7 @@ export default function ShotHistory() {
                     {icon}
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={`Shot at ${formattedTimeInDate}.`} secondary={`Duration ${duration}`} />
+                <ListItemText primary={`${formattedDay}, ${formattedTimeInDay}.`} secondary={`Duration ${duration}`} />
               </ButtonBase>
             </ListItem>
           );

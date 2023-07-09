@@ -59,10 +59,10 @@ function Home() {
         {/* Left size Gauges */}
         {isBiggerScreen && (
         <Grid sm={2} md={2}>
-          <Box sx={{ p: theme.spacing(2) }}>
+          <Box sx={{ p: theme.spacing(1) }}>
             <GaugeLiquid value={sensorState.waterLevel} />
           </Box>
-          <Box sx={{ mt: theme.spacing(1), p: theme.spacing(2) }}>
+          <Box sx={{ mt: theme.spacing(1), p: theme.spacing(1) }}>
             <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
           </Box>
 
@@ -84,7 +84,16 @@ function Home() {
               <Grid xs={12}>
                 <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
                   <Typography variant="h6">Shot history</Typography>
-                  {shotHistory.length > 0 && <ShotHistory />}
+                  {shotHistory.length > 0 && (
+                    <Box sx={{
+                      p: { xs: 0, sm: theme.spacing(1) },
+                      maxHeight: '25vh', // 25% of the viewport height
+                      overflow: 'auto', // Makes the box scrollable when contents overflow
+                    }}
+                    >
+                      <ShotHistory />
+                    </Box>
+                  )}
                   {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
                 </Paper>
               </Grid>
