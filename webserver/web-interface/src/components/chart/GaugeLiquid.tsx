@@ -2,7 +2,9 @@ import React, {
   useCallback,
   useEffect, useRef, useState,
 } from 'react';
-import { debounce, useTheme } from '@mui/material';
+import {
+  darken, debounce, lighten, useTheme,
+} from '@mui/material';
 import LiquidFillGauge from 'react-liquid-gauge';
 import AspectRatioBox from '../layout/AspectRatioBox';
 import { GaugeTitle } from './GaugeChart';
@@ -57,7 +59,7 @@ export default function GaugeLiquidComponent({ value }: { value: number}) {
             fontFamily: theme.typography.fontFamily,
           }}
           waveTextStyle={{
-            fill: theme.palette.water.main,
+            fill: theme.palette.mode === 'dark' ? darken(theme.palette.water.main, 0.4) : lighten(theme.palette.water.main, 0.4),
             fontFamily: theme.typography.fontFamily,
           }}
         />
