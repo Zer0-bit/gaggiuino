@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useRef, useState, useMemo,
+  useEffect, useRef, useState, useMemo, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
@@ -152,10 +152,18 @@ function addDataPointToChartData(chartData, dataPoint, maxLength, chartRef) {
   /* eslint-enable no-param-reassign */
 }
 
-function Chart({ data, newDataPoint, maxLength }) {
+function Chart({
+  data, newDataPoint, maxLength, onHover,
+}) {
   const chartRef = useRef(null);
   const theme = useTheme();
-  const config = useMemo(() => getShotChartConfig(theme), [theme]);
+  const [datapoints, setDatapoints] = useState([]);
+
+  const onHoverInternal = useCallback((hoverIndex) => {
+    onHover(datapoints[hoverIndex]);
+  }, [onHover, datapoints]);
+
+  const config = useMemo(() => getShotChartConfig(theme, onHoverInternal), [theme, onHoverInternal]);
   const [chartData, setChartData] = useState(mapToChartData([], theme));
 
   if (newDataPoint && data) {
@@ -167,8 +175,9 @@ function Chart({ data, newDataPoint, maxLength }) {
     if (data === undefined || data === null) {
       return;
     }
+    setDatapoints(data);
     setChartData(mapToChartData(data, theme));
-  }, [data, theme]);
+  }, [data, theme, setDatapoints, setChartData]);
 
   // Adds newDataPoint to the end of the chart unless it detects that a new shot was started. More efficient.
   useEffect(() => {
@@ -177,10 +186,13 @@ function Chart({ data, newDataPoint, maxLength }) {
     }
     if (newShotStarted(newDataPoint, chartData)) {
       setChartData(mapToChartData([newDataPoint], theme));
+      setDatapoints([newDataPoint]);
     } else {
       addDataPointToChartData(chartData, newDataPoint, maxLength, chartRef);
+      setDatapoints([...datapoints, newDataPoint]);
     }
-  }, [newDataPoint, theme, chartData, maxLength]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newDataPoint, theme, maxLength, setDatapoints, setChartData]);
 
   return (
     <Line
@@ -209,10 +221,12 @@ Chart.propTypes = {
   data: PropTypes.arrayOf(ShotChartDataPointType),
   newDataPoint: ShotChartDataPointType,
   maxLength: PropTypes.number,
+  onHover: PropTypes.func,
 };
 
 Chart.defaultProps = {
   data: undefined,
   newDataPoint: undefined,
   maxLength: undefined,
+  onHover: undefined,
 };

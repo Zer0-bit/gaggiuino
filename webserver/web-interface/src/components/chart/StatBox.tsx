@@ -42,7 +42,7 @@ export function StatBox({
       ...sx,
     }}
     >
-      <Stack direction="row" alignContent="stretch">
+      <Stack direction="row" alignItems="center" sx={{ height: '100%' }}>
         {icon && (
         <Box display="flex" alignItems="center" color={color}>
           <Typography fontSize="6px">{icon}</Typography>

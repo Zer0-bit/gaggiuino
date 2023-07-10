@@ -1,11 +1,17 @@
 import { Theme, alpha } from '@mui/material';
 import { ChartOptions } from 'chart.js';
 
-export function getShotChartConfig(theme: Theme): ChartOptions<'line'> {
+export function getShotChartConfig(theme: Theme, onHover?: (index: number) => void): ChartOptions<'line'> {
   return {
     animation: false,
     responsive: true,
     maintainAspectRatio: false,
+    onHover: (event, elements) => {
+      if (onHover && elements && elements.length > 0 && elements[0].index) {
+        const { index } = elements[0]; // get the index of the hovered element
+        onHover(index);
+      }
+    },
     interaction: {
       mode: 'index',
       intersect: false,
@@ -13,6 +19,9 @@ export function getShotChartConfig(theme: Theme): ChartOptions<'line'> {
     plugins: {
       legend: {
         display: false,
+      },
+      tooltip: {
+        enabled: false,
       },
     },
     datasets: {
