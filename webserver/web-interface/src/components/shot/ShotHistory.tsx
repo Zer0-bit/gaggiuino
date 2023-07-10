@@ -1,4 +1,3 @@
-import Brightness3Icon from '@mui/icons-material/Brightness3';
 import Brightness5Icon from '@mui/icons-material/Brightness5';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import NightsStayIcon from '@mui/icons-material/NightsStay';

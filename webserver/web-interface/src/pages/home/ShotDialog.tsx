@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  AppBar, Box, Dialog, IconButton, Stack, Toolbar, useMediaQuery, useTheme, Container,
+  AppBar, Box, Dialog, IconButton, Toolbar, useTheme,
 
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
