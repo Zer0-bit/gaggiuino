@@ -12,11 +12,7 @@ export function getShotChartConfig(theme: Theme): ChartOptions<'line'> {
     },
     plugins: {
       legend: {
-        display: true,
-        position: 'bottom',
-        labels: {
-          color: theme.palette.text.secondary,
-        },
+        display: false,
       },
     },
     datasets: {

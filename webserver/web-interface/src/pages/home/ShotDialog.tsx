@@ -1,6 +1,7 @@
 import React from 'react';
 import {
-  AppBar, Box, Dialog, IconButton, Stack, Toolbar,
+  AppBar, Box, Dialog, IconButton, Stack, Toolbar, useMediaQuery, useTheme, Container,
+
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -19,6 +20,9 @@ interface ShotDialogProps {
 
 export default function ShotDialog({ open, setOpen, historyShot }: ShotDialogProps) {
   const { latestShotDatapoint } = useShotDataStore();
+  const theme = useTheme();
+  const fullHeightGraph = `calc(100vh - 64px - ${theme.spacing(2)})`;
+  const lessHeightGraph = `calc(75vh - 64px - ${theme.spacing(2)})`;
 
   return (
     <Dialog
@@ -27,75 +31,71 @@ export default function ShotDialog({ open, setOpen, historyShot }: ShotDialogPro
       onClose={() => setOpen(false)}
       PaperProps={{ elevation: 0 }}
     >
-      <Stack direction="column" display="flex" alignItems="stretch" justifyContent="flex-start" height="100%" spacing={2}>
-        <AppBar sx={{ position: 'relative', display: 'flex', flexGrow: 0 }}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={() => setOpen(false)}
-              aria-label="close"
-            >
-              <CloseIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-
-        <Grid container columns={4} spacing={1} sx={{ flexGrow: 1 }}>
-          <Grid xs={4} sm={3} display="flex" alignContent="stretch" flexGrow={1}>
-            <Box sx={{ position: 'relative', width: '100%' }}>
-              {historyShot && <ShotChart data={historyShot.datapoints} />}
-              {!historyShot && <ShotChart newDataPoint={latestShotDatapoint} />}
-            </Box>
-          </Grid>
-          <Grid xs={4} sm={1}>
-            {latestShotDatapoint && (
-            <Grid container columns={3} spacing={1}>
-              <Grid xs={1} sm={3}>
-                <TimeStatBox
-                  timeInShot={latestShotDatapoint.timeInShot}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <WeightStatBox
-                  shotWeight={latestShotDatapoint.shotWeight}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <PressureStatBox
-                  pressure={latestShotDatapoint.pressure}
-                  target={latestShotDatapoint.targetPressure}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <PumpFlowStatBox
-                  pumpFlow={latestShotDatapoint.pumpFlow}
-                  target={latestShotDatapoint.targetPumpFlow}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <WeightFlowStatBox
-                  flow={latestShotDatapoint.weightFlow}
-                  target={latestShotDatapoint.targetPumpFlow}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <TemperatureStatBox
-                  temperature={latestShotDatapoint.temperature}
-                  target={latestShotDatapoint.targetTemperature}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
+      <AppBar sx={{ position: 'relative', height: '64px' }}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={() => setOpen(false)}
+            aria-label="close"
+          >
+            <CloseIcon />
+          </IconButton>
+          {historyShot ? 'Reviewing shot from history' : 'Shot in progress'}
+        </Toolbar>
+      </AppBar>
+      <Grid container spacing={1} sx={{ mx: 0, mt: theme.spacing(2) }}>
+        <Grid xs={12} sm={9} sx={{ height: { xs: lessHeightGraph, sm: fullHeightGraph } }}>
+          <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+            {historyShot && <ShotChart data={historyShot.datapoints} />}
+            {!historyShot && <ShotChart newDataPoint={latestShotDatapoint} />}
+          </Box>
+        </Grid>
+        <Grid xs={12} sm={3} sx={{ height: { xs: '25vh', sm: fullHeightGraph } }}>
+          <Grid container columns={3} spacing={1} sx={{ height: '100%', overflow: 'scroll' }}>
+            <Grid xs={1} sm={3}>
+              <TimeStatBox
+                timeInShot={latestShotDatapoint?.timeInShot || 0}
+                sx={{ height: '100%' }}
+              />
             </Grid>
-            )}
+            <Grid xs={1} sm={3}>
+              <WeightStatBox
+                shotWeight={latestShotDatapoint?.shotWeight || 0}
+                sx={{ height: '100%' }}
+              />
+            </Grid>
+            <Grid xs={1} sm={3}>
+              <PressureStatBox
+                pressure={latestShotDatapoint?.pressure || 0}
+                target={latestShotDatapoint?.targetPressure || 0}
+                sx={{ height: '100%' }}
+              />
+            </Grid>
+            <Grid xs={1} sm={3}>
+              <PumpFlowStatBox
+                pumpFlow={latestShotDatapoint?.pumpFlow || 0}
+                target={latestShotDatapoint?.targetPumpFlow || 0}
+                sx={{ height: '100%' }}
+              />
+            </Grid>
+            <Grid xs={1} sm={3}>
+              <WeightFlowStatBox
+                flow={latestShotDatapoint?.weightFlow || 0}
+                target={latestShotDatapoint?.targetPumpFlow || 0}
+                sx={{ height: '100%' }}
+              />
+            </Grid>
+            <Grid xs={1} sm={3}>
+              <TemperatureStatBox
+                temperature={latestShotDatapoint?.temperature || 0}
+                target={latestShotDatapoint?.targetTemperature || 0}
+                sx={{ height: '100%' }}
+              />
+            </Grid>
           </Grid>
         </Grid>
-      </Stack>
+      </Grid>
     </Dialog>
   );
 }

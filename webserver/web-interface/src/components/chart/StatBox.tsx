@@ -14,6 +14,9 @@ function formatNumber(value: number | undefined, decimals = 1) {
   return typeof value === 'number' ? value.toFixed(decimals) : undefined;
 }
 
+function formatTarget(value: number | undefined, decimals = 1) {
+  return typeof value === 'number' && value > 0 ? value.toFixed(decimals) : undefined;
+}
 export interface StatBoxProps {
   label: string;
   color: string;
@@ -21,7 +24,7 @@ export interface StatBoxProps {
   statTarget?: string;
   icon?: ReactElement;
   unit?: string;
-  sx: SxProps<Theme>;
+  sx?: SxProps<Theme>;
 }
 
 export function StatBox({
@@ -29,23 +32,30 @@ export function StatBox({
 }: StatBoxProps) {
   const theme = useTheme();
   return (
-    <Paper sx={{ border: `2px solid ${color}`, padding: theme.spacing(1), ...sx }}>
+    <Paper sx={{
+      border: `1px solid ${color}`,
+      color,
+      px: theme.spacing(1),
+      py: theme.spacing(0.5),
+      fontSize: theme.typography.caption,
+      overflow: 'hidden',
+      ...sx,
+    }}
+    >
       <Stack direction="row" alignContent="stretch">
         {icon && (
         <Box display="flex" alignItems="center" color={color}>
-          {icon}
+          <Typography fontSize="6px">{icon}</Typography>
         </Box>
         )}
         <Box sx={{ flexGrow: 1 }}>
           <Box>
-            <Typography color={color} align="right" sx={{ fontWeight: 'bold' }}>
+            <Typography fontSize="inherit" color={color} align="right" fontWeight="bold" noWrap>
               {label}
             </Typography>
           </Box>
-          <Box>
-            <Typography sx={{ color }} align="right">
-              {`${stat} ${unit || ''}`}
-            </Typography>
+          <Box display="flex" justifyContent="flex-end" alignItems="center" color={color}>
+            {`${stat} ${unit || ''}`}
           </Box>
           {statTarget && statTarget >= '0' && (
             <Box display="flex" justifyContent="flex-end" alignItems="center" color={color}>
@@ -64,9 +74,10 @@ StatBox.defaultProps = {
   icon: undefined,
   statTarget: undefined,
   unit: '',
+  sx: {},
 };
 
-export function TimeStatBox({ timeInShot, sx }: {timeInShot: number, sx: SxProps<Theme>}) {
+export function TimeStatBox({ timeInShot, sx }: {timeInShot: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
   return (
@@ -79,10 +90,11 @@ export function TimeStatBox({ timeInShot, sx }: {timeInShot: number, sx: SxProps
     />
   );
 }
+TimeStatBox.defaultProps = { sx: {} };
 
 export function WeightStatBox({
   shotWeight, target, sx,
-}: {shotWeight: number, target?: number, sx: SxProps<Theme> }) {
+}: {shotWeight: number, target?: number, sx?: SxProps<Theme> }) {
   const theme = useTheme();
 
   return (
@@ -91,17 +103,17 @@ export function WeightStatBox({
       icon={<ScaleIcon />}
       color={theme.palette.weight.main}
       stat={formatNumber(shotWeight)}
-      statTarget={formatNumber(target)}
+      statTarget={formatTarget(target)}
       unit="g"
       sx={sx}
     />
   );
 }
-WeightStatBox.defaultProps = { target: undefined };
+WeightStatBox.defaultProps = { target: undefined, sx: {} };
 
 export function TemperatureStatBox({
   temperature, target, sx,
-}: {temperature: number, target: number, sx: SxProps<Theme>}) {
+}: {temperature: number, target: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
   return (
@@ -110,16 +122,17 @@ export function TemperatureStatBox({
       icon={<TemperatureIcon />}
       color={theme.palette.temperature.main}
       stat={formatNumber(temperature)}
-      statTarget={formatNumber(target)}
+      statTarget={formatTarget(target)}
       unit="°C"
       sx={sx}
     />
   );
 }
+TemperatureStatBox.defaultProps = { sx: {} };
 
 export function PumpFlowStatBox({
   pumpFlow, target, sx,
-}: {pumpFlow: number, target: number, sx: SxProps<Theme>}) {
+}: {pumpFlow: number, target: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
   return (
@@ -128,16 +141,17 @@ export function PumpFlowStatBox({
       icon={<AirIcon />}
       color={theme.palette.flow.main}
       stat={formatNumber(pumpFlow)}
-      statTarget={formatNumber(target)}
+      statTarget={formatTarget(target)}
       unit="ml/s"
       sx={sx}
     />
   );
 }
+PumpFlowStatBox.defaultProps = { sx: {} };
 
 export function WeightFlowStatBox({
   flow, target, sx,
-}: {flow: number, target: number, sx: SxProps<Theme>}) {
+}: {flow: number, target: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
   return (
@@ -146,16 +160,17 @@ export function WeightFlowStatBox({
       icon={<AirIcon />}
       color={theme.palette.weightFlow.main}
       stat={formatNumber(flow)}
-      statTarget={formatNumber(target)}
+      statTarget={formatTarget(target)}
       unit="ml/s"
       sx={sx}
     />
   );
 }
+WeightFlowStatBox.defaultProps = { sx: {} };
 
 export function PressureStatBox({
   pressure, target, sx,
-}: {pressure: number, target: number, sx: SxProps<Theme>}) {
+}: {pressure: number, target: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
   return (
@@ -164,9 +179,10 @@ export function PressureStatBox({
       label="Pressure"
       color={theme.palette.pressure.main}
       stat={formatNumber(pressure)}
-      statTarget={formatNumber(target)}
+      statTarget={formatTarget(target)}
       unit="bar"
       sx={sx}
     />
   );
 }
+PressureStatBox.defaultProps = { sx: {} };
