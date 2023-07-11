@@ -8,7 +8,7 @@ import ScaleIcon from '@mui/icons-material/Scale';
 import CompressIcon from '@mui/icons-material/Compress';
 import AirIcon from '@mui/icons-material/Air';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
-import { formatTime } from '../../models/api';
+import formatTime from '../../models/time_format';
 
 function formatNumber(value: number | undefined, decimals = 1) {
   return typeof value === 'number' ? value.toFixed(decimals) : undefined;

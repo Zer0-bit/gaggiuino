@@ -8,7 +8,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
-import { formatTime } from '../../models/api';
+import formatTime from '../../models/time_format';
 import useShotDataStore from '../../state/ShotDataStore';
 import ShotDialog from '../../pages/home/ShotDialog';
 import { Shot } from '../../models/models';

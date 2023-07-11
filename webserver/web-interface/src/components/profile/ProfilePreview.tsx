@@ -9,7 +9,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import { Profile } from '../../models/profile';
 import ProfileChart from '../chart/ProfileChart';
-import { formatTime } from '../../models/api';
+import formatTime from '../../models/time_format';
 
 interface GlobalRestrictionProps {
   icon: React.ElementType, value: string | undefined, color?: string

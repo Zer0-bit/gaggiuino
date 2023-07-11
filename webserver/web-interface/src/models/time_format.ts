@@ -1,8 +1,4 @@
-export const apiHost = (process.env.NODE_ENV === 'development')
-  ? '192.168.0.21'
-  : window.location.host;
-
-export function formatTime({
+export default function formatTime({
   time,
   includeMillis = false,
   truncateLeadingZeroUnits = true,
