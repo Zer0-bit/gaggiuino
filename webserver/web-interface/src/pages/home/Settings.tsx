@@ -14,25 +14,51 @@ import {
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Unstable_Grid2';
+import SaveIcon from '@mui/icons-material/Save';
 import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
 import ProgressBar from '../../components/inputs/ProgressBar';
-import VerticalTabs from '../../components/Tabs/tabs_settings';
+import TabbedSettings from '../../components/Tabs/tabs_settings';
+import useSettingsStore from '../../state/SettingsStore';
 
 export default function Settings() {
   const theme = useTheme();
+  const { settings, updateSettingsAndSync, persistSettings } = useSettingsStore();
 
   return (
     <div>
       <Container sx={{ mt: theme.spacing(1) }}>
-        <Grid container columns={12} spacing={2} alignItems="stretch">
-          <Grid item xs={4}>
+        <Grid container spacing={2} alignItems="stretch">
+          {settings && (
+          <Grid xs={12} sm={12}>
+            <Box sx={{
+              border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '10px', width: '100%', padding: '1px',
+            }}
+            >
+              <Card sx={{ height: '100%' }}>
+                <CardContent sx={{ width: '100%' }}>
+                  <Box sx={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: theme.spacing(2),
+                  }}
+                  >
+                    <Typography variant="h5">
+                      Machine State Management
+                    </Typography>
+                    <IconButton color="inherit" onClick={persistSettings}><SaveIcon fontSize="inherit" /></IconButton>
+                  </Box>
+                  <TabbedSettings settings={settings} onChange={updateSettingsAndSync} />
+                </CardContent>
+              </Card>
+            </Box>
+          </Grid>
+          )}
+          <Grid xs={12} sm={6}>
             <WifiSettingsCard />
           </Grid>
-          <Grid item xs={8} sm={8}>
+          <Grid xs={12} sm={6}>
             <Card sx={{ height: '100%' }}>
               <CardContent>
-                <Typography gutterBottom variant="h5">
+                <Typography variant="h5" sx={{ mb: theme.spacing(2) }}>
                   OTA Update
                 </Typography>
               </CardContent>
@@ -60,21 +86,6 @@ export default function Settings() {
                 <Button variant="contained" component="label">Upload</Button>
               </CardActions>
             </Card>
-          </Grid>
-          <Grid item xs={12} sm={12}>
-            <Box sx={{
-              border: `0px solid ${theme.palette.divider}`, position: 'relative', borderRadius: '10px', width: '100%', padding: '1px',
-            }}
-            >
-              <Card sx={{ height: '100%' }}>
-                <CardContent sx={{ width: '100%' }}>
-                  <Typography gutterBottom variant="h5">
-                    Machine State Management
-                  </Typography>
-                  <VerticalTabs />
-                </CardContent>
-              </Card>
-            </Box>
           </Grid>
         </Grid>
       </Container>

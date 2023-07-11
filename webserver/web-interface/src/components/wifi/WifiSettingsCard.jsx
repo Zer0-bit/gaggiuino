@@ -1,6 +1,6 @@
 import {
   Button,
-  Card, CardActions, CardContent, Typography,
+  Card, CardActions, CardContent, Typography, useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { disconnectFromWifi, getWifiStatus } from '../client/WifiClient';
@@ -12,6 +12,7 @@ export default function WifiSettingsCard() {
   const [wifiStatus, setWifiStatus] = useState({});
   const [wifiStatusLoading, setWifiStatusLoading] = useState(true);
   const [wifiDrawerOpen, setWiFiDrawerOpen] = useState(false);
+  const theme = useTheme();
 
   function isConnected() {
     return wifiStatus && wifiStatus.status === 'connected';
@@ -42,7 +43,7 @@ export default function WifiSettingsCard() {
     <div style={{ height: '100%' }}>
       <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <CardContent sx={{ flex: '1 0 auto' }}>
-          <Typography gutterBottom variant="h5" component="div">
+          <Typography variant="h5" sx={{ mb: theme.spacing(2) }}>
             WiFi Status
           </Typography>
           {wifiStatusLoading ? <Loader /> : <WifiStatus status={wifiStatus} />}

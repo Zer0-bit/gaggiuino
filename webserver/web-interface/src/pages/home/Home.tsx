@@ -5,24 +5,25 @@ import {
   Box,
   Button,
   Container,
-  Unstable_Grid2 as Grid, Paper,
+  Unstable_Grid2 as Grid,
+  IconButton,
+  Paper,
   Skeleton,
   TextField,
   Typography,
-  lighten,
-  useTheme,
-  IconButton,
   darken,
+  lighten,
   useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import React, { useEffect } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import AspectRatioBox from '../../components/layout/AspectRatioBox';
-import useProfileStore from '../../state/ProfileStore';
-import useSensorStateStore from '../../state/SensorStateStore';
 import { ProfileReview } from '../../components/profile/ProfilePreview';
 import ShotHistory from '../../components/shot/ShotHistory';
+import useProfileStore from '../../state/ProfileStore';
+import useSensorStateStore from '../../state/SensorStateStore';
 import useShotDataStore from '../../state/ShotDataStore';
 
 function Home() {
