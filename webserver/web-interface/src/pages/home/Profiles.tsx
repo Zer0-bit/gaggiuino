@@ -18,6 +18,7 @@ import { Profile } from '../../models/profile';
 
 export default function Profiles() {
   const theme = useTheme();
+  const [selectedPhaseIndex, setSelectedPhaseIndex] = useState<number| undefined>(undefined);
 
   const [elements, setElements] = useState([
     { id: 1, type: 'select', value: '' },
@@ -184,21 +185,30 @@ export default function Profiles() {
           <Typography variant="h5" sx={{ mb: theme.spacing(2) }}>
             Profile syntax playground
           </Typography>
-          <Grid container columns={{ xs: 1, sm: 3 }} spacing={2}>
-            <Grid item xs={1} sm={3}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
               <Alert severity={error ? 'error' : 'success'}>
                 {error || 'Nice syntax!'}
               </Alert>
             </Grid>
-            <Grid item xs={1} sm={1}>
+            <Grid item xs={6}>
               <TextareaAutosize
                 minRows={15}
+                maxRows={15}
                 onChange={(evt) => updateProfile(evt.target.value)}
-                style={{ width: '100%', backgroundColor: theme.palette.background.paper }}
+                style={{
+                  color: theme.palette.text.secondary,
+                  width: '100%',
+                  backgroundColor: theme.palette.background.paper,
+                }}
               />
             </Grid>
-            <Grid item xs={1} sm={2} position="relative" height="400">
-              <ProfileChart profile={profile} />
+            <Grid item xs={6} position="relative" height="400">
+              <ProfileChart
+                profile={profile}
+                selectedPhaseIndex={selectedPhaseIndex}
+                onSelectPhase={setSelectedPhaseIndex}
+              />
             </Grid>
           </Grid>
         </Paper>

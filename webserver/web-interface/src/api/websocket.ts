@@ -37,8 +37,8 @@ const useWebSocket = (url:string) => {
   const { lastJsonMessage } = reactUseWebSocket(url, {
     share: true,
     shouldReconnect: () => true,
-    reconnectAttempts: 1000,
-    reconnectInterval: 1,
+    reconnectAttempts: 1000000,
+    reconnectInterval: 3,
     retryOnError: true,
   });
 

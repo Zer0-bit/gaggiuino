@@ -75,13 +75,23 @@ export function getShotChartConfig(theme: Theme, onHover?: (index: number) => vo
   };
 }
 
-export function getProfilePreviewChartConfig(theme: Theme): ChartOptions<'line'> {
+export function getProfilePreviewChartConfig(theme: Theme, onClick: (dataIndex: number) => void): ChartOptions<'line'> {
   return {
     animation: false,
     responsive: true,
     maintainAspectRatio: false,
+    onClick: (event, elements) => {
+      if (onClick && elements && elements.length > 0 && elements[0].index) {
+        const { index } = elements[0]; // get the index of the clicked element
+        onClick(index);
+      }
+    },
     layout: {
       padding: 0,
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false,
     },
     plugins: {
       tooltip: {
@@ -96,6 +106,7 @@ export function getProfilePreviewChartConfig(theme: Theme): ChartOptions<'line'>
         pointRadius: 0,
         borderWidth: 1.5,
         borderDash: [3, 3],
+        tension: 0,
       },
     },
     scales: {
