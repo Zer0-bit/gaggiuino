@@ -196,11 +196,11 @@ function MainAppBar() {
               size="medium"
               sx={{
                 color: 'primary.main',
-                backgroundColor: 'background.default',
+                backgroundColor: 'background.paper',
                 boxShadow: 0,
                 '&:hover': {
                   boxShadow: 0,
-                  backgroundColor: 'background.default',
+                  backgroundColor: 'background.paper',
                 },
               }}
             >
