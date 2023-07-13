@@ -6,6 +6,7 @@ import {
   ButtonBase,
   List, ListItem, ListItemAvatar,
   ListItemText,
+  alpha,
 } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
 import formatTime from '../../models/time_format';
@@ -45,13 +46,13 @@ const getIcon = (timeOfDay: TimeOfDay) => {
 const getColorForTimeOfDay = (timeOfDay: TimeOfDay): string => {
   switch (timeOfDay) {
     case TimeOfDay.Morning:
-      return 'yellow';
+      return '#ffea00';
     case TimeOfDay.Afternoon:
-      return 'orange';
+      return '#ffa733';
     case TimeOfDay.Evening:
-      return 'blue';
+      return '#3d5afe';
     default:
-      return 'grey';
+      return '#444';
   }
 };
 
@@ -87,12 +88,13 @@ export default function ShotHistory() {
           const duration = formatTime({ time: shot.datapoints[shot.datapoints.length - 1].timeInShot });
           const formattedTimeInDay = shotDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           const formattedDay = shotDate.toLocaleDateString([], { day: 'numeric', month: 'short' });
+          // const theme = useTheme();
 
           return (
             <ListItem key={shot.time} disableGutters>
               <ButtonBase component="div" style={{ width: '100%' }} onClick={() => handleShotSelected(shot)}>
                 <ListItemAvatar>
-                  <Avatar sx={{ color }}>
+                  <Avatar sx={{ color, backgroundColor: alpha(color, 0.15) }}>
                     {icon}
                   </Avatar>
                 </ListItemAvatar>
