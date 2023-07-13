@@ -51,6 +51,7 @@ module.exports = {
     'react/jsx-no-bind': 'off',
     'react/prop-types': 'off',
     'react/jsx-fragments': 'off',
+    'react/require-default-props': 'off',
     'no-plusplus': 'off',
     'import/no-extraneous-dependencies': [
       'error',

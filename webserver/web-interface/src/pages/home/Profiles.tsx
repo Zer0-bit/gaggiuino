@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Card, Container, useTheme, Typography, CardContent, CardActions, Paper, TextareaAutosize, Alert,
+  Card, Container, useTheme, Typography, CardContent, CardActions, Paper, TextareaAutosize, Alert, MenuItem,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import QrCodeIcon from '@mui/icons-material/QrCode';
@@ -153,10 +153,10 @@ export default function Profiles() {
                                 value={element.value}
                                 onChange={(event) => handleSelectChange(event, element.id)}
                               >
-                                <option value="1">Preinfusion</option>
-                                <option value="2">Soak</option>
-                                <option value="3">Flow</option>
-                                <option value="4">Pressure</option>
+                                <MenuItem value="1">Preinfusion</MenuItem>
+                                <MenuItem value="2">Soak</MenuItem>
+                                <MenuItem value="3">Flow</MenuItem>
+                                <MenuItem value="4">Pressure</MenuItem>
                               </Select>
                             </Grid>
                           );
