@@ -90,7 +90,7 @@ export function SettingsNumberInput({
           variant="outlined"
           sx={{
             '& fieldset': { border: 'none' },
-            '& input': { textAlign: 'left', p: theme.spacing(0.5) },
+            '& input': { textAlign: 'left', py: theme.spacing(0.5), px: 0 },
           }}
           InputProps={{ readOnly: false }}
         />
@@ -114,8 +114,6 @@ export interface LedColorInputProps {
 }
 
 export function LedColorPickerInput({ label, value, onChange }: LedColorInputProps) {
-  const theme = useTheme();
-
   const color = {
     r: value.R, g: value.G, b: value.B, a: 1,
   };
@@ -130,14 +128,16 @@ export function LedColorPickerInput({ label, value, onChange }: LedColorInputPro
   return (
     <SettingsInputWrapper>
       <SettingsInputBorderLabel>{label}</SettingsInputBorderLabel>
-      <Colorful
-        style={{ width: '100%', marginTop: theme.spacing(1) }}
-        color={rgbaToHex(color)}
-        disableAlpha
-        onChange={(newColor) => {
-          updateLedColor(newColor.rgba);
-        }}
-      />
+      <Grid xs={12} sx={{ mt: 1 }}>
+        <Colorful
+          style={{ width: '100%' }}
+          color={rgbaToHex(color)}
+          disableAlpha
+          onChange={(newColor) => {
+            updateLedColor(newColor.rgba);
+          }}
+        />
+      </Grid>
     </SettingsInputWrapper>
   );
 }
@@ -163,13 +163,13 @@ export function SettingsInputWrapper({ children }: {children: React.ReactNode}) 
         p: theme.spacing(1),
       }}
     >
-      {borderLabel && <Box sx={{ position: 'absolute', top: -14, left: 15 }}>{borderLabel}</Box>}
-      <Grid container width="100%">
+      {borderLabel && <Box sx={{ position: 'absolute', top: -14, left: theme.spacing(1) }}>{borderLabel}</Box>}
+      <Grid container width="100%" sx={{ px: theme.spacing(0.5) }}>
         {inlineLabel && <Grid xs={columnSize} display="flex" alignItems="center">{inlineLabel}</Grid>}
         {field && <Grid xs={columnSize} display="flex" alignItems="center">{field}</Grid>}
         {actions && <Grid xs={columnSize} display="flex" alignItems="center" justifyContent="end">{actions}</Grid>}
+        {otherChildern}
       </Grid>
-      {otherChildern}
       <fieldset style={{
         position: 'absolute',
         margin: 0,
@@ -179,7 +179,7 @@ export function SettingsInputWrapper({ children }: {children: React.ReactNode}) 
         bottom: 0,
         left: 0,
         border: `1px solid ${theme.palette.divider}`,
-        borderRadius: theme.spacing(0.5),
+        borderRadius: theme.spacing(1),
         pointerEvents: 'none',
       }}
       >
@@ -189,7 +189,7 @@ export function SettingsInputWrapper({ children }: {children: React.ReactNode}) 
           padding: 0,
           float: 'none',
           margin: 0,
-          marginLeft: '13px',
+          marginLeft: theme.spacing(1),
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
         }}

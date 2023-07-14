@@ -158,7 +158,7 @@ interface BoilerSettingsPanelProps {
 function BoilerSettingsPanel({ boiler, onChange }: BoilerSettingsPanelProps) {
   return (
     <Box sx={{
-      display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1, width: '100%',
+      display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%',
     }}
     >
       <SettingsNumberInput
@@ -203,7 +203,7 @@ interface SystemSettingsPanelProps {
 function SystemSettingsPanel({ system, onChange }: SystemSettingsPanelProps) {
   return (
     <Box sx={{
-      display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1, width: '100%',
+      display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%',
     }}
     >
       <SettingsNumberInput
@@ -233,7 +233,7 @@ function SystemSettingsPanel({ system, onChange }: SystemSettingsPanelProps) {
       />
       <SettingsInputWrapper>
         <SettingsInputInlineLabel>Dark/Light toggle</SettingsInputInlineLabel>
-        <SettingsInputActions><ThemeModeToggle /></SettingsInputActions>
+        <SettingsInputActions><Box display="flex" paddingY={1}><ThemeModeToggle /></Box></SettingsInputActions>
       </SettingsInputWrapper>
       <SettingsToggleInput
         label="Warmup on startup"
@@ -252,7 +252,7 @@ interface LedSettingsPanelProps {
 function LedSettingsPanel({ led, onChange }: LedSettingsPanelProps) {
   return (
     <Box sx={{
-      display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1, width: '100%',
+      display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%',
     }}
     >
       <SettingsToggleInput
