@@ -75,7 +75,7 @@ export function getShotChartConfig(theme: Theme, onHover?: (index: number) => vo
   };
 }
 
-export function getProfilePreviewChartConfig(theme: Theme, onClick: (dataIndex: number) => void): ChartOptions<'line'> {
+export function getProfilePreviewChartConfig({ theme, onClick, max }: {theme: Theme, onClick: (dataIndex: number) => void, max?: number}): ChartOptions<'line'> {
   return {
     animation: false,
     responsive: true,
@@ -105,7 +105,6 @@ export function getProfilePreviewChartConfig(theme: Theme, onClick: (dataIndex: 
       line: {
         pointRadius: 0,
         borderWidth: 1.5,
-        borderDash: [3, 3],
         tension: 0,
       },
     },
@@ -121,6 +120,7 @@ export function getProfilePreviewChartConfig(theme: Theme, onClick: (dataIndex: 
           color: theme.palette.divider,
         },
         min: 0,
+        max,
       },
       y1: {
         type: 'linear',
@@ -130,8 +130,6 @@ export function getProfilePreviewChartConfig(theme: Theme, onClick: (dataIndex: 
         suggestedMax: 100,
         grid: {
           display: false,
-          color: alpha(theme.palette.temperature.main, 0.5),
-          tickBorderDash: [3, 3],
         },
         ticks: {
           display: false,
@@ -145,8 +143,6 @@ export function getProfilePreviewChartConfig(theme: Theme, onClick: (dataIndex: 
         max: 12,
         grid: {
           display: false,
-          color: alpha(theme.palette.pressure.main, 0.5),
-          tickBorderDash: [3, 3],
         },
         ticks: {
           display: false,

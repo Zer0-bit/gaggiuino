@@ -13,6 +13,7 @@ import {
   Tooltip,
   Legend,
   ChartData,
+  ChartDataset,
 } from 'chart.js';
 import { useTheme, alpha, Theme } from '@mui/material';
 import { getProfilePreviewChartConfig } from './ChartConfig';
@@ -34,18 +35,22 @@ ChartJS.register(
 const POINTS_PER_PHASE = 10;
 
 interface DataPoints {
-  labels: Array<number>;
-  pressureData: Array<number>,
-  flowData: Array<number>,
-  tempData: Array<number>,
-  phaseIds: Array<number>,
+  labels: number[];
+  pressureTargetsData: (number | null)[],
+  pressureLimitsData: (number | null)[],
+  flowTargetsData: (number | null)[],
+  flowLimitsData: (number | null)[],
+  tempData: (number | null)[],
+  phaseIds: number[],
 }
 
 function profileToDatasets(profile: Profile): DataPoints {
   const data: DataPoints = {
     labels: [],
-    pressureData: [],
-    flowData: [],
+    pressureTargetsData: [],
+    pressureLimitsData: [],
+    flowTargetsData: [],
+    flowLimitsData: [],
     tempData: [],
     phaseIds: [],
   };
@@ -55,20 +60,25 @@ function profileToDatasets(profile: Profile): DataPoints {
   let phaseId = 0;
   profile.phases.forEach((phase) => {
     if (!phase.skip) {
-      const previousPressure = currentSegment === 0 ? 0 : data.pressureData[data.pressureData.length - 1];
-      const previousFlow = currentSegment === 0 ? 0 : data.flowData[data.pressureData.length - 1];
+      const lastDataIdx = data.labels.length - 1;
+      const previousPressure = data.pressureTargetsData[lastDataIdx] || data.pressureLimitsData[lastDataIdx] || 0;
+      const previousFlow = data.flowTargetsData[lastDataIdx] || data.flowLimitsData[lastDataIdx] || 0;
       const phaseTemp = (phase.waterTemperature) ? phase.waterTemperature : profile.waterTemperature;
-      const previousTemp = currentSegment === 0 ? phaseTemp : data.tempData[data.tempData.length - 1];
+      const previousTemp = currentSegment === 0 ? phaseTemp : data.tempData[lastDataIdx];
 
-      const pressureTargets = getPressureSegment(phase, previousPressure);
-      const flowTargets = getFlowSegment(phase, previousFlow);
+      const pressureTargets = getPressureTargets(phase, previousPressure);
+      const pressureLimits = getPressureLimits(phase, previousPressure);
+      const flowTargets = getFlowTargets(phase, previousFlow);
+      const flowLimits = getFlowLimits(phase, previousFlow);
       const labels = getPointsInTime(phase, phaseStartTime);
       const temp = [previousTemp, ...Array(POINTS_PER_PHASE + 1).fill(phaseTemp)];
       const phaseIds = Array(POINTS_PER_PHASE + 1).fill(phaseId);
 
       data.labels.push(...labels);
-      data.flowData.push(...flowTargets);
-      data.pressureData.push(...pressureTargets);
+      data.flowTargetsData.push(...flowTargets);
+      data.flowLimitsData.push(...flowLimits);
+      data.pressureTargetsData.push(...pressureTargets);
+      data.pressureLimitsData.push(...pressureLimits);
       data.tempData.push(...temp);
       data.phaseIds.push(...phaseIds);
 
@@ -81,66 +91,79 @@ function profileToDatasets(profile: Profile): DataPoints {
   return data;
 }
 
-function mapToChartData(data: DataPoints, theme: Theme, selectedPhaseIndex?: number): ChartData<'line'> {
-  const nullSelected = (d: number, i: number) => (
-    (selectedPhaseIndex !== undefined && selectedPhaseIndex === data.phaseIds[i]) ? null : d
-  );
-  const nullUnselected = (d: number, i: number) => (
-    (selectedPhaseIndex !== undefined && selectedPhaseIndex === data.phaseIds[i]) ? d : null
-  );
+function buildEmptyChartData(theme: Theme): ChartData<'line'> {
   return {
-    labels: data.labels,
+    labels: [],
     datasets: [
       {
-        label: 'Pressure',
-        data: data.pressureData.map(nullSelected),
+        label: 'Pressure Target',
+        data: [],
         backgroundColor: alpha(theme.palette.pressure.main, 0.8),
         borderColor: theme.palette.pressure.main,
         yAxisID: 'y2',
       },
       {
-        label: 'Flow',
-        data: data.flowData.map(nullSelected),
+        label: 'Flow Target',
+        data: [],
         backgroundColor: alpha(theme.palette.flow.main, 0.8),
         borderColor: theme.palette.flow.main,
         yAxisID: 'y2',
       },
       {
-        label: 'Temp',
-        data: data.tempData.map(nullSelected),
+        label: 'Temp Target',
+        data: [],
         backgroundColor: alpha(theme.palette.temperature.main, 0.8),
         borderColor: theme.palette.temperature.main,
         yAxisID: 'y1',
       },
       {
-        label: 'Selected Pressure',
-        data: data.pressureData.map(nullUnselected),
+        label: 'Pressure Limit',
+        data: [],
         backgroundColor: alpha(theme.palette.pressure.main, 0.8),
         borderColor: theme.palette.pressure.main,
-        borderDash: [],
-        borderWidth: 3,
+        borderDash: [3, 3],
         yAxisID: 'y2',
       },
       {
-        label: 'Selected Flow',
-        data: data.flowData.map(nullUnselected),
+        label: 'Flow Limit',
+        data: [],
         backgroundColor: alpha(theme.palette.flow.main, 0.8),
         borderColor: theme.palette.flow.main,
-        borderDash: [],
-        borderWidth: 3,
+        borderDash: [3, 3],
         yAxisID: 'y2',
-      },
-      {
-        label: 'Selected Temp',
-        data: data.tempData.map(nullUnselected),
-        backgroundColor: alpha(theme.palette.temperature.main, 0.8),
-        borderColor: theme.palette.temperature.main,
-        borderDash: [],
-        borderWidth: 3,
-        yAxisID: 'y1',
       },
     ],
   };
+}
+
+function mapToChartData(data: DataPoints, theme: Theme, selectedPhaseIndex?: number): ChartData<'line'> {
+  const nullSelected = (d: number | null, i: number) => (
+    (selectedPhaseIndex !== undefined && selectedPhaseIndex === data.phaseIds[i]) ? null : d
+  );
+  const nullUnselected = (d: number | null, i: number) => (
+    (selectedPhaseIndex !== undefined && selectedPhaseIndex === data.phaseIds[i]) ? d : null
+  );
+  const chartData = buildEmptyChartData(theme);
+  chartData.labels = data.labels;
+  chartData.datasets[0].data = data.pressureTargetsData.map(nullSelected);
+  chartData.datasets[1].data = data.flowTargetsData.map(nullSelected);
+  chartData.datasets[2].data = data.tempData.map(nullSelected);
+  chartData.datasets[3].data = data.pressureLimitsData.map(nullSelected);
+  chartData.datasets[4].data = data.flowLimitsData.map(nullSelected);
+
+  if (selectedPhaseIndex !== undefined) {
+    const selectedDataSets:ChartDataset<'line'>[] = chartData.datasets.map((dataSet) => ({
+      ...dataSet, data: [], label: `Selected ${dataSet.label}`, borderWidth: 3,
+    }));
+    selectedDataSets[0].data = data.pressureTargetsData.map(nullUnselected);
+    selectedDataSets[1].data = data.flowTargetsData.map(nullUnselected);
+    selectedDataSets[2].data = data.tempData.map(nullUnselected);
+    selectedDataSets[3].data = data.pressureLimitsData.map(nullUnselected);
+    selectedDataSets[4].data = data.flowLimitsData.map(nullUnselected);
+    chartData.datasets.push(...selectedDataSets);
+  }
+
+  return chartData;
 }
 
 export interface ProfileChartProps {
@@ -152,15 +175,26 @@ export interface ProfileChartProps {
 function ProfileChart({ profile, selectedPhaseIndex, onSelectPhase }: ProfileChartProps) {
   const chartRef = useRef(null);
   const theme = useTheme();
+
   const datapoints = useMemo(() => profileToDatasets(profile), [profile]);
+
   const chartData = useMemo(
     () => mapToChartData(datapoints, theme, selectedPhaseIndex),
     [datapoints, selectedPhaseIndex, theme],
   );
+
   const onClickHandler = useCallback((dataIndex: number) => {
     onSelectPhase && onSelectPhase(datapoints.phaseIds[dataIndex]);
   }, [datapoints, onSelectPhase]);
-  const config = useMemo(() => getProfilePreviewChartConfig(theme, onClickHandler), [theme, onClickHandler]);
+
+  const config = useMemo(
+    () => getProfilePreviewChartConfig({
+      theme,
+      onClick: onClickHandler,
+      max: datapoints.labels[datapoints.labels.length - 1],
+    }),
+    [theme, datapoints, onClickHandler],
+  );
 
   return (
     <Line
@@ -189,7 +223,7 @@ function easeInOut(pct: number) {
   return 0.5 * (Math.sin((pct - 0.5) * Math.PI) + 1);
 }
 
-function percentageWithTransition(pct: number, curve:CurveStyle) {
+function percentageWithCurve(pct: number, curve:CurveStyle) {
   switch (curve) {
     case CurveStyle.LINEAR:
       return pct;
@@ -210,7 +244,7 @@ function mapRange(
   refEnd: number,
   targetStart: number,
   targetEnd: number,
-  transition: CurveStyle,
+  curve: CurveStyle,
 ): number {
   const deltaRef = refEnd - refStart;
   const deltaTarget = targetEnd - targetStart;
@@ -221,7 +255,7 @@ function mapRange(
 
   const pct = Math.max(0, Math.min(1, Math.abs((refNumber - refStart) / deltaRef)));
 
-  return targetStart + deltaTarget * percentageWithTransition(pct, transition);
+  return targetStart + deltaTarget * percentageWithCurve(pct, curve);
 }
 
 // Essentially this calculates the x axis(time) for a phase
@@ -288,17 +322,30 @@ function getPointCounts(phase: Phase) {
   };
 }
 
-function getPressureSegment(phase: Phase, previousPressure: number): number[] {
+function getPressureTargets(phase: Phase, previousPressure: number): (number | null)[] {
+  if (phase.type === PhaseType.PRESSURE) {
+    return getTargetValues(phase, previousPressure);
+  }
+  return [null, ...Array(POINTS_PER_PHASE).fill(null)];
+}
+
+function getPressureLimits(phase: Phase, previousPressure: number): (number | null)[] {
   if (phase.type === PhaseType.FLOW) {
     return [previousPressure, ...Array(POINTS_PER_PHASE).fill(phase.restriction || 0)];
   }
-
-  return getTargetValues(phase, previousPressure);
+  return [null, ...Array(POINTS_PER_PHASE).fill(null)];
 }
 
-function getFlowSegment(phase: Phase, previousFlow: number): number[] {
+function getFlowTargets(phase: Phase, previousFlow: number): (number | null)[] {
+  if (phase.type === PhaseType.FLOW) {
+    return getTargetValues(phase, previousFlow);
+  }
+  return [null, ...Array(POINTS_PER_PHASE).fill(null)];
+}
+
+function getFlowLimits(phase: Phase, previousFlow: number): (number | null)[] {
   if (phase.type === PhaseType.PRESSURE) {
     return [previousFlow, ...Array(POINTS_PER_PHASE).fill(phase.restriction || 0)];
   }
-  return getTargetValues(phase, previousFlow);
+  return [null, ...Array(POINTS_PER_PHASE).fill(null)];
 }
