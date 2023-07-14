@@ -66,6 +66,11 @@ module.exports = {
     'react/jsx-filename-extension': [2, { extensions }],
     'no-shadow': 'off',
     '@typescript-eslint/no-shadow': ['error'],
+    'react/require-default-props': ['error', {
+      forbidDefaultForRequired: true,
+      classes: 'defaultProps',
+      functions: 'defaultArguments',
+    }],
   },
   ignorePatterns: ['build/*.js', 'scripts/*.js', 'config/*.js'],
 };

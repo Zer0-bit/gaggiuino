@@ -1,7 +1,6 @@
 import React, {
-  useEffect, useRef, useState, useMemo,
+  useEffect, useRef, useState, useMemo, useCallback,
 } from 'react';
-import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,9 +12,12 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
 } from 'chart.js';
-import { useTheme, alpha } from '@mui/material';
+import { useTheme, alpha, Theme } from '@mui/material';
 import { getShotChartConfig } from './ChartConfig';
+import { ShotSnapshot } from '../../models/models';
+import { isNewShotStarted } from '../../state/ShotDataStore';
 
 ChartJS.register(
   CategoryScale,
@@ -28,23 +30,19 @@ ChartJS.register(
   Legend,
 );
 
-function mapDataPointToLabel(dataPoint) {
-  if (!dataPoint.timeInShot) {
-    return 0;
-  }
-
-  return dataPoint.timeInShot / 1000;
+function mapDataPointToLabel(dataPoint:ShotSnapshot) {
+  return dataPoint.timeInShot;
 }
 
-function getLabels(input) {
+function getLabels(input: ShotSnapshot[]) {
   return input.map(mapDataPointToLabel);
 }
 
-function getDataset(input, key) {
+function getDataset(input:ShotSnapshot[], key: keyof ShotSnapshot) {
   return input.map((dp) => dp[key]);
 }
 
-function mapToChartData(input, theme) {
+function mapToChartData(input: ShotSnapshot[], theme: Theme) {
   return {
     labels: getLabels(input),
     datasets: [
@@ -110,8 +108,8 @@ function mapToChartData(input, theme) {
   };
 }
 
-function popDataFromChartData(chartData) {
-  chartData.labels.shift();
+function popDataFromChartData(chartData: ChartData<'line'>) {
+  chartData.labels?.shift();
   chartData.datasets.forEach((dataset) => dataset.data.shift());
 }
 
@@ -119,14 +117,13 @@ function popDataFromChartData(chartData) {
  * Compares the timeInShot prop of the dataPoint to the last dataPoint in chartData.
  * If it's before it must mean a new shot was started.
  */
-function newShotStarted(dataPoint, chartData) {
-  const newTimeLabel = mapDataPointToLabel(dataPoint);
-  const previousMaxTimeLabel = chartData.labels[chartData.labels.length - 1] || 0;
-  return previousMaxTimeLabel > newTimeLabel;
+function newShotStarted(newDataPoint:ShotSnapshot, existingDatapoints: ShotSnapshot[]) {
+  return isNewShotStarted({ time: 0, datapoints: existingDatapoints }, newDataPoint);
 }
 
-function addDataPointToChartData(chartData, dataPoint, maxLength, chartRef) {
-  while (!Number.isNaN(maxLength) && chartData.labels.length >= maxLength) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function addDataPointToChartData(chartData: ChartData<'line'>, dataPoint: ShotSnapshot, maxLength: number | undefined, chartRef:React.MutableRefObject<any>) {
+  while (maxLength && chartData.labels && chartData.labels.length >= maxLength) {
     popDataFromChartData(chartData);
   }
 
@@ -134,7 +131,7 @@ function addDataPointToChartData(chartData, dataPoint, maxLength, chartRef) {
     return;
   }
 
-  chartData.labels.push(mapDataPointToLabel(dataPoint));
+  chartData.labels?.push(mapDataPointToLabel(dataPoint));
   chartData.datasets[0].data.push(dataPoint.temperature);
   chartData.datasets[1].data.push(dataPoint.pressure);
   chartData.datasets[2].data.push(dataPoint.pumpFlow);
@@ -152,10 +149,29 @@ function addDataPointToChartData(chartData, dataPoint, maxLength, chartRef) {
   /* eslint-enable no-param-reassign */
 }
 
-function Chart({ data, newDataPoint, maxLength }) {
-  const chartRef = useRef(null);
+export interface ShotChartProps {
+  data?: ShotSnapshot[],
+  newDataPoint?: ShotSnapshot,
+  maxLength?: number,
+  onHover?: (datapoint: ShotSnapshot) => void,
+}
+
+function ShotChart({
+  data = undefined,
+  newDataPoint = undefined,
+  maxLength = undefined,
+  onHover = undefined,
+}: ShotChartProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chartRef = useRef<any>();
   const theme = useTheme();
-  const config = useMemo(() => getShotChartConfig(theme), [theme]);
+  const [datapoints, setDatapoints] = useState<ShotSnapshot[]>([]);
+
+  const onHoverInternal = useCallback((hoverIndex: number) => {
+    onHover && onHover(datapoints[hoverIndex]);
+  }, [onHover, datapoints]);
+
+  const config = useMemo(() => getShotChartConfig(theme, onHoverInternal), [theme, onHoverInternal]);
   const [chartData, setChartData] = useState(mapToChartData([], theme));
 
   if (newDataPoint && data) {
@@ -167,20 +183,24 @@ function Chart({ data, newDataPoint, maxLength }) {
     if (data === undefined || data === null) {
       return;
     }
+    setDatapoints(data);
     setChartData(mapToChartData(data, theme));
-  }, [data, theme]);
+  }, [data, theme, setDatapoints, setChartData]);
 
   // Adds newDataPoint to the end of the chart unless it detects that a new shot was started. More efficient.
   useEffect(() => {
     if (newDataPoint === undefined || newDataPoint === null) {
       return;
     }
-    if (newShotStarted(newDataPoint, chartData)) {
+    if (newShotStarted(newDataPoint, datapoints)) {
       setChartData(mapToChartData([newDataPoint], theme));
+      setDatapoints([newDataPoint]);
     } else {
       addDataPointToChartData(chartData, newDataPoint, maxLength, chartRef);
+      setDatapoints([...datapoints, newDataPoint]);
     }
-  }, [newDataPoint, theme, chartData, maxLength]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newDataPoint, theme, maxLength, setDatapoints, setChartData]);
 
   return (
     <Line
@@ -191,28 +211,4 @@ function Chart({ data, newDataPoint, maxLength }) {
   );
 }
 
-export default Chart;
-
-export const ShotChartDataPointType = PropTypes.shape({
-  timeInShot: PropTypes.number,
-  temperature: PropTypes.number,
-  pressure: PropTypes.number,
-  pumpFlow: PropTypes.number,
-  weightFlow: PropTypes.number,
-  shotWeight: PropTypes.number,
-  targetTemperature: PropTypes.number,
-  targetPumpFlow: PropTypes.number,
-  targetPressure: PropTypes.number,
-});
-
-Chart.propTypes = {
-  data: PropTypes.arrayOf(ShotChartDataPointType),
-  newDataPoint: ShotChartDataPointType,
-  maxLength: PropTypes.number,
-};
-
-Chart.defaultProps = {
-  data: undefined,
-  newDataPoint: undefined,
-  maxLength: undefined,
-};
+export default ShotChart;

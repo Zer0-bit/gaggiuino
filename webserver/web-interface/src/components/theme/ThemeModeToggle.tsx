@@ -1,10 +1,15 @@
 import React, { createContext, useContext, useState } from 'react';
 import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
-import { useTheme } from '@mui/material';
+import { PaletteMode, useTheme } from '@mui/material';
 
-export const ThemeModeContext = createContext({
+export interface ThemeModeContextType {
+    themeMode: PaletteMode;
+    changeThemeMode: (newMode: PaletteMode) => void;
+  }
+
+export const ThemeModeContext = createContext<ThemeModeContextType>({
   themeMode: 'dark',
-  changeThemeMode: () => false,
+  changeThemeMode: (newMode: PaletteMode) => false,
 });
 
 export default function ThemeModeToggle() {

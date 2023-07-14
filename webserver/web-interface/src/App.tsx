@@ -12,7 +12,6 @@ import Settings from './pages/home/Settings';
 import MainAppBar from './components/appbar/MainAppBar';
 import ThemeWrapper from './components/theme/ThemeWrapper';
 import useWebSocket from './api/websocket';
-import { apiHost } from './models/api';
 
 function Layout() {
   return (
@@ -34,7 +33,7 @@ const router = createBrowserRouter(
 );
 
 function App() {
-  useWebSocket(`ws://${apiHost}/ws`);
+  useWebSocket(`ws://${window.location.host}/ws`);
   return <RouterProvider router={router} />;
 }
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useWebSocket as reactUseWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
 import useSensorStateStore from '../state/SensorStateStore';
 import {
+  GaggiaSettings,
   LogMessage, SensorState, ShotSnapshot, SystemState,
 } from '../models/models';
 import useSystemStateStore from '../state/SystemStateStore';
@@ -9,6 +10,7 @@ import useLogMessageStore from '../state/LogStore';
 import useShotDataStore from '../state/ShotDataStore';
 import useProfileStore from '../state/ProfileStore';
 import { Profile } from '../models/profile';
+import useSettingsStore from '../state/SettingsStore';
 
 enum WsActionType {
     SensorStateUpdate = 'sensor_data_update',
@@ -30,12 +32,13 @@ const useWebSocket = (url:string) => {
   const { addMessage } = useLogMessageStore();
   const { addShotDatapoint } = useShotDataStore();
   const { setLocalActiveProfile } = useProfileStore();
+  const { updateLocalSettings } = useSettingsStore();
 
   const { lastJsonMessage } = reactUseWebSocket(url, {
     share: true,
     shouldReconnect: () => true,
-    reconnectAttempts: 1000,
-    reconnectInterval: 1,
+    reconnectAttempts: 1000000,
+    reconnectInterval: 3,
     retryOnError: true,
   });
 
@@ -60,10 +63,11 @@ const useWebSocket = (url:string) => {
         setLocalActiveProfile(messageData.data as Profile);
         break;
       case WsActionType.SettingsUpdated:
-        // TODO: implement setting it in the store
+        updateLocalSettings(messageData.data as GaggiaSettings);
         break;
     }
-  }, [lastJsonMessage, updateSensorState, updateSystemState, addMessage, addShotDatapoint, setLocalActiveProfile]);
+  }, [lastJsonMessage, updateLocalSettings, updateSensorState,
+    updateSystemState, addMessage, addShotDatapoint, setLocalActiveProfile]);
 };
 
 export default useWebSocket;

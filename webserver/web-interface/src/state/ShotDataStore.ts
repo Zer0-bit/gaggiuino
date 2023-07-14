@@ -11,6 +11,19 @@ interface ShotDataStore {
   addShotToHistory: (shot: Shot) => void,
 }
 
+// This constant defines a buffer of time to prevent handling of out-of-order
+// socket messages.
+const OUT_OF_ORDER_BUFFER_TOLERANCE = 500; // msec
+
+function isDatapointOutOfOrder(
+  previousShotDatapoint: ShotSnapshot,
+  newShotDatapoint: ShotSnapshot,
+  tolerance = OUT_OF_ORDER_BUFFER_TOLERANCE,
+) {
+  return newShotDatapoint.timeInShot > previousShotDatapoint.timeInShot - tolerance
+  && newShotDatapoint.timeInShot < previousShotDatapoint.timeInShot;
+}
+
 export function isShotLongEnoughToBeStored(shot: Shot): boolean {
   return shot.datapoints.length > 0 && shot.datapoints[shot.datapoints.length - 1].timeInShot > 8000;
 }
@@ -55,6 +68,12 @@ const useShotDataStore = create<ShotDataStore>()(
         }),
 
         addShotDatapoint: (shotDatapoint: ShotSnapshot) => {
+          // This is here to protect the store from datapoints that are potentially delivered out of order
+          // It was observed that some WS messages are delivered out of order
+          if (isDatapointOutOfOrder(get().latestShotDatapoint, shotDatapoint)) {
+            return;
+          }
+
           if (isNewShotStarted(get().currentShot, shotDatapoint)) {
             get().addShotToHistory(get().currentShot);
             get().startNewShot();

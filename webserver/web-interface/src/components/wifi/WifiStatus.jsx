@@ -4,7 +4,7 @@ import SignalWifiOffIcon from '@mui/icons-material/SignalWifiOff';
 import { Stack, Typography } from '@mui/material';
 import { WifiStatusPropType } from './NetworkPropTypes';
 
-export default function WifiStatus({ status }) {
+export default function WifiStatus({ status = undefined }) {
   function isConnected() {
     return status && status.status === 'connected';
   }
@@ -26,8 +26,4 @@ export default function WifiStatus({ status }) {
 
 WifiStatus.propTypes = {
   status: WifiStatusPropType,
-};
-
-WifiStatus.defaultProps = {
-  status: null,
 };

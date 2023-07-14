@@ -1,22 +1,27 @@
 import { Theme, alpha } from '@mui/material';
 import { ChartOptions } from 'chart.js';
 
-export function getShotChartConfig(theme: Theme): ChartOptions<'line'> {
+export function getShotChartConfig(theme: Theme, onHover?: (index: number) => void): ChartOptions<'line'> {
   return {
     animation: false,
     responsive: true,
     maintainAspectRatio: false,
+    onHover: (event, elements) => {
+      if (onHover && elements && elements.length > 0 && elements[0].index) {
+        const { index } = elements[0]; // get the index of the hovered element
+        onHover(index);
+      }
+    },
     interaction: {
       mode: 'index',
       intersect: false,
     },
     plugins: {
       legend: {
-        display: true,
-        position: 'bottom',
-        labels: {
-          color: theme.palette.text.secondary,
-        },
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
       },
     },
     datasets: {
@@ -30,12 +35,13 @@ export function getShotChartConfig(theme: Theme): ChartOptions<'line'> {
         type: 'linear',
         ticks: {
           color: theme.palette.text.secondary,
+          callback: (tickValue) => `${tickValue as number / 1000}`,
         },
         grid: {
           color: theme.palette.divider,
         },
         min: 0,
-        suggestedMax: 60,
+        suggestedMax: 60000,
       },
       y1: {
         type: 'linear',
@@ -69,13 +75,23 @@ export function getShotChartConfig(theme: Theme): ChartOptions<'line'> {
   };
 }
 
-export function getProfilePreviewChartConfig(theme: Theme): ChartOptions<'line'> {
+export function getProfilePreviewChartConfig({ theme, onClick, max }: {theme: Theme, onClick: (dataIndex: number) => void, max?: number}): ChartOptions<'line'> {
   return {
     animation: false,
     responsive: true,
     maintainAspectRatio: false,
+    onClick: (event, elements) => {
+      if (onClick && elements && elements.length > 0 && elements[0].index) {
+        const { index } = elements[0]; // get the index of the clicked element
+        onClick(index);
+      }
+    },
     layout: {
       padding: 0,
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false,
     },
     plugins: {
       tooltip: {
@@ -89,7 +105,7 @@ export function getProfilePreviewChartConfig(theme: Theme): ChartOptions<'line'>
       line: {
         pointRadius: 0,
         borderWidth: 1.5,
-        borderDash: [3, 3],
+        tension: 0,
       },
     },
     scales: {
@@ -104,17 +120,16 @@ export function getProfilePreviewChartConfig(theme: Theme): ChartOptions<'line'>
           color: theme.palette.divider,
         },
         min: 0,
+        max,
       },
       y1: {
         type: 'linear',
         display: false,
         position: 'left',
         min: 0,
-        suggestedMax: 100,
+        suggestedMax: 105,
         grid: {
           display: false,
-          color: alpha(theme.palette.temperature.main, 0.5),
-          tickBorderDash: [3, 3],
         },
         ticks: {
           display: false,
@@ -125,11 +140,9 @@ export function getProfilePreviewChartConfig(theme: Theme): ChartOptions<'line'>
         display: false,
         position: 'right',
         min: -0.5,
-        max: 12,
+        max: 15,
         grid: {
           display: false,
-          color: alpha(theme.palette.pressure.main, 0.5),
-          tickBorderDash: [3, 3],
         },
         ticks: {
           display: false,

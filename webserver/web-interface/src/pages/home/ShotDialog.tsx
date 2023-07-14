@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  AppBar, Box, Dialog, IconButton, Stack, Toolbar,
+  AppBar, Box, Dialog, IconButton, SxProps, Theme, Toolbar, useTheme,
+
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -9,7 +10,7 @@ import {
   PressureStatBox, PumpFlowStatBox, TemperatureStatBox, TimeStatBox, WeightFlowStatBox, WeightStatBox,
 } from '../../components/chart/StatBox';
 import useShotDataStore from '../../state/ShotDataStore';
-import { Shot } from '../../models/models';
+import { Shot, ShotSnapshot } from '../../models/models';
 
 interface ShotDialogProps {
   open?: boolean;
@@ -17,8 +18,22 @@ interface ShotDialogProps {
   historyShot?: Shot;
 }
 
-export default function ShotDialog({ open, setOpen, historyShot }: ShotDialogProps) {
+export default function ShotDialog({ open = false, setOpen, historyShot = undefined }: ShotDialogProps) {
   const { latestShotDatapoint } = useShotDataStore();
+  const theme = useTheme();
+  const fullHeightGraph = `calc(100vh - 64px - ${theme.spacing(1)})`;
+  const lessHeightGraph = `calc(75vh - 64px - ${theme.spacing(1)})`;
+  const [activeDatapoint, setActiveDatapoint] = useState<ShotSnapshot | undefined>(undefined);
+
+  useEffect(() => {
+    if (!historyShot || historyShot.datapoints.length === 0) return;
+    setActiveDatapoint(historyShot.datapoints[historyShot.datapoints.length - 1]);
+  }, [historyShot, setActiveDatapoint]);
+
+  useEffect(() => {
+    if (historyShot) return;
+    setActiveDatapoint(latestShotDatapoint);
+  }, [latestShotDatapoint, historyShot, setActiveDatapoint]);
 
   return (
     <Dialog
@@ -27,80 +42,79 @@ export default function ShotDialog({ open, setOpen, historyShot }: ShotDialogPro
       onClose={() => setOpen(false)}
       PaperProps={{ elevation: 0 }}
     >
-      <Stack direction="column" display="flex" alignItems="stretch" justifyContent="flex-start" height="100%" spacing={2}>
-        <AppBar sx={{ position: 'relative', display: 'flex', flexGrow: 0 }}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={() => setOpen(false)}
-              aria-label="close"
-            >
-              <CloseIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-
-        <Grid container columns={4} spacing={1} sx={{ flexGrow: 1 }}>
-          <Grid xs={4} sm={3} display="flex" alignContent="stretch" flexGrow={1}>
-            <Box sx={{ position: 'relative', width: '100%' }}>
-              {historyShot && <ShotChart data={historyShot.datapoints} />}
-              {!historyShot && <ShotChart newDataPoint={latestShotDatapoint} />}
-            </Box>
-          </Grid>
-          <Grid xs={4} sm={1}>
-            {latestShotDatapoint && (
-            <Grid container columns={3} spacing={1}>
-              <Grid xs={1} sm={3}>
-                <TimeStatBox
-                  timeInShot={latestShotDatapoint.timeInShot}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <WeightStatBox
-                  shotWeight={latestShotDatapoint.shotWeight}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <PressureStatBox
-                  pressure={latestShotDatapoint.pressure}
-                  target={latestShotDatapoint.targetPressure}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <PumpFlowStatBox
-                  pumpFlow={latestShotDatapoint.pumpFlow}
-                  target={latestShotDatapoint.targetPumpFlow}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <WeightFlowStatBox
-                  flow={latestShotDatapoint.weightFlow}
-                  target={latestShotDatapoint.targetPumpFlow}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-              <Grid xs={1} sm={3}>
-                <TemperatureStatBox
-                  temperature={latestShotDatapoint.temperature}
-                  target={latestShotDatapoint.targetTemperature}
-                  sx={{ height: '100%' }}
-                />
-              </Grid>
-            </Grid>
-            )}
-          </Grid>
+      <AppBar sx={{ position: 'relative', height: '64px' }}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={() => setOpen(false)}
+            aria-label="close"
+          >
+            <CloseIcon />
+          </IconButton>
+          {historyShot ? 'Reviewing shot from history' : 'Shot in progress'}
+        </Toolbar>
+      </AppBar>
+      <Grid container spacing={1} sx={{ mx: 0, mt: theme.spacing(1) }}>
+        <Grid xs={12} sm={9} sx={{ height: { xs: lessHeightGraph, sm: fullHeightGraph } }}>
+          <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+            {historyShot && <ShotChart data={historyShot.datapoints} onHover={setActiveDatapoint} />}
+            {!historyShot && <ShotChart newDataPoint={latestShotDatapoint} onHover={setActiveDatapoint} />}
+          </Box>
         </Grid>
-      </Stack>
+        <Grid xs={12} sm={3} sx={{ height: { xs: '25vh', sm: fullHeightGraph }, overflow: 'scroll' }}>
+          <StatBoxes activeDatapoint={activeDatapoint} />
+        </Grid>
+      </Grid>
     </Dialog>
   );
 }
 
-ShotDialog.defaultProps = {
-  open: false,
-  historyShot: undefined,
-};
+function StatBoxes({ activeDatapoint = undefined }: { activeDatapoint?: ShotSnapshot}) {
+  const boxSx:SxProps<Theme> = { height: { xs: '100%', sm: 'auto' } };
+
+  return (
+    <Grid container spacing={1} sx={{ height: { xs: '100%', sm: 'auto' } }}>
+      <Grid xs={4} sm={12}>
+        <TimeStatBox
+          timeInShot={activeDatapoint?.timeInShot || 0}
+          sx={boxSx}
+        />
+      </Grid>
+      <Grid xs={4} sm={12}>
+        <WeightStatBox
+          shotWeight={activeDatapoint?.shotWeight || 0}
+          sx={boxSx}
+        />
+      </Grid>
+      <Grid xs={4} sm={12}>
+        <PressureStatBox
+          pressure={activeDatapoint?.pressure || 0}
+          target={activeDatapoint?.targetPressure || 0}
+          sx={boxSx}
+        />
+      </Grid>
+      <Grid xs={4} sm={12}>
+        <PumpFlowStatBox
+          pumpFlow={activeDatapoint?.pumpFlow || 0}
+          target={activeDatapoint?.targetPumpFlow || 0}
+          sx={boxSx}
+        />
+      </Grid>
+      <Grid xs={4} sm={12}>
+        <WeightFlowStatBox
+          flow={activeDatapoint?.weightFlow || 0}
+          target={activeDatapoint?.targetPumpFlow || 0}
+          sx={boxSx}
+        />
+      </Grid>
+      <Grid xs={4} sm={12}>
+        <TemperatureStatBox
+          temperature={activeDatapoint?.temperature || 0}
+          target={activeDatapoint?.targetTemperature || 0}
+          sx={boxSx}
+        />
+      </Grid>
+    </Grid>
+  );
+}

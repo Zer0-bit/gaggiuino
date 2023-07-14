@@ -5,7 +5,7 @@ import { getAvailableNetworks } from '../../client/WifiClient';
 import Loader from '../../loader/Loader';
 import AvailableNetwork from './AvailableNetwork';
 
-export default function AvailableNetworks({ onConnected }) {
+export default function AvailableNetworks({ onConnected = () => false }) {
   const [networks, setNetworks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [networksError, setNetworksError] = useState(false);
@@ -56,8 +56,4 @@ export default function AvailableNetworks({ onConnected }) {
 
 AvailableNetworks.propTypes = {
   onConnected: PropTypes.func,
-};
-
-AvailableNetworks.defaultProps = {
-  onConnected: () => false,
 };

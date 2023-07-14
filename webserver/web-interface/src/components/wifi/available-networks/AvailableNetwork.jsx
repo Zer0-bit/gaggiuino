@@ -10,9 +10,9 @@ import Loader from '../../loader/Loader';
 
 export default function AvailableNetwork({
   network,
-  onClick,
-  expanded,
-  onConnected,
+  onClick = () => false,
+  expanded = false,
+  onConnected = () => false,
 }) {
   const [password, setPassword] = useState('');
   const [connecting, setConnecting] = useState(false);
@@ -76,10 +76,4 @@ AvailableNetwork.propTypes = {
   onClick: PropTypes.func,
   onConnected: PropTypes.func,
   expanded: PropTypes.bool,
-};
-
-AvailableNetwork.defaultProps = {
-  onClick: () => false,
-  onConnected: () => false,
-  expanded: false,
 };
