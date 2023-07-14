@@ -9,7 +9,6 @@ import {
   Tab,
   Tabs,
   Theme,
-  Typography,
   debounce,
   useMediaQuery,
   useTheme,
@@ -23,12 +22,12 @@ import ThemeModeToggle from '../theme/ThemeModeToggle';
 import {
   LedColorPickerInput,
   SettingsInputActions,
-  SettingsInputField,
-  SettingsInputLabel,
+  SettingsInputInlineLabel,
   SettingsInputWrapper,
   SettingsNumberInput,
   SettingsToggleInput,
 } from './settings_inputs';
+import { constrain } from '../../models/utils';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -37,10 +36,9 @@ interface TabPanelProps {
   sx?: SxProps<Theme>;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const {
-    children, value, index, ...other
-  } = props;
+function TabPanel({
+  children = undefined, value, index, ...other
+}: TabPanelProps) {
   return (
     <Box
       role="tabpanel"
@@ -54,11 +52,6 @@ function TabPanel(props: TabPanelProps) {
     </Box>
   );
 }
-
-TabPanel.defaultProps = {
-  children: null,
-  sx: {},
-};
 
 function a11yProps(index: number) {
   return {
@@ -108,10 +101,11 @@ export default function TabbedSettings({ settings, onChange }: TabbedSettingsPro
   return (
     <Box sx={{
       display: 'flex',
-      flexGrow: 1,
+      width: '100%',
       bgcolor: 'background.paper',
       height: '100%',
       p: theme.spacing(2),
+      gap: theme.spacing(1),
       borderRadius: theme.spacing(2),
       flexDirection: { xs: 'column', sm: 'row' },
     }}
@@ -170,26 +164,31 @@ function BoilerSettingsPanel({ boiler, onChange }: BoilerSettingsPanelProps) {
       <SettingsNumberInput
         label="Steam Temperature"
         value={boiler.steamSetPoint}
-        onChange={(value) => onChange({ ...boiler, steamSetPoint: value })}
+        maxDecimals={0}
+        onChange={(value) => onChange({ ...boiler, steamSetPoint: constrain(value, 0, 165) })}
       />
       <SettingsNumberInput
         label="Temperature Offset"
         value={boiler.offsetTemp}
-        onChange={(value) => onChange({ ...boiler, offsetTemp: value })}
+        maxDecimals={0}
+        onChange={(value) => onChange({ ...boiler, offsetTemp: constrain(value, 0, 20) })}
       />
       <SettingsNumberInput
         label="HPWR"
         value={boiler.hpwr}
+        maxDecimals={0}
         onChange={(value) => onChange({ ...boiler, hpwr: value })}
       />
       <SettingsNumberInput
         label="Main Divider"
         value={boiler.mainDivider}
+        maxDecimals={0}
         onChange={(value) => onChange({ ...boiler, mainDivider: value })}
       />
       <SettingsNumberInput
         label="Brew Divider"
         value={boiler.brewDivider}
+        maxDecimals={0}
         onChange={(value) => onChange({ ...boiler, brewDivider: value })}
       />
     </Box>
@@ -211,26 +210,29 @@ function SystemSettingsPanel({ system, onChange }: SystemSettingsPanelProps) {
         label="LCD sleep"
         value={system.lcdSleep}
         onChange={(value) => onChange({ ...system, lcdSleep: value })}
+        maxDecimals={0}
       />
       <SettingsNumberInput
         label="Pump Zero (PZ)"
         value={system.pumpFlowAtZero}
         onChange={(value) => onChange({ ...system, pumpFlowAtZero: value })}
-        fractionDigits={3}
+        maxDecimals={3}
+        buttonIncrements={0.001}
       />
       <SettingsNumberInput
         label="Scales F1"
         value={system.scalesF1}
         onChange={(value) => onChange({ ...system, scalesF1: value })}
+        maxDecimals={0}
       />
       <SettingsNumberInput
         label="Scales F2"
         value={system.scalesF2}
         onChange={(value) => onChange({ ...system, scalesF2: value })}
+        maxDecimals={0}
       />
       <SettingsInputWrapper>
-        <SettingsInputLabel><Typography>Dark/Light toggle:</Typography></SettingsInputLabel>
-        <SettingsInputField></SettingsInputField>
+        <SettingsInputInlineLabel>Dark/Light toggle</SettingsInputInlineLabel>
         <SettingsInputActions><ThemeModeToggle /></SettingsInputActions>
       </SettingsInputWrapper>
       <SettingsToggleInput

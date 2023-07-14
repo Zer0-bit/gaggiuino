@@ -58,8 +58,6 @@ export function GlobalRestriction({ icon: Icon, value, color = undefined }: Glob
   );
 }
 
-GlobalRestriction.defaultProps = { color: undefined };
-
 export interface RestrictionProps {
   value: number | undefined
 }

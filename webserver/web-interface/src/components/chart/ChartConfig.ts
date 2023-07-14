@@ -127,7 +127,7 @@ export function getProfilePreviewChartConfig({ theme, onClick, max }: {theme: Th
         display: false,
         position: 'left',
         min: 0,
-        suggestedMax: 100,
+        suggestedMax: 105,
         grid: {
           display: false,
         },
@@ -140,7 +140,7 @@ export function getProfilePreviewChartConfig({ theme, onClick, max }: {theme: Th
         display: false,
         position: 'right',
         min: -0.5,
-        max: 12,
+        max: 15,
         grid: {
           display: false,
         },

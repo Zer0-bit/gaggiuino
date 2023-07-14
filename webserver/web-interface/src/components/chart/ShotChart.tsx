@@ -157,7 +157,10 @@ export interface ShotChartProps {
 }
 
 function ShotChart({
-  data, newDataPoint, maxLength, onHover,
+  data = undefined,
+  newDataPoint = undefined,
+  maxLength = undefined,
+  onHover = undefined,
 }: ShotChartProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chartRef = useRef<any>();
@@ -209,10 +212,3 @@ function ShotChart({
 }
 
 export default ShotChart;
-
-ShotChart.defaultProps = {
-  data: undefined,
-  newDataPoint: undefined,
-  maxLength: undefined,
-  onHover: undefined,
-};

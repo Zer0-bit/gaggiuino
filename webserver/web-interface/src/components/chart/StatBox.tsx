@@ -28,7 +28,7 @@ export interface StatBoxProps {
 }
 
 export function StatBox({
-  label, color, stat, icon, statTarget, unit, sx,
+  label, color, stat = undefined, icon = undefined, statTarget = undefined, unit = '', sx = {},
 }: StatBoxProps) {
   const theme = useTheme();
   return (
@@ -69,15 +69,7 @@ export function StatBox({
   );
 }
 
-StatBox.defaultProps = {
-  stat: undefined,
-  icon: undefined,
-  statTarget: undefined,
-  unit: '',
-  sx: {},
-};
-
-export function TimeStatBox({ timeInShot, sx }: {timeInShot: number, sx?: SxProps<Theme>}) {
+export function TimeStatBox({ timeInShot, sx = {} }: {timeInShot: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
   return (
@@ -90,10 +82,9 @@ export function TimeStatBox({ timeInShot, sx }: {timeInShot: number, sx?: SxProp
     />
   );
 }
-TimeStatBox.defaultProps = { sx: {} };
 
 export function WeightStatBox({
-  shotWeight, target, sx,
+  shotWeight, target = undefined, sx = {},
 }: {shotWeight: number, target?: number, sx?: SxProps<Theme> }) {
   const theme = useTheme();
 
@@ -109,10 +100,9 @@ export function WeightStatBox({
     />
   );
 }
-WeightStatBox.defaultProps = { target: undefined, sx: {} };
 
 export function TemperatureStatBox({
-  temperature, target, sx,
+  temperature, target, sx = {},
 }: {temperature: number, target: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
@@ -128,10 +118,8 @@ export function TemperatureStatBox({
     />
   );
 }
-TemperatureStatBox.defaultProps = { sx: {} };
-
 export function PumpFlowStatBox({
-  pumpFlow, target, sx,
+  pumpFlow, target, sx = undefined,
 }: {pumpFlow: number, target: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
@@ -147,10 +135,9 @@ export function PumpFlowStatBox({
     />
   );
 }
-PumpFlowStatBox.defaultProps = { sx: {} };
 
 export function WeightFlowStatBox({
-  flow, target, sx,
+  flow, target, sx = undefined,
 }: {flow: number, target: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
@@ -166,10 +153,9 @@ export function WeightFlowStatBox({
     />
   );
 }
-WeightFlowStatBox.defaultProps = { sx: {} };
 
 export function PressureStatBox({
-  pressure, target, sx,
+  pressure, target, sx = undefined,
 }: {pressure: number, target: number, sx?: SxProps<Theme>}) {
   const theme = useTheme();
 
@@ -185,4 +171,3 @@ export function PressureStatBox({
     />
   );
 }
-PressureStatBox.defaultProps = { sx: {} };

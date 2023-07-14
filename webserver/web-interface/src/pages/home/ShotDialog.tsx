@@ -18,7 +18,7 @@ interface ShotDialogProps {
   historyShot?: Shot;
 }
 
-export default function ShotDialog({ open, setOpen, historyShot }: ShotDialogProps) {
+export default function ShotDialog({ open = false, setOpen, historyShot = undefined }: ShotDialogProps) {
   const { latestShotDatapoint } = useShotDataStore();
   const theme = useTheme();
   const fullHeightGraph = `calc(100vh - 64px - ${theme.spacing(1)})`;
@@ -70,12 +70,7 @@ export default function ShotDialog({ open, setOpen, historyShot }: ShotDialogPro
   );
 }
 
-ShotDialog.defaultProps = {
-  open: false,
-  historyShot: undefined,
-};
-
-function StatBoxes({ activeDatapoint }: { activeDatapoint?: ShotSnapshot}) {
+function StatBoxes({ activeDatapoint = undefined }: { activeDatapoint?: ShotSnapshot}) {
   const boxSx:SxProps<Theme> = { height: { xs: '100%', sm: 'auto' } };
 
   return (
@@ -123,5 +118,3 @@ function StatBoxes({ activeDatapoint }: { activeDatapoint?: ShotSnapshot}) {
     </Grid>
   );
 }
-
-StatBoxes.defaultProps = { activeDatapoint: undefined };

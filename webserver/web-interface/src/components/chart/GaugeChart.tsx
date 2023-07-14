@@ -14,14 +14,6 @@ import AspectRatioBox from '../layout/AspectRatioBox';
 
 ChartJS.register(ArcElement, Title, GaugeCentralTextPlugin);
 
-interface GaugeChartProps {
-  value: number;
-  maxValue?: number;
-  primaryColor: Color;
-  unit?: string;
-  title?: string;
-}
-
 export function GaugeTitle({ children, sx }: TypographyProps) {
   const theme = useTheme();
   return (
@@ -38,12 +30,20 @@ export function GaugeTitle({ children, sx }: TypographyProps) {
   );
 }
 
+type GaugeChartProps = {
+  value: number;
+  maxValue?: number;
+  primaryColor: Color;
+  unit?: string;
+  title?: string;
+}
+
 export function GaugeChart({
   value,
-  maxValue,
+  maxValue = 100,
   primaryColor,
-  unit,
-  title,
+  unit = '',
+  title = '',
 }: GaugeChartProps) {
   const theme = useTheme();
 
@@ -87,9 +87,3 @@ export function GaugeChart({
 }
 
 export default GaugeChart;
-
-GaugeChart.defaultProps = {
-  maxValue: 100,
-  unit: '',
-  title: '',
-};

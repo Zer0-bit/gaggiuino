@@ -1,18 +1,19 @@
-import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
-import React, { useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+import {
+  CssBaseline, PaletteMode, ThemeProvider, useMediaQuery,
+} from '@mui/material';
+import React, { ReactNode, useMemo, useState } from 'react';
 import getAppTheme from './AppTheme';
 import { ThemeModeContext } from './ThemeModeToggle';
 
 const SAVED_THEME_MODE_KEY = 'savedTheme';
 
-export default function ThemeWrapper({ children }) {
+export default function ThemeWrapper({ children = undefined }: { children: ReactNode}) {
   const themeModeBrowserPreference = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
-  const savedThemeMode = localStorage.getItem(SAVED_THEME_MODE_KEY);
+  const savedThemeMode = localStorage.getItem(SAVED_THEME_MODE_KEY) as (PaletteMode | null);
 
   const [themeMode, setThemeMode] = useState(savedThemeMode || themeModeBrowserPreference);
 
-  const changeThemeMode = (newMode) => {
+  const changeThemeMode = (newMode: PaletteMode) => {
     localStorage.setItem(SAVED_THEME_MODE_KEY, newMode);
     setThemeMode(newMode);
   };
@@ -29,11 +30,3 @@ export default function ThemeWrapper({ children }) {
     </ThemeModeContext.Provider>
   );
 }
-
-ThemeWrapper.propTypes = {
-  children: PropTypes.node,
-};
-
-ThemeWrapper.defaultProps = {
-  children: undefined,
-};

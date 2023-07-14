@@ -9,7 +9,7 @@ import { refrehNetworks } from '../../client/WifiClient';
 import Loader from '../../loader/Loader';
 import AvailableNetworks from './AvailableNetworks';
 
-export default function AvailableNetworksDrawer({ open, onOpenChanged, onConnected }) {
+export default function AvailableNetworksDrawer({ open, onOpenChanged, onConnected = () => false }) {
   const theme = useTheme();
   const [networksRefreshing, setNetworksRefreshing] = useState(false);
   const [wifiDrawerRefreshKey, setWifiDrawerRefreshKey] = useState(0);
@@ -55,8 +55,4 @@ AvailableNetworksDrawer.propTypes = {
   open: PropTypes.bool.isRequired,
   onOpenChanged: PropTypes.func.isRequired,
   onConnected: PropTypes.func,
-};
-
-AvailableNetworksDrawer.defaultProps = {
-  onConnected: () => false,
 };

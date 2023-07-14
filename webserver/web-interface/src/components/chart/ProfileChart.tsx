@@ -172,7 +172,7 @@ export interface ProfileChartProps {
   onSelectPhase?: (phaseIndex: number) => void;
 }
 
-function ProfileChart({ profile, selectedPhaseIndex, onSelectPhase }: ProfileChartProps) {
+function ProfileChart({ profile, selectedPhaseIndex = undefined, onSelectPhase = undefined }: ProfileChartProps) {
   const chartRef = useRef(null);
   const theme = useTheme();
 
@@ -204,10 +204,6 @@ function ProfileChart({ profile, selectedPhaseIndex, onSelectPhase }: ProfileCha
     />
   );
 }
-ProfileChart.defaultProps = {
-  selectedPhaseIndex: undefined,
-  onSelectPhase: undefined,
-};
 
 export default ProfileChart;
 
@@ -268,7 +264,7 @@ function getPointsInTime(phase: Phase, phaseStartTime:number) {
   const pointsInTime = [phaseStartTime]; // Adding one extra point to connect to precious phase
   for (let i = 0; i < pointCounts.forTransition; i++) {
     const pct = i / (pointCounts.forTransition - 1);
-    pointsInTime.push(phaseStartTime + pct * times.transition);
+    pointsInTime.push(phaseStartTime + pct * Math.min(times.transition, times.totalTime));
   }
   for (let i = 0; i < pointCounts.forRestOfPhase; i++) {
     const pct = i / (pointCounts.forRestOfPhase - 1);
@@ -283,16 +279,16 @@ function getPointsInTime(phase: Phase, phaseStartTime:number) {
 function getTargetValues(phase: Phase, previousValue: number): number[] {
   const startingValue = (phase.target.start) ? phase.target.start : previousValue;
   const endValue = phase.target.end || 0;
-  const pointCounts = getPointCounts(phase);
+  const times = getPhaseTimes(phase);
+  const pointsInTime = getPointsInTime(phase, 0);
 
   const targetValues = [previousValue]; // Adding one extra point to connect to precious phase
-  for (let i = 0; i < pointCounts.forTransition; i++) {
-    const pct = i / (pointCounts.forTransition - 1);
-    targetValues.push(mapRange(pct, 0, 1, startingValue, endValue, phase.target.curve));
+  for (let i = 1; i < pointsInTime.length; i++) { // Skip first element as it's manually set to point to previousValue above
+    targetValues.push(
+      mapRange(pointsInTime[i], 0, times.transition, startingValue, endValue, phase.target.curve),
+    );
   }
-  for (let i = 0; i < pointCounts.forRestOfPhase; i++) {
-    targetValues.push(endValue);
-  }
+
   return targetValues;
 }
 

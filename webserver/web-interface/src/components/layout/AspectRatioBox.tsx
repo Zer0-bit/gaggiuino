@@ -28,8 +28,4 @@ const AspectRatioBox = React.forwardRef(({
   </Box>
 ));
 
-AspectRatioBox.defaultProps = {
-  ratio: 1,
-};
-
 export default AspectRatioBox;

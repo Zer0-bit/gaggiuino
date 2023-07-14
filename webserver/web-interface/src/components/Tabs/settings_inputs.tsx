@@ -5,9 +5,12 @@ import {
   IconButton, Switch, TextField, Typography, useTheme,
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import React, { useCallback } from 'react';
+import React, {
+  useCallback, useEffect, useMemo, useState,
+} from 'react';
 import { Colorful, RgbaColor, rgbaToHex } from '@uiw/react-color';
 import { LedColor } from '../../models/models';
+import { same, sanitizeNumberString } from '../../models/utils';
 
 export interface SettingsToggleInputProps {
   label: string;
@@ -18,8 +21,7 @@ export interface SettingsToggleInputProps {
 export function SettingsToggleInput({ label, value, onChange }: SettingsToggleInputProps) {
   return (
     <SettingsInputWrapper>
-      <SettingsInputLabel><Typography>{label}</Typography></SettingsInputLabel>
-      <SettingsInputField />
+      <SettingsInputInlineLabel>{label}</SettingsInputInlineLabel>
       <SettingsInputActions>
         <Switch checked={value} onChange={(e) => onChange(e.target.checked)} />
       </SettingsInputActions>
@@ -31,44 +33,79 @@ export interface SettingsNumberInputProps {
   label: string;
   value: number;
   onChange: (value: number) => void;
-  fractionDigits?: number;
+  buttonIncrements?: number;
+  maxDecimals?: number;
 }
 
 export function SettingsNumberInput({
-  label, value, onChange, fractionDigits,
+  label, value, onChange, maxDecimals = undefined, buttonIncrements = 1,
 }: SettingsNumberInputProps) {
   const theme = useTheme();
-  const scale = 10.0 ** (fractionDigits || 0);
+  const round = useMemo(() => (x: number) => {
+    if (maxDecimals === undefined) return x;
+    const scale = 10 ** maxDecimals;
+    return Math.round(x * scale) / scale;
+  }, [maxDecimals]);
+
+  const [inputValue, setInputValue] = useState<string>(sanitizeNumberString(round(value).toString()));
+
+  const handleValueChange = useCallback((newNumericValue: number) => {
+    const roundedNumber = round(newNumericValue);
+
+    // Ignore update if the value hasn't changed
+    if (!same(value, roundedNumber)) {
+      onChange(roundedNumber);
+    }
+  }, [onChange, value, round]);
+
+  useEffect(() => setInputValue(round(value).toString()), [value, round]);
+
+  useEffect(
+    () => {
+      const number = parseFloat(inputValue || '');
+      if (Number.isNaN(number) || same(number, value)) return;
+      handleValueChange(number);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [inputValue], // Remove handleValueChange dependency. Important to avoid infinite loop.
+  );
+
+  const handleFocusLost = useCallback(() => {
+    setInputValue(sanitizeNumberString(round(value).toString()));
+  }, [value, round]);
+
+  const handleInputValueChanged = useCallback((newValue: string) => {
+    setInputValue(sanitizeNumberString(newValue, maxDecimals));
+  }, [setInputValue, maxDecimals]);
 
   return (
     <SettingsInputWrapper>
-      <SettingsInputLabel><Typography>{label}</Typography></SettingsInputLabel>
+      <SettingsInputBorderLabel><Typography variant="caption" color="text.secondary">{label}</Typography></SettingsInputBorderLabel>
       <SettingsInputField>
         <TextField
-          value={value.toFixed(fractionDigits)}
-          onChange={(e) => onChange(parseInt(e.target.value, 10))}
+          fullWidth
+          value={inputValue}
+          onChange={(e) => handleInputValueChanged(e.target.value)}
+          onBlur={handleFocusLost}
           variant="outlined"
           sx={{
-            width: '7ch',
             '& fieldset': { border: 'none' },
-            '& input': { textAlign: 'center', p: theme.spacing(0.5) },
+            '& input': { textAlign: 'left', p: theme.spacing(0.5) },
           }}
-          InputProps={{ readOnly: true }}
+          InputProps={{ readOnly: false }}
         />
       </SettingsInputField>
       <SettingsInputActions>
-        <IconButton size="small" color="primary" onClick={() => onChange(value - (1.0 / scale))}>
+        <IconButton size="small" color="primary" onClick={() => handleValueChange(value - buttonIncrements)}>
           <RemoveIcon />
         </IconButton>
-        <IconButton size="small" color="primary" onClick={() => onChange(value + (1.0 / scale))}>
+        <IconButton size="small" color="primary" onClick={() => handleValueChange(value + buttonIncrements)}>
           <AddIcon />
         </IconButton>
       </SettingsInputActions>
     </SettingsInputWrapper>
   );
 }
-
-SettingsNumberInput.defaultProps = { fractionDigits: 0 };
 
 export interface LedColorInputProps {
   label: string;
@@ -90,11 +127,9 @@ export function LedColorPickerInput({ label, value, onChange }: LedColorInputPro
     [onChange],
   );
 
-  // useEffect(() => updateLedColor(color), [updateLedColor, color]);
-
   return (
     <SettingsInputWrapper>
-      <SettingsInputLabel><Typography>{label}</Typography></SettingsInputLabel>
+      <SettingsInputBorderLabel>{label}</SettingsInputBorderLabel>
       <Colorful
         style={{ width: '100%', marginTop: theme.spacing(1) }}
         color={rgbaToHex(color)}
@@ -108,20 +143,61 @@ export function LedColorPickerInput({ label, value, onChange }: LedColorInputPro
 }
 
 export function SettingsInputWrapper({ children }: {children: React.ReactNode}) {
+  const childrenArray = React.Children.toArray(children);
+
+  // Check if child is a valid React element and its type is SettingsInputLabel
+  const borderLabel = childrenArray.find((c) => React.isValidElement(c) && c.type === SettingsInputBorderLabel);
+  const inlineLabel = childrenArray.find((c) => React.isValidElement(c) && c.type === SettingsInputInlineLabel);
+  const field = childrenArray.find((c) => React.isValidElement(c) && c.type === SettingsInputField);
+  const actions = childrenArray.find((c) => React.isValidElement(c) && c.type === SettingsInputActions);
+  const otherChildern = childrenArray.filter((c) => [borderLabel, inlineLabel, field, actions].indexOf(c) === -1);
+
   const theme = useTheme();
+  const trueColumns = [field, actions, inlineLabel].filter((x) => !!x);
+  const columnSize = 12 / trueColumns.length || 12;
   return (
     <Box
       sx={{
-        p: theme.spacing(1),
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: theme.spacing(1),
+        position: 'relative',
         width: '100%',
-        gap: theme.spacing(2),
+        p: theme.spacing(1),
       }}
     >
+      {borderLabel && <Box sx={{ position: 'absolute', top: -14, left: 15 }}>{borderLabel}</Box>}
       <Grid container width="100%">
-        {children}
+        {inlineLabel && <Grid xs={columnSize} display="flex" alignItems="center">{inlineLabel}</Grid>}
+        {field && <Grid xs={columnSize} display="flex" alignItems="center">{field}</Grid>}
+        {actions && <Grid xs={columnSize} display="flex" alignItems="center" justifyContent="end">{actions}</Grid>}
       </Grid>
+      {otherChildern}
+      <fieldset style={{
+        position: 'absolute',
+        margin: 0,
+        padding: 0,
+        top: borderLabel ? -12 : 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: theme.spacing(0.5),
+        pointerEvents: 'none',
+      }}
+      >
+        {borderLabel && (
+        <legend style={{
+          visibility: 'hidden',
+          padding: 0,
+          float: 'none',
+          margin: 0,
+          marginLeft: '13px',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        >
+          {borderLabel}
+        </legend>
+        )}
+      </fieldset>
     </Box>
   );
 }
@@ -130,29 +206,27 @@ export interface GridItemProps {
   children?: React.ReactNode;
 }
 
-export function SettingsInputLabel({ children }: GridItemProps) {
+export function SettingsInputInlineLabel({ children = undefined }: GridItemProps) {
   return (
-    <Grid xs={5} sx={{ display: 'flex', alignItems: 'center' }}>
-      {children}
-    </Grid>
+    <Box alignItems="center" display="flex" width="100%">
+      <Typography noWrap variant="body2">{ children }</Typography>
+    </Box>
   );
 }
-SettingsInputLabel.defaultProps = { children: undefined };
 
-export function SettingsInputField({ children }: GridItemProps) {
+export function SettingsInputBorderLabel({ children = undefined }: GridItemProps) {
+  const theme = useTheme();
   return (
-    <Grid xs={3} alignItems="center" display="flex">
-      {children}
-    </Grid>
+    <Box sx={{ display: 'inline-block' }}>
+      <Typography noWrap variant="caption" sx={{ px: theme.spacing(0.5) }}>{ children }</Typography>
+    </Box>
   );
 }
-SettingsInputField.defaultProps = { children: undefined };
 
-export function SettingsInputActions({ children }: GridItemProps) {
-  return (
-    <Grid xs={4} alignItems="center" display="flex" justifyContent="end">
-      {children}
-    </Grid>
-  );
+export function SettingsInputField({ children = undefined }: GridItemProps) {
+  return <Box alignItems="center" display="flex" width="100%">{ children }</Box>;
 }
-SettingsInputActions.defaultProps = { children: undefined };
+
+export function SettingsInputActions({ children = undefined }: GridItemProps) {
+  return <Box alignItems="center" display="flex" justifyContent="end">{ children }</Box>;
+}

@@ -14,7 +14,7 @@ export interface ProfileReviewProps {
   onEdit?: () => void | undefined,
 }
 
-export function ProfileReview({ profile, onSave, onEdit }: ProfileReviewProps) {
+export function ProfileReview({ profile, onSave = undefined, onEdit = undefined }: ProfileReviewProps) {
   const theme = useTheme();
   return (
     <>
@@ -39,8 +39,3 @@ export function ProfileReview({ profile, onSave, onEdit }: ProfileReviewProps) {
     </>
   );
 }
-
-ProfileReview.defaultProps = {
-  onSave: undefined,
-  onEdit: undefined,
-};
