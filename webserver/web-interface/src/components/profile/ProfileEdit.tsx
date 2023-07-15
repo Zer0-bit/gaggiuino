@@ -17,7 +17,7 @@ import {
 } from '../../models/profile';
 import ProfileChart from '../chart/ProfileChart';
 import { GlobalRestrictions } from './GlobalRestrictions';
-import PhaseEditor from './PhaseEditor';
+import PhaseEdit from './PhaseEdit';
 import { getIndexInRange } from '../../models/utils';
 import { ProfileGlobalsEdit } from './ProfileGlobalsEdit';
 
@@ -30,21 +30,35 @@ export interface ProfileEditProps {
 export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined }: ProfileEditProps) {
   const [editingProfile, setEditingProfile] = useState(profile);
   const [phaseIndexSelected, setPhaseIndexSelected] = useState<number |undefined>(undefined);
-  const [globalsSectionVisible, setGlobalsSectionVisible] = useState(false);
+  const [globalsSectionVisible, setGlobalsSectionVisible] = useState(true);
+
+  const handlePhaseIndexSelected = useCallback((index: number | undefined) => {
+    setPhaseIndexSelected(index);
+    if (index !== undefined) {
+      setGlobalsSectionVisible(false);
+    }
+  }, []);
+
+  const handleGlobalsVisibleChange = useCallback((state: boolean) => {
+    setGlobalsSectionVisible(state);
+    if (state) {
+      setPhaseIndexSelected(undefined);
+    }
+  }, []);
 
   useEffect(() => {
     setEditingProfile(profile);
-    setPhaseIndexSelected(undefined);
-  }, [profile, setEditingProfile, setPhaseIndexSelected]);
+    handlePhaseIndexSelected(undefined);
+  }, [profile, setEditingProfile, handlePhaseIndexSelected]);
 
   const deletePhase = useCallback(
     (phaseIndex: number) => {
       const newPhases = [...editingProfile.phases];
       newPhases.splice(phaseIndex, 1);
       setEditingProfile({ ...editingProfile, phases: newPhases });
-      setPhaseIndexSelected(getIndexInRange(phaseIndex - 1, newPhases));
+      handlePhaseIndexSelected(getIndexInRange(phaseIndex - 1, newPhases));
     },
-    [setEditingProfile, editingProfile],
+    [setEditingProfile, editingProfile, handlePhaseIndexSelected],
   );
 
   const createNewPhase = useCallback(
@@ -58,9 +72,9 @@ export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined 
       };
       const newPhases = [...editingProfile.phases.slice(0, index), newPhase, ...editingProfile.phases.slice(index)];
       setEditingProfile({ ...editingProfile, phases: newPhases });
-      setPhaseIndexSelected(getIndexInRange(index, newPhases));
+      handlePhaseIndexSelected(getIndexInRange(index, newPhases));
     },
-    [setEditingProfile, editingProfile],
+    [setEditingProfile, editingProfile, handlePhaseIndexSelected],
   );
 
   const updatePhase = useCallback((index: number, phase:Phase) => {
@@ -80,7 +94,7 @@ export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined 
           <ProfileChart
             profile={editingProfile}
             selectedPhaseIndex={phaseIndexSelected}
-            onSelectPhase={setPhaseIndexSelected}
+            onSelectPhase={handlePhaseIndexSelected}
           />
         </Box>
         <GlobalRestrictions profile={editingProfile} />
@@ -91,22 +105,22 @@ export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined 
           phaseIndexSelected={phaseIndexSelected}
           onCreatePhase={createNewPhase}
           onDeletePhase={deletePhase}
-          onGlobalClicked={() => setGlobalsSectionVisible(!globalsSectionVisible)}
-          onUpdatePhaseIndexSelected={setPhaseIndexSelected}
+          onGlobalClicked={() => handleGlobalsVisibleChange(!globalsSectionVisible)}
+          onUpdatePhaseIndexSelected={handlePhaseIndexSelected}
         />
       </Box>
       {globalsSectionVisible && (
         <GlobalsSection
           profile={editingProfile}
           onUpdated={setEditingProfile}
-          onClose={() => setGlobalsSectionVisible(false)}
+          onClose={() => handleGlobalsVisibleChange(false)}
         />
       )}
       {phaseIndexSelected !== undefined && (
         <PhaseEditingSection
           title={`Phase ${phaseIndexSelected + 1}`}
           phase={editingProfile.phases[phaseIndexSelected]}
-          onClose={() => setPhaseIndexSelected(undefined)}
+          onClose={() => handlePhaseIndexSelected(undefined)}
           onUpdatePhase={(newPhase) => updatePhase(phaseIndexSelected, newPhase)}
         />
       )}
@@ -150,19 +164,18 @@ function PhaseManagementBar(
     }}
     >
       {profile.phases.length > 1 && (<Button variant="outlined" onClick={previousPhase}><PreviousIcon /></Button>)}
-      {phaseIndexSelected !== undefined && (
       <Box display="flex" flexGrow="1" justifyContent="center">
         <IconButton color="info" onClick={() => onGlobalClicked()}><GlobeIcon /></IconButton>
-        <IconButton color="error" onClick={() => onDeletePhase(phaseIndexSelected)}><DeleteIcon /></IconButton>
-        <IconButton color="success" onClick={() => onCreatePhase(phaseIndexSelected + 1)}><CreateIcon /></IconButton>
+        {phaseIndexSelected !== undefined && (
+        <>
+          <IconButton color="error" onClick={() => onDeletePhase(phaseIndexSelected)}><DeleteIcon /></IconButton>
+          <IconButton color="success" onClick={() => onCreatePhase(phaseIndexSelected + 1)}><CreateIcon /></IconButton>
+        </>
+        )}
+        {((profile.phases.length === 0)) && (
+          <IconButton color="success" onClick={() => onCreatePhase(profile.phases.length)}><CreateIcon /></IconButton>
+        )}
       </Box>
-      )}
-      {((profile.phases.length === 0) || (phaseIndexSelected === undefined)) && (
-      <Box display="flex" flexGrow="1" justifyContent="center">
-        <IconButton color="info" onClick={() => onGlobalClicked()}><GlobeIcon /></IconButton>
-        <IconButton color="success" onClick={() => onCreatePhase(profile.phases.length)}><CreateIcon /></IconButton>
-      </Box>
-      )}
       {profile.phases.length > 1 && (<Button variant="outlined" onClick={nextPhase}><NextIcon /></Button>)}
     </Box>
   );
@@ -193,11 +206,21 @@ function ProfileEditTitle(
     }}
     >
       <Typography variant="h6">
-        <TextField variant="standard" value={profile.name || 'New profile'} onChange={(e) => updateName(e.target.value)}></TextField>
+        <TextField
+          variant="standard"
+          value={profile.name || 'New profile'}
+          onChange={(e) => updateName(e.target.value)}
+          sx={{
+            '& .MuiInputBase-root': {
+              fontSize: '1.5rem',
+            },
+          }}
+        >
+        </TextField>
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', columnGap: theme.spacing(1) }}>
-        {onDone && <IconButton size="small" color="success" onClick={() => onDone(profile)}><DoneIcon fontSize="inherit" /></IconButton>}
-        {onCancel && <IconButton size="small" color="error" onClick={onCancel}><CancelIcon fontSize="inherit" /></IconButton>}
+        {onDone && <IconButton color="success" onClick={() => onDone(profile)}><DoneIcon fontSize="inherit" /></IconButton>}
+        {onCancel && <IconButton color="error" onClick={onCancel}><CancelIcon fontSize="inherit" /></IconButton>}
       </Box>
     </Box>
   );
@@ -230,7 +253,7 @@ function PhaseEditingSection({
         <Typography>{title}</Typography>
         <IconButton size="small" onClick={onClose}><CloseIcon /></IconButton>
       </Box>
-      <PhaseEditor phase={phase} onChange={onUpdatePhase} />
+      <PhaseEdit phase={phase} onChange={onUpdatePhase} />
     </Box>
   );
 }

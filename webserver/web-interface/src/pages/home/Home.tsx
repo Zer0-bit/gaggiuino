@@ -77,7 +77,11 @@ function Home() {
               <Grid xs={12}>
                 {activeProfile && (
                 <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
-                  <ProfileReview profile={activeProfile} onSave={handlePersistActiveProfile} />
+                  <ProfileReview
+                    profile={activeProfile}
+                    onSave={handlePersistActiveProfile}
+                    onChange={(p) => updateActiveProfile(p)}
+                  />
                 </Paper>
                 ) }
                 {!activeProfile && <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />}

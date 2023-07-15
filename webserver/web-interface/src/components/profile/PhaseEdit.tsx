@@ -9,7 +9,7 @@ import {
 import { SettingsNumberInput } from '../Tabs/settings_inputs';
 import { constrain } from '../../models/utils';
 
-export interface PhaseEditorProps {
+export interface PhaseEditProps {
   phase: Phase;
   onChange: (phase: Phase) => void;
 }
@@ -21,7 +21,7 @@ function getNewTargetForTime(target:Transition, time: number): Transition {
   return { ...target, time };
 }
 
-export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
+export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
   const theme = useTheme();
   const handleTypeChange = (newType: PhaseType) => onChange({ ...phase, type: newType });
   const handleRestrictionChange = (restriction: number) => onChange({ ...phase, restriction });
@@ -171,7 +171,7 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
   );
 }
 
-export default PhaseEditor;
+export default PhaseEdit;
 
 interface PhaseTypeToggleProps {
   value: PhaseType;
