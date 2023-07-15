@@ -22,7 +22,10 @@ export default function ProfileEditDialog({
       PaperProps={{
         elevation: 0,
         sx: {
-          width: { xs: '100vw', sm: '90vw' },
+          borderRadius: { xs: 2, sm: 4 },
+          width: '100%',
+          maxHeight: '100vh',
+          m: { xs: 1, sm: 4 },
           p: 2,
         },
       }}
