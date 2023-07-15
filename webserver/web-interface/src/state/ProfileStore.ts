@@ -9,7 +9,7 @@ interface ProfileStore {
   activeProfileLoading: boolean,
   availableProfilesLoading: boolean,
   activeProfile: Profile | null,
-  availableProfiles: Array<ProfileSummary>,
+  availableProfiles: ProfileSummary[],
   setLocalActiveProfile: (profile: Profile) => void,
   fetchActiveProfile: () => Promise<void>,
   fetchAvailableProfiles: () => Promise<void>,
@@ -49,5 +49,17 @@ const useProfileStore = create<ProfileStore>()(
     }),
   ),
 );
+
+// Fetching activeProfile the first time if they aren't already loaded
+const { activeProfileLoading, activeProfile, fetchActiveProfile } = useProfileStore.getState();
+if (!activeProfile && !activeProfileLoading) {
+  fetchActiveProfile();
+}
+
+// Fetching availableProfiles the first time if they aren't already loaded
+const { availableProfilesLoading, availableProfiles, fetchAvailableProfiles } = useProfileStore.getState();
+if (availableProfiles.length === 0 && !availableProfilesLoading) {
+  fetchAvailableProfiles();
+}
 
 export default useProfileStore;

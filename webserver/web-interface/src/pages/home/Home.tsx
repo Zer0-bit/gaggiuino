@@ -2,6 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ScaleIcon from '@mui/icons-material/Scale';
 import {
+  Alert,
   Box,
   Button,
   Container,
@@ -9,14 +10,16 @@ import {
   IconButton,
   Paper,
   Skeleton,
+  Snackbar,
   TextField,
   Typography,
   darken,
+  debounce,
   lighten,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import AspectRatioBox from '../../components/layout/AspectRatioBox';
@@ -25,30 +28,46 @@ import ShotHistory from '../../components/shot/ShotHistory';
 import useProfileStore from '../../state/ProfileStore';
 import useSensorStateStore from '../../state/SensorStateStore';
 import useShotDataStore from '../../state/ShotDataStore';
+import SnackNotification, { SnackMessage } from '../../components/alert/SnackMessage';
+import { Profile } from '../../models/profile';
 
 function Home() {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
+  const [alertMessage, setAlertMessage] = useState<SnackMessage>();
 
   const { sensorState } = useSensorStateStore();
   const { shotHistory } = useShotDataStore();
   const {
-    activeProfile, updateActiveProfile, fetchActiveProfile, persistActiveProfile,
+    activeProfile, updateActiveProfile, persistActiveProfile, setLocalActiveProfile,
   } = useProfileStore();
 
-  useEffect(() => {
-    fetchActiveProfile();
-  }, [fetchActiveProfile]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleProfileUpdate = useCallback(debounce(async (newProfile: Profile) => {
+    try {
+      await updateActiveProfile(newProfile);
+      setAlertMessage({ content: 'Updated active profile.', level: 'success' });
+    } catch (e) {
+      setAlertMessage({ content: 'Failed to update active profile', level: 'error' });
+    }
+  }, 1000), [updateActiveProfile]);
 
-  function handleTempUpdate(value: number) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handlePersistActiveProfile = useCallback(debounce(async () => {
+    try {
+      await persistActiveProfile();
+      setAlertMessage({ content: 'Persisted active profile', level: 'success' });
+    } catch (e) {
+      setAlertMessage({ content: 'Failed to persist active profile', level: 'error' });
+    }
+  }, 1000), [persistActiveProfile]);
+
+  const handleTempUpdate = useCallback((value: number) => {
     if (!activeProfile) return;
     if (value > 169 || value < 0) return;
-    updateActiveProfile({ ...activeProfile, waterTemperature: value });
-  }
-
-  function handlePersistActiveProfile() {
-    persistActiveProfile();
-  }
+    setLocalActiveProfile({ ...activeProfile, waterTemperature: value });
+    handleProfileUpdate({ ...activeProfile, waterTemperature: value });
+  }, [activeProfile, handleProfileUpdate, setLocalActiveProfile]);
 
   const colorScaling = theme.palette.mode === 'light' ? lighten : darken;
 
@@ -80,7 +99,7 @@ function Home() {
                   <ProfileReview
                     profile={activeProfile}
                     onSave={handlePersistActiveProfile}
-                    onChange={(p) => updateActiveProfile(p)}
+                    onChange={handleProfileUpdate}
                   />
                 </Paper>
                 ) }
@@ -223,6 +242,7 @@ function Home() {
           </Box>
         </Grid>
       </Grid>
+      <SnackNotification message={alertMessage} />
     </Container>
   );
 }
