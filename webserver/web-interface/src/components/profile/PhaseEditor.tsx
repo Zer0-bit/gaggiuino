@@ -14,6 +14,13 @@ export interface PhaseEditorProps {
   onChange: (phase: Phase) => void;
 }
 
+function getNewTargetForTime(target:Transition, time: number): Transition {
+  if (time === 0 || target.curve === CurveStyle.INSTANT) {
+    return { ...target, time: 0, curve: CurveStyle.INSTANT };
+  }
+  return { ...target, time };
+}
+
 export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
   const theme = useTheme();
   const handleTypeChange = (newType: PhaseType) => onChange({ ...phase, type: newType });
@@ -24,6 +31,31 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
   const handleStopConditionChange = (value: number, key: keyof PhaseStopConditions) => onChange(
     { ...phase, stopConditions: { ...phase.stopConditions, [key]: value } },
   );
+
+  const handleCurveChange = (value: CurveStyle) => {
+    const time = value === CurveStyle.INSTANT ? 0 : phase.target.time || phase.stopConditions.time || 0;
+    onChange({ ...phase, target: { ...phase.target, time, curve: value } });
+  };
+
+  // Managing curve style when transition time changes to/from zero
+  const handleTransitionTimeChange = (newTime: number) => {
+    onChange({ ...phase, target: getNewTargetForTime(phase.target, newTime * 1000) });
+  };
+
+  const handleStopTimeChange = (newTime: number) => {
+    const time = newTime * 1000;
+
+    // If there is a stop on time, also update the transition time
+    if (time !== 0) {
+      onChange({
+        ...phase,
+        target: getNewTargetForTime(phase.target, time),
+        stopConditions: { ...phase.stopConditions, time },
+      });
+    } else {
+      handleStopConditionChange(time, 'time');
+    }
+  };
 
   return (
     <Grid container spacing={2}>
@@ -47,22 +79,14 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
           />
         </Grid>
         <Grid xs={6}>
-          <SettingsNumberInput
-            label="Time(s)"
-            value={(phase.target.time || 0) / 1000}
-            maxDecimals={0}
-            onChange={(v) => handleTargetValueChange(constrain(v, 0, 1000) * 1000, 'time')}
-          />
-        </Grid>
-        <Grid xs={6}>
           <TextField
             fullWidth
             size="small"
             label="Curve"
             select
-            sx={{ '& > div': { py: theme.spacing(0.7) } }}
+            sx={{ '& > div': { py: theme.spacing(0.6) } }}
             value={phase.target.curve}
-            onChange={(e) => handleTargetValueChange(e.target.value as CurveStyle, 'curve')}
+            onChange={(e) => handleCurveChange(e.target.value as CurveStyle)}
           >
             {Object.values(CurveStyle).map((value) => (
               <MenuItem key={value} value={value}>
@@ -70,6 +94,14 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
               </MenuItem>
             ))}
           </TextField>
+        </Grid>
+        <Grid xs={6}>
+          <SettingsNumberInput
+            label="Curve time(s)"
+            value={(phase.target.time || 0) / 1000}
+            maxDecimals={0}
+            onChange={(v) => handleTransitionTimeChange(constrain(v, 0, 1000))}
+          />
         </Grid>
       </Grid>
       <Grid container xs={12} sm={6} spacing={2} alignContent="flex-start">
@@ -79,7 +111,7 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
             label="Time(s)"
             maxDecimals={0}
             value={(phase.stopConditions.time || 0) / 1000}
-            onChange={(v) => handleStopConditionChange(constrain(v, 0, 1000) * 1000, 'time')}
+            onChange={(v) => handleStopTimeChange(constrain(v, 0, 1000))}
           />
         </Grid>
         <Grid xs={6}>
