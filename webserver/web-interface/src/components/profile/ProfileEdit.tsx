@@ -1,5 +1,5 @@
 import React, {
-  useCallback, useEffect, useMemo, useState,
+  useCallback, useEffect, useState,
 } from 'react';
 import {
   Box, Button, IconButton, TextField, Typography, alpha, useTheme,
@@ -10,6 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import NextIcon from '@mui/icons-material/NavigateNext';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CreateIcon from '@mui/icons-material/AddCircle';
+import GlobeIcon from '@mui/icons-material/Public';
 import PreviousIcon from '@mui/icons-material/NavigateBefore';
 import {
   CurveStyle, Phase, PhaseType, Profile,
@@ -18,6 +19,7 @@ import ProfileChart from '../chart/ProfileChart';
 import { GlobalRestrictions } from './GlobalRestrictions';
 import PhaseEditor from './PhaseEditor';
 import { getIndexInRange } from '../../models/utils';
+import { ProfileGlobalsEdit } from './ProfileGlobalsEdit';
 
 export interface ProfileEditProps {
   profile: Profile,
@@ -28,6 +30,7 @@ export interface ProfileEditProps {
 export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined }: ProfileEditProps) {
   const [editingProfile, setEditingProfile] = useState(profile);
   const [phaseIndexSelected, setPhaseIndexSelected] = useState<number |undefined>(undefined);
+  const [globalsSectionVisible, setGlobalsSectionVisible] = useState(false);
 
   useEffect(() => {
     setEditingProfile(profile);
@@ -80,7 +83,7 @@ export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined 
             onSelectPhase={setPhaseIndexSelected}
           />
         </Box>
-        <GlobalRestrictions profile={profile} />
+        <GlobalRestrictions profile={editingProfile} />
       </Box>
       <Box>
         <PhaseManagementBar
@@ -88,9 +91,17 @@ export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined 
           phaseIndexSelected={phaseIndexSelected}
           onCreatePhase={createNewPhase}
           onDeletePhase={deletePhase}
+          onGlobalClicked={() => setGlobalsSectionVisible(!globalsSectionVisible)}
           onUpdatePhaseIndexSelected={setPhaseIndexSelected}
         />
       </Box>
+      {globalsSectionVisible && (
+        <GlobalsSection
+          profile={editingProfile}
+          onUpdated={setEditingProfile}
+          onClose={() => setGlobalsSectionVisible(false)}
+        />
+      )}
       {phaseIndexSelected !== undefined && (
         <PhaseEditingSection
           title={`Phase ${phaseIndexSelected + 1}`}
@@ -108,12 +119,13 @@ interface PhaseManagementBarProps {
   phaseIndexSelected: number | undefined;
   onUpdatePhaseIndexSelected: (newValue: number | undefined) => void;
   onCreatePhase: (index: number) => void;
-  onDeletePhase: (undex: number) => void;
+  onDeletePhase: (index: number) => void;
+  onGlobalClicked: () => void;
 }
 
 function PhaseManagementBar(
   {
-    profile, phaseIndexSelected, onUpdatePhaseIndexSelected, onCreatePhase, onDeletePhase,
+    profile, phaseIndexSelected, onUpdatePhaseIndexSelected, onCreatePhase, onDeletePhase, onGlobalClicked,
   }: PhaseManagementBarProps,
 ) {
   const theme = useTheme();
@@ -140,13 +152,14 @@ function PhaseManagementBar(
       {profile.phases.length > 1 && (<Button variant="outlined" onClick={previousPhase}><PreviousIcon /></Button>)}
       {phaseIndexSelected !== undefined && (
       <Box display="flex" flexGrow="1" justifyContent="center">
-        <IconButton color="success" onClick={() => onCreatePhase(phaseIndexSelected)}><CreateIcon /></IconButton>
+        <IconButton color="info" onClick={() => onGlobalClicked()}><GlobeIcon /></IconButton>
         <IconButton color="error" onClick={() => onDeletePhase(phaseIndexSelected)}><DeleteIcon /></IconButton>
         <IconButton color="success" onClick={() => onCreatePhase(phaseIndexSelected + 1)}><CreateIcon /></IconButton>
       </Box>
       )}
       {((profile.phases.length === 0) || (phaseIndexSelected === undefined)) && (
       <Box display="flex" flexGrow="1" justifyContent="center">
+        <IconButton color="info" onClick={() => onGlobalClicked()}><GlobeIcon /></IconButton>
         <IconButton color="success" onClick={() => onCreatePhase(profile.phases.length)}><CreateIcon /></IconButton>
       </Box>
       )}
@@ -218,6 +231,34 @@ function PhaseEditingSection({
         <IconButton size="small" onClick={onClose}><CloseIcon /></IconButton>
       </Box>
       <PhaseEditor phase={phase} onChange={onUpdatePhase} />
+    </Box>
+  );
+}
+
+interface GlobalsSectionProps {
+  profile: Profile
+  onClose: () => void;
+  onUpdated: (profile: Profile) => void;
+}
+
+function GlobalsSection({ profile, onUpdated, onClose }: GlobalsSectionProps) {
+  const theme = useTheme();
+  return (
+    <Box sx={{
+      mt: theme.spacing(2),
+      background: alpha(theme.palette.weightFlow.main, 0.1),
+      p: 2,
+      borderRadius: theme.spacing(2),
+    }}
+    >
+      <Box sx={{
+        mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}
+      >
+        <Typography>Global profile settings</Typography>
+        <IconButton size="small" onClick={onClose}><CloseIcon /></IconButton>
+      </Box>
+      <ProfileGlobalsEdit profile={profile} onChange={onUpdated} />
     </Box>
   );
 }

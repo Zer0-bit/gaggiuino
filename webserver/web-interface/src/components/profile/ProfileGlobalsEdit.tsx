@@ -10,7 +10,7 @@ export interface ProfileGlobalsEditProps {
   onChange: (profile: Profile) => void;
 }
 
-export function PhaseEditor({ profile, onChange }: ProfileGlobalsEditProps) {
+export function ProfileGlobalsEdit({ profile, onChange }: ProfileGlobalsEditProps) {
   const handleStopConditionChange = (value: number, key: keyof GlobalStopConditions) => onChange(
     { ...profile, globalStopConditions: { ...profile.globalStopConditions, [key]: value } },
   );
@@ -21,12 +21,14 @@ export function PhaseEditor({ profile, onChange }: ProfileGlobalsEditProps) {
   return (
     <Grid container spacing={2}>
       <Grid container xs={12} spacing={2} alignContent="flex-start">
-        <SettingsNumberInput
-          label="Water temp"
-          value={profile.waterTemperature}
-          maxDecimals={1}
-          onChange={(v) => handleWaterTempChange(constrain(v, 0, 105))}
-        />
+        <Grid xs={12} sm={6}>
+          <SettingsNumberInput
+            label="Water temp"
+            value={profile.waterTemperature}
+            maxDecimals={1}
+            onChange={(v) => handleWaterTempChange(constrain(v, 0, 105))}
+          />
+        </Grid>
       </Grid>
       <Grid container xs={12} spacing={2} alignContent="flex-start">
         <Grid xs={12}><Typography variant="body2">STOP ON</Typography></Grid>
@@ -58,5 +60,3 @@ export function PhaseEditor({ profile, onChange }: ProfileGlobalsEditProps) {
     </Grid>
   );
 }
-
-export default PhaseEditor;
