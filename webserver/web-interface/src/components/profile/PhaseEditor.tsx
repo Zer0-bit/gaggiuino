@@ -59,9 +59,11 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
 
   return (
     <Grid container spacing={2}>
+      <Grid container xs={12}>
+        <Grid xs={6}><PhaseTypeToggle value={phase.type} onChange={handleTypeChange} /></Grid>
+      </Grid>
       <Grid container xs={12} sm={6} spacing={2} alignContent="flex-start">
-        <Grid xs={12}><Typography variant="body2">Targets</Typography></Grid>
-        <Grid xs={12}><PhaseTypeToggle value={phase.type} onChange={handleTypeChange} /></Grid>
+        <Grid xs={12}><Typography variant="body1">Targets</Typography></Grid>
         <Grid xs={6}>
           <SettingsNumberInput
             label={phase.type === PhaseType.FLOW ? 'Flow' : 'Pressure'}
@@ -78,6 +80,15 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
             onChange={(v) => handleRestrictionChange(constrain(v, 0, 10))}
           />
         </Grid>
+        <Grid xs={12}>
+          <SettingsNumberInput
+            label="Time(s)"
+            maxDecimals={0}
+            value={(phase.stopConditions.time || 0) / 1000}
+            onChange={(v) => handleStopTimeChange(constrain(v, 0, 1000))}
+          />
+        </Grid>
+        <Grid xs={12}><Typography variant="body1">Transition</Typography></Grid>
         <Grid xs={6}>
           <TextField
             fullWidth
@@ -103,17 +114,10 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
             onChange={(v) => handleTransitionTimeChange(constrain(v, 0, 1000))}
           />
         </Grid>
+
       </Grid>
       <Grid container xs={12} sm={6} spacing={2} alignContent="flex-start">
-        <Grid xs={12}><Typography variant="body2">Phase stop conditions</Typography></Grid>
-        <Grid xs={12}>
-          <SettingsNumberInput
-            label="Time(s)"
-            maxDecimals={0}
-            value={(phase.stopConditions.time || 0) / 1000}
-            onChange={(v) => handleStopTimeChange(constrain(v, 0, 1000))}
-          />
-        </Grid>
+        <Grid xs={12}><Typography variant="body1">Stop conditions</Typography></Grid>
         <Grid xs={6}>
           <SettingsNumberInput
             label="Pressure above"
@@ -184,11 +188,8 @@ function PhaseTypeToggle({ value, onChange }: PhaseTypeToggleProps) {
         onChange={(e, newValue: PhaseType) => onChange(newValue)}
         fullWidth
       >
-        {Object.values(PhaseType).map((type) => (
-          <ToggleButton key={type} value={type}>
-            {type}
-          </ToggleButton>
-        ))}
+        <ToggleButton key={PhaseType.PRESSURE} value={PhaseType.PRESSURE}>PRESSURE</ToggleButton>
+        <ToggleButton key={PhaseType.FLOW} value={PhaseType.FLOW}>FLOW</ToggleButton>
       </ToggleButtonGroup>
     </Box>
   );

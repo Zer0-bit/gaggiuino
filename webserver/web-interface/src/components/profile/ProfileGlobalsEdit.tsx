@@ -51,9 +51,9 @@ export function ProfileGlobalsEdit({ profile, onChange }: ProfileGlobalsEditProp
         <Grid xs={6}>
           <SettingsNumberInput
             label="Total time (s)"
-            value={profile.globalStopConditions?.time || 0}
+            value={(profile.globalStopConditions?.time || 0) / 1000}
             maxDecimals={1}
-            onChange={(v) => handleStopConditionChange(constrain(v, 0, 1000), 'time')}
+            onChange={(v) => handleStopConditionChange(constrain(v, 0, 1000) * 1000, 'time')}
           />
         </Grid>
       </Grid>
