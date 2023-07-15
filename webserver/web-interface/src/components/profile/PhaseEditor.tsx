@@ -40,7 +40,7 @@ export function PhaseEditor({ phase, onChange }: PhaseEditorProps) {
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
-            label={phase.type === PhaseType.FLOW ? 'Pressulre limit' : 'Flow limit'}
+            label={phase.type === PhaseType.FLOW ? 'Pressure limit' : 'Flow limit'}
             value={phase.restriction || 0}
             maxDecimals={1}
             onChange={(v) => handleRestrictionChange(constrain(v, 0, 10))}

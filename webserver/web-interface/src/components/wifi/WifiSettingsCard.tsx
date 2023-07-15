@@ -5,11 +5,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import { disconnectFromWifi, getWifiStatus } from '../client/WifiClient';
 import Loader from '../loader/Loader';
-import WifiStatus from './WifiStatus';
+import WifiStatusDisplay from './WifiStatus';
 import AvailableNetworksDrawer from './available-networks/AvailableNetworksDrawer';
+import { WifiStatus } from './NetworkTypes';
 
 export default function WifiSettingsCard() {
-  const [wifiStatus, setWifiStatus] = useState({});
+  const [wifiStatus, setWifiStatus] = useState<WifiStatus | undefined>(undefined);
   const [wifiStatusLoading, setWifiStatusLoading] = useState(true);
   const [wifiDrawerOpen, setWiFiDrawerOpen] = useState(false);
   const theme = useTheme();
@@ -24,7 +25,7 @@ export default function WifiSettingsCard() {
       const status = await getWifiStatus();
       setWifiStatus(status);
     } catch (e) {
-      setWifiStatus(null);
+      setWifiStatus(undefined);
     } finally {
       setWifiStatusLoading(false);
     }
@@ -46,7 +47,7 @@ export default function WifiSettingsCard() {
           <Typography variant="h5" sx={{ mb: theme.spacing(2) }}>
             WiFi Status
           </Typography>
-          {wifiStatusLoading ? <Loader /> : <WifiStatus status={wifiStatus} />}
+          {wifiStatusLoading ? <Loader /> : <WifiStatusDisplay status={wifiStatus} />}
         </CardContent>
         <CardActions>
           {isConnected() && <Button variant="outlined" size="small" color="secondary" onClick={() => disconnect()}>Disconnect</Button>}
