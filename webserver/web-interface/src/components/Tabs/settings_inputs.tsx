@@ -153,8 +153,10 @@ export function SettingsInputWrapper({ children }: {children: React.ReactNode}) 
   const otherChildern = childrenArray.filter((c) => [borderLabel, inlineLabel, field, actions].indexOf(c) === -1);
 
   const theme = useTheme();
-  const trueColumns = [field, actions, inlineLabel].filter((x) => !!x);
-  const columnSize = 12 / trueColumns.length || 12;
+
+  // See https://css-tricks.com/snippets/css/complete-guide-grid for CSS Grid
+  const gridTemplateColunns = `${inlineLabel ? '1fr ' : ''}${field ? '1fr ' : ''}${actions ? '50px ' : ''}`;
+
   return (
     <Box
       sx={{
@@ -164,12 +166,18 @@ export function SettingsInputWrapper({ children }: {children: React.ReactNode}) 
       }}
     >
       {borderLabel && <Box sx={{ position: 'absolute', top: -14, left: theme.spacing(1) }}>{borderLabel}</Box>}
-      <Grid container width="100%" sx={{ px: theme.spacing(0.5) }}>
-        {inlineLabel && <Grid xs={columnSize} display="flex" alignItems="center">{inlineLabel}</Grid>}
-        {field && <Grid xs={columnSize} display="flex" alignItems="center">{field}</Grid>}
-        {actions && <Grid xs={columnSize} display="flex" alignItems="center" justifyContent="end">{actions}</Grid>}
-        {otherChildern}
-      </Grid>
+      <Box sx={{
+        display: 'grid',
+        width: '100%',
+        px: theme.spacing(0.5),
+        gridTemplateColumns: gridTemplateColunns,
+      }}
+      >
+        {inlineLabel}
+        {field}
+        {actions}
+      </Box>
+      {otherChildern}
       <fieldset style={{
         position: 'absolute',
         margin: 0,
@@ -192,6 +200,8 @@ export function SettingsInputWrapper({ children }: {children: React.ReactNode}) 
           marginLeft: theme.spacing(1),
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          maxWidth: '50%',
         }}
         >
           {borderLabel}
@@ -217,9 +227,19 @@ export function SettingsInputInlineLabel({ children = undefined }: GridItemProps
 export function SettingsInputBorderLabel({ children = undefined }: GridItemProps) {
   const theme = useTheme();
   return (
-    <Box sx={{ display: 'inline-block' }}>
-      <Typography noWrap variant="caption" sx={{ px: theme.spacing(0.5) }}>{ children }</Typography>
-    </Box>
+    <Typography
+      variant="caption"
+      sx={{
+        px: theme.spacing(0.5),
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        maxWidth: '50%',
+      }}
+    >
+      { children }
+
+    </Typography>
   );
 }
 

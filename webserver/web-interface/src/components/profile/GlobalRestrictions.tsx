@@ -11,13 +11,14 @@ import formatTime from '../../models/time_format';
 export function GlobalRestrictions({ profile }: {profile: Profile}) {
   const theme = useTheme();
   return (
-    <Box sx={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      flexWrap: 'wrap',
-      fontSize: theme.typography.caption.fontSize,
-    }}
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        fontSize: theme.typography.caption.fontSize,
+      }}
     >
       <Box sx={{ display: { xs: 'none', sm: 'block' } }}>STOP ON</Box>
       <Box sx={{

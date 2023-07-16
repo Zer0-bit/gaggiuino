@@ -78,9 +78,8 @@ export default function TabbedSettings({ settings, onChange }: TabbedSettingsPro
   const tabOrientation = smallScreen ? 'horizontal' : 'vertical';
   const tabPanelStyling = {
     width: '100%',
-    maxWidth: '500px',
-    mt: { xs: theme.spacing(2), sm: 0 },
-    ml: { xs: 0, sm: theme.spacing(2) },
+    mt: 2,
+    ml: { xs: 0, sm: 2 },
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
