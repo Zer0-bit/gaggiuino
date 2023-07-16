@@ -109,7 +109,10 @@ void pumpPhaseShift(void) {
 // Models the flow per click, follows a compromise between the schematic and recorded findings
 // plotted: https://www.desmos.com/calculator/eqynzclagu
 float getPumpFlowPerClick(const float pressure) {
+  float livepressure = pressure;
   float fpc = 0.f;
+  /* If pressure smh ends up being 0 just to avoid any crashes or bs cause of division by 0 */
+  if (livepressure <= 0.f ) livepressure = 0.1f;
   fpc = (pressureInefficiencyCoefficient[5] / pressure + pressureInefficiencyCoefficient[6]) * ( -pressure * pressure ) + ( flowPerClickAtZeroBar - pressureInefficiencyCoefficient[0]) - (pressureInefficiencyCoefficient[1] + (pressureInefficiencyCoefficient[2] - (pressureInefficiencyCoefficient[3] - pressureInefficiencyCoefficient[4] * pressure) * pressure) * pressure) * pressure;
   return fpc * fpc_multiplier;
 }
