@@ -91,6 +91,7 @@ namespace state {
     return persistence::saveProfile(activeProfileId, activeProfile);
   };
 
+  // Persists the `activeProfileId` to NVS
   bool persistActiveProfileId() {
     return persistence::saveActiveProfileId(activeProfileId);
   }
