@@ -208,7 +208,7 @@ function ProfileEditTitle(
       <Typography variant="h6">
         <TextField
           variant="standard"
-          value={profile.name || 'New profile'}
+          value={profile.name}
           onChange={(e) => updateName(e.target.value)}
           sx={{
             '& .MuiInputBase-root': {
