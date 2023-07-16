@@ -16,6 +16,8 @@ import {
   lighten,
   useMediaQuery,
   useTheme,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
@@ -30,6 +32,39 @@ import SnackNotification, { SnackMessage } from '../../components/alert/SnackMes
 import { Profile } from '../../models/profile';
 import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `full-width-tab-${index}`,
+    'aria-controls': `full-width-tabpanel-${index}`,
+  };
+}
 
 function Home() {
   const theme = useTheme();
@@ -82,6 +117,12 @@ function Home() {
 
   const colorScaling = theme.palette.mode === 'light' ? lighten : darken;
 
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
   return (
     <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
       {/* <ShowAlert level="INFO" text="Welcome home motherfucker \_O_/" /> */}
@@ -116,7 +157,39 @@ function Home() {
                 {!activeProfile && <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />}
               </Grid>
               <Grid xs={12}>
-                <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+                <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                  <Tabs value={value} onChange={handleChange} centered>
+                    <Tab label="Available Profiles" />
+                    <Tab label="Shot History" />
+                  </Tabs>
+                  <TabPanel value={value} index={0}>
+                    <Box sx={{
+                      p: { xs: 0, sm: theme.spacing(1) },
+                      maxHeight: '40vh', // 25% of the viewport height
+                      overflow: 'auto', // Makes the box scrollable when contents overflow
+                    }}
+                    >
+                      <AvailableProfileSelector
+                        selectedProfileId={activeProfile?.id}
+                        onSelected={handleNewProfileSelected}
+                      />
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value={value} index={1}>
+                    {shotHistory.length > 0 && (
+                      <Box sx={{
+                        p: { xs: 0, sm: theme.spacing(1) },
+                        maxHeight: '40vh', // 25% of the viewport height
+                        overflow: 'auto', // Makes the box scrollable when contents overflow
+                      }}
+                      >
+                        <ShotHistory />
+                        {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
+                      </Box>
+                    )}
+                  </TabPanel>
+                </Box>
+                {/* <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
                   <Typography variant="h6">Profiles</Typography>
                   <Box sx={{
                     maxHeight: '20vh', // 25% of the viewport height
@@ -129,9 +202,9 @@ function Home() {
                     />
                   </Box>
                   {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
-                </Paper>
+                </Paper> */}
               </Grid>
-              <Grid xs={12}>
+              {/* <Grid xs={12}>
                 <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
                   <Typography variant="h6">Shot history</Typography>
                   {shotHistory.length > 0 && (
@@ -146,7 +219,7 @@ function Home() {
                   )}
                   {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
                 </Paper>
-              </Grid>
+              </Grid> */}
               <Grid xs={6}>
                 <Skeleton variant="rounded" height={150} sx={{ borderRadius: '16px' }} />
               </Grid>
