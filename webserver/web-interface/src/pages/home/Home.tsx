@@ -165,7 +165,7 @@ function Home() {
                   <TabPanel value={value} index={0}>
                     <Box sx={{
                       p: { xs: 0, sm: theme.spacing(1) },
-                      maxHeight: '40vh', // 25% of the viewport height
+                      maxHeight: '35vh', // 25% of the viewport height
                       overflow: 'auto', // Makes the box scrollable when contents overflow
                     }}
                     >
@@ -179,7 +179,7 @@ function Home() {
                     {shotHistory.length > 0 && (
                       <Box sx={{
                         p: { xs: 0, sm: theme.spacing(1) },
-                        maxHeight: '40vh', // 25% of the viewport height
+                        maxHeight: '35vh', // 25% of the viewport height
                         overflow: 'auto', // Makes the box scrollable when contents overflow
                       }}
                       >
