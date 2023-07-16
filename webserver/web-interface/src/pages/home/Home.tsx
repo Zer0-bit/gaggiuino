@@ -124,7 +124,7 @@ function Home() {
               {/* Target temp input line */}
               <Grid container xs={12} alignItems="center">
                 <Grid xs={4}>
-                  <Typography fontSize={10}>TARGET TEMP</Typography>
+                  <Typography fontSize={12}>TARGET TEMP</Typography>
                 </Grid>
                 <Grid xs={4}>
                   <TextField
@@ -166,7 +166,7 @@ function Home() {
               {/* Scale input line */}
               <Grid container xs={12} alignItems="center">
                 <Grid xs={4}>
-                  <Typography fontSize={10}>SCALE</Typography>
+                  <Typography fontSize={12}>SCALE</Typography>
                 </Grid>
                 <Grid xs={4}>
                   <TextField
