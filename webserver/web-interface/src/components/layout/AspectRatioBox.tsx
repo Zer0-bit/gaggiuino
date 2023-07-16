@@ -28,4 +28,8 @@ const AspectRatioBox = React.forwardRef(({
   </Box>
 ));
 
+// This is required somehow still by linter even though a default argument is passed.
+// Seems like a known issue with forwardRef. https://github.com/jsx-eslint/eslint-plugin-react/issues/2856
+AspectRatioBox.defaultProps = { ratio: 1 };
+
 export default AspectRatioBox;

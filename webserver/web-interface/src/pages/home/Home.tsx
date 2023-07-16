@@ -2,7 +2,6 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ScaleIcon from '@mui/icons-material/Scale';
 import {
-  Alert,
   Box,
   Button,
   Container,
@@ -10,7 +9,6 @@ import {
   IconButton,
   Paper,
   Skeleton,
-  Snackbar,
   TextField,
   Typography,
   darken,
@@ -19,7 +17,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import AspectRatioBox from '../../components/layout/AspectRatioBox';
