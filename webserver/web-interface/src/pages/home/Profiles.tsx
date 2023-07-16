@@ -9,7 +9,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Grid from '@mui/material/Grid';
 import ProfileChart from '../../components/chart/ProfileChart';
 import { Profile } from '../../models/profile';
-import { ProfileEdit } from '../../components/profile/ProfileEdit';
+import { ProfileEdit } from '../../components/profile/edit/ProfileEdit';
 
 export default function Profiles() {
   const theme = useTheme();

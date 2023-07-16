@@ -26,7 +26,7 @@ import {
   SettingsInputWrapper,
   SettingsNumberInput,
   SettingsToggleInput,
-} from './settings_inputs';
+} from '../inputs/settings_inputs';
 import { constrain } from '../../models/utils';
 
 interface TabPanelProps {

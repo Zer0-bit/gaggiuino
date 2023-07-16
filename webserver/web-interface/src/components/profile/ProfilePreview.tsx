@@ -7,7 +7,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Profile } from '../../models/profile';
 import ProfileChart from '../chart/ProfileChart';
 import { GlobalRestrictions } from './GlobalRestrictions';
-import ProfileEditDialog from './ProfileEditDialog';
+import ProfileEditDialog from './edit/ProfileEditDialog';
 
 export interface ProfileReviewProps {
   profile: Profile,

@@ -1,8 +1,6 @@
 import React from 'react';
 import { Dialog } from '@mui/material';
-import {
-} from '../chart/StatBox';
-import { Profile } from '../../models/profile';
+import { Profile } from '../../../models/profile';
 import { ProfileEdit } from './ProfileEdit';
 
 interface ProfileEditialogProps {
