@@ -40,7 +40,7 @@ function Home() {
   const { shotHistory } = useShotDataStore();
   const {
     activeProfile,
-    updateActiveProfile, persistActiveProfile, setLocalActiveProfile,
+    updateActiveProfile, persistActiveProfile, setLocalActiveProfile, fetchAvailableProfiles,
   } = useProfileStore();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,6 +57,8 @@ function Home() {
   const handlePersistActiveProfile = useCallback(debounce(async () => {
     try {
       await persistActiveProfile();
+      fetchAvailableProfiles(); // Fetch profiles to update list names
+
       setAlertMessage({ content: 'Persisted active profile', level: 'success' });
     } catch (e) {
       setAlertMessage({ content: 'Failed to persist active profile', level: 'error' });

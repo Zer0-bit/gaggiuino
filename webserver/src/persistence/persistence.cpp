@@ -138,16 +138,21 @@ namespace persistence {
     if (xSemaphoreTakeRecursive(persistenceLock, portMAX_DELAY) == pdFALSE) return false;
 
     auto profilePointer = findProfileById(id);
+    bool updateDictionary = false;
 
     if (profilePointer == profileDictionary.profiles.end()) { // the id does not exist
       profileDictionary.profiles.push_back(SavedProfile{ .id = id, .name = profile.name });
+      updateDictionary = true;
     }
 
     if (profilePointer->name != profile.name) { // if name changed update the dictionary
       profilePointer->name = profile.name;
+      updateDictionary = true;
     }
 
-    saveProtoResource<SavedProfilesConverter>(KEY_SAVED_PROFILES, profileDictionary);
+    if (updateDictionary) {
+      saveProtoResource<SavedProfilesConverter>(KEY_SAVED_PROFILES, profileDictionary);
+    }
     saveProtoResource<ProfileConverter>(KEY_PROFILE(id), profile);
 
     xSemaphoreGiveRecursive(persistenceLock);
