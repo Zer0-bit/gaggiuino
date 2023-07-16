@@ -14,11 +14,11 @@ import GlobeIcon from '@mui/icons-material/Public';
 import PreviousIcon from '@mui/icons-material/NavigateBefore';
 import {
   CurveStyle, Phase, PhaseType, Profile,
-} from '../../models/profile';
-import ProfileChart from '../chart/ProfileChart';
-import { GlobalRestrictions } from './GlobalRestrictions';
+} from '../../../models/profile';
+import ProfileChart from '../../chart/ProfileChart';
+import { GlobalRestrictions } from '../GlobalRestrictions';
 import PhaseEdit from './PhaseEdit';
-import { getIndexInRange } from '../../models/utils';
+import { getIndexInRange } from '../../../models/utils';
 import { ProfileGlobalsEdit } from './ProfileGlobalsEdit';
 
 export interface ProfileEditProps {
@@ -208,7 +208,7 @@ function ProfileEditTitle(
       <Typography variant="h6">
         <TextField
           variant="standard"
-          value={profile.name || 'New profile'}
+          value={profile.name}
           onChange={(e) => updateName(e.target.value)}
           sx={{
             '& .MuiInputBase-root': {

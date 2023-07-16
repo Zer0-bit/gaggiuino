@@ -18,7 +18,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import SaveIcon from '@mui/icons-material/Save';
 import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
 import ProgressBar from '../../components/inputs/ProgressBar';
-import TabbedSettings from '../../components/Tabs/tabs_settings';
+import TabbedSettings from '../../components/settings/tabs_settings';
 import useSettingsStore from '../../state/SettingsStore';
 import SnackNotification, { SnackMessage } from '../../components/alert/SnackMessage';
 import { GaggiaSettings } from '../../models/models';

@@ -162,7 +162,7 @@ void handleSelectActiveProfileId(AsyncWebServerRequest* request, JsonVariant& bo
 
   uint32_t id = body["id"];
 
-  bool result = state::updateActiveProfileId(id) && state::persistActiveProfileId();
+  bool result = state::updateActiveProfileId(id);
   if (!result) {
     request->send(422, "application/json", "{}");
     return;
@@ -186,7 +186,7 @@ void handleGetActiveProfileId(AsyncWebServerRequest* request) {
 void handlePersistActiveProfile(AsyncWebServerRequest* request) {
   LOG_INFO("Got request to persist active profile");
 
-  bool result = state::persistActiveProfile();
+  bool result = state::persistActiveProfile() && state::persistActiveProfileId();
 
   if (result) {
     request->send(200);

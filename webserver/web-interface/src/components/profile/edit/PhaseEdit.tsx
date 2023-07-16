@@ -5,9 +5,9 @@ import {
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import {
   CurveStyle, Phase, PhaseStopConditions, PhaseType, Transition,
-} from '../../models/profile';
-import { SettingsNumberInput } from '../Tabs/settings_inputs';
-import { constrain } from '../../models/utils';
+} from '../../../models/profile';
+import { SettingsNumberInput } from '../../inputs/settings_inputs';
+import { constrain } from '../../../models/utils';
 
 export interface PhaseEditProps {
   phase: Phase;

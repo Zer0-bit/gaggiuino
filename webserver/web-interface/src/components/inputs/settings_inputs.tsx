@@ -2,13 +2,14 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import {
   Box,
-  IconButton, Switch, TextField, Typography, useTheme,
+  IconButton, Switch, SxProps, TextField, Theme, Typography, useTheme,
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import React, {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { Colorful, RgbaColor, rgbaToHex } from '@uiw/react-color';
+import { Variant } from '@mui/material/styles/createTypography';
 import { LedColor } from '../../models/models';
 import { same, sanitizeNumberString } from '../../models/utils';
 
@@ -29,17 +30,23 @@ export function SettingsToggleInput({ label, value, onChange }: SettingsToggleIn
   );
 }
 
-export interface SettingsNumberInputProps {
-  label: string;
+export interface SettingsInputFieldNumberProps {
   value: number;
   onChange: (value: number) => void;
-  buttonIncrements?: number;
   maxDecimals?: number;
+  sx?: SxProps<Theme>;
+  readOnly?: boolean;
+  textAlign?: string;
 }
 
-export function SettingsNumberInput({
-  label, value, onChange, maxDecimals = undefined, buttonIncrements = 1,
-}: SettingsNumberInputProps) {
+export function SettingsInputFieldNumber({
+  value,
+  onChange,
+  maxDecimals = 1,
+  sx = {},
+  readOnly = false,
+  textAlign = 'left',
+}: SettingsInputFieldNumberProps) {
   const theme = useTheme();
   const round = useMemo(() => (x: number) => {
     if (maxDecimals === undefined) return x;
@@ -79,29 +86,66 @@ export function SettingsNumberInput({
   }, [setInputValue, maxDecimals]);
 
   return (
+    <TextField
+      fullWidth
+      value={inputValue}
+      onChange={(e) => handleInputValueChanged(e.target.value)}
+      onBlur={handleFocusLost}
+      variant="outlined"
+      sx={{
+        '& fieldset': { border: 'none' },
+        '& input': { textAlign, py: theme.spacing(0.5), px: 0 },
+        ...sx,
+      }}
+      InputProps={{ readOnly }}
+    />
+  );
+}
+
+export interface SettingsNumberIncrementButtonsProps {
+  value: number;
+  onChange: (val: number) => void;
+  buttonIncrements?: number
+}
+
+export function SettingsNumberIncrementButtons(
+  { value, onChange, buttonIncrements = 1 } : SettingsNumberIncrementButtonsProps,
+) {
+  return (
+    <SettingsInputActions>
+      <IconButton size="small" color="primary" onClick={() => onChange(value - buttonIncrements)}>
+        <RemoveIcon />
+      </IconButton>
+      <IconButton size="small" color="primary" onClick={() => onChange(value + buttonIncrements)}>
+        <AddIcon />
+      </IconButton>
+    </SettingsInputActions>
+  );
+}
+
+export interface SettingsNumberInputProps {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  buttonIncrements?: number;
+  maxDecimals?: number;
+}
+
+export function SettingsNumberInput({
+  label, value, onChange, maxDecimals = undefined, buttonIncrements = 1,
+}: SettingsNumberInputProps) {
+  return (
     <SettingsInputWrapper>
       <SettingsInputBorderLabel><Typography variant="caption" color="text.secondary">{label}</Typography></SettingsInputBorderLabel>
       <SettingsInputField>
-        <TextField
-          fullWidth
-          value={inputValue}
-          onChange={(e) => handleInputValueChanged(e.target.value)}
-          onBlur={handleFocusLost}
-          variant="outlined"
-          sx={{
-            '& fieldset': { border: 'none' },
-            '& input': { textAlign: 'left', py: theme.spacing(0.5), px: 0 },
-          }}
-          InputProps={{ readOnly: false }}
+        <SettingsInputFieldNumber
+          value={value}
+          onChange={onChange}
+          maxDecimals={maxDecimals}
         />
       </SettingsInputField>
       <SettingsInputActions>
-        <IconButton size="small" color="primary" onClick={() => handleValueChange(value - buttonIncrements)}>
-          <RemoveIcon />
-        </IconButton>
-        <IconButton size="small" color="primary" onClick={() => handleValueChange(value + buttonIncrements)}>
-          <AddIcon />
-        </IconButton>
+        <SettingsNumberIncrementButtons value={value} onChange={onChange} buttonIncrements={buttonIncrements} />
       </SettingsInputActions>
     </SettingsInputWrapper>
   );
@@ -155,7 +199,7 @@ export function SettingsInputWrapper({ children }: {children: React.ReactNode}) 
   const theme = useTheme();
 
   // See https://css-tricks.com/snippets/css/complete-guide-grid for CSS Grid
-  const gridTemplateColunns = `${inlineLabel ? '1fr ' : ''}${field ? '1fr ' : ''}${actions ? '50px ' : ''}`;
+  const gridTemplateColunns = `${inlineLabel ? '1fr ' : ''}${field ? '1fr ' : ''}${actions ? 'auto' : ''}`;
 
   return (
     <Box
@@ -212,16 +256,23 @@ export function SettingsInputWrapper({ children }: {children: React.ReactNode}) 
   );
 }
 
-export interface GridItemProps {
+export interface SettingsInputInlineLabelProps {
   children?: React.ReactNode;
+  variant?: Variant | 'inherit';
 }
 
-export function SettingsInputInlineLabel({ children = undefined }: GridItemProps) {
+export function SettingsInputInlineLabel(
+  { variant = 'body2', children = undefined }: SettingsInputInlineLabelProps,
+) {
   return (
     <Box alignItems="center" display="flex" width="100%">
-      <Typography noWrap variant="body2">{ children }</Typography>
+      <Typography noWrap variant={variant}>{ children }</Typography>
     </Box>
   );
+}
+
+export interface GridItemProps {
+  children?: React.ReactNode;
 }
 
 export function SettingsInputBorderLabel({ children = undefined }: GridItemProps) {

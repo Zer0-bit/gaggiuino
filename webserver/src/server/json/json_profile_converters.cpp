@@ -54,7 +54,7 @@ namespace json {
 
   void mapTransitionToJson(const Transition& transition, JsonObject& target) {
     addSkippable(target, "start", transition.start);
-    addSkippable(target, "end", transition.end);
+    target["end"] = transition.end;
     target["curve"] = mapTransitionCurveToJsonValue(transition.curve);
     addSkippable(target, "time", transition.time);
   }
