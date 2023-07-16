@@ -36,3 +36,10 @@ export function sanitizeNumberString(input: string, maxDecimals?: number) {
 export function same(v1: number, v2:number) {
   return Math.abs(v1 - v2) < 0.0001;
 }
+
+export function getIndexInRange(desiredIndex: number | undefined, array: unknown[]): number | undefined {
+  if (array.length === 0 || desiredIndex === undefined) {
+    return undefined;
+  }
+  return Math.max(0, Math.min(array.length - 1, desiredIndex));
+}

@@ -3,17 +3,23 @@ import SignalWifi3BarIcon from '@mui/icons-material/SignalWifi3Bar';
 import {
   Accordion, AccordionSummary, Alert, Button, TextField, Typography, AccordionDetails, Stack,
 } from '@mui/material';
-import PropTypes from 'prop-types';
-import { Network } from '../NetworkPropTypes';
+import { Network } from '../NetworkTypes';
 import { connectToWifi } from '../../client/WifiClient';
 import Loader from '../../loader/Loader';
 
+type AvailableNetworkProps = {
+  network: Network;
+  onClick: () => void;
+  onConnected: (network: Network) => void;
+  expanded: boolean;
+}
+
 export default function AvailableNetwork({
   network,
-  onClick = () => false,
+  onClick,
   expanded = false,
-  onConnected = () => false,
-}) {
+  onConnected,
+}: AvailableNetworkProps) {
   const [password, setPassword] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
@@ -70,10 +76,3 @@ export default function AvailableNetwork({
     </Accordion>
   );
 }
-
-AvailableNetwork.propTypes = {
-  network: Network.isRequired,
-  onClick: PropTypes.func,
-  onConnected: PropTypes.func,
-  expanded: PropTypes.bool,
-};

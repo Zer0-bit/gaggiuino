@@ -46,7 +46,7 @@ export default function Profiles() {
 
       <Container sx={{ mt: theme.spacing(2) }}>
         <Paper sx={{ mt: theme.spacing(2), p: theme.spacing(2) }}>
-          <ProfileEdit profile={profile} onDone={console.log} onCancel={console.log} />
+          <ProfileEdit profile={profile} />
         </Paper>
       </Container>
       <Container sx={{ mt: theme.spacing(2) }}>

@@ -4,12 +4,17 @@ import {
   Box,
   Button, Drawer, Stack, Typography, useTheme,
 } from '@mui/material';
-import PropTypes from 'prop-types';
 import { refrehNetworks } from '../../client/WifiClient';
 import Loader from '../../loader/Loader';
 import AvailableNetworks from './AvailableNetworks';
 
-export default function AvailableNetworksDrawer({ open, onOpenChanged, onConnected = () => false }) {
+type AvailableNetworksDrawerProps = {
+  open: boolean;
+  onOpenChanged: (isOpen: boolean) => void;
+  onConnected: () => void;
+}
+
+export default function AvailableNetworksDrawer({ open, onOpenChanged, onConnected }: AvailableNetworksDrawerProps) {
   const theme = useTheme();
   const [networksRefreshing, setNetworksRefreshing] = useState(false);
   const [wifiDrawerRefreshKey, setWifiDrawerRefreshKey] = useState(0);
@@ -24,8 +29,8 @@ export default function AvailableNetworksDrawer({ open, onOpenChanged, onConnect
     }
   }
 
-  const toggleDrawer = (isOpen) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+  const toggleDrawer = (isOpen: boolean) => (event: { type?: string; key?: string; }) => {
+    if (event?.type === 'keydown' && (event?.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
     onOpenChanged(isOpen);
@@ -42,7 +47,7 @@ export default function AvailableNetworksDrawer({ open, onOpenChanged, onConnect
           Available networks
         </Typography>
         <Typography variant="h5" sx={{ m: theme.spacing(2) }}>
-          <Button onClick={refreshNetworksAction}><RefreshIcon /></Button>
+          <Button onClick={() => refreshNetworksAction()}><RefreshIcon /></Button>
         </Typography>
       </Stack>
       {networksRefreshing && <Box display="flex" justifyContent="center"><Loader /></Box>}
@@ -50,9 +55,3 @@ export default function AvailableNetworksDrawer({ open, onOpenChanged, onConnect
     </Drawer>
   ) : <span />;
 }
-
-AvailableNetworksDrawer.propTypes = {
-  open: PropTypes.bool.isRequired,
-  onOpenChanged: PropTypes.func.isRequired,
-  onConnected: PropTypes.func,
-};

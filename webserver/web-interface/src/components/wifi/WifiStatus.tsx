@@ -2,9 +2,13 @@ import React from 'react';
 import SignalWifi3BarIcon from '@mui/icons-material/SignalWifi3Bar';
 import SignalWifiOffIcon from '@mui/icons-material/SignalWifiOff';
 import { Stack, Typography } from '@mui/material';
-import { WifiStatusPropType } from './NetworkPropTypes';
+import { WifiStatus } from './NetworkTypes';
 
-export default function WifiStatus({ status = undefined }) {
+type WifiStatusProps = {
+  status?: WifiStatus
+}
+
+export default function WifiStatusDisplay({ status = undefined }: WifiStatusProps) {
   function isConnected() {
     return status && status.status === 'connected';
   }
@@ -13,7 +17,7 @@ export default function WifiStatus({ status = undefined }) {
     ? (
       <Stack spacing={1} direction="row" alignItems="center">
         <SignalWifi3BarIcon color="success" />
-        <Typography>{`${status.ssid} (${status.ip})`}</Typography>
+        <Typography>{`${status?.ssid} (${status?.ip})`}</Typography>
       </Stack>
     )
     : (
@@ -23,7 +27,3 @@ export default function WifiStatus({ status = undefined }) {
       </Stack>
     );
 }
-
-WifiStatus.propTypes = {
-  status: WifiStatusPropType,
-};

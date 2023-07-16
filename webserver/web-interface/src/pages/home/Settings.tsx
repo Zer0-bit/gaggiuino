@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   Container,
@@ -20,10 +20,31 @@ import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
 import ProgressBar from '../../components/inputs/ProgressBar';
 import TabbedSettings from '../../components/Tabs/tabs_settings';
 import useSettingsStore from '../../state/SettingsStore';
+import SnackNotification, { SnackMessage } from '../../components/alert/SnackMessage';
+import { GaggiaSettings } from '../../models/models';
 
 export default function Settings() {
   const theme = useTheme();
   const { settings, updateSettingsAndSync, persistSettings } = useSettingsStore();
+  const [alertMessage, setAlertMessage] = useState<SnackMessage>();
+
+  async function handlePersistSettings() {
+    try {
+      await persistSettings();
+      setAlertMessage({ content: 'Successfully persisted settings', level: 'success' });
+    } catch (e) {
+      setAlertMessage({ content: 'Failed to persisted settings', level: 'error' });
+    }
+  }
+
+  async function handleUpdateRemoteSettings(newSettings: GaggiaSettings) {
+    try {
+      await updateSettingsAndSync(newSettings);
+      setAlertMessage({ content: 'Updated running settings.', level: 'success' });
+    } catch (e) {
+      setAlertMessage({ content: 'Failed to update settings', level: 'error' });
+    }
+  }
 
   return (
     <div>
@@ -44,9 +65,9 @@ export default function Settings() {
                     <Typography variant="h5">
                       Machine State Management
                     </Typography>
-                    <IconButton color="inherit" onClick={persistSettings}><SaveIcon fontSize="inherit" /></IconButton>
+                    <IconButton color="inherit" onClick={handlePersistSettings}><SaveIcon fontSize="inherit" /></IconButton>
                   </Box>
-                  <TabbedSettings settings={settings} onChange={updateSettingsAndSync} />
+                  <TabbedSettings settings={settings} onChange={handleUpdateRemoteSettings} />
                 </CardContent>
               </Card>
             </Box>
@@ -88,6 +109,7 @@ export default function Settings() {
             </Card>
           </Grid>
         </Grid>
+        <SnackNotification message={alertMessage} />
       </Container>
     </div>
   );

@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { Alert, Box } from '@mui/material';
 import { getAvailableNetworks } from '../../client/WifiClient';
 import Loader from '../../loader/Loader';
 import AvailableNetwork from './AvailableNetwork';
+import { Network } from '../NetworkTypes';
 
-export default function AvailableNetworks({ onConnected = () => false }) {
-  const [networks, setNetworks] = useState([]);
+type AvailableNetworksProps = {
+  onConnected: () => void;
+}
+
+export default function AvailableNetworks({ onConnected }: AvailableNetworksProps) {
+  const [networks, setNetworks] = useState<Network[]>([]);
   const [loading, setLoading] = useState(false);
   const [networksError, setNetworksError] = useState(false);
-  const [expandedNetworkId, setExpandedNetworkId] = useState(null);
+  const [expandedNetworkId, setExpandedNetworkId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadNetworks = async () => {
@@ -26,7 +30,9 @@ export default function AvailableNetworks({ onConnected = () => false }) {
       }
     };
     loadNetworks();
-  }, [loading]);
+  // only load networks once per render of this component
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (networksError) {
     return <Alert severity="error">Failed to load available networks</Alert>;
@@ -53,7 +59,3 @@ export default function AvailableNetworks({ onConnected = () => false }) {
       </div>
     );
 }
-
-AvailableNetworks.propTypes = {
-  onConnected: PropTypes.func,
-};
