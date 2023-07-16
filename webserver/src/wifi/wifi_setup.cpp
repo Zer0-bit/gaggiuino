@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include "../task_config.h"
 #include "../log/log.h"
+#include "esp_task_wdt.h"
 
 /**
   * Helper class for persisting and retrieving WiFi connection credentials
@@ -96,10 +97,23 @@ bool wifiConnect(String ssid, String pass, const uint32_t timeout) {
   WiFi.begin(ssid.c_str(), pass.c_str());
   LOG_INFO("Connecting to WiFi [%s]", ssid.c_str());
 
-  if (WiFi.waitForConnectResult(timeout) != WL_CONNECTED) {
-    LOG_INFO("Failed to connect. Check password.");
-    xSemaphoreGiveRecursive(wifi::lock);
-    return false;
+  uint32_t wifiStartTimer = millis();
+  while (WiFi.status() != WL_CONNECTED) {
+
+    if (WiFi.status() == WL_CONNECT_FAILED) {
+      LOG_INFO("\nFailed to connect. Check password.");
+      xSemaphoreGiveRecursive(wifi::lock);
+      return false;
+    }
+
+    if (millis() - wifiStartTimer >= timeout) {
+      LOG_INFO("\nFailed to connect after %ld seconds.\n", timeout / 1000);
+      xSemaphoreGiveRecursive(wifi::lock);
+      return false;
+    }
+
+    esp_task_wdt_reset();
+    delay(100);
   }
 
   LOG_INFO("Connected to WiFi [%s] with IP:[%s]", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
