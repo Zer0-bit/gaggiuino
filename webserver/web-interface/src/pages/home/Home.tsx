@@ -40,7 +40,8 @@ function Home() {
   const { shotHistory } = useShotDataStore();
   const {
     activeProfile,
-    updateActiveProfile, persistActiveProfile, setLocalActiveProfile, fetchAvailableProfiles,
+    updateActiveProfile, persistActiveProfile, setLocalActiveProfile,
+    fetchAvailableProfiles, fetchActiveProfile,
   } = useProfileStore();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,8 +76,9 @@ function Home() {
   const handleNewProfileSelected = useCallback((id: number) => {
     if (activeProfile?.id !== id) {
       selectActiveProfile(id);
+      fetchActiveProfile();
     }
-  }, [activeProfile]);
+  }, [activeProfile, fetchActiveProfile]);
 
   const colorScaling = theme.palette.mode === 'light' ? lighten : darken;
 
@@ -94,7 +96,6 @@ function Home() {
           <Box sx={{ mt: theme.spacing(1), p: theme.spacing(1) }}>
             <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
           </Box>
-
         </Grid>
         )}
 
@@ -168,7 +169,7 @@ function Home() {
           </Box>
 
           <Box sx={{ mt: theme.spacing(3) }}>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} sx={{ px: 1 }}>
               {/* Target temp input line */}
               <Grid container xs={12} alignItems="center">
                 <Grid xs={4}>

@@ -27,14 +27,15 @@ export default function AvailableProfileSelector({
   return (
     <List>
       {availableProfiles.map((profileSummary) => (
-        <ButtonBase component="div" style={{ width: '100%' }} onClick={() => handleProfileSelected(profileSummary.id)}>
-          <ListItem
-            key={profileSummary.id}
-            disableGutters
-            sx={{
-              backgroundColor: profileSummary.id === selectedProfileId ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-              p: 1,
-            }}
+        <ListItem
+          key={profileSummary.id}
+          disableGutters
+          sx={{ p: 0 }}
+        >
+          <ButtonBase
+            component="div"
+            sx={{ width: '100%', p: 1, backgroundColor: profileSummary.id === selectedProfileId ? alpha(theme.palette.primary.main, 0.1) : 'transparent' }}
+            onClick={() => handleProfileSelected(profileSummary.id)}
           >
             <ListItemAvatar>
               <Avatar>
@@ -45,8 +46,8 @@ export default function AvailableProfileSelector({
               </Avatar>
             </ListItemAvatar>
             <ListItemText primary={profileSummary.name} />
-          </ListItem>
-        </ButtonBase>
+          </ButtonBase>
+        </ListItem>
       ))}
     </List>
   );
