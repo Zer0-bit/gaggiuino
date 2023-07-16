@@ -214,19 +214,21 @@ function MainAppBar() {
           )}
           {!isBiggerScreen && <NavMenu activeItem={activeTab} onChange={setActiveTab} />}
           {/* <ThemeModeToggle /> */}
-          <Skeleton
-            variant="rounded"
-            height={40}
-            width={100}
-            sx={{
+          <div
+            style={{
               fontSize: '1rem',
+              width: '100px',
+              height: '40px',
               borderRadius: '16px',
               display: 'flex',
-              alignContent: 'end',
-              textAlign: 'center',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid #ccc',
+              // Add any other styling you want for the container
             }}
           >
-          </Skeleton>
+            01:15:20
+          </div>
         </Stack>
       </Toolbar>
       <Box />
