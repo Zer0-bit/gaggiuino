@@ -22,3 +22,23 @@ export async function persistActiveProfileChanges(): Promise<void> {
 export async function updateActiveProfile(profile: Profile): Promise<void> {
   return axios.put('/api/profiles/active-profile', profile);
 }
+
+export async function getProfileById(id: number): Promise<Profile> {
+  return axios.get(`/api/profiles/${id}`).then(({ data }) => data);
+}
+
+export async function createProfile(profile: Profile): Promise<Profile> {
+  return axios.post('/api/profiles', profile)
+    .then(({ data }) => data);
+}
+
+export async function deleteProfileById(id: number): Promise<void> {
+  return axios.delete(`/api/profiles/${id}`);
+}
+
+export async function updateProfile(profile: Profile): Promise<void> {
+  if (!profile.id) {
+    throw Error('Attempting to update a profile without id. Create a profile first.');
+  }
+  return axios.put(`/api/profiles/${profile.id}`, profile);
+}

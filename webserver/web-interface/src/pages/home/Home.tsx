@@ -28,6 +28,8 @@ import useSensorStateStore from '../../state/SensorStateStore';
 import useShotDataStore from '../../state/ShotDataStore';
 import SnackNotification, { SnackMessage } from '../../components/alert/SnackMessage';
 import { Profile } from '../../models/profile';
+import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
+import { selectActiveProfile } from '../../components/client/ProfileClient';
 
 function Home() {
   const theme = useTheme();
@@ -37,7 +39,8 @@ function Home() {
   const { sensorState } = useSensorStateStore();
   const { shotHistory } = useShotDataStore();
   const {
-    activeProfile, updateActiveProfile, persistActiveProfile, setLocalActiveProfile,
+    activeProfile,
+    updateActiveProfile, persistActiveProfile, setLocalActiveProfile,
   } = useProfileStore();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,6 +69,12 @@ function Home() {
     setLocalActiveProfile({ ...activeProfile, waterTemperature: value });
     handleProfileUpdate({ ...activeProfile, waterTemperature: value });
   }, [activeProfile, handleProfileUpdate, setLocalActiveProfile]);
+
+  const handleNewProfileSelected = useCallback((id: number) => {
+    if (activeProfile?.id !== id) {
+      selectActiveProfile(id);
+    }
+  }, [activeProfile]);
 
   const colorScaling = theme.palette.mode === 'light' ? lighten : darken;
 
@@ -105,11 +114,27 @@ function Home() {
               </Grid>
               <Grid xs={12}>
                 <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+                  <Typography variant="h6">Profiles</Typography>
+                  <Box sx={{
+                    maxHeight: '20vh', // 25% of the viewport height
+                    overflow: 'auto', // Makes the box scrollable when contents overflow
+                  }}
+                  >
+                    <AvailableProfileSelector
+                      selectedProfileId={activeProfile?.id}
+                      onSelected={handleNewProfileSelected}
+                    />
+                  </Box>
+                  {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
+                </Paper>
+              </Grid>
+              <Grid xs={12}>
+                <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
                   <Typography variant="h6">Shot history</Typography>
                   {shotHistory.length > 0 && (
                     <Box sx={{
                       p: { xs: 0, sm: theme.spacing(1) },
-                      maxHeight: '25vh', // 25% of the viewport height
+                      maxHeight: '20vh', // 25% of the viewport height
                       overflow: 'auto', // Makes the box scrollable when contents overflow
                     }}
                     >
