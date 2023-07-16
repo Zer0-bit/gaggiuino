@@ -16,7 +16,6 @@ import {
   MenuItem,
   Button,
   Menu,
-  Skeleton,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import Logo from '../icons/Logo';

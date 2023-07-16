@@ -39,9 +39,12 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function TabPanel({
+  children = 'tabpanel',
+  value,
+  index,
+  ...other
+}: TabPanelProps) {
   return (
     <div
       role="tabpanel"
@@ -52,7 +55,7 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          <Typography variant="h6">{children}</Typography>
         </Box>
       )}
     </div>
@@ -159,8 +162,8 @@ function Home() {
               <Grid xs={12}>
                 <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
                   <Tabs value={value} onChange={handleChange} centered>
-                    <Tab label="Available Profiles" />
-                    <Tab label="Shot History" />
+                    <Tab label="Available Profiles" {...a11yProps(0)} />
+                    <Tab label="Shot History" {...a11yProps(1)} />
                   </Tabs>
                   <TabPanel value={value} index={0}>
                     <Box sx={{
