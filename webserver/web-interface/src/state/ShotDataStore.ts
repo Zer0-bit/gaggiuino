@@ -25,7 +25,7 @@ function isDatapointOutOfOrder(
 }
 
 export function isShotLongEnoughToBeStored(shot: Shot): boolean {
-  return shot.datapoints.length > 0 && shot.datapoints[shot.datapoints.length - 1].timeInShot > 8000;
+  return shot.datapoints.length > 0 && shot.datapoints[shot.datapoints.length - 1].timeInShot > 14000;
 }
 
 export function isNewShotStarted(currentShot: Shot, newShotDatapoint: ShotSnapshot):boolean {

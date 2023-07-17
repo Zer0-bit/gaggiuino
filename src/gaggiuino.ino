@@ -9,7 +9,6 @@
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.06f);
 SimpleKalmanFilter smoothPumpFlow(0.6f, 0.6f, 0.049f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
-SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
 Profile manualProfile;
 Profile activeProfile;
