@@ -11,9 +11,6 @@ SimpleKalmanFilter smoothPumpFlow(0.6f, 0.6f, 0.049f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
 
-// Define a deque to store the last 5 considered flow values
-std::deque<float> lastConsideredFlows;
-
 Profile manualProfile;
 Profile activeProfile;
 PhaseProfiler phaseProfiler;
@@ -227,34 +224,11 @@ static void calculateWeightAndFlow(void) {
       predictiveWeight.update(currentState, phase, runningCfg);
 
       // Start the predictive weight calculations when conditions are true
-      if (predictiveWeight.isOutputFlow() || currentState.weight > 0.4f) {
+      if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
-        /* Probabilistically the flow is lower if the shot is just started winding up and we're flow profiling,
-        once pressure stabilises around the setpoint the flow is either stable or puck restriction is high af. */
-        // if ((ACTIVE_PROFILE(runningCfg).mfProfileState || ACTIVE_PROFILE(runningCfg).tpType) && currentState.pressureChangeSpeed > 0.15f) {
-        //   if ((currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).mfProfileStart * 0.9f)
-        //   || (currentState.smoothedPressure < ACTIVE_PROFILE(runningCfg).tfProfileStart * 0.9f)) {
-        //     actualFlow *= 0.3f;
-        //   }
-        // }
-        
-        // Add the new considered flow to the deque
-        lastConsideredFlows.push_back(smoothConsideredFlow.updateEstimate(actualFlow));
-        // Ensure the deque only contains the last 5 values
-        if (lastConsideredFlows.size() > 5) {
-          lastConsideredFlows.pop_front();
-        }
-        // Calculate the average of the last 5 consideredFlow values
-        float sum = 0.0f;
-        for (float value : lastConsideredFlows) {
-          sum += value;
-        }
-        float average = sum / lastConsideredFlows.size();
-        // Update the currentState.consideredFlow variable only if
-        // it's higher than the average of the last 5 readings
-        currentState.consideredFlow = (consideredFlow > average) ? consideredFlow : average;
-        
+        /* TO-DO: Account for the initial moments of a shot winding up,
+        usually the flow starts lower and increases considerably in the next few seconds */
         if (!systemState.scalesPresent) {
           currentState.shotWeight = currentState.shotWeight + actualFlow;
         }
