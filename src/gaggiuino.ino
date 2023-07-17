@@ -7,9 +7,12 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.06f);
-SimpleKalmanFilter smoothPumpFlow(0.6f, 0.6f, 0.006f);
+SimpleKalmanFilter smoothPumpFlow(0.6f, 0.6f, 0.049f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
 SimpleKalmanFilter smoothConsideredFlow(0.1f, 0.1f, 0.1f);
+
+// Define a deque to store the last 5 considered flow values
+std::deque<float> lastConsideredFlows;
 
 Profile manualProfile;
 Profile activeProfile;
@@ -235,7 +238,23 @@ static void calculateWeightAndFlow(void) {
         //     actualFlow *= 0.3f;
         //   }
         // }
-        currentState.consideredFlow = smoothConsideredFlow.updateEstimate(actualFlow);
+        
+        // Add the new considered flow to the deque
+        lastConsideredFlows.push_back(smoothConsideredFlow.updateEstimate(actualFlow));
+        // Ensure the deque only contains the last 5 values
+        if (lastConsideredFlows.size() > 5) {
+          lastConsideredFlows.pop_front();
+        }
+        // Calculate the average of the last 5 consideredFlow values
+        float sum = 0.0f;
+        for (float value : lastConsideredFlows) {
+          sum += value;
+        }
+        float average = sum / lastConsideredFlows.size();
+        // Update the currentState.consideredFlow variable only if
+        // it's higher than the average of the last 5 readings
+        currentState.consideredFlow = (consideredFlow > average) ? consideredFlow : average;
+        
         if (!systemState.scalesPresent) {
           currentState.shotWeight = currentState.shotWeight + actualFlow;
         }

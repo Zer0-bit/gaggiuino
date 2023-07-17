@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include <SimpleKalmanFilter.h>
+#include <deque> // Include the deque library for the rolling average
 
 #include "log.h"
 #include "peripherals/internal_watchdog.h"
