@@ -26,10 +26,14 @@ export default function SplitButton() {
     setOpen((prevOpen) => !prevOpen);
   };
 
-  const handleClose = (event) => {
-    if (anchorRef.current && anchorRef.current.contains(event?.target)) {
-      return;
-    }
+  const handleClose = (event: MouseEvent | TouchEvent) => {
+    // Check if the event's target is null (for TypeScript safety)
+    const targetNode = (event as MouseEvent)?.target || (event as TouchEvent)?.target;
+
+    // // If anchorRef exists and contains the event's target, return early (do nothing)
+    // if (anchorRef.current && anchorRef.current.contains(targetNode)) {
+    //   return;
+    // }
 
     setOpen(false);
   };
