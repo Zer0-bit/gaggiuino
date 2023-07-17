@@ -53,11 +53,7 @@ function TabPanel({
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h6">{children}</Typography>
-        </Box>
-      )}
+      {value === index && children}
     </div>
   );
 }
@@ -120,11 +116,7 @@ function Home() {
 
   const colorScaling = theme.palette.mode === 'light' ? lighten : darken;
 
-  const [value, setValue] = React.useState(0);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
+  const [tabValue, setTabValue] = useState(0);
 
   return (
     <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
@@ -160,12 +152,12 @@ function Home() {
                 {!activeProfile && <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />}
               </Grid>
               <Grid xs={12}>
-                <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                  <Tabs value={value} onChange={handleChange} centered>
+                <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+                  <Tabs value={tabValue} variant="fullWidth" onChange={(e, newValue) => setTabValue(newValue)}>
                     <Tab label="Available Profiles" {...a11yProps(0)} />
                     <Tab label="Shot History" {...a11yProps(1)} />
                   </Tabs>
-                  <TabPanel value={value} index={0}>
+                  <TabPanel value={tabValue} index={0}>
                     <Box sx={{
                       p: { xs: 0, sm: theme.spacing(1) },
                       maxHeight: '35vh', // 25% of the viewport height
@@ -178,51 +170,21 @@ function Home() {
                       />
                     </Box>
                   </TabPanel>
-                  <TabPanel value={value} index={1}>
+                  <TabPanel value={tabValue} index={1}>
                     {shotHistory.length > 0 && (
-                      <Box sx={{
-                        p: { xs: 0, sm: theme.spacing(1) },
-                        maxHeight: '35vh', // 25% of the viewport height
-                        overflow: 'auto', // Makes the box scrollable when contents overflow
-                      }}
-                      >
-                        <ShotHistory />
-                        {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
-                      </Box>
-                    )}
-                  </TabPanel>
-                </Box>
-                {/* <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
-                  <Typography variant="h6">Profiles</Typography>
-                  <Box sx={{
-                    maxHeight: '20vh', // 25% of the viewport height
-                    overflow: 'auto', // Makes the box scrollable when contents overflow
-                  }}
-                  >
-                    <AvailableProfileSelector
-                      selectedProfileId={activeProfile?.id}
-                      onSelected={handleNewProfileSelected}
-                    />
-                  </Box>
-                  {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
-                </Paper> */}
-              </Grid>
-              {/* <Grid xs={12}>
-                <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
-                  <Typography variant="h6">Shot history</Typography>
-                  {shotHistory.length > 0 && (
                     <Box sx={{
                       p: { xs: 0, sm: theme.spacing(1) },
-                      maxHeight: '20vh', // 25% of the viewport height
+                      maxHeight: '35vh', // 25% of the viewport height
                       overflow: 'auto', // Makes the box scrollable when contents overflow
                     }}
                     >
                       <ShotHistory />
+                      {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
                     </Box>
-                  )}
-                  {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
+                    )}
+                  </TabPanel>
                 </Paper>
-              </Grid> */}
+              </Grid>
               <Grid xs={6}>
                 <Skeleton variant="rounded" height={150} sx={{ borderRadius: '16px' }} />
               </Grid>
