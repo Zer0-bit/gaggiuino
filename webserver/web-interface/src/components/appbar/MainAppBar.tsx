@@ -21,6 +21,8 @@ import PropTypes from 'prop-types';
 import Logo from '../icons/Logo';
 import ShotDialog from '../../pages/home/ShotDialog';
 import useShotDataStore from '../../state/ShotDataStore';
+import useSystemStateStore from '../../state/SystemStateStore';
+import formatTime from '../../models/time_format';
 
 const menuItems: { [key: string]: { label: string; icon: JSX.Element } } = {
   '/': { label: 'Home', icon: <CoffeeIcon /> },
@@ -165,6 +167,7 @@ function MainAppBar() {
   const [shotDialogOpen, setShotDialogOpen] = useState<boolean>(false);
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
   const { latestShotDatapoint } = useShotDataStore();
+  const { timeAlive } = useSystemStateStore().systemState;
 
   useEffect(() => {
     if (latestShotDatapoint.timeInShot > 0) setShotDialogOpen(true);
@@ -212,7 +215,6 @@ function MainAppBar() {
             <TabMenu activeItem={activeTab} activeColor={activeColor} onChange={setActiveTab} />
           )}
           {!isBiggerScreen && <NavMenu activeItem={activeTab} onChange={setActiveTab} />}
-          {/* <ThemeModeToggle /> */}
           <div
             style={{
               fontSize: '1rem',
@@ -226,7 +228,7 @@ function MainAppBar() {
               // Add any other styling you want for the container
             }}
           >
-            01:15:20
+            {formatTime({ time: timeAlive * 1000 })}
           </div>
         </Stack>
       </Toolbar>
