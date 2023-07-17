@@ -1,6 +1,8 @@
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ScaleIcon from '@mui/icons-material/Scale';
+import ShowerIcon from '@mui/icons-material/Shower';
+import LocalCarWashIcon from '@mui/icons-material/LocalCarWash';
 import {
   Box,
   Button,
@@ -186,10 +188,16 @@ function Home() {
                 </Paper>
               </Grid>
               <Grid xs={6}>
-                <Skeleton variant="rounded" height={150} sx={{ borderRadius: '16px' }} />
+                <Button variant="contained" color="primary" sx={{ borderRadius: '16px', height: 130, width: '100%' }}>
+                  <ShowerIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
+                  <Typography variant='h4'>FLUSH</Typography>
+                </Button>
               </Grid>
               <Grid xs={6}>
-                <Skeleton variant="rounded" height={150} sx={{ fontSize: '1rem', borderRadius: '16px' }} />
+                <Button variant="contained" color="primary" sx={{ borderRadius: '16px', height: 130, width: '100%' }}>
+                  <LocalCarWashIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
+                  <Typography variant='h4'>DESCALE</Typography>
+                </Button>
               </Grid>
             </Grid>
           </Box>
