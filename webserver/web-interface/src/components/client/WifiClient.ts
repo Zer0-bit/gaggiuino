@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Network } from '../wifi/NetworkTypes';
 
 export async function getWifiStatus() {
   return axios.get('/api/wifi/status')
@@ -6,7 +7,7 @@ export async function getWifiStatus() {
 }
 
 export async function getAvailableNetworks() {
-  return axios.get('/api/wifi/networks')
+  return axios.get<Network[]>('/api/wifi/networks')
     .then(({ data }) => {
       const networks = data.filter((network) => network.ssid !== null && network.ssid.length > 0);
       const networksUniqueByKey = [...new Map(networks.map((item) => [item.ssid, item])).values()];
@@ -18,7 +19,7 @@ export async function disconnectFromWifi() {
   return axios.delete('/api/wifi/selected-network');
 }
 
-export async function connectToWifi({ ssid, pass }) {
+export async function connectToWifi({ ssid, pass }: { ssid: string; pass: string; }) {
   return axios.put('/api/wifi/selected-network', { ssid, pass }, {
     timeout: 10000,
   });

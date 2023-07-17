@@ -17,7 +17,6 @@ import {
   Button,
   Menu,
 } from '@mui/material';
-import PropTypes from 'prop-types';
 import Logo from '../icons/Logo';
 import ShotDialog from '../../pages/home/ShotDialog';
 import useShotDataStore from '../../state/ShotDataStore';
@@ -59,10 +58,6 @@ function LinkTab(props: LinkTabProps) {
     />
   );
 }
-
-LinkTab.propTypes = {
-  value: PropTypes.string.isRequired,
-};
 
 interface TabMenuProps {
   activeItem: string;
