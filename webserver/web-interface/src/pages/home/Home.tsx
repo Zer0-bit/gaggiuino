@@ -20,6 +20,7 @@ import {
   useTheme,
   Tab,
   Tabs,
+  alpha,
 } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
@@ -68,6 +69,7 @@ function a11yProps(index: number) {
 }
 
 function Home() {
+  const opacityValue = 0.4;
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
   const [alertMessage, setAlertMessage] = useState<SnackMessage>();
@@ -188,15 +190,27 @@ function Home() {
                 </Paper>
               </Grid>
               <Grid xs={6}>
-                <Button variant="contained" color="primary" sx={{ borderRadius: '16px', height: 130, width: '100%' }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    borderRadius: '16px', height: 130, width: '100%', backgroundColor: (theme) => alpha(theme.palette.primary.main, opacityValue),
+                  }}
+                >
                   <ShowerIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
-                  <Typography variant='h4'>FLUSH</Typography>
+                  <Typography variant="h4">FLUSH</Typography>
                 </Button>
               </Grid>
               <Grid xs={6}>
-                <Button variant="contained" color="primary" sx={{ borderRadius: '16px', height: 130, width: '100%' }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    borderRadius: '16px', height: 130, width: '100%', backgroundColor: (theme) => alpha(theme.palette.primary.main, opacityValue),
+                  }}
+                >
                   <LocalCarWashIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
-                  <Typography variant='h4'>DESCALE</Typography>
+                  <Typography variant="h4">DESCALE</Typography>
                 </Button>
               </Grid>
             </Grid>
