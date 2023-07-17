@@ -53,11 +53,11 @@ export default function Profiles() {
     }
   }, []);
 
-  const startNewProfile = (): Profile => ({
-    name: 'New Profile',
-    phases: [],
-    waterTemperature: 93,
-  });
+  // const startNewProfile = (): Profile => ({
+  //   name: 'New Profile',
+  //   phases: [],
+  //   waterTemperature: 93,
+  // });
 
   const handleDelete = useCallback(async () => {
     if (!selectedProfileId) return;
@@ -154,7 +154,7 @@ export default function Profiles() {
               <AvailableProfileSelector selectedProfileId={selectedProfileId} onSelected={handleNewProfileSelected} />
             </Grid>
             {!smallScreen && (
-            <Grid sm={8} md={7}>
+            <Grid sm={8} md={9}>
               {selectedProfile && (
               <Box>
                 <ProfileReview profile={selectedProfile} />
