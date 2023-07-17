@@ -94,7 +94,27 @@ export default function Profiles() {
   return (
     <>
       <Container sx={{ mt: theme.spacing(2), height: `calc(100vh - 60px - ${theme.spacing(2)}` }}>
-        <Paper sx={{ p: 2, maxHeight: { xs: '50vh', sm: '' }, overflow: { xs: 'scroll', sm: 'hide' } }}>
+        <Paper
+          sx={{
+            p: 2,
+            maxHeight: { xs: '50vh', sm: '' },
+            overflowX: 'hidden',
+            overflowY: 'scroll',
+            scrollbarWidth: 'thin', // Set the scrollbar width to thin (if supported)
+            scrollbarColor: () => `${theme.palette.primary.main} ${theme.palette.background.paper}`, // Customize scrollbar color
+            '&::-webkit-scrollbar': {
+              width: '10px', // Customize scrollbar width for Webkit browsers (Chrome, Safari, etc.)
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: () => theme.palette.primary.main, // Customize scrollbar thumb color
+              borderRadius: '10px', // Customize scrollbar thumb border radius
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: () => theme.palette.background.paper, // Customize scrollbar track color
+              borderRadius: '10px', // Customize scrollbar track border radius
+            },
+          }}
+        >
           <Typography variant="h6">Manage profiles</Typography>
           <Grid container spacing={2}>
             {smallScreen && (
@@ -108,7 +128,29 @@ export default function Profiles() {
               {!selectedProfile && <Skeleton variant="rounded" sx={{ height: '25vh' }} />}
             </Grid>
             )}
-            <Grid xs={12} sm={4} md={3} sx={{ overflowX: 'hidden', overflowY: 'scroll', maxHeight: { sm: '100%' } }}>
+            <Grid
+              xs={12}
+              sm={4}
+              md={3}
+              sx={{
+                overflowX: 'hidden',
+                overflowY: 'scroll',
+                maxHeight: { sm: '100%' },
+                scrollbarWidth: 'thin',
+                scrollbarColor: () => `${theme.palette.primary.main} ${theme.palette.background.paper}`, // Customize scrollbar color
+                '&::-webkit-scrollbar': {
+                  width: '10px', // Customize scrollbar width for Webkit browsers (Chrome, Safari, etc.)
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: () => theme.palette.primary.main, // Customize scrollbar thumb color
+                  borderRadius: '10px', // Customize scrollbar thumb border radius
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: () => theme.palette.background.paper, // Customize scrollbar track color
+                  borderRadius: '10px', // Customize scrollbar track border radius
+                },
+              }}
+            >
               <AvailableProfileSelector selectedProfileId={selectedProfileId} onSelected={handleNewProfileSelected} />
             </Grid>
             {!smallScreen && (

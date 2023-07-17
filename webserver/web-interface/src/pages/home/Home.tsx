@@ -194,11 +194,16 @@ function Home() {
                   variant="contained"
                   color="primary"
                   sx={{
-                    borderRadius: '16px', height: 130, width: '100%', backgroundColor: (theme) => alpha(theme.palette.primary.main, opacityValue),
+                    borderRadius: '16px',
+                    height: 130,
+                    width: '100%',
+                    backgroundColor: (theme) => alpha(theme.palette.primary.main, opacityValue),
+                    whiteSpace: 'break-spaces',
+                    wordWrap: 'break-word',
                   }}
                 >
                   <ShowerIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
-                  <Typography variant="h4">FLUSH</Typography>
+                  <Typography variant="body1">FLUSH</Typography>
                 </Button>
               </Grid>
               <Grid xs={6}>
@@ -210,7 +215,7 @@ function Home() {
                   }}
                 >
                   <LocalCarWashIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
-                  <Typography variant="h4">DESCALE</Typography>
+                  <Typography variant="body1">DESCALE</Typography>
                 </Button>
               </Grid>
             </Grid>
