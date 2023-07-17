@@ -24,8 +24,12 @@ export function ProfileReview({ profile, onSave = undefined, onChange = undefine
   };
 
   return (
-    <>
+    <Box sx={{
+      width: '100%',
+    }}
+    >
       <Box sx={{
+        width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -41,11 +45,11 @@ export function ProfileReview({ profile, onSave = undefined, onChange = undefine
         </Box>
         )}
       </Box>
-      <Box position="relative"><ProfileChart profile={profile} /></Box>
+      <Box position="relative" width="100%"><ProfileChart profile={profile} /></Box>
       <GlobalRestrictions profile={profile} />
       {onChange && (
         <ProfileEditDialog open={editOpen} onClose={() => setEditOpen(false)} profile={profile} onDone={handleDone} />
       )}
-    </>
+    </Box>
   );
 }
