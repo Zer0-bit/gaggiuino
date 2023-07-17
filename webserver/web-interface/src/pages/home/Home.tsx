@@ -141,7 +141,7 @@ function Home() {
             <Grid container spacing={1}>
               <Grid xs={12}>
                 {activeProfile && (
-                <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+                <Paper sx={{ padding: theme.spacing(1), position: 'relative' }} elevation={1}>
                   <ProfileReview
                     profile={activeProfile}
                     onSave={handlePersistActiveProfile}

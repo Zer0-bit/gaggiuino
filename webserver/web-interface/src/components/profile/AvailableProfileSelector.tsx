@@ -40,7 +40,9 @@ export default function AvailableProfileSelector({
             <ListItemAvatar>
               <Avatar>
                 { profileSummary.name
-                  .split(' ').map((word) => word[0]).join('') // Initials
+                  .split(' ')
+                  .map((word) => word.replace(/[^a-zA-Z0-9]/g, '')[0]) // Ignore everything that's not a letter or a number
+                  .join('') // Initials
                   .substring(0, 2) // Keep 2
                   .toLocaleUpperCase() }
               </Avatar>
