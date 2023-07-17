@@ -6,7 +6,7 @@ import useLogMessageStore from '../../state/LogStore';
 
 function LogContainer() {
   const theme = useTheme();
-  const bottomRef = useRef(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const [followLogs, setFollowLogs] = useState(false);
 
   const { logs } = useLogMessageStore();
@@ -17,7 +17,7 @@ function LogContainer() {
     }
   }, [logs, followLogs]);
 
-  const onChangeSwitch = (event, newValue) => {
+  const onChangeSwitch = (event: React.ChangeEvent<HTMLInputElement>, newValue: boolean) => {
     setFollowLogs(newValue);
   };
 

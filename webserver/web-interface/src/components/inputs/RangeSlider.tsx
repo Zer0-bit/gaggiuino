@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 
 export default function VerticalSlider() {
-  function preventHorizontalKeyboardNavigation(event) {
+  function preventHorizontalKeyboardNavigation(event: React.KeyboardEvent<HTMLSpanElement>) {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();
     }
