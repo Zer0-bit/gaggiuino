@@ -164,7 +164,7 @@ function Home() {
                   <TabPanel value={tabValue} index={0}>
                     <Box sx={{
                       p: { xs: 0, sm: theme.spacing(1) },
-                      maxHeight: '35vh', // 25% of the viewport height
+                      height: '35vh', // 25% of the viewport height
                       overflow: 'auto', // Makes the box scrollable when contents overflow
                     }}
                     >
@@ -178,7 +178,7 @@ function Home() {
                     {shotHistory.length > 0 && (
                     <Box sx={{
                       p: { xs: 0, sm: theme.spacing(1) },
-                      maxHeight: '35vh', // 25% of the viewport height
+                      height: '35vh', // 25% of the viewport height
                       overflow: 'auto', // Makes the box scrollable when contents overflow
                     }}
                     >
@@ -197,7 +197,7 @@ function Home() {
                     borderRadius: '16px',
                     height: 130,
                     width: '100%',
-                    backgroundColor: (theme) => alpha(theme.palette.primary.main, opacityValue),
+                    backgroundColor: alpha(theme.palette.primary.main, opacityValue),
                     whiteSpace: 'break-spaces',
                     wordWrap: 'break-word',
                   }}
@@ -211,7 +211,7 @@ function Home() {
                   variant="contained"
                   color="primary"
                   sx={{
-                    borderRadius: '16px', height: 130, width: '100%', backgroundColor: (theme) => alpha(theme.palette.primary.main, opacityValue),
+                    borderRadius: '16px', height: 130, width: '100%', backgroundColor: alpha(theme.palette.primary.main, opacityValue),
                   }}
                 >
                   <LocalCarWashIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
