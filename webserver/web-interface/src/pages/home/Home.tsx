@@ -40,6 +40,7 @@ import { selectActiveProfile } from '../../components/client/ProfileClient';
 import { OperationMode, SensorState } from '../../models/models';
 import useSystemStateStore from '../../state/SystemStateStore';
 import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
+import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
 
@@ -365,17 +366,7 @@ function TargetTempInput(
         />
       </Grid>
       <Grid xs={4}>
-        <Box sx={{
-          width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly',
-        }}
-        >
-          <IconButton size="small" color="primary" onClick={() => handleTempUpdate(targetTemp - 1)}>
-            <RemoveIcon />
-          </IconButton>
-          <IconButton size="small" color="primary" onClick={() => handleTempUpdate(targetTemp + 1)}>
-            <AddIcon />
-          </IconButton>
-        </Box>
+        <SettingsNumberIncrementButtons value={targetTemp} onChange={handleTempUpdate} />
       </Grid>
     </Grid>
   );
