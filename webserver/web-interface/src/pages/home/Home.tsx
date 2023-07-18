@@ -22,8 +22,9 @@ import {
   Tabs,
   alpha,
   Theme,
+  ButtonBase,
 } from '@mui/material';
-import React, { useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import AspectRatioBox from '../../components/layout/AspectRatioBox';
@@ -36,7 +37,9 @@ import SnackNotification, { SnackMessage } from '../../components/alert/SnackMes
 import { Profile } from '../../models/profile';
 import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
-import { SensorState } from '../../models/models';
+import { OperationMode, SensorState } from '../../models/models';
+import useSystemStateStore from '../../state/SystemStateStore';
+import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
 
@@ -46,6 +49,8 @@ function Home() {
   const [alertMessage, setAlertMessage] = useState<SnackMessage>();
 
   const { sensorState } = useSensorStateStore();
+
+  const { systemState, updateSystemState } = useSystemStateStore();
 
   const {
     activeProfile,
@@ -89,6 +94,17 @@ function Home() {
     }
   }, [activeProfile, fetchActiveProfile]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleOpmodeChange = useCallback(debounce(async (newMode: OperationMode) => {
+    try {
+      await updateOperationMode(newMode);
+      const mode = await getOperationMode();
+      updateSystemState({ ...systemState, operationMode: mode });
+    } catch (e) {
+      setAlertMessage({ content: 'Failed to persist active profile', level: 'error' });
+    }
+  }, 500), []);
+
   return (
     <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
       {/* <ShowAlert level="INFO" text="Welcome home motherfucker \_O_/" /> */}
@@ -113,7 +129,7 @@ function Home() {
 
         {/* Right part - Temperature Gauge and Scale */}
         <Grid xs={5} sm={4}>
-          {RightSection(sensorState, activeProfile, handleTempUpdate)}
+          {RightSection(sensorState, activeProfile, handleTempUpdate, handleOpmodeChange)}
         </Grid>
       </Grid>
       <SnackNotification message={alertMessage} />
@@ -165,9 +181,6 @@ function MiddleSection(
             {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
           </Paper>
         </Grid>
-        <Grid container xs={12}>
-          {OpModeButtons(theme)}
-        </Grid>
       </Grid>
     </Box>
   );
@@ -177,6 +190,7 @@ function RightSection(
   sensorState: SensorState,
   activeProfile: Profile | null,
   handleTempUpdate: (value: number) => void,
+  handleOpmodeChange: (opMode: OperationMode) => void,
 ) {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
@@ -196,6 +210,10 @@ function RightSection(
         <TargetTempInput targetTemp={activeProfile?.waterTemperature || 0} handleTempUpdate={handleTempUpdate} />
         <ScalesInput />
 
+        <Grid container xs={12} sx={{ mt: 2 }}>
+          <OpModeButtons onChange={handleOpmodeChange} />
+        </Grid>
+
         {/* Gauges for small screens */}
         {!isBiggerScreen && (
           <Grid xs={12} sx={{ display: 'flex', alignItems: 'stretch' }}>
@@ -212,41 +230,103 @@ function RightSection(
   );
 }
 
-function OpModeButtons(theme: Theme) {
-  const opmodeButtonOpacity = 0.4;
+function OpModeButtons({ onChange }: {onChange: (opMode: OperationMode) => void}) {
+  const { operationMode } = useSystemStateStore().systemState;
+
+  function handleFlushStateChange(newState: boolean) {
+    onChange(newState ? OperationMode.FLUSH : OperationMode.BREW_AUTO);
+  }
+  function handleDescaleStateChange(newState: boolean) {
+    onChange(newState ? OperationMode.DESCALE : OperationMode.BREW_AUTO);
+  }
 
   return (
-    <>
-      <Grid xs={6}>
-        <Button
-          variant="contained"
-          color="primary"
+    <Box width="100%" display="flex" justifyContent="space-evenly" gap={2}>
+      <OpmodeButton
+        state={operationMode === OperationMode.FLUSH}
+        onChange={handleFlushStateChange}
+        icon={<ShowerIcon fontSize="inherit" />}
+        label="FLUSH"
+      />
+      <OpmodeButton
+        state={operationMode === OperationMode.DESCALE}
+        onChange={handleDescaleStateChange}
+        icon={<LocalCarWashIcon fontSize="inherit" />}
+        label="DESCALE"
+      />
+    </Box>
+  );
+}
+
+interface OpModeButtonProps {
+  state: boolean;
+  icon?: ReactNode;
+  label?: ReactNode;
+  onChange?: (state: boolean) => void;
+}
+
+function OpmodeButton({
+  state = false,
+  icon = undefined,
+  label = undefined,
+  onChange = undefined,
+}: OpModeButtonProps) {
+  const theme = useTheme();
+  const background = (state)
+    ? 'linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%)'
+    : 'linear-gradient(to top, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%)';
+  const boxShadow = '0px 1px 2px -1px rgba(0,0,0,0.2), 0px 3px 3px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)';
+  const ledColorOn = '#ef4e2b';
+  const ledColorOff = '#822714';
+
+  return (
+    <Box sx={{
+      p: { xs: 0.5, sm: 1 },
+      borderRadius: theme.spacing(1),
+      width: '100%',
+      maxWidth: '120px',
+      border: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
+      boxShadow,
+    }}
+    >
+      <AspectRatioBox ratio={1 / 1.4}>
+        <ButtonBase
           sx={{
-            borderRadius: '16px',
-            height: 130,
+            borderRadius: theme.spacing(1),
+            boxShadow,
+            background,
+            border: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
+            ':hover': {
+              border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+            },
+          }}
+          onClick={() => (onChange && onChange(!state))}
+        >
+          <Box sx={{
+            height: '100%',
             width: '100%',
-            backgroundColor: alpha(theme.palette.primary.main, opmodeButtonOpacity),
-            whiteSpace: 'break-spaces',
-            wordWrap: 'break-word',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-around',
+            alignItems: 'center',
+            py: { xs: 1, sm: 2 },
           }}
-        >
-          <ShowerIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
-          <Typography variant="body1">FLUSH</Typography>
-        </Button>
-      </Grid>
-      <Grid xs={6}>
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{
-            borderRadius: '16px', height: 130, width: '100%', backgroundColor: alpha(theme.palette.primary.main, opmodeButtonOpacity),
-          }}
-        >
-          <LocalCarWashIcon fontSize="large" sx={{ mr: theme.spacing(1) }} />
-          <Typography variant="body1">DESCALE</Typography>
-        </Button>
-      </Grid>
-    </>
+          >
+            <Box sx={{ fontSize: { xs: theme.typography.body2.fontSize, sm: theme.typography.body1.fontSize } }}>
+              {icon}
+            </Box>
+            <Box sx={{ overflowX: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{label}</Box>
+            <Box sx={{
+              width: '15px',
+              height: '10px',
+              backgroundColor: state ? ledColorOn : ledColorOff,
+              boxShadow: state ? '0 0 5px 3px rgba(239,78,43,0.5)' : '', // Glow effect
+            }}
+            />
+          </Box>
+        </ButtonBase>
+      </AspectRatioBox>
+    </Box>
   );
 }
 
