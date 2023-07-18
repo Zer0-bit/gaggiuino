@@ -34,6 +34,7 @@ export function ProfileGlobalsEdit({ profile, onChange }: ProfileGlobalsEditProp
         <Grid xs={12}><Typography variant="body2">STOP ON</Typography></Grid>
         <Grid xs={12} sm={6}>
           <SettingsNumberInput
+            optional
             label="Shot Weight"
             value={profile.globalStopConditions?.weight || 0}
             maxDecimals={1}
@@ -42,6 +43,7 @@ export function ProfileGlobalsEdit({ profile, onChange }: ProfileGlobalsEditProp
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label="Total water pumped"
             value={profile.globalStopConditions?.waterPumped || 0}
             maxDecimals={1}
@@ -50,6 +52,7 @@ export function ProfileGlobalsEdit({ profile, onChange }: ProfileGlobalsEditProp
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label="Total time (s)"
             value={(profile.globalStopConditions?.time || 0) / 1000}
             maxDecimals={1}

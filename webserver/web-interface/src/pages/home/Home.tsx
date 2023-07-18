@@ -213,8 +213,7 @@ function RightSection(
         <Grid xs={12}>
           <ScalesInput />
         </Grid>
-
-        <Grid container xs={12} sx={{ mt: 2 }}>
+        <Grid xs={12}>
           <OpModeButtons onChange={handleOpmodeChange} />
         </Grid>
 

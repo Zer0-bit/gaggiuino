@@ -74,6 +74,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label={phase.type === PhaseType.FLOW ? 'Pressure limit' : 'Flow limit'}
             value={phase.restriction || 0}
             maxDecimals={1}
@@ -82,6 +83,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
         </Grid>
         <Grid xs={12}>
           <SettingsNumberInput
+            optional
             label="Time(s)"
             maxDecimals={0}
             value={(phase.stopConditions.time || 0) / 1000}
@@ -89,7 +91,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
           />
         </Grid>
         <Grid xs={12}><Typography variant="body1">Transition</Typography></Grid>
-        <Grid xs={6}>
+        <Grid xs={phase.target.curve === CurveStyle.INSTANT ? 12 : 6}>
           <TextField
             fullWidth
             size="small"
@@ -106,6 +108,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
             ))}
           </TextField>
         </Grid>
+        {phase.target.curve !== CurveStyle.INSTANT && (
         <Grid xs={6}>
           <SettingsNumberInput
             label="Curve time(s)"
@@ -114,12 +117,14 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
             onChange={(v) => handleTransitionTimeChange(constrain(v, 0, 1000))}
           />
         </Grid>
+        )}
 
       </Grid>
       <Grid container xs={12} sm={6} spacing={2} alignContent="flex-start">
         <Grid xs={12}><Typography variant="body1">Stop conditions</Typography></Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label="Pressure above"
             maxDecimals={1}
             value={(phase.stopConditions.pressureAbove || 0)}
@@ -128,6 +133,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label="Pressure below"
             maxDecimals={1}
             value={(phase.stopConditions.pressureBelow || 0)}
@@ -136,6 +142,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label="Flow above"
             maxDecimals={1}
             value={(phase.stopConditions.flowAbove || 0)}
@@ -144,6 +151,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label="Flow below"
             maxDecimals={1}
             value={(phase.stopConditions.flowBelow || 0)}
@@ -152,6 +160,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label="Weight change"
             maxDecimals={1}
             value={(phase.stopConditions.weight || 0)}
@@ -160,6 +169,7 @@ export function PhaseEdit({ phase, onChange }: PhaseEditProps) {
         </Grid>
         <Grid xs={6}>
           <SettingsNumberInput
+            optional
             label="Water pumped"
             maxDecimals={1}
             value={(phase.stopConditions.waterPumpedInPhase || 0)}

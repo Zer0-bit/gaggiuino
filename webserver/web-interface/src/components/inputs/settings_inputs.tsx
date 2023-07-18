@@ -6,7 +6,8 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import React, {
-  useCallback, useEffect, useMemo, useState,
+  forwardRef,
+  useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { Colorful, RgbaColor, rgbaToHex } from '@uiw/react-color';
 import { Variant } from '@mui/material/styles/createTypography';
@@ -37,16 +38,20 @@ export interface SettingsInputFieldNumberProps {
   sx?: SxProps<Theme>;
   readOnly?: boolean;
   textAlign?: string;
+  onBlur?: () => void;
+  disabled?: boolean
 }
 
-export function SettingsInputFieldNumber({
+export const SettingsInputFieldNumber = forwardRef(({
   value,
   onChange,
   maxDecimals = 1,
   sx = {},
   readOnly = false,
   textAlign = 'left',
-}: SettingsInputFieldNumberProps) {
+  onBlur = undefined,
+  disabled = false,
+}: SettingsInputFieldNumberProps, ref) => {
   const theme = useTheme();
   const round = useMemo(() => (x: number) => {
     if (maxDecimals === undefined) return x;
@@ -79,7 +84,8 @@ export function SettingsInputFieldNumber({
 
   const handleFocusLost = useCallback(() => {
     setInputValue(sanitizeNumberString(round(value).toString()));
-  }, [value, round]);
+    onBlur && onBlur();
+  }, [value, round, onBlur]);
 
   const handleInputValueChanged = useCallback((newValue: string) => {
     setInputValue(sanitizeNumberString(newValue, maxDecimals));
@@ -87,6 +93,8 @@ export function SettingsInputFieldNumber({
 
   return (
     <TextField
+      inputRef={ref}
+      disabled={disabled}
       fullWidth
       value={inputValue}
       onChange={(e) => handleInputValueChanged(e.target.value)}
@@ -100,7 +108,16 @@ export function SettingsInputFieldNumber({
       InputProps={{ readOnly }}
     />
   );
-}
+});
+
+SettingsInputFieldNumber.defaultProps = {
+  maxDecimals: undefined,
+  sx: {},
+  readOnly: false,
+  textAlign: 'left',
+  onBlur: undefined,
+  disabled: false,
+};
 
 export interface SettingsNumberIncrementButtonsProps {
   value: number;
@@ -113,10 +130,10 @@ export function SettingsNumberIncrementButtons(
 ) {
   return (
     <SettingsInputActions>
-      <IconButton size="small" color="primary" onClick={() => onChange(value - buttonIncrements)}>
+      <IconButton sx={{ p: '1px' }} size="small" color="primary" onClick={() => onChange(value - buttonIncrements)}>
         <RemoveIcon />
       </IconButton>
-      <IconButton size="small" color="primary" onClick={() => onChange(value + buttonIncrements)}>
+      <IconButton sx={{ p: '1px' }} size="small" color="primary" onClick={() => onChange(value + buttonIncrements)}>
         <AddIcon />
       </IconButton>
     </SettingsInputActions>
@@ -129,25 +146,86 @@ export interface SettingsNumberInputProps {
   onChange: (value: number) => void;
   buttonIncrements?: number;
   maxDecimals?: number;
+  optional?: boolean;
 }
 
 export function SettingsNumberInput({
-  label, value, onChange, maxDecimals = undefined, buttonIncrements = 1,
+  label, value, onChange, maxDecimals = undefined, buttonIncrements = 1, optional = false,
 }: SettingsNumberInputProps) {
+  const [justEnabled, setJustEnabled] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null); // Create a ref
+  const handleInputChanged = (newValue: number) => {
+    onChange(newValue);
+    setJustEnabled(false);
+  };
+  const handleToggleSwitch = (newValue: boolean) => {
+    setJustEnabled(newValue);
+    setTimeout(() => inputRef.current && inputRef.current.focus(), 200);
+  };
+  const handleInputLostFocus = () => {
+    if (justEnabled) {
+      setTimeout(() => setJustEnabled(false), 200);
+    }
+  };
+
   return (
     <SettingsInputWrapper>
       <SettingsInputBorderLabel><Typography variant="caption" color="text.secondary">{label}</Typography></SettingsInputBorderLabel>
       <SettingsInputField>
         <SettingsInputFieldNumber
+          ref={inputRef}
           value={value}
-          onChange={onChange}
+          disabled={optional && value === 0 && !justEnabled}
+          onChange={handleInputChanged}
           maxDecimals={maxDecimals}
+          onBlur={handleInputLostFocus}
         />
       </SettingsInputField>
       <SettingsInputActions>
-        <SettingsNumberIncrementButtons value={value} onChange={onChange} buttonIncrements={buttonIncrements} />
+        {(optional && value === 0 && !justEnabled)
+          && (
+            <DelayedSwitch
+              checked={justEnabled}
+              onChange={handleToggleSwitch}
+            />
+          )}
+        {(!optional || value !== 0 || justEnabled) && (
+          <SettingsNumberIncrementButtons
+            value={value}
+            onChange={handleInputChanged}
+            buttonIncrements={buttonIncrements}
+          />
+        )}
       </SettingsInputActions>
     </SettingsInputWrapper>
+  );
+}
+
+interface DelayedSwitchProps {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}
+
+export function DelayedSwitch({ checked, onChange }: DelayedSwitchProps) {
+  const [checkedInternal, setCheckedInternal] = useState(checked);
+  useEffect(() => setCheckedInternal(checked), [checked]);
+
+  const handleToggle = (value: boolean) => {
+    setCheckedInternal(value);
+    setTimeout(() => {
+      onChange(value);
+    }, 150); // approximate duration of the MUI switch animation
+  };
+
+  return (
+    <Box>
+      <Switch
+        color="primary"
+        size="small"
+        checked={checkedInternal}
+        onChange={(e) => handleToggle(e.target.checked)}
+      />
+    </Box>
   );
 }
 
