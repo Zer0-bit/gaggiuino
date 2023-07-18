@@ -207,8 +207,12 @@ function RightSection(
       </Box>
 
       <Grid container spacing={2} sx={{ px: 1, mt: 3 }}>
-        <TargetTempInput targetTemp={activeProfile?.waterTemperature || 0} handleTempUpdate={handleTempUpdate} />
-        <ScalesInput />
+        <Grid xs={12}>
+          <TargetTempInput targetTemp={activeProfile?.waterTemperature || 0} handleTempUpdate={handleTempUpdate} />
+        </Grid>
+        <Grid xs={12}>
+          <ScalesInput />
+        </Grid>
 
         <Grid container xs={12} sx={{ mt: 2 }}>
           <OpModeButtons onChange={handleOpmodeChange} />
@@ -335,7 +339,7 @@ function TargetTempInput(
 ) {
   const theme = useTheme();
   return (
-    <Grid container xs={12} alignItems="center">
+    <Grid container alignItems="center">
       <Grid xs={4}>
         <Typography fontSize={12}>TARGET TEMP</Typography>
       </Grid>
@@ -383,7 +387,7 @@ function ScalesInput() {
   const { sensorState } = useSensorStateStore();
 
   return (
-    <Grid container xs={12} alignItems="center">
+    <Grid container alignItems="center">
       <Grid xs={4}>
         <Typography fontSize={12}>SCALE</Typography>
       </Grid>
