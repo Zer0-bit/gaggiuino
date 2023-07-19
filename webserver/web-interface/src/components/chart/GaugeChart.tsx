@@ -49,11 +49,13 @@ export function GaugeChart({
   const [setIsFlashing, setIsSteaming] = useState(false);
 
   useEffect(() => {
-    setIsSteaming(value > 120);
-
-    const interval = setInterval(() => {
-      setIsSteaming((prevIsFlashing) => !prevIsFlashing);
-    }, 500); // Flashing interval (milliseconds), change as needed
+    let interval: any;
+    if (value > 120) {
+      setIsSteaming(value > 120);
+      interval = setInterval(() => {
+        setIsSteaming((prevIsFlashing) => !prevIsFlashing);
+      }, 500); // TO-DO: make the gauge glowing increasing and decreasing intensity instead of flashing
+    }
 
     return () => clearInterval(interval);
   }, [value]);
