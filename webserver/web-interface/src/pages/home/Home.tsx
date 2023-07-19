@@ -441,7 +441,7 @@ function ProfileAndHistoryTabs(
       <TabPanel value={tabValue} index={0}>
         <Box sx={{
           p: { xs: 0, sm: theme.spacing(1) },
-          height: '35vh',
+          height: '45vh',
           overflow: 'auto', // Makes the box scrollable when contents overflow
         }}
         >
@@ -455,7 +455,7 @@ function ProfileAndHistoryTabs(
         {shotHistory.length > 0 && (
         <Box sx={{
           p: { xs: 0, sm: theme.spacing(1) },
-          height: '35vh',
+          height: '45vh',
           overflow: 'auto', // Makes the box scrollable when contents overflow
         }}
         >
