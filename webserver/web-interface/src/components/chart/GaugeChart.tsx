@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -46,6 +46,17 @@ export function GaugeChart({
   title = '',
 }: GaugeChartProps) {
   const theme = useTheme();
+  const [setIsFlashing, setIsSteaming] = useState(false);
+
+  useEffect(() => {
+    setIsSteaming(value > 120);
+
+    const interval = setInterval(() => {
+      setIsSteaming((prevIsFlashing) => !prevIsFlashing);
+    }, 500); // Flashing interval (milliseconds), change as needed
+
+    return () => clearInterval(interval);
+  }, [value]);
 
   const options: ChartOptions<'doughnut'> = {
     cutout: '89%',
@@ -73,11 +84,12 @@ export function GaugeChart({
       data: [value, Math.max(0, (maxValue || 100) - value)],
       borderWidth: 0,
       backgroundColor: [
-        primaryColor,
+        setIsFlashing ? theme.palette.primary.light : primaryColor,
         theme.palette.divider,
       ],
     }],
   };
+
   return (
     <>
       {title && <GaugeTitle>{title}</GaugeTitle>}
