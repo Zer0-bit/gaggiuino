@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import Copy from '@mui/icons-material/CopyAll';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';

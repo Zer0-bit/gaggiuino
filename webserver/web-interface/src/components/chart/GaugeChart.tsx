@@ -49,7 +49,7 @@ export function GaugeChart({
   const [setIsFlashing, setIsSteaming] = useState(false);
 
   useEffect(() => {
-    let interval: any;
+    let interval: NodeJS.Timer;
     if (value > 120) {
       setIsSteaming(value > 120);
       interval = setInterval(() => {
