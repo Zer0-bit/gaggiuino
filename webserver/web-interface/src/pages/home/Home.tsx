@@ -1,5 +1,3 @@
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
 import ScaleIcon from '@mui/icons-material/Scale';
 import ShowerIcon from '@mui/icons-material/Shower';
 import LocalCarWashIcon from '@mui/icons-material/LocalCarWash';
@@ -8,7 +6,6 @@ import {
   Button,
   Container,
   Unstable_Grid2 as Grid,
-  IconButton,
   Paper,
   Skeleton,
   TextField,

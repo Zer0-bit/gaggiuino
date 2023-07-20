@@ -1,5 +1,9 @@
-import { useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useWebSocket as reactUseWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
+import {
+  useCallback, useEffect, useState,
+} from 'react';
+import { Options } from 'react-use-websocket/dist/lib/types';
 import useSensorStateStore from '../state/SensorStateStore';
 import {
   GaggiaSettings,
@@ -21,6 +25,15 @@ enum WsActionType {
     SettingsUpdated ='settings_update',
 }
 
+const TIMEOUT_INTERVAL = 3000; // 3 seconds
+const WS_OPTIONS: Options = {
+  share: true,
+  shouldReconnect: () => true,
+  reconnectAttempts: 1000000,
+  reconnectInterval: 3,
+  retryOnError: true,
+};
+
 interface MessageData {
     action: WsActionType,
     data: unknown,
@@ -34,13 +47,28 @@ const useWebSocket = (url:string) => {
   const { setLocalActiveProfile } = useProfileStore();
   const { updateLocalSettings } = useSettingsStore();
 
-  const { lastJsonMessage } = reactUseWebSocket(url, {
-    share: true,
-    shouldReconnect: () => true,
-    reconnectAttempts: 1000000,
-    reconnectInterval: 3,
-    retryOnError: true,
-  });
+  const [connected, setConnected] = useState(true);
+  const [messageTimeoutId, setMessageTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const { lastJsonMessage, getWebSocket } = reactUseWebSocket(url, WS_OPTIONS, connected);
+
+  // Function to reset connection
+  const resetConnection = useCallback(() => {
+    const webSocketInstance = getWebSocket();
+    if (webSocketInstance && webSocketInstance.readyState === WebSocket.OPEN) {
+      setConnected(false);
+      setTimeout(() => setConnected(true), 1);
+    }
+  }, [getWebSocket]);
+
+  useEffect(() => {
+    if (messageTimeoutId) clearTimeout(messageTimeoutId);
+
+    // If no message in 3 seconds, reset connection
+    const timeoutId = setTimeout(resetConnection, TIMEOUT_INTERVAL);
+
+    setMessageTimeoutId(timeoutId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastJsonMessage, resetConnection]);
 
   useEffect(() => {
     if (!lastJsonMessage) return;
