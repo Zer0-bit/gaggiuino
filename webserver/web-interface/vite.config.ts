@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgrPlugin from 'vite-plugin-svgr';
-
+import viteCompression from 'vite-plugin-compression';
 // This function gets the IP that the Development server will point to from `local.config.ts`.
 // To change your local IP create a file named `local.config.ts` in the same directory as vite.config.ts
 // And contents:
@@ -42,7 +42,7 @@ export default defineConfig(async () => ({
     host: '0.0.0.0',
     port: 3000,
   },
-  plugins: [react(), viteTsconfigPaths(), svgrPlugin()],
+  plugins: [react(), viteTsconfigPaths(), svgrPlugin(), viteCompression()],
   build: {
     outDir: '../data',
     emptyOutDir: true,
