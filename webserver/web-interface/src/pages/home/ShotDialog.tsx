@@ -43,16 +43,16 @@ export default function ShotDialog({ open = false, setOpen, historyShot = undefi
       PaperProps={{ elevation: 0 }}
     >
       <AppBar sx={{ position: 'relative', height: '64px' }}>
-        <Toolbar>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          {historyShot ? 'Reviewing shot from history' : 'Shot in progress'}
           <IconButton
-            edge="start"
+            edge="end"
             color="inherit"
             onClick={() => setOpen(false)}
             aria-label="close"
           >
             <CloseIcon />
           </IconButton>
-          {historyShot ? 'Reviewing shot from history' : 'Shot in progress'}
         </Toolbar>
       </AppBar>
       <Grid container spacing={1} sx={{ mx: 0, mt: theme.spacing(1) }}>
