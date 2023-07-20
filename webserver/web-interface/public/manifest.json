@@ -1,14 +1,30 @@
 {
   "short_name": "Gaggiuino",
   "name": "Gaggiuino web portal",
+  "protocol_handlers": [
+    {
+      "protocol": "web+http",
+      "url": "/"
+    }
+  ],
   "icons": [
     {
       "src": "favicon.png",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "any",
+      "type": "image/png"
+    },
+    {
+      "src": "splash.png",
+      "sizes": "any",
+      "type": "image/png"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"
