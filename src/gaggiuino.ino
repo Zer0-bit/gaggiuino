@@ -8,7 +8,7 @@
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.06f);
 SimpleKalmanFilter smoothPumpFlow(0.6f, 0.6f, 0.0499f);
-SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
+SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.005f);
 
 Profile manualProfile;
 Profile activeProfile;
@@ -202,7 +202,6 @@ static long sensorsReadFlow(float elapsedTimeSec) {
   previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
   // Some flow smoothing
   currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
-  currentState.smoothedPumpFlow += .2f;
   currentState.pumpFlowChangeSpeed = (currentState.smoothedPumpFlow - previousSmoothedPumpFlow) / elapsedTimeSec;
   return pumpClicks;
 }
