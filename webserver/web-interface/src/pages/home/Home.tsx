@@ -227,8 +227,7 @@ function RightSection({
             value={sensorState.temperature}
             primaryColor={theme.palette.temperature.main}
             maxValue={targetTemp}
-            flashAfterValue={50}
-            // flashAfterValue={settings ? settings.boiler.steamSetPoint - 20 : undefined}
+            flashAfterValue={settings ? settings.boiler.steamSetPoint - 20 : undefined}
             unit="°C"
           />
         </AspectRatioBox>
