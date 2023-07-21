@@ -407,7 +407,7 @@ function ScalesInput() {
       </Grid>
       <Grid xs={4}>
         <Box sx={{
-          width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly',
+          width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'end',
         }}
         >
           <Button sx={{ fontSize: { xs: 12, sm: 14 } }} size="small" onClick={() => false}>
