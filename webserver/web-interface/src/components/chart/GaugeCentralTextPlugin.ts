@@ -5,8 +5,8 @@ declare module 'chart.js' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface PluginOptionsByType<TType extends ChartType = ChartType> {
     center?: {
-      value: string,
       unit: string,
+      decimals?: number,
       color?: string | CanvasGradient | CanvasPattern,
       minFontSize?: number,
       maxFontSize?: number,
@@ -28,7 +28,7 @@ const GaugeCentralTextPlugin: Plugin = {
       // Get options from the center object in options
       const centerConfig = chart.config.options.plugins.center;
       const fontStyle = centerConfig?.fontStyle || 'Arial';
-      const value = centerConfig.value || '';
+      const value = (chart.data.datasets[0].data[0] as number).toFixed(centerConfig.decimals || 0) || '';
       const unit = centerConfig.unit || '';
       const color = centerConfig.color || '#000';
       const maxFontSize = centerConfig.maxFontSize || 75;

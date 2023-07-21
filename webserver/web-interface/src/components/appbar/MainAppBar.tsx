@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -168,9 +168,9 @@ function MainAppBar() {
     if (latestShotDatapoint.timeInShot > 0) setShotDialogOpen(true);
   }, [latestShotDatapoint]);
 
-  const activeColor = theme.palette.mode === 'light'
+  const activeColor = useMemo(() => (theme.palette.mode === 'light'
     ? theme.palette.primary.contrastText
-    : theme.palette.primary.main;
+    : theme.palette.primary.main), [theme]);
 
   return (
     <AppBar sx={{ position: 'static' }} elevation={1}>

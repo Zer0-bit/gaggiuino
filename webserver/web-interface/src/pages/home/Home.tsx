@@ -200,7 +200,12 @@ function RightSection(
       }}
       >
         <AspectRatioBox ratio={1}>
-          <GaugeChart value={sensorState.temperature} primaryColor={theme.palette.temperature.main} unit="°C" />
+          <GaugeChart
+            value={sensorState.temperature}
+            primaryColor={theme.palette.temperature.main}
+            flashAfterValue={120}
+            unit="°C"
+          />
         </AspectRatioBox>
       </Box>
 

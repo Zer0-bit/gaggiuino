@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Box, IconButton, Typography, useTheme,
 } from '@mui/material';
@@ -18,10 +18,10 @@ export interface ProfileReviewProps {
 export function ProfileReview({ profile, onSave = undefined, onChange = undefined }: ProfileReviewProps) {
   const theme = useTheme();
   const [editOpen, setEditOpen] = useState(false);
-  const handleDone = (newProfile :Profile) => {
+  const handleDone = useCallback((newProfile :Profile) => {
     setEditOpen(false);
     onChange && onChange(newProfile);
-  };
+  }, [onChange]);
 
   return (
     <Box sx={{

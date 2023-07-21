@@ -14,18 +14,15 @@ export default function GaugeLiquidComponent({ value }: { value: number}) {
   const gaugeRef = useRef<HTMLElement | null>(null);
   const [gaugeSize, setGaugeSize] = useState({ width: 0, height: 0 });
 
-  const calculateGaugeSize = useCallback(
-    () => {
-      const debouncedCalculateSize = debounce(() => {
-        if (gaugeRef.current) {
-          const { width, height } = gaugeRef.current.getBoundingClientRect();
-          setGaugeSize({ width, height });
-        }
-      }, 300);
-      debouncedCalculateSize();
-    },
-    [gaugeRef, setGaugeSize],
-  );
+  const calculateGaugeSize = useCallback(() => {
+    const debouncedCalculateSize = debounce(() => {
+      if (gaugeRef.current) {
+        const { width, height } = gaugeRef.current.getBoundingClientRect();
+        setGaugeSize({ width, height });
+      }
+    }, 300);
+    debouncedCalculateSize();
+  }, []);
 
   useEffect(() => {
     calculateGaugeSize();
@@ -34,7 +31,7 @@ export default function GaugeLiquidComponent({ value }: { value: number}) {
     return () => {
       window.removeEventListener('resize', calculateGaugeSize);
     };
-  }, [gaugeRef, calculateGaugeSize]);
+  }, [calculateGaugeSize]);
 
   return (
     <>
