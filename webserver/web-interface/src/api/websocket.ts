@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useWebSocket as reactUseWebSocket } from 'react-use-websocket/dist/lib/use-websocket';
 import {
   useCallback, useEffect, useState,
@@ -25,7 +24,9 @@ enum WsActionType {
     SettingsUpdated ='settings_update',
 }
 
-const TIMEOUT_INTERVAL = 3000; // 3 seconds
+// Time after which, if we didn't receive any data, the websocket will try to reconnect
+const TIMEOUT_INTERVAL = 8000;
+
 const WS_OPTIONS: Options = {
   share: true,
   shouldReconnect: () => true,
@@ -48,7 +49,7 @@ const useWebSocket = (url:string) => {
   const { updateLocalSettings } = useSettingsStore();
 
   const [connected, setConnected] = useState(true);
-  const [messageTimeoutId, setMessageTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [messageTimeoutId, setMessageTimeoutId] = useState<NodeJS.Timeout>();
   const { lastJsonMessage, getWebSocket } = reactUseWebSocket(url, WS_OPTIONS, connected);
 
   // Function to reset connection
