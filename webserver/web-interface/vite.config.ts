@@ -19,7 +19,7 @@ async function getDevelopmentIp() {
     console.info(`Development server proxying to ${localConfig.default.targetIp}`);
     return localConfig.default.targetIp;
   } catch (e) {
-    console.info(`Didn not find local_config.ts file. IP will default to ${defaultTargetIp}`);
+    console.info(`Did not find local_config.ts file. IP will default to ${defaultTargetIp}`);
     return defaultTargetIp;
   }
 }
