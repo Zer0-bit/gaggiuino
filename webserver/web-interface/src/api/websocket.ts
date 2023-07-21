@@ -25,7 +25,7 @@ enum WsActionType {
 }
 
 // Time after which, if we didn't receive any data, the websocket will try to reconnect
-const TIMEOUT_INTERVAL = 8000;
+const TIMEOUT_INTERVAL = 5000;
 
 const WS_OPTIONS: Options = {
   share: true,
