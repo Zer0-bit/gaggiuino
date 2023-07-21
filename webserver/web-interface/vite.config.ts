@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgrPlugin from 'vite-plugin-svgr';
 import viteCompression from 'vite-plugin-compression';
-import { VitePWA } from 'vite-plugin-pwa'
+// import { VitePWA } from 'vite-plugin-pwa';
 // This function gets the IP that the Development server will point to from `local.config.ts`.
 // To change your local IP create a file named `local.config.ts` in the same directory as vite.config.ts
 // And contents:
@@ -48,13 +48,13 @@ export default defineConfig(async () => ({
     viteTsconfigPaths(),
     svgrPlugin(),
     viteCompression(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      workbox: {
-        clientsClaim: true,
-        skipWaiting: true
-      }
-    })
+    // VitePWA({
+    //   registerType: 'autoUpdate',
+    //   workbox: {
+    //     clientsClaim: true,
+    //     skipWaiting: true,
+    //   },
+    // }),
   ],
   build: {
     outDir: '../data',
