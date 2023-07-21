@@ -21,7 +21,9 @@ import {
   Theme,
   ButtonBase,
 } from '@mui/material';
-import React, { ReactNode, useCallback, useState } from 'react';
+import React, {
+  ReactNode, useCallback, useMemo, useState,
+} from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import AspectRatioBox from '../../components/layout/AspectRatioBox';
@@ -38,6 +40,7 @@ import { OperationMode, SensorState } from '../../models/models';
 import useSystemStateStore from '../../state/SystemStateStore';
 import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
 import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
+import useSettingsStore from '../../state/SettingsStore';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
 
@@ -111,23 +114,28 @@ function Home() {
         {/* Left size Gauges */}
         {isBiggerScreen && (
         <Grid sm={2} md={2}>
-          {LeftSection(sensorState)}
+          <LeftSection sensorState={sensorState} />
         </Grid>
         )}
 
         {/* Center part - profiles */}
         <Grid xs={7} sm={6} sx={{ gap: '8px', position: 'relative' }}>
-          {MiddleSection(
-            activeProfile,
-            handlePersistActiveProfile,
-            handleProfileUpdate,
-            handleNewProfileSelected,
-          )}
+          <MiddleSection
+            activeProfile={activeProfile}
+            handlePersistActiveProfile={handlePersistActiveProfile}
+            handleProfileUpdate={handleProfileUpdate}
+            handleNewProfileSelected={handleNewProfileSelected}
+          />
         </Grid>
 
         {/* Right part - Temperature Gauge and Scale */}
         <Grid xs={5} sm={4}>
-          {RightSection(sensorState, activeProfile, handleTempUpdate, handleOpmodeChange)}
+          <RightSection
+            sensorState={sensorState}
+            activeProfile={activeProfile}
+            handleTempUpdate={handleTempUpdate}
+            handleOpmodeChange={handleOpmodeChange}
+          />
         </Grid>
       </Grid>
       <SnackNotification message={alertMessage} />
@@ -137,7 +145,7 @@ function Home() {
 
 export default Home;
 
-function LeftSection(sensorState: SensorState): React.ReactNode {
+function LeftSection({ sensorState }: {sensorState: SensorState}): React.ReactNode {
   const theme = useTheme();
   return (
     <>
@@ -151,12 +159,16 @@ function LeftSection(sensorState: SensorState): React.ReactNode {
   );
 }
 
-function MiddleSection(
+interface MiddleSectionProps {
   activeProfile: Profile | null,
   handlePersistActiveProfile: () => void,
   handleProfileUpdate: (profile: Profile) => void,
   handleNewProfileSelected: (id: number) => void,
-) {
+}
+
+function MiddleSection({
+  activeProfile, handlePersistActiveProfile, handleProfileUpdate, handleNewProfileSelected,
+}: MiddleSectionProps) {
   const theme = useTheme();
 
   return (
@@ -184,14 +196,25 @@ function MiddleSection(
   );
 }
 
-function RightSection(
-  sensorState: SensorState,
-  activeProfile: Profile | null,
-  handleTempUpdate: (value: number) => void,
-  handleOpmodeChange: (opMode: OperationMode) => void,
-) {
+interface RightSectionProps{
+  sensorState: SensorState;
+  activeProfile: Profile | null;
+  handleTempUpdate: (value: number) => void;
+  handleOpmodeChange: (opMode: OperationMode) => void;
+}
+
+function RightSection({
+  sensorState,
+  activeProfile,
+  handleTempUpdate,
+  handleOpmodeChange,
+}: RightSectionProps) {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
+  const { settings } = useSettingsStore();
+  const targetTemp = useMemo(() => (sensorState.steamActive
+    ? settings?.boiler.steamSetPoint
+    : activeProfile?.waterTemperature || 0), [settings, activeProfile, sensorState]);
 
   return (
     <>
@@ -203,7 +226,9 @@ function RightSection(
           <GaugeChart
             value={sensorState.temperature}
             primaryColor={theme.palette.temperature.main}
-            flashAfterValue={120}
+            maxValue={targetTemp}
+            flashAfterValue={50}
+            // flashAfterValue={settings ? settings.boiler.steamSetPoint - 20 : undefined}
             unit="°C"
           />
         </AspectRatioBox>

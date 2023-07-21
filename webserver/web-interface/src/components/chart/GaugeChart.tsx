@@ -1,11 +1,12 @@
-import React, { useMemo } from 'react';
+import React, {
+  useEffect, useMemo, useRef, useState,
+} from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
   Title,
   ChartOptions,
-  Color,
   ChartData,
 } from 'chart.js';
 import {
@@ -35,7 +36,7 @@ export function GaugeTitle({ children, sx }: TypographyProps) {
 type GaugeChartProps = {
   value: number;
   maxValue?: number;
-  primaryColor: Color;
+  primaryColor: string;
   unit?: string;
   title?: string;
   flashAfterValue?: number,
@@ -49,11 +50,24 @@ export function GaugeChart({
   title = '',
   flashAfterValue = undefined,
 }: GaugeChartProps) {
+  const theme = useTheme();
+  const [shouldFlash, setShouldFlash] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chartRef = useRef<ChartJS<'doughnut'>>();
+
+  useEffect(() => {
+    const newShouldFlash = flashAfterValue !== undefined && value > flashAfterValue;
+    setShouldFlash(newShouldFlash);
+  }, [value, flashAfterValue]);
+
   const options: ChartOptions<'doughnut'> = useMemo(() => ({
     cutout: '89%',
     responsive: true,
     maintainAspectRatio: true,
-    animation: true,
+    animation: {
+      animateScale: false,
+      animateRotate: false,
+    },
     borderWidth: 0,
     plugins: {
       tooltip: {
@@ -68,31 +82,39 @@ export function GaugeChart({
         sidePadding: 10,
       },
     },
-  }), [primaryColor, unit]);
+    borderColor: primaryColor,
+    backgroundColor: (ctx) => (ctx.dataIndex === 0 ? primaryColor : theme.palette.divider),
+    animations: {
+      backgroundColor: shouldFlash ? {
+        duration: 500,
+        easing: 'linear',
+        type: 'color',
+        from: (ctx) => (ctx.dataIndex === 0 ? primaryColor : theme.palette.divider),
+        to: (ctx) => (ctx.dataIndex === 0 ? lighten(primaryColor, 0.5) : theme.palette.divider),
+        loop: true,
+      } : false,
+    },
+
+  }), [primaryColor, unit, shouldFlash, theme]);
+
+  // update data without re-render of the whole component
+  useEffect(() => {
+    if (chartRef.current?.data.datasets[0]) {
+      chartRef.current.data.datasets[0].data = [value, Math.max(0, maxValue - value)];
+      chartRef.current.update();
+    }
+  }, [value, maxValue]);
 
   const data: ChartData<'doughnut'> = useMemo(() => ({
     datasets: [{
-      data: [value],
-      borderColor: primaryColor,
-      backgroundColor: primaryColor,
-      circumference: (value / maxValue * 360),
-      animations: {
-        backgroundColor: flashAfterValue && value > flashAfterValue ? {
-          duration: 1000,
-          easing: 'linear',
-          type: 'color',
-          from: primaryColor,
-          to: lighten(primaryColor as string, 0.5),
-          loop: true,
-        } : {},
-      },
+      data: [0, 0],
     }],
-  }), [value, primaryColor, maxValue, flashAfterValue]);
+  }), []);
 
   return (
     <>
       {title && <GaugeTitle>{title}</GaugeTitle>}
-      <AspectRatioBox><Doughnut data={data} options={options} /></AspectRatioBox>
+      <AspectRatioBox><Doughnut ref={chartRef} data={data} options={options} /></AspectRatioBox>
     </>
   );
 }
