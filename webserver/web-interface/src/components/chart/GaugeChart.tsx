@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+  useEffect, useMemo, useRef, useState,
+} from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
   Title,
   ChartOptions,
-  Color,
   ChartData,
 } from 'chart.js';
-import { Typography, TypographyProps, useTheme } from '@mui/material';
+import {
+  Typography, TypographyProps, lighten, useTheme,
+} from '@mui/material';
 import GaugeCentralTextPlugin from './GaugeCentralTextPlugin';
 import AspectRatioBox from '../layout/AspectRatioBox';
 
@@ -33,9 +36,10 @@ export function GaugeTitle({ children, sx }: TypographyProps) {
 type GaugeChartProps = {
   value: number;
   maxValue?: number;
-  primaryColor: Color;
+  primaryColor: string;
   unit?: string;
   title?: string;
+  flashAfterValue?: number,
 }
 
 export function GaugeChart({
@@ -44,58 +48,73 @@ export function GaugeChart({
   primaryColor,
   unit = '',
   title = '',
+  flashAfterValue = undefined,
 }: GaugeChartProps) {
   const theme = useTheme();
-  const [setIsFlashing, setIsSteaming] = useState(false);
+  const [shouldFlash, setShouldFlash] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chartRef = useRef<ChartJS<'doughnut'>>();
 
   useEffect(() => {
-    let interval: NodeJS.Timer;
-    if (value > 120) {
-      setIsSteaming(value > 120);
-      interval = setInterval(() => {
-        setIsSteaming((prevIsFlashing) => !prevIsFlashing);
-      }, 500); // TO-DO: make the gauge glowing increasing and decreasing intensity instead of flashing
-    }
+    const newShouldFlash = flashAfterValue !== undefined && value > flashAfterValue;
+    setShouldFlash(newShouldFlash);
+  }, [value, flashAfterValue]);
 
-    return () => clearInterval(interval);
-  }, [value]);
-
-  const options: ChartOptions<'doughnut'> = {
+  const options: ChartOptions<'doughnut'> = useMemo(() => ({
     cutout: '89%',
     responsive: true,
     maintainAspectRatio: true,
-    animation: false,
-    borderColor: primaryColor,
+    animation: {
+      animateScale: false,
+      animateRotate: false,
+    },
+    borderWidth: 0,
     plugins: {
       tooltip: {
         enabled: false,
       },
       center: {
-        value: value.toFixed(1),
         unit,
+        decimals: 1,
         color: primaryColor,
         maxFontSize: 55,
         minFontSize: 1,
         sidePadding: 10,
       },
     },
-  };
+    borderColor: primaryColor,
+    backgroundColor: (ctx) => (ctx.dataIndex === 0 ? primaryColor : theme.palette.divider),
+    animations: {
+      backgroundColor: shouldFlash ? {
+        duration: 500,
+        easing: 'linear',
+        type: 'color',
+        from: (ctx) => (ctx.dataIndex === 0 ? primaryColor : theme.palette.divider),
+        to: (ctx) => (ctx.dataIndex === 0 ? lighten(primaryColor, 0.5) : theme.palette.divider),
+        loop: true,
+      } : false,
+    },
 
-  const data: ChartData<'doughnut'> = {
+  }), [primaryColor, unit, shouldFlash, theme]);
+
+  // update data without re-render of the whole component
+  useEffect(() => {
+    if (chartRef.current?.data.datasets[0]) {
+      chartRef.current.data.datasets[0].data = [value, Math.max(0, maxValue - value)];
+      chartRef.current.update();
+    }
+  }, [value, maxValue]);
+
+  const data: ChartData<'doughnut'> = useMemo(() => ({
     datasets: [{
-      data: [value, Math.max(0, (maxValue || 100) - value)],
-      borderWidth: 0,
-      backgroundColor: [
-        setIsFlashing ? theme.palette.primary.light : primaryColor,
-        theme.palette.divider,
-      ],
+      data: [0, 0],
     }],
-  };
+  }), []);
 
   return (
     <>
       {title && <GaugeTitle>{title}</GaugeTitle>}
-      <AspectRatioBox><Doughnut data={data} options={options} /></AspectRatioBox>
+      <AspectRatioBox><Doughnut ref={chartRef} data={data} options={options} /></AspectRatioBox>
     </>
   );
 }

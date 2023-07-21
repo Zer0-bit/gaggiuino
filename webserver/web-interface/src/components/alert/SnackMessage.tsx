@@ -1,7 +1,9 @@
 import {
   Alert, AlertColor, Snackbar, SnackbarCloseReason,
 } from '@mui/material';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, {
+  ReactNode, useCallback, useEffect, useState,
+} from 'react';
 
 export interface SnackMessage {
   content: ReactNode;
@@ -21,13 +23,13 @@ function SnackNotification({ message = undefined }: SnackNotificationProps) {
     setMessageInternal(message);
   }, [message]);
 
-  const handleClose = (event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
+  const handleClose = useCallback((event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
     if (reason === 'clickaway') {
       return;
     }
 
     setMessageInternal(undefined);
-  };
+  }, []);
 
   return (
     <Snackbar

@@ -1,5 +1,3 @@
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
 import ScaleIcon from '@mui/icons-material/Scale';
 import ShowerIcon from '@mui/icons-material/Shower';
 import LocalCarWashIcon from '@mui/icons-material/LocalCarWash';
@@ -8,7 +6,6 @@ import {
   Button,
   Container,
   Unstable_Grid2 as Grid,
-  IconButton,
   Paper,
   Skeleton,
   TextField,
@@ -24,7 +21,9 @@ import {
   Theme,
   ButtonBase,
 } from '@mui/material';
-import React, { ReactNode, useCallback, useState } from 'react';
+import React, {
+  ReactNode, useCallback, useMemo, useState,
+} from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import AspectRatioBox from '../../components/layout/AspectRatioBox';
@@ -40,6 +39,8 @@ import { selectActiveProfile } from '../../components/client/ProfileClient';
 import { OperationMode, SensorState } from '../../models/models';
 import useSystemStateStore from '../../state/SystemStateStore';
 import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
+import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
+import useSettingsStore from '../../state/SettingsStore';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
 
@@ -113,23 +114,28 @@ function Home() {
         {/* Left size Gauges */}
         {isBiggerScreen && (
         <Grid sm={2} md={2}>
-          {LeftSection(sensorState)}
+          <LeftSection sensorState={sensorState} />
         </Grid>
         )}
 
         {/* Center part - profiles */}
         <Grid xs={7} sm={6} sx={{ gap: '8px', position: 'relative' }}>
-          {MiddleSection(
-            activeProfile,
-            handlePersistActiveProfile,
-            handleProfileUpdate,
-            handleNewProfileSelected,
-          )}
+          <MiddleSection
+            activeProfile={activeProfile}
+            handlePersistActiveProfile={handlePersistActiveProfile}
+            handleProfileUpdate={handleProfileUpdate}
+            handleNewProfileSelected={handleNewProfileSelected}
+          />
         </Grid>
 
         {/* Right part - Temperature Gauge and Scale */}
         <Grid xs={5} sm={4}>
-          {RightSection(sensorState, activeProfile, handleTempUpdate, handleOpmodeChange)}
+          <RightSection
+            sensorState={sensorState}
+            activeProfile={activeProfile}
+            handleTempUpdate={handleTempUpdate}
+            handleOpmodeChange={handleOpmodeChange}
+          />
         </Grid>
       </Grid>
       <SnackNotification message={alertMessage} />
@@ -139,7 +145,7 @@ function Home() {
 
 export default Home;
 
-function LeftSection(sensorState: SensorState): React.ReactNode {
+function LeftSection({ sensorState }: {sensorState: SensorState}): React.ReactNode {
   const theme = useTheme();
   return (
     <>
@@ -153,12 +159,16 @@ function LeftSection(sensorState: SensorState): React.ReactNode {
   );
 }
 
-function MiddleSection(
+interface MiddleSectionProps {
   activeProfile: Profile | null,
   handlePersistActiveProfile: () => void,
   handleProfileUpdate: (profile: Profile) => void,
   handleNewProfileSelected: (id: number) => void,
-) {
+}
+
+function MiddleSection({
+  activeProfile, handlePersistActiveProfile, handleProfileUpdate, handleNewProfileSelected,
+}: MiddleSectionProps) {
   const theme = useTheme();
 
   return (
@@ -186,14 +196,25 @@ function MiddleSection(
   );
 }
 
-function RightSection(
-  sensorState: SensorState,
-  activeProfile: Profile | null,
-  handleTempUpdate: (value: number) => void,
-  handleOpmodeChange: (opMode: OperationMode) => void,
-) {
+interface RightSectionProps{
+  sensorState: SensorState;
+  activeProfile: Profile | null;
+  handleTempUpdate: (value: number) => void;
+  handleOpmodeChange: (opMode: OperationMode) => void;
+}
+
+function RightSection({
+  sensorState,
+  activeProfile,
+  handleTempUpdate,
+  handleOpmodeChange,
+}: RightSectionProps) {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
+  const { settings } = useSettingsStore();
+  const targetTemp = useMemo(() => (sensorState.steamActive
+    ? settings?.boiler.steamSetPoint
+    : activeProfile?.waterTemperature || 0), [settings, activeProfile, sensorState]);
 
   return (
     <>
@@ -202,15 +223,24 @@ function RightSection(
       }}
       >
         <AspectRatioBox ratio={1}>
-          <GaugeChart value={sensorState.temperature} primaryColor={theme.palette.temperature.main} unit="°C" />
+          <GaugeChart
+            value={sensorState.temperature}
+            primaryColor={theme.palette.temperature.main}
+            maxValue={targetTemp}
+            flashAfterValue={settings ? settings.boiler.steamSetPoint - 20 : undefined}
+            unit="°C"
+          />
         </AspectRatioBox>
       </Box>
 
       <Grid container spacing={2} sx={{ px: 1, mt: 3 }}>
-        <TargetTempInput targetTemp={activeProfile?.waterTemperature || 0} handleTempUpdate={handleTempUpdate} />
-        <ScalesInput />
-
-        <Grid container xs={12} sx={{ mt: 2 }}>
+        <Grid xs={12}>
+          <TargetTempInput targetTemp={activeProfile?.waterTemperature || 0} handleTempUpdate={handleTempUpdate} />
+        </Grid>
+        <Grid xs={12}>
+          <ScalesInput />
+        </Grid>
+        <Grid xs={12}>
           <OpModeButtons onChange={handleOpmodeChange} />
         </Grid>
 
@@ -335,7 +365,7 @@ function TargetTempInput(
 ) {
   const theme = useTheme();
   return (
-    <Grid container xs={12} alignItems="center">
+    <Grid container alignItems="center">
       <Grid xs={4}>
         <Typography fontSize={12}>TARGET TEMP</Typography>
       </Grid>
@@ -362,17 +392,7 @@ function TargetTempInput(
         />
       </Grid>
       <Grid xs={4}>
-        <Box sx={{
-          width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly',
-        }}
-        >
-          <IconButton size="small" color="primary" onClick={() => handleTempUpdate(targetTemp - 1)}>
-            <RemoveIcon />
-          </IconButton>
-          <IconButton size="small" color="primary" onClick={() => handleTempUpdate(targetTemp + 1)}>
-            <AddIcon />
-          </IconButton>
-        </Box>
+        <SettingsNumberIncrementButtons value={targetTemp} onChange={handleTempUpdate} />
       </Grid>
     </Grid>
   );
@@ -383,7 +403,7 @@ function ScalesInput() {
   const { sensorState } = useSensorStateStore();
 
   return (
-    <Grid container xs={12} alignItems="center">
+    <Grid container alignItems="center">
       <Grid xs={4}>
         <Typography fontSize={12}>SCALE</Typography>
       </Grid>
@@ -411,7 +431,7 @@ function ScalesInput() {
       </Grid>
       <Grid xs={4}>
         <Box sx={{
-          width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly',
+          width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'end',
         }}
         >
           <Button sx={{ fontSize: { xs: 12, sm: 14 } }} size="small" onClick={() => false}>
