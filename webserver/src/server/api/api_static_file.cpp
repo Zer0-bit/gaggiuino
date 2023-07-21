@@ -2,6 +2,25 @@
 #include <LittleFS.h>
 #include "../../log/log.h"
 
+class GzipFileResponse: public AsyncFileResponse {
+  using headers_t = LinkedList<AsyncWebHeader *>;
+
+  public:
+    GzipFileResponse(fs::FS &fs, const String& path, const String& contentType)
+    : AsyncFileResponse(fs, path, contentType, false, AwsTemplateProcessor()) {
+
+      _headers.remove_first([](const AsyncWebHeader* header) {
+        return header->name() == "Content-Disposition";
+      });
+
+      String originalPath = path;
+      originalPath.replace(".gz", "");
+      String disp = "inline; filename=\"" + originalPath.substring(originalPath.lastIndexOf('/') + 1) + "\"";
+      addHeader("Content-Disposition", disp);
+      addHeader("Content-Encoding", "gzip");
+    }
+};
+
 void setupStaticFiles(AsyncWebServer& server) {
 
   // Prefer .gz files for .js
