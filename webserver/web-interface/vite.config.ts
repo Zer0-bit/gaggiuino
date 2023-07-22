@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgrPlugin from 'vite-plugin-svgr';
 import viteCompression from 'vite-plugin-compression';
-// import { VitePWA } from 'vite-plugin-pwa';
+import { VitePWA } from 'vite-plugin-pwa';
 // This function gets the IP that the Development server will point to from `local.config.ts`.
 // To change your local IP create a file named `local.config.ts` in the same directory as vite.config.ts
 // And contents:
@@ -48,13 +48,48 @@ export default defineConfig(async () => ({
     viteTsconfigPaths(),
     svgrPlugin(),
     viteCompression(),
-    // VitePWA({
+
+    VitePWA({
     //   registerType: 'autoUpdate',
     //   workbox: {
     //     clientsClaim: true,
     //     skipWaiting: true,
     //   },
-    // }),
+      manifest: {
+        short_name: 'Gaggiuino',
+        name: 'Gaggiuino web portal',
+        protocol_handlers: [
+          {
+            protocol: 'web+http',
+            url: '/',
+          },
+        ],
+        icons: [
+          {
+            src: 'favicon.png',
+            sizes: '64x64 32x32 24x24 16x16',
+            type: 'image/png',
+          },
+          {
+            src: 'logo.png',
+            sizes: 'any',
+            type: 'image/png',
+          },
+          {
+            src: 'splash.png',
+            sizes: 'any',
+            type: 'image/png',
+          },
+        ],
+        start_url: '/',
+        display: 'standalone',
+        theme_color: '#000000',
+        background_color: '#ffffff',
+      },
+      manifestFilename: 'manifest.json',
+      injectRegister: null, // Disable SW registration for now
+      // registerType: 'autoUpdate',
+    }),
   ],
   build: {
     outDir: '../data',
