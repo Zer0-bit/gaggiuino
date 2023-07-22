@@ -124,7 +124,7 @@ function Home() {
   }, 500), []);
 
   return (
-    <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
+    <Container sx={{ pt: theme.spacing(2), px: { xs: 0.5, sm: 1 }, gap: 0 }}>
       {/* <ShowAlert level="INFO" text="Welcome home motherfucker \_O_/" /> */}
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
 
@@ -251,7 +251,7 @@ function RightSection({
             value={sensorState.temperature}
             primaryColor={theme.palette.temperature.main}
             maxValue={targetTemp}
-            flashAfterValue={settings ? settings.boiler.steamSetPoint - 20 : undefined}
+            flashAfterValue={settings && settings.boiler ? settings.boiler.steamSetPoint - 20 : undefined}
             unit="°C"
           />
         </AspectRatioBox>
@@ -419,7 +419,7 @@ function TargetTempInput(
         />
       </Grid>
       <Grid xs={4}>
-        <SettingsNumberIncrementButtons value={targetTemp} onChange={handleTempUpdate} />
+        <SettingsNumberIncrementButtons fontSize="22px" value={targetTemp} onChange={handleTempUpdate} />
       </Grid>
     </Grid>
   );
@@ -428,6 +428,7 @@ function TargetTempInput(
 function ScalesInput() {
   const theme = useTheme();
   const { sensorState } = useSensorStateStore();
+  const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Grid container alignItems="center">
@@ -461,9 +462,16 @@ function ScalesInput() {
           width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'end',
         }}
         >
-          <Button sx={{ fontSize: { xs: 12, sm: 14 } }} size="small" onClick={() => false}>
+          <Button
+            sx={{
+              fontSize: '14px',
+              minWidth: 30,
+            }}
+            size="small"
+            onClick={() => false}
+          >
             <ScaleIcon fontSize="inherit" sx={{ mr: theme.spacing(1) }} />
-            Tare
+            {isBiggerScreen ? 'TARE' : 'TR'}
           </Button>
         </Box>
       </Grid>
