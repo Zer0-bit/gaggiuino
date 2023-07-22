@@ -41,11 +41,11 @@ interface MessageData {
 }
 
 const useWebSocket = (url:string) => {
-  const { updateSensorState } = useSensorStateStore();
-  const { updateSystemState } = useSystemStateStore();
+  const { updateLocalSensorState } = useSensorStateStore();
+  const { updateLocalSystemState } = useSystemStateStore();
   const { addMessage } = useLogMessageStore();
   const { addShotDatapoint } = useShotDataStore();
-  const { setLocalActiveProfile } = useProfileStore();
+  const { updateLocalActiveProfile } = useProfileStore();
   const { updateLocalSettings } = useSettingsStore();
 
   const [connected, setConnected] = useState(true);
@@ -77,7 +77,7 @@ const useWebSocket = (url:string) => {
     const messageData = lastJsonMessage as unknown as MessageData;
     switch (messageData.action) {
       case WsActionType.SensorStateUpdate:
-        updateSensorState(messageData.data as SensorState);
+        updateLocalSensorState(messageData.data as SensorState);
         break;
       case WsActionType.ShotSnapshotUpdate:
         addShotDatapoint(messageData.data as ShotSnapshot);
@@ -86,17 +86,17 @@ const useWebSocket = (url:string) => {
         addMessage(messageData.data as LogMessage);
         break;
       case WsActionType.SystemStateUpdate:
-        updateSystemState(messageData.data as SystemState);
+        updateLocalSystemState(messageData.data as SystemState);
         break;
       case WsActionType.ActiveProfileUpdated:
-        setLocalActiveProfile(messageData.data as Profile);
+        updateLocalActiveProfile(messageData.data as Profile);
         break;
       case WsActionType.SettingsUpdated:
         updateLocalSettings(messageData.data as GaggiaSettings);
         break;
     }
-  }, [lastJsonMessage, updateLocalSettings, updateSensorState,
-    updateSystemState, addMessage, addShotDatapoint, setLocalActiveProfile]);
+  }, [lastJsonMessage, updateLocalSettings, updateLocalSensorState,
+    updateLocalSystemState, addMessage, addShotDatapoint, updateLocalActiveProfile]);
 };
 
 export default useWebSocket;

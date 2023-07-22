@@ -37,7 +37,7 @@ import { Profile } from '../../models/profile';
 import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
 import {
-  GaggiaSettings, OperationMode, SensorState, areGaggiaSettingsEqual,
+  GaggiaSettings, OperationMode, SensorState,
 } from '../../models/models';
 import useSystemStateStore from '../../state/SystemStateStore';
 import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
@@ -52,23 +52,23 @@ function Home() {
   const [alertMessage, setAlertMessage] = useState<SnackMessage>();
 
   const { sensorState } = useSensorStateStore();
-  const { systemState, updateSystemState } = useSystemStateStore();
+  const { systemState, updateLocalSystemState } = useSystemStateStore();
   const { settings, updateLocalSettings, updateSettingsAndSync } = useSettingsStore();
   const {
     activeProfile,
-    updateActiveProfile, persistActiveProfile, setLocalActiveProfile,
+    updateActiveProfileAndSync, persistActiveProfile, updateLocalActiveProfile,
     fetchAvailableProfiles, fetchActiveProfile,
   } = useProfileStore();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleProfileUpdate = useCallback(debounce(async (newProfile: Profile) => {
     try {
-      await updateActiveProfile(newProfile);
+      await updateActiveProfileAndSync(newProfile);
       setAlertMessage({ content: 'Updated active profile.', level: 'success' });
     } catch (e) {
       setAlertMessage({ content: 'Failed to update active profile', level: 'error' });
     }
-  }, 1000), [updateActiveProfile]);
+  }, 1000), [updateActiveProfileAndSync]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handlePersistActiveProfile = useCallback(debounce(async () => {
@@ -93,9 +93,9 @@ function Home() {
   const handleBrewTempUpdate = useCallback((value: number) => {
     if (!activeProfile) return;
     if (value > 120 || value < 0) return;
-    setLocalActiveProfile({ ...activeProfile, waterTemperature: value });
+    updateLocalActiveProfile({ ...activeProfile, waterTemperature: value });
     handleProfileUpdate({ ...activeProfile, waterTemperature: value });
-  }, [activeProfile, handleProfileUpdate, setLocalActiveProfile]);
+  }, [activeProfile, handleProfileUpdate, updateLocalActiveProfile]);
 
   const handleSteamTempUpdate = useCallback((value: number) => {
     if (!settings) return;
@@ -117,7 +117,7 @@ function Home() {
     try {
       await updateOperationMode(newMode);
       const mode = await getOperationMode();
-      updateSystemState({ ...systemState, operationMode: mode });
+      updateLocalSystemState({ ...systemState, operationMode: mode });
     } catch (e) {
       setAlertMessage({ content: 'Failed to persist active profile', level: 'error' });
     }

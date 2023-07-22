@@ -10,10 +10,10 @@ interface ProfileStore {
   availableProfilesLoading: boolean,
   activeProfile: Profile | null,
   availableProfiles: ProfileSummary[],
-  setLocalActiveProfile: (profile: Profile) => void,
+  updateLocalActiveProfile: (profile: Profile) => void,
+  updateActiveProfileAndSync: (profile: Profile) => Promise<void>,
   fetchActiveProfile: () => Promise<void>,
   fetchAvailableProfiles: () => Promise<void>,
-  updateActiveProfile: (profile: Profile) => Promise<void>,
   persistActiveProfile: () => Promise<void>,
   selectNewProfile: (id: number) => Promise<void>,
 }
@@ -25,7 +25,7 @@ const useProfileStore = create<ProfileStore>()(
       availableProfilesLoading: false,
       activeProfile: null,
       availableProfiles: [],
-      setLocalActiveProfile: (profile: Profile) => {
+      updateLocalActiveProfile: (profile: Profile) => {
         set({ activeProfile: profile });
       },
       fetchActiveProfile: async () => {
@@ -36,7 +36,7 @@ const useProfileStore = create<ProfileStore>()(
         set({ availableProfilesLoading: true });
         set({ availableProfiles: await getAvailableProfiles(), availableProfilesLoading: false });
       },
-      updateActiveProfile: async (profile: Profile) => {
+      updateActiveProfileAndSync: async (profile: Profile) => {
         await updateActiveProfile(profile);
         set({ activeProfile: profile });
       },

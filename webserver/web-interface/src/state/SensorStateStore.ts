@@ -4,7 +4,7 @@ import { SensorState } from '../models/models';
 
 interface SensorStateStore {
   sensorState: SensorState,
-  updateSensorState: (newState: SensorState) => void,
+  updateLocalSensorState: (newState: SensorState) => void,
 }
 
 const useSensorStateStore = create<SensorStateStore>()(
@@ -22,7 +22,7 @@ const useSensorStateStore = create<SensorStateStore>()(
         weight: 0,
         waterLevel: 0,
       },
-      updateSensorState: (newState: SensorState) => set(() => ({ sensorState: newState })),
+      updateLocalSensorState: (newState: SensorState) => set(() => ({ sensorState: newState })),
     }),
   ),
 );
