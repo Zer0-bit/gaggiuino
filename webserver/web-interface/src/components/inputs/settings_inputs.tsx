@@ -122,19 +122,22 @@ SettingsInputFieldNumber.defaultProps = {
 export interface SettingsNumberIncrementButtonsProps {
   value: number;
   onChange: (val: number) => void;
-  buttonIncrements?: number
+  buttonIncrements?: number;
+  fontSize?: string;
 }
 
 export function SettingsNumberIncrementButtons(
-  { value, onChange, buttonIncrements = 1 } : SettingsNumberIncrementButtonsProps,
+  {
+    value, onChange, buttonIncrements = 1, fontSize = undefined,
+  } : SettingsNumberIncrementButtonsProps,
 ) {
   return (
     <SettingsInputActions>
-      <IconButton sx={{ p: '1px' }} size="small" color="primary" onClick={() => onChange(value - buttonIncrements)}>
-        <RemoveIcon />
+      <IconButton sx={{ p: '2px', fontSize }} size="small" color="primary" onClick={() => onChange(value - buttonIncrements)}>
+        <RemoveIcon fontSize="inherit" />
       </IconButton>
-      <IconButton sx={{ p: '1px' }} size="small" color="primary" onClick={() => onChange(value + buttonIncrements)}>
-        <AddIcon />
+      <IconButton sx={{ p: '2px', fontSize }} size="small" color="primary" onClick={() => onChange(value + buttonIncrements)}>
+        <AddIcon fontSize="inherit" />
       </IconButton>
     </SettingsInputActions>
   );

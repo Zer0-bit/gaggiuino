@@ -29,20 +29,6 @@ void webServerSetup() {
   setupStaticFiles(webserver::server);
   webserver::server.onNotFound(&handleUrlNotFound);
 
-  // Ggzipped files still not being handled. ::shrug::
-  webserver::server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    AsyncWebServerResponse *response = request->beginResponse(LittleFS , "/index.html.gz"); //request->beginResponse( LittleFS, "/index.html.gz");
-    if (request->url().endsWith(".gz")) {
-      response->addHeader("Content-Encoding", "gzip");
-    } else {
-      response = request->beginResponse(LittleFS, "/index.html");
-    }
-
-    request->send(response);
-  });
-
-  // webserver::server.serveStatic("/", LittleFS, "/");
-
   LOG_INFO("Starting up web server on port %d...", webserver::PORT_NUMBER);
   webserver::server.begin();
 

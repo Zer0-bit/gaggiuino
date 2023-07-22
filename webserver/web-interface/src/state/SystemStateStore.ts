@@ -4,7 +4,8 @@ import { OperationMode, SystemState } from '../models/models';
 
 interface SystemStateStore {
   systemState: SystemState,
-  updateSystemState: (newState: SystemState) => void,
+  updateLocalSystemState: (newState: SystemState) => void,
+  updateLocalOperationMode: (newOpMode: OperationMode) => void,
 }
 
 const useSystemStateStore = create<SystemStateStore>()(
@@ -19,7 +20,10 @@ const useSystemStateStore = create<SystemStateStore>()(
         timeAlive: 0,
         descaleProgress: 0,
       },
-      updateSystemState: (newState: SystemState) => set(() => ({ systemState: newState })),
+      updateLocalSystemState: (newState: SystemState) => set(() => ({ systemState: newState })),
+      updateLocalOperationMode: (newOpMode: OperationMode) => set((state) => ({
+        systemState: { ...state.systemState, operationMode: newOpMode },
+      })),
     }),
   ),
 );

@@ -36,7 +36,9 @@ import SnackNotification, { SnackMessage } from '../../components/alert/SnackMes
 import { Profile } from '../../models/profile';
 import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
-import { OperationMode, SensorState } from '../../models/models';
+import {
+  GaggiaSettings, OperationMode, SensorState,
+} from '../../models/models';
 import useSystemStateStore from '../../state/SystemStateStore';
 import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
 import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
@@ -50,24 +52,23 @@ function Home() {
   const [alertMessage, setAlertMessage] = useState<SnackMessage>();
 
   const { sensorState } = useSensorStateStore();
-
-  const { systemState, updateSystemState } = useSystemStateStore();
-
+  const { systemState, updateLocalSystemState } = useSystemStateStore();
+  const { settings, updateLocalSettings, updateSettingsAndSync } = useSettingsStore();
   const {
     activeProfile,
-    updateActiveProfile, persistActiveProfile, setLocalActiveProfile,
+    updateActiveProfileAndSync, persistActiveProfile, updateLocalActiveProfile,
     fetchAvailableProfiles, fetchActiveProfile,
   } = useProfileStore();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleProfileUpdate = useCallback(debounce(async (newProfile: Profile) => {
     try {
-      await updateActiveProfile(newProfile);
+      await updateActiveProfileAndSync(newProfile);
       setAlertMessage({ content: 'Updated active profile.', level: 'success' });
     } catch (e) {
       setAlertMessage({ content: 'Failed to update active profile', level: 'error' });
     }
-  }, 1000), [updateActiveProfile]);
+  }, 1000), [updateActiveProfileAndSync]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handlePersistActiveProfile = useCallback(debounce(async () => {
@@ -81,12 +82,28 @@ function Home() {
     }
   }, 1000), [persistActiveProfile]);
 
-  const handleTempUpdate = useCallback((value: number) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateSettingsDebounced = useCallback(
+    debounce((newSettings: GaggiaSettings) => {
+      updateSettingsAndSync(newSettings);
+    }, 1000),
+    [updateSettingsAndSync],
+  );
+
+  const handleBrewTempUpdate = useCallback((value: number) => {
     if (!activeProfile) return;
-    if (value > 169 || value < 0) return;
-    setLocalActiveProfile({ ...activeProfile, waterTemperature: value });
+    if (value > 120 || value < 0) return;
+    updateLocalActiveProfile({ ...activeProfile, waterTemperature: value });
     handleProfileUpdate({ ...activeProfile, waterTemperature: value });
-  }, [activeProfile, handleProfileUpdate, setLocalActiveProfile]);
+  }, [activeProfile, handleProfileUpdate, updateLocalActiveProfile]);
+
+  const handleSteamTempUpdate = useCallback((value: number) => {
+    if (!settings) return;
+    if (value > 169 || value < 120) return;
+    const newSettings = { ...settings, boiler: { ...settings.boiler, steamSetPoint: value } };
+    updateLocalSettings(newSettings);
+    updateSettingsDebounced(newSettings);
+  }, [settings, updateLocalSettings, updateSettingsDebounced]);
 
   const handleNewProfileSelected = useCallback((id: number) => {
     if (activeProfile?.id !== id) {
@@ -100,14 +117,14 @@ function Home() {
     try {
       await updateOperationMode(newMode);
       const mode = await getOperationMode();
-      updateSystemState({ ...systemState, operationMode: mode });
+      updateLocalSystemState({ ...systemState, operationMode: mode });
     } catch (e) {
       setAlertMessage({ content: 'Failed to persist active profile', level: 'error' });
     }
   }, 500), []);
 
   return (
-    <Container sx={{ pt: theme.spacing(2), gap: '0px' }}>
+    <Container sx={{ pt: theme.spacing(2), px: { xs: 0.5, sm: 1 }, gap: 0 }}>
       {/* <ShowAlert level="INFO" text="Welcome home motherfucker \_O_/" /> */}
       <Grid container columns={12} spacing={1} sx={{ mb: theme.spacing(1), gap: '0px' }}>
 
@@ -133,7 +150,8 @@ function Home() {
           <RightSection
             sensorState={sensorState}
             activeProfile={activeProfile}
-            handleTempUpdate={handleTempUpdate}
+            handleBrewTempUpdate={handleBrewTempUpdate}
+            handleSteamTempUpdate={handleSteamTempUpdate}
             handleOpmodeChange={handleOpmodeChange}
           />
         </Grid>
@@ -199,14 +217,16 @@ function MiddleSection({
 interface RightSectionProps{
   sensorState: SensorState;
   activeProfile: Profile | null;
-  handleTempUpdate: (value: number) => void;
+  handleBrewTempUpdate: (value: number) => void;
+  handleSteamTempUpdate: (value: number) => void;
   handleOpmodeChange: (opMode: OperationMode) => void;
 }
 
 function RightSection({
   sensorState,
   activeProfile,
-  handleTempUpdate,
+  handleBrewTempUpdate,
+  handleSteamTempUpdate,
   handleOpmodeChange,
 }: RightSectionProps) {
   const theme = useTheme();
@@ -215,6 +235,10 @@ function RightSection({
   const targetTemp = useMemo(() => (sensorState.steamActive
     ? settings?.boiler.steamSetPoint
     : activeProfile?.waterTemperature || 0), [settings, activeProfile, sensorState]);
+  const tempUpdateHandler = useMemo(
+    () => (sensorState.steamActive ? handleSteamTempUpdate : handleBrewTempUpdate),
+    [sensorState, handleSteamTempUpdate, handleBrewTempUpdate],
+  );
 
   return (
     <>
@@ -227,7 +251,7 @@ function RightSection({
             value={sensorState.temperature}
             primaryColor={theme.palette.temperature.main}
             maxValue={targetTemp}
-            flashAfterValue={settings ? settings.boiler.steamSetPoint - 20 : undefined}
+            flashAfterValue={settings && settings.boiler ? settings.boiler.steamSetPoint - 20 : undefined}
             unit="°C"
           />
         </AspectRatioBox>
@@ -235,7 +259,10 @@ function RightSection({
 
       <Grid container spacing={2} sx={{ px: 1, mt: 3 }}>
         <Grid xs={12}>
-          <TargetTempInput targetTemp={activeProfile?.waterTemperature || 0} handleTempUpdate={handleTempUpdate} />
+          <TargetTempInput
+            targetTemp={targetTemp || 0}
+            handleTempUpdate={tempUpdateHandler}
+          />
         </Grid>
         <Grid xs={12}>
           <ScalesInput />
@@ -392,7 +419,7 @@ function TargetTempInput(
         />
       </Grid>
       <Grid xs={4}>
-        <SettingsNumberIncrementButtons value={targetTemp} onChange={handleTempUpdate} />
+        <SettingsNumberIncrementButtons fontSize="22px" value={targetTemp} onChange={handleTempUpdate} />
       </Grid>
     </Grid>
   );
@@ -401,6 +428,7 @@ function TargetTempInput(
 function ScalesInput() {
   const theme = useTheme();
   const { sensorState } = useSensorStateStore();
+  const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Grid container alignItems="center">
@@ -434,9 +462,16 @@ function ScalesInput() {
           width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'end',
         }}
         >
-          <Button sx={{ fontSize: { xs: 12, sm: 14 } }} size="small" onClick={() => false}>
+          <Button
+            sx={{
+              fontSize: '14px',
+              minWidth: 30,
+            }}
+            size="small"
+            onClick={() => false}
+          >
             <ScaleIcon fontSize="inherit" sx={{ mr: theme.spacing(1) }} />
-            Tare
+            {isBiggerScreen ? 'TARE' : 'TR'}
           </Button>
         </Box>
       </Grid>
