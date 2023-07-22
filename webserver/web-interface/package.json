@@ -63,6 +63,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
+    "postbuild": "node postbuild.js",
     "serve": "vite preview",
     "test": "jest --watch",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx --fix"
