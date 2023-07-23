@@ -25,7 +25,7 @@ enum WsActionType {
 }
 
 // Time after which, if we didn't receive any data, the websocket will try to reconnect
-const TIMEOUT_INTERVAL = 5000;
+const TIMEOUT_INTERVAL = 4000;
 
 const WS_OPTIONS: Options = {
   share: true,
@@ -49,7 +49,7 @@ const useWebSocket = (url:string) => {
   const { updateLocalSettings } = useSettingsStore();
 
   const [connected, setConnected] = useState(true);
-  const [messageTimeoutId, setMessageTimeoutId] = useState<NodeJS.Timeout>();
+  const [, setMessageTimeoutId] = useState<NodeJS.Timeout>();
   const { lastJsonMessage, getWebSocket } = reactUseWebSocket(url, WS_OPTIONS, connected);
 
   // Function to reset connection
@@ -57,18 +57,22 @@ const useWebSocket = (url:string) => {
     const webSocketInstance = getWebSocket();
     if (webSocketInstance && webSocketInstance.readyState === WebSocket.OPEN) {
       setConnected(false);
-      setTimeout(() => setConnected(true), 1);
+      setTimeout(() => setConnected(true), 1000);
     }
   }, [getWebSocket]);
 
+  // If no message in {TIMEOUT_INTERVAL} seconds, reset connection
   useEffect(() => {
-    if (messageTimeoutId) clearTimeout(messageTimeoutId);
+    let timeoutId: NodeJS.Timeout;
 
-    // If no message in 3 seconds, reset connection
-    const timeoutId = setTimeout(resetConnection, TIMEOUT_INTERVAL);
-
-    setMessageTimeoutId(timeoutId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setMessageTimeoutId((previousTimeoutId) => {
+      if (previousTimeoutId) {
+        clearTimeout(previousTimeoutId);
+      }
+      timeoutId = setTimeout(resetConnection, TIMEOUT_INTERVAL);
+      return timeoutId;
+    });
+    return () => clearTimeout(timeoutId);
   }, [lastJsonMessage, resetConnection]);
 
   useEffect(() => {
