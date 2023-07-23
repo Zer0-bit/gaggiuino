@@ -52,7 +52,7 @@ function Home() {
   const [alertMessage, setAlertMessage] = useState<SnackMessage>();
 
   const { sensorState } = useSensorStateStore();
-  const { systemState, updateLocalSystemState } = useSystemStateStore();
+  const { updateLocalOperationMode } = useSystemStateStore();
   const { settings, updateLocalSettings, updateSettingsAndSync } = useSettingsStore();
   const {
     activeProfile,
@@ -117,7 +117,7 @@ function Home() {
     try {
       await updateOperationMode(newMode);
       const mode = await getOperationMode();
-      updateLocalSystemState({ ...systemState, operationMode: mode });
+      updateLocalOperationMode(mode);
     } catch (e) {
       setAlertMessage({ content: 'Failed to persist active profile', level: 'error' });
     }
