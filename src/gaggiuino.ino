@@ -7,8 +7,8 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.0589f);
-SimpleKalmanFilter smoothPumpFlow(0.4f, 0.4f, 0.09f);
-SimpleKalmanFilter smoothScalesFlow(1.f, 1.f, 0.1f);
+SimpleKalmanFilter smoothPumpFlow(0.4f, 0.4f, 0.25f);
+SimpleKalmanFilter smoothScalesFlow(0.1f, 0.1f, 0.1f);
 
 Profile manualProfile;
 Profile activeProfile;
@@ -173,7 +173,7 @@ static void sensorsReadWeight(void) {
 
       if (brewActive) {
         currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
-        currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
+        currentState.weightFlow = fmax(currentState.weightFlow, weightMeasurements.measurementChange().changeSpeed());
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
     }
