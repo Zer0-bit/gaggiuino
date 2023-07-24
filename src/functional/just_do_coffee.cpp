@@ -93,7 +93,7 @@ void steamCtrl(const GaggiaSettings& settings, const SensorState& currentState, 
     setSteamBoilerRelayOn();
     #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adding water during steaming
       if (currentState.smoothedPressure < activeSteamPressure_) {
-        setPumpToRawValue(3);
+        setPumpToPercentage(0.03f);
       } else {
         setPumpOff();
       }
@@ -109,7 +109,7 @@ void steamCtrl(const GaggiaSettings& settings, const SensorState& currentState, 
 /*Water mode and all that*/
 void hotWaterMode(const SensorState &currentState) {
   closeValve();
-  setPumpToRawValue(80);
+  setPumpToPercentage(0.8f);
   setBoilerOn();
   if (currentState.temperature < MAX_WATER_TEMP) setBoilerOn();
   else setBoilerOff();

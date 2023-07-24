@@ -7,13 +7,13 @@
 
 #define ZC_MODE    FALLING
 
-constexpr uint8_t PUMP_RANGE = 100;
+constexpr uint8_t PUMP_RANGE = 250; // Push to 250 for less rounding
 
 void pumpInit(const int powerLineFrequency, const float pumpFlowAtZero);
 void setPumpPressure(const float targetPressure, const float flowRestriction, const SensorState &currentState);
 void setPumpOff(void);
 void setPumpFullOn(void);
-void setPumpToRawValue(const uint8_t val);
+void setPumpToPercentage(const float percentage); // 0.0 - 1.0
 long  getAndResetClickCounter(void);
 int getCPS(void);
 void pumpPhaseShift(void);
