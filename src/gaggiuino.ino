@@ -173,7 +173,7 @@ static void sensorsReadWeight(void) {
 
       if (brewActive) {
         currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
-        currentState.weightFlow = fmax(currentState.weightFlow, weightMeasurements.measurementChange().changeSpeed());
+        currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
     }
