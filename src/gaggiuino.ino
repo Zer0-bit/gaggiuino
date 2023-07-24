@@ -7,7 +7,7 @@
 #include "gaggiuino.h"
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.0589f);
-SimpleKalmanFilter smoothPumpFlow(0.4f, 0.4f, 0.0499f);
+SimpleKalmanFilter smoothPumpFlow(0.4f, 0.4f, 0.09f);
 SimpleKalmanFilter smoothScalesFlow(1.f, 1.f, 0.1f);
 
 Profile manualProfile;
@@ -566,13 +566,8 @@ static void fillBoilerUntilThreshod(unsigned long elapsedTime) {
 
   espCommsSendNotification(Notification::info("Filling boiler!"));
   openValve();
-  setPumpToRawValue(35);
+  setPumpToPercentage(0.35);
 }
-
-// TODO: 
-// static void updateStartupTimer(void) {
-//   lcdSetUpTime(getTimeSinceInit() / 1000);
-// }
 
 static void cpsInit(GaggiaSettings &runningCfg) {
   int cps = getCPS();
