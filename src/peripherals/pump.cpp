@@ -4,6 +4,8 @@
 #include <PSM.h>
 #include "utils.h"
 #include "internal_watchdog.h"
+#undef round
+#include "math.h"
 
 PSM pump(zcPin, dimmerPin, PUMP_RANGE, ZC_MODE, 1, 6);
 
