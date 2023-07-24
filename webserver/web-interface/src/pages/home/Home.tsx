@@ -119,7 +119,7 @@ function Home() {
       const mode = await getOperationMode();
       updateLocalOperationMode(mode);
     } catch (e) {
-      setAlertMessage({ content: 'Failed to persist active profile', level: 'error' });
+      setAlertMessage({ content: 'Failed to change operation mode', level: 'error' });
     }
   }, 500), []);
 
