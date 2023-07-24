@@ -566,7 +566,7 @@ static void fillBoilerUntilThreshod(unsigned long elapsedTime) {
 
   espCommsSendNotification(Notification::info("Filling boiler!"));
   openValve();
-  setPumpToPercentage(0.35);
+  setPumpToPercentage(0.35f);
 }
 
 static void cpsInit(GaggiaSettings &runningCfg) {

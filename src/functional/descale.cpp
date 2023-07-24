@@ -26,7 +26,7 @@ void deScale(const GaggiaSettings &gaggiaSettings, const SensorState &currentSta
       break;
     case DescalingState::DESCALING_PHASE1: // Slowly penetrating that scale
       currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
-      setPumpToPercentage(0.1);
+      setPumpToPercentage(0.1f);
       if (millis() - descalingTimer > DESCALE_PHASE1_EVERY) {
         descalingCycle += 1;
         if (descalingCycle < DESCALE_MAX_CYCLES) {
@@ -48,7 +48,7 @@ void deScale(const GaggiaSettings &gaggiaSettings, const SensorState &currentSta
       break;
     case DescalingState::DESCALING_PHASE3: // Fucking up that scale big time
       currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
-      setPumpToPercentage(0.3);
+      setPumpToPercentage(0.3f);
       if (millis() - descalingTimer > DESCALE_PHASE3_EVERY) {
         solenoidBeat();
         descalingCycle += 1;
