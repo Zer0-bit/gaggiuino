@@ -15,7 +15,7 @@ struct MeasurementChange {
   float deltaValue;
   uint32_t deltaMillis;
 
-  float changeSpeed() {
+  float speed() {
     if (deltaMillis == 0) {
       return 0.f;
     }
@@ -40,9 +40,9 @@ private:
 public:
   Measurements(size_t size) : size(size) {}
 
-  Measurement latest();
-  Measurement previous();
-  MeasurementChange measurementChange();
+  Measurement getLatest();
+  Measurement getPrevious();
+  MeasurementChange getMeasurementChange();
   void clear();
   void add(float value);
   void add(Measurement measurement);

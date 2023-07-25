@@ -18,18 +18,10 @@ class TOF {
     uint16_t readRangeToPct(uint16_t);
 
   private:
-    // HardwareTimer* hw_timer;
-    // static void TimerHandler10(void);
     uint32_t tofReading;
 };
 
 TOF::TOF() {}
-
-// void TOF::TimerHandler10() {
-//   if (instance != nullptr && tof_sensor.isRangeComplete()) {
-//     TOF::tofReading = tof_sensor.readRangeResult();
-//   }
-// }
 
 void TOF::init(SystemState& systemState) {
   #ifdef TOF_VL53L0X
@@ -38,13 +30,6 @@ void TOF::init(SystemState& systemState) {
   }
   tof_sensor.startRangeContinuous();
   mvAvg.begin();
-  // Configure the hardware timer
-  // hw_timer = new HardwareTimer(TIM10);
-  // hw_timer->setCount(100000, MICROSEC_FORMAT);
-  // hw_timer->setOverflow(100000, MICROSEC_FORMAT);
-  // hw_timer->setInterruptPriority(1, 1);
-  // hw_timer->attachInterrupt(TOF::TimerHandler10); // Attach the ISR function to the timer
-
   #endif
 }
 

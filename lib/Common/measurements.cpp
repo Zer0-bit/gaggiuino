@@ -1,8 +1,7 @@
-
 #include "measurements.h"
 
 void Measurements::add(float measurement) {
-  add(Measurement{.value=measurement, .millis=(uint32_t) millis()});
+  add(Measurement{.value=measurement, .millis=static_cast<uint32_t>(millis())});
 }
 
 void Measurements::add(Measurement measurement) {
@@ -13,12 +12,12 @@ void Measurements::add(Measurement measurement) {
   }
 }
 
-Measurement Measurements::previous() {
+Measurement Measurements::getPrevious() {
   if (values.size() < 2) return Measurement{0.f, 0};
   return *std::next(values.begin());
 }
 
-Measurement Measurements::latest() {
+Measurement Measurements::getLatest() {
   if (!values.empty()) {
     return values.front();
   }
@@ -30,23 +29,28 @@ void Measurements::clear() {
 }
 
 /**
-  * See explanation in Measurements classs. This method tries to find the last 2 different
-  * measurements and returns the change betweeen them (delta and deltaTime)
+  * See explanation in Measurements class. This method tries to find the last 2 different
+  * measurements and returns the change between them (delta and deltaTime)
   */
-MeasurementChange Measurements::measurementChange() {
-  if (values.size() < 2) return MeasurementChange{0.f, 0};
-  Measurement latest = values.front();
-  Measurement closestDifferent = values.back();
+MeasurementChange Measurements::getMeasurementChange() {
+  MeasurementChange result = MeasurementChange{0.f, 0};
 
-  for (auto it = values.begin(); it != values.end(); it = std::next(it)) {
-    if (it->value != latest.value) {
-      closestDifferent = *it;
+  if (values.size() < 2) return result;
+
+  // Use reverse iterators to more efficiently traverse the deque in reverse order
+  auto reverseIterator = values.rbegin();
+  auto prevRiterator = std::next(reverseIterator);
+
+  for (; prevRiterator != values.rend(); ++reverseIterator, ++prevRiterator) {
+    if (reverseIterator->value != prevRiterator->value) {
+      result = MeasurementChange{
+        .deltaValue = reverseIterator->value - prevRiterator->value,
+        .deltaMillis = reverseIterator->millis - prevRiterator->millis,
+      };
       break;
     }
   }
 
-  return MeasurementChange{
-    .deltaValue = latest.value - closestDifferent.value,
-    .deltaMillis=latest.millis - closestDifferent.millis
-  };
+  return result;
 }
+

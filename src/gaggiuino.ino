@@ -8,7 +8,7 @@
 
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.0589f);
 SimpleKalmanFilter smoothPumpFlow(0.4f, 0.4f, 0.25f);
-SimpleKalmanFilter smoothScalesFlow(0.1f, 0.1f, 0.1f);
+SimpleKalmanFilter smoothScalesFlow(0.1f, 0.1f, 0.06f);
 
 Profile manualProfile;
 Profile activeProfile;
@@ -169,11 +169,12 @@ static void sensorsReadWeight(void) {
       else {
         weightMeasurements.add(scalesGetWeight());
       }
-      currentState.weight = weightMeasurements.latest().value;
+      currentState.weight = weightMeasurements.getLatest().value;
 
       if (brewActive) {
         currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
-        currentState.weightFlow = fmax(0.f, weightMeasurements.measurementChange().changeSpeed());
+        
+        currentState.weightFlow = fmax(0.f, weightMeasurements.getMeasurementChange().speed());
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
     }

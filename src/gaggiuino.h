@@ -30,7 +30,7 @@
 #define GET_KTYPE_READ_EVERY    250 // max6675 amp module data read interval not recommended to be changed to lower than 250 (ms)
 #endif
 #define GET_PRESSURE_READ_EVERY 10 // Pressure refresh interval (ms)
-#define GET_SCALES_READ_EVERY   100 // Scales refresh interval (ms)
+#define GET_SCALES_READ_EVERY   200 // Scales refresh interval (ms)
 #define REFRESH_ESP_DATA_EVERY  100 // Screen refresh interval (ms)
 #define REFRESH_FLOW_EVERY      200 // Flow refresh interval (ms)
 #define HEALTHCHECK_EVERY       30000 // System checks happen every 30sec
