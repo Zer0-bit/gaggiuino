@@ -33,19 +33,18 @@ void Measurements::clear() {
   * measurements and returns the change between them (delta and deltaTime)
   */
 MeasurementChange Measurements::getMeasurementChange() {
-  MeasurementChange result = MeasurementChange{0.f, 0};
+  MeasurementChange result = MeasurementChange{ 0.f, 0 };
 
   if (values.size() < 2) return result;
 
-  // Use reverse iterators to more efficiently traverse the deque in reverse order
-  auto reverseIterator = values.rbegin();
-  auto prevRiterator = std::next(reverseIterator);
-
-  for (; prevRiterator != values.rend(); ++reverseIterator, ++prevRiterator) {
-    if (reverseIterator->value != prevRiterator->value) {
+  for (auto latest = values.begin(), prev = std::next(values.begin());
+    prev != values.end();
+    latest = std::next(latest), prev = std::next(prev)
+  ) {
+    if (latest->value != prev->value) {
       result = MeasurementChange{
-        .deltaValue = reverseIterator->value - prevRiterator->value,
-        .deltaMillis = reverseIterator->millis - prevRiterator->millis,
+        .deltaValue = latest->value - prev->value,
+        .deltaMillis = latest->millis - prev->millis,
       };
       break;
     }
@@ -53,4 +52,5 @@ MeasurementChange Measurements::getMeasurementChange() {
 
   return result;
 }
+
 
