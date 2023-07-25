@@ -136,23 +136,23 @@ static void sensorsReadTemperature(void) {
   }
 }
 
-// static Measurement handleTaringAndReadWeight() {
-//   if (!currentState.tarePending) { // No tare needed just get weight
-//     return scalesGetWeight();
-//   }
+static Measurement handleTaringAndReadWeight() {
+  if (!currentState.tarePending) { // No tare needed just get weight
+    return scalesGetWeight();
+  }
 
-//   // Tare is required. Invoke it.
-//   scalesTare();
-//   weightMeasurements.clear();
-//   Measurement weight = scalesGetWeight();
+  // Tare is required. Invoke it.
+  scalesTare();
+  weightMeasurements.clear();
+  Measurement weight = scalesGetWeight();
 
-//   if (fabsf(weight.value < 0.3f) && fabsf(weight.value > -0.2f)) { // Tare was successful. return reading
-//     currentState.tarePending = false;
-//     return weight;
-//   } else {  // Tare was unsuccessful. return 0 weight.
-//     return Measurement{ .value=0.f, .millis = millis()};
-//   }
-// }
+  if (fabsf(weight.value) < 0.5f) { // Tare was successful. return reading
+    currentState.tarePending = false;
+    return weight;
+  } else {  // Tare was unsuccessful. return 0 weight.
+    return Measurement{ .value=0.f, .millis = millis()};
+  }
+}
 
 static void sensorsReadWeight(void) {
   uint32_t elapsedTime = millis() - scalesTimer;
@@ -160,15 +160,8 @@ static void sensorsReadWeight(void) {
   if (elapsedTime > GET_SCALES_READ_EVERY) {
     systemState.scalesPresent = scalesIsPresent();
     if (systemState.scalesPresent) {
-      if (currentState.tarePending) {
-        scalesTare();
-        weightMeasurements.clear();
-        weightMeasurements.add(scalesGetWeight());
-        currentState.tarePending = false;
-      }
-      else {
-        weightMeasurements.add(scalesGetWeight());
-      }
+      const auto weight = handleTaringAndReadWeight();
+      weightMeasurements.add(weight);
       currentState.weight = weightMeasurements.getLatest().value;
 
       if (brewActive) {

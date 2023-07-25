@@ -1,3 +1,4 @@
+
 #include "measurements.h"
 
 void Measurements::add(float measurement) {
@@ -52,5 +53,3 @@ MeasurementChange Measurements::getMeasurementChange() {
 
   return result;
 }
-
-

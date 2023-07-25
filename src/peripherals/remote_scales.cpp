@@ -8,7 +8,7 @@ bool remoteScalesPresent = false;
 float remoteScalesLatestWeight = 0.f;
 uint32_t remoteScalesLastWeightTime = 0;
 
-const uint16_t REMOTE_SCALES_TARE_DEBOUNCE = 500;
+const uint16_t REMOTE_SCALES_TARE_DEBOUNCE = 1000;
 uint32_t lastRemoteScalesTare = 0;
 void remoteScalesTare(void) {
   uint32_t now = millis();
