@@ -19,6 +19,7 @@ import { getShotChartConfig } from './ChartConfig';
 import { ShotSnapshot } from '../../models/models';
 import { isNewShotStarted } from '../../state/ShotDataStore';
 import MoreMenu from '../inputs/SpeedDial';
+import useSensorStateStore from '../../state/SensorStateStore';
 
 ChartJS.register(
   CategoryScale,
@@ -210,9 +211,11 @@ function ShotChart({
         options={config}
         data={chartData}
       />
-      <div style={{ position: 'absolute', top: '10vh', right: '1vh'  }}>
-        <MoreMenu />
-      </div>
+      {!useSensorStateStore().sensorState.brewActive && (
+        <div style={{ position: 'absolute', top: '10vh', right: '1vh'  }}>
+          <MoreMenu />
+        </div>
+      )}
     </div>
   );
 }

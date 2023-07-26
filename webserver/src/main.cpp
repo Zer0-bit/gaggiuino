@@ -8,7 +8,6 @@
 #include "scales/ble_scales.h"
 #include "persistence/persistence.h"
 #include "state/state.h"
-#include "state/state.h"
 #include "./log/log.h"
 
 void setup() {
