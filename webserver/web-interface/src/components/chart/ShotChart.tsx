@@ -212,7 +212,7 @@ function ShotChart({
         data={chartData}
       />
       {!useSensorStateStore().sensorState.brewActive && (
-        <div style={{ position: 'absolute', top: '10vh', right: '1vh'  }}>
+        <div style={{ position: 'absolute', top: '10vh', right: '1vh' }}>
           <MoreMenu />
         </div>
       )}

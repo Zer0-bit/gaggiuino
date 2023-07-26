@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -32,16 +33,16 @@ const actions = [
 export default function SpeedDialInput() {
   const { addShotToHistory, currentShot } = useShotDataStore();
   const handleClick = (actionName: string) => {
-    if(actionName === 'Save') {
+    if (actionName === 'Save') {
       addShotToHistory(currentShot);
       console.log(`Clicked on ${actionName}`);
-    }else if(actionName === 'Delete') {
+    } else if (actionName === 'Delete') {
       // Maybe dismiss the shot but theoretically we can just close the shot dialog
       console.log(`Clicked on ${actionName}`);
-    }else if(actionName === 'CloudUpload') {
+    } else if (actionName === 'CloudUpload') {
       // TO-DO: Upload to some cloud provider maybe (Visualiser or maybe another one is avail)
       console.log(`Clicked on ${actionName}`);
-    }else if(actionName === 'Share') {
+    } else if (actionName === 'Share') {
       // TO-DO: Share a profile with the community aka profile export
       console.log(`Clicked on ${actionName}`);
     }
