@@ -196,6 +196,12 @@ static long sensorsReadFlow(float elapsedTimeSec) {
   previousSmoothedPumpFlow = currentState.smoothedPumpFlow;
   // Some flow smoothing
   currentState.smoothedPumpFlow = smoothPumpFlow.updateEstimate(currentState.pumpFlow);
+  float averagedSmoothedPumpFlow = getAverage(currentState.smoothedPumpFlow);
+
+  // SMall corrections 
+  currentState.smoothedPumpFlow = (fabs(currentState.smoothedPumpFlow - averagedSmoothedPumpFlow) <= 0.5f)
+    ? (averagedSmoothedPumpFlow + currentState.smoothedPumpFlow) / 2.f
+    : currentState.smoothedPumpFlow;
 
   currentState.pumpFlowChangeSpeed = (currentState.smoothedPumpFlow - previousSmoothedPumpFlow) / elapsedTimeSec;
   return pumpClicks;
