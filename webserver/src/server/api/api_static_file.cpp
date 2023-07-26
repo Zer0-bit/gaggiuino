@@ -5,6 +5,5 @@
 void setupStaticFiles(AsyncWebServer& server) {
 
   server.serveStatic("/", LittleFS, "/")
-    .setDefaultFile("index.html")
-    .setCacheControl("max-age=600");
+    .setDefaultFile("index.html");
 }
