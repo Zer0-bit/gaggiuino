@@ -18,6 +18,7 @@ import { useTheme, alpha, Theme } from '@mui/material';
 import { getShotChartConfig } from './ChartConfig';
 import { ShotSnapshot } from '../../models/models';
 import { isNewShotStarted } from '../../state/ShotDataStore';
+import MoreMenu from '../inputs/SpeedDial';
 
 ChartJS.register(
   CategoryScale,
@@ -203,11 +204,16 @@ function ShotChart({
   }, [newDataPoint, theme, maxLength, setDatapoints, setChartData]);
 
   return (
-    <Line
-      ref={chartRef}
-      options={config}
-      data={chartData}
-    />
+    <div style={{ height: '100%', position: 'relative' }}>
+      <Line
+        ref={chartRef}
+        options={config}
+        data={chartData}
+      />
+      <div style={{ position: 'absolute', top: '10vh', right: '1vh'  }}>
+        <MoreMenu />
+      </div>
+    </div>
   );
 }
 
