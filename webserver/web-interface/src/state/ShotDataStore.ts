@@ -76,10 +76,11 @@ const useShotDataStore = create<ShotDataStore>()(
           }
 
           if (isNewShotStarted(get().currentShot, shotDatapoint)) {
-            const previousShot = get().currentShot.datapoints[get().currentShot.datapoints.length - 1];
-            if (get().currentShot.time !== previousShot.timeInShot) {
-              get().addShotToHistory(get().currentShot);
-            }
+            // const previousShot = get().currentShot.datapoints[get().currentShot.datapoints.length - 1];
+            // if (get().currentShot.time !== previousShot.timeInShot) {
+            //   get().addShotToHistory(get().currentShot);
+            // }
+            get().addShotToHistory(get().currentShot);
             get().startNewShot();
           }
           const { currentShot } = get();
