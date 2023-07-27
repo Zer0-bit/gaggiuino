@@ -199,7 +199,8 @@ static long sensorsReadFlow(float elapsedTimeSec) {
   float averagedSmoothedPumpFlow = getAverage(currentState.smoothedPumpFlow);
 
   // SMall corrections 
-  currentState.smoothedPumpFlow = (fabs(currentState.smoothedPumpFlow - averagedSmoothedPumpFlow) <= 0.5f)
+  currentState.smoothedPumpFlow = (fabs(currentState.smoothedPumpFlow - averagedSmoothedPumpFlow) <= 0.7f 
+                                && fabs(currentState.smoothedPumpFlow - averagedSmoothedPumpFlow) > 0.2f)
     ? (averagedSmoothedPumpFlow + currentState.smoothedPumpFlow) / 2.f
     : currentState.smoothedPumpFlow;
 
