@@ -6,6 +6,7 @@
 #include <Adafruit_VL53L0X.h>
 #include <movingAvg.h>
 #include "system_state.h"
+#include <algorithm> // for std::generate
 
 Adafruit_VL53L0X tof_sensor;
 movingAvg mvAvg(4);
@@ -14,11 +15,17 @@ class TOF {
   public:
     TOF();
     void init(SystemState&);
+    void setCustomRanges(uint16_t startValue, uint16_t endValue);
     uint16_t readLvl();
     uint16_t readRangeToPct(uint16_t);
 
   private:
     uint32_t tofReading;
+    const std::array<uint16_t, 10> waterLvl = { 100u, 90u, 80u, 70u, 60u, 50u, 40u, 30u, 20u, 10u };
+    std::array<uint16_t, 9> ranges;
+
+    // Helper function to calculate ranges
+    void calculateRanges(uint16_t startValue, uint16_t endValue);
 };
 
 TOF::TOF() {}
@@ -33,6 +40,21 @@ void TOF::init(SystemState& systemState) {
   #endif
 }
 
+void TOF::setCustomRanges(uint16_t startValue, uint16_t endValue) {
+  calculateRanges(startValue, endValue);
+}
+
+void TOF::calculateRanges(uint16_t startValue, uint16_t endValue) {
+  uint16_t step = (endValue - startValue) / (ranges.size() - 1);
+
+  uint16_t current = startValue;
+  std::generate(ranges.begin(), ranges.end(), [&current, step]() {
+    uint16_t value = current;
+    current += step;
+    return value;
+  });
+}
+
 uint16_t TOF::readLvl() {
   #ifdef TOF_VL53L0X
   if(tof_sensor.isRangeComplete()) {
@@ -43,11 +65,9 @@ uint16_t TOF::readLvl() {
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {
-  static const std::array<uint16_t, 10> water_lvl = { 100u, 90u, 80u, 70u, 60u, 50u, 40u, 30u, 20u, 10u };
-  static const std::array<uint16_t, 9> ranges = { 15u, 30u, 45u, 60u, 75u, 90u, 105u, 115u, 125u };
   for (size_t i = 0; i < ranges.size(); i++) {
     if (val <= ranges[i]) {
-      return water_lvl[i];
+      return TOF::waterLvl[i];
     }
   }
 

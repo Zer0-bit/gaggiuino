@@ -60,6 +60,7 @@ void setup(void) {
   led.setColor(9u, 0u, 9u); // WHITE
   // Init the tof sensor
   tof.init(systemState);
+  tof.setCustomRanges(tofStartValue, tofEndValue);
 
   cpsInit(runningCfg);
   LOG_INFO("CPS Init");
