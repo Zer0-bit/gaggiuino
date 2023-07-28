@@ -309,11 +309,12 @@ static void modeSelect(void) {
 
 static void espUpdateState(void) {
   if (millis() > pageRefreshTimer) {
-    espCommsSendSystemState(systemState, 1000);
-    espCommsSendSensorData(currentState, 500);
  
     if (brewActive && systemState.operationMode == OperationMode::BREW_AUTO) {
       espCommsSendShotData(buildShotSnapshot(millis() - brewingTimer, currentState, phaseProfiler), 100);
+    } else {
+      espCommsSendSystemState(systemState, 1000);
+      espCommsSendSensorData(currentState, 500);
     }
     pageRefreshTimer = millis() + REFRESH_ESP_DATA_EVERY;
   }
