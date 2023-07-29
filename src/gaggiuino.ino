@@ -586,7 +586,10 @@ static void cpsInit(GaggiaSettings &runningCfg) {
 }
 
 static void doLed(void) {
-  if (runningCfg.led.disco && brewActive) {
+  if (!runningCfg.led.state) {
+    led.setColor(0, 0, 0);
+  }
+  else if (runningCfg.led.disco && brewActive) {
     switch(systemState.operationMode) {
       case OperationMode::BREW_AUTO:
       case OperationMode::BREW_MANUAL:
