@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   AppBar, Box, Dialog, IconButton, SxProps, Theme, Toolbar, useTheme,
 
@@ -11,7 +11,7 @@ import {
 } from '../../components/chart/StatBox';
 import useShotDataStore from '../../state/ShotDataStore';
 import { Shot, ShotSnapshot } from '../../models/models';
-import SpeedDialInput from '../../components/inputs/SpeedDial';
+import ShotSpeedDial from '../../components/inputs/ShotSpeedDial';
 
 interface ShotDialogProps {
   open?: boolean;
@@ -20,11 +20,18 @@ interface ShotDialogProps {
 }
 
 export default function ShotDialog({ open = false, setOpen, historyShot = undefined }: ShotDialogProps) {
-  const { latestShotDatapoint, currentShot, shotRunning } = useShotDataStore();
+  const {
+    latestShotDatapoint, currentShot, shotRunning, addShotToHistory, removeShotFromHistory,
+  } = useShotDataStore();
   const theme = useTheme();
   const fullHeightGraph = `calc(100vh - 64px - ${theme.spacing(1)})`;
   const lessHeightGraph = `calc(75vh - 64px - ${theme.spacing(1)})`;
   const [activeDatapoint, setActiveDatapoint] = useState<ShotSnapshot | undefined>(undefined);
+
+  const handleOnDelete = useCallback((shot: Shot) => {
+    removeShotFromHistory(shot);
+    setOpen(false);
+  }, [removeShotFromHistory, setOpen]);
 
   useEffect(() => {
     if (!historyShot || historyShot.datapoints.length === 0) return;
@@ -61,7 +68,15 @@ export default function ShotDialog({ open = false, setOpen, historyShot = undefi
           <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
             {historyShot && <ShotChart data={historyShot.datapoints} onHover={setActiveDatapoint} />}
             {!historyShot && <ShotChart newDataPoint={latestShotDatapoint} onHover={setActiveDatapoint} />}
-            {!shotRunning && <SpeedDialInput shot={historyShot || currentShot} />}
+            {!shotRunning && (
+              <Box sx={{ position: 'absolute', top: theme.spacing(2), right: theme.spacing(4) }}>
+                <ShotSpeedDial
+                  shot={historyShot || currentShot}
+                  onSave={addShotToHistory}
+                  onDelete={handleOnDelete}
+                />
+              </Box>
+            )}
           </Box>
         </Grid>
         <Grid xs={12} sm={3} sx={{ height: { xs: '25vh', sm: fullHeightGraph }, overflow: 'scroll' }}>

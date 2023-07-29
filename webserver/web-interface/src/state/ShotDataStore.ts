@@ -18,6 +18,8 @@ interface ShotDataStore {
 // socket messages.
 const OUT_OF_ORDER_BUFFER_TOLERANCE = 500; // msec
 const MAX_SHOT_HISTORY_LENGTH = 20;
+const MIN_SHOT_DURATION_TO_SAVE_IN_HISTORY = 14000; // msec
+
 const EMPTY_SNAPSHOT:ShotSnapshot = {
   timeInShot: 0,
   pressure: 0,
@@ -41,7 +43,8 @@ function isDatapointOutOfOrder(
 }
 
 export function isShotLongEnoughToBeStored(shot: Shot): boolean {
-  return shot.datapoints.length > 0 && shot.datapoints[shot.datapoints.length - 1].timeInShot > 14000;
+  const lastDatapoint = shot.datapoints[shot.datapoints.length - 1];
+  return lastDatapoint && lastDatapoint.timeInShot > MIN_SHOT_DURATION_TO_SAVE_IN_HISTORY;
 }
 
 export function isNewShotStarted(currentShot: Shot, newShotDatapoint: ShotSnapshot):boolean {
