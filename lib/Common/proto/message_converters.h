@@ -7,6 +7,7 @@
 #include "measurements.h"
 #include "notification_message.h"
 #include "messages.pb.h"
+#include "mcu_comms.h"
 
 using namespace NanoPb::Converter;
 
@@ -126,7 +127,7 @@ public:
 };
 
 
-class ShotSnapshotConverter : public NanoPb::Converter::MessageConverter<SensorStateSnapshotConverter, ShotSnapshot, ShotSnapshotDto, ShotSnapshotDto_fields> {
+class ShotSnapshotConverter : public NanoPb::Converter::MessageConverter<ShotSnapshotConverter, ShotSnapshot, ShotSnapshotDto, ShotSnapshotDto_fields> {
 public:
   static ProtoType encoderInit(const LocalType& local) {
     return ShotSnapshotDto{

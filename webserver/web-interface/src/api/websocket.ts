@@ -44,7 +44,7 @@ const useWebSocket = (url:string) => {
   const { updateLocalSensorState } = useSensorStateStore();
   const { updateLocalSystemState } = useSystemStateStore();
   const { addMessage } = useLogMessageStore();
-  const { addShotDatapoint } = useShotDataStore();
+  const { addShotDatapoint, setShotRunning } = useShotDataStore();
   const { updateLocalActiveProfile } = useProfileStore();
   const { updateLocalSettings } = useSettingsStore();
 
@@ -80,9 +80,14 @@ const useWebSocket = (url:string) => {
 
     const messageData = lastJsonMessage as unknown as MessageData;
     switch (messageData.action) {
-      case WsActionType.SensorStateUpdate:
-        updateLocalSensorState(messageData.data as SensorState);
+      case WsActionType.SensorStateUpdate: {
+        const sensorState = messageData.data as SensorState;
+        updateLocalSensorState(sensorState);
+        if (!sensorState.brewActive) {
+          setShotRunning(false);
+        }
         break;
+      }
       case WsActionType.ShotSnapshotUpdate:
         addShotDatapoint(messageData.data as ShotSnapshot);
         break;
@@ -100,7 +105,8 @@ const useWebSocket = (url:string) => {
         break;
     }
   }, [lastJsonMessage, updateLocalSettings, updateLocalSensorState,
-    updateLocalSystemState, addMessage, addShotDatapoint, updateLocalActiveProfile]);
+    updateLocalSystemState, addMessage, addShotDatapoint, updateLocalActiveProfile,
+    setShotRunning]);
 };
 
 export default useWebSocket;

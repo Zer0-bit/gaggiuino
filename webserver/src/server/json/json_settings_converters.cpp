@@ -8,6 +8,7 @@ namespace json {
 
   void mapLedSettingsToJson(const LedSettings& led, JsonObject& target) {
     target["state"] = led.state;
+    target["disco"] = led.disco;
     JsonObject ledColor = target.createNestedObject("color");
     ledColor["R"] = led.color.R;
     ledColor["G"] = led.color.G;
@@ -64,6 +65,7 @@ namespace json {
     JsonObject colorObject = json["color"].as<JsonObject>();
     return LedSettings{
       .state = json["state"],
+      .disco = json["disco"],
       .color = LedSettings::Color {
         .R = colorObject["R"],
         .G = colorObject["G"],

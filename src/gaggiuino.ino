@@ -309,11 +309,12 @@ static void modeSelect(void) {
 
 static void espUpdateState(void) {
   if (millis() > pageRefreshTimer) {
-    espCommsSendSystemState(systemState, 1000);
-    espCommsSendSensorData(currentState, 500);
  
     if (brewActive && systemState.operationMode == OperationMode::BREW_AUTO) {
       espCommsSendShotData(buildShotSnapshot(millis() - brewingTimer, currentState, phaseProfiler), 100);
+    } else {
+      espCommsSendSystemState(systemState, 1000);
+      espCommsSendSensorData(currentState, 500);
     }
     pageRefreshTimer = millis() + REFRESH_ESP_DATA_EVERY;
   }
@@ -585,7 +586,10 @@ static void cpsInit(GaggiaSettings &runningCfg) {
 }
 
 static void doLed(void) {
-  if (runningCfg.led.disco && brewActive) {
+  if (!runningCfg.led.state) {
+    led.setColor(0, 0, 0);
+  }
+  else if (runningCfg.led.disco && brewActive) {
     switch(systemState.operationMode) {
       case OperationMode::BREW_AUTO:
       case OperationMode::BREW_MANUAL:
