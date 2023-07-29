@@ -10,6 +10,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import useShotDataStore from '../../state/ShotDataStore';
+import { Shot, ShotSnapshot } from '../../models/models';
+import ShotHistory from '../shot/ShotHistory';
 
 const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
   position: 'absolute',
@@ -31,13 +33,15 @@ const actions = [
 ];
 
 export default function SpeedDialInput() {
-  const { addShotToHistory, currentShot } = useShotDataStore();
+  const { addShotToHistory, removeShotFromHistory, currentShot, shotHistory,  } = useShotDataStore();
   const handleClick = (actionName: string) => {
     if (actionName === 'Save') {
       addShotToHistory(currentShot);
       console.log(`Clicked on ${actionName}`);
     } else if (actionName === 'Delete') {
-      // Maybe dismiss the shot but theoretically we can just close the shot dialog
+      const shotHistory: Shot[] = useShotDataStore(state => state.shotHistory);
+      const selectedShot: Shot | undefined  = shotHistory.find((shot: Shot) => shot.time === currentShot.time);;
+      useShotDataStore.getState().removeShotFromHistory(selectedShot);
       console.log(`Clicked on ${actionName}`);
     } else if (actionName === 'CloudUpload') {
       // TO-DO: Upload to some cloud provider maybe (Visualiser or maybe another one is avail)

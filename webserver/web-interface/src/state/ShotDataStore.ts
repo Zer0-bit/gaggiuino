@@ -9,7 +9,7 @@ interface ShotDataStore {
   startNewShot: () => void,
   addShotDatapoint: (shotDatapoint: ShotSnapshot) => void,
   addShotToHistory: (shot: Shot) => void,
-  // deleteShotFromHistory: (shot: Shot) => void,
+  removeShotFromHistory: (shot: Shot) => void,
 }
 
 // This constant defines a buffer of time to prevent handling of out-of-order
@@ -68,6 +68,16 @@ const useShotDataStore = create<ShotDataStore>()(
           return {};
         }),
 
+        removeShotFromHistory: (shot: Shot) => set((state) => {
+          const shotIndex = state.shotHistory.indexOf(shot);
+          if (shotIndex !== -1) {
+            const updatedShotHistory = [...state.shotHistory];
+            updatedShotHistory.splice(shotIndex, 1);
+            return { shotHistory: updatedShotHistory };
+          }
+          return {};
+        }),
+
         addShotDatapoint: (shotDatapoint: ShotSnapshot) => {
           // This is here to protect the store from datapoints that are potentially delivered out of order
           // It was observed that some WS messages are delivered out of order
@@ -76,11 +86,10 @@ const useShotDataStore = create<ShotDataStore>()(
           }
 
           if (isNewShotStarted(get().currentShot, shotDatapoint)) {
-            // const previousShot = get().currentShot.datapoints[get().currentShot.datapoints.length - 1];
-            // if (get().currentShot.time !== previousShot.timeInShot) {
-            //   get().addShotToHistory(get().currentShot);
-            // }
-            get().addShotToHistory(get().currentShot);
+            if (get().currentShot.time !== useShotDataStore().shotHistory[0].time ) {
+              get().addShotToHistory(get().currentShot);
+            }
+            // get().addShotToHistory(get().currentShot);
             get().startNewShot();
           }
           const { currentShot } = get();
