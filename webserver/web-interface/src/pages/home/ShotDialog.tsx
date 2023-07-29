@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppBar, Box, Dialog, IconButton, SxProps, Theme, Toolbar, useTheme,
 
@@ -27,11 +27,6 @@ export default function ShotDialog({ open = false, setOpen, historyShot = undefi
   const fullHeightGraph = `calc(100vh - 64px - ${theme.spacing(1)})`;
   const lessHeightGraph = `calc(75vh - 64px - ${theme.spacing(1)})`;
   const [activeDatapoint, setActiveDatapoint] = useState<ShotSnapshot | undefined>(undefined);
-
-  const handleOnDelete = useCallback((shot: Shot) => {
-    removeShotFromHistory(shot);
-    setOpen(false);
-  }, [removeShotFromHistory, setOpen]);
 
   useEffect(() => {
     if (!historyShot || historyShot.datapoints.length === 0) return;
@@ -73,7 +68,7 @@ export default function ShotDialog({ open = false, setOpen, historyShot = undefi
                 <ShotSpeedDial
                   shot={historyShot || currentShot}
                   onSave={addShotToHistory}
-                  onDelete={handleOnDelete}
+                  onDelete={removeShotFromHistory}
                 />
               </Box>
             )}

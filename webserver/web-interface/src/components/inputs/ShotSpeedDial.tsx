@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import SpeedDial from '@mui/material/SpeedDial';
@@ -10,25 +10,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import { Shot } from '../../models/models';
-
-// const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
-//   position: 'absolute',
-//   '&.MuiSpeedDial-directionUp, &.MuiSpeedDial-directionLeft': {
-//     bottom: theme.spacing(2),
-//     right: theme.spacing(2),
-//   },
-//   '&.MuiSpeedDial-directionDown, &.MuiSpeedDial-directionRight': {
-//     top: theme.spacing(2),
-//     left: theme.spacing(2),
-//   },
-// }));
-
-const actions = [
-  { icon: <DeleteIcon />, name: 'Delete' },
-  { icon: <SaveIcon />, name: 'Save' },
-  { icon: <CloudQueueIcon />, name: 'CloudUpload' },
-  { icon: <ShareIcon />, name: 'Share' },
-];
+import useShotDataStore from '../../state/ShotDataStore';
 
 export interface ShotSpeedDialProps {
   shot: Shot;
@@ -37,29 +19,15 @@ export interface ShotSpeedDialProps {
 }
 
 export default function ShotSpeedDial({ shot, onSave, onDelete }: ShotSpeedDialProps) {
-  const handleClick = useCallback((actionName: string) => {
-    console.log(`Clicked on ${actionName}`);
-    if (actionName === 'Save') {
-      onSave(shot);
-    } else if (actionName === 'Delete') {
-      onDelete(shot);
-    } else if (actionName === 'CloudUpload') {
-      // TO-DO: Upload to some cloud provider maybe (Visualiser or maybe another one is avail)
-    } else if (actionName === 'Share') {
-      // TO-DO: Share a profile with the community aka profile export
-    }
-  }, [onSave, onDelete, shot]);
+  const { shotHistory } = useShotDataStore();
+  const shotAlreadyInHistory = useMemo(() => shotHistory.find((s) => s.time === shot.time), [shot, shotHistory]);
 
   return (
     <SpeedDial ariaLabel="speed-dial" icon={<MenuOpenIcon />} direction="left">
-      {actions.map((action) => (
-        <SpeedDialAction
-          key={action.name}
-          icon={action.icon}
-          tooltipTitle={action.name}
-          onClick={() => handleClick(action.name)}
-        />
-      ))}
+      {shotAlreadyInHistory && <SpeedDialAction icon={<DeleteIcon />} tooltipTitle="Delete" onClick={() => onDelete(shot)} />}
+      {!shotAlreadyInHistory && <SpeedDialAction icon={<SaveIcon />} tooltipTitle="Save" onClick={() => onSave(shot)} />}
+      <SpeedDialAction icon={<CloudQueueIcon />} tooltipTitle="Cloud Upload" />
+      <SpeedDialAction icon={<ShareIcon />} tooltipTitle="Share" />
     </SpeedDial>
   );
 }
