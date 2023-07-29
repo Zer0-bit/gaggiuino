@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import SpeedDial from '@mui/material/SpeedDial';
@@ -10,8 +10,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import useShotDataStore from '../../state/ShotDataStore';
-import { Shot, ShotSnapshot } from '../../models/models';
-import ShotHistory from '../shot/ShotHistory';
+import { Shot } from '../../models/models';
 
 const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
   position: 'absolute',
@@ -32,16 +31,15 @@ const actions = [
   { icon: <ShareIcon />, name: 'Share' },
 ];
 
-export default function SpeedDialInput() {
-  const { addShotToHistory, removeShotFromHistory, currentShot, shotHistory,  } = useShotDataStore();
-  const handleClick = (actionName: string) => {
+export default function SpeedDialInput({ shot }: {shot: Shot}) {
+  const { addShotToHistory, removeShotFromHistory } = useShotDataStore();
+
+  const handleClick = useCallback((actionName: string) => {
     if (actionName === 'Save') {
-      addShotToHistory(currentShot);
+      addShotToHistory(shot);
       console.log(`Clicked on ${actionName}`);
     } else if (actionName === 'Delete') {
-      const shotHistory: Shot[] = useShotDataStore(state => state.shotHistory);
-      const selectedShot: Shot | undefined  = shotHistory.find((shot: Shot) => shot.time === currentShot.time);;
-      useShotDataStore.getState().removeShotFromHistory(selectedShot);
+      removeShotFromHistory(shot);
       console.log(`Clicked on ${actionName}`);
     } else if (actionName === 'CloudUpload') {
       // TO-DO: Upload to some cloud provider maybe (Visualiser or maybe another one is avail)
@@ -50,7 +48,7 @@ export default function SpeedDialInput() {
       // TO-DO: Share a profile with the community aka profile export
       console.log(`Clicked on ${actionName}`);
     }
-  };
+  }, [addShotToHistory, removeShotFromHistory, shot]);
 
   return (
     <Box sx={{ transform: 'translateZ(0px)', flexGrow: 1 }}>

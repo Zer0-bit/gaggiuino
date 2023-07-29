@@ -11,6 +11,7 @@ import {
 } from '../../components/chart/StatBox';
 import useShotDataStore from '../../state/ShotDataStore';
 import { Shot, ShotSnapshot } from '../../models/models';
+import SpeedDialInput from '../../components/inputs/SpeedDial';
 
 interface ShotDialogProps {
   open?: boolean;
@@ -19,7 +20,7 @@ interface ShotDialogProps {
 }
 
 export default function ShotDialog({ open = false, setOpen, historyShot = undefined }: ShotDialogProps) {
-  const { latestShotDatapoint } = useShotDataStore();
+  const { latestShotDatapoint, currentShot, shotRunning } = useShotDataStore();
   const theme = useTheme();
   const fullHeightGraph = `calc(100vh - 64px - ${theme.spacing(1)})`;
   const lessHeightGraph = `calc(75vh - 64px - ${theme.spacing(1)})`;
@@ -60,6 +61,7 @@ export default function ShotDialog({ open = false, setOpen, historyShot = undefi
           <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
             {historyShot && <ShotChart data={historyShot.datapoints} onHover={setActiveDatapoint} />}
             {!historyShot && <ShotChart newDataPoint={latestShotDatapoint} onHover={setActiveDatapoint} />}
+            {!shotRunning && <SpeedDialInput shot={historyShot || currentShot} />}
           </Box>
         </Grid>
         <Grid xs={12} sm={3} sx={{ height: { xs: '25vh', sm: fullHeightGraph }, overflow: 'scroll' }}>

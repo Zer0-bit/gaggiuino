@@ -5,16 +5,31 @@ import { Shot, ShotSnapshot } from '../models/models';
 interface ShotDataStore {
   latestShotDatapoint: ShotSnapshot,
   currentShot: Shot,
+  shotRunning: boolean,
   shotHistory: Shot[],
   startNewShot: () => void,
   addShotDatapoint: (shotDatapoint: ShotSnapshot) => void,
   addShotToHistory: (shot: Shot) => void,
   removeShotFromHistory: (shot: Shot) => void,
+  setShotRunning: (value: boolean) => void,
 }
 
 // This constant defines a buffer of time to prevent handling of out-of-order
 // socket messages.
 const OUT_OF_ORDER_BUFFER_TOLERANCE = 500; // msec
+const MAX_SHOT_HISTORY_LENGTH = 20;
+const EMPTY_SNAPSHOT:ShotSnapshot = {
+  timeInShot: 0,
+  pressure: 0,
+  pumpFlow: 0,
+  weightFlow: 0,
+  temperature: 0,
+  shotWeight: 0,
+  waterPumped: 0,
+  targetTemperature: 0,
+  targetPumpFlow: 0,
+  targetPressure: 0,
+};
 
 function isDatapointOutOfOrder(
   previousShotDatapoint: ShotSnapshot,
@@ -40,32 +55,26 @@ const useShotDataStore = create<ShotDataStore>()(
   devtools(
     persist(
       (set, get) => ({
-        latestShotDatapoint: {
-          timeInShot: 0,
-          pressure: 0,
-          pumpFlow: 0,
-          weightFlow: 0,
-          temperature: 0,
-          shotWeight: 0,
-          waterPumped: 0,
-          targetTemperature: 0,
-          targetPumpFlow: 0,
-          targetPressure: 0,
-        },
-        currentShot: { time: 0, datapoints: [] },
+        latestShotDatapoint: EMPTY_SNAPSHOT,
+        shotRunning: false,
+        currentShot: { time: Date.now(), datapoints: [] },
         shotHistory: [],
 
         startNewShot: () => set(() => ({ currentShot: { time: Date.now(), datapoints: [] } })),
 
         addShotToHistory: (shot:Shot) => set((state) => {
-          if (isShotLongEnoughToBeStored(shot)) {
-            const updatedShotHistory = [...state.shotHistory, shot];
-            while (updatedShotHistory.length > 10) {
-              updatedShotHistory.shift(); // This will remove the first element from the array
-            }
-            return { shotHistory: updatedShotHistory };
+          if (!isShotLongEnoughToBeStored(shot)) {
+            return {};
           }
-          return {};
+          if (state.shotHistory.find((s) => s.time === shot.time)) {
+            return {};
+          }
+
+          const updatedShotHistory = [...state.shotHistory, shot];
+          while (updatedShotHistory.length > MAX_SHOT_HISTORY_LENGTH) {
+            updatedShotHistory.shift(); // This will remove the first element from the array
+          }
+          return { shotHistory: updatedShotHistory };
         }),
 
         removeShotFromHistory: (shot: Shot) => set((state) => {
@@ -85,17 +94,28 @@ const useShotDataStore = create<ShotDataStore>()(
             return;
           }
 
+          get().setShotRunning(true);
+
           if (isNewShotStarted(get().currentShot, shotDatapoint)) {
-            if (get().currentShot.time !== useShotDataStore().shotHistory[0].time ) {
-              get().addShotToHistory(get().currentShot);
-            }
-            // get().addShotToHistory(get().currentShot);
+            get().addShotToHistory(get().currentShot);
             get().startNewShot();
           }
           const { currentShot } = get();
           const shot = { ...(currentShot) };
           shot.datapoints.push(shotDatapoint);
           set(() => ({ currentShot: shot, latestShotDatapoint: shotDatapoint }));
+        },
+
+        setShotRunning: (value: boolean) => {
+          const previousValue = get().shotRunning;
+
+          if (previousValue === value) return;
+          set(() => ({ shotRunning: value }));
+
+          // Shot just stopped. Add to history
+          if (previousValue && !value) {
+            get().addShotToHistory(get().currentShot);
+          }
         },
       }),
       {

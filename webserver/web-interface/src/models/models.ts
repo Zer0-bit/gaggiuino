@@ -53,7 +53,7 @@ export interface LogMessage {
 
 export interface Shot {
   time: number,
-  datapoints: Array<ShotSnapshot>,
+  datapoints: ShotSnapshot[],
 }
 
 export interface BoilerSettings {
