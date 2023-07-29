@@ -8,8 +8,6 @@
 
 class SavedProfileConverter : public NanoPb::Converter::MessageConverter<SavedProfileConverter, SavedProfile, SavedProfileDto, SavedProfileDto_fields> {
 public:
-  // using PhaseArrayConverter = NanoPb::Converter::ArrayConverter<PhaseConverter, std::vector<Phase>>;
-
   static ProtoType encoderInit(const LocalType& local) {
     return SavedProfileDto{
       .id = local.id,
