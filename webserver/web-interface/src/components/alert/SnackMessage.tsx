@@ -56,11 +56,13 @@ function SnackNotification({ notification = undefined }: SnackNotificationProps)
       key={key}
       open={open}
       autoHideDuration={3000}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       onClose={handleClose}
       sx={{
-        top: `${theme.spacing(1)} !important`,
-        minWidth: '50vw',
+        top: {
+          xs: `calc(56px + ${theme.spacing(1)}) !important`,
+          sm: `calc(72px + ${theme.spacing(1)}) !important`,
+        },
         '& .MuiPaper-root': {
           py: theme.spacing(1),
           px: theme.spacing(2),
