@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useMemo, useRef, useState,
+  useMemo, useRef,
 } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import {
