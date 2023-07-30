@@ -78,6 +78,11 @@ void onMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>& da
     ProtoSerializer::deserialize<McuCommsRequestDataConverter>(data, dataRequest);
     onDataRequest(dataRequest.type);
   }
+  case McuCommsMessageType::MCUC_DATA_NOTIFICATION: {
+    Notification notification;
+    ProtoSerializer::deserialize<NotificationConverter>(data, notification);
+    onNotification(notification);
+  }
   default:
     break;
   }

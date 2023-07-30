@@ -51,6 +51,9 @@ void onProfileRequested() {
   LOG_INFO("STM request active profile");
   stmCommsSendProfile(state::getActiveProfile());
 }
+void onNotification(const Notification& notification) {
+  wsSendNotification(notification);
+}
 
 // ------------------------------------------------------------------------
 // ------------------ Handle state updated callbacks ----------------------

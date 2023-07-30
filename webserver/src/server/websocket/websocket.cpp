@@ -10,13 +10,15 @@
 #include "../json/json_system_state_converters.h"
 #include "../json/json_profile_converters.h"
 #include "../json/json_settings_converters.h"
+#include "../json/json_notification_converters.h"
 
 const std::string WS_MSG_SENSOR_DATA = "sensor_data_update";
 const std::string WS_MSG_SHOT_DATA = "shot_data_update";
 const std::string WS_MSG_LOG = "log_record";
-const std::string WS_MSG_SYSTEM_STATE ="sys_state";
-const std::string WS_MSG_ACTIVE_PROFILE_UPDATED ="act_prof_update";
-const std::string WS_MSG_SETTINGS_UPDATED ="settings_update";
+const std::string WS_MSG_SYSTEM_STATE = "sys_state";
+const std::string WS_MSG_ACTIVE_PROFILE_UPDATED = "act_prof_update";
+const std::string WS_MSG_SETTINGS_UPDATED = "settings_update";
+const std::string WS_MSG_NOTIFICATION = "notification";
 
 namespace websocket {
   AsyncWebSocket wsServer("/ws");
@@ -179,7 +181,7 @@ void wsSendSystemStateToClients(const SystemState& systemState) {
 }
 
 void wsSendActiveProfileUpdated() {
-    if (!websocket::lockJson()) return;
+  if (!websocket::lockJson()) return;
   JsonObject root = websocket::jsonDoc.to<JsonObject>();
 
   root["action"] = WS_MSG_ACTIVE_PROFILE_UPDATED;
@@ -207,3 +209,19 @@ void wsSendSettingsUpdated() {
 
   websocket::wsServer.textAll(serializedMsg.c_str(), serializedMsg.length());
 };
+
+void wsSendNotification(const Notification& notification) {
+  if (!websocket::lockJson()) return;
+  JsonObject root = websocket::jsonDoc.to<JsonObject>();
+
+  root["action"] = WS_MSG_NOTIFICATION;
+  JsonObject data = root.createNestedObject("data");
+  json::mapNotificationToJson(notification, data);
+
+  std::string serializedMsg; // create temp buffer
+  serializeJson(root, serializedMsg);  // serialize to buffer
+
+  websocket::unlockJson();
+
+  websocket::wsServer.textAll(serializedMsg.c_str(), serializedMsg.length());
+}

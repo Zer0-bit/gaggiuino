@@ -137,3 +137,15 @@ export function areGaggiaSettingsEqual(settings1: GaggiaSettings, settings2: Gag
         && areBrewSettingsEqual(settings1.brew, settings2.brew)
         && areLedSettingsEqual(settings1.led, settings2.led);
 }
+
+export enum NotificationType {
+  INFO,
+  SUCCESS,
+  ERROR,
+  WARN,
+}
+
+export interface Notification {
+  type: NotificationType,
+  message: string,
+}

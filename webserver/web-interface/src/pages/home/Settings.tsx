@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Card,
   Container,
@@ -20,29 +20,29 @@ import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
 import ProgressBar from '../../components/inputs/ProgressBar';
 import TabbedSettings from '../../components/settings/tabs_settings';
 import useSettingsStore from '../../state/SettingsStore';
-import SnackNotification, { SnackMessage } from '../../components/alert/SnackMessage';
-import { GaggiaSettings } from '../../models/models';
+import { GaggiaSettings, NotificationType } from '../../models/models';
+import useNotificationStore from '../../state/NotificationDataStore';
 
 export default function Settings() {
   const theme = useTheme();
   const { settings, updateSettingsAndSync, persistSettings } = useSettingsStore();
-  const [alertMessage, setAlertMessage] = useState<SnackMessage>();
+  const { updateLatestNotification } = useNotificationStore();
 
   async function handlePersistSettings() {
     try {
       await persistSettings();
-      setAlertMessage({ content: 'Successfully persisted settings', level: 'success' });
+      updateLatestNotification({ message: 'Successfully persisted settings', type: NotificationType.SUCCESS });
     } catch (e) {
-      setAlertMessage({ content: 'Failed to persisted settings', level: 'error' });
+      updateLatestNotification({ message: 'Failed to persisted settings', type: NotificationType.ERROR });
     }
   }
 
   async function handleUpdateRemoteSettings(newSettings: GaggiaSettings) {
     try {
       await updateSettingsAndSync(newSettings);
-      setAlertMessage({ content: 'Updated running settings.', level: 'success' });
+      updateLatestNotification({ message: 'Updated running settings.', type: NotificationType.SUCCESS });
     } catch (e) {
-      setAlertMessage({ content: 'Failed to update settings', level: 'error' });
+      updateLatestNotification({ message: 'Failed to update settings', type: NotificationType.ERROR });
     }
   }
 
@@ -109,7 +109,6 @@ export default function Settings() {
             </Card>
           </Grid>
         </Grid>
-        <SnackNotification message={alertMessage} />
       </Container>
     </div>
   );
