@@ -51,14 +51,8 @@ export function GaugeChart({
   flashAfterValue = undefined,
 }: GaugeChartProps) {
   const theme = useTheme();
-  const [shouldFlash, setShouldFlash] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const shouldFlash = useMemo(() => flashAfterValue !== undefined && value > flashAfterValue, [value, flashAfterValue]);
   const chartRef = useRef<ChartJS<'doughnut'>>();
-
-  useEffect(() => {
-    const newShouldFlash = flashAfterValue !== undefined && value > flashAfterValue;
-    setShouldFlash(newShouldFlash);
-  }, [value, flashAfterValue]);
 
   const options: ChartOptions<'doughnut'> = useMemo(() => ({
     cutout: '89%',
@@ -97,19 +91,14 @@ export function GaugeChart({
 
   }), [primaryColor, unit, shouldFlash, theme]);
 
-  // update data without re-render of the whole component
-  useEffect(() => {
-    if (chartRef.current?.data.datasets[0]) {
-      chartRef.current.data.datasets[0].data = [value, Math.max(0, maxValue - value)];
-      chartRef.current.update();
-    }
+  const data: ChartData<'doughnut'> = useMemo(() => {
+    const newValue = value > 100 ? Math.round(value) : value;
+    return {
+      datasets: [{
+        data: [newValue, Math.max(0, maxValue - newValue)],
+      }],
+    };
   }, [value, maxValue]);
-
-  const data: ChartData<'doughnut'> = useMemo(() => ({
-    datasets: [{
-      data: [0, 0],
-    }],
-  }), []);
 
   return (
     <>

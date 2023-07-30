@@ -213,12 +213,16 @@ export function DelayedSwitch({ checked, onChange }: DelayedSwitchProps) {
   const [checkedInternal, setCheckedInternal] = useState(checked);
   useEffect(() => setCheckedInternal(checked), [checked]);
 
-  const handleToggle = (value: boolean) => {
+  const handleToggle = useCallback((value: boolean) => {
     setCheckedInternal(value);
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       onChange(value);
     }, 150); // approximate duration of the MUI switch animation
-  };
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [onChange]);
 
   return (
     <Box>

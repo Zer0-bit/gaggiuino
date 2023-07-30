@@ -339,6 +339,7 @@ function OpmodeButton({
     <Box sx={{
       p: { xs: 0.5, sm: 1 },
       borderRadius: theme.spacing(1),
+      background: (theme.palette.mode === 'light') ? 'rgba(0, 0, 0, 0.4)' : 'rgba(25, 25, 25, 0.2)',
       width: '100%',
       maxWidth: '120px',
       border: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
@@ -365,6 +366,7 @@ function OpmodeButton({
             flexDirection: 'column',
             justifyContent: 'space-around',
             alignItems: 'center',
+            color: 'rgba(255, 255, 255, 0.8)',
             py: { xs: 1, sm: 2 },
           }}
           >
