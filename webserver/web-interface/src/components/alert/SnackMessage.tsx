@@ -1,5 +1,5 @@
 import {
-  Alert, AlertColor, Snackbar, SnackbarCloseReason,
+  Alert, AlertColor, Snackbar, SnackbarCloseReason, useTheme,
 } from '@mui/material';
 import React, {
   ReactNode, useCallback, useEffect, useState,
@@ -35,6 +35,7 @@ function SnackNotification({ notification = undefined }: SnackNotificationProps)
   const [messageInternal, setMessageInternal] = useState<SnackMessage | undefined>();
   const [open, setOpen] = useState(false);
   const [key, setKey] = useState(0);
+  const theme = useTheme();
 
   useEffect(() => {
     setKey((prevKey) => prevKey + 1);
@@ -55,8 +56,16 @@ function SnackNotification({ notification = undefined }: SnackNotificationProps)
       key={key}
       open={open}
       autoHideDuration={3000}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       onClose={handleClose}
+      sx={{
+        top: `${theme.spacing(1)} !important`,
+        minWidth: '50vw',
+        '& .MuiPaper-root': {
+          py: theme.spacing(1),
+          px: theme.spacing(2),
+        },
+      }}
     >
       <Alert onClose={handleClose} severity={messageInternal?.level} sx={{ width: '100%' }}>
         {messageInternal?.content}
