@@ -17,7 +17,7 @@ interface ShotDataStore {
 // This constant defines a buffer of time to prevent handling of out-of-order
 // socket messages.
 const OUT_OF_ORDER_BUFFER_TOLERANCE = 500; // msec
-const MAX_SHOT_HISTORY_LENGTH = 20;
+const MAX_SHOT_HISTORY_LENGTH = 50;
 const MIN_SHOT_DURATION_TO_SAVE_IN_HISTORY = 14000; // msec
 
 const EMPTY_SNAPSHOT:ShotSnapshot = {
