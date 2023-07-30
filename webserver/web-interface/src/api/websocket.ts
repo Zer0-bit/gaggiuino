@@ -6,7 +6,7 @@ import { Options } from 'react-use-websocket/dist/lib/types';
 import useSensorStateStore from '../state/SensorStateStore';
 import {
   GaggiaSettings,
-  LogMessage, SensorState, ShotSnapshot, SystemState,
+  LogMessage, Notification, SensorState, ShotSnapshot, SystemState,
 } from '../models/models';
 import useSystemStateStore from '../state/SystemStateStore';
 import useLogMessageStore from '../state/LogStore';
@@ -14,6 +14,7 @@ import useShotDataStore from '../state/ShotDataStore';
 import useProfileStore from '../state/ProfileStore';
 import { Profile } from '../models/profile';
 import useSettingsStore from '../state/SettingsStore';
+import useNotificationStore from '../state/NotificationDataStore';
 
 enum WsActionType {
     SensorStateUpdate = 'sensor_data_update',
@@ -22,6 +23,7 @@ enum WsActionType {
     SystemStateUpdate = 'sys_state',
     ActiveProfileUpdated ='act_prof_update',
     SettingsUpdated ='settings_update',
+    NotificationReceived = 'notification',
 }
 
 // Time after which, if we didn't receive any data, the websocket will try to reconnect
@@ -47,6 +49,7 @@ const useWebSocket = (url:string) => {
   const { addShotDatapoint, setShotRunning } = useShotDataStore();
   const { updateLocalActiveProfile } = useProfileStore();
   const { updateLocalSettings } = useSettingsStore();
+  const { updateLatestNotification } = useNotificationStore();
 
   const [connected, setConnected] = useState(true);
   const [, setMessageTimeoutId] = useState<NodeJS.Timeout>();
@@ -103,10 +106,13 @@ const useWebSocket = (url:string) => {
       case WsActionType.SettingsUpdated:
         updateLocalSettings(messageData.data as GaggiaSettings);
         break;
+      case WsActionType.NotificationReceived:
+        updateLatestNotification(messageData.data as Notification);
+        break;
     }
   }, [lastJsonMessage, updateLocalSettings, updateLocalSensorState,
     updateLocalSystemState, addMessage, addShotDatapoint, updateLocalActiveProfile,
-    setShotRunning]);
+    setShotRunning, updateLatestNotification]);
 };
 
 export default useWebSocket;

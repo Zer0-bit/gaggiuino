@@ -6,6 +6,7 @@
 #include "string"
 #include "sensors_state.h"
 #include "system_state.h"
+#include "notification_message.h"
 
 void setupWebSocket(AsyncWebServer& server);
 void wsCleanup();
@@ -15,5 +16,6 @@ void wsSendLog(std::string log, std::string source = "webserver");
 void wsSendSystemStateToClients(const SystemState& systemState);
 void wsSendActiveProfileUpdated();
 void wsSendSettingsUpdated();
+void wsSendNotification(const Notification& notification);
 
 #endif

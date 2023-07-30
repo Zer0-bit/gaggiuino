@@ -1,57 +1,57 @@
+import LocalCarWashIcon from '@mui/icons-material/LocalCarWash';
 import ScaleIcon from '@mui/icons-material/Scale';
 import ShowerIcon from '@mui/icons-material/Shower';
-import LocalCarWashIcon from '@mui/icons-material/LocalCarWash';
 import {
   Box,
   Button,
+  ButtonBase,
   Container,
   Unstable_Grid2 as Grid,
   Paper,
   Skeleton,
+  Tab,
+  Tabs,
   TextField,
+  Theme,
   Typography,
+  alpha,
   darken,
   debounce,
   lighten,
   useMediaQuery,
   useTheme,
-  Tab,
-  Tabs,
-  alpha,
-  Theme,
-  ButtonBase,
 } from '@mui/material';
 import React, {
   ReactNode, useCallback, useMemo, useState,
 } from 'react';
 import GaugeChart from '../../components/chart/GaugeChart';
 import GaugeLiquid from '../../components/chart/GaugeLiquid';
-import AspectRatioBox from '../../components/layout/AspectRatioBox';
-import { ProfileReview } from '../../components/profile/ProfilePreview';
-import ShotHistory from '../../components/shot/ShotHistory';
-import useProfileStore from '../../state/ProfileStore';
-import useSensorStateStore from '../../state/SensorStateStore';
-import useShotDataStore from '../../state/ShotDataStore';
-import SnackNotification, { SnackMessage } from '../../components/alert/SnackMessage';
-import { Profile } from '../../models/profile';
-import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
-import {
-  GaggiaSettings, OperationMode, SensorState,
-} from '../../models/models';
-import useSystemStateStore from '../../state/SystemStateStore';
 import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
 import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
+import AspectRatioBox from '../../components/layout/AspectRatioBox';
+import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
+import { ProfileReview } from '../../components/profile/ProfilePreview';
+import ShotHistory from '../../components/shot/ShotHistory';
+import {
+  GaggiaSettings, NotificationType, OperationMode, SensorState,
+} from '../../models/models';
+import { Profile } from '../../models/profile';
+import useProfileStore from '../../state/ProfileStore';
+import useSensorStateStore from '../../state/SensorStateStore';
 import useSettingsStore from '../../state/SettingsStore';
+import useShotDataStore from '../../state/ShotDataStore';
+import useSystemStateStore from '../../state/SystemStateStore';
+import useNotificationStore from '../../state/NotificationDataStore';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
 
 function Home() {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
-  const [alertMessage, setAlertMessage] = useState<SnackMessage>();
 
   const { sensorState } = useSensorStateStore();
+  const { updateLatestNotification } = useNotificationStore();
   const { updateLocalOperationMode } = useSystemStateStore();
   const { settings, updateLocalSettings, updateSettingsAndSync } = useSettingsStore();
   const {
@@ -64,9 +64,9 @@ function Home() {
   const handleProfileUpdate = useCallback(debounce(async (newProfile: Profile) => {
     try {
       await updateActiveProfileAndSync(newProfile);
-      setAlertMessage({ content: 'Updated active profile.', level: 'success' });
+      updateLatestNotification({ message: 'Updated active profile.', type: NotificationType.SUCCESS });
     } catch (e) {
-      setAlertMessage({ content: 'Failed to update active profile', level: 'error' });
+      updateLatestNotification({ message: 'Failed to update active profile.', type: NotificationType.ERROR });
     }
   }, 1000), [updateActiveProfileAndSync]);
 
@@ -76,9 +76,9 @@ function Home() {
       await persistActiveProfile();
       fetchAvailableProfiles(); // Fetch profiles to update list names
 
-      setAlertMessage({ content: 'Persisted active profile', level: 'success' });
+      updateLatestNotification({ message: 'Persisted active profile.', type: NotificationType.SUCCESS });
     } catch (e) {
-      setAlertMessage({ content: 'Failed to persist active profile', level: 'error' });
+      updateLatestNotification({ message: 'Failed to persist active profile.', type: NotificationType.ERROR });
     }
   }, 1000), [persistActiveProfile]);
 
@@ -119,7 +119,7 @@ function Home() {
       const mode = await getOperationMode();
       updateLocalOperationMode(mode);
     } catch (e) {
-      setAlertMessage({ content: 'Failed to change operation mode', level: 'error' });
+      updateLatestNotification({ message: 'Failed to change operation mode', type: NotificationType.ERROR });
     }
   }, 500), []);
 
@@ -156,7 +156,6 @@ function Home() {
           />
         </Grid>
       </Grid>
-      <SnackNotification message={alertMessage} />
     </Container>
   );
 }

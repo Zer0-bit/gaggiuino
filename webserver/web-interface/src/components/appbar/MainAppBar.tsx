@@ -22,6 +22,8 @@ import ShotDialog from '../../pages/home/ShotDialog';
 import useShotDataStore from '../../state/ShotDataStore';
 import useSystemStateStore from '../../state/SystemStateStore';
 import formatTime from '../../models/time_format';
+import SnackNotification from '../alert/SnackMessage';
+import useNotificationStore from '../../state/NotificationDataStore';
 
 const menuItems: { [key: string]: { label: string; icon: JSX.Element } } = {
   '/': { label: 'Home', icon: <CoffeeIcon /> },
@@ -163,6 +165,7 @@ function MainAppBar() {
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
   const { latestShotDatapoint } = useShotDataStore();
   const { timeAlive } = useSystemStateStore().systemState;
+  const { latestNotification } = useNotificationStore();
 
   useEffect(() => {
     if (latestShotDatapoint.timeInShot > 0) setShotDialogOpen(true);
@@ -229,6 +232,7 @@ function MainAppBar() {
       </Toolbar>
       <Box />
       {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
+      <SnackNotification notification={latestNotification} />
     </AppBar>
   );
 }

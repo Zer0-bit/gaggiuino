@@ -4,6 +4,7 @@
 #include "mcu_comms.h"
 #include "gaggia_settings.h"
 #include "system_state.h"
+#include "notification_message.h"
 
 void stmCommsInit(HardwareSerial& serial);
 void stmCommsReadData();
@@ -24,5 +25,6 @@ void onScalesTareReceived();
 void onGaggiaSettingsRequested();
 void onProfileRequested();
 void onSystemStateReceived(const SystemState& systemState);
+void onNotification(const Notification& notification);
 
 #endif
