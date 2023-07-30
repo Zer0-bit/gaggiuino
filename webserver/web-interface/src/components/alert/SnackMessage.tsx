@@ -67,7 +67,7 @@ function SnackNotification({ notification = undefined }: SnackNotificationProps)
         },
       }}
     >
-      <Alert onClose={handleClose} severity={messageInternal?.level} sx={{ width: '100%' }}>
+      <Alert onClose={handleClose} severity={messageInternal?.level}>
         {messageInternal?.content}
       </Alert>
     </Snackbar>
