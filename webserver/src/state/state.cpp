@@ -7,6 +7,7 @@ namespace state {
   Profile activeProfile;
   ProfileId activeProfileId;
   OperationMode operationMode;
+  SensorState sensorState;
 
   void init() {
     currentSettings = persistence::getSettings();
@@ -23,6 +24,10 @@ namespace state {
 
   const GaggiaSettings& getSettings() {
     return currentSettings;
+  }
+
+  const SensorState& getSensor() {
+    return sensorState;
   }
 
   // Updates the instance of `currentSettings`. Does not persist to NVS.

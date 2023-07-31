@@ -86,10 +86,8 @@ export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined 
 
   return (
     <>
-      <Box>
-        <ProfileEditTitle profile={editingProfile} onUpdated={setEditingProfile} onDone={onDone} onCancel={onCancel} />
-      </Box>
-      <Box>
+      <ProfileEditTitle profile={editingProfile} onUpdated={setEditingProfile} onDone={onDone} onCancel={onCancel} />
+      <>
         <Box position="relative">
           <ProfileChart
             profile={editingProfile}
@@ -98,17 +96,15 @@ export function ProfileEdit({ profile, onDone = undefined, onCancel = undefined 
           />
         </Box>
         <GlobalRestrictions profile={editingProfile} />
-      </Box>
-      <Box>
-        <PhaseManagementBar
-          profile={editingProfile}
-          phaseIndexSelected={phaseIndexSelected}
-          onCreatePhase={createNewPhase}
-          onDeletePhase={deletePhase}
-          onGlobalClicked={() => handleGlobalsVisibleChange(!globalsSectionVisible)}
-          onUpdatePhaseIndexSelected={handlePhaseIndexSelected}
-        />
-      </Box>
+      </>
+      <PhaseManagementBar
+        profile={editingProfile}
+        phaseIndexSelected={phaseIndexSelected}
+        onCreatePhase={createNewPhase}
+        onDeletePhase={deletePhase}
+        onGlobalClicked={() => handleGlobalsVisibleChange(!globalsSectionVisible)}
+        onUpdatePhaseIndexSelected={handlePhaseIndexSelected}
+      />
       {globalsSectionVisible && (
         <GlobalsSection
           profile={editingProfile}

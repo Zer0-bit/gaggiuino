@@ -173,7 +173,7 @@ function LeftSection() {
       </Box>
     </>
   );
-}
+};
 
 interface MiddleSectionProps {
   activeProfile: Profile | null,
@@ -182,16 +182,15 @@ interface MiddleSectionProps {
   handleNewProfileSelected: (id: number) => void,
 }
 
-function MiddleSection({
+const MiddleSection: React.FC<MiddleSectionProps> = React.memo(({
   activeProfile, handlePersistActiveProfile, handleProfileUpdate, handleNewProfileSelected,
-}: MiddleSectionProps) {
+}) => {
   const theme = useTheme();
 
   return (
-    <Box>
-      <Grid container spacing={1}>
-        <Grid xs={12}>
-          {activeProfile && (
+    <Grid container spacing={1}>
+      <Grid xs={12}>
+        {activeProfile ? (
           <Paper sx={{ padding: theme.spacing(1), position: 'relative' }} elevation={1}>
             <ProfileReview
               profile={activeProfile}
@@ -199,18 +198,18 @@ function MiddleSection({
               onChange={handleProfileUpdate}
             />
           </Paper>
-          )}
-          {!activeProfile && <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />}
-        </Grid>
-        <Grid xs={12}>
-          <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
-            {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
-          </Paper>
-        </Grid>
+        ) : (
+          <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />
+        )}
       </Grid>
-    </Box>
+      <Grid xs={12}>
+        <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+          {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
+        </Paper>
+      </Grid>
+    </Grid>
   );
-}
+});
 
 interface RightSectionProps{
   handleBrewTempUpdate: (value: number) => void;
@@ -238,9 +237,14 @@ function RightSection({
 
   return (
     <>
-      <Box sx={{
-        pb: 1, pl: 0.5, pr: 0.5, borderRadius: '50%', backgroundColor: colorScaling(theme)(theme.palette.background.default, 0.4),
-      }}
+      <Box
+        sx={{
+          pb: 1,
+          pl: 0.5,
+          pr: 0.5,
+          borderRadius: '50%',
+          backgroundColor: colorScaling(theme)(theme.palette.background.default, 0.4),
+        }}
       >
         <AspectRatioBox ratio={1}>
           <MemoTemperatureGauge targetTemperature={targetTemp} />
@@ -275,7 +279,7 @@ function RightSection({
       </Grid>
     </>
   );
-}
+};
 
 function getBrewBtnState(operationMode: OperationMode) {
   if (operationMode === OperationMode.FLUSH) return SwitchLedState.ON;

@@ -25,6 +25,7 @@ export interface SensorState {
     brewActive: boolean;
     steamActive: boolean;
     hotWaterSwitchState: boolean;
+    tarePending: boolean,
     temperature: number;
     waterTemperature: number;
     pressure: number;

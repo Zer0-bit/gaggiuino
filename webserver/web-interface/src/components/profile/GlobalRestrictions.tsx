@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Box, Typography, useTheme,
 } from '@mui/material';
@@ -8,8 +8,9 @@ import WaterIcon from '@mui/icons-material/Water';
 import { Profile } from '../../models/profile';
 import formatTime from '../../models/time_format';
 
-export function GlobalRestrictions({ profile }: {profile: Profile}) {
+export function GlobalRestrictions({ profile }: { profile: Profile }) {
   const theme = useTheme();
+  const { weight, waterPumped, time } = profile.globalStopConditions || {};
   return (
     <Box
       sx={{
@@ -25,9 +26,9 @@ export function GlobalRestrictions({ profile }: {profile: Profile}) {
         display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', sm: 'flex-end' }, columnGap: theme.spacing(2), flexWrap: 'wrap',
       }}
       >
-        <WeightRestriction value={profile.globalStopConditions?.weight} />
-        <WaterPumpedRestriction value={profile.globalStopConditions?.waterPumped} />
-        <TimeRestriction value={profile.globalStopConditions?.time} />
+        <WeightRestriction value={weight} />
+        <WaterPumpedRestriction value={waterPumped} />
+        <TimeRestriction value={time} />
       </Box>
     </Box>
   );
@@ -39,17 +40,7 @@ export interface GlobalRestrictionProps {
 
 export function GlobalRestriction({ icon: Icon, value, color = undefined }: GlobalRestrictionProps) {
   const theme = useTheme();
-  const [finalColor, setFinalColor] = useState(theme.palette.text.primary);
-
-  useEffect(() => {
-    if (!value) {
-      setFinalColor(theme.palette.text.disabled);
-    } else if (!color) {
-      setFinalColor(theme.palette.text.primary);
-    } else {
-      setFinalColor(color);
-    }
-  }, [color, value, setFinalColor, theme]);
+  const finalColor = !value ? theme.palette.text.disabled : color || theme.palette.text.primary;
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', columnGap: theme.spacing(0.5) }}>

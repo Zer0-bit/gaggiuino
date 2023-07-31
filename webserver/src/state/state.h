@@ -13,6 +13,7 @@ namespace state {
 // ---------------------------------- SETTINGS -------------------------------------
 // ---------------------------------------------------------------------------------
   const GaggiaSettings& getSettings();
+  const SensorState& getSensor();
   void updateAllSettings(const GaggiaSettings& settings);
   void updateBrewSettings(const BrewSettings& settings);
   void updateBoilerSettings(const BoilerSettings& settings);

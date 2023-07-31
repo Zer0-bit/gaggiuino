@@ -99,6 +99,7 @@ public:
       .brewActive = local.brewActive,
       .steamActive = local.steamActive,
       .hotWaterSwitchState = local.hotWaterSwitchState,
+      .tarePending = local.tarePending,
       .temperature = local.temperature,
       .waterTemperature = local.waterTemperature,
       .pressure = local.pressure,
@@ -117,6 +118,7 @@ public:
     local.brewActive = proto.brewActive;
     local.steamActive = proto.steamActive;
     local.hotWaterSwitchState = proto.hotWaterSwitchState;
+    local.tarePending = proto.tarePending,
     local.temperature = proto.temperature;
     local.waterTemperature = proto.waterTemperature;
     local.pressure = proto.pressure;
