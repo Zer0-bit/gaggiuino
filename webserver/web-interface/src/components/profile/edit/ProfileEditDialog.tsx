@@ -1,9 +1,9 @@
 import React from 'react';
-import { Dialog } from '@mui/material';
+import { Dialog, Slide } from '@mui/material';
 import { Profile } from '../../../models/profile';
 import { ProfileEdit } from './ProfileEdit';
 
-interface ProfileEditialogProps {
+interface ProfileEditDialogProps {
   open?: boolean;
   profile: Profile;
   onClose: () => void;
@@ -11,12 +11,16 @@ interface ProfileEditialogProps {
 }
 
 export default function ProfileEditDialog({
-  open = false, profile, onClose, onDone,
-}: ProfileEditialogProps) {
+  open = false,
+  profile,
+  onClose,
+  onDone,
+}: ProfileEditDialogProps) {
   return (
     <Dialog
-      open={open || false}
-      onClose={() => onClose()}
+      open={open}
+      onClose={onClose}
+      TransitionComponent={Slide}
       PaperProps={{
         elevation: 0,
         sx: {

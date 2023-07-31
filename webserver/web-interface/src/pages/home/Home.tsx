@@ -162,7 +162,12 @@ function Home() {
 
 export default Home;
 
-function LeftSection({ sensorState }: {sensorState: SensorState}): React.ReactNode {
+interface LeftSectionProps {
+  sensorState: SensorState;
+}
+
+// Memoize the rendering of the below screen sections
+const LeftSection: React.FC<LeftSectionProps> = React.memo(({ sensorState }) => {
   const theme = useTheme();
   return (
     <>
@@ -170,11 +175,17 @@ function LeftSection({ sensorState }: {sensorState: SensorState}): React.ReactNo
         <GaugeLiquid value={sensorState.waterLevel} />
       </Box>
       <Box sx={{ mt: theme.spacing(1), p: theme.spacing(1) }}>
-        <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
+        <GaugeChart
+          value={sensorState.pressure}
+          primaryColor={theme.palette.pressure.main}
+          title="Pressure"
+          unit="bar"
+          maxValue={14}
+        />
       </Box>
     </>
   );
-}
+});
 
 interface MiddleSectionProps {
   activeProfile: Profile | null,
@@ -183,16 +194,15 @@ interface MiddleSectionProps {
   handleNewProfileSelected: (id: number) => void,
 }
 
-function MiddleSection({
+const MiddleSection: React.FC<MiddleSectionProps> = React.memo(({
   activeProfile, handlePersistActiveProfile, handleProfileUpdate, handleNewProfileSelected,
-}: MiddleSectionProps) {
+}) => {
   const theme = useTheme();
 
   return (
-    <Box>
-      <Grid container spacing={1}>
-        <Grid xs={12}>
-          {activeProfile && (
+    <Grid container spacing={1}>
+      <Grid xs={12}>
+        {activeProfile ? (
           <Paper sx={{ padding: theme.spacing(1), position: 'relative' }} elevation={1}>
             <ProfileReview
               profile={activeProfile}
@@ -200,18 +210,18 @@ function MiddleSection({
               onChange={handleProfileUpdate}
             />
           </Paper>
-          )}
-          {!activeProfile && <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />}
-        </Grid>
-        <Grid xs={12}>
-          <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
-            {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
-          </Paper>
-        </Grid>
+        ) : (
+          <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />
+        )}
       </Grid>
-    </Box>
+      <Grid xs={12}>
+        <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+          {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
+        </Paper>
+      </Grid>
+    </Grid>
   );
-}
+});
 
 interface RightSectionProps{
   sensorState: SensorState;
@@ -221,29 +231,29 @@ interface RightSectionProps{
   handleOpmodeChange: (opMode: OperationMode) => void;
 }
 
-function RightSection({
-  sensorState,
-  activeProfile,
-  handleBrewTempUpdate,
-  handleSteamTempUpdate,
-  handleOpmodeChange,
-}: RightSectionProps) {
+const RightSection: React.FC<RightSectionProps> = React.memo(({
+  sensorState, activeProfile, handleBrewTempUpdate, handleSteamTempUpdate, handleOpmodeChange,
+}) => {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
   const { settings } = useSettingsStore();
-  const targetTemp = useMemo(() => (sensorState.steamActive
-    ? settings?.boiler.steamSetPoint
-    : activeProfile?.waterTemperature || 0), [settings, activeProfile, sensorState]);
-  const tempUpdateHandler = useMemo(
-    () => (sensorState.steamActive ? handleSteamTempUpdate : handleBrewTempUpdate),
-    [sensorState, handleSteamTempUpdate, handleBrewTempUpdate],
-  );
+  const targetTemp = useMemo(() => (
+    sensorState.steamActive ? settings?.boiler.steamSetPoint : activeProfile?.waterTemperature || 0
+  ), [settings, activeProfile, sensorState]);
+  const tempUpdateHandler = useMemo(() => (
+    sensorState.steamActive ? handleSteamTempUpdate : handleBrewTempUpdate
+  ), [sensorState, handleSteamTempUpdate, handleBrewTempUpdate]);
 
   return (
     <>
-      <Box sx={{
-        pb: 1, pl: 0.5, pr: 0.5, borderRadius: '50%', backgroundColor: colorScaling(theme)(theme.palette.background.default, 0.4),
-      }}
+      <Box
+        sx={{
+          pb: 1,
+          pl: 0.5,
+          pr: 0.5,
+          borderRadius: '50%',
+          backgroundColor: colorScaling(theme)(theme.palette.background.default, 0.4),
+        }}
       >
         <AspectRatioBox ratio={1}>
           <GaugeChart
@@ -272,19 +282,19 @@ function RightSection({
 
         {/* Gauges for small screens */}
         {!isBiggerScreen && (
-          <Grid xs={12} sx={{ display: 'flex', alignItems: 'stretch' }}>
-            <Box sx={{ width: '50%', p: theme.spacing(1) }}>
-              <GaugeLiquid value={sensorState.waterLevel} />
-            </Box>
-            <Box sx={{ width: '50%', p: theme.spacing(1) }}>
-              <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
-            </Box>
-          </Grid>
+        <Grid xs={12} sx={{ display: 'flex', alignItems: 'stretch' }}>
+          <Box sx={{ width: '50%', p: theme.spacing(1) }}>
+            <GaugeLiquid value={sensorState.waterLevel} />
+          </Box>
+          <Box sx={{ width: '50%', p: theme.spacing(1) }}>
+            <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
+          </Box>
+        </Grid>
         )}
       </Grid>
     </>
   );
-}
+});
 
 function OpModeButtons({ onChange }: {onChange: (opMode: OperationMode) => void}) {
   const { operationMode } = useSystemStateStore().systemState;
