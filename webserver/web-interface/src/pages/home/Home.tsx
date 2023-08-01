@@ -183,6 +183,7 @@ interface MiddleSectionProps {
 }
 
 const MiddleSection: React.FC<MiddleSectionProps> = React.memo(({
+const MiddleSection: React.FC<MiddleSectionProps> = React.memo(({
   activeProfile, handlePersistActiveProfile, handleProfileUpdate, handleNewProfileSelected,
 }) => {
   const theme = useTheme();
@@ -208,7 +209,18 @@ const MiddleSection: React.FC<MiddleSectionProps> = React.memo(({
         </Paper>
       </Grid>
     </Grid>
+        ) : (
+          <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />
+        )}
+      </Grid>
+      <Grid xs={12}>
+        <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+          {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
+        </Paper>
+      </Grid>
+    </Grid>
   );
+});
 });
 
 interface RightSectionProps{
@@ -237,6 +249,14 @@ function RightSection({
 
   return (
     <>
+      <Box
+        sx={{
+          pb: 1,
+          pl: 0.5,
+          pr: 0.5,
+          borderRadius: '50%',
+          backgroundColor: colorScaling(theme)(theme.palette.background.default, 0.4),
+        }}
       <Box
         sx={{
           pb: 1,
