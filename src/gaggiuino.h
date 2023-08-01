@@ -42,12 +42,12 @@
 
 // If not defined in the extra_defines.ini use default range
 #if not defined(TOF_START) || not defined(TOF_END)
-#define TOF_START 0u
-#define TOF_END 0u
+#define TOF_START 15u
+#define TOF_END 125u
 #endif
 
-const uint16_t tofStartValue = TOF_START != 0u ? TOF_START : 15u; // Tof offset when tank is full
-const uint16_t tofEndValue = TOF_END != 0u ? TOF_END : 125u; // Tof offset when tank is nearly empty
+const uint16_t tofStartValue = TOF_START; // Tof offset when tank is full
+const uint16_t tofEndValue = TOF_END; // Tof offset when tank is nearly empty
 
 //Timers
 unsigned long systemHealthTimer;
