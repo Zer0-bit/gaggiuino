@@ -4,7 +4,6 @@ import ShowerIcon from '@mui/icons-material/Shower';
 import {
   Box,
   Button,
-  ButtonBase,
   Container,
   Unstable_Grid2 as Grid,
   Paper,
@@ -14,7 +13,6 @@ import {
   TextField,
   Theme,
   Typography,
-  alpha,
   darken,
   debounce,
   lighten,
@@ -22,10 +20,8 @@ import {
   useTheme,
 } from '@mui/material';
 import React, {
-  ReactNode, useCallback, useMemo, useState,
+  useCallback, useState,
 } from 'react';
-import GaugeChart from '../../components/chart/GaugeChart';
-import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
 import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
 import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
@@ -34,25 +30,30 @@ import AvailableProfileSelector from '../../components/profile/AvailableProfileS
 import { ProfileReview } from '../../components/profile/ProfilePreview';
 import ShotHistory from '../../components/shot/ShotHistory';
 import {
-  GaggiaSettings, NotificationType, OperationMode, SensorState,
+  GaggiaSettings, NotificationType, OperationMode,
 } from '../../models/models';
 import { Profile } from '../../models/profile';
 import useProfileStore from '../../state/ProfileStore';
 import useSensorStateStore from '../../state/SensorStateStore';
 import useSettingsStore from '../../state/SettingsStore';
-import useShotDataStore from '../../state/ShotDataStore';
 import useSystemStateStore from '../../state/SystemStateStore';
 import useNotificationStore from '../../state/NotificationDataStore';
+import { SwitchLedButton, SwitchLedState } from '../../components/inputs/SwitchLedButton';
+import PressureGauge from '../../components/gauges/PressureGauge';
+import WaterLevelGauge from '../../components/gauges/WaterLevelGauge';
+import TemperatureGauge from '../../components/gauges/TemperatureGauge';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
+
+const MemoMiddleSection = React.memo(MiddleSection);
+const MemoLeftSection = React.memo(LeftSection);
+const MemoRightSection = React.memo(RightSection);
 
 function Home() {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
-
-  const { sensorState } = useSensorStateStore();
-  const { updateLatestNotification } = useNotificationStore();
-  const { updateLocalOperationMode } = useSystemStateStore();
+  const updateLatestNotification = useNotificationStore((state) => state.updateLatestNotification);
+  const updateLocalOperationMode = useSystemStateStore((state) => state.updateLocalOperationMode);
   const { settings, updateLocalSettings, updateSettingsAndSync } = useSettingsStore();
   const {
     activeProfile,
@@ -131,13 +132,13 @@ function Home() {
         {/* Left size Gauges */}
         {isBiggerScreen && (
         <Grid sm={2} md={2}>
-          <LeftSection sensorState={sensorState} />
+          <MemoLeftSection />
         </Grid>
         )}
 
         {/* Center part - profiles */}
         <Grid xs={7} sm={6} sx={{ gap: '8px', position: 'relative' }}>
-          <MiddleSection
+          <MemoMiddleSection
             activeProfile={activeProfile}
             handlePersistActiveProfile={handlePersistActiveProfile}
             handleProfileUpdate={handleProfileUpdate}
@@ -147,9 +148,7 @@ function Home() {
 
         {/* Right part - Temperature Gauge and Scale */}
         <Grid xs={5} sm={4}>
-          <RightSection
-            sensorState={sensorState}
-            activeProfile={activeProfile}
+          <MemoRightSection
             handleBrewTempUpdate={handleBrewTempUpdate}
             handleSteamTempUpdate={handleSteamTempUpdate}
             handleOpmodeChange={handleOpmodeChange}
@@ -162,15 +161,15 @@ function Home() {
 
 export default Home;
 
-function LeftSection({ sensorState }: {sensorState: SensorState}): React.ReactNode {
+function LeftSection() {
   const theme = useTheme();
   return (
     <>
       <Box sx={{ p: theme.spacing(1) }}>
-        <GaugeLiquid value={sensorState.waterLevel} />
+        <WaterLevelGauge />
       </Box>
       <Box sx={{ mt: theme.spacing(1), p: theme.spacing(1) }}>
-        <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
+        <PressureGauge />
       </Box>
     </>
   );
@@ -214,30 +213,28 @@ function MiddleSection({
 }
 
 interface RightSectionProps{
-  sensorState: SensorState;
-  activeProfile: Profile | null;
   handleBrewTempUpdate: (value: number) => void;
   handleSteamTempUpdate: (value: number) => void;
   handleOpmodeChange: (opMode: OperationMode) => void;
 }
 
+const MemoOpModeButtons = React.memo(OpModeButtons);
+const MemoTargetTempInput = React.memo(TargetTempInput);
+const MemoScalesInput = React.memo(ScalesInput);
+const MemoTemperatureGauge = React.memo(TemperatureGauge);
+
 function RightSection({
-  sensorState,
-  activeProfile,
   handleBrewTempUpdate,
   handleSteamTempUpdate,
   handleOpmodeChange,
 }: RightSectionProps) {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
-  const { settings } = useSettingsStore();
-  const targetTemp = useMemo(() => (sensorState.steamActive
-    ? settings?.boiler.steamSetPoint
-    : activeProfile?.waterTemperature || 0), [settings, activeProfile, sensorState]);
-  const tempUpdateHandler = useMemo(
-    () => (sensorState.steamActive ? handleSteamTempUpdate : handleBrewTempUpdate),
-    [sensorState, handleSteamTempUpdate, handleBrewTempUpdate],
-  );
+  const steamActive = useSensorStateStore((state) => state.sensorState.steamActive);
+  const steamSetPoint = useSettingsStore((state) => state.settings?.boiler.steamSetPoint || 0);
+  const brewTemperature = useProfileStore((state) => state.activeProfile?.waterTemperature || 0);
+  const targetTemp = steamActive ? steamSetPoint : brewTemperature;
+  const tempUpdateHandler = steamActive ? handleSteamTempUpdate : handleBrewTempUpdate;
 
   return (
     <>
@@ -246,38 +243,32 @@ function RightSection({
       }}
       >
         <AspectRatioBox ratio={1}>
-          <GaugeChart
-            value={sensorState.temperature}
-            primaryColor={theme.palette.temperature.main}
-            maxValue={targetTemp}
-            flashAfterValue={settings && settings.boiler ? settings.boiler.steamSetPoint - 20 : undefined}
-            unit="°C"
-          />
+          <MemoTemperatureGauge targetTemperature={targetTemp} />
         </AspectRatioBox>
       </Box>
 
       <Grid container spacing={2} sx={{ px: 1, mt: 3 }}>
         <Grid xs={12}>
-          <TargetTempInput
+          <MemoTargetTempInput
             targetTemp={targetTemp || 0}
             handleTempUpdate={tempUpdateHandler}
           />
         </Grid>
         <Grid xs={12}>
-          <ScalesInput />
+          <MemoScalesInput />
         </Grid>
         <Grid xs={12}>
-          <OpModeButtons onChange={handleOpmodeChange} />
+          <MemoOpModeButtons onChange={handleOpmodeChange} />
         </Grid>
 
         {/* Gauges for small screens */}
         {!isBiggerScreen && (
           <Grid xs={12} sx={{ display: 'flex', alignItems: 'stretch' }}>
             <Box sx={{ width: '50%', p: theme.spacing(1) }}>
-              <GaugeLiquid value={sensorState.waterLevel} />
+              <WaterLevelGauge />
             </Box>
             <Box sx={{ width: '50%', p: theme.spacing(1) }}>
-              <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
+              <PressureGauge />
             </Box>
           </Grid>
         )}
@@ -286,104 +277,42 @@ function RightSection({
   );
 }
 
-function OpModeButtons({ onChange }: {onChange: (opMode: OperationMode) => void}) {
-  const { operationMode } = useSystemStateStore().systemState;
+function getBrewBtnState(operationMode: OperationMode) {
+  if (operationMode === OperationMode.FLUSH) return SwitchLedState.ON;
+  if (operationMode === OperationMode.FLUSH_AUTO) return SwitchLedState.AUTO;
+  return SwitchLedState.OFF;
+}
 
-  function handleFlushStateChange(newState: boolean) {
-    onChange(newState ? OperationMode.FLUSH : OperationMode.BREW_AUTO);
-  }
-  function handleDescaleStateChange(newState: boolean) {
-    onChange(newState ? OperationMode.DESCALE : OperationMode.BREW_AUTO);
-  }
+function OpModeButtons({ onChange }: {
+  onChange: (opMode: OperationMode) => void
+}) {
+  const operationMode = useSystemStateStore((state) => state.systemState.operationMode);
+
+  const handleFlushStateChange = useCallback((newState: SwitchLedState) => {
+    if (newState === SwitchLedState.OFF) onChange(OperationMode.BREW_AUTO);
+    else if (newState === SwitchLedState.ON) onChange(OperationMode.FLUSH);
+    else onChange(OperationMode.FLUSH_AUTO);
+  }, [onChange]);
+
+  const handleDescaleStateChange = useCallback((newState: SwitchLedState) => {
+    onChange(newState === SwitchLedState.ON ? OperationMode.DESCALE : OperationMode.BREW_AUTO);
+  }, [onChange]);
 
   return (
     <Box width="100%" display="flex" justifyContent="space-evenly" gap={2}>
-      <OpmodeButton
-        state={operationMode === OperationMode.FLUSH}
+      <SwitchLedButton
+        state={getBrewBtnState(operationMode)}
         onChange={handleFlushStateChange}
         icon={<ShowerIcon fontSize="inherit" />}
+        supportsAuto
         label="FLUSH"
       />
-      <OpmodeButton
-        state={operationMode === OperationMode.DESCALE}
+      <SwitchLedButton
+        state={operationMode === OperationMode.DESCALE ? SwitchLedState.ON : SwitchLedState.OFF}
         onChange={handleDescaleStateChange}
         icon={<LocalCarWashIcon fontSize="inherit" />}
         label="DESCALE"
       />
-    </Box>
-  );
-}
-
-interface OpModeButtonProps {
-  state: boolean;
-  icon?: ReactNode;
-  label?: ReactNode;
-  onChange?: (state: boolean) => void;
-}
-
-function OpmodeButton({
-  state = false,
-  icon = undefined,
-  label = undefined,
-  onChange = undefined,
-}: OpModeButtonProps) {
-  const theme = useTheme();
-  const background = (state)
-    ? 'linear-gradient(to top, rgba(127, 127, 127, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%)'
-    : 'linear-gradient(to top, rgba(255, 255, 255, 0.1) 0%, rgba(80, 80, 80, 0.1) 100%)';
-  const boxShadow = '0px 1px 2px -1px rgba(0,0,0,0.2), 0px 3px 3px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)';
-  const ledColorOn = '#ef4e2b';
-  const ledColorOff = '#822714';
-
-  return (
-    <Box sx={{
-      p: { xs: 0.5, sm: 1 },
-      borderRadius: theme.spacing(1),
-      background: (theme.palette.mode === 'light') ? 'rgba(0, 0, 0, 0.4)' : 'rgba(25, 25, 25, 0.2)',
-      width: '100%',
-      maxWidth: '120px',
-      border: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
-      boxShadow,
-    }}
-    >
-      <AspectRatioBox ratio={1 / 1.4}>
-        <ButtonBase
-          sx={{
-            borderRadius: theme.spacing(1),
-            boxShadow,
-            background,
-            border: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
-            ':hover': {
-              border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-            },
-          }}
-          onClick={() => (onChange && onChange(!state))}
-        >
-          <Box sx={{
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            color: 'rgba(255, 255, 255, 0.8)',
-            py: { xs: 1, sm: 2 },
-          }}
-          >
-            <Box sx={{ fontSize: { xs: theme.typography.body2.fontSize, sm: theme.typography.body1.fontSize } }}>
-              {icon}
-            </Box>
-            <Box sx={{ overflowX: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{label}</Box>
-            <Box sx={{
-              width: '15px',
-              height: '10px',
-              backgroundColor: state ? ledColorOn : ledColorOff,
-              boxShadow: state ? '0 0 5px 3px rgba(239,78,43,0.5)' : '', // Glow effect
-            }}
-            />
-          </Box>
-        </ButtonBase>
-      </AspectRatioBox>
     </Box>
   );
 }
@@ -428,7 +357,7 @@ function TargetTempInput(
 
 function ScalesInput() {
   const theme = useTheme();
-  const { sensorState } = useSensorStateStore();
+  const currentWeight = useSensorStateStore((state) => state.sensorState.weight);
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
@@ -446,7 +375,7 @@ function ScalesInput() {
           }}
           disabled
           type="text"
-          value={sensorState.weight.toFixed(1)}
+          value={currentWeight.toFixed(1)}
           InputProps={{
             sx: {
               '& input': {
@@ -486,7 +415,6 @@ function ProfileAndHistoryTabs(
 ) {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
-  const { shotHistory } = useShotDataStore();
 
   return (
     <>
@@ -508,7 +436,6 @@ function ProfileAndHistoryTabs(
         </Box>
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        {shotHistory.length > 0 && (
         <Box sx={{
           p: { xs: 0, sm: theme.spacing(1) },
           height: '45vh',
@@ -516,9 +443,7 @@ function ProfileAndHistoryTabs(
         }}
         >
           <ShotHistory />
-          {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
         </Box>
-        )}
       </TabPanel>
     </>
   );

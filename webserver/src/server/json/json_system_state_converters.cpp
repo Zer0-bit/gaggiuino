@@ -22,6 +22,7 @@ namespace json {
     case OperationMode::FLUSH: return "FLUSH";
     case OperationMode::DESCALE: return "DESCALE";
     case OperationMode::STEAM: return "STEAM";
+    case OperationMode::FLUSH_AUTO: return "FLUSH_AUTO";
     default: return "BREW_AUTO";
     }
   }
@@ -66,6 +67,7 @@ namespace json {
     if (modeValue == "FLUSH") return OperationMode::FLUSH;
     if (modeValue == "DESCALE") return OperationMode::DESCALE;
     if (modeValue == "STEAM") return OperationMode::STEAM;
+    if (modeValue == "FLUSH_AUTO") return OperationMode::FLUSH_AUTO;
     return OperationMode::BREW_AUTO;
   }
 

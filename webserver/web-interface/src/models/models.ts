@@ -2,6 +2,7 @@ export enum OperationMode {
     BREW_AUTO = 'BREW_AUTO',
     BREW_MANUAL = 'BREW_MANUAL',
     FLUSH = 'FLUSH',
+    FLUSH_AUTO = 'FLUSH_AUTO',
     DESCALE = 'DESCALE',
     STEAM = 'STEAM',
 }

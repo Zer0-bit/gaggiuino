@@ -268,7 +268,6 @@ static void modeSelect(void) {
   if (!systemState.startupInitFinished) return;
 
   switch (systemState.operationMode) {
-    //REPLACE ALL THE BELOW WITH OPMODE_auto_profiling
     case OperationMode::BREW_AUTO:
       if (currentState.hotWaterSwitchState) hotWaterMode(currentState);
       else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState, systemState);
@@ -285,6 +284,10 @@ static void modeSelect(void) {
       if (!currentState.steamSwitchState) steamTime = millis();
       backFlush(currentState);
       brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, activeProfile.waterTemperature, false);
+      break;
+  case OperationMode::FLUSH_AUTO:
+      if (!currentState.steamSwitchState) steamTime = millis();
+      flushAuto();
       break;
     case OperationMode::STEAM:
       steamCtrl(runningCfg, currentState, systemState);
@@ -608,4 +611,24 @@ static void doLed(void) {
   } else {
     led.setColor(runningCfg.led.color.R, runningCfg.led.color.G, runningCfg.led.color.B);
   }
+}
+
+static void flushAuto() {
+  #if defined(LEGO_VALVE_RELAY) || defined(SINGLE_BOARD)
+  static uint32_t flushAutoTimer = 0;
+  
+
+  if (millis() - flushAutoTimer > 5000) { //FLUSH_AUTO just started
+    flushAutoTimer = millis();
+  }
+
+  if (millis() - flushAutoTimer < 4000) {
+    currentState.brewSwitchState = true;
+    backFlush(currentState);
+    setBoilerOff();
+  } else {
+    flushAutoTimer = 0;
+    systemState.operationMode = OperationMode::BREW_AUTO;
+  }
+  #endif
 }
