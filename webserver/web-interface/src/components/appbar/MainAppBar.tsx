@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -160,20 +160,14 @@ function NavMenu({ activeItem, onChange }: NavMenuProps) {
 function MainAppBar() {
   const theme = useTheme();
   const location = useLocation();
+  const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
+
   const [activeTab, setActiveTab] = useState<string>(location.pathname || '/');
   const [shotDialogOpen, setShotDialogOpen] = useState<boolean>(false);
-  const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
-  const { latestShotDatapoint } = useShotDataStore();
-  const { timeAlive } = useSystemStateStore().systemState;
-  const { latestNotification } = useNotificationStore();
 
-  useEffect(() => {
-    if (latestShotDatapoint.timeInShot > 0) setShotDialogOpen(true);
-  }, [latestShotDatapoint]);
-
-  const activeColor = useMemo(() => (theme.palette.mode === 'light'
+  const activeColor = theme.palette.mode === 'light'
     ? theme.palette.primary.contrastText
-    : theme.palette.primary.main), [theme]);
+    : theme.palette.primary.main;
 
   return (
     <AppBar sx={{ position: 'static' }} elevation={1}>
@@ -213,28 +207,52 @@ function MainAppBar() {
             <TabMenu activeItem={activeTab} activeColor={activeColor} onChange={setActiveTab} />
           )}
           {!isBiggerScreen && <NavMenu activeItem={activeTab} onChange={setActiveTab} />}
-          <div
-            style={{
-              fontSize: '1rem',
-              width: '100px',
-              height: '40px',
-              borderRadius: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #ccc',
-              // Add any other styling you want for the container
-            }}
-          >
-            {formatTime({ time: timeAlive * 1000 })}
-          </div>
+          <TimeCounter />
         </Stack>
       </Toolbar>
       <Box />
-      {shotDialogOpen && <ShotDialog open={shotDialogOpen} setOpen={setShotDialogOpen} />}
-      <SnackNotification notification={latestNotification} />
+      <ShotDialogObserver open={shotDialogOpen} setOpen={setShotDialogOpen} />
+      <AppNotification />
     </AppBar>
   );
+}
+
+function TimeCounter() {
+  const timeAlive = useSystemStateStore((state) => state.systemState.timeAlive);
+  return (
+    <div
+      style={{
+        fontSize: '1rem',
+        width: '100px',
+        height: '40px',
+        borderRadius: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: '1px solid #ccc',
+      }}
+    >
+      {formatTime({ time: timeAlive * 1000 })}
+    </div>
+  );
+}
+
+function ShotDialogObserver({ open, setOpen }: {open:boolean, setOpen: (value: boolean) => void}) {
+  const latestShotDatapoint = useShotDataStore((state) => state.latestShotDatapoint);
+
+  useEffect(() => {
+    if (latestShotDatapoint.timeInShot > 0) setOpen(true);
+  }, [latestShotDatapoint, setOpen]);
+
+  if (open) {
+    return <ShotDialog open={open} setOpen={setOpen} />;
+  }
+  return null;
+}
+
+function AppNotification() {
+  const latestNotification = useNotificationStore((state) => state.latestNotification);
+  return <SnackNotification notification={latestNotification} />;
 }
 
 export default MainAppBar;
