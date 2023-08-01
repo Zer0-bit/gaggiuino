@@ -173,7 +173,7 @@ function LeftSection() {
       </Box>
     </>
   );
-};
+}
 
 interface MiddleSectionProps {
   activeProfile: Profile | null,
@@ -182,16 +182,16 @@ interface MiddleSectionProps {
   handleNewProfileSelected: (id: number) => void,
 }
 
-const MiddleSection: React.FC<MiddleSectionProps> = React.memo(({
-const MiddleSection: React.FC<MiddleSectionProps> = React.memo(({
+function MiddleSection({
   activeProfile, handlePersistActiveProfile, handleProfileUpdate, handleNewProfileSelected,
-}) => {
+}: MiddleSectionProps) {
   const theme = useTheme();
 
   return (
-    <Grid container spacing={1}>
-      <Grid xs={12}>
-        {activeProfile ? (
+    <Box>
+      <Grid container spacing={1}>
+        <Grid xs={12}>
+          {activeProfile && (
           <Paper sx={{ padding: theme.spacing(1), position: 'relative' }} elevation={1}>
             <ProfileReview
               profile={activeProfile}
@@ -199,29 +199,18 @@ const MiddleSection: React.FC<MiddleSectionProps> = React.memo(({
               onChange={handleProfileUpdate}
             />
           </Paper>
-        ) : (
-          <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />
-        )}
+          )}
+          {!activeProfile && <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />}
+        </Grid>
+        <Grid xs={12}>
+          <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
+            {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
+          </Paper>
+        </Grid>
       </Grid>
-      <Grid xs={12}>
-        <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
-          {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
-        </Paper>
-      </Grid>
-    </Grid>
-        ) : (
-          <Skeleton variant="rounded" sx={{ borderRadius: '16px' }} height={190} />
-        )}
-      </Grid>
-      <Grid xs={12}>
-        <Paper sx={{ padding: theme.spacing(1) }} elevation={1}>
-          {ProfileAndHistoryTabs(activeProfile, handleNewProfileSelected)}
-        </Paper>
-      </Grid>
-    </Grid>
+    </Box>
   );
-});
-});
+}
 
 interface RightSectionProps{
   handleBrewTempUpdate: (value: number) => void;
@@ -249,22 +238,9 @@ function RightSection({
 
   return (
     <>
-      <Box
-        sx={{
-          pb: 1,
-          pl: 0.5,
-          pr: 0.5,
-          borderRadius: '50%',
-          backgroundColor: colorScaling(theme)(theme.palette.background.default, 0.4),
-        }}
-      <Box
-        sx={{
-          pb: 1,
-          pl: 0.5,
-          pr: 0.5,
-          borderRadius: '50%',
-          backgroundColor: colorScaling(theme)(theme.palette.background.default, 0.4),
-        }}
+      <Box sx={{
+        pb: 1, pl: 0.5, pr: 0.5, borderRadius: '50%', backgroundColor: colorScaling(theme)(theme.palette.background.default, 0.4),
+      }}
       >
         <AspectRatioBox ratio={1}>
           <MemoTemperatureGauge targetTemperature={targetTemp} />
@@ -299,7 +275,7 @@ function RightSection({
       </Grid>
     </>
   );
-};
+}
 
 function getBrewBtnState(operationMode: OperationMode) {
   if (operationMode === OperationMode.FLUSH) return SwitchLedState.ON;
