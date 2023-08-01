@@ -14,7 +14,6 @@ const useSensorStateStore = create<SensorStateStore>()(
         brewActive: false,
         steamActive: false,
         hotWaterSwitchState: false,
-        tarePending: false,
         temperature: 0,
         waterTemperature: 0,
         pressure: 0,

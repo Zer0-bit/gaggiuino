@@ -38,6 +38,7 @@ namespace state {
 // ---------------------------------------------------------------------------------
   OperationMode getOperationMode();
   void updateOperationMode(OperationMode operationMode);
+  void updateTarePending(SystemState& systemState);
 
 // ---------------------------------------------------------------------------------
 // --------------------------------- CALLBACKS -------------------------------------
@@ -49,6 +50,7 @@ namespace state {
   void onLedSettingsUpdated(const LedSettings& settings);
   void onSystemSettingsUpdated(const SystemSettings& settings);
   void onOperationModeUpdated(const OperationMode operationMode);
+  void onSystemStateUpdate(const SystemState& systemState);
 }
 
 #endif

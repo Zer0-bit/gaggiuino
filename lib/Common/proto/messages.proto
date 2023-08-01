@@ -25,20 +25,20 @@ message SystemStateDto {
   OperationModeDto operationMode = 5;
   uint32 timeAlive = 6;
   uint32 descaleProgress = 7;
+  bool tarePending = 8;
 }
 
 message SensorStateSnapshotDto {
   bool brewActive = 1;
   bool steamActive = 2;
   bool hotWaterSwitchState = 3;
-  bool tarePending = 4;
-  float temperature = 5;
-  float waterTemperature = 6;
-  float pressure = 7;
-  float pumpFlow = 8;
-  float weightFlow = 9;
-  float weight = 10;
-  uint32 waterLevel = 11;
+  float temperature = 4;
+  float waterTemperature = 5;
+  float pressure = 6;
+  float pumpFlow = 7;
+  float weightFlow = 8;
+  float weight = 9;
+  uint32 waterLevel = 10;
 }
 
 message ShotSnapshotDto {

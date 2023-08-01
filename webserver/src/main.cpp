@@ -81,3 +81,7 @@ void state::onSystemSettingsUpdated(const SystemSettings& settings) {
 void state::onOperationModeUpdated(const OperationMode operationMode) {
   stmCommsSendUpdateOperationMode(operationMode);
 }
+
+void state::onSystemStateUpdate(const SystemState& systemState) {
+  stmCommsSendUpdateSystemState(systemState);
+}

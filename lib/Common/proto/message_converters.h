@@ -55,6 +55,7 @@ public:
       .operationMode = OperationModeConverter::encode(local.operationMode),
       .timeAlive = local.timeAlive,
       .descaleProgress = local.descaleProgress,
+      .tarePending = local.tarePending,
     };
   };
 
@@ -70,6 +71,7 @@ public:
     local.operationMode = OperationModeConverter::decode(proto.operationMode);
     local.timeAlive = proto.timeAlive;
     local.descaleProgress = proto.descaleProgress;
+    local.tarePending = proto.tarePending;
     return true;
   };
 };
@@ -99,7 +101,6 @@ public:
       .brewActive = local.brewActive,
       .steamActive = local.steamActive,
       .hotWaterSwitchState = local.hotWaterSwitchState,
-      .tarePending = local.tarePending,
       .temperature = local.temperature,
       .waterTemperature = local.waterTemperature,
       .pressure = local.pressure,
@@ -118,7 +119,6 @@ public:
     local.brewActive = proto.brewActive;
     local.steamActive = proto.steamActive;
     local.hotWaterSwitchState = proto.hotWaterSwitchState;
-    local.tarePending = proto.tarePending,
     local.temperature = proto.temperature;
     local.waterTemperature = proto.waterTemperature;
     local.pressure = proto.pressure;

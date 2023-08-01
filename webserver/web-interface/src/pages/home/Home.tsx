@@ -360,6 +360,10 @@ function ScalesInput() {
   const currentWeight = useSensorStateStore((state) => state.sensorState.weight);
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
 
+  const handleTareButtonClicked = () => {
+    useSystemStateStore().systemState.tarePending = true;
+  };
+
   return (
     <Grid container alignItems="center">
       <Grid xs={4}>
@@ -398,7 +402,7 @@ function ScalesInput() {
               minWidth: 30,
             }}
             size="small"
-            onClick={() => false}
+            onClick={handleTareButtonClicked}
           >
             <ScaleIcon fontSize="inherit" sx={{ mr: theme.spacing(1) }} />
             {isBiggerScreen ? 'TARE' : 'TR'}

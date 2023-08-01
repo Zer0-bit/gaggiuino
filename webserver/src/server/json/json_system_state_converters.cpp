@@ -86,6 +86,7 @@ namespace json {
     systemState.scalesPresent = json["scalesPresent"];
     systemState.timeAlive = json["timeAlive"];
     systemState.descaleProgress = json["descaleProgress"];
+    systemState.tarePending = json["tarePending"];
     return systemState;
   }
 }

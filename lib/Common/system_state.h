@@ -19,6 +19,7 @@ struct SystemState {
   bool          scalesPresent = false;
   uint32_t      timeAlive = 0; // sec
   uint8_t       descaleProgress = 0; // %
+  bool          tarePending = false;
 };
 
 struct UpdateOperationMode {

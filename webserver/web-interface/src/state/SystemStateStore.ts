@@ -19,6 +19,7 @@ const useSystemStateStore = create<SystemStateStore>()(
         scalesPresent: false,
         timeAlive: 0,
         descaleProgress: 0,
+        tarePending: false,
       },
       updateLocalSystemState: (newState: SystemState) => set(() => ({ systemState: newState })),
       updateLocalOperationMode: (newOpMode: OperationMode) => set((state) => ({

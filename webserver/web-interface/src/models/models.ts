@@ -19,13 +19,13 @@ export interface SystemState {
     scalesPresent: boolean,
     timeAlive: number,
     descaleProgress: number,
+    tarePending: boolean,
 }
 
 export interface SensorState {
     brewActive: boolean;
     steamActive: boolean;
     hotWaterSwitchState: boolean;
-    tarePending: boolean,
     temperature: number;
     waterTemperature: number;
     pressure: number;

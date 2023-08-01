@@ -138,7 +138,7 @@ static void sensorsReadTemperature(void) {
 }
 
 static Measurement handleTaringAndReadWeight() {
-  if (!currentState.tarePending) { // No tare needed just get weight
+  if (!systemState.tarePending) { // No tare needed just get weight
     return scalesGetWeight();
   }
 
@@ -148,7 +148,7 @@ static Measurement handleTaringAndReadWeight() {
   Measurement weight = scalesGetWeight();
 
   if (fabsf(weight.value) < 0.5f) { // Tare was successful. return reading
-    currentState.tarePending = false;
+    systemState.tarePending = false;
     return weight;
   } else {  // Tare was unsuccessful. return 0 weight.
     return Measurement{ .value=0.f, .millis = millis()};
@@ -166,7 +166,7 @@ static void sensorsReadWeight(void) {
       currentState.weight = weightMeasurements.getLatest().value;
 
       if (brewActive) {
-        currentState.shotWeight = currentState.tarePending ? 0.f : currentState.weight;
+        currentState.shotWeight = systemState.tarePending ? 0.f : currentState.weight;
         
         currentState.weightFlow = fmax(0.f, weightMeasurements.getMeasurementChange().speed());
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
@@ -214,7 +214,7 @@ static void calculateWeightAndFlow(void) {
 
   if (brewActive) {
     // Marking for tare in case smth has gone wrong and it has exited tare already.
-    if (currentState.weight < -.3f) currentState.tarePending = true;
+    if (currentState.weight < -.3f) systemState.tarePending = true;
 
     if (elapsedTime > REFRESH_FLOW_EVERY) {
       flowTimer = millis();
@@ -426,7 +426,7 @@ static void brewDetect(void) {
 }
 
 static void brewParamsReset(void) {
-  currentState.tarePending = true;
+  systemState.tarePending = true;
   currentState.shotWeight  = 0.f;
   currentState.pumpFlow    = 0.f;
   currentState.weight      = 0.f;
