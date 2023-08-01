@@ -6,6 +6,7 @@ interface SystemStateStore {
   systemState: SystemState,
   updateLocalSystemState: (newState: SystemState) => void,
   updateLocalOperationMode: (newOpMode: OperationMode) => void,
+  updateTarePending: (newState: boolean) => void,
 }
 
 const useSystemStateStore = create<SystemStateStore>()(
@@ -24,6 +25,9 @@ const useSystemStateStore = create<SystemStateStore>()(
       updateLocalSystemState: (newState: SystemState) => set(() => ({ systemState: newState })),
       updateLocalOperationMode: (newOpMode: OperationMode) => set((state) => ({
         systemState: { ...state.systemState, operationMode: newOpMode },
+      })),
+      updateTarePending: (newState: boolean) => set((state) => ({
+        systemState: { ...state.systemState, tarePending: newState },
       })),
     }),
   ),

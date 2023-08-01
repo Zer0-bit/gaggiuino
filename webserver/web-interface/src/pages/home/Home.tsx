@@ -359,9 +359,10 @@ function ScalesInput() {
   const theme = useTheme();
   const currentWeight = useSensorStateStore((state) => state.sensorState.weight);
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
+  const tarePending = useSystemStateStore((state) => state.updateTarePending);
 
   const handleTareButtonClicked = () => {
-    useSystemStateStore().systemState.tarePending = true;
+    tarePending(true);
   };
 
   return (
