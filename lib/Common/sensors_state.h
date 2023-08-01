@@ -31,7 +31,6 @@ struct SensorStateSnapshot {
   bool brewActive;
   bool steamActive;
   bool hotWaterSwitchState;
-  bool tarePending;
   float temperature;
   float waterTemperature;
   float pressure;
