@@ -175,7 +175,10 @@ void stmCommsSendUpdateOperationMode(const OperationMode mode) {
 
 void stmCommsSendUpdateSystemState(const SystemState& state) {
   if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
-  SystemState command = { .tarePending = state.tarePending };
+  SystemState command = {
+                          .operationMode = state.operationMode,
+                          .tarePending = state.tarePending
+                        };
   mcuComms.sendMessage(
     McuCommsMessageType::MCUC_CMD_UPDATE_OPERATION_MODE,
     ProtoSerializer::serialize<SystemStateConverter>(command)

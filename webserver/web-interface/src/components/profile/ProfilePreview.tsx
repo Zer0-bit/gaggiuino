@@ -55,6 +55,3 @@ export function ProfileReview({ profile, onSave, onChange }: ProfileReviewProps)
   );
 }
 
-// Memoized ProfileChart and GlobalRestrictions components
-export const MemoizedProfileChart = React.memo(ProfileChart);
-export const MemoizedGlobalRestrictions = React.memo(GlobalRestrictions);
