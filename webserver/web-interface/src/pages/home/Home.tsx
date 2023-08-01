@@ -4,7 +4,6 @@ import ShowerIcon from '@mui/icons-material/Shower';
 import {
   Box,
   Button,
-  ButtonBase,
   Container,
   Unstable_Grid2 as Grid,
   Paper,
@@ -14,7 +13,6 @@ import {
   TextField,
   Theme,
   Typography,
-  alpha,
   darken,
   debounce,
   lighten,
@@ -43,6 +41,7 @@ import useSettingsStore from '../../state/SettingsStore';
 import useShotDataStore from '../../state/ShotDataStore';
 import useSystemStateStore from '../../state/SystemStateStore';
 import useNotificationStore from '../../state/NotificationDataStore';
+import { SwitchLedButton, SwitchLedState } from '../../components/inputs/SwitchLedButton';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
 
@@ -286,104 +285,42 @@ function RightSection({
   );
 }
 
-function OpModeButtons({ onChange }: {onChange: (opMode: OperationMode) => void}) {
-  const { operationMode } = useSystemStateStore().systemState;
+function getBrewBtnState(operationMode: OperationMode) {
+  if (operationMode === OperationMode.FLUSH) return SwitchLedState.ON;
+  if (operationMode === OperationMode.FLUSH_AUTO) return SwitchLedState.AUTO;
+  return SwitchLedState.OFF;
+}
 
-  function handleFlushStateChange(newState: boolean) {
-    onChange(newState ? OperationMode.FLUSH : OperationMode.BREW_AUTO);
-  }
-  function handleDescaleStateChange(newState: boolean) {
-    onChange(newState ? OperationMode.DESCALE : OperationMode.BREW_AUTO);
-  }
+function OpModeButtons({ onChange }: {
+  onChange: (opMode: OperationMode) => void
+}) {
+  const operationMode = useSystemStateStore((state) => state.systemState.operationMode);
+
+  const handleFlushStateChange = useCallback((newState: SwitchLedState) => {
+    if (newState === SwitchLedState.OFF) onChange(OperationMode.BREW_AUTO);
+    else if (newState === SwitchLedState.ON) onChange(OperationMode.FLUSH);
+    else onChange(OperationMode.FLUSH_AUTO);
+  }, [onChange]);
+
+  const handleDescaleStateChange = useCallback((newState: SwitchLedState) => {
+    onChange(newState === SwitchLedState.ON ? OperationMode.DESCALE : OperationMode.BREW_AUTO);
+  }, [onChange]);
 
   return (
     <Box width="100%" display="flex" justifyContent="space-evenly" gap={2}>
-      <OpmodeButton
-        state={operationMode === OperationMode.FLUSH}
+      <SwitchLedButton
+        state={getBrewBtnState(operationMode)}
         onChange={handleFlushStateChange}
         icon={<ShowerIcon fontSize="inherit" />}
+        supportsAuto
         label="FLUSH"
       />
-      <OpmodeButton
-        state={operationMode === OperationMode.DESCALE}
+      <SwitchLedButton
+        state={operationMode === OperationMode.DESCALE ? SwitchLedState.ON : SwitchLedState.OFF}
         onChange={handleDescaleStateChange}
         icon={<LocalCarWashIcon fontSize="inherit" />}
         label="DESCALE"
       />
-    </Box>
-  );
-}
-
-interface OpModeButtonProps {
-  state: boolean;
-  icon?: ReactNode;
-  label?: ReactNode;
-  onChange?: (state: boolean) => void;
-}
-
-function OpmodeButton({
-  state = false,
-  icon = undefined,
-  label = undefined,
-  onChange = undefined,
-}: OpModeButtonProps) {
-  const theme = useTheme();
-  const background = (state)
-    ? 'linear-gradient(to top, rgba(127, 127, 127, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%)'
-    : 'linear-gradient(to top, rgba(255, 255, 255, 0.1) 0%, rgba(80, 80, 80, 0.1) 100%)';
-  const boxShadow = '0px 1px 2px -1px rgba(0,0,0,0.2), 0px 3px 3px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)';
-  const ledColorOn = '#ef4e2b';
-  const ledColorOff = '#822714';
-
-  return (
-    <Box sx={{
-      p: { xs: 0.5, sm: 1 },
-      borderRadius: theme.spacing(1),
-      background: (theme.palette.mode === 'light') ? 'rgba(0, 0, 0, 0.4)' : 'rgba(25, 25, 25, 0.2)',
-      width: '100%',
-      maxWidth: '120px',
-      border: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
-      boxShadow,
-    }}
-    >
-      <AspectRatioBox ratio={1 / 1.4}>
-        <ButtonBase
-          sx={{
-            borderRadius: theme.spacing(1),
-            boxShadow,
-            background,
-            border: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
-            ':hover': {
-              border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-            },
-          }}
-          onClick={() => (onChange && onChange(!state))}
-        >
-          <Box sx={{
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            color: 'rgba(255, 255, 255, 0.8)',
-            py: { xs: 1, sm: 2 },
-          }}
-          >
-            <Box sx={{ fontSize: { xs: theme.typography.body2.fontSize, sm: theme.typography.body1.fontSize } }}>
-              {icon}
-            </Box>
-            <Box sx={{ overflowX: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{label}</Box>
-            <Box sx={{
-              width: '15px',
-              height: '10px',
-              backgroundColor: state ? ledColorOn : ledColorOff,
-              boxShadow: state ? '0 0 5px 3px rgba(239,78,43,0.5)' : '', // Glow effect
-            }}
-            />
-          </Box>
-        </ButtonBase>
-      </AspectRatioBox>
     </Box>
   );
 }

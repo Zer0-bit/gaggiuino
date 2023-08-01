@@ -26,6 +26,7 @@ public:
     case OperationMode::FLUSH: return OperationModeDto::OperationModeDto_FLUSH;
     case OperationMode::DESCALE: return OperationModeDto::OperationModeDto_DESCALE;
     case OperationMode::STEAM: return OperationModeDto::OperationModeDto_STEAM;
+    case OperationMode::FLUSH_AUTO: return OperationModeDto::OperationModeDto_FLUSH_AUTO;
     }
     return OperationModeDto::OperationModeDto_BREW_AUTO;
   };
@@ -37,6 +38,7 @@ public:
     case OperationModeDto::OperationModeDto_FLUSH: return OperationMode::FLUSH;
     case OperationModeDto::OperationModeDto_DESCALE: return OperationMode::DESCALE;
     case OperationModeDto::OperationModeDto_STEAM: return OperationMode::STEAM;
+    case OperationModeDto::OperationModeDto_FLUSH_AUTO: return OperationMode::FLUSH_AUTO;
     }
     return OperationMode::BREW_AUTO;
   };

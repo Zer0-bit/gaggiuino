@@ -8,6 +8,7 @@ enum class OperationMode {
   FLUSH = 2,
   DESCALE = 3,
   STEAM = 4,
+  FLUSH_AUTO = 5,
 };
 
 struct SystemState {
