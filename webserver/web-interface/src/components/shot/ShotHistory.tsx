@@ -6,6 +6,7 @@ import {
   ButtonBase,
   List, ListItem, ListItemAvatar,
   ListItemText,
+  Typography,
   alpha,
 } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -57,7 +58,7 @@ const getColorForTimeOfDay = (timeOfDay: TimeOfDay): string => {
 };
 
 export default function ShotHistory() {
-  const { shotHistory } = useShotDataStore();
+  const shotHistory = useShotDataStore((state) => state.shotHistory);
   const [viewingShot, setViewingShot] = useState<Shot | undefined>(undefined);
   const [sortedShotHistory, setSortedShotHistory] = useState<Shot[]>([]);
 
@@ -79,6 +80,8 @@ export default function ShotHistory() {
 
   return (
     <>
+      {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
+      {shotHistory.length > 0 && (
       <List>
         {sortedShotHistory.map((shot) => {
           const shotDate = new Date(shot.time);
@@ -104,6 +107,7 @@ export default function ShotHistory() {
           );
         })}
       </List>
+      )}
       {viewingShot && (
       <ShotDialog
         open={!!viewingShot}

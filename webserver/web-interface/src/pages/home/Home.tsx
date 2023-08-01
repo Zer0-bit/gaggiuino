@@ -20,10 +20,8 @@ import {
   useTheme,
 } from '@mui/material';
 import React, {
-  ReactNode, useCallback, useMemo, useState,
+  useCallback, useState,
 } from 'react';
-import GaugeChart from '../../components/chart/GaugeChart';
-import GaugeLiquid from '../../components/chart/GaugeLiquid';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
 import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
 import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
@@ -32,26 +30,30 @@ import AvailableProfileSelector from '../../components/profile/AvailableProfileS
 import { ProfileReview } from '../../components/profile/ProfilePreview';
 import ShotHistory from '../../components/shot/ShotHistory';
 import {
-  GaggiaSettings, NotificationType, OperationMode, SensorState,
+  GaggiaSettings, NotificationType, OperationMode,
 } from '../../models/models';
 import { Profile } from '../../models/profile';
 import useProfileStore from '../../state/ProfileStore';
 import useSensorStateStore from '../../state/SensorStateStore';
 import useSettingsStore from '../../state/SettingsStore';
-import useShotDataStore from '../../state/ShotDataStore';
 import useSystemStateStore from '../../state/SystemStateStore';
 import useNotificationStore from '../../state/NotificationDataStore';
 import { SwitchLedButton, SwitchLedState } from '../../components/inputs/SwitchLedButton';
+import PressureGauge from '../../components/gauges/PressureGauge';
+import WaterLevelGauge from '../../components/gauges/WaterLevelGauge';
+import TemperatureGauge from '../../components/gauges/TemperatureGauge';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
+
+const MemoMiddleSection = React.memo(MiddleSection);
+const MemoLeftSection = React.memo(LeftSection);
+const MemoRightSection = React.memo(RightSection);
 
 function Home() {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
-
-  const { sensorState } = useSensorStateStore();
-  const { updateLatestNotification } = useNotificationStore();
-  const { updateLocalOperationMode } = useSystemStateStore();
+  const updateLatestNotification = useNotificationStore((state) => state.updateLatestNotification);
+  const updateLocalOperationMode = useSystemStateStore((state) => state.updateLocalOperationMode);
   const { settings, updateLocalSettings, updateSettingsAndSync } = useSettingsStore();
   const {
     activeProfile,
@@ -130,13 +132,13 @@ function Home() {
         {/* Left size Gauges */}
         {isBiggerScreen && (
         <Grid sm={2} md={2}>
-          <LeftSection sensorState={sensorState} />
+          <MemoLeftSection />
         </Grid>
         )}
 
         {/* Center part - profiles */}
         <Grid xs={7} sm={6} sx={{ gap: '8px', position: 'relative' }}>
-          <MiddleSection
+          <MemoMiddleSection
             activeProfile={activeProfile}
             handlePersistActiveProfile={handlePersistActiveProfile}
             handleProfileUpdate={handleProfileUpdate}
@@ -146,9 +148,7 @@ function Home() {
 
         {/* Right part - Temperature Gauge and Scale */}
         <Grid xs={5} sm={4}>
-          <RightSection
-            sensorState={sensorState}
-            activeProfile={activeProfile}
+          <MemoRightSection
             handleBrewTempUpdate={handleBrewTempUpdate}
             handleSteamTempUpdate={handleSteamTempUpdate}
             handleOpmodeChange={handleOpmodeChange}
@@ -161,15 +161,15 @@ function Home() {
 
 export default Home;
 
-function LeftSection({ sensorState }: {sensorState: SensorState}): React.ReactNode {
+function LeftSection() {
   const theme = useTheme();
   return (
     <>
       <Box sx={{ p: theme.spacing(1) }}>
-        <GaugeLiquid value={sensorState.waterLevel} />
+        <WaterLevelGauge />
       </Box>
       <Box sx={{ mt: theme.spacing(1), p: theme.spacing(1) }}>
-        <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
+        <PressureGauge />
       </Box>
     </>
   );
@@ -213,30 +213,28 @@ function MiddleSection({
 }
 
 interface RightSectionProps{
-  sensorState: SensorState;
-  activeProfile: Profile | null;
   handleBrewTempUpdate: (value: number) => void;
   handleSteamTempUpdate: (value: number) => void;
   handleOpmodeChange: (opMode: OperationMode) => void;
 }
 
+const MemoOpModeButtons = React.memo(OpModeButtons);
+const MemoTargetTempInput = React.memo(TargetTempInput);
+const MemoScalesInput = React.memo(ScalesInput);
+const MemoTemperatureGauge = React.memo(TemperatureGauge);
+
 function RightSection({
-  sensorState,
-  activeProfile,
   handleBrewTempUpdate,
   handleSteamTempUpdate,
   handleOpmodeChange,
 }: RightSectionProps) {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
-  const { settings } = useSettingsStore();
-  const targetTemp = useMemo(() => (sensorState.steamActive
-    ? settings?.boiler.steamSetPoint
-    : activeProfile?.waterTemperature || 0), [settings, activeProfile, sensorState]);
-  const tempUpdateHandler = useMemo(
-    () => (sensorState.steamActive ? handleSteamTempUpdate : handleBrewTempUpdate),
-    [sensorState, handleSteamTempUpdate, handleBrewTempUpdate],
-  );
+  const steamActive = useSensorStateStore((state) => state.sensorState.steamActive);
+  const steamSetPoint = useSettingsStore((state) => state.settings?.boiler.steamSetPoint || 0);
+  const brewTemperature = useProfileStore((state) => state.activeProfile?.waterTemperature || 0);
+  const targetTemp = steamActive ? steamSetPoint : brewTemperature;
+  const tempUpdateHandler = steamActive ? handleSteamTempUpdate : handleBrewTempUpdate;
 
   return (
     <>
@@ -245,38 +243,32 @@ function RightSection({
       }}
       >
         <AspectRatioBox ratio={1}>
-          <GaugeChart
-            value={sensorState.temperature}
-            primaryColor={theme.palette.temperature.main}
-            maxValue={targetTemp}
-            flashAfterValue={settings && settings.boiler ? settings.boiler.steamSetPoint - 20 : undefined}
-            unit="°C"
-          />
+          <MemoTemperatureGauge targetTemperature={targetTemp} />
         </AspectRatioBox>
       </Box>
 
       <Grid container spacing={2} sx={{ px: 1, mt: 3 }}>
         <Grid xs={12}>
-          <TargetTempInput
+          <MemoTargetTempInput
             targetTemp={targetTemp || 0}
             handleTempUpdate={tempUpdateHandler}
           />
         </Grid>
         <Grid xs={12}>
-          <ScalesInput />
+          <MemoScalesInput />
         </Grid>
         <Grid xs={12}>
-          <OpModeButtons onChange={handleOpmodeChange} />
+          <MemoOpModeButtons onChange={handleOpmodeChange} />
         </Grid>
 
         {/* Gauges for small screens */}
         {!isBiggerScreen && (
           <Grid xs={12} sx={{ display: 'flex', alignItems: 'stretch' }}>
             <Box sx={{ width: '50%', p: theme.spacing(1) }}>
-              <GaugeLiquid value={sensorState.waterLevel} />
+              <WaterLevelGauge />
             </Box>
             <Box sx={{ width: '50%', p: theme.spacing(1) }}>
-              <GaugeChart value={sensorState.pressure} primaryColor={theme.palette.pressure.main} title="Pressure" unit="bar" maxValue={14} />
+              <PressureGauge />
             </Box>
           </Grid>
         )}
@@ -365,7 +357,7 @@ function TargetTempInput(
 
 function ScalesInput() {
   const theme = useTheme();
-  const { sensorState } = useSensorStateStore();
+  const currentWeight = useSensorStateStore((state) => state.sensorState.weight);
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
@@ -383,7 +375,7 @@ function ScalesInput() {
           }}
           disabled
           type="text"
-          value={sensorState.weight.toFixed(1)}
+          value={currentWeight.toFixed(1)}
           InputProps={{
             sx: {
               '& input': {
@@ -423,7 +415,6 @@ function ProfileAndHistoryTabs(
 ) {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
-  const { shotHistory } = useShotDataStore();
 
   return (
     <>
@@ -445,7 +436,6 @@ function ProfileAndHistoryTabs(
         </Box>
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        {shotHistory.length > 0 && (
         <Box sx={{
           p: { xs: 0, sm: theme.spacing(1) },
           height: '45vh',
@@ -453,9 +443,7 @@ function ProfileAndHistoryTabs(
         }}
         >
           <ShotHistory />
-          {shotHistory.length === 0 && <Typography variant="body2">Pull some shots to see them here.</Typography>}
         </Box>
-        )}
       </TabPanel>
     </>
   );
