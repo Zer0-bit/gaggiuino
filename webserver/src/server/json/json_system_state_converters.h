@@ -12,7 +12,7 @@ namespace json {
   // ------------------------------------------------------------------------------------------
   std::string mapOperationModeToJsonValue(const OperationMode& mode);
   void mapSystemStateToJson(const SystemState& systemState, JsonObject& target);
-  void mapUpdateOperationModeToJson(const UpdateOperationMode& updateOperationMode, JsonObject& target);
+  void mapUpdateSystemStateCommmandToJson(const UpdateSystemStateComand& command, JsonObject& target);
   void mapSensorStateToJson(const SensorStateSnapshot& sensorState, JsonObject& target);
   void mapShotSnapshotToJson(const ShotSnapshot& shotSnaposhot, JsonObject& target);
 
@@ -21,6 +21,6 @@ namespace json {
   // ------------------------------------------------------------------------------------------
   OperationMode mapJsonValueToOperationMode(const std::string& modeValue);
   SystemState mapJsonToSystemState(const JsonObject& json);
-  UpdateOperationMode mapJsonToUpdateOperationMode(const JsonObject& json);
+  UpdateSystemStateComand mapJsonToUpdateSystemStateCommand(const JsonObject& json);
 }
 #endif

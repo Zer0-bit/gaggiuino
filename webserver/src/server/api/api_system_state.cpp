@@ -9,39 +9,52 @@
 #include "../../log/log.h"
 
 // Gets and updates part of the settings object in memory.
-void handleGetOperationMode(AsyncWebServerRequest* request);
-void handleUpdateOperationMode(AsyncWebServerRequest* request, JsonVariant& json);
+void handleGetSystemState(AsyncWebServerRequest* request);
+void handleUpdateSystemStateOperationMode(AsyncWebServerRequest* request, JsonVariant& json);
+void handleUpdateSystemStateTarePending(AsyncWebServerRequest* request, JsonVariant& json);
 
 void setupSystemStateApi(AsyncWebServer& server) {
-  server.on("/api/system-state/operation-mode", HTTP_GET, handleGetOperationMode);
-  server.on("/api/system-state/operation-mode", HTTP_PUT, withJson(handleUpdateOperationMode), NULL, onJsonBody);
+  server.on("/api/system-state", HTTP_GET, handleGetSystemState);
+  server.on("/api/system-state/operation-mode", HTTP_PUT, withJson(handleUpdateSystemStateOperationMode), NULL, onJsonBody);
+  server.on("/api/system-state/tare-pending", HTTP_PUT, withJson(handleUpdateSystemStateTarePending), NULL, onJsonBody);
 }
 
 // ------------------------------------------------------------------------------------------
 // ------------------------------------- GET METHODS ----------------------------------------
 // ------------------------------------------------------------------------------------------
 
-void handleGetOperationMode(AsyncWebServerRequest* request) {
-  LOG_INFO("Got request get operation mode");
-
+void systemStateResponse(AsyncWebServerRequest* request, JsonObject json, int code = 200) {
   AsyncResponseStream* response = request->beginResponseStream("application/json");
-  DynamicJsonDocument json(100);
-  JsonObject jsonObj = json.to<JsonObject>();
-  jsonObj["operationMode"] = json::mapOperationModeToJsonValue(state::getOperationMode());
+  response->setCode(code);
 
-  response->setCode(200);
-  serializeJson(jsonObj, *response);
+  json::mapSystemStateToJson(state::getSystemState(), json);
+  serializeJson(json, *response);
+
   request->send(response);
 }
 
-void handleUpdateOperationMode(AsyncWebServerRequest* request, JsonVariant& body) {
+void handleGetSystemState(AsyncWebServerRequest* request) {
+  LOG_INFO("Got request get operation mode");
+
+  DynamicJsonDocument json(512);
+  JsonObject jsonObj = json.to<JsonObject>();
+  systemStateResponse(request, jsonObj, 200);
+}
+
+void handleUpdateSystemStateTarePending(AsyncWebServerRequest* request, JsonVariant& body) {
   LOG_INFO("Got request to update operation mode");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
-  UpdateOperationMode command = json::mapJsonToUpdateOperationMode(body);
-  state::updateOperationMode(command.operationMode);
+  state::updateTarePending(body["tarePending"]);
 
-  response->setCode(200);
-  serializeJson(body, *response);
-  request->send(response);
+  JsonObject responseBody = body.to<JsonObject>();
+  systemStateResponse(request, responseBody, 200);
+}
+
+void handleUpdateSystemStateOperationMode(AsyncWebServerRequest* request, JsonVariant& body) {
+  LOG_INFO("Got request to update operation mode");
+
+  state::updateOperationMode(json::mapJsonValueToOperationMode(body["operationMode"]));
+
+  JsonObject responseBody = body.to<JsonObject>();
+  systemStateResponse(request, responseBody, 200);
 }

@@ -16,7 +16,7 @@ void stmCommsSendBrewSettings(const BrewSettings& settings);
 void stmCommsSendBoilerSettings(const BoilerSettings& settings);
 void stmCommsSendLedSettings(const LedSettings& settings);
 void stmCommsSendSystemSettings(const SystemSettings& settings);
-void stmCommsSendUpdateOperationMode(const OperationMode mode);
+void stmCommsSendUpdateSystemState(const UpdateSystemStateComand& state);
 
 // To be defined elsewhere
 void onSensorStateSnapshotReceived(const SensorStateSnapshot& snapshot);

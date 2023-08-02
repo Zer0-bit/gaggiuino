@@ -6,13 +6,12 @@ namespace state {
   GaggiaSettings currentSettings;
   Profile activeProfile;
   ProfileId activeProfileId;
-  OperationMode operationMode;
+  SystemState systemState;
 
   void init() {
     currentSettings = persistence::getSettings();
     activeProfileId = persistence::getActiveProfileId();
     activeProfile = persistence::getProfile(activeProfileId).second;
-    operationMode = OperationMode::BREW_AUTO;
 
     LOG_INFO("Initialized state. s.hpwr=%d, apId=%d, ap.name=%s", currentSettings.boiler.hpwr, activeProfileId, activeProfile.name.c_str());
   }
@@ -99,12 +98,26 @@ namespace state {
   // ---------------------------------------------------------------------------------
   // -------------------------------- SYSTEM_STATE -----------------------------------
   // ---------------------------------------------------------------------------------
-  OperationMode getOperationMode() {
-    return operationMode;
+  SystemState getSystemState() {
+    return systemState;
+  }
+
+  void updateSystemState(const SystemState& newState) {
+    systemState = newState;
+    onSystemStateUpdated(systemState);
+  }
+
+  void sumitUpdateSystemStateCommand(const UpdateSystemStateComand& command) {
+    systemState.tarePending = command.tarePending;
+    systemState.operationMode = command.operationMode;
+    onUpdateSystemStateCommandSubmitted(command);
+  }
+
+  void updateTarePending(bool tarePending) {
+    sumitUpdateSystemStateCommand({ .operationMode = systemState.operationMode, .tarePending = tarePending });
   }
 
   void updateOperationMode(OperationMode operationMode) {
-    state::operationMode = operationMode;
-    onOperationModeUpdated(state::operationMode);
+    sumitUpdateSystemStateCommand({ .operationMode = operationMode, .tarePending = systemState.tarePending });
   }
 }

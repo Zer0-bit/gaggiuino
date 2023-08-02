@@ -19,6 +19,7 @@ export interface SystemState {
     scalesPresent: boolean,
     timeAlive: number,
     descaleProgress: number,
+    tarePending: boolean,
 }
 
 export interface SensorState {

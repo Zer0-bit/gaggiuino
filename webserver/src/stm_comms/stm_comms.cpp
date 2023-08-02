@@ -163,12 +163,15 @@ void stmCommsSendSystemSettings(const SystemSettings& settings) {
   xSemaphoreGiveRecursive(mcucLock);
 }
 
-void stmCommsSendUpdateOperationMode(const OperationMode mode) {
+void stmCommsSendUpdateSystemState(const UpdateSystemStateComand& state) {
   if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
-  UpdateOperationMode command = { .operationMode = mode };
+  UpdateSystemStateComand command = {
+    .operationMode = state.operationMode,
+    .tarePending = state.tarePending
+  };
   mcuComms.sendMessage(
-    McuCommsMessageType::MCUC_CMD_UPDATE_OPERATION_MODE,
-    ProtoSerializer::serialize<UpdateOperationModeConverter>(command)
+    McuCommsMessageType::MCUC_CMD_UPDATE_SYSTEM_STATE,
+    ProtoSerializer::serialize<UpdateSystemStateComandConverter>(command)
   );
   xSemaphoreGiveRecursive(mcucLock);
 }

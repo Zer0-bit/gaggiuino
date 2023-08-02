@@ -6,7 +6,6 @@ struct SensorState {
   bool brewSwitchState;
   bool steamSwitchState;
   bool hotWaterSwitchState;
-  bool tarePending;
   float temperature;          // °C
   /* calculated water temperature as wanted but not guaranteed
   due to boiler having a hard limit of 4ml/s heat capacity */

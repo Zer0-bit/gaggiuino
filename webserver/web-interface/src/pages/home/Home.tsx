@@ -23,7 +23,7 @@ import React, {
   useCallback, useState,
 } from 'react';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
-import { getOperationMode, updateOperationMode } from '../../components/client/SystemStateClient';
+import { updateOperationMode, updateTarePending } from '../../components/client/SystemStateClient';
 import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
 import AspectRatioBox from '../../components/layout/AspectRatioBox';
 import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
@@ -53,7 +53,6 @@ function Home() {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
   const updateLatestNotification = useNotificationStore((state) => state.updateLatestNotification);
-  const updateLocalOperationMode = useSystemStateStore((state) => state.updateLocalOperationMode);
   const { settings, updateLocalSettings, updateSettingsAndSync } = useSettingsStore();
   const {
     activeProfile,
@@ -113,17 +112,6 @@ function Home() {
     }
   }, [activeProfile, fetchActiveProfile]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleOpmodeChange = useCallback(debounce(async (newMode: OperationMode) => {
-    try {
-      await updateOperationMode(newMode);
-      const mode = await getOperationMode();
-      updateLocalOperationMode(mode);
-    } catch (e) {
-      updateLatestNotification({ message: 'Failed to change operation mode', type: NotificationType.ERROR });
-    }
-  }, 500), []);
-
   return (
     <Container sx={{ pt: theme.spacing(2), px: { xs: 0.5, sm: 1 }, gap: 0 }}>
       {/* <ShowAlert level="INFO" text="Welcome home motherfucker \_O_/" /> */}
@@ -151,7 +139,6 @@ function Home() {
           <MemoRightSection
             handleBrewTempUpdate={handleBrewTempUpdate}
             handleSteamTempUpdate={handleSteamTempUpdate}
-            handleOpmodeChange={handleOpmodeChange}
           />
         </Grid>
       </Grid>
@@ -215,7 +202,6 @@ function MiddleSection({
 interface RightSectionProps{
   handleBrewTempUpdate: (value: number) => void;
   handleSteamTempUpdate: (value: number) => void;
-  handleOpmodeChange: (opMode: OperationMode) => void;
 }
 
 const MemoOpModeButtons = React.memo(OpModeButtons);
@@ -226,7 +212,6 @@ const MemoTemperatureGauge = React.memo(TemperatureGauge);
 function RightSection({
   handleBrewTempUpdate,
   handleSteamTempUpdate,
-  handleOpmodeChange,
 }: RightSectionProps) {
   const theme = useTheme();
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
@@ -258,7 +243,7 @@ function RightSection({
           <MemoScalesInput />
         </Grid>
         <Grid xs={12}>
-          <MemoOpModeButtons onChange={handleOpmodeChange} />
+          <MemoOpModeButtons />
         </Grid>
 
         {/* Gauges for small screens */}
@@ -283,20 +268,30 @@ function getBrewBtnState(operationMode: OperationMode) {
   return SwitchLedState.OFF;
 }
 
-function OpModeButtons({ onChange }: {
-  onChange: (opMode: OperationMode) => void
-}) {
+function OpModeButtons() {
   const operationMode = useSystemStateStore((state) => state.systemState.operationMode);
+  const updateLatestNotification = useNotificationStore((state) => state.updateLatestNotification);
+  const updateLocalSystemState = useSystemStateStore((state) => state.updateLocalSystemState);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleOpmodeChange = useCallback(debounce(async (newMode: OperationMode) => {
+    try {
+      const systemState = await updateOperationMode(newMode);
+      updateLocalSystemState(systemState);
+    } catch (e) {
+      updateLatestNotification({ message: 'Failed to change operation mode', type: NotificationType.ERROR });
+    }
+  }, 250), []);
 
   const handleFlushStateChange = useCallback((newState: SwitchLedState) => {
-    if (newState === SwitchLedState.OFF) onChange(OperationMode.BREW_AUTO);
-    else if (newState === SwitchLedState.ON) onChange(OperationMode.FLUSH);
-    else onChange(OperationMode.FLUSH_AUTO);
-  }, [onChange]);
+    if (newState === SwitchLedState.OFF) handleOpmodeChange(OperationMode.BREW_AUTO);
+    else if (newState === SwitchLedState.ON) handleOpmodeChange(OperationMode.FLUSH);
+    else handleOpmodeChange(OperationMode.FLUSH_AUTO);
+  }, [handleOpmodeChange]);
 
   const handleDescaleStateChange = useCallback((newState: SwitchLedState) => {
-    onChange(newState === SwitchLedState.ON ? OperationMode.DESCALE : OperationMode.BREW_AUTO);
-  }, [onChange]);
+    handleOpmodeChange(newState === SwitchLedState.ON ? OperationMode.DESCALE : OperationMode.BREW_AUTO);
+  }, [handleOpmodeChange]);
 
   return (
     <Box width="100%" display="flex" justifyContent="space-evenly" gap={2}>
@@ -359,6 +354,18 @@ function ScalesInput() {
   const theme = useTheme();
   const currentWeight = useSensorStateStore((state) => state.sensorState.weight);
   const isBiggerScreen = useMediaQuery(theme.breakpoints.up('sm'));
+  const updateLocalSystemState = useSystemStateStore((state) => state.updateLocalSystemState);
+  const updateLatestNotification = useNotificationStore((state) => state.updateLatestNotification);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleTare = useCallback(debounce(async () => {
+    try {
+      const systemState = await updateTarePending(true);
+      updateLocalSystemState(systemState);
+    } catch (e) {
+      updateLatestNotification({ message: 'Failed to tare', type: NotificationType.ERROR });
+    }
+  }, 250), []);
 
   return (
     <Grid container alignItems="center">
@@ -398,7 +405,7 @@ function ScalesInput() {
               minWidth: 30,
             }}
             size="small"
-            onClick={() => false}
+            onClick={handleTare}
           >
             <ScaleIcon fontSize="inherit" sx={{ mr: theme.spacing(1) }} />
             {isBiggerScreen ? 'TARE' : 'TR'}

@@ -10,17 +10,18 @@ import { GlobalRestrictions } from './GlobalRestrictions';
 import ProfileEditDialog from './edit/ProfileEditDialog';
 
 export interface ProfileReviewProps {
-  profile: Profile,
-  onSave?: () => void,
+  profile: Profile;
+  onSave?: () => void;
   onChange?: (profile: Profile) => void;
 }
 
-export function ProfileReview({ profile, onSave = undefined, onChange = undefined }: ProfileReviewProps) {
+export function ProfileReview({ profile, onSave, onChange }: ProfileReviewProps) {
   const theme = useTheme();
   const [editOpen, setEditOpen] = useState(false);
-  const handleDone = useCallback((newProfile :Profile) => {
+
+  const handleDone = useCallback((newProfile: Profile) => {
     setEditOpen(false);
-    onChange && onChange(newProfile);
+    onChange?.(newProfile);
   }, [onChange]);
 
   return (
@@ -39,10 +40,10 @@ export function ProfileReview({ profile, onSave = undefined, onChange = undefine
       >
         <Typography variant="h6">{profile.name}</Typography>
         {(onSave || onChange) && (
-        <Box sx={{ display: 'flex', alignItems: 'center', columnGap: theme.spacing(1) }}>
-          {onSave && <IconButton size="small" color="inherit" onClick={onSave}><SaveIcon fontSize="inherit" /></IconButton>}
-          {onChange && <IconButton size="small" color="inherit" onClick={() => setEditOpen(true)}><EditIcon fontSize="inherit" /></IconButton>}
-        </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', columnGap: theme.spacing(1) }}>
+            {onSave && <IconButton size="small" color="inherit" onClick={onSave}><SaveIcon fontSize="inherit" /></IconButton>}
+            {onChange && <IconButton size="small" color="inherit" onClick={() => setEditOpen(true)}><EditIcon fontSize="inherit" /></IconButton>}
+          </Box>
         )}
       </Box>
       <Box position="relative" width="100%"><ProfileChart profile={profile} /></Box>
@@ -53,3 +54,4 @@ export function ProfileReview({ profile, onSave = undefined, onChange = undefine
     </Box>
   );
 }
+

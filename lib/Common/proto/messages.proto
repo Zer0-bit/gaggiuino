@@ -9,8 +9,9 @@ enum OperationModeDto {
   FLUSH_AUTO = 5;
 };
 
-message UpdateOperationModeDto {
+message UpdateSystemStateComandDto {
   OperationModeDto operationMode = 1;
+  bool tarePending = 2;
 }
 
 message RequestDataDto {
@@ -25,6 +26,7 @@ message SystemStateDto {
   OperationModeDto operationMode = 5;
   uint32 timeAlive = 6;
   uint32 descaleProgress = 7;
+  bool tarePending = 8;
 }
 
 message SensorStateSnapshotDto {

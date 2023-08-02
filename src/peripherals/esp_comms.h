@@ -34,7 +34,7 @@ void onSystemSettingsReceived(const SystemSettings& systemSettings);
 void onBrewSettingsReceived(const BrewSettings& brewSettings);
 
 // System state updates
-void onOperationModeReceived(const OperationMode operationMode);
+void onUpdateSystemStateCommandReceived(const UpdateSystemStateComand& command);
 
 // Profiling
 void onProfileReceived(const Profile& profile);
