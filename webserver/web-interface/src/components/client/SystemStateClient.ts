@@ -1,16 +1,21 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { OperationMode } from '../../models/models';
+import { OperationMode, SystemState } from '../../models/models';
 
 const config:AxiosRequestConfig = {
   timeout: 4000,
 };
 
-export async function getOperationMode(): Promise<OperationMode> {
-  return axios.get('/api/system-state/operation-mode', config)
-    .then(({ data }) => data)
-    .then(({ operationMode }) => operationMode);
+export async function getSystemState(): Promise<SystemState> {
+  return axios.get('/api/system-state', config)
+    .then(({ data }) => data);
 }
 
-export async function updateOperationMode(operationMode: OperationMode): Promise<void> {
-  return axios.put('/api/system-state/operation-mode', { operationMode }, config);
+export async function updateOperationMode(operationMode: OperationMode): Promise<SystemState> {
+  return axios.put('/api/system-state/operation-mode', { operationMode }, config)
+    .then(({ data }) => data);
+}
+
+export async function updateTarePending(tarePending: boolean): Promise<SystemState> {
+  return axios.put('/api/system-state/tare-pending', { tarePending }, config)
+    .then(({ data }) => data);
 }

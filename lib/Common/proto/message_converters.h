@@ -76,20 +76,22 @@ public:
   };
 };
 
-class UpdateOperationModeConverter : public NanoPb::Converter::MessageConverter<UpdateOperationModeConverter, UpdateOperationMode, UpdateOperationModeDto, UpdateOperationModeDto_fields> {
+class UpdateSystemStateComandConverter : public NanoPb::Converter::MessageConverter<UpdateSystemStateComandConverter, UpdateSystemStateComand, UpdateSystemStateComandDto, UpdateSystemStateComandDto_fields> {
 public:
   static ProtoType encoderInit(const LocalType& local) {
-    return UpdateOperationModeDto{
+    return UpdateSystemStateComandDto{
       .operationMode = OperationModeConverter::encode(local.operationMode),
+      .tarePending = local.tarePending,
     };
   };
 
   static ProtoType decoderInit(LocalType& local) {
-    return UpdateOperationModeDto{};
+    return UpdateSystemStateComandDto{};
   };
 
   static bool decoderApply(const ProtoType& proto, LocalType& local) {
     local.operationMode = OperationModeConverter::decode(proto.operationMode);
+    local.tarePending = proto.tarePending;
     return true;
   };
 };

@@ -9,8 +9,9 @@ enum OperationModeDto {
   FLUSH_AUTO = 5;
 };
 
-message UpdateOperationModeDto {
+message UpdateSystemStateComandDto {
   OperationModeDto operationMode = 1;
+  bool tarePending = 2;
 }
 
 message RequestDataDto {

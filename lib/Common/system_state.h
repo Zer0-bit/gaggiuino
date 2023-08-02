@@ -22,8 +22,9 @@ struct SystemState {
   bool          tarePending = false;
 };
 
-struct UpdateOperationMode {
+struct UpdateSystemStateComand {
   OperationMode operationMode;
+  bool tarePending;
 };
 
 #endif

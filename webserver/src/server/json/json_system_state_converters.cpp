@@ -27,8 +27,9 @@ namespace json {
     }
   }
 
-  void mapUpdateOperationModeToJson(const UpdateOperationMode& updateOperationMode, JsonObject& target) {
-    target["operationMode"] = mapOperationModeToJsonValue(updateOperationMode.operationMode);
+  void mapUpdateSystemStateCommmandToJson(const UpdateSystemStateComand& command, JsonObject& target) {
+    target["operationMode"] = mapOperationModeToJsonValue(command.operationMode);
+    target["tarePending"] = command.tarePending;
   }
 
   void mapSensorStateToJson(const SensorStateSnapshot& sensorState, JsonObject& target) {
@@ -71,9 +72,10 @@ namespace json {
     return OperationMode::BREW_AUTO;
   }
 
-  UpdateOperationMode mapJsonToUpdateOperationMode(const JsonObject& json) {
-    return UpdateOperationMode{
+  UpdateSystemStateComand mapJsonToUpdateSystemStateCommand(const JsonObject& json) {
+    return UpdateSystemStateComand{
       .operationMode = mapJsonValueToOperationMode(json["operationMode"]),
+      .tarePending = json["tarePending"],
     };
   }
 

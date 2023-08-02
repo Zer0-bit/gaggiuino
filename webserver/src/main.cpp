@@ -37,7 +37,7 @@ void onShotSnapshotReceived(const ShotSnapshot& shotData) {
   wsSendShotSnapshotToClients(shotData);
 }
 void onSystemStateReceived(const SystemState& systemState) {
-  wsSendSystemStateToClients(systemState);
+  state::updateSystemState(systemState);
 }
 void onScalesTareReceived() {
   LOG_INFO("STM sent tare command");
@@ -78,10 +78,9 @@ void state::onLedSettingsUpdated(const LedSettings& settings) {
 void state::onSystemSettingsUpdated(const SystemSettings& settings) {
   stmCommsSendSystemSettings(settings);
 }
-void state::onOperationModeUpdated(const OperationMode operationMode) {
-  stmCommsSendUpdateOperationMode(operationMode);
+void state::onSystemStateUpdated(const SystemState& systemState) {
+  wsSendSystemStateToClients(systemState);
 }
-
-void state::onSystemStateUpdate(const SystemState& systemState) {
-  stmCommsSendUpdateSystemState(systemState);
+void state::onUpdateSystemStateCommandSubmitted(const UpdateSystemStateComand& command) {
+  stmCommsSendUpdateSystemState(command);
 }

@@ -341,8 +341,9 @@ void onManualBrewPhaseReceived(const Phase& phase) {
   manualProfile.phases[0] = phase;
 }
 
-void onOperationModeReceived(const OperationMode operationMode) {
-  systemState.operationMode = operationMode;
+void onUpdateSystemStateCommandReceived(const UpdateSystemStateComand& command) {
+  systemState.operationMode = command.operationMode;
+  systemState.tarePending = command.tarePending;
 }
 
 void onBoilerSettingsReceived(const BoilerSettings& boilerSettings) {

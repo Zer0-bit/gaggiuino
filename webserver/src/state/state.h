@@ -36,9 +36,10 @@ namespace state {
 // ---------------------------------------------------------------------------------
 // -------------------------------- SYSTEM_STATE -----------------------------------
 // ---------------------------------------------------------------------------------
-  OperationMode getOperationMode();
+  SystemState getSystemState();
+  void updateSystemState(const SystemState& command);
+  void updateTarePending(bool tarePending);
   void updateOperationMode(OperationMode operationMode);
-  void updateTarePending(SystemState& systemState);
 
 // ---------------------------------------------------------------------------------
 // --------------------------------- CALLBACKS -------------------------------------
@@ -49,8 +50,9 @@ namespace state {
   void onBoilerSettingsUpdated(const BoilerSettings& settings);
   void onLedSettingsUpdated(const LedSettings& settings);
   void onSystemSettingsUpdated(const SystemSettings& settings);
-  void onOperationModeUpdated(const OperationMode operationMode);
-  void onSystemStateUpdate(const SystemState& systemState);
+
+  void onSystemStateUpdated(const SystemState& systemState);
+  void onUpdateSystemStateCommandSubmitted(const UpdateSystemStateComand& command);
 }
 
 #endif

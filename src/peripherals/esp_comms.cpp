@@ -170,12 +170,6 @@ void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>
     onManualBrewPhaseReceived(phase);
     break;
   }
-  case McuCommsMessageType::MCUC_DATA_SYSTEM_STATE: {
-    UpdateOperationMode updateOperationMode = { OperationMode::BREW_AUTO };
-    ProtoSerializer::deserialize<UpdateOperationModeConverter>(data, updateOperationMode);
-    onOperationModeReceived(updateOperationMode.operationMode);
-    break;
-  }
   case McuCommsMessageType::MCUC_DATA_BOILER_SETTINGS: {
     BoilerSettings boilerSettings;
     ProtoSerializer::deserialize<BoilerSettingsConverter>(data, boilerSettings);
@@ -200,10 +194,10 @@ void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>
     onBrewSettingsReceived(brewSettings);
     break;
   }
-  case McuCommsMessageType::MCUC_CMD_UPDATE_OPERATION_MODE: {
-    UpdateOperationMode command{ .operationMode = OperationMode::BREW_AUTO }; // init default
-    ProtoSerializer::deserialize<UpdateOperationModeConverter>(data, command);
-    onOperationModeReceived(command.operationMode);
+  case McuCommsMessageType::MCUC_CMD_UPDATE_SYSTEM_STATE: {
+    UpdateSystemStateComand command;
+    ProtoSerializer::deserialize<UpdateSystemStateComandConverter>(data, command);
+    onUpdateSystemStateCommandReceived(command);
     break;
   }
   default: // Ignore message in all other cases
