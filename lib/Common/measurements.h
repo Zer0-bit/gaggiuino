@@ -10,7 +10,7 @@ struct Measurement {
   float value = 0.f;
   uint32_t millis = 0u;
 
-  void round(uint8_t precision) {
+  void setPrecision(uint8_t precision) {
     value = truncate(value, precision);
   }
 };

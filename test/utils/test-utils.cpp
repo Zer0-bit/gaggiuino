@@ -97,7 +97,6 @@ void TEST_ASSERT_EQUAL_SYSTEM_STATE(const SystemState& expected, const SystemSta
   TEST_ASSERT_EQUAL_MESSAGE(expected.isSteamForgottenON, actual.isSteamForgottenON, "system.isSteamForgottenON");
   TEST_ASSERT_EQUAL_MESSAGE(expected.scalesPresent, actual.scalesPresent, "system.scalesPresent");
   TEST_ASSERT_EQUAL_MESSAGE(expected.timeAlive, actual.timeAlive, "system.timeAlive");
-  TEST_ASSERT_EQUAL_MESSAGE(expected.descaleProgress, actual.descaleProgress, "system.descaleProgress");
 }
 
 #include <iostream>

@@ -77,7 +77,7 @@ Measurement scalesGetWeight(void) {
   else if (remoteScalesIsPresent()) {
     currentWeight = remoteScalesGetWeight();
   }
-  currentWeight.round(1);
+  currentWeight.setPrecision(1);
   return currentWeight;
 }
 
