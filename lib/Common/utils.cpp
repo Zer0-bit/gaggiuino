@@ -70,3 +70,7 @@ float getAverage(float value) {
   return sum / BUFFER_SIZE;
 }
 
+float truncate(float num, uint8_t precision) {
+    float factor = std::pow(10.0f, precision);
+    return std::round(num * factor) / factor;
+}
