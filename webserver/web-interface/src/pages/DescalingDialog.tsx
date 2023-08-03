@@ -5,6 +5,7 @@ import {
   Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, Typography,
 } from '@mui/material';
 import { DescalingProgress, DescalingState } from '../models/models';
+import formatTime from '../models/time_format';
 
 interface DescalingDialogProps {
   data: DescalingProgress;
@@ -22,8 +23,6 @@ const descriptions = {
 
 function DescalingDialog({ data, open, onClose }:DescalingDialogProps) {
   const { state, time, progress } = data;
-
-  const timeElapsedSeconds = (time / 1000).toFixed(0);
 
   return (
     <Dialog
@@ -50,9 +49,7 @@ function DescalingDialog({ data, open, onClose }:DescalingDialogProps) {
         <Typography variant="body2">
           Time:
           {' '}
-          {timeElapsedSeconds}
-          {' '}
-          seconds
+          {formatTime({ time })}
         </Typography>
         <Box display="flex" alignItems="center" flexDirection="column" sx={{ pt: 2 }}>
           <LinearProgress
