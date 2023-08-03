@@ -25,7 +25,6 @@ message SystemStateDto {
   bool scalesPresent = 4;
   OperationModeDto operationMode = 5;
   uint32 timeAlive = 6;
-  uint32 descaleProgress = 7;
   bool tarePending = 8;
 }
 
@@ -69,4 +68,18 @@ message NotificationDto {
   }
   NotificationTypeDto type = 1;
   string message = 2;
+}
+
+enum DescalingStateDto {
+  IDLE = 0;
+  PHASE1 = 1;
+  PHASE2 = 2;
+  PHASE3 = 3;
+  FINISHED = 4;
+}
+
+message DescalingProgressDto {
+  DescalingStateDto state = 1;
+  uint32 time = 2;
+  uint32 progess = 3;
 }

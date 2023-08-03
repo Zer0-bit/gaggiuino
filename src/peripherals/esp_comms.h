@@ -21,6 +21,7 @@ void espCommsSendTareScalesCommand();
 void espCommsSendNotification(const Notification notification, uint32_t frequency = 1000);
 void espCommsSendSystemState(const SystemState& systemState, uint32_t frequency = 1000);
 void espCommsRequestData(McuCommsMessageType dataType);
+void espCommsSendDescaleProgress(const DescalingProgress& descalingProgress);
 
 // MCU updates
 void onRemoteScalesWeightReceived(float weight);

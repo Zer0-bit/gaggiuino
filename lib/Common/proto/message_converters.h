@@ -54,7 +54,6 @@ public:
       .scalesPresent = local.scalesPresent,
       .operationMode = OperationModeConverter::encode(local.operationMode),
       .timeAlive = local.timeAlive,
-      .descaleProgress = local.descaleProgress,
       .tarePending = local.tarePending,
     };
   };
@@ -70,7 +69,6 @@ public:
     local.scalesPresent = proto.scalesPresent;
     local.operationMode = OperationModeConverter::decode(proto.operationMode);
     local.timeAlive = proto.timeAlive;
-    local.descaleProgress = proto.descaleProgress;
     local.tarePending = proto.tarePending;
     return true;
   };
@@ -251,4 +249,52 @@ public:
   };
 };
 
+
+class DescalingStateConverter : public NanoPb::Converter::EnumConverter<DescalingStateConverter, DescalingState, DescalingStateDto> {
+public:
+  static ProtoType encode(const LocalType& local) {
+    switch (local) {
+    case DescalingState::IDLE: return DescalingStateDto::DescalingStateDto_IDLE;
+    case DescalingState::PHASE1: return DescalingStateDto::DescalingStateDto_PHASE1;
+    case DescalingState::PHASE2: return DescalingStateDto::DescalingStateDto_PHASE2;
+    case DescalingState::PHASE3: return DescalingStateDto::DescalingStateDto_PHASE3;
+    case DescalingState::FINISHED: return DescalingStateDto::DescalingStateDto_FINISHED;
+    }
+    return DescalingStateDto::DescalingStateDto_IDLE;
+  };
+
+  static LocalType decode(const ProtoType& proto) {
+    switch (proto) {
+    case DescalingStateDto::DescalingStateDto_IDLE: return DescalingState::IDLE;
+    case DescalingStateDto::DescalingStateDto_PHASE1: return DescalingState::PHASE1;
+    case DescalingStateDto::DescalingStateDto_PHASE2: return DescalingState::PHASE2;
+    case DescalingStateDto::DescalingStateDto_PHASE3: return DescalingState::PHASE3;
+    case DescalingStateDto::DescalingStateDto_FINISHED: return DescalingState::FINISHED;
+    }
+    return DescalingState::IDLE;
+  };
+};
+
+
+class DescalingProgressConverter : public NanoPb::Converter::MessageConverter<DescalingProgressConverter, DescalingProgress, DescalingProgressDto, DescalingProgressDto_fields> {
+public:
+  static ProtoType encoderInit(const LocalType& local) {
+    return DescalingProgressDto{
+      .state = DescalingStateConverter::encode(local.state),
+      .time = local.time,
+      .progess = local.progess,
+    };
+  };
+
+  static ProtoType decoderInit(LocalType& local) {
+    return DescalingProgressDto{};
+  };
+
+  static bool decoderApply(const ProtoType& proto, LocalType& local) {
+    local.state = DescalingStateConverter::decode(proto.state);
+    local.time = proto.time;
+    local.progess = proto.progess;
+    return true;
+  };
+};
 #endif

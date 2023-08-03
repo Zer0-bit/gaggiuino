@@ -10,69 +10,77 @@ DescalingState descalingState = DescalingState::IDLE;
 
 short flushCounter = 0;
 uint8_t counter = 0;
-unsigned long descalingTimer = 0;
+uint32_t descalingTimer = 0;
+uint32_t descalingStartTime = 0;
+uint32_t descalingStopTime = 0;
 int descalingCycle = 0;
 
-void deScale(const GaggiaSettings &gaggiaSettings, const SensorState &currentState, SystemState& systemState) {
+void sendDescalingProgressToEsp();
+
+void deScale(const GaggiaSettings& gaggiaSettings, const SensorState& currentState) {
   switch (descalingState) {
-    case DescalingState::IDLE: // Waiting for fuckfest to begin
-      if (currentState.brewSwitchState) {
-        openValve();
-        setSteamValveRelayOn();
-        descalingState = DescalingState::DESCALING_PHASE1;
-        descalingCycle = 0;
+  case DescalingState::IDLE: // Waiting for fuckfest to begin
+    if (currentState.brewSwitchState) {
+      openValve();
+      setSteamValveRelayOn();
+      descalingState = DescalingState::PHASE1;
+      descalingCycle = 0;
+      descalingTimer = millis();
+      descalingStartTime = millis();
+      descalingStopTime = 0;
+    }
+    break;
+  case DescalingState::PHASE1: // Slowly penetrating that scale
+    descalingState = currentState.brewSwitchState ? descalingState : DescalingState::FINISHED;
+    setPumpToPercentage(0.1f);
+    if (millis() - descalingTimer > DESCALE_PHASE1_EVERY) {
+      descalingCycle += 1;
+      if (descalingCycle < DESCALE_MAX_CYCLES) {
         descalingTimer = millis();
+        descalingState = DescalingState::PHASE2;
       }
-      break;
-    case DescalingState::DESCALING_PHASE1: // Slowly penetrating that scale
-      currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
-      setPumpToPercentage(0.1f);
-      if (millis() - descalingTimer > DESCALE_PHASE1_EVERY) {
-        descalingCycle += 1;
-        if (descalingCycle < DESCALE_MAX_CYCLES) {
-          descalingTimer = millis();
-          descalingState = DescalingState::DESCALING_PHASE2;
-        } else {
-          descalingState = DescalingState::FINISHED;
-        }
+      else {
+        descalingState = DescalingState::FINISHED;
       }
-      break;
-    case DescalingState::DESCALING_PHASE2: // Softening the f outta that scale
-      currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
-      setPumpOff();
-      if (millis() - descalingTimer > DESCALE_PHASE2_EVERY) {
+    }
+    break;
+  case DescalingState::PHASE2: // Softening the f outta that scale
+    descalingState = currentState.brewSwitchState ? descalingState : DescalingState::FINISHED;
+    setPumpOff();
+    if (millis() - descalingTimer > DESCALE_PHASE2_EVERY) {
+      descalingTimer = millis();
+      descalingCycle += 1;
+      descalingState = DescalingState::PHASE3;
+    }
+    break;
+  case DescalingState::PHASE3: // Fucking up that scale big time
+    descalingState = currentState.brewSwitchState ? descalingState : DescalingState::FINISHED;
+    setPumpToPercentage(0.3f);
+    if (millis() - descalingTimer > DESCALE_PHASE3_EVERY) {
+      solenoidBeat();
+      descalingCycle += 1;
+      if (descalingCycle < DESCALE_MAX_CYCLES) {
         descalingTimer = millis();
-        descalingCycle += 1;
-        descalingState = DescalingState::DESCALING_PHASE3;
+        descalingState = DescalingState::PHASE1;
       }
-      break;
-    case DescalingState::DESCALING_PHASE3: // Fucking up that scale big time
-      currentState.brewSwitchState ? descalingState : descalingState = DescalingState::FINISHED;
-      setPumpToPercentage(0.3f);
-      if (millis() - descalingTimer > DESCALE_PHASE3_EVERY) {
-        solenoidBeat();
-        descalingCycle += 1;
-        if (descalingCycle < DESCALE_MAX_CYCLES) {
-          descalingTimer = millis();
-          descalingState = DescalingState::DESCALING_PHASE1;
-        } else {
-          descalingState = DescalingState::FINISHED;
-        }
+      else {
+        descalingState = DescalingState::FINISHED;
       }
-      break;
-    case DescalingState::FINISHED: // Scale successufuly fucked
-      setPumpOff();
-      closeValve();
-      setSteamValveRelayOff();
-      currentState.brewSwitchState ? descalingState = DescalingState::FINISHED : descalingState = DescalingState::IDLE;
-      if (millis() - descalingTimer > 1000) {
-        // lcdBrewTimerStop(); TODO
-        espCommsSendNotification(Notification::info("Descale finished!"));
-        descalingTimer = millis();
-      }
-      break;
+    }
+    break;
+  case DescalingState::FINISHED: // Scale successufuly fucked
+    if (descalingStopTime == 0) {
+      descalingStopTime = millis();
+      espCommsSendNotification(Notification::info("Descale finished!"));
+    }
+    setPumpOff();
+    closeValve();
+    setSteamValveRelayOff();
+    descalingState = currentState.brewSwitchState ? DescalingState::FINISHED : DescalingState::IDLE;
+    break;
   }
-  systemState.descaleProgress = descalingCycle / DESCALE_MAX_CYCLES;
+
+  sendDescalingProgressToEsp();
   justDoCoffee(gaggiaSettings, currentState, 9.f, false);
 }
 
@@ -95,7 +103,7 @@ void solenoidBeat() {
   setPumpOff();
 }
 
-void backFlush(const SensorState &currentState) {
+void backFlush(const SensorState& currentState) {
   static unsigned long backflushTimer = millis();
   unsigned long elapsedTime = millis() - backflushTimer;
   if (currentState.brewSwitchState) {
@@ -105,8 +113,10 @@ void backFlush(const SensorState &currentState) {
     }
     else if (elapsedTime > 7000UL && currentState.smoothedPressure > 5.f) {
       flushPhases();
-    } else flushActivated();
-  } else {
+    }
+    else flushActivated();
+  }
+  else {
     flushDeactivated();
     flushCounter = 0;
     backflushTimer = millis();
@@ -134,7 +144,8 @@ void flushPhases(void) {
       }
       openValve();
       setPumpFullOn();
-    } else {
+    }
+    else {
       if (millis() - timer >= 5000) {
         flushCounter++;
         timer = millis();
@@ -142,8 +153,30 @@ void flushPhases(void) {
       closeValve();
       setPumpOff();
     }
-  } else {
+  }
+  else {
     flushDeactivated();
     timer = millis();
+  }
+}
+
+void sendDescalingProgressToEsp() {
+  static uint32_t espUpdateTimer = 0;
+  uint32_t now = millis();
+
+  if (now - espUpdateTimer > 1000) {
+    espUpdateTimer = now;
+    uint32_t time = 0;
+    uint8_t progress = 0;
+    if (descalingState != DescalingState::IDLE) {
+      time = descalingStopTime == 0 ? now - descalingStartTime : descalingStopTime - descalingStartTime;
+      progress = (uint8_t)(100 * descalingCycle / DESCALE_MAX_CYCLES);
+    }
+
+    espCommsSendDescaleProgress({
+      .state = descalingState,
+      .time = time,
+      .progess = progress
+      });
   }
 }

@@ -123,6 +123,14 @@ void espCommsSendSystemState(const SystemState& systemState, uint32_t frequency)
   );
 }
 
+void espCommsSendDescaleProgress(const DescalingProgress& descalingProgress) {
+  esp::mcuComms.sendMessage(
+    McuCommsMessageType::MCUC_DATA_DESCALING_PROGRESS,
+    ProtoSerializer::serialize<DescalingProgressConverter>(descalingProgress)
+  );
+}
+
+
 void espCommsRequestData(McuCommsMessageType dataType) {
   esp::mcuComms.sendMessage(
     McuCommsMessageType::MCUC_REQ_DATA,

@@ -141,13 +141,27 @@ export function areGaggiaSettingsEqual(settings1: GaggiaSettings, settings2: Gag
 }
 
 export enum NotificationType {
-  INFO,
-  SUCCESS,
-  ERROR,
-  WARN,
+  INFO = 'INFO',
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+  WARN = 'WARN',
 }
 
 export interface Notification {
   type: NotificationType,
   message: string,
+}
+
+export enum DescalingState {
+  IDLE='IDLE',
+  PHASE1='PHASE1',
+  PHASE2='PHASE2',
+  PHASE3='PHASE3',
+  FINISHED='FINISHED',
+}
+
+export interface DescalingProgress {
+  state: DescalingState;
+  time: number; // (time in millis)
+  progress: number; // 0-100
 }

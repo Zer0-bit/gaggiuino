@@ -83,6 +83,13 @@ void onMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>& da
     ProtoSerializer::deserialize<NotificationConverter>(data, notification);
     onNotification(notification);
   }
+  case McuCommsMessageType::MCUC_DATA_DESCALING_PROGRESS: {
+    DescalingProgress progress;
+    ProtoSerializer::deserialize<DescalingProgressConverter>(data, progress);
+    onDescalingProgressReceived(progress);
+    break;
+  }
+
   default:
     break;
   }

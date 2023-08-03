@@ -15,15 +15,7 @@ const unsigned long DESCALE_PHASE3_EVERY = 10000UL; //10000 // short burst for d
 //###############################____DESCALE__CONTROL____######################################
 //#############################################################################################
 
-enum class DescalingState {
-  IDLE,
-  DESCALING_PHASE1,
-  DESCALING_PHASE2,
-  DESCALING_PHASE3,
-  FINISHED
-};
-
-void deScale(const GaggiaSettings &gaggiaSettings, const SensorState &currentState, SystemState& systemState);
+void deScale(const GaggiaSettings &gaggiaSettings, const SensorState &currentState);
 void solenoidBeat(void);
 void backFlush(const SensorState &currentState);
 void flushActivated(void);

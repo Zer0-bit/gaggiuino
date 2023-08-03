@@ -54,6 +54,9 @@ void onProfileRequested() {
 void onNotification(const Notification& notification) {
   wsSendNotification(notification);
 }
+void onDescalingProgressReceived(const DescalingProgress& progress) {
+  wsSendDescalingProgress(progress);
+}
 
 // ------------------------------------------------------------------------
 // ------------------ Handle state updated callbacks ----------------------
