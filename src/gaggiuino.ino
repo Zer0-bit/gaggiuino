@@ -157,22 +157,34 @@ static Measurement handleTaringAndReadWeight() {
 
 static void sensorsReadWeight(void) {
   uint32_t elapsedTime = millis() - scalesTimer;
+  uint32_t weightBumpTimeout = millis() - changeTimeoutTimer;
+  float previousWeight = currentState.weight;
 
   if (elapsedTime > GET_SCALES_READ_EVERY) {
     systemState.scalesPresent = scalesIsPresent();
+    float weightDiff = fabsf(currentState.weight - previousWeight);
+    // if there's a sudden jump in weight by 9gr at once
+    if (brewActive && !systemState.tarePending && weightDiff > 9.f) {
+      if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
+        return;
+      } else {
+        systemState.tarePending = true;
+        changeTimeoutTimer = millis();
+      }
+    }
     if (systemState.scalesPresent) {
       const auto weight = handleTaringAndReadWeight();
       weightMeasurements.add(weight);
       currentState.weight = weightMeasurements.getLatest().value;
 
-      if (brewActive) {
+      if (brewActive) {        
         currentState.shotWeight = systemState.tarePending ? 0.f : currentState.weight;
-        
         currentState.weightFlow = fmax(0.f, weightMeasurements.getMeasurementChange().speed());
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
     }
     scalesTimer = millis();
+    changeTimeoutTimer = millis();
   }
 }
 

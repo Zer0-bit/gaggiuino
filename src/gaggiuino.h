@@ -31,6 +31,7 @@
 #endif
 #define GET_PRESSURE_READ_EVERY 10 // Pressure refresh interval (ms)
 #define GET_SCALES_READ_EVERY   200 // Scales refresh interval (ms)
+#define GET_SCALES_ACCIDENTAL   2000u // Accidental touches or placing cup on scales post brew activation timeout
 #define REFRESH_ESP_DATA_EVERY  100 // Screen refresh interval (ms)
 #define REFRESH_FLOW_EVERY      200 // Flow refresh interval (ms)
 #define HEALTHCHECK_EVERY       30000 // System checks happen every 30sec
@@ -56,6 +57,7 @@ unsigned long pressureTimer;
 unsigned long brewingTimer;
 unsigned long thermoTimer;
 unsigned long scalesTimer;
+unsigned long changeTimeoutTimer;
 unsigned long flowTimer;
 unsigned long steamTime;
 
