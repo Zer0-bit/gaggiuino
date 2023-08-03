@@ -31,6 +31,7 @@ enum class McuCommsMessageType : uint8_t {
   MCUC_DATA_NOTIFICATION = 12,
   MCUC_DATA_MANUAL_BREW_PHASE = 13,
   MCUC_DATA_SYSTEM_STATE = 14,
+  MCUC_DATA_DESCALING_PROGRESS = 18,
 
   // Request specific data
   MCUC_REQ_DATA = 15,

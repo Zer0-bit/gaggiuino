@@ -17,5 +17,6 @@ void wsSendSystemStateToClients(const SystemState& systemState);
 void wsSendActiveProfileUpdated();
 void wsSendSettingsUpdated();
 void wsSendNotification(const Notification& notification);
+void wsSendDescalingProgress(const DescalingProgress& notification);
 
 #endif

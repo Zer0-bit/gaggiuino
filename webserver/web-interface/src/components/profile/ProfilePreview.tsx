@@ -15,7 +15,7 @@ export interface ProfileReviewProps {
   onChange?: (profile: Profile) => void;
 }
 
-export function ProfileReview({ profile, onSave, onChange }: ProfileReviewProps) {
+export function ProfileReview({ profile, onSave = undefined, onChange = undefined }: ProfileReviewProps) {
   const theme = useTheme();
   const [editOpen, setEditOpen] = useState(false);
 
@@ -54,4 +54,3 @@ export function ProfileReview({ profile, onSave, onChange }: ProfileReviewProps)
     </Box>
   );
 }
-

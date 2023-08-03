@@ -20,7 +20,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, {
-  useCallback, useState,
+  useCallback, useEffect, useState,
 } from 'react';
 import { selectActiveProfile } from '../../components/client/ProfileClient';
 import { updateOperationMode, updateTarePending } from '../../components/client/SystemStateClient';
@@ -30,6 +30,7 @@ import AvailableProfileSelector from '../../components/profile/AvailableProfileS
 import { ProfileReview } from '../../components/profile/ProfilePreview';
 import ShotHistory from '../../components/shot/ShotHistory';
 import {
+  DescalingState,
   GaggiaSettings, NotificationType, OperationMode,
 } from '../../models/models';
 import { Profile } from '../../models/profile';
@@ -42,6 +43,8 @@ import { SwitchLedButton, SwitchLedState } from '../../components/inputs/SwitchL
 import PressureGauge from '../../components/gauges/PressureGauge';
 import WaterLevelGauge from '../../components/gauges/WaterLevelGauge';
 import TemperatureGauge from '../../components/gauges/TemperatureGauge';
+import DescalingDialog from '../DescalingDialog';
+import useDescalingProgressStore from '../../state/DescalingProgressDataStore';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
 
@@ -142,6 +145,7 @@ function Home() {
           />
         </Grid>
       </Grid>
+      <DiscalingDialogWrapper />
     </Container>
   );
 }
@@ -486,4 +490,22 @@ function a11yProps(index: number) {
     id: `full-width-tab-${index}`,
     'aria-controls': `full-width-tabpanel-${index}`,
   };
+}
+
+function DiscalingDialogWrapper() {
+  const descalingProgress = useDescalingProgressStore((state) => state.descalingProgress);
+  const operationMode = useSystemStateStore((state) => state.systemState.operationMode);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(operationMode === OperationMode.DESCALE && descalingProgress.state !== DescalingState.IDLE);
+  }, [descalingProgress, operationMode]);
+
+  return (
+    <DescalingDialog
+      open={open}
+      onClose={() => setOpen(false)}
+      data={descalingProgress}
+    />
+  );
 }

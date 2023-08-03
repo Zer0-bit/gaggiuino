@@ -15,6 +15,8 @@ namespace json {
   void mapUpdateSystemStateCommmandToJson(const UpdateSystemStateComand& command, JsonObject& target);
   void mapSensorStateToJson(const SensorStateSnapshot& sensorState, JsonObject& target);
   void mapShotSnapshotToJson(const ShotSnapshot& shotSnaposhot, JsonObject& target);
+  std::string mapDescalingStateToJsonValue(const DescalingState& state);
+  void mapDescalingProgressToJson(const DescalingProgress& progress, JsonObject& target);
 
   // ------------------------------------------------------------------------------------------
   // ----------------------------------- Deserializers ----------------------------------------

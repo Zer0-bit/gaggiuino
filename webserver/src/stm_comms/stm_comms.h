@@ -26,5 +26,6 @@ void onGaggiaSettingsRequested();
 void onProfileRequested();
 void onSystemStateReceived(const SystemState& systemState);
 void onNotification(const Notification& notification);
+void onDescalingProgressReceived(const DescalingProgress& progress);
 
 #endif

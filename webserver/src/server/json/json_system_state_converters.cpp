@@ -12,7 +12,6 @@ namespace json {
     target["isSteamForgottenON"] = systemState.isSteamForgottenON;
     target["scalesPresent"] = systemState.scalesPresent;
     target["timeAlive"] = systemState.timeAlive;
-    target["descaleProgress"] = systemState.descaleProgress;
   }
 
   std::string mapOperationModeToJsonValue(const OperationMode& mode) {
@@ -87,8 +86,30 @@ namespace json {
     systemState.isSteamForgottenON = json["isSteamForgottenON"];
     systemState.scalesPresent = json["scalesPresent"];
     systemState.timeAlive = json["timeAlive"];
-    systemState.descaleProgress = json["descaleProgress"];
     systemState.tarePending = json["tarePending"];
     return systemState;
+  }
+
+  std::string mapDescalingStateToJsonValue(const DescalingState& state) {
+    switch (state) {
+    case DescalingState::IDLE:
+      return "IDLE";
+    case DescalingState::PHASE1:
+      return "PHASE1";
+    case DescalingState::PHASE2:
+      return "PHASE2";
+    case DescalingState::PHASE3:
+      return "PHASE3";
+    case DescalingState::FINISHED:
+      return "FINISHED";
+    default:
+      return "IDLE";
+    }
+  }
+
+  void mapDescalingProgressToJson(const DescalingProgress& progress, JsonObject& target) {
+    target["state"] = mapDescalingStateToJsonValue(progress.state);
+    target["time"] = progress.time;
+    target["progress"] = progress.progess;
   }
 }

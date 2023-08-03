@@ -18,13 +18,27 @@ struct SystemState {
   bool          isSteamForgottenON = false;
   bool          scalesPresent = false;
   uint32_t      timeAlive = 0; // sec
-  uint8_t       descaleProgress = 0; // %
   bool          tarePending = false;
 };
 
 struct UpdateSystemStateComand {
   OperationMode operationMode;
   bool tarePending;
+};
+
+
+enum class DescalingState {
+  IDLE,
+  PHASE1,
+  PHASE2,
+  PHASE3,
+  FINISHED
+};
+
+struct DescalingProgress {
+  DescalingState state;
+  uint32_t time;
+  uint8_t progess;
 };
 
 #endif

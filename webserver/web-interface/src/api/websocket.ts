@@ -5,6 +5,7 @@ import {
 import { Options } from 'react-use-websocket/dist/lib/types';
 import useSensorStateStore from '../state/SensorStateStore';
 import {
+  DescalingProgress,
   GaggiaSettings,
   LogMessage, Notification, SensorState, ShotSnapshot, SystemState,
 } from '../models/models';
@@ -15,6 +16,7 @@ import useProfileStore from '../state/ProfileStore';
 import { Profile } from '../models/profile';
 import useSettingsStore from '../state/SettingsStore';
 import useNotificationStore from '../state/NotificationDataStore';
+import useDescalingProgressStore from '../state/DescalingProgressDataStore';
 
 enum WsActionType {
     SensorStateUpdate = 'sensor_data_update',
@@ -24,6 +26,7 @@ enum WsActionType {
     ActiveProfileUpdated ='act_prof_update',
     SettingsUpdated ='settings_update',
     NotificationReceived = 'notification',
+    DescalingProgressReceived = 'descaling_progress'
 }
 
 // Time after which, if we didn't receive any data, the websocket will try to reconnect
@@ -43,13 +46,15 @@ interface MessageData {
 }
 
 const useWebSocket = (url:string) => {
-  const { updateLocalSensorState } = useSensorStateStore();
-  const { updateLocalSystemState } = useSystemStateStore();
-  const { addMessage } = useLogMessageStore();
-  const { addShotDatapoint, setShotRunning } = useShotDataStore();
-  const { updateLocalActiveProfile } = useProfileStore();
-  const { updateLocalSettings } = useSettingsStore();
-  const { updateLatestNotification } = useNotificationStore();
+  const updateLocalSensorState = useSensorStateStore((state) => state.updateLocalSensorState);
+  const updateLocalSystemState = useSystemStateStore((state) => state.updateLocalSystemState);
+  const addMessage = useLogMessageStore((state) => state.addMessage);
+  const setShotRunning = useShotDataStore((state) => state.setShotRunning);
+  const addShotDatapoint = useShotDataStore((state) => state.addShotDatapoint);
+  const updateLocalActiveProfile = useProfileStore((state) => state.updateLocalActiveProfile);
+  const updateLocalSettings = useSettingsStore((state) => state.updateLocalSettings);
+  const updateLatestNotification = useNotificationStore((state) => state.updateLatestNotification);
+  const updateLocalDescalingProgress = useDescalingProgressStore((state) => state.updateLocalDescalingProgress);
 
   const [connected, setConnected] = useState(true);
   const [, setMessageTimeoutId] = useState<NodeJS.Timeout>();
@@ -109,10 +114,14 @@ const useWebSocket = (url:string) => {
       case WsActionType.NotificationReceived:
         updateLatestNotification(messageData.data as Notification);
         break;
+      case WsActionType.DescalingProgressReceived:
+        console.log(messageData.data);
+        updateLocalDescalingProgress(messageData.data as DescalingProgress);
+        break;
     }
   }, [lastJsonMessage, updateLocalSettings, updateLocalSensorState,
     updateLocalSystemState, addMessage, addShotDatapoint, updateLocalActiveProfile,
-    setShotRunning, updateLatestNotification]);
+    setShotRunning, updateLatestNotification, updateLocalDescalingProgress]);
 };
 
 export default useWebSocket;

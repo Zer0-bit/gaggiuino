@@ -299,7 +299,7 @@ static void modeSelect(void) {
       break;
     case OperationMode::DESCALE:
       if (!currentState.steamSwitchState) steamTime = millis();
-      deScale(runningCfg, currentState, systemState);
+      deScale(runningCfg, currentState);
       break;
     default:
       break;

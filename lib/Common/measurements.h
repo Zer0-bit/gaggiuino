@@ -2,12 +2,17 @@
 #define MEASUREMENTS_UTIL_H
 
 #include "Arduino.h"
+#include "utils.h"
 #include <deque>
 
 /** Holds a measurement value and the time it was taken */
 struct Measurement {
   float value = 0.f;
   uint32_t millis = 0u;
+
+  void round(uint8_t precision) {
+    value = truncate(value, precision);
+  }
 };
 
 /** Holds a measurement delta and can calculate its speed of change */
