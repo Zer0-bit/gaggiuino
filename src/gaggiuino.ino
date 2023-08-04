@@ -55,13 +55,6 @@ void setup(void) {
   // Initialise comms library for talking to the ESP mcu
   espCommsInit();
 
-  // Initialize LED
-  led.begin();
-  led.setColor(9u, 0u, 9u); // WHITE
-  // Init the tof sensor
-  tof.init(systemState);
-  tof.setCustomRanges(tofStartValue, tofEndValue);
-
   cpsInit(runningCfg);
   LOG_INFO("CPS Init");
 
@@ -79,8 +72,8 @@ void setup(void) {
   pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
   LOG_INFO("Pump init");
 
-  // Change LED colour on setup exit.
-  led.setColor(9u, 0u, 9u); // 64171
+  ToFnLedInit();
+  LOG_INFO("ToFnLed Init");
 
   iwdcInit();
 }
@@ -653,4 +646,13 @@ static void flushAuto() {
     systemState.operationMode = OperationMode::BREW_AUTO;
   }
   #endif
+}
+
+static void ToFnLedInit() {
+    // Initialize LED
+  led.begin();
+  led.setColor(9u, 0u, 9u); // WHITE
+  // Init the tof sensor
+  tof.init(systemState);
+  tof.setCustomRanges(tofStartValue, tofEndValue);
 }
