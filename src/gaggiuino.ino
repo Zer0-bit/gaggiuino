@@ -166,7 +166,7 @@ static void sensorsReadWeight(void) {
       if (brewActive) {
         // If there's a sudden jump in weight
         bool isChangeRateHigh = weightMeasurements.getMeasurementChange().speed() > weightRateThreshold;
-        bool isCupPlaced = weightMeasurements.getLatest().value - initialWeight > 40.f;
+        bool isCupPlaced = currentState.weight - initialWeight > 40.f;
         if (!systemState.tarePending && (isChangeRateHigh || isCupPlaced)) {
           // Ignore accidental weight bumps
           if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
