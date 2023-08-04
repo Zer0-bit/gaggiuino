@@ -156,10 +156,10 @@ static Measurement handleTaringAndReadWeight() {
 }
 
 static void sensorsReadWeight(void) {
+  const float weightRateThreshold = 6.f;
   uint32_t currentMillis = millis();
   uint32_t elapsedTime = currentMillis - scalesTimer;
   uint32_t weightBumpTimeout = currentMillis - scalesTimeout;
-  float previousWeight = currentState.weight;
 
   if (elapsedTime > GET_SCALES_READ_EVERY) {
     systemState.scalesPresent = scalesIsPresent();
@@ -169,21 +169,20 @@ static void sensorsReadWeight(void) {
       weightMeasurements.add(weight);
       currentState.weight = weightMeasurements.getLatest().value;
 
-      float weightDiff = fabsf(currentState.weight - previousWeight);
-
-      // if there's a sudden jump in weight by 9gr at once
-      if (brewActive && !systemState.tarePending && weightDiff > 0.6f) {
-        if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
-          scalesTimer = currentMillis;
-          return; // Ignore accidental weight bumps
-        } else {
-          systemState.tarePending = true;
-          scalesTimer = currentMillis;
-          scalesTimeout = currentMillis;
-        }
-      }
-
-      if (brewActive) {        
+      if (brewActive) {
+        // If there's a sudden jump in weight
+        bool isChangeRateHigh = weightMeasurements.getMeasurementChange().speed() > weightRateThreshold;
+        if (!systemState.tarePending && isChangeRateHigh) {
+          // Ignore accidental weight bumps
+          if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
+            scalesTimer = currentMillis;
+            return;
+          } else { // Weight increased drastically and is constant ? mark for tare.
+            systemState.tarePending = true;
+            scalesTimer = currentMillis;
+            scalesTimeout = currentMillis;
+          }
+        }      
         currentState.shotWeight = systemState.tarePending ? 0.f : currentState.weight;
 
         // Only take flow measurements when tare is not pending.
