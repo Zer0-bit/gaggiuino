@@ -156,7 +156,7 @@ static Measurement handleTaringAndReadWeight() {
 }
 
 static void sensorsReadWeight(void) {
-  const float weightRateThreshold = 6.f;
+  const float weightRateThreshold = 4.f;
   uint32_t currentMillis = millis();
   uint32_t elapsedTime = currentMillis - scalesTimer;
   uint32_t weightBumpTimeout = currentMillis - scalesTimeout;
