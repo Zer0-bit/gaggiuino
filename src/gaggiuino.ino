@@ -172,7 +172,7 @@ static void sensorsReadWeight(void) {
       float weightDiff = fabsf(currentState.weight - previousWeight);
 
       // if there's a sudden jump in weight by 9gr at once
-      if (brewActive && !systemState.tarePending && weightDiff > 9.f) {
+      if (brewActive && !systemState.tarePending && weightDiff > 0.3f) {
         if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
           scalesTimer = currentMillis;
           return; // Ignore accidental weight bumps
