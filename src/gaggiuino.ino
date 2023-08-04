@@ -153,6 +153,7 @@ static void sensorsReadWeight(void) {
   uint32_t currentMillis = millis();
   uint32_t elapsedTime = currentMillis - scalesTimer;
   uint32_t weightBumpTimeout = currentMillis - scalesTimeout;
+  static float initialWeight = 0.f;
 
   if (elapsedTime > GET_SCALES_READ_EVERY) {
     systemState.scalesPresent = scalesIsPresent();
@@ -165,7 +166,8 @@ static void sensorsReadWeight(void) {
       if (brewActive) {
         // If there's a sudden jump in weight
         bool isChangeRateHigh = weightMeasurements.getMeasurementChange().speed() > weightRateThreshold;
-        if (!systemState.tarePending && isChangeRateHigh) {
+        bool isCupPlaced = weightMeasurements.getLatest().value - initialWeight > 40.f;
+        if (!systemState.tarePending && (isChangeRateHigh || isCupPlaced)) {
           // Ignore accidental weight bumps
           if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
             scalesTimer = currentMillis;
@@ -177,6 +179,7 @@ static void sensorsReadWeight(void) {
           }
         }      
         currentState.shotWeight = systemState.tarePending ? 0.f : currentState.weight;
+        initialWeight = currentState.shotWeight;
 
         // Only take flow measurements when tare is not pending.
         currentState.weightFlow = systemState.tarePending
