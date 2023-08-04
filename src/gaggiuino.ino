@@ -186,10 +186,11 @@ static void sensorsReadWeight(void) {
       if (brewActive) {        
         currentState.shotWeight = systemState.tarePending ? 0.f : currentState.weight;
 
-        if (!systemState.tarePending) { // Only take flow measurements when tare is not pending.
-          currentState.weightFlow = fmax(0.f, weightMeasurements.getMeasurementChange().speed());
-          currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
-        }
+        // Only take flow measurements when tare is not pending.
+        currentState.weightFlow = systemState.tarePending
+                                ? currentState.weightFlow
+                                : fmax(0.f, weightMeasurements.getMeasurementChange().speed());
+        currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
     }
     scalesTimer = currentMillis;
