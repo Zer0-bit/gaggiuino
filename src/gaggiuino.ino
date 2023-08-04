@@ -156,8 +156,9 @@ static Measurement handleTaringAndReadWeight() {
 }
 
 static void sensorsReadWeight(void) {
-  uint32_t elapsedTime = millis() - scalesTimer;
-  uint32_t weightBumpTimeout = millis() - scalesTimeout;
+  uint32_t currentMillis = millis();
+  uint32_t elapsedTime = currentMillis - scalesTimer;
+  uint32_t weightBumpTimeout = currentMillis - scalesTimeout;
   float previousWeight = currentState.weight;
 
   if (elapsedTime > GET_SCALES_READ_EVERY) {
@@ -173,10 +174,12 @@ static void sensorsReadWeight(void) {
       // if there's a sudden jump in weight by 9gr at once
       if (brewActive && !systemState.tarePending && weightDiff > 9.f) {
         if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
+          scalesTimer = currentMillis;
           return; // Ignore accidental weight bumps
         } else {
           systemState.tarePending = true;
-          scalesTimeout = millis();
+          scalesTimer = currentMillis;
+          scalesTimeout = currentMillis;
         }
       }
 
@@ -189,8 +192,8 @@ static void sensorsReadWeight(void) {
         }
       }
     }
-    scalesTimer = millis();
-    scalesTimeout = millis();
+    scalesTimer = currentMillis;
+    scalesTimeout = currentMillis;
   }
 }
 
