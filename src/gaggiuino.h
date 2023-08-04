@@ -57,7 +57,7 @@ unsigned long pressureTimer;
 unsigned long brewingTimer;
 unsigned long thermoTimer;
 unsigned long scalesTimer;
-unsigned long changeTimeoutTimer;
+unsigned long scalesTimeout;
 unsigned long flowTimer;
 unsigned long steamTime;
 
