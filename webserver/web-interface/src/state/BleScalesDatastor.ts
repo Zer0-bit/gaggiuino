@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { BleScales } from '../models/models';
+import { getConnectedBleScales } from '../components/client/BleScalesClient';
 
 interface BleScalesStore {
   bleScales: BleScales,
@@ -18,5 +19,13 @@ const useBleScalesStore = create<BleScalesStore>()(
     }),
   ),
 );
+
+// Fetching settings the first time if they aren't already loaded
+const { bleScales, updateBleScales } = useBleScalesStore.getState();
+if (bleScales.name.length === 0) {
+  try {
+    updateBleScales(await getConnectedBleScales());
+  } catch (e) { console.error(e); }
+}
 
 export default useBleScalesStore;

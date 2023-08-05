@@ -1,5 +1,5 @@
-#ifndef API_PROFILE_H
-#define API_PROFILE_H
+#ifndef API_SCALES_H
+#define API_SCALES_H
 
 #include "ESPAsyncWebServer.h"
 

@@ -9,6 +9,7 @@
 #include "api/api_settings.h"
 #include "api/api_profile.h"
 #include "api/api_system_state.h"
+#include "api/api_scales.h"
 #include "websocket/websocket.h"
 #include "../task_config.h"
 #include "../log/log.h"
@@ -25,6 +26,7 @@ void webServerSetup() {
   setupSettingsApi(webserver::server);
   setupProfileApi(webserver::server);
   setupSystemStateApi(webserver::server);
+  setupScalesApi(webserver::server);
   setupWebSocket(webserver::server);
   setupStaticFiles(webserver::server);
   webserver::server.onNotFound(&handleUrlNotFound);
