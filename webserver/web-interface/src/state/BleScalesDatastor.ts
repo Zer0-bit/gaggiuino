@@ -23,9 +23,7 @@ const useBleScalesStore = create<BleScalesStore>()(
 // Fetching settings the first time if they aren't already loaded
 const { bleScales, updateBleScales } = useBleScalesStore.getState();
 if (bleScales.name.length === 0) {
-  try {
-    updateBleScales(await getConnectedBleScales());
-  } catch (e) { console.error(e); }
+  getConnectedBleScales().then(updateBleScales);
 }
 
 export default useBleScalesStore;
