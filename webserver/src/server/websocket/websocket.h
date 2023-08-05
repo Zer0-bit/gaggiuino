@@ -7,6 +7,7 @@
 #include "sensors_state.h"
 #include "system_state.h"
 #include "notification_message.h"
+#include "../../scales/ble_scales.h"
 
 void setupWebSocket(AsyncWebServer& server);
 void wsCleanup();
@@ -18,5 +19,6 @@ void wsSendActiveProfileUpdated();
 void wsSendSettingsUpdated();
 void wsSendNotification(const Notification& notification);
 void wsSendDescalingProgress(const DescalingProgress& notification);
+void wsSendConnectedBleScalesUpdated(const blescales::Scales& scales);
 
 #endif

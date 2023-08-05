@@ -2,6 +2,7 @@
 #include "scales.h"
 #include "pindef.h"
 #include "remote_scales.h"
+#include "gaggia_settings.h"
 
 #include <HX711_2.h>
 namespace {
@@ -17,6 +18,8 @@ namespace {
   };
 }
 
+ScalesSettings currentScalesSettings;
+
 bool hwScalesPresent = false;
 
 #if defined SINGLE_HX711_BOARD
@@ -25,41 +28,42 @@ unsigned char scale_clk = OUTPUT;
 unsigned char scale_clk = OUTPUT_OPEN_DRAIN;
 #endif
 
-void scalesInit(float scalesF1, float scalesF2) {
+void scalesInit(const ScalesSettings& settings) {
+  currentScalesSettings = settings;
   hwScalesPresent = false;
   // Forced predicitve scales in case someone with actual hardware scales wants to use them.
-  if (FORCE_PREDICTIVE_SCALES) {
+  if (currentScalesSettings.forcePredictive) {
     return;
   }
 
-#ifndef DISABLE_HW_SCALES
-  auto& loadCells = LoadCellSingleton::getInstance();
-  loadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, 128U, scale_clk);
-  loadCells.set_scale(scalesF1, scalesF2);
-  loadCells.power_up();
+  if (currentScalesSettings.hwScalesEnabled) {
+    auto& loadCells = LoadCellSingleton::getInstance();
+    loadCells.begin(HX711_dout_1, HX711_dout_2, HX711_sck_1, 128U, scale_clk);
+    loadCells.set_scale(currentScalesSettings.hwScalesF1, currentScalesSettings.hwScalesF2);
+    loadCells.power_up();
 
-  if (loadCells.wait_ready_timeout(1000, 10)) {
-    loadCells.tare(4);
-    hwScalesPresent = true;
+    if (loadCells.wait_ready_timeout(1000, 10)) {
+      loadCells.tare(4);
+      hwScalesPresent = true;
   }
-  else {
-    loadCells.power_down();
-  }
-#endif
+    else {
+      loadCells.power_down();
+    }
+}
 
-  if (!hwScalesPresent && remoteScalesIsPresent()) {
+  if (!hwScalesPresent && settings.btScalesEnabled && remoteScalesIsPresent()) {
     remoteScalesTare();
   }
 }
 
 void scalesTare(void) {
-  if (hwScalesPresent) {
+  if (currentScalesSettings.hwScalesEnabled && hwScalesPresent) {
     auto& loadCells = LoadCellSingleton::getInstance();
     if (loadCells.wait_ready_timeout(150, 10)) {
       loadCells.tare(4);
     }
   }
-  else if (remoteScalesIsPresent()) {
+  else if (currentScalesSettings.btScalesEnabled && remoteScalesIsPresent()) {
     remoteScalesTare();
   }
 }
@@ -71,7 +75,7 @@ Measurement scalesGetWeight(void) {
     if (loadCells.wait_ready_timeout(150, 10)) {
       float values[2];
       loadCells.get_units(values);
-      currentWeight = Measurement{ .value=values[0] + values[1], .millis=static_cast<uint32_t>(millis()) };
+      currentWeight = Measurement{ .value = values[0] + values[1], .millis = static_cast<uint32_t>(millis()) };
     }
   }
   else if (remoteScalesIsPresent()) {
@@ -83,10 +87,11 @@ Measurement scalesGetWeight(void) {
 
 bool scalesIsPresent(void) {
   // Forced predicitve scales in case someone with actual hardware scales wants to use them.
-  if (FORCE_PREDICTIVE_SCALES) {
+  if (currentScalesSettings.forcePredictive) {
     return false;
   }
-  return hwScalesPresent || remoteScalesIsPresent();
+  return (currentScalesSettings.hwScalesEnabled && hwScalesPresent) ||
+    (currentScalesSettings.btScalesEnabled && remoteScalesIsPresent());
 }
 
 float scalesDripTrayWeight() {

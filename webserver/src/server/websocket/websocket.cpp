@@ -20,6 +20,7 @@ const std::string WS_MSG_ACTIVE_PROFILE_UPDATED = "act_prof_update";
 const std::string WS_MSG_SETTINGS_UPDATED = "settings_update";
 const std::string WS_MSG_NOTIFICATION = "notification";
 const std::string WS_MSG_DESCALING_PROGRESS = "descaling_progress";
+const std::string WS_MSG_BLE_SCALES_UPDATED = "ble_scls_upd";
 
 namespace websocket {
   AsyncWebSocket wsServer("/ws");
@@ -234,6 +235,22 @@ void wsSendDescalingProgress(const DescalingProgress& progress) {
   root["action"] = WS_MSG_DESCALING_PROGRESS;
   JsonObject data = root.createNestedObject("data");
   json::mapDescalingProgressToJson(progress, data);
+
+  std::string serializedMsg; // create temp buffer
+  serializeJson(root, serializedMsg);  // serialize to buffer
+
+  websocket::unlockJson();
+
+  websocket::wsServer.textAll(serializedMsg.c_str(), serializedMsg.length());
+}
+
+void wsSendConnectedBleScalesUpdated(const blescales::Scales& scles) {
+  if (!websocket::lockJson()) return;
+  JsonObject root = websocket::jsonDoc.to<JsonObject>();
+
+  root["action"] = WS_MSG_BLE_SCALES_UPDATED;
+  JsonObject data = root.createNestedObject("data");
+  json::mapBleScalesToJson(scles, data);
 
   std::string serializedMsg; // create temp buffer
   serializeJson(root, serializedMsg);  // serialize to buffer

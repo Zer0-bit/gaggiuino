@@ -45,7 +45,6 @@ void setupProfileApi(AsyncWebServer& server) {
 void handleGetProfileSummaries(AsyncWebServerRequest* request) {
   LOG_INFO("Got request to get profile summaries");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(2048);
   JsonArray profileSummariesJson = json.to<JsonArray>();
 
@@ -55,8 +54,7 @@ void handleGetProfileSummaries(AsyncWebServerRequest* request) {
     json::mapProfileSummaryToJson(savedProfile, savedProfileJson);
   }
 
-  serializeJson(profileSummariesJson, *response);
-  request->send(response);
+  sendJsonResponse(request, profileSummariesJson);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -72,13 +70,12 @@ void handleGetProfileById(AsyncWebServerRequest* request) {
     return;
   }
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(2048);
   JsonObject jsonObj = json.to<JsonObject>();
 
   json::mapProfileToJson(id, result.second, jsonObj);
-  serializeJson(jsonObj, *response);
-  request->send(response);
+
+  sendJsonResponse(request, jsonObj);
 }
 
 void handlePostProfile(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -92,12 +89,10 @@ void handlePostProfile(AsyncWebServerRequest* request, JsonVariant& body) {
   }
   SavedProfile savedProfile = result.second;
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   JsonObject responseBody = body.to<JsonObject>();
   json::mapProfileToJson(savedProfile.id, newProfile, responseBody);
 
-  serializeJson(responseBody, *response);
-  request->send(response);
+  sendJsonResponse(request, responseBody);
 }
 
 void handleUpdateProfile(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -115,12 +110,10 @@ void handleUpdateProfile(AsyncWebServerRequest* request, JsonVariant& body) {
   }
   persistence::saveProfile(id, profile);
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   JsonObject responseBody = body.to<JsonObject>();
   json::mapProfileToJson(id, profile, responseBody);
 
-  serializeJson(responseBody, *response);
-  request->send(response);
+  sendJsonResponse(request, responseBody);
 }
 
 void handleDeleteProfile(AsyncWebServerRequest* request) {
@@ -148,13 +141,12 @@ void handleDeleteProfile(AsyncWebServerRequest* request) {
 void handleGetActiveProfile(AsyncWebServerRequest* request) {
   LOG_INFO("Got request to get active profile");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(4096);
   JsonObject jsonObj = json.to<JsonObject>();
 
   json::mapProfileToJson(state::getActiveProfileId(), state::getActiveProfile(), jsonObj);
-  serializeJson(jsonObj, *response);
-  request->send(response);
+
+  sendJsonResponse(request, jsonObj);
 }
 
 void handleSelectActiveProfileId(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -174,13 +166,11 @@ void handleSelectActiveProfileId(AsyncWebServerRequest* request, JsonVariant& bo
 void handleGetActiveProfileId(AsyncWebServerRequest* request) {
   LOG_INFO("Got request to get the active profile id");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(50);
   JsonObject jsonObj = json.to<JsonObject>();
   jsonObj["id"] = state::getActiveProfileId();
 
-  serializeJson(jsonObj, *response);
-  request->send(response);
+  sendJsonResponse(request, jsonObj);
 }
 
 void handlePersistActiveProfile(AsyncWebServerRequest* request) {
@@ -201,10 +191,8 @@ void handleUpdateActiveProfile(AsyncWebServerRequest* request, JsonVariant& body
 
   state::updateActiveProfile(json::mapJsonToProfile(body));
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   JsonObject responseBody = body.to<JsonObject>();
   json::mapProfileToJson(state::getActiveProfileId(), state::getActiveProfile(), responseBody);
 
-  serializeJson(responseBody, *response);
-  request->send(response);
+  sendJsonResponse(request, responseBody);
 }

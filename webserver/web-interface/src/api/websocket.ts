@@ -5,6 +5,7 @@ import {
 import { Options } from 'react-use-websocket/dist/lib/types';
 import useSensorStateStore from '../state/SensorStateStore';
 import {
+  BleScales,
   DescalingProgress,
   GaggiaSettings,
   LogMessage, Notification, SensorState, ShotSnapshot, SystemState,
@@ -17,6 +18,7 @@ import { Profile } from '../models/profile';
 import useSettingsStore from '../state/SettingsStore';
 import useNotificationStore from '../state/NotificationDataStore';
 import useDescalingProgressStore from '../state/DescalingProgressDataStore';
+import useBleScalesStore from '../state/BleScalesDatastor';
 
 enum WsActionType {
     SensorStateUpdate = 'sensor_data_update',
@@ -26,7 +28,8 @@ enum WsActionType {
     ActiveProfileUpdated ='act_prof_update',
     SettingsUpdated ='settings_update',
     NotificationReceived = 'notification',
-    DescalingProgressReceived = 'descaling_progress'
+    DescalingProgressReceived = 'descaling_progress',
+    BleScalesUpdated = 'ble_scls_upd',
 }
 
 // Time after which, if we didn't receive any data, the websocket will try to reconnect
@@ -55,6 +58,7 @@ const useWebSocket = (url:string) => {
   const updateLocalSettings = useSettingsStore((state) => state.updateLocalSettings);
   const updateLatestNotification = useNotificationStore((state) => state.updateLatestNotification);
   const updateLocalDescalingProgress = useDescalingProgressStore((state) => state.updateLocalDescalingProgress);
+  const updateBleScales = useBleScalesStore((state) => state.updateBleScales);
 
   const [connected, setConnected] = useState(true);
   const [, setMessageTimeoutId] = useState<NodeJS.Timeout>();
@@ -115,13 +119,16 @@ const useWebSocket = (url:string) => {
         updateLatestNotification(messageData.data as Notification);
         break;
       case WsActionType.DescalingProgressReceived:
-        console.log(messageData.data);
         updateLocalDescalingProgress(messageData.data as DescalingProgress);
+        break;
+      case WsActionType.BleScalesUpdated:
+        updateBleScales(messageData.data as BleScales);
         break;
     }
   }, [lastJsonMessage, updateLocalSettings, updateLocalSensorState,
     updateLocalSystemState, addMessage, addShotDatapoint, updateLocalActiveProfile,
-    setShotRunning, updateLatestNotification, updateLocalDescalingProgress]);
+    setShotRunning, updateLatestNotification, updateLocalDescalingProgress,
+    updateBleScales]);
 };
 
 export default useWebSocket;

@@ -3,6 +3,7 @@
 
 #include "gaggia_settings.h"
 #include "profiling_phases.h"
+#include "../scales/ble_scales.h"
 #include "system_state.h"
 #include "../persistence/saved_profiles.h"
 
@@ -19,6 +20,7 @@ namespace state {
   void updateBoilerSettings(const BoilerSettings& settings);
   void updateLedSettings(const LedSettings& settings);
   void updateSystemSettings(const SystemSettings& settings);
+  void updateScalesSettings(const ScalesSettings& settings);
 
   bool persistSettings();
 
@@ -41,6 +43,13 @@ namespace state {
   void updateTarePending(bool tarePending);
   void updateOperationMode(OperationMode operationMode);
 
+
+// ---------------------------------------------------------------------------------
+// ----------------------------------- SCALES --------------------------------------
+// ---------------------------------------------------------------------------------
+  blescales::Scales getConnectedScales();
+  void   updateConnectedScales(const blescales::Scales& scales);
+
 // ---------------------------------------------------------------------------------
 // --------------------------------- CALLBACKS -------------------------------------
 // ---------------------------------------------------------------------------------
@@ -50,9 +59,11 @@ namespace state {
   void onBoilerSettingsUpdated(const BoilerSettings& settings);
   void onLedSettingsUpdated(const LedSettings& settings);
   void onSystemSettingsUpdated(const SystemSettings& settings);
+  void onScalesSettingsUpdated(const ScalesSettings& settings);
 
   void onSystemStateUpdated(const SystemState& systemState);
   void onUpdateSystemStateCommandSubmitted(const UpdateSystemStateComand& command);
+  void onConnectedBleScalesUpdated(const blescales::Scales& scales);
 }
 
 #endif
