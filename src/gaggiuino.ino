@@ -161,12 +161,13 @@ static void sensorsReadWeight(void) {
       const auto weight = handleTaringAndReadWeight();
       weightMeasurements.add(weight);
       currentState.weight = weightMeasurements.getLatest().value;
-      float weightFlow = weightMeasurements.getMeasurementChange().speed();
+      const float weightFlow = weightMeasurements.getMeasurementChange().speed();
 
       if (brewActive && !currentState.steamSwitchState) {
         // If there's a sudden jump in weight
         bool isChangeRateHigh = weightFlow > weightRateThreshold;
-        bool isCupPlaced = currentState.weight - initialWeight >= weightIncreaseThreshold;
+        bool isCupPlaced = currentState.weight - initialWeight > 0.f 
+                          && currentState.weight - initialWeight >= weightIncreaseThreshold;
         if (!systemState.tarePending && (isChangeRateHigh || isCupPlaced)) {
           // Ignore accidental weight bumps
           if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
