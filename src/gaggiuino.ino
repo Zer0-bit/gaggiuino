@@ -150,6 +150,7 @@ static Measurement handleTaringAndReadWeight() {
 
 static void sensorsReadWeight(void) {
   const float weightRateThreshold = 9.f;
+  const float weightIncreaseThreshold = 40.f;
   uint32_t currentMillis = millis();
   uint32_t elapsedTime = currentMillis - scalesTimer;
   uint32_t weightBumpTimeout = currentMillis - scalesTimeout;
@@ -166,7 +167,7 @@ static void sensorsReadWeight(void) {
       if (brewActive) {
         // If there's a sudden jump in weight
         bool isChangeRateHigh = weightMeasurements.getMeasurementChange().speed() > weightRateThreshold;
-        bool isCupPlaced = currentState.weight - initialWeight > 40.f;
+        bool isCupPlaced = currentState.weight - initialWeight >= weightIncreaseThreshold;
         if (!systemState.tarePending && (isChangeRateHigh || isCupPlaced)) {
           // Ignore accidental weight bumps
           if (weightBumpTimeout < GET_SCALES_ACCIDENTAL) {
