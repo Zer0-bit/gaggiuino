@@ -14,8 +14,6 @@ struct BoilerSettings {
 };
 struct SystemSettings {
   float    pumpFlowAtZero;     /* A PZ constant used for pump calibration */
-  int      scalesF1;           /* Scales calibration constant 1 */
-  int      scalesF2;           /* Scales calibration constant 2 */
   uint16_t lcdSleep;           /* Time (in minutes) after which the screen should go to sleep */
   bool     warmupState;        /* Should gaggia wait to warmup */
 };
@@ -27,6 +25,15 @@ struct ScalesSettings {
   int  hwScalesF2;
   bool btScalesEnabled;
   bool btScalesAutoConnect;
+
+  friend bool operator==(const ScalesSettings& lhs, const ScalesSettings& rhs) {
+    return lhs.forcePredictive == rhs.forcePredictive &&
+      lhs.hwScalesEnabled == rhs.hwScalesEnabled &&
+      lhs.hwScalesF1 == rhs.hwScalesF1 &&
+      lhs.hwScalesF2 == rhs.hwScalesF2 &&
+      lhs.btScalesEnabled == rhs.btScalesEnabled &&
+      lhs.btScalesAutoConnect == rhs.btScalesAutoConnect;
+  }
 };
 
 struct BrewSettings {

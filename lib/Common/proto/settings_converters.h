@@ -84,8 +84,6 @@ public:
 
   static bool decoderApply(const ProtoType& proto, LocalType& local) {
     local.pumpFlowAtZero = proto.pumpFlowAtZero;
-    local.scalesF1 = proto.scalesF1;
-    local.scalesF2 = proto.scalesF2;
     local.warmupState = proto.warmupState;
     local.lcdSleep = proto.lcdSleep;
     return true;
