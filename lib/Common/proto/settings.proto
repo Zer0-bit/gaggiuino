@@ -11,8 +11,8 @@ message BoilerSettingsDto {
 message SystemSettingsDto {
   reserved 1;
   float pumpFlowAtZero = 2;
-  int32 scalesF1 = 3;
-  int32 scalesF2 = 4;
+  int32 scalesF1 = 3 [deprecated = true];
+  int32 scalesF2 = 4 [deprecated = true];
   uint32 lcdSleep = 5;
   bool warmupState = 6;
 }
@@ -34,9 +34,19 @@ message LedSettingsDto {
   bool disco = 3;
 }
 
+message ScalesSettingsDto {
+  bool forcePredictive = 1;
+  bool hwScalesEnabled = 2;
+  int32  hwScalesF1 = 3;
+  int32  hwScalesF2 = 4;
+  bool btScalesEnabled = 5;
+  bool btScalesAutoConnect = 6;
+}
+
 message GaggiaSettingsDto {
   BoilerSettingsDto boiler = 1;
   SystemSettingsDto system = 2;
   BrewSettingsDto   brew = 3;
   LedSettingsDto    led = 4;
+  ScalesSettingsDto scales = 5;
 }

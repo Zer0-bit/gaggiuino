@@ -27,8 +27,6 @@ namespace json {
     target["warmupState"] = system.warmupState;
     target["lcdSleep"] = system.lcdSleep;
     target["pumpFlowAtZero"] = system.pumpFlowAtZero;
-    target["scalesF1"] = system.scalesF1;
-    target["scalesF2"] = system.scalesF2;
   }
 
   void mapBrewSettingsToJson(const BrewSettings& brew, JsonObject& target) {
@@ -37,16 +35,32 @@ namespace json {
     target["homeOnShotFinish"] = brew.homeOnShotFinish;
   }
 
+  void mapScalesSettingsToJson(const ScalesSettings& scales, JsonObject& target) {
+    target["forcePredictive"] = scales.forcePredictive;
+    target["hwScalesEnabled"] = scales.hwScalesEnabled;
+    target["hwScalesF1"] = scales.hwScalesF1;
+    target["hwScalesF2"] = scales.hwScalesF2;
+    target["btScalesEnabled"] = scales.btScalesEnabled;
+    target["btScalesAutoConnect"] = scales.btScalesAutoConnect;
+  }
+
   void mapAllSettingsToJson(const GaggiaSettings& settings, JsonObject& target) {
     JsonObject systemObj = target.createNestedObject("system");
     JsonObject boilerObj = target.createNestedObject("boiler");
     JsonObject brewObj = target.createNestedObject("brew");
     JsonObject ledObj = target.createNestedObject("led");
+    JsonObject scalesObj = target.createNestedObject("scales");
     mapSystemSettingsToJson(settings.system, systemObj);
     mapBoilerSettingsToJson(settings.boiler, boilerObj);
     mapBrewSettingsToJson(settings.brew, brewObj);
     mapLedSettingsToJson(settings.led, ledObj);
+    mapScalesSettingsToJson(settings.scales, scalesObj);
   };
+
+  void mapBleScalesToJson(const blescales::Scales& scales, JsonObject& target) {
+    target["name"] = scales.name;
+    target["address"] = scales.address;
+  }
 
   // ------------------------------------------------------------------------------------------
   // ----------------------------------- Deserializers ----------------------------------------
@@ -92,16 +106,37 @@ namespace json {
     };
   }
 
+  ScalesSettings mapJsonToScalesSettings(const JsonObject& json) {
+    return ScalesSettings{
+      .forcePredictive = json["forcePredictive"],
+      .hwScalesEnabled = json["hwScalesEnabled"],
+      .hwScalesF1 = json["hwScalesF1"],
+      .hwScalesF2 = json["hwScalesF2"],
+      .btScalesEnabled = json["btScalesEnabled"],
+      .btScalesAutoConnect = json["btScalesAutoConnect"],
+    };
+  }
+
   GaggiaSettings mapJsonToAllSettings(const JsonObject& json) {
     JsonObject boilerJson = json["boiler"].as<JsonObject>();
     JsonObject systemJson = json["system"].as<JsonObject>();
     JsonObject brewJson = json["brew"].as<JsonObject>();
     JsonObject ledJson = json["led"].as<JsonObject>();
+    JsonObject scalesJson = json["scales"].as<JsonObject>();
     return GaggiaSettings{
       .boiler = mapJsonToBoilerSettings(boilerJson),
       .system = mapJsonToSystemSettings(systemJson),
       .brew = mapJsonToBrewSettings(brewJson),
       .led = mapJsonToLedSettings(ledJson),
+      .scales = mapJsonToScalesSettings(scalesJson),
     };
   }
+
+  blescales::Scales mapJsonToBleScales(const JsonObject& json) {
+    return blescales::Scales{
+      .name = json["name"],
+      .address = json["address"],
+    };
+  }
+
 }

@@ -170,6 +170,15 @@ void stmCommsSendSystemSettings(const SystemSettings& settings) {
   xSemaphoreGiveRecursive(mcucLock);
 }
 
+void stmCommsSendScalesSettings(const ScalesSettings& settings) {
+  if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
+  mcuComms.sendMessage(
+    McuCommsMessageType::MCUC_DATA_SCALES_SETTINGS,
+    ProtoSerializer::serialize<ScalesSettingsConverter>(settings)
+  );
+  xSemaphoreGiveRecursive(mcucLock);
+}
+
 void stmCommsSendUpdateSystemState(const UpdateSystemStateComand& state) {
   if (xSemaphoreTakeRecursive(mcucLock, portMAX_DELAY) == pdFALSE) return;
   UpdateSystemStateComand command = {

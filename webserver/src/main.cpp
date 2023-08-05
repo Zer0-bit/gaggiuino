@@ -19,7 +19,7 @@ void setup() {
   stmCommsInit(Serial1);
   wifiSetup();
   webServerSetup();
-  bleScalesInit();
+  blescales::init();
   vTaskDelete(NULL);     //Delete own task by passing NULL
 }
 
@@ -41,7 +41,7 @@ void onSystemStateReceived(const SystemState& systemState) {
 }
 void onScalesTareReceived() {
   LOG_INFO("STM sent tare command");
-  bleScalesTare();
+  blescales::tare();
 }
 void onGaggiaSettingsRequested() {
   LOG_INFO("STM request active settings");
@@ -81,9 +81,25 @@ void state::onLedSettingsUpdated(const LedSettings& settings) {
 void state::onSystemSettingsUpdated(const SystemSettings& settings) {
   stmCommsSendSystemSettings(settings);
 }
+void state::onScalesSettingsUpdated(const ScalesSettings& settings) {
+  stmCommsSendScalesSettings(settings);
+}
 void state::onSystemStateUpdated(const SystemState& systemState) {
   wsSendSystemStateToClients(systemState);
 }
 void state::onUpdateSystemStateCommandSubmitted(const UpdateSystemStateComand& command) {
   stmCommsSendUpdateSystemState(command);
+}
+void state::onConnectedBleScalesUpdated(const blescales::Scales& scales) {
+  if (scales.address.length() == 0) {
+    stmCommsSendScaleDisconnected();
+  }
+  wsSendConnectedBleScalesUpdated(scales);
+}
+
+// ------------------------------------------------------------------------
+// -------------------- Handle ble scales callbacks -----------------------
+// ------------------------------------------------------------------------
+void blescales::onWeightReceived(float weight) {
+  stmCommsSendWeight(weight);
 }

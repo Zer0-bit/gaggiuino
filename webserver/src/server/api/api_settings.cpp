@@ -21,6 +21,9 @@ void handlePutBrewSettings(AsyncWebServerRequest* request, JsonVariant& body);
 void handleGetLedSettings(AsyncWebServerRequest* request);
 void handlePutLedSettings(AsyncWebServerRequest* request, JsonVariant& body);
 
+void handleGetScalesSettings(AsyncWebServerRequest* request);
+void handlePutScalesSettings(AsyncWebServerRequest* request, JsonVariant& body);
+
 void handleGetSystemSettings(AsyncWebServerRequest* request);
 void handlePutSystemSettings(AsyncWebServerRequest* request, JsonVariant& body);
 
@@ -41,6 +44,9 @@ void setupSettingsApi(AsyncWebServer& server) {
   server.on("/api/settings/system", HTTP_GET, handleGetSystemSettings);
   server.on("/api/settings/system", HTTP_PUT, withJson(handlePutSystemSettings), NULL, onJsonBody);
 
+  server.on("/api/settings/scales", HTTP_GET, handleGetScalesSettings);
+  server.on("/api/settings/scales", HTTP_PUT, withJson(handlePutScalesSettings), NULL, onJsonBody);
+
   server.on("/api/settings/persist",  HTTP_PUT, handlePersistSettings);
 
   server.on("/api/settings", HTTP_GET, handleGetAllSettings);
@@ -56,13 +62,11 @@ void handleGetLedSettings(AsyncWebServerRequest* request) {
 
   LOG_INFO("Got request get LedSettings");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(100);
   JsonObject jsonObj = json.to<JsonObject>();
   json::mapLedSettingsToJson(led, jsonObj);
 
-  serializeJson(jsonObj, *response);
-  request->send(response);
+  sendJsonResponse(request, jsonObj);
 }
 
 void handleGetBoilerSettings(AsyncWebServerRequest* request) {
@@ -70,13 +74,11 @@ void handleGetBoilerSettings(AsyncWebServerRequest* request) {
 
   LOG_INFO("Got request get BoilerSettings");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(100);
   JsonObject jsonObj = json.to<JsonObject>();
   json::mapBoilerSettingsToJson(boiler, jsonObj);
 
-  serializeJson(jsonObj, *response);
-  request->send(response);
+  sendJsonResponse(request, jsonObj);
 }
 
 
@@ -85,13 +87,11 @@ void handleGetBrewSettings(AsyncWebServerRequest* request) {
 
   LOG_INFO("Got request get BrewSettings");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(100);
   JsonObject jsonObj = json.to<JsonObject>();
   json::mapBrewSettingsToJson(brew, jsonObj);
 
-  serializeJson(jsonObj, *response);
-  request->send(response);
+  sendJsonResponse(request, jsonObj);
 }
 
 void handleGetSystemSettings(AsyncWebServerRequest* request) {
@@ -99,13 +99,23 @@ void handleGetSystemSettings(AsyncWebServerRequest* request) {
 
   LOG_INFO("Got request get SystemSettings");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(100);
   JsonObject jsonObj = json.to<JsonObject>();
   json::mapSystemSettingsToJson(system, jsonObj);
 
-  serializeJson(jsonObj, *response);
-  request->send(response);
+  sendJsonResponse(request, jsonObj);
+}
+
+void handleGetScalesSettings(AsyncWebServerRequest* request) {
+  const ScalesSettings& scales = state::getSettings().scales;
+
+  LOG_INFO("Got request get ScalesSettings");
+
+  DynamicJsonDocument json(400);
+  JsonObject jsonObj = json.to<JsonObject>();
+  json::mapScalesSettingsToJson(scales, jsonObj);
+
+  sendJsonResponse(request, jsonObj);
 }
 
 void handleGetAllSettings(AsyncWebServerRequest* request) {
@@ -113,13 +123,11 @@ void handleGetAllSettings(AsyncWebServerRequest* request) {
 
   LOG_INFO("Got request get all settings");
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   DynamicJsonDocument json(500);
   JsonObject jsonObj = json.to<JsonObject>();
   json::mapAllSettingsToJson(settings, jsonObj);
 
-  serializeJson(jsonObj, *response);
-  request->send(response);
+  sendJsonResponse(request, jsonObj);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -131,13 +139,10 @@ void handlePutAllSettings(AsyncWebServerRequest* request, JsonVariant& body) {
 
   state::updateAllSettings(json::mapJsonToAllSettings(body));
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   JsonObject responseBody = body.to<JsonObject>();
   json::mapAllSettingsToJson(state::getSettings(), responseBody);
 
-  response->setCode(200);
-  serializeJson(responseBody, *response);
-  request->send(response);
+  sendJsonResponse(request, responseBody);
 }
 
 void handlePutBoilerSettings(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -145,13 +150,10 @@ void handlePutBoilerSettings(AsyncWebServerRequest* request, JsonVariant& body) 
 
   state::updateBoilerSettings(json::mapJsonToBoilerSettings(body));
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   JsonObject responseBody = body.to<JsonObject>();
   json::mapBoilerSettingsToJson(state::getSettings().boiler, responseBody);
 
-  response->setCode(200);
-  serializeJson(responseBody, *response);
-  request->send(response);
+  sendJsonResponse(request, responseBody);
 }
 
 void handlePutBrewSettings(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -159,13 +161,10 @@ void handlePutBrewSettings(AsyncWebServerRequest* request, JsonVariant& body) {
 
   state::updateBrewSettings(json::mapJsonToBrewSettings(body));
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   JsonObject responseBody = body.to<JsonObject>();
   json::mapBrewSettingsToJson(state::getSettings().brew, responseBody);
 
-  response->setCode(200);
-  serializeJson(responseBody, *response);
-  request->send(response);
+  sendJsonResponse(request, responseBody);
 }
 
 void handlePutLedSettings(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -173,14 +172,10 @@ void handlePutLedSettings(AsyncWebServerRequest* request, JsonVariant& body) {
 
   state::updateLedSettings(json::mapJsonToLedSettings(body));
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   JsonObject responseBody = body.to<JsonObject>();
   json::mapLedSettingsToJson(state::getSettings().led, responseBody);
 
-  response->setCode(200);
-  serializeJson(responseBody, *response);
-  request->send(response);
-
+  sendJsonResponse(request, responseBody);
 }
 
 void handlePutSystemSettings(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -188,14 +183,23 @@ void handlePutSystemSettings(AsyncWebServerRequest* request, JsonVariant& body) 
 
   state::updateSystemSettings(json::mapJsonToSystemSettings(body));
 
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
   JsonObject responseBody = body.to<JsonObject>();
   json::mapSystemSettingsToJson(state::getSettings().system, responseBody);
 
-  response->setCode(200);
-  serializeJson(body, *response);
-  request->send(response);
+  sendJsonResponse(request, responseBody);
 }
+
+void handlePutScalesSettings(AsyncWebServerRequest* request, JsonVariant& body) {
+  LOG_INFO("Got request to update ScalesSettings");
+
+  state::updateScalesSettings(json::mapJsonToScalesSettings(body));
+
+  JsonObject responseBody = body.to<JsonObject>();
+  json::mapScalesSettingsToJson(state::getSettings().scales, responseBody);
+
+  sendJsonResponse(request, responseBody);
+}
+
 
 void handlePersistSettings(AsyncWebServerRequest* request) {
   LOG_INFO("Got request to persist current settings");

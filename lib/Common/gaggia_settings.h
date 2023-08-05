@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <vector>
+#include <string>
 
 struct BoilerSettings {
   uint16_t steamSetPoint; /* Desired steam temperature */
@@ -17,6 +18,15 @@ struct SystemSettings {
   int      scalesF2;           /* Scales calibration constant 2 */
   uint16_t lcdSleep;           /* Time (in minutes) after which the screen should go to sleep */
   bool     warmupState;        /* Should gaggia wait to warmup */
+};
+
+struct ScalesSettings {
+  bool forcePredictive;
+  bool hwScalesEnabled;
+  int  hwScalesF1;
+  int  hwScalesF2;
+  bool btScalesEnabled;
+  bool btScalesAutoConnect;
 };
 
 struct BrewSettings {
@@ -40,6 +50,7 @@ struct GaggiaSettings {
   SystemSettings system;
   BrewSettings   brew;
   LedSettings    led;
+  ScalesSettings scales;
 };
 
 #endif

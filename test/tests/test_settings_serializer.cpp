@@ -63,7 +63,6 @@ void test_system_state_serialized_correctly(void) {
     .isSteamForgottenON = true,
     .scalesPresent = true,
     .timeAlive = 123123,
-    .descaleProgress = 12,
   };
 
   std::vector<uint8_t> serializedData = ProtoSerializer::serialize<SystemStateConverter>(systemState);

@@ -1,5 +1,7 @@
+import BluetoothIcon from '@mui/icons-material/Bluetooth';
 import CoffeeMakerIcon from '@mui/icons-material/CoffeeMaker';
 import TemperatureIcon from '@mui/icons-material/DeviceThermostat';
+import EqualizerIcon from '@mui/icons-material/Equalizer';
 import FlareIcon from '@mui/icons-material/Flare';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
 import ScaleIcon from '@mui/icons-material/Scale';
@@ -9,16 +11,17 @@ import {
   Tab,
   Tabs,
   Theme,
+  Typography,
   debounce,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  BoilerSettings, GaggiaSettings, LedSettings, SystemSettings, areGaggiaSettingsEqual,
+  BoilerSettings, GaggiaSettings, LedSettings, ScalesSettings, SystemSettings, areGaggiaSettingsEqual,
 } from '../../models/models';
-import LogContainer from '../log/LogContainer';
-import ThemeModeToggle from '../theme/ThemeModeToggle';
+import { constrain } from '../../models/utils';
+import useBleScalesStore from '../../state/BleScalesDatastor';
 import {
   LedColorPickerInput,
   SettingsInputActions,
@@ -27,7 +30,8 @@ import {
   SettingsNumberInput,
   SettingsToggleInput,
 } from '../inputs/settings_inputs';
-import { constrain } from '../../models/utils';
+import LogContainer from '../log/LogContainer';
+import ThemeModeToggle from '../theme/ThemeModeToggle';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -140,7 +144,10 @@ export default function TabbedSettings({ settings, onChange }: TabbedSettingsPro
         />
       </TabPanel>
       <TabPanel value={selectedTab} index={3} sx={tabPanelStyling}>
-        PLACEHOLDER
+        <ScalesSettingsPanel
+          scales={settingsInternal.scales}
+          onChange={(scales) => setSettingsInternal({ ...settingsInternal, scales })}
+        />
       </TabPanel>
       <TabPanel value={selectedTab} index={4} sx={tabPanelStyling}>
         <LogContainer />
@@ -218,18 +225,6 @@ function SystemSettingsPanel({ system, onChange }: SystemSettingsPanelProps) {
         maxDecimals={3}
         buttonIncrements={0.001}
       />
-      <SettingsNumberInput
-        label="Scales F1"
-        value={system.scalesF1}
-        onChange={(value) => onChange({ ...system, scalesF1: value })}
-        maxDecimals={0}
-      />
-      <SettingsNumberInput
-        label="Scales F2"
-        value={system.scalesF2}
-        onChange={(value) => onChange({ ...system, scalesF2: value })}
-        maxDecimals={0}
-      />
       <SettingsInputWrapper>
         <SettingsInputInlineLabel>Dark/Light toggle</SettingsInputInlineLabel>
         <SettingsInputActions><Box display="flex" paddingY={1}><ThemeModeToggle /></Box></SettingsInputActions>
@@ -270,5 +265,95 @@ function LedSettingsPanel({ led, onChange }: LedSettingsPanelProps) {
         onChange={(color) => onChange({ ...led, color })}
       />
     </Box>
+  );
+}
+
+interface ScalesettingsPanelProps {
+  scales: ScalesSettings;
+  onChange: (settings: ScalesSettings) => void;
+}
+
+function ScalesSettingsPanel({ scales, onChange }: ScalesettingsPanelProps) {
+  const theme = useTheme();
+  const connectedScales = useBleScalesStore((state) => state.bleScales);
+  return (
+    <>
+      <Box sx={{
+        display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%',
+      }}
+      >
+        <Typography sx={{ px: 1, display: 'flex', alignItems: 'center' }} variant="h6">
+          <EqualizerIcon fontSize="inherit" sx={{ mr: 1, color: theme.palette.flow.main }} />
+          Predictive scales
+        </Typography>
+        <SettingsToggleInput
+          label="Force predictive"
+          value={scales.forcePredictive}
+          onChange={(value) => onChange({ ...scales, forcePredictive: value })}
+        />
+      </Box>
+
+      <Box sx={{
+        display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%', mt: 3,
+      }}
+      >
+        <Typography sx={{ px: 1, display: 'flex', alignItems: 'center' }} variant="h6">
+          <ScaleIcon fontSize="inherit" sx={{ mr: 1, color: theme.palette.weight.main }} />
+          Hardware scales
+        </Typography>
+        <SettingsToggleInput
+          label="Enabled"
+          value={scales.hwScalesEnabled}
+          onChange={(value) => onChange({ ...scales, hwScalesEnabled: value })}
+        />
+        {scales.hwScalesEnabled && (
+          <>
+            <SettingsNumberInput
+              label="Calibration F1"
+              value={scales.hwScalesF1}
+              onChange={(value) => onChange({ ...scales, hwScalesF1: value })}
+              maxDecimals={0}
+            />
+            <SettingsNumberInput
+              label="Calibration F2"
+              value={scales.hwScalesF2}
+              onChange={(value) => onChange({ ...scales, hwScalesF2: value })}
+              maxDecimals={0}
+            />
+          </>
+        )}
+      </Box>
+      <Box sx={{
+        display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%', mt: 3,
+      }}
+      >
+        <Typography sx={{ px: 1, alignItems: 'center', display: 'flex' }} variant="h6">
+          <BluetoothIcon fontSize="inherit" sx={{ mr: 1, color: '#0082FC' }} />
+          Bluetooth scales
+        </Typography>
+        <SettingsToggleInput
+          label="Enabled"
+          value={scales.btScalesEnabled}
+          onChange={(value) => onChange({ ...scales, btScalesEnabled: value })}
+        />
+        {scales.btScalesEnabled && (
+        <>
+          <SettingsToggleInput
+            label="Auto connect"
+            value={scales.btScalesAutoConnect}
+            onChange={(value) => onChange({ ...scales, btScalesAutoConnect: value })}
+          />
+          <SettingsInputWrapper>
+            <SettingsInputInlineLabel>Device</SettingsInputInlineLabel>
+            {/* <SettingsInputActions> */}
+            {connectedScales.address.length > 0
+              ? <Typography sx={{ color: theme.palette.success.main, ml: 0.5 }}>{connectedScales.name}</Typography>
+              : <Typography sx={{ color: theme.palette.warning.main, ml: 0.5 }}>Not connected</Typography>}
+            {/* </SettingsInputActions> */}
+          </SettingsInputWrapper>
+        </>
+        )}
+      </Box>
+    </>
   );
 }

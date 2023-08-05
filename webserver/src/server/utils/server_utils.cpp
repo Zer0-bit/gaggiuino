@@ -28,3 +28,10 @@ ArRequestHandlerFunction withJson(ArJsonRequestHandlerFunction wrappedHandler, s
     }
   };
 }
+
+void sendJsonResponse(AsyncWebServerRequest *request, JsonVariantConst json, int code) {
+  AsyncResponseStream* response = request->beginResponseStream("application/json");
+  response->setCode(code);
+  serializeJson(json, *response);
+  request->send(response);
+}

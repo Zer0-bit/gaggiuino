@@ -65,7 +65,7 @@ void setup(void) {
   LOG_INFO("Pressure sensor init");
 
   // Scales handling
-  scalesInit(runningCfg.system.scalesF1, runningCfg.system.scalesF2);
+  scalesInit(runningCfg.scales);
   LOG_INFO("Scales init");
 
   // Pump init
@@ -349,6 +349,7 @@ void onGaggiaSettingsReceived(const GaggiaSettings& newSettings) {
   runningCfg = newSettings;
   if (systemState.startupInitFinished) {
     pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
+    scalesInit(runningCfg.scales);
   }
 }
 

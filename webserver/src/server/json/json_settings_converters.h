@@ -3,6 +3,7 @@
 
 #include "ArduinoJson.h"
 #include "gaggia_settings.h"
+#include "../../scales/ble_scales.h"
 
 namespace json {
   // ------------------------------------------------------------------------------------------
@@ -12,7 +13,9 @@ namespace json {
   void mapBoilerSettingsToJson(const BoilerSettings& boiler, JsonObject& target);
   void mapSystemSettingsToJson(const SystemSettings& system, JsonObject& target);
   void mapBrewSettingsToJson(const BrewSettings& brew, JsonObject& target);
+  void mapScalesSettingsToJson(const ScalesSettings& brew, JsonObject& target);
   void mapAllSettingsToJson(const GaggiaSettings& settings, JsonObject& target);
+  void mapBleScalesToJson(const blescales::Scales& scales, JsonObject& target);
   // ------------------------------------------------------------------------------------------
   // ----------------------------------- Deserializers ----------------------------------------
   // ------------------------------------------------------------------------------------------
@@ -20,6 +23,8 @@ namespace json {
   LedSettings mapJsonToLedSettings(const JsonObject& json);
   BrewSettings mapJsonToBrewSettings(const JsonObject& json);
   BoilerSettings mapJsonToBoilerSettings(const JsonObject& json);
+  ScalesSettings mapJsonToScalesSettings(const JsonObject& json);
   GaggiaSettings mapJsonToAllSettings(const JsonObject& json);
+  blescales::Scales mapJsonToBleScales(const JsonObject& json);
 }
 #endif
