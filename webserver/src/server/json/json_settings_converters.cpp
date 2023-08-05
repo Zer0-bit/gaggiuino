@@ -68,8 +68,6 @@ namespace json {
   SystemSettings mapJsonToSystemSettings(const JsonObject& json) {
     return SystemSettings{
       .pumpFlowAtZero = json["pumpFlowAtZero"],
-      .scalesF1 = json["scalesF1"],
-      .scalesF2 = json["scalesF2"],
       .lcdSleep = json["lcdSleep"],
       .warmupState = json["warmupState"],
     };
