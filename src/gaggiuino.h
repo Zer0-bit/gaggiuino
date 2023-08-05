@@ -49,6 +49,8 @@
 
 const uint16_t tofStartValue = TOF_START; // Tof offset when tank is full
 const uint16_t tofEndValue = TOF_END; // Tof offset when tank is nearly empty
+const float weightRateThreshold = 9.f; // The rate of weigh random change(aka accidental scales touching)
+const float weightIncreaseThreshold = 40.f; // Accounting for placing a cup on the scales after initiating brew
 
 //Timers
 unsigned long systemHealthTimer;
