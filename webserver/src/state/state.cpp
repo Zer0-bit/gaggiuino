@@ -7,6 +7,7 @@ namespace state {
   Profile activeProfile;
   ProfileId activeProfileId;
   SystemState systemState;
+  blescales::Scales connectedScales;
 
   void init() {
     currentSettings = persistence::getSettings();
@@ -46,13 +47,16 @@ namespace state {
     currentSettings.system = settings;
     onSystemSettingsUpdated(currentSettings.system);
   }
+  void updateScalesSettings(const ScalesSettings& settings) {
+    currentSettings.scales = settings;
+    onScalesSettingsUpdated(currentSettings.scales);
+  }
 
   // Persists the `currentSettings` to NVS
   bool persistSettings() {
     persistence::saveSettings(currentSettings);
     return true;
   }
-
 
   // ------------------------------------------------------------------------------
   // --------------------------- PROFILE RELATED STATE ----------------------------
@@ -119,5 +123,19 @@ namespace state {
 
   void updateOperationMode(OperationMode operationMode) {
     sumitUpdateSystemStateCommand({ .operationMode = operationMode, .tarePending = systemState.tarePending });
+  }
+
+  // ---------------------------------------------------------------------------------
+  // ----------------------------------- SCALES --------------------------------------
+  // ---------------------------------------------------------------------------------
+  blescales::Scales getConnectedScales() {
+    return connectedScales;
+  }
+
+  void updateConnectedScales(const blescales::Scales& scales) {
+    if (scales.address == connectedScales.address && scales.name == connectedScales.name) return;
+
+    connectedScales = scales;
+    onConnectedBleScalesUpdated(connectedScales);
   }
 }

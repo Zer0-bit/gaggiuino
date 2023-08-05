@@ -126,18 +126,38 @@ export function areLedSettingsEqual(settings1: LedSettings, settings2: LedSettin
       && areLedColorsEqual(settings1.color, settings2.color);
 }
 
+export interface ScalesSettings {
+  forcePredictive: boolean;
+  hwScalesEnabled: boolean;
+  hwScalesF1: number;
+  hwScalesF2: number;
+  btScalesEnabled: boolean;
+  btScalesAutoConnect: boolean;
+}
+
+export function areScalesSettingsEqual(settings1: ScalesSettings, settings2: ScalesSettings): boolean {
+  return settings1.forcePredictive === settings2.forcePredictive
+      && settings1.hwScalesEnabled === settings2.hwScalesEnabled
+      && settings1.hwScalesF1 === settings2.hwScalesF1
+      && settings1.hwScalesF2 === settings2.hwScalesF2
+      && settings1.btScalesEnabled === settings2.btScalesEnabled
+      && settings1.btScalesAutoConnect === settings2.btScalesAutoConnect;
+}
+
 export interface GaggiaSettings {
   boiler: BoilerSettings;
   system: SystemSettings;
   brew: BrewSettings;
   led: LedSettings;
+  scales: ScalesSettings;
 }
 
 export function areGaggiaSettingsEqual(settings1: GaggiaSettings, settings2: GaggiaSettings): boolean {
   return areBoilerSettingsEqual(settings1.boiler, settings2.boiler)
         && areSystemSettingsEqual(settings1.system, settings2.system)
         && areBrewSettingsEqual(settings1.brew, settings2.brew)
-        && areLedSettingsEqual(settings1.led, settings2.led);
+        && areLedSettingsEqual(settings1.led, settings2.led)
+        && areScalesSettingsEqual(settings1.scales, settings2.scales);
 }
 
 export enum NotificationType {
@@ -164,4 +184,9 @@ export interface DescalingProgress {
   state: DescalingState;
   time: number; // (time in millis)
   progress: number; // 0-100
+}
+
+export interface BleScales {
+  name: string;
+  address: string;
 }

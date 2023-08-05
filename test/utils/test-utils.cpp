@@ -60,8 +60,6 @@ void TEST_ASSERT_EQUAL_GAGGIA_SETTINGS(const GaggiaSettings& expected, const Gag
   TEST_ASSERT_EQUAL_MESSAGE(expected.boiler.brewDivider, actual.boiler.brewDivider, "boiler.brewDivider");
 
   TEST_ASSERT_EQUAL_MESSAGE(expected.system.pumpFlowAtZero, actual.system.pumpFlowAtZero, "system.pumpFlowAtZero");
-  TEST_ASSERT_EQUAL_MESSAGE(expected.system.scalesF1, actual.system.scalesF1, "system.scalesF1");
-  TEST_ASSERT_EQUAL_MESSAGE(expected.system.scalesF2, actual.system.scalesF2, "system.scalesF2");
   TEST_ASSERT_EQUAL_MESSAGE(expected.system.warmupState, actual.system.warmupState, "system.warmupState");
   TEST_ASSERT_EQUAL_MESSAGE(expected.system.lcdSleep, actual.system.lcdSleep, "screen.lcdSleep");
 
@@ -74,6 +72,13 @@ void TEST_ASSERT_EQUAL_GAGGIA_SETTINGS(const GaggiaSettings& expected, const Gag
   TEST_ASSERT_EQUAL_MESSAGE(expected.led.color.R, actual.led.color.R, "led.color.R");
   TEST_ASSERT_EQUAL_MESSAGE(expected.led.color.G, actual.led.color.G, "led.color.G");
   TEST_ASSERT_EQUAL_MESSAGE(expected.led.color.B, actual.led.color.B, "led.color.B");
+
+  TEST_ASSERT_EQUAL_MESSAGE(expected.scales.forcePredictive, actual.scales.forcePredictive, "scales.forcePredictive");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.scales.hwScalesEnabled, actual.scales.hwScalesEnabled, "scales.hwScalesEnabled");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.scales.hwScalesF1, actual.scales.hwScalesF1, "scales.hwScalesF1");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.scales.hwScalesF2, actual.scales.hwScalesF2, "scales.hwScalesF2");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.scales.btScalesEnabled, actual.scales.btScalesEnabled, "scales.btScalesEnabled");
+  TEST_ASSERT_EQUAL_MESSAGE(expected.scales.btScalesAutoConnect, actual.scales.btScalesAutoConnect, "scales.btScalesAutoConnect");
 }
 
 void TEST_ASSERT_EQUAL_SHOT_SNAPSHOT(const ShotSnapshot& expected, const ShotSnapshot& actual) {
@@ -97,7 +102,6 @@ void TEST_ASSERT_EQUAL_SYSTEM_STATE(const SystemState& expected, const SystemSta
   TEST_ASSERT_EQUAL_MESSAGE(expected.isSteamForgottenON, actual.isSteamForgottenON, "system.isSteamForgottenON");
   TEST_ASSERT_EQUAL_MESSAGE(expected.scalesPresent, actual.scalesPresent, "system.scalesPresent");
   TEST_ASSERT_EQUAL_MESSAGE(expected.timeAlive, actual.timeAlive, "system.timeAlive");
-  TEST_ASSERT_EQUAL_MESSAGE(expected.descaleProgress, actual.descaleProgress, "system.descaleProgress");
 }
 
 #include <iostream>

@@ -24,13 +24,8 @@ void setupSystemStateApi(AsyncWebServer& server) {
 // ------------------------------------------------------------------------------------------
 
 void systemStateResponse(AsyncWebServerRequest* request, JsonObject json, int code = 200) {
-  AsyncResponseStream* response = request->beginResponseStream("application/json");
-  response->setCode(code);
-
   json::mapSystemStateToJson(state::getSystemState(), json);
-  serializeJson(json, *response);
-
-  request->send(response);
+  sendJsonResponse(request, json, code);
 }
 
 void handleGetSystemState(AsyncWebServerRequest* request) {
@@ -38,7 +33,7 @@ void handleGetSystemState(AsyncWebServerRequest* request) {
 
   DynamicJsonDocument json(512);
   JsonObject jsonObj = json.to<JsonObject>();
-  systemStateResponse(request, jsonObj, 200);
+  systemStateResponse(request, jsonObj);
 }
 
 void handleUpdateSystemStateTarePending(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -47,7 +42,7 @@ void handleUpdateSystemStateTarePending(AsyncWebServerRequest* request, JsonVari
   state::updateTarePending(body["tarePending"]);
 
   JsonObject responseBody = body.to<JsonObject>();
-  systemStateResponse(request, responseBody, 200);
+  systemStateResponse(request, responseBody);
 }
 
 void handleUpdateSystemStateOperationMode(AsyncWebServerRequest* request, JsonVariant& body) {
@@ -56,5 +51,5 @@ void handleUpdateSystemStateOperationMode(AsyncWebServerRequest* request, JsonVa
   state::updateOperationMode(json::mapJsonValueToOperationMode(body["operationMode"]));
 
   JsonObject responseBody = body.to<JsonObject>();
-  systemStateResponse(request, responseBody, 200);
+  systemStateResponse(request, responseBody);
 }

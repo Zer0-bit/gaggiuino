@@ -23,8 +23,6 @@ namespace default_settings {
     defaultData.brew.basketPrefill = false;
 
     // System settings
-    defaultData.system.scalesF1 = 3920;
-    defaultData.system.scalesF2 = 4210;
     defaultData.system.pumpFlowAtZero = 0.2401f;
     defaultData.system.lcdSleep = 16;
     defaultData.system.warmupState = false;
@@ -35,6 +33,14 @@ namespace default_settings {
     defaultData.led.color.R = 9;
     defaultData.led.color.G = 0;
     defaultData.led.color.B = 9;
+
+    // Scales settings
+    defaultData.scales.forcePredictive = false;
+    defaultData.scales.hwScalesF1 = 3920;
+    defaultData.scales.hwScalesF2 = 4210;
+    defaultData.scales.hwScalesEnabled = true;
+    defaultData.scales.btScalesEnabled = false;
+    defaultData.scales.btScalesAutoConnect = true;
 
     return defaultData;
   }

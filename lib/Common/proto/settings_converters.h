@@ -73,8 +73,6 @@ public:
   static ProtoType encoderInit(const LocalType& local) {
     return SystemSettingsDto{
       .pumpFlowAtZero = local.pumpFlowAtZero,
-      .scalesF1 = local.scalesF1,
-      .scalesF2 = local.scalesF2,
       .lcdSleep = local.lcdSleep,
       .warmupState = local.warmupState,
     };
@@ -117,6 +115,35 @@ public:
   };
 };
 
+class ScalesSettingsConverter : public NanoPb::Converter::MessageConverter<ScalesSettingsConverter, ScalesSettings, ScalesSettingsDto, ScalesSettingsDto_fields> {
+public:
+  static ProtoType encoderInit(const LocalType& local) {
+    return ScalesSettingsDto{
+      .forcePredictive = local.forcePredictive,
+      .hwScalesEnabled = local.hwScalesEnabled,
+      .hwScalesF1 = local.hwScalesF1,
+      .hwScalesF2 = local.hwScalesF2,
+      .btScalesEnabled = local.btScalesEnabled,
+      .btScalesAutoConnect = local.btScalesAutoConnect,
+    };
+  };
+
+  static ProtoType decoderInit(LocalType& local) {
+    return ScalesSettingsDto{};
+  };
+
+  static bool decoderApply(const ProtoType& proto, LocalType& local) {
+    local.forcePredictive = proto.forcePredictive;
+    local.hwScalesEnabled = proto.hwScalesEnabled;
+    local.hwScalesF1 = proto.hwScalesF1;
+    local.hwScalesF2 = proto.hwScalesF2;
+    local.btScalesEnabled = proto.btScalesEnabled;
+    local.btScalesAutoConnect = proto.btScalesAutoConnect;
+
+    return true;
+  };
+};
+
 class GaggiaSettingsConverter : public NanoPb::Converter::MessageConverter<GaggiaSettingsConverter, GaggiaSettings, GaggiaSettingsDto, GaggiaSettingsDto_fields> {
 public:
   static ProtoType encoderInit(const LocalType& local) {
@@ -129,6 +156,8 @@ public:
       .brew = BrewSettingsConverter::encoderInit(local.brew),
       .has_led = true,
       .led = LedSettingsConverter::encoderInit(local.led),
+      .has_scales = true,
+      .scales = ScalesSettingsConverter::encoderInit(local.scales),
     };
   };
 
@@ -138,6 +167,7 @@ public:
       .system = SystemSettingsConverter::decoderInit(local.system),
       .brew = BrewSettingsConverter::decoderInit(local.brew),
       .led = LedSettingsConverter::decoderInit(local.led),
+      .scales = ScalesSettingsConverter::decoderInit(local.scales),
     };
   };
 
@@ -146,6 +176,11 @@ public:
     SystemSettingsConverter::decoderApply(proto.system, local.system);
     BrewSettingsConverter::decoderApply(proto.brew, local.brew);
     LedSettingsConverter::decoderApply(proto.led, local.led);
+    ScalesSettingsConverter::decoderApply(proto.scales, local.scales);
+
+    if (proto.system.scalesF1 != 0 && local.scales.hwScalesF1 == 0) local.scales.hwScalesF1 = proto.system.scalesF1;
+    if (proto.system.scalesF2 != 0 && local.scales.hwScalesF2 == 0) local.scales.hwScalesF2 = proto.system.scalesF2;
+
     return true;
   };
 };
