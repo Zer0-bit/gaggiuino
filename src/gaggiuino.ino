@@ -164,7 +164,7 @@ static void sensorsReadWeight(void) {
       weightMeasurements.add(weight);
       currentState.weight = weightMeasurements.getLatest().value;
 
-      if (brewActive) {
+      if (brewActive && !currentState.steamSwitchState) {
         // If there's a sudden jump in weight
         bool isChangeRateHigh = weightMeasurements.getMeasurementChange().speed() > weightRateThreshold;
         bool isCupPlaced = currentState.weight - initialWeight >= weightIncreaseThreshold;
