@@ -346,10 +346,15 @@ void onProfileReceived(const Profile& newProfile) {
 }
 
 void onGaggiaSettingsReceived(const GaggiaSettings& newSettings) {
+  GaggiaSettings previous = runningCfg;
   runningCfg = newSettings;
-  if (systemState.startupInitFinished) {
-    pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
+  if (!systemState.startupInitFinished) return;
+
+  if (!(previous.scales == runningCfg.scales)) {
     scalesInit(runningCfg.scales);
+  }
+  if (previous.system.pumpFlowAtZero != runningCfg.system.pumpFlowAtZero) {
+    pumpInit(currentState.powerLineFrequency, runningCfg.system.pumpFlowAtZero);
   }
 }
 
