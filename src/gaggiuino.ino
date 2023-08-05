@@ -161,10 +161,11 @@ static void sensorsReadWeight(void) {
       const auto weight = handleTaringAndReadWeight();
       weightMeasurements.add(weight);
       currentState.weight = weightMeasurements.getLatest().value;
+      float weightFlow = weightMeasurements.getMeasurementChange().speed();
 
       if (brewActive && !currentState.steamSwitchState) {
         // If there's a sudden jump in weight
-        bool isChangeRateHigh = weightMeasurements.getMeasurementChange().speed() > weightRateThreshold;
+        bool isChangeRateHigh = weightFlow > weightRateThreshold;
         bool isCupPlaced = currentState.weight - initialWeight >= weightIncreaseThreshold;
         if (!systemState.tarePending && (isChangeRateHigh || isCupPlaced)) {
           // Ignore accidental weight bumps
@@ -183,7 +184,7 @@ static void sensorsReadWeight(void) {
         // Only take flow measurements when tare is not pending.
         currentState.weightFlow = systemState.tarePending
                                 ? currentState.weightFlow
-                                : fmax(0.f, weightMeasurements.getMeasurementChange().speed());
+                                : fmax(0.f, weightFlow);
         currentState.smoothedWeightFlow = smoothScalesFlow.updateEstimate(currentState.weightFlow);
       }
     }
