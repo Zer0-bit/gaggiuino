@@ -163,7 +163,7 @@ static void sensorsReadWeight(void) {
       currentState.weight = weightMeasurements.getLatest().value;
       const float weightFlow = weightMeasurements.getMeasurementChange().speed();
       const bool isBrew = systemState.operationMode != OperationMode::FLUSH
-                       || systemState.operationMode != OperationMode::BREW_AUTO
+                       || systemState.operationMode != OperationMode::FLUSH_AUTO
                        || systemState.operationMode != OperationMode::DESCALE
                        || systemState.operationMode != OperationMode::STEAM;
                         
