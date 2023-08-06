@@ -166,7 +166,6 @@ static void sensorsReadWeight(void) {
                        || systemState.operationMode != OperationMode::FLUSH_AUTO
                        || systemState.operationMode != OperationMode::DESCALE
                        || systemState.operationMode != OperationMode::STEAM;
-                        
 
       if (brewActive && isBrew) {
         // If there's a sudden jump in weight
