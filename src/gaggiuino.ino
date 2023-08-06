@@ -162,8 +162,13 @@ static void sensorsReadWeight(void) {
       weightMeasurements.add(weight);
       currentState.weight = weightMeasurements.getLatest().value;
       const float weightFlow = weightMeasurements.getMeasurementChange().speed();
+      const bool isBrew = systemState.operationMode != OperationMode::FLUSH
+                       || systemState.operationMode != OperationMode::BREW_AUTO
+                       || systemState.operationMode != OperationMode::DESCALE
+                       || systemState.operationMode != OperationMode::STEAM;
+                        
 
-      if (brewActive && !currentState.steamSwitchState) {
+      if (brewActive && isBrew) {
         // If there's a sudden jump in weight
         bool isChangeRateHigh = weightFlow > weightRateThreshold;
         bool isCupPlaced = currentState.weight - initialWeight > 0.f

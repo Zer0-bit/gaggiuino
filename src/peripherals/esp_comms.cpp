@@ -100,7 +100,7 @@ void espCommsSendTareScalesCommand() {
 }
 
 volatile uint32_t notificationTimer;
-void espCommsSendNotification(Notification notification, uint32_t frequency) {
+void espCommsSendNotification(const Notification notification, uint32_t frequency) {
   uint32_t now = millis();
   if (now - notificationTimer < frequency) return;
   notificationTimer = now;
