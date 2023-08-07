@@ -46,7 +46,7 @@ void updateFirmware() {
   Serial.println("Starting firmware update...");
 
   // Set the starting address for firmware flashing
-  uint32_t address = BOOTLOADER_START_ADDRESS;
+  uint32_t address = flashSectorStartAddresses[0];
 
   /*
   According to the "Application Note: AN2606 - STM32™ microcontroller system memory boot mode"
