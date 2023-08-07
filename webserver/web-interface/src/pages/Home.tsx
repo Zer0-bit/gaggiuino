@@ -22,29 +22,29 @@ import {
 import React, {
   useCallback, useEffect, useState,
 } from 'react';
-import { selectActiveProfile } from '../../components/client/ProfileClient';
-import { updateOperationMode, updateTarePending } from '../../components/client/SystemStateClient';
-import { SettingsNumberIncrementButtons } from '../../components/inputs/settings_inputs';
-import AspectRatioBox from '../../components/layout/AspectRatioBox';
-import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
-import { ProfileReview } from '../../components/profile/ProfilePreview';
-import ShotHistory from '../../components/shot/ShotHistory';
+import { selectActiveProfile } from '../components/client/ProfileClient';
+import { updateOperationMode, updateTarePending } from '../components/client/SystemStateClient';
+import { SettingsNumberIncrementButtons } from '../components/inputs/settings_inputs';
+import AspectRatioBox from '../components/layout/AspectRatioBox';
+import AvailableProfileSelector from '../components/profile/AvailableProfileSelector';
+import { ProfileReview } from '../components/profile/ProfilePreview';
+import ShotHistory from '../components/shot/ShotHistory';
 import {
   DescalingState,
   GaggiaSettings, NotificationType, OperationMode,
-} from '../../models/models';
-import { Profile } from '../../models/profile';
-import useProfileStore from '../../state/ProfileStore';
-import useSensorStateStore from '../../state/SensorStateStore';
-import useSettingsStore from '../../state/SettingsStore';
-import useSystemStateStore from '../../state/SystemStateStore';
-import useNotificationStore from '../../state/NotificationDataStore';
-import { SwitchLedButton, SwitchLedState } from '../../components/inputs/SwitchLedButton';
-import PressureGauge from '../../components/gauges/PressureGauge';
-import WaterLevelGauge from '../../components/gauges/WaterLevelGauge';
-import TemperatureGauge from '../../components/gauges/TemperatureGauge';
-import DescalingDialog from '../DescalingDialog';
-import useDescalingProgressStore from '../../state/DescalingProgressDataStore';
+} from '../models/models';
+import { Profile } from '../models/profile';
+import useProfileStore from '../state/ProfileStore';
+import useSensorStateStore from '../state/SensorStateStore';
+import useSettingsStore from '../state/SettingsStore';
+import useSystemStateStore from '../state/SystemStateStore';
+import useNotificationStore from '../state/NotificationDataStore';
+import { SwitchLedButton, SwitchLedState } from '../components/inputs/SwitchLedButton';
+import PressureGauge from '../components/gauges/PressureGauge';
+import WaterLevelGauge from '../components/gauges/WaterLevelGauge';
+import TemperatureGauge from '../components/gauges/TemperatureGauge';
+import DescalingDialog from './DescalingDialog';
+import useDescalingProgressStore from '../state/DescalingProgressDataStore';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);
 

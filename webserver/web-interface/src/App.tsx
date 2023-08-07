@@ -6,9 +6,9 @@ import {
   Route,
   Outlet,
 } from 'react-router-dom';
-import Home from './pages/home/Home';
-import Profiles from './pages/home/Profiles';
-import Settings from './pages/home/Settings';
+import Home from './pages/Home';
+import Profiles from './pages/Profiles';
+import Settings from './pages/Settings';
 import MainAppBar from './components/appbar/MainAppBar';
 import ThemeWrapper from './components/theme/ThemeWrapper';
 import useWebSocket from './api/websocket';

@@ -18,7 +18,7 @@ import {
   Menu,
 } from '@mui/material';
 import Logo from '../icons/Logo';
-import ShotDialog from '../../pages/home/ShotDialog';
+import ShotDialog from '../../pages/ShotDialog';
 import useShotDataStore from '../../state/ShotDataStore';
 import useSystemStateStore from '../../state/SystemStateStore';
 import formatTime from '../../models/time_format';

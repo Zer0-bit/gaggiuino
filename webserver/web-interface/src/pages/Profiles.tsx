@@ -25,12 +25,12 @@ import Grid from '@mui/material/Unstable_Grid2';
 import React, { useCallback, useState } from 'react';
 import {
   createProfile, deleteProfileById, getProfileById, updateProfile,
-} from '../../components/client/ProfileClient';
-import AvailableProfileSelector from '../../components/profile/AvailableProfileSelector';
-import { ProfileReview } from '../../components/profile/ProfilePreview';
-import { Profile } from '../../models/profile';
-import useProfileStore from '../../state/ProfileStore';
-import ProfileEditDialog from '../../components/profile/edit/ProfileEditDialog';
+} from '../components/client/ProfileClient';
+import AvailableProfileSelector from '../components/profile/AvailableProfileSelector';
+import { ProfileReview } from '../components/profile/ProfilePreview';
+import { Profile } from '../models/profile';
+import useProfileStore from '../state/ProfileStore';
+import ProfileEditDialog from '../components/profile/edit/ProfileEditDialog';
 
 export default function Profiles() {
   const theme = useTheme();

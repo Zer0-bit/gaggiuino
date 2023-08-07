@@ -5,13 +5,13 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Grid from '@mui/material/Unstable_Grid2';
-import ShotChart from '../../components/chart/ShotChart';
+import ShotChart from '../components/chart/ShotChart';
 import {
   PressureStatBox, PumpFlowStatBox, TemperatureStatBox, TimeStatBox, WeightFlowStatBox, WeightStatBox,
-} from '../../components/chart/StatBox';
-import useShotDataStore from '../../state/ShotDataStore';
-import { Shot, ShotSnapshot } from '../../models/models';
-import ShotSpeedDial from '../../components/inputs/ShotSpeedDial';
+} from '../components/chart/StatBox';
+import useShotDataStore from '../state/ShotDataStore';
+import { Shot, ShotSnapshot } from '../models/models';
+import ShotSpeedDial from '../components/inputs/ShotSpeedDial';
 
 interface ShotDialogProps {
   open?: boolean;

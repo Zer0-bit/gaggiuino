@@ -16,12 +16,12 @@ import IconButton from '@mui/material/IconButton';
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
 import Grid from '@mui/material/Unstable_Grid2';
 import SaveIcon from '@mui/icons-material/Save';
-import WifiSettingsCard from '../../components/wifi/WifiSettingsCard';
-import ProgressBar from '../../components/inputs/ProgressBar';
-import TabbedSettings from '../../components/settings/tabs_settings';
-import useSettingsStore from '../../state/SettingsStore';
-import { GaggiaSettings, NotificationType } from '../../models/models';
-import useNotificationStore from '../../state/NotificationDataStore';
+import WifiSettingsCard from '../components/wifi/WifiSettingsCard';
+import ProgressBar from '../components/inputs/ProgressBar';
+import TabbedSettings from '../components/settings/tabs_settings';
+import useSettingsStore from '../state/SettingsStore';
+import { GaggiaSettings, NotificationType } from '../models/models';
+import useNotificationStore from '../state/NotificationDataStore';
 
 export default function Settings() {
   const theme = useTheme();
