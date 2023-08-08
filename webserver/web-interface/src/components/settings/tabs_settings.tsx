@@ -308,7 +308,7 @@ function ScalesSettingsPanel({ scales, onChange }: ScalesettingsPanelProps) {
           variant="h6"
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <ScaleIcon fontSize="inherit" sx={{ mr: 1 }} color='primary'/>
+            <ScaleIcon fontSize="inherit" sx={{ mr: 1 }} color="primary" />
             Hardware scales
           </Box>
           <Button variant="outlined">
