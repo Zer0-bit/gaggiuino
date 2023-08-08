@@ -7,6 +7,7 @@ import LogoDevIcon from '@mui/icons-material/LogoDev';
 import ScaleIcon from '@mui/icons-material/Scale';
 import {
   Box,
+  Button,
   SxProps,
   Tab,
   Tabs,
@@ -297,10 +298,24 @@ function ScalesSettingsPanel({ scales, onChange }: ScalesettingsPanelProps) {
         display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%', mt: 3,
       }}
       >
-        <Typography sx={{ px: 1, display: 'flex', alignItems: 'center' }} variant="h6">
-          <ScaleIcon fontSize="inherit" sx={{ mr: 1, color: theme.palette.weight.main }} />
-          Hardware scales
+        <Typography
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 1,
+          }}
+          variant="h6"
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <ScaleIcon fontSize="inherit" sx={{ mr: 1 }} color='primary'/>
+            Hardware scales
+          </Box>
+          <Button variant="outlined">
+            Calibrate
+          </Button>
         </Typography>
+
         <SettingsToggleInput
           label="Enabled"
           value={scales.hwScalesEnabled}
