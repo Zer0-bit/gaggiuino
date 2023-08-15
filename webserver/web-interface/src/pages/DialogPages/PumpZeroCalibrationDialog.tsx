@@ -33,19 +33,21 @@ function PzCalibrationDialog({
         },
       }}
     >
-      <DialogTitle>Pump Zero Calibration</DialogTitle>
+      <DialogTitle style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', padding: '20px' }}>
+        Pump Zero Calibration
+      </DialogTitle>
       <DialogContent>
         <Box display="flex" gap={5} alignItems="center" mt={1}>
           <Typography variant="body1">
             Pump Zero calibration is manual for the time being.
             <br />
-            For calibration check
+            For calibration instructions check
             {' '}
             <a href="https://discord.gg/eJTDJA3xfh" style={{ color: 'Orange' }}>Discord</a>
             .
             <br />
             <br />
-            Pump Zero is an important parameter to tune correctly, as it`&apos;`s directly responsible for
+            Pump Zero is an important parameter to tune correctly, as it&apos;s directly responsible for
             any and all flow-related calculations, as well as for accurately calculating any predictive scales output.
             <br />
             <br />

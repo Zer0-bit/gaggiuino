@@ -78,7 +78,9 @@ function ScalesCalibrationDialog({
         },
       }}
     >
-      <DialogTitle>Scales Calibration</DialogTitle>
+      <DialogTitle style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', padding: '20px' }}>
+        Scales Calibration
+      </DialogTitle>
       <DialogContent>
         <Box display="flex" gap={5} alignItems="center" mt={1}>
           <SettingsNumberInput
@@ -94,18 +96,12 @@ function ScalesCalibrationDialog({
             onChange={(newValue) => onScalesF2Change(newValue)}
           />
         </Box>
-        <Box display="flex" gap={5} alignItems="center" mt={3}>
+        <Box display="flex" alignItems="center" mt={5}>
           <SettingsNumber
-            label="Cell 1 Weight"
+            label="Weight Value"
             value={parseFloat(currentWeight.toFixed(1))}
             maxDecimals={1}
-            onChange={() => setValue}
-          />
-          <SettingsNumber
-            label="Cell 2 weight"
-            value={parseFloat(currentWeight.toFixed(1))}
-            maxDecimals={1}
-            onChange={() => setValue}
+            onChange={setValue}
           />
         </Box>
       </DialogContent>
