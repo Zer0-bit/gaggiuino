@@ -363,7 +363,7 @@ function downloadProfileJson(profile: Profile) {
 
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'profile.json';
+  a.download = `${profile.name}.json`;
   a.click();
 
   URL.revokeObjectURL(url);
