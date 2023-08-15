@@ -33,6 +33,8 @@ import {
 } from '../inputs/settings_inputs';
 import LogContainer from '../log/LogContainer';
 import ThemeModeToggle from '../theme/ThemeModeToggle';
+import ScalesCalibration from '../../pages/DialogPages/ScalesCalibrationDialog';
+import PzCalibration from '../../pages/DialogPages/PumpZeroCalibrationDialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -277,15 +279,34 @@ interface ScalesettingsPanelProps {
 function ScalesSettingsPanel({ scales, onChange }: ScalesettingsPanelProps) {
   const theme = useTheme();
   const connectedScales = useBleScalesStore((state) => state.bleScales);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [pzDialogOpen, pzSetDialogOpen] = useState(false);
+  const handleOpenDialog = () => { setDialogOpen(true); };
+  const handleOpenPzDialog = () => { pzSetDialogOpen(true); };
+
   return (
     <>
       <Box sx={{
-        display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%',
+        display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 1.5, width: '100%', mt: 3,
       }}
       >
-        <Typography sx={{ px: 1, display: 'flex', alignItems: 'center' }} variant="h6">
-          <EqualizerIcon fontSize="inherit" sx={{ mr: 1, color: theme.palette.flow.main }} />
-          Predictive scales
+        <Typography
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 1,
+          }}
+          variant="h6"
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <EqualizerIcon fontSize="inherit" sx={{ mr: 1, color: theme.palette.flow.main }} />
+            Predictive scales
+          </Box>
+          <Button variant="outlined" onClick={handleOpenPzDialog}>
+            Calibrate
+          </Button>
+          <PzCalibration open={pzDialogOpen} onClose={() => pzSetDialogOpen(false)} />
         </Typography>
         <SettingsToggleInput
           label="Force predictive"
@@ -311,9 +332,17 @@ function ScalesSettingsPanel({ scales, onChange }: ScalesettingsPanelProps) {
             <ScaleIcon fontSize="inherit" sx={{ mr: 1 }} color="primary" />
             Hardware scales
           </Box>
-          <Button variant="outlined">
+          <Button variant="outlined" onClick={handleOpenDialog}>
             Calibrate
           </Button>
+          <ScalesCalibration
+            open={dialogOpen}
+            onClose={() => setDialogOpen(false)}
+            scalesF1={scales.hwScalesF1}
+            scalesF2={scales.hwScalesF2}
+            onScalesF1Change={(value) => onChange({ ...scales, hwScalesF1: value })}
+            onScalesF2Change={(value) => onChange({ ...scales, hwScalesF2: value })}
+          />
         </Typography>
 
         <SettingsToggleInput

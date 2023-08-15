@@ -15,18 +15,28 @@ const std::array<uint32_t, FLASH_SECTOR_COUNT> flashSectorStartAddresses = {
 };
 
 void waitForFw() {
-  while (!Serial); // Wait for serial port to connect
-  // Wait for the start marker of the firmware binary
-  uint32_t receivedMarker = 0;
+  while (!Serial); // Make sure we got serial connectivity
+
+  const uint32_t expectedMarker = FW_UPGRADE_MARKER;
+  uint32_t receivedMarker = 0x00000000;
+
+  size_t bytesReceived = 0;
   while (true) {
-    if ((uint32_t)Serial.available() >= sizeof(receivedMarker)) {
-      uint8_t* markerPtr = (uint8_t*)&receivedMarker;
-      for (size_t i = 0; i < sizeof(receivedMarker); ++i) {
-        markerPtr[i] = Serial.read();
-      }
-      if (receivedMarker == FW_UPGRADE_MARKER) {
-        // Firmware binary available -> upgrade!
-        updateFirmware();
+    if (Serial.available()) {
+      uint8_t byteRead = Serial.read();
+
+      // Shift the receivedMarker and add the new byte
+      receivedMarker = (receivedMarker << 8) | byteRead;
+      bytesReceived++;
+
+      if (bytesReceived == sizeof(receivedMarker)) {
+        if (receivedMarker == expectedMarker) {
+          // Firmware binary available -> upgrade!
+          updateFirmware();
+        }
+        // Reset for the next check
+        receivedMarker = 0x00000000;
+        bytesReceived = 0;
       }
     }
   }

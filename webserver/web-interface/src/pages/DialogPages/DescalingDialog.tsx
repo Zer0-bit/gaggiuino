@@ -4,8 +4,8 @@ import {
   Button,
   Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, Typography,
 } from '@mui/material';
-import { DescalingProgress, DescalingState } from '../models/models';
-import formatTime from '../models/time_format';
+import { DescalingProgress, DescalingState } from '../../models/models';
+import formatTime from '../../models/time_format';
 
 interface DescalingDialogProps {
   data: DescalingProgress;

@@ -18,6 +18,14 @@ int descalingCycle = 0;
 void sendDescalingProgressToEsp();
 
 void deScale(const GaggiaSettings& gaggiaSettings, const SensorState& currentState) {
+  if (currentState.waterLvl <= 4u) {
+    setPumpOff();
+    closeValve();
+    setSteamValveRelayOff();
+    espCommsSendNotification(Notification::info("Fill tank with fresh water to clean the system!"));
+    return;
+  }
+
   switch (descalingState) {
   case DescalingState::IDLE: // Waiting for fuckfest to begin
     if (currentState.brewSwitchState) {

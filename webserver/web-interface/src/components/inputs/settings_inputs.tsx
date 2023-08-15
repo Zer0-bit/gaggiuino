@@ -204,6 +204,38 @@ export function SettingsNumberInput({
   );
 }
 
+export function SettingsNumber({
+  label, value, onChange, maxDecimals = undefined, buttonIncrements = 1, optional = false,
+}: SettingsNumberInputProps) {
+  const [justEnabled, setJustEnabled] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null); // Create a ref
+  const handleInputChanged = (newValue: number) => {
+    onChange(newValue);
+    setJustEnabled(false);
+  };
+  const handleInputLostFocus = () => {
+    if (justEnabled) {
+      setTimeout(() => setJustEnabled(false), 200);
+    }
+  };
+
+  return (
+    <SettingsInputWrapper>
+      <SettingsInputBorderLabel><Typography variant="caption" color="text.secondary">{label}</Typography></SettingsInputBorderLabel>
+      <SettingsInputField>
+        <SettingsInputFieldNumber
+          ref={inputRef}
+          value={value}
+          disabled={optional && value === 0 && !justEnabled}
+          onChange={handleInputChanged}
+          maxDecimals={maxDecimals}
+          onBlur={handleInputLostFocus}
+        />
+      </SettingsInputField>
+    </SettingsInputWrapper>
+  );
+}
+
 interface DelayedSwitchProps {
   checked: boolean;
   onChange: (checked: boolean) => void;

@@ -2,15 +2,17 @@
 import Copy from '@mui/icons-material/CopyAll';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
+import Add from '@mui/icons-material/Add';
+import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
 import {
-  Box, Button,
-  Card,
-  CardActions,
-  CardContent,
+  Box,
+  Button,
   Container,
   Dialog,
   DialogActions,
-  DialogContent, DialogContentText,
+  DialogContent,
+  DialogContentText,
   DialogTitle,
   Paper,
   Skeleton,
@@ -18,11 +20,8 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import IconButton from '@mui/material/IconButton';
-import QrCodeIcon from '@mui/icons-material/QrCode';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Grid from '@mui/material/Unstable_Grid2';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import {
   createProfile, deleteProfileById, getProfileById, updateProfile,
 } from '../components/client/ProfileClient';
@@ -31,6 +30,8 @@ import { ProfileReview } from '../components/profile/ProfilePreview';
 import { Profile } from '../models/profile';
 import useProfileStore from '../state/ProfileStore';
 import ProfileEditDialog from '../components/profile/edit/ProfileEditDialog';
+import useNotificationStore from '../state/NotificationDataStore';
+import { NotificationType } from '../models/models';
 
 export default function Profiles() {
   const theme = useTheme();
@@ -54,11 +55,25 @@ export default function Profiles() {
     }
   }, []);
 
-  // const startNewProfile = (): Profile => ({
-  //   name: 'New Profile',
-  //   phases: [],
-  //   waterTemperature: 93,
-  // });
+  const startNewProfile = (): Profile => ({
+    name: 'New Profile',
+    phases: [],
+    waterTemperature: 93,
+  });
+
+  const handleNew = useCallback(async () => {
+    const profileOpts = {
+      ...startNewProfile,
+      name: 'New Profile',
+      phases: [],
+      waterTemperature: 93,
+    };
+    const profile = await createProfile(profileOpts);
+    await fetchAvailableProfiles();
+    setSelectedProfile(profile);
+    setSelectedProfileId(profile.id);
+    setShowEdit(true);
+  }, [fetchAvailableProfiles]);
 
   const handleDelete = useCallback(async () => {
     if (!selectedProfileId) return;
@@ -92,6 +107,49 @@ export default function Profiles() {
     setShowEdit(false);
   }, [fetchAvailableProfiles]);
 
+  const handleExportJson = () => {
+    if (selectedProfile) {
+      downloadProfileJson(selectedProfile);
+    }
+  };
+
+  const handleImportJson = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const jsonContent = e.target?.result;
+          const importedProfile = JSON.parse(jsonContent as string);
+
+          // Create a new profile based on the imported data
+          // Adding (imported) to the profile name
+          // POSSIBLE: Ask for a new name in the future?
+          const newProfile = {
+            name: `${importedProfile.name} (imported)`,
+            phases: [...importedProfile.phases],
+            waterTemperature: importedProfile.waterTemperature,
+          };
+
+          // Create the new profile
+          const createdProfile = await createProfile(newProfile);
+
+          await fetchAvailableProfiles();
+          setSelectedProfileId(createdProfile.id);
+          setSelectedProfile(createdProfile);
+          updateLatestNotification({ message: 'Profile Imported!', type: NotificationType.SUCCESS });
+        } catch (error) {
+          console.error('Error importing JSON:', error);
+          updateLatestNotification({ message: 'Cannot import profile!', type: NotificationType.ERROR });
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const { updateLatestNotification } = useNotificationStore();
+
   return (
     <>
       <Container sx={{ mt: theme.spacing(2), height: `calc(100vh - 60px - ${theme.spacing(2)}` }}>
@@ -123,7 +181,21 @@ export default function Profiles() {
               {selectedProfile && (
               <>
                 <ProfileReview profile={selectedProfile} />
-                <ActionBar onDeleteConfirmed={handleDelete} onEdit={handleEdit} onDuplicate={handleDuplicate} />
+                <ActionBar
+                  onDeleteConfirmed={handleDelete}
+                  onEdit={handleEdit}
+                  onDuplicate={handleDuplicate}
+                  onAdd={handleNew}
+                  onExportJson={handleExportJson}
+                  onImportJson={() => inputRef.current?.click()}
+                />
+                <input
+                  type="file"
+                  accept=".json"
+                  ref={inputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleImportJson}
+                />
               </>
               )}
               {!selectedProfile && <Skeleton variant="rounded" sx={{ height: '25vh' }} />}
@@ -159,7 +231,21 @@ export default function Profiles() {
               {selectedProfile && (
               <Box>
                 <ProfileReview profile={selectedProfile} />
-                <ActionBar onDeleteConfirmed={handleDelete} onEdit={handleEdit} onDuplicate={handleDuplicate} />
+                <ActionBar
+                  onDeleteConfirmed={handleDelete}
+                  onEdit={handleEdit}
+                  onDuplicate={handleDuplicate}
+                  onAdd={handleNew}
+                  onExportJson={handleExportJson}
+                  onImportJson={() => inputRef.current?.click()}
+                />
+                <input
+                  type="file"
+                  accept=".json"
+                  ref={inputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleImportJson}
+                />
               </Box>
               )}
               {!selectedProfile && <Skeleton variant="rounded" sx={{ height: '30vh' }} />}
@@ -176,7 +262,7 @@ export default function Profiles() {
           )}
         </Paper>
       </Container>
-      <Container sx={{ mt: theme.spacing(2) }}>
+      {/* <Container sx={{ mt: theme.spacing(2) }}>
         <Card sx={{ mt: theme.spacing(2) }}>
           <Grid container columns={{ xs: 1, sm: 2 }}>
             <Grid xs={1}>
@@ -198,7 +284,7 @@ export default function Profiles() {
             </Grid>
           </Grid>
         </Card>
-      </Container>
+      </Container> */}
     </>
   );
 }
@@ -207,14 +293,28 @@ export interface ActionBarProp {
   onDeleteConfirmed: () => void;
   onEdit: () => void;
   onDuplicate: () => void;
+  onAdd: () => void;
+  onExportJson: () => void;
+  onImportJson: () => void;
 }
 
-function ActionBar({ onDeleteConfirmed, onEdit, onDuplicate }: ActionBarProp) {
+function ActionBar({
+  onDeleteConfirmed, onEdit, onDuplicate, onAdd, onExportJson, onImportJson,
+}: ActionBarProp) {
   return (
     <Box sx={{
       mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     }}
     >
+      <Button
+        size="small"
+        onClick={onAdd}
+        color="info"
+        variant="outlined"
+        startIcon={<Add />}
+      >
+        New
+      </Button>
       <Button
         size="small"
         onClick={onEdit}
@@ -233,9 +333,44 @@ function ActionBar({ onDeleteConfirmed, onEdit, onDuplicate }: ActionBarProp) {
       >
         Duplicate
       </Button>
+      <Button
+        size="small"
+        onClick={onImportJson}
+        color="success"
+        variant="outlined"
+        startIcon={<UploadIcon />}
+      >
+        Import
+      </Button>
+      <Button
+        size="small"
+        onClick={onExportJson}
+        color="success"
+        variant="outlined"
+        startIcon={<DownloadIcon />}
+      >
+        Export
+      </Button>
       <DeleteProfileButton onConfirm={onDeleteConfirmed} />
     </Box>
   );
+}
+
+function downloadProfileJson(profile: Profile) {
+  const json = profileToJson(profile);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'profile.json';
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function profileToJson(profile: Profile) {
+  return JSON.stringify(profile, null, 2);
 }
 
 export function DeleteProfileButton({ onConfirm }: { onConfirm: () => void}) {

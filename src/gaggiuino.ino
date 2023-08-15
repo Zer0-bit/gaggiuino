@@ -232,6 +232,11 @@ static long sensorsReadFlow(float elapsedTimeSec) {
 }
 
 static void calculateWeightAndFlow(void) {
+  // Define variables to track peak pressure and related time
+  static float peakPressure = 0.0f;
+  static uint32_t peakTime = millis();
+  static bool pressureDropping = false;
+  static uint32_t timeToPressureDrop = 0;
   uint32_t elapsedTime = millis() - flowTimer;
 
   if (brewActive) {
@@ -251,10 +256,25 @@ static void calculateWeightAndFlow(void) {
       if (predictiveWeight.isOutputFlow()) {
         float flowPerClick = getPumpFlowPerClick(currentState.smoothedPressure);
         float actualFlow = (consideredFlow > pumpClicks * flowPerClick) ? consideredFlow : pumpClicks * flowPerClick;
+
+        // Check for peak pressure
+        if (currentState.smoothedPressure > peakPressure) {
+          peakPressure = currentState.smoothedPressure;
+          peakTime = millis(); 
+          pressureDropping = false;
+        }
+        // Check for pressure drop by 1 bar from the peak pressure
+        if (!pressureDropping && (peakPressure - currentState.smoothedPressure) >= 1.0f) {
+          timeToPressureDrop = millis() - peakTime; // Save the pressure drop time
+          pressureDropping = true; // Set the flag to prevent further checks
+        }
         /* TO-DO: Account for the initial moments of a shot winding up,
         usually the flow starts lower and increases considerably in the next few seconds */
         if (!systemState.scalesPresent) {
           currentState.shotWeight = currentState.shotWeight + actualFlow;
+          // Pressure dropping fast after PI, most likely low puck resistance == high cup flow
+          if(pressureDropping && timeToPressureDrop < 1000u && pumpClicks < 5l)
+            currentState.shotWeight *= 10.f;
         }
       }
       currentState.waterPumped += consideredFlow;
@@ -263,12 +283,16 @@ static void calculateWeightAndFlow(void) {
     currentState.consideredFlow = 0.f;
     currentState.pumpClicks = getAndResetClickCounter();
     flowTimer = millis();
+    peakPressure = 0.0f;
+    peakTime = millis();
+    pressureDropping = false;
+    timeToPressureDrop = 0;
   }
 }
 
 // return the reading in mm of the tank water level.
 static void readTankWaterLevel(void) {
-  if (!brewActive) {
+  if (!brewActive || systemState.operationMode == OperationMode::DESCALE) {
     currentState.waterLvl = tof.readLvl();
   }
 }

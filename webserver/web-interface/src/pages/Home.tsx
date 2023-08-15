@@ -43,7 +43,7 @@ import { SwitchLedButton, SwitchLedState } from '../components/inputs/SwitchLedB
 import PressureGauge from '../components/gauges/PressureGauge';
 import WaterLevelGauge from '../components/gauges/WaterLevelGauge';
 import TemperatureGauge from '../components/gauges/TemperatureGauge';
-import DescalingDialog from './DescalingDialog';
+import DescalingDialog from './DialogPages/DescalingDialog';
 import useDescalingProgressStore from '../state/DescalingProgressDataStore';
 
 const colorScaling = (theme: Theme) => (theme.palette.mode === 'light' ? lighten : darken);

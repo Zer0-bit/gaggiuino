@@ -43,8 +43,8 @@
 
 // If not defined in the extra_defines.ini use default range
 #if not defined(TOF_START) || not defined(TOF_END)
-#define TOF_START 15u
-#define TOF_END 125u
+#define TOF_START 6u
+#define TOF_END 130u
 #endif
 
 const uint16_t tofStartValue = TOF_START; // Tof offset when tank is full

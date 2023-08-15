@@ -101,3 +101,26 @@ float scalesDripTrayWeight() {
   }
   return ((float)value[0] + (float)value[1]);
 }
+
+void scalesCalibrate(void) {
+  static unsigned long timer = millis();
+
+  if (currentScalesSettings.hwScalesEnabled && hwScalesPresent) {
+    float values[2];
+    static float previousFactor1, previousFactor2;
+    auto& loadCells = LoadCellSingleton::getInstance();
+
+    if (currentScalesSettings.hwScalesF1 != previousFactor1 || currentScalesSettings.hwScalesF1 != previousFactor2) {
+      loadCells.set_scale(currentScalesSettings.hwScalesF1, currentScalesSettings.hwScalesF2);
+      previousFactor1 = currentScalesSettings.hwScalesF1;
+      previousFactor2 = currentScalesSettings.hwScalesF2;
+    }
+
+    if (millis() > timer) {
+      loadCells.get_units(values);
+      // write vals to the weight boxes
+      timer = millis() + 100ul;
+    }
+  }
+
+}

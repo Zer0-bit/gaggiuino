@@ -71,7 +71,7 @@ uint16_t TOF::readRangeToPct(uint16_t val) {
     }
   }
 
-  return 9u;
+  return 4u;
 }
 
 #endif

@@ -32,7 +32,7 @@ private:
 
 public:
   PhaseProfiler();
-  PhaseProfiler(const Profile& profile);
+  explicit PhaseProfiler(const Profile& profile);
   // Gets the profiling phase we should be in based on the timeInShot and the Sensors state
   void setProfile(const Profile& profile) { this->profile = &profile; };
   void updatePhase(uint32_t timeInShot, SensorState& state);

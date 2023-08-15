@@ -9,5 +9,6 @@ void scalesTare(void);
 Measurement scalesGetWeight(void);
 bool scalesIsPresent(void);
 float scalesDripTrayWeight();
+void scalesCalibrate(void);
 
 #endif

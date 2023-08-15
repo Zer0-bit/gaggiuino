@@ -79,7 +79,7 @@ public:
       if (resistanceDelta > 500.f || puckResistance < 1100.f) return;
     }
 
-    // If flow is too big for given pressure or the delta is changing too quickly we're not there yet
+    // If puck resistance is too high we're not there yet
     // if (puckResistance < 1100.f) return;
     if (truePuckResistance < -0.015f) return;
 

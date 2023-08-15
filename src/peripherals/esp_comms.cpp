@@ -42,10 +42,10 @@ namespace esp {
 
 void handleMessageReceived(McuCommsMessageType messageType, std::vector<uint8_t>& data);
 void espCommsInit() {
-  USART_ESP.begin(921600);
+  USART_LCD.begin(921600);
 
   // mcuComms.setDebugPort(&USART_ESP);
-  esp::mcuComms.begin(USART_ESP, 1000);
+  esp::mcuComms.begin(USART_LCD, 1000);
 
   // Set callbacks
   esp::mcuComms.setMessageReceivedCallback(handleMessageReceived);
@@ -100,7 +100,7 @@ void espCommsSendTareScalesCommand() {
 }
 
 volatile uint32_t notificationTimer;
-void espCommsSendNotification(const Notification notification, uint32_t frequency) {
+void espCommsSendNotification(const Notification& notification, uint32_t frequency) {
   uint32_t now = millis();
   if (now - notificationTimer < frequency) return;
   notificationTimer = now;
