@@ -93,8 +93,7 @@ void steamCtrl(const GaggiaSettings& settings, const SensorState& currentState, 
     setSteamBoilerRelayOn();
     #ifndef DREAM_STEAM_DISABLED // disabled for bigger boilers which have no  need of adding water during steaming
       if (currentState.smoothedPressure < activeSteamPressure_) {
-        float pumpPercent = 0.f;
-        mapRange(currentState.smoothedPressure, 0.8f, 2.f, 0.08f, 0.03f, 2);
+        float pumpPercent = mapRange(currentState.smoothedPressure, 0.8f, 2.f, 0.08f, 0.03f, 2);
         pumpPercent = constrain(pumpPercent, 0.03f, 0.08f);
         setPumpToPercentage(pumpPercent);
       } else {
