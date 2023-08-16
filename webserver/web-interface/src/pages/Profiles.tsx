@@ -303,7 +303,11 @@ function ActionBar({
 }: ActionBarProp) {
   return (
     <Box sx={{
-      mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      mt: 2,
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     }}
     >
       <Button
