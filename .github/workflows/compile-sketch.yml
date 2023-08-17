@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   
 env:
-  BUILD_CACHE: build-cache # Directory where build-wrapper output will be placed
+  BUILD_CACHE: build-cache
 
 jobs:
   coding-style:
