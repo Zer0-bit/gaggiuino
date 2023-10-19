@@ -49,14 +49,13 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - uses: actions/setup-python@v4
-      - name: Install Platformio
-        run: |
-          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
       - name: Install sonar-scanner
         uses: SonarSource/sonarcloud-github-c-cpp@v1
       - name: Run build-wrapper on ${{ matrix.environment.name }}
         run: |
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} ~/.platformio/penv/bin/platformio run -e ${{ matrix.environment.command }}
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} pio run -e ${{ matrix.environment.command }}
         env:
           PLATFORMIO_BUILD_SRC_FLAGS: -Wdouble-promotion -Wall -Werror
       - name: Run sonar-scanner
@@ -72,13 +71,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
-      - name: Install Platformio
-        run: |
-          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
       - name: Run tests
-        run: |
-          ~/.platformio/penv/bin/platformio test -e test
-
+        run: pio test -e test
+  
   static-analysis:
     name: Static Analysis
     runs-on: ubuntu-latest
@@ -90,9 +87,7 @@ jobs:
           - "scales-calibration-stlink"
     steps:
       - uses: actions/checkout@v3
-      - name: Install Platformio
-        run: |
-          python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
       - name: Run static analysis on ${{ matrix.environment }}
-        run: |
-          ~/.platformio/penv/bin/platformio check -e ${{ matrix.environment }} --fail-on-defect medium --fail-on-defect high
+        run: pio check -e ${{ matrix.environment }} --fail-on-defect medium --fail-on-defect high
