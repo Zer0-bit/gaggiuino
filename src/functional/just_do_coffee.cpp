@@ -7,8 +7,8 @@ extern unsigned long steamTime;
 inline static float TEMP_DELTA(float d, const SensorState &currentState) {
   return (
     d * (currentState.pumpFlow < 1.f
-      ? currentState.pumpFlow / 9.f
-      : currentState.pumpFlow / 10.f
+      ? currentState.pumpFlow / 7.f
+      : currentState.pumpFlow / 5.f
     )
   );
 }
