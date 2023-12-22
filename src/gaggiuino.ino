@@ -800,7 +800,7 @@ static inline void sysHealthCheck(float pressureThreshold) {
 
   /* This *while* is here to prevent situations where the system failed to get a temp reading and temp reads as 0 or -7(cause of the offset)
   If we would use a non blocking function then the system would keep the SSR in HIGH mode which would most definitely cause boiler overheating */
-  while (currentState.temperature <= 0.0f || currentState.temperature == NAN || currentState.temperature >= 170.0f) {
+  while (currentState.sensorTemperature <= -3.0f || currentState.sensorTemperature == NAN || currentState.sensorTemperature >= 170.0f) {
     //Reloading the watchdog timer, if this function fails to run MCU is rebooted
     watchdogReload();
     /* In the event of the temp failing to read while the SSR is HIGH
@@ -811,7 +811,8 @@ static inline void sysHealthCheck(float pressureThreshold) {
     if (millis() > thermoTimer) {
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
       currentState.steamSwitchState ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
-      currentState.temperature  = thermocoupleRead() - runningCfg.offsetTemp;  // Making sure we're getting a value
+      currentState.sensorTemperature = thermocoupleRead();
+      currentState.temperature  = currentState.sensorTemperature - runningCfg.offsetTemp;  // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }

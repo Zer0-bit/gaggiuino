@@ -12,6 +12,8 @@ struct SensorState {
   float temperature;          // °C
   /* calculated water temperature as wanted but not guaranteed
   due to boiler having a hard limit of 4ml/s heat capacity */
+  float sensorTemperature;          // °C
+  /* real temperature */
   float waterTemperature;     // °C
   float pressure;             // bar
   float pressureChangeSpeed;  // bar/s
