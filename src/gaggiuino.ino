@@ -5,6 +5,7 @@
 #endif
 #include "gaggiuino.h"
 
+SimpleKalmanFilter smoothTemperature(3.0f, 0.3f, 0.1f);
 SimpleKalmanFilter smoothPressure(0.6f, 0.6f, 0.1f);
 SimpleKalmanFilter smoothPumpFlow(0.1f, 0.1f, 0.01f);
 SimpleKalmanFilter smoothScalesFlow(0.5f, 0.5f, 0.01f);
@@ -26,6 +27,21 @@ SystemState systemState;
 
 LED led;
 TOF tof;
+
+static void temperatureEstimateInit(void)
+{
+  float temperature = thermocoupleRead();
+  int i;
+
+  // The estimate is initialized to 0.0f by default!
+  // Initialize by updating the estimate for 30 times so that we
+  // get the correct temperature at boot, avoiding the danger of
+  // powering up the heater for 1-3 seconds at every bootup which,
+  // in the event of a bootloop, may result in a thermal runaway.
+   
+  for (i = 0; i < 30; i++)
+    smoothTemperature.updateEstimate(temperature);
+}
 
 void setup(void) {
   LOG_INIT();
@@ -98,6 +114,8 @@ void setup(void) {
   led.setColor(9u, 0u, 9u); // 64171
 
   iwdcInit();
+
+  temperatureEstimateInit();
 }
 
 //##############################################################################################################################
@@ -143,7 +161,9 @@ static void sensorReadSwitches(void) {
 
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
-    currentState.temperature = thermocoupleRead() - runningCfg.offsetTemp;
+    float temperature = thermocoupleRead();
+
+    currentState.temperature = smoothTemperature.updateEstimate(temperature) - runningCfg.offsetTemp;
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }
@@ -809,9 +829,10 @@ static inline void sysHealthCheck(float pressureThreshold) {
     setBoilerOff();
     setSteamBoilerRelayOff();
     if (millis() > thermoTimer) {
+      float temperature = thermocoupleRead();
       LOG_ERROR("Cannot read temp from thermocouple (last read: %.1lf)!", static_cast<double>(currentState.temperature));
       currentState.steamSwitchState ? lcdShowPopup("COOLDOWN") : lcdShowPopup("TEMP READ ERROR"); // writing a LCD message
-      currentState.temperature  = thermocoupleRead() - runningCfg.offsetTemp;  // Making sure we're getting a value
+      currentState.temperature = smoothTemperature.updateEstimate(temperature) - runningCfg.offsetTemp; // Making sure we're getting a value
       thermoTimer = millis() + GET_KTYPE_READ_EVERY;
     }
   }
