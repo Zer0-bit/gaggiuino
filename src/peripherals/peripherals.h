@@ -9,19 +9,19 @@
 #include <Arduino.h>
 
 // Variables for momentary buttons
-#ifdef steamMomentary
+#ifdef STEAM_MOMENTARY
 static int steamCurrentState = HIGH;
 static int steamLastState = HIGH;
 static bool steamPressed = false;
 static unsigned long steamLastDebounceTime;
 #endif
-#ifdef brewMomentary
+#ifdef BREW_MOMENTARY
 static int brewCurrentState = HIGH;
 static int brewLastState = HIGH;
 static bool brewPressed = false;
 static unsigned long brewLastDebounceTime;
 #endif
-#ifdef waterMomentary
+#if defined(waterPin) && defined(WATER_MOMENTARY)
 static int waterCurrentState = HIGH;
 static int waterLastState = HIGH;
 static bool waterPressed = false;
@@ -103,10 +103,17 @@ static inline bool momentaryButtonPressed(int pin, int *currentState, int *lastS
   return *buttonIsDown;
 }
 
+#ifdef BREW_MOMENTARY
+static inline void resetMomentaryBrew()
+{
+  brewPressed = false;
+}
+#endif
+
 //Function to get the state of the brew switch button
 //returns true or false based on the read P(power) value
 static inline bool brewState(void) {
-  #ifdef brewMomentary
+  #ifdef BREW_MOMENTARY
   return momentaryButtonPressed(brewPin, &brewCurrentState, &brewLastState, &brewPressed, &brewLastDebounceTime);
   #else
   return digitalRead(brewPin) == LOW; // pin will be low when switch is ON.
@@ -116,7 +123,7 @@ static inline bool brewState(void) {
 // Returns HIGH when switch is OFF and LOW when ON
 // pin will be high when switch is ON.
 static inline bool steamState(void) {
-  #ifdef steamMomentary
+  #ifdef STEAM_MOMENTARY
   return momentaryButtonPressed(steamPin, &steamCurrentState, &steamLastState, &steamPressed, &steamLastDebounceTime);
   #else
   return digitalRead(steamPin) == LOW; // pin will be low when switch is ON.
@@ -125,7 +132,7 @@ static inline bool steamState(void) {
 
 static inline bool waterPinState(void) {
   #ifdef waterPin
-  #ifdef waterMomentary
+  #ifdef WATER_MOMENTARY
   return momentaryButtonPressed(waterPin, &waterCurrentState, &waterLastState, &waterPressed, &waterLastDebounceTime);
   #else
   return digitalRead(waterPin) == LOW; // pin will be low when switch is ON.

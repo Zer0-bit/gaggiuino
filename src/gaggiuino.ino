@@ -701,6 +701,9 @@ static void profiling(void) {
       setPumpOff();
       closeValve();
       brewActive = false;
+      #ifdef BREW_MOMENTARY
+      resetMomentaryBrew();
+      #endif
     } else if (currentPhase.getType() == PHASE_TYPE::PHASE_TYPE_PRESSURE) {
       float newBarValue = currentPhase.getTarget();
       float flowRestriction =  currentPhase.getRestriction();
