@@ -94,10 +94,10 @@ int getCPS(void) {
   watchdogReload();
   if (cps > 80u) {
     pump.setDivider(2);
-    pump.initTimer(cps > 110u ? 60u : 50u, TIM9);
+    pump.initTimer(cps > 110u ? 5000u : 6000u, TIM9);
   }
   else {
-    pump.initTimer(cps > 55u ? 60u : 50u, TIM9);
+    pump.initTimer(cps > 55u ? 5000u : 6000u, TIM9);
   }
   return cps;
 }
