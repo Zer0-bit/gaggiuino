@@ -12,6 +12,6 @@
 ### For install instructions head to the project [documentation](https://gaggiuino.github.io/#/) section.
 
 
-#### For project related help join us on [discord](https://discord.gg/gaggiuino).*
+#### For project related help join us on [discord](https://discord.gg/gaggiuino).
 
 </div>
