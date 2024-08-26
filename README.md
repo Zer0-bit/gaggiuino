@@ -13,6 +13,6 @@
 
 ### For install or upgrade binaries head over to [Releases](https://github.com/Zer0-bit/gaggiuino/releases).
 
-#### For project related help join us on [discord](https://discord.gg/gaggiuino).
+### For project related help join us on [discord](https://discord.gg/gaggiuino).
 
 </div>
