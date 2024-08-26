@@ -6,9 +6,9 @@
 </div>
 
 
-
-#### Gaggiuino started as an idea to improve an already capable coffee machine while keeping the machine appearance and button functionality as close as possible to the original.
-
+---
+### Gaggiuino started as an idea to improve an already capable coffee machine while keeping the machine appearance and button functionality as close as possible to the original.
+---
 ### For install instructions head to the project [documentation](https://gaggiuino.github.io/#/) section.
 
 ### For install or upgrade binaries head over to [Releases](https://github.com/Zer0-bit/gaggiuino/releases).
