@@ -17,9 +17,11 @@ class LED {
     LED() noexcept;
     void begin(void);
     void setColor(uint8_t red, uint8_t green, uint8_t blue);
+    void setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t white);
     void setRed(uint8_t red);
     void setBlue(uint8_t blue);
     void setGreen(uint8_t green);
+    void setWhite(uint8_t white);
     void setDisco(uint32_t timer);
     enum discoMode : uint16_t {
       STROBE = 100u,
@@ -44,6 +46,15 @@ void LED::setColor(uint8_t red, uint8_t green, uint8_t blue) {
   #endif
 }
 
+void LED::setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t white) {
+  #if defined LED_PCA9632
+  tankLED.setRGBW(red, green, blue, white);
+  #endif
+  #if defined LED_NCP5623
+  tankLED.setColor(red, green, blue);
+  #endif
+}
+
 void LED::setRed(uint8_t red) {
   #if defined LED_NCP5623 || defined LED_PCA9632
   tankLED.setRed(red);
@@ -59,6 +70,11 @@ void LED::setBlue(uint8_t blue) {
 void LED::setGreen(uint8_t green) {
   #if defined LED_NCP5623 || defined LED_PCA9632
   tankLED.setGreen(green);
+  #endif
+}
+void LED::setWhite(uint8_t green) {
+  #if defined LED_PCA9632
+  tankLED.setWhite(green);
   #endif
 }
 
