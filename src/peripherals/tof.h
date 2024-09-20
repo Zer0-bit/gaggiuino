@@ -8,6 +8,7 @@
 
 Adafruit_VL53L0X tof_sensor;
 movingAvg mvAvg(4);
+bool isTOFConnected = false;  // Flag to check if TOF sensor is available
 
 class TOF {
   public:
@@ -32,11 +33,20 @@ TOF::TOF() {}
 
 void TOF::init(SensorState& sensor) {
   #ifdef TOF_VL53L0X
-  while(!sensor.tofReady) {
+  unsigned long startTime = millis();
+  const unsigned long timeout = 5000;  // 5 seconds timeout
+  
+  while(!sensor.tofReady && (millis() - startTime) < timeout) {
     sensor.tofReady = tof_sensor.begin(0x29, false, &Wire, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY);
   }
-  tof_sensor.startRangeContinuous();
-  mvAvg.begin();
+
+  if (sensor.tofReady) {
+    tof_sensor.startRangeContinuous();
+    mvAvg.begin();
+    isTOFConnected = true;  // Mark the TOF sensor as connected
+  } else {
+    isTOFConnected = false;  // Failed to initialize TOF sensor
+  }
   // Configure the hardware timer
   // hw_timer = new HardwareTimer(TIM10);
   // hw_timer->setCount(100000, MICROSEC_FORMAT);
@@ -49,11 +59,11 @@ void TOF::init(SensorState& sensor) {
 
 uint16_t TOF::readLvl() {
   #ifdef TOF_VL53L0X
-  if(tof_sensor.isRangeComplete()) {
+  if(isTOFConnected && tof_sensor.isRangeComplete()) {
     TOF::tofReading = mvAvg.reading(tof_sensor.readRangeResult());
   }
   #endif
-  return  TOF::tofReading != 0 ? readRangeToPct(TOF::tofReading) : 30u;
+  return isTOFConnected ? readRangeToPct(TOF::tofReading) : 30u;
 }
 
 uint16_t TOF::readRangeToPct(uint16_t val) {
