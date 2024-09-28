@@ -1,4 +1,5 @@
 <div align="center">
+<b>THIS BRANCH IS FROZEN NO FURTHER DEVELOPMENT HAPPENING OR PULL REQUESTS ACCEPTED</b>
 
 [![Gaggiuino](/images/GAGGIUINO_LOGO_transp.png)](https://gaggiuino.github.io/#/)
   
