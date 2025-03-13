@@ -1,0 +1,127 @@
+{
+  "id": 36,
+  "name": "Tea Mofos Reloaded",
+  "phases": [
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 1.5,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 30
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 0.5,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0.20000000298023224,
+      "stopConditions": {
+        "time": 60000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 1.5,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 50
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 0.5,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0.20000000298023224,
+      "stopConditions": {
+        "time": 60000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 1.5,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 0,
+    "waterPumped": 0
+  },
+  "waterTemperature": 86,
+  "recipe": {
+    "coffeeIn": 0,
+    "coffeeOut": 0,
+    "ratio": 0
+  }
+}
