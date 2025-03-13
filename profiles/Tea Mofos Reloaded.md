@@ -1,0 +1,1 @@
+A profile used to pull tea using standard baskets, works similarly to Filter 3.0.
