@@ -1,0 +1,105 @@
+{
+  "id": 3,
+  "name": "Adaptive",
+  "phases": [
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 7,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 3,
+      "stopConditions": {
+        "time": 20000,
+        "pressureAbove": 3,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 60
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 3,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 6000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 9,
+        "curve": "LINEAR",
+        "time": 5000
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 5000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 2.5,
+        "curve": "LINEAR",
+        "time": 25000
+      },
+      "restriction": 9,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 33,
+    "waterPumped": 0
+  },
+  "waterTemperature": 93,
+  "recipe": {
+    "coffeeIn": 15,
+    "coffeeOut": 33,
+    "ratio": 0
+  }
+}

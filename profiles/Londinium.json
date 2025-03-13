@@ -1,0 +1,127 @@
+{
+  "id": 2,
+  "name": "Londinium",
+  "phases": [
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 9,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 4,
+      "stopConditions": {
+        "time": 10000,
+        "pressureAbove": 4,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 65
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 0,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 10000,
+        "pressureAbove": 0,
+        "pressureBelow": 0.699999988079071,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 9,
+        "curve": "EASE_OUT",
+        "time": 1000
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 1000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 9,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 3,
+      "stopConditions": {
+        "time": 4000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 9,
+        "end": 3,
+        "curve": "EASE_IN_OUT",
+        "time": 20000
+      },
+      "restriction": 3,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 40,
+    "waterPumped": 0
+  },
+  "waterTemperature": 92,
+  "recipe": {
+    "coffeeIn": 20,
+    "coffeeOut": 0,
+    "ratio": 2
+  }
+}
