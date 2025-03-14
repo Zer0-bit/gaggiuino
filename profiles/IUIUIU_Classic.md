@@ -1,1 +1,0 @@
-A mixed style profile with a flow driven preinfusion for an even puck, free falling pressure driven soak to provide balanced extraction and a complex pressure driven but flow limited profiling phase. A good all-rounder profile that should suit most beans with some tweaking.
