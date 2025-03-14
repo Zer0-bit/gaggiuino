@@ -1,1 +1,0 @@
-Hot water dispensing through the grouphead.
