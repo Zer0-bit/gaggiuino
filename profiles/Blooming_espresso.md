@@ -1,1 +1,0 @@
-Designed to maximize extraction quality and quantity with a flow-controlled pre-infusion and a long "blooming" phase, which allows the puck to become fully saturated before extraction. Best for light roasts, complex beans to draw out flavours the way a pour over would, while preventing sourness and sharpness.
