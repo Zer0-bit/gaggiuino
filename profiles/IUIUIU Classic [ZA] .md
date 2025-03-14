@@ -1,1 +1,0 @@
-A nice improvement on Zer0-bit' IUIUIU Classic style profile, this profile focuses more on flow with pressure being restricted to 9 bar but not achieving the pressure is not a issue. Should pair well with medium to darker roasts.
