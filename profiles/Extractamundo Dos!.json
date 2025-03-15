@@ -1,0 +1,83 @@
+{
+  "id": 16,
+  "name": "Extractamundo Dos!",
+  "phases": [
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 8,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 4.5,
+      "stopConditions": {
+        "time": 20000,
+        "pressureAbove": 4.5,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 100
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 0,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 40000,
+        "pressureAbove": 0,
+        "pressureBelow": 2.200000047683716,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 6,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 3,
+        "curve": "EASE_IN_OUT",
+        "time": 3000
+      },
+      "restriction": 6,
+      "stopConditions": {
+        "time": 60000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 40,
+    "waterPumped": 0
+  },
+  "waterTemperature": 93,
+  "recipe": {
+    "coffeeIn": 0,
+    "coffeeOut": 0,
+    "ratio": 0
+  }
+}
