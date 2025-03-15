@@ -31,4 +31,4 @@ I only tried it with my 24.5 mm IMS competition basket and puck screen with 16 g
 *__This profile is extremely dependent on the calculated “pump flow”, so PZ calibration is important!__*
 
 **Example shot graph:**
-![image](https://github.com/user-attachments/assets/4918e1db-3ff5-45fa-b61a-4ff94ec8cd1e)
+<img src="https://github.com/user-attachments/assets/4918e1db-3ff5-45fa-b61a-4ff94ec8cd1e" alt="example_graph" width="50%" height="50%">
