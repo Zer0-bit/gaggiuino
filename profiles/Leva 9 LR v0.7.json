@@ -1,20 +1,20 @@
 {
-  "id": 57,
-  "name": "Leva 9 LR v0.5",
+  "id": 60,
+  "name": "Leva 9 LR v0.7",
   "phases": [
     {
       "name": "",
       "type": "FLOW",
       "target": {
-        "start": 7,
-        "end": 7,
+        "start": 8,
+        "end": 8,
         "curve": "INSTANT",
         "time": 0
       },
       "restriction": 0,
       "stopConditions": {
         "time": 10000,
-        "pressureAbove": 1.5,
+        "pressureAbove": 2,
         "pressureBelow": 0,
         "flowAbove": 0,
         "flowBelow": 0,
@@ -36,7 +36,7 @@
       "restriction": 0,
       "stopConditions": {
         "time": 10000,
-        "pressureAbove": 2.200000047683716,
+        "pressureAbove": 2.700000047683716,
         "pressureBelow": 0,
         "flowAbove": 0,
         "flowBelow": 0,
@@ -75,9 +75,9 @@
         "start": 0,
         "end": 9,
         "curve": "EASE_IN_OUT",
-        "time": 2000
+        "time": 4000
       },
-      "restriction": 3,
+      "restriction": 5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -360,7 +360,7 @@
     "weight": 40,
     "waterPumped": 0
   },
-  "waterTemperature": 93,
+  "waterTemperature": 90,
   "recipe": {
     "coffeeIn": 0,
     "coffeeOut": 0,
