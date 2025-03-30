@@ -1,0 +1,126 @@
+{
+  "name": "LPL - SISO v2.2",
+  "phases": [
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 12,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 2,
+      "stopConditions": {
+        "time": 6000,
+        "pressureAbove": 1.5,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 1.1,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 10000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 1.1,
+        "end": 7,
+        "curve": "EASE_OUT",
+        "time": 7000
+      },
+      "restriction": 5,
+      "stopConditions": {
+        "time": 7000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 7,
+        "end": 4.5,
+        "curve": "EASE_OUT",
+        "time": 10000
+      },
+      "restriction": 5,
+      "stopConditions": {
+        "time": 10000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 4.5,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 5,
+      "stopConditions": {
+        "time": 25000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 44,
+    "waterPumped": 0
+  },
+  "waterTemperature": 93,
+  "recipe": {
+    "coffeeIn": 0,
+    "coffeeOut": 0,
+    "ratio": 0
+  }
+}
