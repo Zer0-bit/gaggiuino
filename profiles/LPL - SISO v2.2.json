@@ -28,7 +28,7 @@
       "type": "PRESSURE",
       "target": {
         "start": 0,
-        "end": 0.800000011920929,
+        "end": 1.1,
         "curve": "INSTANT",
         "time": 0
       },
@@ -49,7 +49,7 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0.800000011920929,
+        "start": 1.1,
         "end": 7,
         "curve": "EASE_OUT",
         "time": 7000
