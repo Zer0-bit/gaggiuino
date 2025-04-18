@@ -14,7 +14,7 @@
 
 ### For install or upgrade binaries head over to [Releases](https://github.com/Zer0-bit/gaggiuino/releases).
 
-### For project related help join us on [Discord]([https://discord.gg/gaggiuino](https://discord.com/invite/gaggiuino-890339612441063494)).
+### For project related help join us on [Discord](https://discord.com/invite/gaggiuino-890339612441063494).
 
 ---
 ##### The legacy version of the project can be found by switching branch or alternatively [click here](https://github.com/Zer0-bit/gaggiuino/tree/release/stm32-blackpill).
