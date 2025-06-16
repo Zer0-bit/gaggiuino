@@ -1,1 +1,0 @@
-Helper profile - turns the temperature off, can be useful in automations or just to keep the machine on while not actively heating.

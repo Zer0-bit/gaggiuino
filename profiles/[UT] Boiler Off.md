@@ -1,0 +1,1 @@
+Utility profile - turns the boiler heaters off, can be useful in automations or just to keep the machine on while not actively heating.

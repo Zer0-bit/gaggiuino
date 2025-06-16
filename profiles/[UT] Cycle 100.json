@@ -1,0 +1,38 @@
+{
+  "name": "[UT] Cycle 100",
+  "phases": [
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 4,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 0,
+    "waterPumped": 100
+  },
+  "waterTemperature": 92,
+  "recipe": {
+    "coffeeIn": 0,
+    "coffeeOut": 0,
+    "ratio": 0
+  }
+}

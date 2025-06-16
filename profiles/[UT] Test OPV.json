@@ -1,18 +1,18 @@
 {
-  "name": "Boiler Off",
+  "name": "[UT] Test OPV",
   "phases": [
     {
       "name": "",
-      "type": "FLOW",
+      "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 0,
-        "curve": "LINEAR",
+        "start": 15,
+        "end": 15,
+        "curve": "INSTANT",
         "time": 0
       },
       "restriction": 0,
       "stopConditions": {
-        "time": 0,
+        "time": 20000,
         "pressureAbove": 0,
         "pressureBelow": 0,
         "flowAbove": 0,
@@ -29,7 +29,7 @@
     "weight": 0,
     "waterPumped": 0
   },
-  "waterTemperature": 9,
+  "waterTemperature": 1,
   "recipe": {
     "coffeeIn": 0,
     "coffeeOut": 0,
