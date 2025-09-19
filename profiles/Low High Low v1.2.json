@@ -1,0 +1,82 @@
+{
+  "name": "Low High Low v1.2",
+  "phases": [
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 4,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 2,
+      "stopConditions": {
+        "time": 10000,
+        "pressureAbove": 1,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 6,
+        "end": 6,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 6,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 50,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 4,
+        "end": 4,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 2,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 67,
+    "waterPumped": 0
+  },
+  "waterTemperature": 92,
+  "recipe": {
+    "coffeeIn": 0,
+    "coffeeOut": 0,
+    "ratio": 0
+  }
+}

@@ -1,63 +1,19 @@
 {
-  "name": "Leva 9 LR v0.7",
+  "name": "Leva 9 SINGLE v0.9",
   "phases": [
     {
       "name": "",
-      "type": "FLOW",
-      "target": {
-        "start": 8,
-        "end": 8,
-        "curve": "INSTANT",
-        "time": 0
-      },
-      "restriction": 0,
-      "stopConditions": {
-        "time": 10000,
-        "pressureAbove": 2,
-        "pressureBelow": 0,
-        "flowAbove": 0,
-        "flowBelow": 0,
-        "weight": 0.5,
-        "waterPumpedInPhase": 0
-      },
-      "skip": false,
-      "waterTemperature": 0
-    },
-    {
-      "name": "",
-      "type": "FLOW",
-      "target": {
-        "start": 3.5,
-        "end": 3.5,
-        "curve": "INSTANT",
-        "time": 0
-      },
-      "restriction": 0,
-      "stopConditions": {
-        "time": 10000,
-        "pressureAbove": 2.700000047683716,
-        "pressureBelow": 0,
-        "flowAbove": 0,
-        "flowBelow": 0,
-        "weight": 0.5,
-        "waterPumpedInPhase": 0
-      },
-      "skip": false,
-      "waterTemperature": 0
-    },
-    {
-      "name": "",
-      "type": "FLOW",
+      "type": "PRESSURE",
       "target": {
         "start": 1.5,
         "end": 1.5,
         "curve": "INSTANT",
         "time": 0
       },
-      "restriction": 3,
+      "restriction": 0,
       "stopConditions": {
         "time": 10000,
-        "pressureAbove": 0,
+        "pressureAbove": 1.5,
         "pressureBelow": 0,
         "flowAbove": 0,
         "flowBelow": 0,
@@ -72,11 +28,55 @@
       "type": "PRESSURE",
       "target": {
         "start": 0,
+        "end": 3,
+        "curve": "EASE_OUT",
+        "time": 2000
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 10000,
+        "pressureAbove": 3,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 3,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 3,
+        "end": 3,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 7000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 10,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
         "end": 9,
         "curve": "EASE_IN_OUT",
-        "time": 4000
+        "time": 5000
       },
-      "restriction": 5,
+      "restriction": 2.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -84,7 +84,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 5
+        "waterPumpedInPhase": 3.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -93,12 +93,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 8.800000190734863,
-        "curve": "INSTANT",
-        "time": 0
+        "start": 9,
+        "end": 8.699999809265137,
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 2,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -106,7 +106,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -115,12 +115,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 8.5,
-        "curve": "INSTANT",
-        "time": 0
+        "start": 8.699999809265137,
+        "end": 8.399999618530273,
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -128,7 +128,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -137,12 +137,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 8.300000190734863,
-        "curve": "INSTANT",
-        "time": 0
+        "start": 8.399999618530273,
+        "end": 8.100000381469727,
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -150,7 +150,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -159,34 +159,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 8,
-        "curve": "INSTANT",
-        "time": 0
-      },
-      "restriction": 3,
-      "stopConditions": {
-        "time": 0,
-        "pressureAbove": 0,
-        "pressureBelow": 0,
-        "flowAbove": 0,
-        "flowBelow": 0,
-        "weight": 0,
-        "waterPumpedInPhase": 2.5
-      },
-      "skip": false,
-      "waterTemperature": 0
-    },
-    {
-      "name": "",
-      "type": "PRESSURE",
-      "target": {
-        "start": 0,
+        "start": 8.100000381469727,
         "end": 7.800000190734863,
-        "curve": "INSTANT",
-        "time": 0
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -194,7 +172,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -203,12 +181,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
+        "start": 7.800000190734863,
         "end": 7.5,
-        "curve": "INSTANT",
-        "time": 0
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -216,7 +194,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -225,12 +203,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 7.300000190734863,
-        "curve": "INSTANT",
-        "time": 0
+        "start": 7.5,
+        "end": 7.199999809265137,
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -238,7 +216,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -247,12 +225,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 7,
-        "curve": "INSTANT",
-        "time": 0
+        "start": 7.199999809265137,
+        "end": 6.900000095367432,
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -260,7 +238,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -269,12 +247,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 6.800000190734863,
-        "curve": "INSTANT",
-        "time": 0
+        "start": 6.900000095367432,
+        "end": 6.599999904632568,
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -282,7 +260,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -291,34 +269,12 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
-        "end": 6.5,
-        "curve": "INSTANT",
-        "time": 0
-      },
-      "restriction": 3,
-      "stopConditions": {
-        "time": 0,
-        "pressureAbove": 0,
-        "pressureBelow": 0,
-        "flowAbove": 0,
-        "flowBelow": 0,
-        "weight": 0,
-        "waterPumpedInPhase": 2.5
-      },
-      "skip": false,
-      "waterTemperature": 0
-    },
-    {
-      "name": "",
-      "type": "PRESSURE",
-      "target": {
-        "start": 0,
+        "start": 6.599999904632568,
         "end": 6.300000190734863,
-        "curve": "INSTANT",
-        "time": 0
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -326,7 +282,7 @@
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 0,
-        "waterPumpedInPhase": 2.5
+        "waterPumpedInPhase": 1.5
       },
       "skip": false,
       "waterTemperature": 0
@@ -335,12 +291,122 @@
       "name": "",
       "type": "PRESSURE",
       "target": {
-        "start": 0,
+        "start": 6.300000190734863,
         "end": 6,
-        "curve": "INSTANT",
-        "time": 0
+        "curve": "LINEAR",
+        "time": 2000
       },
-      "restriction": 3,
+      "restriction": 1.5,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 1.5
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 6,
+        "end": 5.699999809265137,
+        "curve": "LINEAR",
+        "time": 2000
+      },
+      "restriction": 1.5,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 1.5
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 5.699999809265137,
+        "end": 5.400000095367432,
+        "curve": "LINEAR",
+        "time": 2000
+      },
+      "restriction": 1.5,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 1.5
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 5.400000095367432,
+        "end": 5.099999904632568,
+        "curve": "LINEAR",
+        "time": 2000
+      },
+      "restriction": 1.5,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 1.5
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 5.099999904632568,
+        "end": 4.800000190734863,
+        "curve": "LINEAR",
+        "time": 2000
+      },
+      "restriction": 1.5,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 1.5
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 4.800000190734863,
+        "end": 4.5,
+        "curve": "LINEAR",
+        "time": 2000
+      },
+      "restriction": 1.5,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -356,7 +422,7 @@
   ],
   "globalStopConditions": {
     "time": 0,
-    "weight": 40,
+    "weight": 0,
     "waterPumped": 0
   },
   "waterTemperature": 90,
