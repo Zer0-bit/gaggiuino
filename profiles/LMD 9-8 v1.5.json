@@ -1,5 +1,5 @@
 {
-  "name": "LMD 9-8 v1.4",
+  "name": "LMD 9-8 v1.5",
   "phases": [
     {
       "name": "",
@@ -12,13 +12,35 @@
       },
       "restriction": 2,
       "stopConditions": {
-        "time": 20000,
+        "time": 2000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 4,
+        "end": 4,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 2,
+      "stopConditions": {
+        "time": 15000,
         "pressureAbove": 2,
         "pressureBelow": 0,
         "flowAbove": 0,
         "flowBelow": 0,
         "weight": 1,
-        "waterPumpedInPhase": 60
+        "waterPumpedInPhase": 0
       },
       "skip": false,
       "waterTemperature": 0
