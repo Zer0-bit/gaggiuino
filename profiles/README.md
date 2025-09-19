@@ -1,6 +1,6 @@
 ## Creating a profile:
 
-> [!WARNING|style:callout|label:Profile ID|iconVisibility:visible]
+> [!WARNING]  
 > Builds **before 2025-03-31** don't strip the **profile ID** from the json when exporting - the ID is system specific and might clash with other people's IDs. Before sharing, update to latest build (recommended) or manually strip the profile ID. 
 
 The profile name must be the same in 3 locations so the profile is properly linked to the description (see image):
