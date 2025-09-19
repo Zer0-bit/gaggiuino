@@ -1,0 +1,126 @@
+{
+  "name": "LMD Single v1.1",
+  "phases": [
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 3,
+        "end": 3,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 1.2000000476837158,
+      "stopConditions": {
+        "time": 2000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 3,
+        "end": 3,
+        "curve": "LINEAR",
+        "time": 5000
+      },
+      "restriction": 1.2000000476837158,
+      "stopConditions": {
+        "time": 18000,
+        "pressureAbove": 1.2000000476837158,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 1,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 7,
+        "curve": "EASE_IN_OUT",
+        "time": 4000
+      },
+      "restriction": 3.5,
+      "stopConditions": {
+        "time": 4000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 7,
+        "end": 6,
+        "curve": "EASE_IN_OUT",
+        "time": 3000
+      },
+      "restriction": 2,
+      "stopConditions": {
+        "time": 3000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 2,
+        "end": 1.2999999523162842,
+        "curve": "EASE_IN_OUT",
+        "time": 8000
+      },
+      "restriction": 6,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 16,
+    "waterPumped": 0
+  },
+  "waterTemperature": 91,
+  "recipe": {
+    "coffeeIn": 0,
+    "coffeeOut": 0,
+    "ratio": 0
+  }
+}
