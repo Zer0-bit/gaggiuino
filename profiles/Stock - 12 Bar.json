@@ -1,0 +1,38 @@
+{
+  "name": "Stock - 12 Bar",
+  "phases": [
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 12,
+        "end": 12,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 300000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 0,
+    "waterPumped": 0
+  },
+  "waterTemperature": 93,
+  "recipe": {
+    "coffeeIn": 0,
+    "coffeeOut": 0,
+    "ratio": 0
+  }
+}
