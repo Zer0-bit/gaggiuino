@@ -1,0 +1,104 @@
+{
+  "name": "Funky Town v2",
+  "phases": [
+    {
+      "name": "",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 2.5,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 8,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 2.5,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 1,
+        "curve": "INSTANT",
+        "time": 0
+      },
+      "restriction": 4,
+      "stopConditions": {
+        "time": 3000,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 1,
+        "curve": "EASE_IN_OUT",
+        "time": 10000
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "",
+      "type": "FLOW",
+      "target": {
+        "start": 0,
+        "end": 3,
+        "curve": "EASE_OUT",
+        "time": 5000
+      },
+      "restriction": 0,
+      "stopConditions": {
+        "time": 0,
+        "pressureAbove": 0,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    }
+  ],
+  "globalStopConditions": {
+    "time": 0,
+    "weight": 42,
+    "waterPumped": 0
+  },
+  "waterTemperature": 80,
+  "recipe": {
+    "coffeeIn": 0,
+    "coffeeOut": 0,
+    "ratio": 0
+  }
+}

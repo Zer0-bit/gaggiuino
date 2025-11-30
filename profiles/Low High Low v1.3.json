@@ -1,5 +1,5 @@
 {
-  "name": "Low High Low v1.2",
+  "name": "Low High Low v1.3",
   "phases": [
     {
       "name": "",
@@ -12,12 +12,12 @@
       },
       "restriction": 2,
       "stopConditions": {
-        "time": 10000,
+        "time": 0,
         "pressureAbove": 1,
         "pressureBelow": 0,
         "flowAbove": 0,
         "flowBelow": 0,
-        "weight": 0,
+        "weight": 0.6000000238418579,
         "waterPumpedInPhase": 0
       },
       "skip": false,
