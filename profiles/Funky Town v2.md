@@ -1,0 +1,3 @@
+Soup and Turbo clarity with a traditional dense espresso body. Made for those beans you "just can't get dialed in". Perfect for funky anerobic, co-fermented, gesha, or thermally shocked beans. Start brewing at 80C, and work your way hotter if the coffee tastes bland. Ideal pressures are less than 4 and might not reach above 2. Ratio of 1 : 2.5-3. Grind is courser than traditional espresso and finer than soup and turbo.
+
+[Original post can be found here](https://discord.com/channels/890339612441063494/1420220943673851935).
