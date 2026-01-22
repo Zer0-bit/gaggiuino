@@ -3,7 +3,6 @@
 ## Intro
 **This a fork from Gaggiuino that started as an idea to improve an already capable coffee machine while keeping the machine appearance and button functionality as close as possible to the original. An important part is that no internal cables/connectors were modified; all the connections were made by creating splitters using the purchased spade connectors.**
 
-
 ## Resumen Técnico del Proyecto
 
 ### Visión General
