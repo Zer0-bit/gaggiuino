@@ -1,0 +1,106 @@
+# Ejemplo: extra_defines.ini
+# 
+# Este archivo permite personalizar tu build de Gaggiuino sin modificar platformio.ini
+# Copia este archivo como "extra_defines.ini" en la raíz del proyecto (mismo nivel que platformio.ini)
+# El archivo extra_defines.ini está en .gitignore, por lo que tus configuraciones personales
+# no se subirán al repositorio.
+
+[extra]
+build_flags =
+    # ============================================================================
+    # Desactivar ESP32 (recomendado para builds simplificados)
+    # ============================================================================
+    # -DNO_ESP32_COMMS
+    
+    # ============================================================================
+    # Configuraciones de hardware
+    # ============================================================================
+    
+    # Deshabilitar DreamSteam (para calderos grandes como Rancilio Silvia)
+    # -DDREAM_STEAM_DISABLED
+    
+    # Usar solo una balanza HX711 (en lugar de dos)
+    # -DSINGLE_HX711_BOARD
+    
+    # Forzar uso de balanzas predictivas
+    # -DFORCE_PREDICTIVE_SCALES=1
+    
+    # ============================================================================
+    # Configuraciones de debugging
+    # ============================================================================
+    
+    # Habilitar debugging con breakpoints (requiere ST-Link)
+    # -DDEBUG_ENABLED
+    
+    # Nivel de logging (0=ERROR, 1=WARN, 2=INFO, 3=DEBUG, 4=VERBOSE)
+    # -DLOG_LEVEL=3
+    
+    # ============================================================================
+    # Configuraciones de placa
+    # ============================================================================
+    
+    # PCB todo-en-uno (en lugar de build modular LEGO)
+    # -DSINGLE_BOARD
+    
+    # Usar relay para válvula (build LEGO)
+    # -DLEGO_VALVE_RELAY
+    
+    # PCB versión 2 con válvula de vapor y caldero de vapor
+    # -DPCBV2
+    
+    # ============================================================================
+    # Configuraciones personalizadas de tu máquina
+    # ============================================================================
+    
+    # Ejemplo: Timeout de llenado de caldero más largo (milisegundos)
+    # -DBOILER_FILL_TIMEOUT=15000UL
+    
+    # Ejemplo: Temperatura máxima de agua caliente
+    # -DMAX_WATER_TEMP=110.0f
+    
+    # Ejemplo: Presión de sistema en idle
+    # -DSYS_PRESSURE_IDLE=0.5f
+
+# ============================================================================
+# CONFIGURACIÓN EJEMPLO 1: Build mínimo sin ESP32
+# ============================================================================
+# [extra]
+# build_flags =
+#     -DNO_ESP32_COMMS
+#     -DLOG_LEVEL=2
+
+# ============================================================================
+# CONFIGURACIÓN EJEMPLO 2: Build para Rancilio Silvia
+# ============================================================================
+# [extra]
+# build_flags =
+#     -DNO_ESP32_COMMS
+#     -DDREAM_STEAM_DISABLED
+#     -DBOILER_FILL_TIMEOUT=15000UL
+#     -DMAX_WATER_TEMP=110.0f
+
+# ============================================================================
+# CONFIGURACIÓN EJEMPLO 3: Build de desarrollo con debugging
+# ============================================================================
+# [extra]
+# build_flags =
+#     -DDEBUG_ENABLED
+#     -DLOG_LEVEL=4
+
+# ============================================================================
+# CONFIGURACIÓN EJEMPLO 4: Build de producción optimizado
+# ============================================================================
+# [extra]
+# build_flags =
+#     -DNO_ESP32_COMMS
+#     -DLOG_LEVEL=1
+#     -DSINGLE_HX711_BOARD
+
+# ============================================================================
+# NOTAS:
+# ============================================================================
+# - Descomentar las líneas que necesites (quitar el # al inicio)
+# - Puedes combinar múltiples flags
+# - Los flags aquí se agregan a los del entorno seleccionado en platformio.ini
+# - Para aplicar cambios, recompilar: pio run -e [entorno]
+# - Este archivo es personal, NO lo commitear a git

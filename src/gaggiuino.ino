@@ -57,8 +57,13 @@ void setup(void) {
   LOG_INFO("DBG init");
 #endif
 
+#ifndef NO_ESP32_COMMS
   // Initialise comms library for talking to the ESP mcu
   espCommsInit();
+  LOG_INFO("ESP32 comms init");
+#else
+  LOG_INFO("ESP32 comms disabled (NO_ESP32_COMMS defined)");
+#endif
 
   // Initialize LED
   led.begin();
@@ -114,7 +119,9 @@ void loop(void) {
   brewDetect();
   modeSelect();
   lcdRefresh();
+#ifndef NO_ESP32_COMMS
   espCommsSendSensorData(currentState);
+#endif
   sysHealthCheck(SYS_PRESSURE_IDLE);
 }
 
@@ -125,7 +132,9 @@ void loop(void) {
 
 static void sensorsRead(void) {
   sensorReadSwitches();
+#ifndef NO_ESP32_COMMS
   espCommsReadData();
+#endif
   sensorsReadTemperature();
   sensorsReadWeight();
   sensorsReadPressure();
@@ -695,7 +704,9 @@ static void profiling(void) {
     phaseProfiler.updatePhase(timeInShot, currentState);
     CurrentPhase& currentPhase = phaseProfiler.getCurrentPhase();
     ShotSnapshot shotSnapshot = buildShotSnapshot(timeInShot, currentState, currentPhase);
+#ifndef NO_ESP32_COMMS
     espCommsSendShotData(shotSnapshot, 100);
+#endif
 
     if (phaseProfiler.isFinished()) {
       setPumpOff();
