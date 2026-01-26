@@ -3,7 +3,7 @@ A profile designed for guided change. Begin with the base profile and adjust the
 ## Guide
 ### Create An Initial Recipe
 - Temperature
-    + Total range: 76-93C, 88-90 is a good starting point to adjust from after dialing in the grind size
+    + Total range: 76-93C, 88-90 is a good starting point to adjust from after dialing in the grind size.
 - Grind size
     + Start with a prior size used for the basket and coffee, then dial-in by taste.
 - Ratio
@@ -26,7 +26,7 @@ __Parameter Adjustments__
 * **Time** / Adjust to extend how long the profile attempts to extract under pressure.
 * **Pressure End Target** / Determines if the pressure increases, decreases, or stays constant relative to the pressure phase 1 ended at. Set for desired pressure action in conjunction with the curve shape.
 * **Curve Shape** / Adjusts the rate of change through this phase from the starting pressure to the end pressure target.
-preferred
+
 ### **Phase #3** 
 **Taper:**\
 Decrease flow to precisely stop the shot at the intended ratio and avoid overextraction.
