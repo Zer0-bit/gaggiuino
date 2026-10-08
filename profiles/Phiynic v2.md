@@ -1,15 +1,15 @@
 ### A profile designed to expand the users insight into extraction and profile development.
 
-#### Untested with predictive scales, bluetooth or hardware recommended.
+Untested with predictive scales, bluetooth or hardware recommended.
 
 ## **Guide**
-### **First Shot:**
-1. Set grind size coarser by 10-20µm, 1-2 steps, or guess.
+### **First Shot**
+1. Set grind size coarser by 10-20um, 1-2 steps, or guess.
 2. Prepare 2 additional cups on the side and the puck / Preferred: Puck screen, Blind shaker dosing with NO wdt and tamped with full force, no spring limitations or calibration clicks/
 3. Wait for beats to drop, lock-in portafilter, place cup 1.
 4. Pull the shot. When weight reaches 1:2 ratio, swap to cup 2 and fill roughly to 10ml, then swap to cup 3 and manually stop at 10-50ml / Near 10 if darker, close to 50 if lighter. Due to extraction speed/
 5. If flow was maxed and pressure was not reached during the 2nd phase, repeat and;
-    - Grind finer 15+µm, 2+ steps
+    - Grind finer 15+um, 2+ steps
     - Increase dose 0.5-1+g / Within basket capacity
 6. Now that you've had an extraction within the expected range with sufficient pressure for long enough, you get to taste and review.
 7. Wait maybe 30+ seconds and/or swirl cup 3 some till temperature lowers to a low-warm, then taste / Sipping with aeration is preferred/
@@ -20,6 +20,15 @@
 
 
 ### **Post-Processing**
+#### **Priority Variables** / Generalized outline of what adjustments to consider first:
+- **Temperature** / Raise or lower based on intensity and balance of the undesirable flavors. Sometimes they can be avoided by lowering and others might need to go higher to bring out more of the desirable flavors.
+- **Grind Size** / Going finer will increase resistance, lowering flow, and speed up the extraction rate of the particles. Additionally, it will extend the pressure taper during the last phase, extracting at higher pressures over a longer period of time. Sometimes, if a shot does not have rich/deep flavors for the sweetness and notes, grinding finer may help.
+- **Ratio** / This one is relatively simple to apply. Use a longer ratio if the tail shots contain flavors you want and little to no undesirable flavors. Sometimes your dial-in adjustments and coffee might match up and give you good overall flavors in each tail shot. At that point, it may be good to just set a cut-off for when it's weak enough and would only seem to dilute the main shot. 
+- **Extraction Extension Flow End** / Adjust depending on the contact time you want to try.
+- **Pressurized Extraction Time** / Adjust depending on the time under pressure you want for the second phase.
+- **Dose** / Decide on a default and focus on adjusting everything else. Using a sufficient amount for the basket is recommended.
+
+#### **Considerations** / Ideas to keep in mind:
 - **Window of Flavor: Extraction Speed**
     + If the 2nd cup and/or 3rd cup still contain a noticeable amount of sweetness or desirable flavors, the rate of extraction was slow enough to extend out of our set ratio and adjustment might be necessary. Potential options:
         - Extend the ratio to capture those flavors
