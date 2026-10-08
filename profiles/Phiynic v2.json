@@ -1,40 +1,42 @@
 {
-  "name": "Phiynic v1.1",
+  "name": "Phiynic v2",
   "phases": [
     {
-      "name": "",
-      "type": "PRESSURE",
-      "target": {
-        "start": 9,
-        "end": 9,
-        "curve": "EASE_IN",
-        "time": 5000
-      },
-      "restriction": 0,
-      "stopConditions": {
-        "time": 5000,
-        "pressureAbove": 0,
-        "pressureBelow": 0,
-        "flowAbove": 0,
-        "flowBelow": 0,
-        "weight": 0,
-        "waterPumpedInPhase": 0
-      },
-      "skip": false,
-      "waterTemperature": 0
-    },
-    {
-      "name": "",
+      "name": "Pressurization & Saturation ",
       "type": "PRESSURE",
       "target": {
         "start": 0,
         "end": 6,
-        "curve": "EASE_IN",
-        "time": 5000
+        "curve": "INSTANT",
+        "time": 0,
+        "volume": 0
+      },
+      "restriction": 12,
+      "stopConditions": {
+        "time": 8000,
+        "pressureAbove": 6,
+        "pressureBelow": 0,
+        "flowAbove": 0,
+        "flowBelow": 0,
+        "weight": 0,
+        "waterPumpedInPhase": 0
+      },
+      "skip": false,
+      "waterTemperature": 0
+    },
+    {
+      "name": "Pressurized Extraction ",
+      "type": "PRESSURE",
+      "target": {
+        "start": 0,
+        "end": 6,
+        "curve": "EASE_OUT",
+        "time": 2000,
+        "volume": 0
       },
       "restriction": 6,
       "stopConditions": {
-        "time": 5000,
+        "time": 6000,
         "pressureAbove": 0,
         "pressureBelow": 0,
         "flowAbove": 0,
@@ -46,15 +48,16 @@
       "waterTemperature": 0
     },
     {
-      "name": "",
+      "name": "Extraction Extension ",
       "type": "FLOW",
       "target": {
         "start": 0,
-        "end": 2,
+        "end": 1.5,
         "curve": "EASE_IN_OUT",
-        "time": 2000
+        "time": 2000,
+        "volume": 0
       },
-      "restriction": 0,
+      "restriction": 6,
       "stopConditions": {
         "time": 0,
         "pressureAbove": 0,
@@ -71,7 +74,9 @@
   "globalStopConditions": {
     "time": 0,
     "weight": 0,
-    "waterPumped": 0
+    "waterPumped": 0,
+    "switchToManualPressureCtrl": false,
+    "switchToManualFlowCtrl": false
   },
   "waterTemperature": 88,
   "recipe": {
