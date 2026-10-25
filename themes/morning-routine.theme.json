@@ -1,0 +1,27 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Morning Routine",
+  "embedded": {
+    "display": {
+      "modernUI": true,
+      "lcdDarkMode": true,
+      "homeLayout": "v4,1;0,0,0,6,4,0,0,6636076;111,6,0,5,4,0,0,4998199;116,11,0,5,4,0,0,7951157;117,0,4,8,4,0,0,6636076;112,8,4,4,4,0,0,4998199;114,12,4,4,4,0,0,7951157;",
+      "homeTileLeftTop": 0,
+      "homeTileLeftBottom": 0,
+      "homeTileRightTop": 0,
+      "homeTileLeftTopGroup": 0,
+      "homeTileLeftBottomGroup": 0,
+      "homeTileRightTopGroup": 0
+    },
+    "theme": {
+      "colourPrimary": 13,
+      "colourSecondary": 10
+    }
+  },
+  "web": {
+    "themeId": "espresso",
+    "dashboardFontSize": "normal",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":2,\"rows\":2},{\"id\":\"readyIn\",\"type\":\"readyIn\",\"col\":2,\"row\":0,\"cols\":2,\"rows\":1},{\"id\":\"chrono\",\"type\":\"chrono\",\"col\":4,\"row\":0,\"cols\":2,\"rows\":1},{\"id\":\"profiles\",\"type\":\"profiles\",\"col\":2,\"row\":1,\"cols\":4,\"rows\":2},{\"id\":\"service\",\"type\":\"service\",\"col\":0,\"row\":2,\"cols\":2,\"rows\":1},{\"id\":\"shotCost\",\"type\":\"shotCost\",\"col\":0,\"row\":3,\"cols\":2,\"rows\":2},{\"id\":\"drinkRecipe\",\"type\":\"drinkRecipe\",\"col\":2,\"row\":3,\"cols\":4,\"rows\":2}]"
+  }
+}

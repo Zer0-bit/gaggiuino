@@ -1,0 +1,27 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Quiet Minimal",
+  "embedded": {
+    "display": {
+      "modernUI": true,
+      "lcdDarkMode": true,
+      "homeLayout": "v4,1;0,0,0,8,8,0,0,1316892;110,8,0,8,4,0,0,1316892;116,8,4,8,4,0,0,1316892;",
+      "homeTileLeftTop": 0,
+      "homeTileLeftBottom": 0,
+      "homeTileRightTop": 0,
+      "homeTileLeftTopGroup": 0,
+      "homeTileLeftBottomGroup": 0,
+      "homeTileRightTopGroup": 0
+    },
+    "theme": {
+      "colourPrimary": 63,
+      "colourSecondary": 64
+    }
+  },
+  "web": {
+    "themeId": "oled",
+    "dashboardFontSize": "medium",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":3,\"rows\":3,\"config\":{\"color\":\"#14181b\"}},{\"id\":\"targetWeight\",\"type\":\"targetWeight\",\"col\":3,\"row\":0,\"cols\":3,\"rows\":2,\"config\":{\"color\":\"#14181b\"}},{\"id\":\"chrono\",\"type\":\"chrono\",\"col\":3,\"row\":2,\"cols\":3,\"rows\":1,\"config\":{\"color\":\"#14181b\"}}]"
+  }
+}

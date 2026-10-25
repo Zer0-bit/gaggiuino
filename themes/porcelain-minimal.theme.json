@@ -1,0 +1,10 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Porcelain Minimal",
+  "web": {
+    "themeId": "light",
+    "dashboardFontSize": "medium",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":3,\"rows\":3},{\"id\":\"scale\",\"type\":\"scale\",\"col\":3,\"row\":0,\"cols\":3,\"rows\":1},{\"id\":\"targetWeight\",\"type\":\"targetWeight\",\"col\":3,\"row\":1,\"cols\":3,\"rows\":1},{\"id\":\"chrono\",\"type\":\"chrono\",\"col\":3,\"row\":2,\"cols\":3,\"rows\":1}]"
+  }
+}

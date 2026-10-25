@@ -1,0 +1,27 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Essential Four",
+  "embedded": {
+    "display": {
+      "modernUI": true,
+      "lcdDarkMode": true,
+      "homeLayout": "v4,1;0,0,0,8,8,0,0,2433826;102,8,0,4,4,0,0,2503746;103,12,0,4,4,0,0,3943730;116,8,4,8,4,0,0,2433826;",
+      "homeTileLeftTop": 0,
+      "homeTileLeftBottom": 0,
+      "homeTileRightTop": 0,
+      "homeTileLeftTopGroup": 0,
+      "homeTileLeftBottomGroup": 0,
+      "homeTileRightTopGroup": 0
+    },
+    "theme": {
+      "colourPrimary": 0,
+      "colourSecondary": 63
+    }
+  },
+  "web": {
+    "themeId": "dark",
+    "dashboardFontSize": "big",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":3,\"rows\":3},{\"id\":\"pressure\",\"type\":\"pressure\",\"col\":3,\"row\":0,\"cols\":3,\"rows\":1},{\"id\":\"scale\",\"type\":\"scale\",\"col\":3,\"row\":1,\"cols\":3,\"rows\":1},{\"id\":\"chrono\",\"type\":\"chrono\",\"col\":3,\"row\":2,\"cols\":3,\"rows\":1}]"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Sand Daily",
+  "web": {
+    "themeId": "sand",
+    "dashboardFontSize": "normal",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":2,\"rows\":2},{\"id\":\"chrono\",\"type\":\"chrono\",\"col\":2,\"row\":0,\"cols\":2,\"rows\":1},{\"id\":\"readyIn\",\"type\":\"readyIn\",\"col\":4,\"row\":0,\"cols\":2,\"rows\":1},{\"id\":\"profileChart\",\"type\":\"profileChart\",\"col\":2,\"row\":1,\"cols\":4,\"rows\":2},{\"id\":\"energy\",\"type\":\"energy\",\"col\":0,\"row\":2,\"cols\":2,\"rows\":1},{\"id\":\"drinkRecipe\",\"type\":\"drinkRecipe\",\"col\":0,\"row\":3,\"cols\":3,\"rows\":2},{\"id\":\"profiles\",\"type\":\"profiles\",\"col\":3,\"row\":3,\"cols\":3,\"rows\":2}]"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Arctic Lab",
+  "web": {
+    "themeId": "ice",
+    "dashboardFontSize": "normal",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":2,\"rows\":2},{\"id\":\"water\",\"type\":\"water\",\"col\":2,\"row\":0,\"cols\":1,\"rows\":1},{\"id\":\"pressure\",\"type\":\"pressure\",\"col\":3,\"row\":0,\"cols\":1,\"rows\":1},{\"id\":\"flow\",\"type\":\"flow\",\"col\":4,\"row\":0,\"cols\":1,\"rows\":1},{\"id\":\"scale\",\"type\":\"scale\",\"col\":5,\"row\":0,\"cols\":1,\"rows\":1},{\"id\":\"energy\",\"type\":\"energy\",\"col\":2,\"row\":1,\"cols\":1,\"rows\":1},{\"id\":\"consistency\",\"type\":\"consistency\",\"col\":3,\"row\":1,\"cols\":1,\"rows\":1},{\"id\":\"shotCount\",\"type\":\"shotCount\",\"col\":4,\"row\":1,\"cols\":1,\"rows\":1},{\"id\":\"shotTimer\",\"type\":\"shotTimer\",\"col\":5,\"row\":1,\"cols\":1,\"rows\":1},{\"id\":\"profileChart\",\"type\":\"profileChart\",\"col\":0,\"row\":2,\"cols\":4,\"rows\":2},{\"id\":\"ghostShot\",\"type\":\"ghostShot\",\"col\":4,\"row\":2,\"cols\":2,\"rows\":2},{\"id\":\"lastShot\",\"type\":\"lastShot\",\"col\":0,\"row\":4,\"cols\":2,\"rows\":1},{\"id\":\"shotCost\",\"type\":\"shotCost\",\"col\":2,\"row\":4,\"cols\":2,\"rows\":1},{\"id\":\"sessionTime\",\"type\":\"sessionTime\",\"col\":4,\"row\":4,\"cols\":2,\"rows\":1},{\"id\":\"baristaChallenge\",\"type\":\"baristaChallenge\",\"col\":0,\"row\":5,\"cols\":3,\"rows\":2},{\"id\":\"flavourHunt\",\"type\":\"flavourHunt\",\"col\":3,\"row\":5,\"cols\":3,\"rows\":2},{\"id\":\"coffeeLab\",\"type\":\"coffeeLab\",\"col\":0,\"row\":7,\"cols\":3,\"rows\":2},{\"id\":\"espressoCompass\",\"type\":\"espressoCompass\",\"col\":3,\"row\":7,\"cols\":3,\"rows\":2}]"
+  }
+}

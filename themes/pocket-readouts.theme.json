@@ -1,0 +1,22 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Pocket Readouts",
+  "embedded": {
+    "display": {
+      "modernUI": true,
+      "lcdDarkMode": true,
+      "homeLayout": "v4,1;0,0,0,4,4,0,0,1324615;101,4,0,2,2,0,0,2311003;102,6,0,2,2,0,0,2440524;103,8,0,2,2,0,0,2968924;118,10,0,2,2,0,0,1324615;119,12,0,2,2,0,0,2311003;107,14,0,2,2,0,0,2440524;106,4,2,2,2,0,0,2968924;108,6,2,4,2,0,0,1324615;111,10,2,2,2,0,0,2440524;112,12,2,2,2,0,0,2968924;110,14,2,2,2,0,0,1324615;117,0,4,8,4,0,0,2311003;4,8,4,4,4,0,0,2440524;105,12,4,4,4,0,0,2968924;",
+      "homeTileLeftTop": 0,
+      "homeTileLeftBottom": 0,
+      "homeTileRightTop": 0,
+      "homeTileLeftTopGroup": 0,
+      "homeTileLeftBottomGroup": 0,
+      "homeTileRightTopGroup": 0
+    },
+    "theme": {
+      "colourPrimary": 7,
+      "colourSecondary": 8
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Classic Essentials",
+  "embedded": {
+    "display": {
+      "modernUI": false,
+      "lcdDarkMode": true,
+      "homeLayout": "v4,0;0,0,0,8,8,0,0,0;117,8,0,4,4,0,0,0;103,12,0,4,4,0,0,0;4,8,4,8,4,0,0,0;",
+      "homeTileLeftTop": 0,
+      "homeTileLeftBottom": 0,
+      "homeTileRightTop": 0,
+      "homeTileLeftTopGroup": 0,
+      "homeTileLeftBottomGroup": 0,
+      "homeTileRightTopGroup": 0
+    },
+    "theme": {
+      "colourPrimary": 13,
+      "colourSecondary": 10
+    }
+  },
+  "web": {
+    "themeId": "espresso",
+    "dashboardFontSize": "medium",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":3,\"rows\":3},{\"id\":\"chrono\",\"type\":\"chrono\",\"col\":3,\"row\":0,\"cols\":3,\"rows\":1},{\"id\":\"profiles\",\"type\":\"profiles\",\"col\":3,\"row\":1,\"cols\":3,\"rows\":2},{\"id\":\"controls\",\"type\":\"controls\",\"col\":0,\"row\":3,\"cols\":6,\"rows\":1}]"
+  }
+}

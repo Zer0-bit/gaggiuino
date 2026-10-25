@@ -1,0 +1,27 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Shot Analysis",
+  "embedded": {
+    "display": {
+      "modernUI": true,
+      "lcdDarkMode": true,
+      "homeLayout": "v4,1;0,0,0,4,4,0,0,2638684;115,4,0,8,4,0,0,3491937;106,12,0,4,4,0,0,3822177;123,0,4,8,4,0,0,2835037;104,8,4,4,4,0,0,3818835;113,12,4,4,4,0,0,2965847;",
+      "homeTileLeftTop": 0,
+      "homeTileLeftBottom": 0,
+      "homeTileRightTop": 0,
+      "homeTileLeftTopGroup": 0,
+      "homeTileLeftBottomGroup": 0,
+      "homeTileRightTopGroup": 0
+    },
+    "theme": {
+      "colourPrimary": 7,
+      "colourSecondary": 24
+    }
+  },
+  "web": {
+    "themeId": "nordic",
+    "dashboardFontSize": "normal",
+    "dashboardLayout": "[{\"id\":\"profileChart\",\"type\":\"profileChart\",\"col\":0,\"row\":0,\"cols\":4,\"rows\":3},{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":4,\"row\":0,\"cols\":2,\"rows\":2},{\"id\":\"consistency\",\"type\":\"consistency\",\"col\":4,\"row\":2,\"cols\":2,\"rows\":1},{\"id\":\"ghostShot\",\"type\":\"ghostShot\",\"col\":0,\"row\":3,\"cols\":3,\"rows\":3},{\"id\":\"shotGraph\",\"type\":\"shotGraph\",\"col\":3,\"row\":3,\"cols\":3,\"rows\":3},{\"id\":\"lastShot\",\"type\":\"lastShot\",\"col\":0,\"row\":6,\"cols\":2,\"rows\":1},{\"id\":\"shotTimer\",\"type\":\"shotTimer\",\"col\":2,\"row\":6,\"cols\":2,\"rows\":1},{\"id\":\"scale\",\"type\":\"scale\",\"col\":4,\"row\":6,\"cols\":2,\"rows\":1}]"
+  }
+}

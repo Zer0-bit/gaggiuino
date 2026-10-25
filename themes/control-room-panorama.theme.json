@@ -1,0 +1,27 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Control Room Panorama",
+  "embedded": {
+    "display": {
+      "modernUI": true,
+      "lcdDarkMode": true,
+      "homeLayout": "v4,1;0,0,0,4,4,0,0,3096169;102,4,0,4,4,0,0,2638938;103,8,0,4,4,0,0,5060703;4,12,0,4,4,0,0,3559037;123,0,4,8,4,0,0,2900580;115,8,4,8,4,0,0,3490138;105,16,0,4,4,0,0,3096169;106,20,0,4,4,0,0,2638938;114,24,0,4,4,0,0,5060703;117,28,0,4,4,0,0,3559037;112,16,4,4,4,0,0,2900580;110,20,4,4,4,0,0,3490138;118,24,4,4,4,0,0,3096169;101,28,4,4,4,0,0,2638938;126,32,0,4,4,0,0,5060703;127,36,0,4,4,0,0,3559037;128,40,0,4,4,0,0,2900580;129,44,0,4,4,0,0,3490138;120,32,4,8,4,0,0,3096169;121,40,4,8,4,0,0,2638938;",
+      "homeTileLeftTop": 0,
+      "homeTileLeftBottom": 0,
+      "homeTileRightTop": 0,
+      "homeTileLeftTopGroup": 0,
+      "homeTileLeftBottomGroup": 0,
+      "homeTileRightTopGroup": 0
+    },
+    "theme": {
+      "colourPrimary": 51,
+      "colourSecondary": 24
+    }
+  },
+  "web": {
+    "themeId": "tokyo",
+    "dashboardFontSize": "normal",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":2,\"rows\":2},{\"id\":\"pressure\",\"type\":\"pressure\",\"col\":2,\"row\":0,\"cols\":1,\"rows\":1},{\"id\":\"flow\",\"type\":\"flow\",\"col\":3,\"row\":0,\"cols\":1,\"rows\":1},{\"id\":\"scale\",\"type\":\"scale\",\"col\":4,\"row\":0,\"cols\":1,\"rows\":1},{\"id\":\"water\",\"type\":\"water\",\"col\":5,\"row\":0,\"cols\":1,\"rows\":1},{\"id\":\"shotTimer\",\"type\":\"shotTimer\",\"col\":2,\"row\":1,\"cols\":2,\"rows\":1},{\"id\":\"targetWeight\",\"type\":\"targetWeight\",\"col\":4,\"row\":1,\"cols\":2,\"rows\":1},{\"id\":\"profileChart\",\"type\":\"profileChart\",\"col\":0,\"row\":2,\"cols\":4,\"rows\":2},{\"id\":\"profiles\",\"type\":\"profiles\",\"col\":4,\"row\":2,\"cols\":2,\"rows\":2},{\"id\":\"ghostShot\",\"type\":\"ghostShot\",\"col\":0,\"row\":4,\"cols\":3,\"rows\":2},{\"id\":\"shotGraph\",\"type\":\"shotGraph\",\"col\":3,\"row\":4,\"cols\":3,\"rows\":2},{\"id\":\"energy\",\"type\":\"energy\",\"col\":0,\"row\":6,\"cols\":2,\"rows\":1},{\"id\":\"consistency\",\"type\":\"consistency\",\"col\":2,\"row\":6,\"cols\":2,\"rows\":1},{\"id\":\"lastShot\",\"type\":\"lastShot\",\"col\":4,\"row\":6,\"cols\":2,\"rows\":1},{\"id\":\"shotCount\",\"type\":\"shotCount\",\"col\":0,\"row\":7,\"cols\":2,\"rows\":1},{\"id\":\"sessionTime\",\"type\":\"sessionTime\",\"col\":2,\"row\":7,\"cols\":2,\"rows\":1},{\"id\":\"shotCost\",\"type\":\"shotCost\",\"col\":4,\"row\":7,\"cols\":2,\"rows\":1},{\"id\":\"readyIn\",\"type\":\"readyIn\",\"col\":0,\"row\":8,\"cols\":2,\"rows\":1},{\"id\":\"service\",\"type\":\"service\",\"col\":2,\"row\":8,\"cols\":2,\"rows\":1},{\"id\":\"powerOff\",\"type\":\"powerOff\",\"col\":4,\"row\":8,\"cols\":2,\"rows\":1},{\"id\":\"controls\",\"type\":\"controls\",\"col\":0,\"row\":9,\"cols\":6,\"rows\":1},{\"id\":\"latteArt\",\"type\":\"latteArt\",\"col\":0,\"row\":10,\"cols\":3,\"rows\":2},{\"id\":\"drinkRecipe\",\"type\":\"drinkRecipe\",\"col\":3,\"row\":10,\"cols\":3,\"rows\":2},{\"id\":\"baristaChallenge\",\"type\":\"baristaChallenge\",\"col\":0,\"row\":12,\"cols\":3,\"rows\":2},{\"id\":\"flavourHunt\",\"type\":\"flavourHunt\",\"col\":3,\"row\":12,\"cols\":3,\"rows\":2},{\"id\":\"coffeeLab\",\"type\":\"coffeeLab\",\"col\":0,\"row\":14,\"cols\":3,\"rows\":2},{\"id\":\"espressoCompass\",\"type\":\"espressoCompass\",\"col\":3,\"row\":14,\"cols\":3,\"rows\":2}]"
+  }
+}

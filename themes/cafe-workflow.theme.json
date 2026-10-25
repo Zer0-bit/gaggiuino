@@ -1,0 +1,27 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Cafe Workflow",
+  "embedded": {
+    "display": {
+      "modernUI": true,
+      "lcdDarkMode": true,
+      "homeLayout": "v4,1;0,0,0,4,4,0,0,8865060;110,4,0,4,4,0,0,7428940;117,8,0,8,4,0,0,6177337;4,0,4,4,4,0,0,4414058;105,4,4,4,4,0,0,7822648;121,8,4,8,4,0,0,5918017;",
+      "homeTileLeftTop": 0,
+      "homeTileLeftBottom": 0,
+      "homeTileRightTop": 0,
+      "homeTileLeftTopGroup": 0,
+      "homeTileLeftBottomGroup": 0,
+      "homeTileRightTopGroup": 0
+    },
+    "theme": {
+      "colourPrimary": 41,
+      "colourSecondary": 39
+    }
+  },
+  "web": {
+    "themeId": "copper",
+    "dashboardFontSize": "normal",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":2,\"rows\":2},{\"id\":\"targetWeight\",\"type\":\"targetWeight\",\"col\":2,\"row\":0,\"cols\":2,\"rows\":1},{\"id\":\"profiles\",\"type\":\"profiles\",\"col\":4,\"row\":0,\"cols\":2,\"rows\":2},{\"id\":\"scale\",\"type\":\"scale\",\"col\":2,\"row\":1,\"cols\":2,\"rows\":1},{\"id\":\"controls\",\"type\":\"controls\",\"col\":0,\"row\":2,\"cols\":3,\"rows\":1},{\"id\":\"energy\",\"type\":\"energy\",\"col\":3,\"row\":2,\"cols\":3,\"rows\":1},{\"id\":\"drinkRecipe\",\"type\":\"drinkRecipe\",\"col\":0,\"row\":3,\"cols\":3,\"rows\":2},{\"id\":\"service\",\"type\":\"service\",\"col\":3,\"row\":3,\"cols\":3,\"rows\":2}]"
+  }
+}

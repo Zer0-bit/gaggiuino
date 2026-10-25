@@ -1,0 +1,10 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Rose Compact",
+  "web": {
+    "themeId": "berry",
+    "dashboardFontSize": "normal",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"col\":0,\"row\":0,\"cols\":3,\"rows\":3,\"config\":{\"color\":\"#342132\"}},{\"id\":\"scale\",\"type\":\"scale\",\"col\":3,\"row\":0,\"cols\":3,\"rows\":1,\"config\":{\"color\":\"#453048\"}},{\"id\":\"targetWeight\",\"type\":\"targetWeight\",\"col\":3,\"row\":1,\"cols\":3,\"rows\":1,\"config\":{\"color\":\"#312638\"}},{\"id\":\"chrono\",\"type\":\"chrono\",\"col\":3,\"row\":2,\"cols\":3,\"rows\":1,\"config\":{\"color\":\"#342132\"}},{\"id\":\"latteArt\",\"type\":\"latteArt\",\"col\":0,\"row\":3,\"cols\":3,\"rows\":2,\"config\":{\"color\":\"#453048\"}},{\"id\":\"espressoFact\",\"type\":\"espressoFact\",\"col\":3,\"row\":3,\"cols\":3,\"rows\":2,\"config\":{\"color\":\"#312638\"}}]"
+  }
+}
