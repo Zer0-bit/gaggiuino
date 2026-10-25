@@ -1,0 +1,10 @@
+{
+  "format": "gaggiuino-home-theme",
+  "version": 1,
+  "name": "Instrument Ocean",
+  "web": {
+    "themeId": "ocean",
+    "dashboardLayout": "[{\"id\":\"temperature\",\"type\":\"temperature\",\"cols\":2,\"rows\":2,\"col\":0,\"row\":0},{\"id\":\"chrono\",\"type\":\"chrono\",\"cols\":2,\"rows\":1,\"col\":2,\"row\":0},{\"id\":\"water\",\"type\":\"water\",\"cols\":1,\"rows\":1,\"col\":4,\"row\":0},{\"id\":\"pressure\",\"type\":\"pressure\",\"cols\":1,\"rows\":1,\"col\":5,\"row\":0},{\"id\":\"scale\",\"type\":\"scale\",\"cols\":2,\"rows\":1,\"col\":2,\"row\":1},{\"id\":\"flow\",\"type\":\"flow\",\"cols\":1,\"rows\":1,\"col\":4,\"row\":1},{\"id\":\"shotTimer\",\"type\":\"shotTimer\",\"cols\":1,\"rows\":1,\"col\":5,\"row\":1},{\"id\":\"profileChart\",\"type\":\"profileChart\",\"cols\":4,\"rows\":2,\"col\":0,\"row\":2},{\"id\":\"profiles\",\"type\":\"profiles\",\"cols\":2,\"rows\":2,\"col\":4,\"row\":2},{\"id\":\"energy\",\"type\":\"energy\",\"cols\":2,\"rows\":1,\"col\":0,\"row\":4},{\"id\":\"espressoFact\",\"type\":\"espressoFact\",\"cols\":4,\"rows\":1,\"col\":2,\"row\":4}]",
+    "dashboardFontSize": "normal"
+  }
+}
