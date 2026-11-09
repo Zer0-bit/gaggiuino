@@ -1,5 +1,5 @@
 # Gaggiuino custom translations
-Copy the complete `languages/` folder, including `fonts/`, choose a language under **Settings →
+Copy the complete `languages/` folder to the root of the micrSD card, choose a language under **Settings →
 Display → Language** and tap **Save language**. The web interface follows it.
 
 | Language | Selector name | Pack |
